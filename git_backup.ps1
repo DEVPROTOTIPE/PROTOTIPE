@@ -73,9 +73,22 @@ Write-Host " [Ruta de Trabajo] $rootDir" -ForegroundColor Gray
 Write-Host ""
 Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
 
+# Detectar y detener el servidor Vite del dev-dashboard para liberar bloqueos sobre .git
+$viteWasStopped = $false
+$dashboardDir = "$rootDir\Central PROTOTIPE\dev-dashboard"
+$vitePids = @(Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue |Where-Object { $_.CommandLine -match [regex]::Escape($dashboardDir) -or ($_.CommandLine -match 'vite' -and $_.CommandLine -match 'dev') } |Select-Object -ExpandProperty ProcessId)
+
+if ($vitePids.Count -gt 0) {
+    Write-Host " [INFO] Pausando servidor Vite del dev-dashboard para liberar bloqueos..." -ForegroundColor Yellow
+    $vitePids | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }
+    Start-Sleep -Milliseconds 800
+    $viteWasStopped = $true
+    Write-Host "    -> Servidor detenido. Se reiniciara automaticamente al finalizar." -ForegroundColor DarkGray
+}
+
 # Buscar repositorios Git de desarrollo
 Write-Host " [1/6] Escaneando directorios en busqueda de Git locales..." -ForegroundColor Cyan
-$gitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git" -Recurse -ErrorAction SilentlyContinue | Where-Object {
+$gitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git" -Recurse -Depth 3 -ErrorAction SilentlyContinue | Where-Object {
     $_.FullName -ne "$rootDir\.git"
 }
 
@@ -272,6 +285,12 @@ finally {
                 }
             }
         }
+    }
+    # Reiniciar Vite si fue detenido al inicio
+    if ($viteWasStopped) {
+        Write-Host " [INFO] Reiniciando servidor Vite del dev-dashboard..." -ForegroundColor Cyan
+        Start-Process powershell -ArgumentList "-NoProfile -NoExit -Command `"Set-Location '$dashboardDir'; npm run dev`"" -WindowStyle Normal
+        Write-Host "    -> Servidor Vite reiniciado en nueva ventana." -ForegroundColor DarkGray
     }
     Write-Host ""
     Write-Host "======================================================================" -ForegroundColor Cyan
