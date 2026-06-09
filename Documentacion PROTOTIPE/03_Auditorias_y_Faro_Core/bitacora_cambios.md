@@ -1,4 +1,15 @@
+### [2026-06-09] - Fix: Blindaje de Consola de Respaldo e Interfaz de Usuario
+* **Tipo:** Bugfix / DevOps / Scripts
+* **Descripción de Cambios:**
+  1. **Evitación de Cierre Abrupto (backup.bat):** Se añadió control de errores en `backup.bat` evaluando `%errorlevel%` y agregando una instrucción `pause` condicionada para impedir que la consola de CMD de Windows se cierre automáticamente si ocurre un fallo fatal de PowerShell.
+  2. **Manejo Seguro del Cursor en PowerShell (menu_backup.ps1):** Se previno la excepción fatal al asignar `$Host.UI.RawUI.CursorSize = 0` en entornos de consola no estándar o Terminales modernas (donde la API del Host restringe el tamaño de cursor de 1 a 100). Se envolvió la llamada en un bloque `try-catch` silencioso y se reemplazó por secuencias de escape ANSI VT (`[?25l` y `[?25h`) para ocultar/mostrar el cursor de forma universal.
+* **Archivos Modificados:**
+  - [`D:/PROTOTIPE/backup.bat`](file:///d:/PROTOTIPE/backup.bat) [MODIFY]
+  - [`D:/PROTOTIPE/menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+* **Verificación:** Ejecución aislada simulada con éxito. Mensajes de depuración agregados al archivo batch.
+
 ### [2026-06-09] - Limpieza y Centralización de Documentación en App Ventas
+
 * **Tipo:** Reestructuración / Documentación
 * **Descripción de Cambios:**
   1. **Migración Local:** Se movieron `Colecciones/colecciones.md`, `tareas pendientes/plan_implementacion_ia.md`, `flujos_aplicacion.md` y `mapa_arquitectura.md` a la carpeta unificada `Documentacion App Ventas` bajo los nombres `esquema_colecciones.md`, `plan_implementacion_ia.md`, `flujos_aplicacion.md` y `mapa_arquitectura.md` respectivamente.

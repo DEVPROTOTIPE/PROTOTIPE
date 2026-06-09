@@ -34,16 +34,25 @@ function Get-MenuSelection {
     $selectedIndex = 0
     $key = 0
     
-    # Ocultar el cursor para una interfaz mas limpia
-    $cursorSize = $Host.UI.RawUI.CursorSize
-    $Host.UI.RawUI.CursorSize = 0
+    # Ocultar el cursor para una interfaz mas limpia usando secuencias ANSI
+    Write-Host "$([char]27)[?25l" -NoNewline
     
+    $cursorSizeRestored = $false
     try {
+        # Intentar guardar el tamaño del cursor original si la consola lo soporta
+        $cursorSize = 25
+        try {
+            $cursorSize = $Host.UI.RawUI.CursorSize
+            if ($cursorSize -gt 0) {
+                $Host.UI.RawUI.CursorSize = 1
+            }
+        } catch {}
+
         while ($true) {
             Show-Header
             Write-Host " $Title" -ForegroundColor Yellow
             Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
-            Write-Host " Use las flechas [↑ / ↓] para navegar y [Enter] para seleccionar:" -ForegroundColor Gray
+            Write-Host " Use las flechas [Up / Down] para navegar y [Enter] para seleccionar:" -ForegroundColor Gray
             Write-Host ""
             
             for ($i = 0; $i -lt $Options.Count; $i++) {
@@ -82,13 +91,20 @@ function Get-MenuSelection {
     }
     finally {
         # Restaurar el cursor al salir
-        $Host.UI.RawUI.CursorSize = $cursorSize
+        Write-Host "$([char]27)[?25h" -NoNewline
+        if (-not $cursorSizeRestored) {
+            try {
+                if ($cursorSize -gt 0) {
+                    $Host.UI.RawUI.CursorSize = $cursorSize
+                }
+            } catch {}
+        }
     }
 }
 
 function Run-Master-Backup {
     Show-Header
-    Write-Host " >>> INICIANDO RESPALDO MAESTRO DE TODO EL PROYECTO <<<" -ForegroundColor Yellow
+    Write-Host " [INICIANDO RESPALDO MAESTRO DE TODO EL PROYECTO]" -ForegroundColor Yellow
     Write-Host ""
     # Llamar al script existente de backup general
     powershell -NoProfile -ExecutionPolicy Bypass -File "$rootDir\git_backup.ps1"
