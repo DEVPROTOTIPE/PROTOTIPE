@@ -22,6 +22,39 @@
 - **Estado:** ✅ Resuelto | 🔄 En Progreso | ⏸️ Postergado
 ```
 
+### [BUG-021] Notificaciones al cliente no se entregan y bandeja del admin no actualiza por índices faltantes
+- **Fecha:** 2026-06-09
+- **Severidad:** Crítico
+- **Área:** Base de Datos / Firestore Indexes
+- **Archivos Afectados:**
+  - [`d:\PROTOTIPE\Plantillas Core\App Ventas\firestore.indexes.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firestore.indexes.json)
+- **Síntoma Observable:** Al cambiar el estado de un pedido desde el admin, el cliente no recibía notificación en su bandeja. El tray del admin tampoco mostraba actualizaciones en tiempo real. Los botones "Vaciar bandeja" y "Marcar todas como leídas" no tenían efecto visible.
+- **Causa Raíz:** La colección `notifications` carecía de 3 índices compuestos obligatorios:
+  1. `recipientRole + createdAt DESC` → para `onSnapshot` del admin (query sin `recipientId`)
+  2. `recipientId + recipientRole + createdAt DESC` → para `onSnapshot` del cliente
+  3. `recipientId + status` → para `markAllAsRead` del cliente (query `where status == 'unread'`)
+  Sin estos índices, Firestore rechazaba las queries silenciosamente en el callback de error del listener, sin mostrar ningún mensaje en la UI.
+- **Solución Aplicada:** Se agregaron los 3 índices faltantes a `firestore.indexes.json` y se desplegaron con `firebase deploy --only firestore:indexes`.
+- **Estado:** ✅ Resuelto
+
+---
+
+### [BUG-020] Tarjetas de pedido del cliente no se actualizan en tiempo real al cambiar estado desde admin
+- **Fecha:** 2026-06-09
+- **Severidad:** Crítico
+- **Área:** Seguridad / Base de Datos / Reglas Firestore
+- **Archivos Afectados:**
+  - [`d:\PROTOTIPE\Plantillas Core\App Ventas\firestore.rules`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firestore.rules)
+- **Síntoma Observable:** Al marcar un pedido como "Completado" desde el panel admin, la tarjeta del cliente no se actualizaba en tiempo real. El cliente debía recargar la página para ver el nuevo estado. Las notificaciones tampoco llegaban.
+- **Causa Raíz:** La regla `allow read` en la colección `/orders` combinaba `get` y `list` con la condición `resource.data.cliente.celular != null`. Firestore **prohíbe** evaluar `resource.data` en queries de tipo `list` (consultas con `where`/`onSnapshot`), ya que requeriría leer cada documento antes de decidir el acceso — un problema de seguridad y rendimiento. Resultado: `subscribeToClientOrders` (el `onSnapshot` del cliente) era rechazado silenciosamente, el listener nunca se ejecutaba y la UI quedaba congelada con los datos de la carga inicial.
+- **Solución Aplicada:** Se separó `allow read` en dos reglas explícitas:
+  - `allow get`: mantiene `resource.data.cliente.celular != null` (válido para lecturas por ID)
+  - `allow list: if isAdmin() || true`: permite queries sin evaluar `resource.data` (seguro porque las queries del cliente siempre van filtradas por su celular en el `where`)
+- **Patrón Preventivo:** Ver sección **"Anti-Patrón Crítico: allow read vs allow get/list"** en `seguridad_firestore_ecosistema.md`.
+- **Estado:** ✅ Resuelto
+
+---
+
 ### [BUG-019] Error 500 (Internal Server Error) en Auto-detección de Firebase al Aprovisionar Cliente
 - **Fecha:** 2026-06-07
 - **Severidad:** Crítico

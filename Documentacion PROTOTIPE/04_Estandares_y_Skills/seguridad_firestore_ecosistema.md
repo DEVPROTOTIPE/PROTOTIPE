@@ -6,6 +6,47 @@ Este estándar técnico establece las directrices de seguridad obligatorias y pr
 
 ## 🚫 Errores Comunes de Compilación a Evitar (Anti-Patrones IA)
 
+> [!CAUTION]
+> **Anti-Patrón #1 — Crítico (BUG-020, detectado en producción 2026-06-09)**
+>
+> **`allow read` con `resource.data` rompe queries en tiempo real (`onSnapshot`)**
+>
+> ```javascript
+> // ❌ INCORRECTO — bloquea silenciosamente los onSnapshot del cliente
+> match /orders/{document} {
+>   allow read: if isAdmin() || resource.data.cliente.celular != null;
+> }
+>
+> // ✅ CORRECTO — separar get (lectura por ID) de list (queries/onSnapshot)
+> match /orders/{document} {
+>   allow get: if isAdmin() || resource.data.cliente.celular != null;
+>   allow list: if isAdmin() || true; // Las queries del cliente ya filtran por su celular
+> }
+> ```
+>
+> **Razón:** Firestore evalúa las reglas de `list` ANTES de leer los documentos. Usar `resource.data` en `list` es ilegal porque requeriría leer cada doc primero. Firestore rechaza la query **silenciosamente** (sin error en UI), congelando la vista del usuario con datos de la carga inicial. Los listeners `onSnapshot` nunca se disparan.
+
+> [!CAUTION]
+> **Anti-Patrón #2 — Crítico (BUG-021, detectado en producción 2026-06-09)**
+>
+> **Queries `onSnapshot` con múltiples `where` + `orderBy` sin índice compuesto**
+>
+> Toda query con 2+ campos en `where` o con `where` + `orderBy` requiere un índice compuesto en Firestore. Sin él, el listener falla silenciosamente igual que el anti-patrón anterior.
+>
+> **Regla de oro al crear una nueva colección con `onSnapshot`:**
+> 1. Identificar todos los campos usados en `where` y `orderBy`
+> 2. Agregar el índice compuesto a `firestore.indexes.json` ANTES de desplegar
+> 3. Desplegar con `firebase deploy --only firestore:indexes`
+>
+> ```json
+> // Ejemplo para colección notifications:
+> { "collectionGroup": "notifications", "fields": [
+>   { "fieldPath": "recipientId", "order": "ASCENDING" },
+>   { "fieldPath": "recipientRole", "order": "ASCENDING" },
+>   { "fieldPath": "createdAt", "order": "DESCENDING" }
+> ]}
+> ```
+
 1. **Comparaciones de Tipos Incompatibles (Warning de Tipo):**
    * *Incorrecto:* `allow read: if (userId != null && request.auth == null)` cuando `userId` es una variable de ruta capturada por el match (siempre se evalúa como string, por lo que compararlo contra `null` genera una advertencia o error en compilación).
    * *Correcto:* `allow read: if request.auth == null` directamente, o verificar la existencia en el objeto de request.

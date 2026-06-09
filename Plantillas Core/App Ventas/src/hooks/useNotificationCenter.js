@@ -76,6 +76,8 @@ export default function useNotificationCenter({
     if (!recipientId || !recipientRole) return
     if (recipientRole === 'client' && (recipientId === 'client' || recipientId === 'anonimo')) return
 
+    const sessionStartTime = Date.now() - 1000 // Margen de 1 segundo de seguridad
+
     const unsub = subscribeToCentralNotifications(
       recipientId,
       recipientRole,
@@ -106,11 +108,17 @@ export default function useNotificationCenter({
 
         if (newItems.length > 0) {
           newItems.forEach(n => seenIdsRef.current.add(n.id))
+          
+          // Solo hacer sonar/animar si la notificación es realmente nueva en esta sesión
           const firstNew = newItems[0]
-          const meta = NC_TYPE_META[firstNew.type] || {}
-          const sound = firstNew.soundCategory || meta.sound || 'pedido'
-          playSynthesizedSound(sound, soundEnabledRef.current)
-          triggerRing()
+          const createdTime = firstNew.createdAt?.toDate ? firstNew.createdAt.toDate().getTime() : (firstNew.createdAt ? new Date(firstNew.createdAt).getTime() : sessionStartTime + 2000)
+          
+          if (createdTime > sessionStartTime) {
+            const meta = NC_TYPE_META[firstNew.type] || {}
+            const sound = firstNew.soundCategory || meta.sound || 'pedido'
+            playSynthesizedSound(sound, soundEnabledRef.current)
+            triggerRing()
+          }
         }
 
         // Mergear: los items live van al principio; preservar páginas históricas al fondo
@@ -172,10 +180,17 @@ export default function useNotificationCenter({
   }, [])
 
   const markAllRead = useCallback(() => {
+    // Limpieza optimista: marcar todos como leídos en estado local inmediatamente
+    setNotifications(prev => prev.map(n => n.status === 'unread' ? { ...n, status: 'read' } : n))
     markAllAsRead(recipientId, recipientRole)
   }, [recipientId, recipientRole])
 
   const clearAll = useCallback(() => {
+    // Limpieza optimista: vaciar lista local inmediatamente sin esperar al listener
+    setNotifications([])
+    idsInListRef.current = new Set()
+    lastDocRef.current = null
+    setHasMore(false)
     archiveAll(recipientId, recipientRole)
   }, [recipientId, recipientRole])
 
