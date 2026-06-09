@@ -6,6 +6,17 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
 ---
 
 ### 💼 Negocio y Modularidad Ecosistema (Prioridad Alta)
+* **[x] ~~Tarea 309: Bugfix y Blindaje de Scripts de Respaldo Git (.ps1)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - Resolver el bloqueo infinito en la verificación de red de Git en `git_backup.ps1` y `subproject_backup.ps1` inyectando `$env:GIT_TERMINAL_PROMPT = "0"` y `$env:GIT_ASKPASS = "true"` temporalmente para forzar un fallo rápido en lugar de prompts interactivos no visibles.
+    - Implementar un bucle de reintento inteligente de renombrado de directorios `.git` en el bloque `finally` de `git_backup.ps1` para mitigar bloqueos de archivos de Vite (`npm run dev`) u otros procesos, previniendo estados inconsistentes de subrepositorios.
+  - Archivos creados/modificados:
+    - `D:/PROTOTIPE/git_backup.ps1` [MODIFY]
+    - `D:/PROTOTIPE/subproject_backup.ps1` [MODIFY]
+
 * **[x] ~~Tarea 308: Estandarización de Selectores Desplegables Premium en dev-dashboard~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-09
