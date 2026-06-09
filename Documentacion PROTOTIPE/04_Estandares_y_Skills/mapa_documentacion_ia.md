@@ -31,6 +31,8 @@
 | **tareas_pendientes.md (dev-dashboard)** | Roadmap del cliente | Para revisar las tareas del proyecto dev-dashboard. | [Ver Tareas dev-dashboard](file:///D:/PROTOTIPE/Central%20PROTOTIPE/Documentacion%20dev-dashboard/tareas_pendientes.md) |
 | **bitacora_cambios.md (dev-dashboard)** | Registro de cambios | Para auditar y revisar el historial de cambios del dev-dashboard. | [Ver Bitácora dev-dashboard](file:///D:/PROTOTIPE/Central%20PROTOTIPE/Documentacion%20dev-dashboard/bitacora_cambios.md) |
 | **mapa_aplicacion.md (dev-dashboard)** | Estructura de archivos | Para conocer la arquitectura física de archivos del dev-dashboard. | [Ver Mapa dev-dashboard](file:///D:/PROTOTIPE/Central%20PROTOTIPE/Documentacion%20dev-dashboard/mapa_aplicacion.md) |
+| **flujos_aplicacion.md (dev-dashboard)** | Flujos Operativos y de Datos | **Para comprender la integración de procesos:** Describe la secuencia de aprovisionamiento de clientes, telemetría de fallos con visor de código y consolidación de comisiones de desarrollo. | [Ver Flujos dev-dashboard](file:///D:/PROTOTIPE/Central%20PROTOTIPE/Documentacion%20dev-dashboard/flujos_aplicacion.md) |
+
 <!-- START_AUTO_CORES_DOCS -->
 ### 📂 Documentación local para App Agendamiento
 | Archivo | Rol Técnico | Cuándo Usarlo (Criterio de Decisión IA) | Ruta de Acceso Directo |
@@ -131,7 +133,6 @@
 | **Skills/git_strategist** | Skill: Gestor de Control de Versiones | Para realizar commits, push y ramificaciones ordenadas (develop y main) usando Conventional Commits, y validar build local antes del push. | [Ver Skill git-strategist](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/git_strategist/SKILL.md) |
 | **Skills/component_creator** | Skill: Creación de Componentes | Para automatizar de manera estricta la creación, documentación, sandbox e indexación de componentes UI (`@crear-componente`). | [Ver Skill component-creator](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_creator/SKILL.md) |
 | **sincronizacion_templates_universal.md** | Estándar de Sincronización de Templates | **Antes de crear un proyecto nuevo con el CLI o al ejecutar `@actualizar-template`:** Define qué archivos de cualquier aplicación base se copian a su plantilla en el CLI, cuáles se excluyen (cliente-específicos), el procedimiento universal de 7 pasos y el historial de sincronizaciones. | [Ver Estándar Sync Templates](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/sincronizacion_templates_universal.md) |
-| **diagrama_flujo_global.md** | Diagrama de Flujo General del Sistema | **Para comprender el flujo de procesos de extremo a extremo:** Diagrama detallado en Mermaid que describe el aprovisionamiento, la sincronización de templates y clientes, y el envío de telemetría. | [Ver Diagrama de Flujo](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/diagrama_flujo_global.md) |
 
 ---
 

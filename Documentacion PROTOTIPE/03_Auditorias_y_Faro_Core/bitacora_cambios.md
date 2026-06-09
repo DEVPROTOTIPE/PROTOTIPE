@@ -1,4 +1,78 @@
+### [2026-06-09] - Bugfix: Blindaje de Scripts de Respaldo Git (.ps1)
+* **Tipo:** Bugfix / DevOps / Scripts
+* **Descripción de Cambios:**
+  1. **Evitación de cuelgues por credenciales Git (git_backup.ps1 y subproject_backup.ps1):** Se deshabilitaron temporalmente los diálogos de credenciales y terminales interactivas (`$env:GIT_TERMINAL_PROMPT = "0"` y `$env:GIT_ASKPASS = "true"`) durante la ejecución de `git ls-remote` en la comprobación de red. Esto evita que el script se cuelgue indefinidamente si el repositorio es privado y faltan credenciales o llaves SSH, respondiendo de inmediato con fallo rápido (fail-fast) y ofreciendo la opción de respaldo local.
+  2. **Recuperación robusta ante archivos Git bloqueados (git_backup.ps1):** Se reemplazó el comando de renombrado directo de restauración de subproyectos `.git` en el bloque `finally` por una rutina de reintentos inteligente (hasta 6 intentos espaciados por 400ms). Esto soluciona el error fatal de *"Acceso denegado"* que ocurría cuando Vite (`npm run dev`) u otros procesos retenían bloqueos temporales sobre la carpeta `dev-dashboard\.git-backup-temp`.
+* **Archivos Modificados:**
+  - [`D:/PROTOTIPE/git_backup.ps1`](file:///D:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`D:/PROTOTIPE/subproject_backup.ps1`](file:///D:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+* **Verificación:** Ejecución y comportamiento verificado de forma no interactiva.
+
+### [2026-06-09] - Estandarización de Selectores Desplegables Premium en dev-dashboard
+* **Tipo:** Refactorización / Estándar de Diseño / UI/UX / Bugfix
+* **Descripción de Cambios:**
+  1. **Estandarización de Componentes:** Reemplazados todos los dropdowns `<select>` nativos e interfaces personalizadas inconsistentes en el dashboard administrador por el componente unificado de diseño atómico `CustomSelect`.
+  2. **Resolución de Conflictos en App.jsx:** Removida la importación duplicada/redundante en `App.jsx` y re-estilizada la función `CustomSelect` local (con firmas de eventos personalizadas) para compartir la misma estética oscura, HSL refinado, viñetas redondeadas y marcas de check que el componente atómico principal.
+  3. **Integración en CoreManagerPanel.jsx:** Sustituido el selector personalizado de scaffold de cores base por la instancia de `CustomSelect` con su respectivo ícono y opciones dinámicas.
+  4. **Solución a Bug de Superposición / Clipping ("queda por detrás"):** Removida la propiedad `overflow-hidden` del wrapper de tarjetas de cores en `CoreManagerPanel.jsx` (añadiendo `rounded-t-2xl` a la cabecera para mantener la estética de bordes redondeados al hacer hover) y aplicado z-index condicional (`isExpanded ? 'z-20' : 'z-0'`) para garantizar que la tarjeta activa se sitúe por encima de las posteriores y el menú desplegable flote libremente.
+  5. **Actualización de Sandboxes:** Portada la integración de `CustomSelect` a los sandboxes del panel administrador: `CreditosSaldosSandbox.jsx`, `CustomCursorSandbox.jsx` y `ReservasAgendaCitasSandbox.jsx` para estandarizar la interfaz en su totalidad.
+* **Archivos Creados/Modificados:**
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx) [MODIFY]
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CreditosSaldosSandbox.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CreditosSaldosSandbox.jsx) [MODIFY]
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CustomCursorSandbox.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CustomCursorSandbox.jsx) [MODIFY]
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ReservasAgendaCitasSandbox.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ReservasAgendaCitasSandbox.jsx) [MODIFY]
+* **Verificación:** Compilación de producción con Vite exitosa en 1.01s. Pruebas visuales de superposición e interactividad en selectores desplegables certificadas.
+
+### [2026-06-09] - Robustecimiento y Automatización del CLI Daemon (Puerto 3001)
+* **Tipo:** Refactorización / Seguridad / Automatización / PWA / DB Sync / CLI
+* **Descripción de Cambios:**
+  1. **Validación de contraste HSL:** Se implementaron las funciones `parseHSL` y `validateHSLColors` en `server.js` para asegurar que las paletas cromáticas personalizadas del cliente cumplan con al menos un 30% de diferencia de luminosidad entre el primario y el fondo antes del aprovisionamiento, protegiendo la legibilidad de la UI.
+  2. **Procesamiento de Logos PWA con Jimp:** Modificada la generación de assets PWA en `generator.js`. Se aplica redimensionamiento proporcional para evitar distorsiones en logos y se añade un margen seguro del 10% (safe area) para iconos PWA maskables y de Apple, rellenando con el fondo del tema del cliente de forma inteligente.
+  3. **Smoke Test Headless con Playwright:** Se programó una rutina síncrona en `worker_create_project.js` para levantar temporalmente el servidor Vite del cliente generado en el puerto `5190` y ejecutar un navegador chromium headless para verificar que la página renderiza correctamente y que no existan errores fatales en la consola de React.
+  4. **Auto-Generación del Mapa Semántico:** Se configuró en `generator.js` la ejecución síncrona inmediata de `generate_ia_map.js` una vez creados los archivos, asegurando la existencia en caliente de `mapa_arquitectura_ia.md` desde el primer minuto.
+  5. **Auditoría e Inyección de Reglas de Base de Datos:** Creado el endpoint `/api/project/sync-database` para comparar los archivos `firestore.rules`, `firestore.indexes.json` y `storage.rules` del cliente contra los de su plantilla original configurada en `.prototipe.json`, permitiendo sincronizar y desplegar automáticamente las reglas en caliente.
+  6. **Escaneo de Cores de Pruebas E2E:** Se modificó el endpoint `/api/e2e/projects` para buscar proyectos con Playwright tanto en `Instancias Clientes/` como en `Plantillas Core/` (añadiendo la etiqueta `(Core)`), evitando la pantalla de "Sin proyectos" cuando no hay clientes activos instanciados.
+* **Archivos Creados/Modificados:**
+  - [`D:/PROTOTIPE/Prototipe-CLI/server.js`](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/generator.js`](file:///D:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/worker_create_project.js`](file:///D:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx) [MODIFY]
+* **Verificación:** Funciones de validación cromática e iconos PWA validadas en caliente. Rutinas del worker del aprovisionador y endpoints de sincronización agregados y listos para ejecutar. Escaneo dual de proyectos Playwright verificado.
+
+### [2026-06-09] - Optimización de Rendimiento por manualChunks y Modo Simulación de Diffs en CLI Sincronizador
+* **Tipo:** Optimización / Performance / DevOps / CLI
+* **Descripción de Cambios:**
+  1. **Segmentación del Core de Ventas (vite.config.js):** Se implementó la opción `manualChunks` en la configuración de Vite para extraer dependencias masivas (`firebase`, `jspdf`/`html2canvas`/`jspdf-autotable`, `framer-motion` y `lucide-react`) en sus propios archivos JS independientes cargados de manera asíncrona. Esto redujo el tamaño del bundle principal de 1.13 MB a 132.6 kB (reducción del 90%), optimizando la carga en móviles y eliminando warnings de empaquetado de Vite.
+  2. **Propagación a Plantillas y Proyectos Futuros:** Se replicó la configuración de `manualChunks` en Vite y se actualizaron las exclusiones del `.gitignore` (incorporando `.vite/`, `playwright-report/`, `test-results/`) tanto en la plantilla de instancias `template-ventas/` como en la semilla de inicialización de nuevos cores `template-core-seed/` para que futuros cores o instancias hereden automáticamente estas optimizaciones.
+  3. **Menú de Selección Interactiva en CLI (sync_clients.js):** Se rediseñó la confirmación de sincronización interactiva convirtiéndola en un menú que permite: Aplicar cambios físicamente, Simular los diffs (Dry Run) sin escribir en disco, u Omitir la sincronización para el cliente seleccionado.
+  4. **Modo Dry Run / Simulación de Diffs:** Se integró la biblioteca `diff` en `sync_clients.js` para comparar línea por línea los cambios entre el core y el cliente, resaltando con colores de terminal `picocolors` las adiciones en verde (`+`), remociones en rojo (`-`) y resumiendo bloques extensos idénticos para legibilidad del desarrollador.
+  5. **Simetría y UX en Móvil (dev-dashboard App.jsx):** Se retiraron las pestañas "Cores" y "Tests E2E" del bottom navigation en móviles para restaurar la simetría perfecta de 5 botones (Inicio, Cobros, Nuevo, Biblioteca, Monitoreo). En su lugar, se añadieron accesos rápidos con diseño a dos columnas en el modal de **Perfil de Administrador**, preservando la funcionalidad intacta sin saturar la navegación inferior.
+* **Archivos Creados/Modificados:**
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/vite.config.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/vite.config.js) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/.gitignore`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/.gitignore) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/vite.config.js`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/vite.config.js) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/.gitignore`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/.gitignore) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/sync_clients.js`](file:///D:/PROTOTIPE/Prototipe-CLI/sync_clients.js) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/package.json`](file:///D:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Ejecutada compilación local del Core de Ventas con éxito. Reducción del chunk inicial verificada. Test de ejecución y visualización de diffs en CLI exitoso. Plantilla core semilla y UX móvil del dashboard actualizadas para mayor simetría.
+
+### [2026-06-09] - Creación de Especificación de Flujos de la Consola Central
+* **Tipo:** Documentación / Procesos
+* **Descripción de Cambios:**
+  1. **Especificación de Flujos de dev-dashboard:** Creado el archivo [`flujos_aplicacion.md`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/Documentacion%20dev-dashboard/flujos_aplicacion.md) para registrar de forma visual y textual los flujos de procesos críticos de la Consola Central de control: el aprovisionamiento asíncrono multi-instancia (Worker fork IPC + SSE), el diagnóstico interactivo de incidentes (colección de telemetría + visor de código fuente en caliente) y la consolidación de comisiones de desarrollo vía telemetría en background.
+  2. **Depuración de Campos de Onboarding:** Se higienizó el diagrama de secuencia retirando menciones erróneas a la carga de logos desde la interfaz, alineando el flujo estrictamente con los parámetros reales soportados por el formulario (Nombre, Nicho y Colores HSL).
+  3. **Indexación Semántica:** Actualizado el mapa de documentación semántica [`mapa_documentacion_ia.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) para incluir el nuevo manual con su respectivo Criterio de Decisión IA.
+* **Archivos Creados/Modificados:**
+  - [`D:/PROTOTIPE/Central PROTOTIPE/Documentacion dev-dashboard/flujos_aplicacion.md`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/Documentacion%20dev-dashboard/flujos_aplicacion.md) [NEW]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+* **Verificación:** Archivo creado e indexado con éxito. Sintaxis de diagramas Mermaid validada.
+
+
 ### [2026-06-09] - Fix: Blindaje de Consola de Respaldo e Interfaz de Usuario
+
 * **Tipo:** Bugfix / DevOps / Scripts
 * **Descripción de Cambios:**
   1. **Evitación de Cierre Abrupto (backup.bat):** Se añadió control de errores en `backup.bat` evaluando `%errorlevel%` y agregando una instrucción `pause` condicionada para impedir que la consola de CMD de Windows se cierre automáticamente si ocurre un fallo fatal de PowerShell.
@@ -6,13 +80,25 @@
   3. **Auto-Recuperación de Subproyectos Git (menu_backup.ps1):** Se implementó una rutina inteligente de auto-recuperación al arrancar el menú principal que escanea y restaura automáticamente directorios `.git-backup-temp` a `.git` en caso de que alguna ejecución del snapshot maestro se haya cancelado de forma forzada a mitad de camino. Se restauraron manualmente los repositorios de `App Ventas` y `dev-dashboard`.
   4. **Optimización de Historial (.gitignore de App Ventas):** Se agregaron reglas de exclusión en `.gitignore` para omitir la caché de compilación local de Vite (`.vite/`) y los reportes/resultados de pruebas de Playwright (`playwright-report/` y `test-results/`), previniendo la subida de basura técnica al repositorio.
   5. **Mensajes de Commit Contextuales Inteligentes (subproject_backup.ps1 y git_backup.ps1):** Se modificó la generación de mensaje automático (cuando el usuario presiona Enter). En lugar de usar la fecha estática, los scripts analizan dinámicamente los cambios pendientes en caliente (`git status --porcelain`) y construyen un mensaje conciso detallando qué archivos fueron modificados (`Mod: ...`), creados/añadidos (`Add: ...`) o eliminados (`Del: ...`), manteniendo el historial de GitHub descriptivo sin esfuerzo manual.
-* **Archivos Modificados:**
+  6. **Bloqueo Preventivo ante Fugas de Variables (.env) (subproject_backup.ps1 y git_backup.ps1):** Se añadió un detector en caliente que escanea el estado de los archivos antes de hacer commit. Si el usuario intenta subir archivos sensibles de configuración local `.env` (excluyendo el archivo público `.env.example`), la ejecución se detendrá de inmediato impidiendo el push y solicitando agregar el archivo al `.gitignore`.
+  7. **Gestión Robusta de Conflictos en Fusiones Automáticas (subproject_backup.ps1 y git_backup.ps1):** Se implementó un control en la sección de merge automático (`develop` -> `main`/`master`). Si hay conflictos al intentar unir las ramas en el repositorio remoto, el script aborta la fusión (`git merge --abort`), revierte de forma segura los cambios a la rama de desarrollo de origen y alerta al usuario para resolverlos manualmente, protegiendo así la rama de producción contra inconsistencias o fallas fatales.
+  8. **Verificación de Conectividad y Respaldos Offline Locales (subproject_backup.ps1 y git_backup.ps1):** Se integró un validador rápido de red e inicio de sesión en el remoto de GitHub. Si el sistema detecta que está desconectado de internet o que las credenciales no son válidas, te ofrecerá realizar un respaldo puramente local (commit local en disco). Si se rechaza, el script revierte de forma limpia el commit para mantener intacto el entorno.
+  9. **Actualización de Documentación de Arquitectura y Remoción de Diagrama Global:** Se actualizó la guía [`arquitectura_git.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/01_Control_Versiones/arquitectura_git.md) detallando los modos de funcionamiento y directrices de seguridad de la suite de respaldos. Se eliminó físicamente el archivo `diagrama_flujo_global.md` por redundancia y para mantener el foco documental en la arquitectura física de las aplicaciones del negocio, actualizando el mapa de documentación semántico [`mapa_documentacion_ia.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md).
+* **Archivos Modificados/Eliminados:**
   - [`D:/PROTOTIPE/backup.bat`](file:///d:/PROTOTIPE/backup.bat) [MODIFY]
   - [`D:/PROTOTIPE/menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
   - [`D:/PROTOTIPE/git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
   - [`D:/PROTOTIPE/subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
   - [`D:/PROTOTIPE/Plantillas Core/App Ventas/.gitignore`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/.gitignore) [MODIFY]
-* **Verificación:** Ejecución aislada simulada con éxito. Mensajes de depuración agregados al archivo batch. Comando de restauración de carpetas .git ejecutado exitosamente. Reglas del .gitignore añadidas y verificadas. Lógica de commits contextuales testeada con éxito.
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/01_Control_Versiones/arquitectura_git.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/01_Control_Versiones/arquitectura_git.md) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/diagrama_flujo_global.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/diagrama_flujo_global.md) [DELETE]
+* **Verificación:** Ejecución aislada simulada con éxito. Mensajes de depuración agregados al archivo batch. Comando de restauración de carpetas .git ejecutado exitosamente. Reglas del .gitignore añadidas y verificadas. Lógica de commits contextuales testeada con éxito. Lógica de aborto de merge por conflicto e interceptor de archivos .env implementados y validados. Pruebas de conectividad y guardado offline integradas. Documentación de arquitectura Git integrada y diagrama de flujo global purgado con éxito.
+
+
+
+
+
 
 
 

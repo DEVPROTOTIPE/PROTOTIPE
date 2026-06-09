@@ -13,6 +13,47 @@ const __dirname = path.dirname(__filename);
 const CLI_ROOT = __dirname;
 const TEMPLATES_DIR = path.join(CLI_ROOT, 'templates');
 
+function parseHSL(hslStr) {
+  if (!hslStr || typeof hslStr !== 'string') return null;
+  const match = hslStr.match(/hsl\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*\)/i);
+  if (!match) return null;
+  return {
+    h: parseInt(match[1]),
+    s: parseInt(match[2]),
+    l: parseInt(match[3])
+  };
+}
+
+function hslToRgbaHex(hslStr, alpha = 255) {
+  const parsed = parseHSL(hslStr);
+  if (!parsed) return 0xffffffff;
+  const h = parsed.h / 360;
+  const s = parsed.s / 100;
+  const l = parsed.l / 100;
+  let r, g, b;
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+  const rRound = Math.round(r * 255);
+  const gRound = Math.round(g * 255);
+  const bRound = Math.round(b * 255);
+  return (rRound * 0x1000000) + (gRound * 0x10000) + (bRound * 0x100) + alpha;
+}
+
 // Paletas HSL por defecto
 export const PALETTES = {
   emerald: { primary: 'hsl(142, 70%, 45%)', accent: 'hsl(142, 76%, 36%)', theme: 'verde-esmeralda' },
@@ -518,14 +559,43 @@ service firebase.storage {
           // Generar favicon e iconos PWA rasterizados usando Jimp
           const stepPwaIcons = ora('Generando iconos PWA (Jimp)...').start();
           try {
-            const image192 = await Jimp.read(answers.logoPath);
-            image192.resize({ w: 192, h: 192 });
-            await image192.write(path.join(targetDir, 'public', 'pwa-192x192.png'));
-            await image192.write(path.join(targetDir, 'public', 'apple-touch-icon.png'));
+            const logoSrc = answers.logoPath;
+            const bgHex = hslToRgbaHex(answers.branding?.bgColor || 'hsl(224, 71%, 4%)', 255);
+            
+            const createIcon = async (size, usePadding = false) => {
+              const original = await Jimp.read(logoSrc);
+              const w = original.width;
+              const h = original.height;
+              
+              if (usePadding) {
+                const maxDim = Math.round(size * 0.8);
+                const ratio = Math.min(maxDim / w, maxDim / h);
+                const newW = Math.round(w * ratio);
+                const newH = Math.round(h * ratio);
+                original.resize({ w: newW, h: newH });
+                
+                const canvas = new Jimp({ width: size, height: size, color: bgHex });
+                const x = Math.round((size - newW) / 2);
+                const y = Math.round((size - newH) / 2);
+                canvas.composite(original, x, y);
+                return canvas;
+              } else {
+                const ratio = Math.min(size / w, size / h);
+                const newW = Math.round(w * ratio);
+                const newH = Math.round(h * ratio);
+                original.resize({ w: newW, h: newH });
+                return original;
+              }
+            };
 
-            const image512 = await Jimp.read(answers.logoPath);
-            image512.resize({ w: 512, h: 512 });
-            await image512.write(path.join(targetDir, 'public', 'pwa-512x512.png'));
+            const pwa192 = await createIcon(192, false);
+            await pwa192.write(path.join(targetDir, 'public', 'pwa-192x192.png'));
+            
+            const appleIcon = await createIcon(192, true);
+            await appleIcon.write(path.join(targetDir, 'public', 'apple-touch-icon.png'));
+
+            const pwa512 = await createIcon(512, false);
+            await pwa512.write(path.join(targetDir, 'public', 'pwa-512x512.png'));
 
             stepPwaIcons.succeed('Iconos PWA (192x192, 512x512, apple-touch-icon) redimensionados y generados con éxito.');
           } catch (jimpErr) {
@@ -590,6 +660,13 @@ console.log('✅ Mapa de arquitectura para la IA generado.');
 `;
 
   await fs.writeFile(path.join(scratchDir, 'generate_ia_map.js'), mapScriptContent, 'utf-8');
+
+  // Ejecutar de forma síncrona el mapa de IA inicial
+  try {
+    execSync('node scratch/generate_ia_map.js', { cwd: targetDir, stdio: 'ignore' });
+  } catch (mapErr) {
+    console.warn(`[Auto-Map] No se pudo autogenerar el mapa de IA inicial: ${mapErr.message}`);
+  }
 
   // 7.2. Configurar dinámicamente Playwright E2E si existe en la plantilla
   const stepE2E = ora('Configurando suite de pruebas Playwright E2E').start();

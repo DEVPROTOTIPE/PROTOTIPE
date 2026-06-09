@@ -29,6 +29,36 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
+function parseHSL(hslStr) {
+  if (!hslStr || typeof hslStr !== 'string') return null;
+  const match = hslStr.match(/hsl\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*\)/i);
+  if (!match) return null;
+  return {
+    h: parseInt(match[1]),
+    s: parseInt(match[2]),
+    l: parseInt(match[3])
+  };
+}
+
+function validateHSLColors(primaryHslStr, bgHslStr) {
+  const primary = parseHSL(primaryHslStr);
+  const bg = parseHSL(bgHslStr);
+
+  if (!primary) return { valid: false, error: `El color primario "${primaryHslStr}" no tiene un formato HSL válido (ej: hsl(262, 83%, 58%))` };
+  
+  const bgL = bg ? bg.l : 6; // 6% de luminosidad por defecto en modo oscuro
+
+  const diff = Math.abs(primary.l - bgL);
+  if (diff < 30) {
+    return {
+      valid: false,
+      error: `Contraste HSL insuficiente (${diff}% de diferencia). La diferencia de luminosidad (Lightness) entre el primario (${primary.l}%) y el fondo (${bgL}%) debe ser de al menos 30% para garantizar la legibilidad de la interfaz.`
+    };
+  }
+
+  return { valid: true };
+}
+
 // Endpoint para obtener la lista de plantillas disponibles
 app.get('/api/templates', async (req, res) => {
   try {
@@ -221,6 +251,19 @@ app.post('/api/create-project', async (req, res) => {
   for (const field of requiredFields) {
     if (!answers[field]) {
       return res.status(400).json({ error: `El campo '${field}' es obligatorio para el aprovisionamiento.` });
+    }
+  }
+
+  // Validar contraste de colores HSL si la paleta elegida es custom
+  if (answers.paletteChoice === 'custom') {
+    const primaryColor = answers.customPrimary || (answers.branding && answers.branding.primaryColor);
+    const bgColor = answers.customBg || (answers.branding && answers.branding.bgColor) || 'hsl(224, 71%, 6%)';
+    if (primaryColor) {
+      const validation = validateHSLColors(primaryColor, bgColor);
+      if (!validation.valid) {
+        console.warn(`[API Bridge] Aprovisionamiento cancelado: ${validation.error}`);
+        return res.status(400).json({ error: validation.error });
+      }
     }
   }
 
@@ -565,74 +608,7 @@ app.get('/api/project/file', async (req, res) => {
   }
 
   try {
-    const baseAppsDir = getWorkspaceRoot();
-    if (!await fs.pathExists(baseAppsDir)) {
-      return res.status(500).json({ error: 'El directorio de aplicaciones no existe.' });
-    }
-
-    const items = await fs.readdir(baseAppsDir);
-    let targetProjectDir = null;
-
-    // 1. Intentar buscar por nombre de carpeta o package.json
-    for (const item of items) {
-      const fullPath = path.join(baseAppsDir, item);
-      const isDir = (await fs.stat(fullPath)).isDirectory();
-      if (!isDir) continue;
-
-      const pkgPath = path.join(fullPath, 'package.json');
-      if (await fs.pathExists(pkgPath)) {
-        try {
-          const pkg = await fs.readJson(pkgPath);
-          const pkgName = pkg.name || '';
-          if (
-            pkgName.toLowerCase() === clientId.toLowerCase() || 
-            item.toLowerCase().replace(/[^a-z0-9]+/g, '-') === clientId.toLowerCase()
-          ) {
-            targetProjectDir = fullPath;
-            break;
-          }
-        } catch (pkgErr) {
-          // Ignorar errores de package.json malformados
-        }
-      }
-    }
-
-    // 2. Fallbacks de mapeo directo — busca subcarpetas que contengan el clientId
-    if (!targetProjectDir) {
-      const knownMappings = [
-        { keys: ['ventas', 'smartfix'],              folder: 'App Ventas' },
-        { keys: ['dev-dashboard', 'control'],         folder: 'dev-dashboard' },
-        { keys: ['servicios'],                        folder: 'App Servicios' },
-        { keys: ['agendamiento', 'barberia'],         folder: 'App Agendamiento' },
-        { keys: ['gastronomia', 'restaurante'],       folder: 'App Gastronomia' }
-      ];
-      for (const mapping of knownMappings) {
-        if (mapping.keys.some(k => clientId.includes(k))) {
-          // 1. Buscar en la raíz del Workspace
-          let candidate = path.join(baseAppsDir, mapping.folder);
-          if (fs.existsSync(candidate)) {
-            targetProjectDir = candidate;
-            break;
-          }
-          // 2. Buscar en Plantillas Core
-          candidate = path.join(baseAppsDir, 'Plantillas Core', mapping.folder);
-          if (fs.existsSync(candidate)) {
-            targetProjectDir = candidate;
-            break;
-          }
-          // 3. Buscar en legacy D:\Aplicaciones
-          candidate = path.join('D:\\Aplicaciones', mapping.folder);
-          if (fs.existsSync(candidate)) {
-            targetProjectDir = candidate;
-            break;
-          }
-          // Fallback por defecto
-          targetProjectDir = path.join(baseAppsDir, mapping.folder);
-          break;
-        }
-      }
-    }
-
+    const targetProjectDir = await findProjectDir(clientId);
     if (!targetProjectDir) {
       return res.status(404).json({ error: `No se pudo encontrar el directorio del proyecto local para el cliente: ${clientId}` });
     }
@@ -678,37 +654,56 @@ app.get('/api/project/file', async (req, res) => {
  * y devuelve la lista automáticamente — sin configuración manual.
  */
 app.get('/api/e2e/projects', async (req, res) => {
-  const BASE_DIR = getWorkspaceRoot();
+  const baseAppsDir = getWorkspaceRoot();
+  const plantillasCoreDir = path.join(path.dirname(baseAppsDir), 'Plantillas Core');
+  
+  const directoriesToScan = [
+    { path: baseAppsDir, suffix: '' }
+  ];
+  
+  if (await fs.pathExists(plantillasCoreDir)) {
+    directoriesToScan.push({ path: plantillasCoreDir, suffix: ' (Core)' });
+  }
+
   try {
-    const items = await fs.readdir(BASE_DIR);
     const projects = [];
 
-    for (const item of items) {
-      const fullPath = path.join(BASE_DIR, item);
-      try {
-        const stat = await fs.stat(fullPath);
-        if (!stat.isDirectory()) continue;
+    for (const scanDir of directoriesToScan) {
+      if (!await fs.pathExists(scanDir.path)) continue;
+      const items = await fs.readdir(scanDir.path);
 
-        // Detectar si tiene playwright instalado
-        const hasPlaywright = await fs.pathExists(path.join(fullPath, 'playwright.config.js'))
-                           || await fs.pathExists(path.join(fullPath, 'playwright.config.ts'));
-        if (!hasPlaywright) continue;
+      for (const item of items) {
+        const fullPath = path.join(scanDir.path, item);
+        try {
+          const stat = await fs.stat(fullPath);
+          if (!stat.isDirectory()) continue;
 
-        // Leer el nombre del package.json si existe
-        let label = item;
-        const pkgPath = path.join(fullPath, 'package.json');
-        if (await fs.pathExists(pkgPath)) {
-          try {
-            const pkg = await fs.readJson(pkgPath);
-            if (pkg.name) label = pkg.name;
-          } catch {}
-        }
+          // Detectar si tiene playwright instalado
+          const hasPlaywright = await fs.pathExists(path.join(fullPath, 'playwright.config.js'))
+                             || await fs.pathExists(path.join(fullPath, 'playwright.config.ts'));
+          if (!hasPlaywright) continue;
 
-        // ID normalizado a kebab-case
-        const id = item.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          // Leer el nombre del package.json si existe
+          let label = item;
+          const pkgPath = path.join(fullPath, 'package.json');
+          if (await fs.pathExists(pkgPath)) {
+            try {
+              const pkg = await fs.readJson(pkgPath);
+              if (pkg.name) label = pkg.name;
+            } catch {}
+          }
 
-        projects.push({ id, label: label.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), path: fullPath });
-      } catch {}
+          // ID normalizado a kebab-case
+          const id = item.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          const finalLabel = label.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) + scanDir.suffix;
+
+          projects.push({ 
+            id: scanDir.suffix ? `${id}-core` : id, 
+            label: finalLabel, 
+            path: fullPath 
+          });
+        } catch {}
+      }
     }
 
     res.json({ success: true, projects });
@@ -1212,6 +1207,162 @@ app.post('/api/cores/:clave/activate', async (req, res) => {
 // POST /api/cores/:clave/deactivate
 // Marca activo: false sin borrar nada (para retirar temporalmente del wizard)
 // ─────────────────────────────────────────────────────────────────────────────
+// Helper para buscar el directorio del proyecto del cliente
+async function findProjectDir(clientId) {
+  const baseAppsDir = getWorkspaceRoot();
+  if (!await fs.pathExists(baseAppsDir)) return null;
+
+  try {
+    const items = await fs.readdir(baseAppsDir);
+    for (const item of items) {
+      const fullPath = path.join(baseAppsDir, item);
+      try {
+        const stat = await fs.stat(fullPath);
+        if (!stat.isDirectory()) continue;
+
+        const pkgPath = path.join(fullPath, 'package.json');
+        if (await fs.pathExists(pkgPath)) {
+          const pkg = await fs.readJson(pkgPath);
+          const pkgName = pkg.name || '';
+          if (
+            pkgName.toLowerCase() === clientId.toLowerCase() || 
+            item.toLowerCase().replace(/[^a-z0-9]+/g, '-') === clientId.toLowerCase()
+          ) {
+            return fullPath;
+          }
+        }
+      } catch (_) {}
+    }
+  } catch (_) {}
+
+  const knownMappings = [
+    { keys: ['ventas', 'smartfix'],              folder: 'App Ventas' },
+    { keys: ['dev-dashboard', 'control'],         folder: 'dev-dashboard' },
+    { keys: ['servicios'],                        folder: 'App Servicios' },
+    { keys: ['agendamiento', 'barberia'],         folder: 'App Agendamiento' },
+    { keys: ['gastronomia', 'restaurante'],       folder: 'App Gastronomia' }
+  ];
+  for (const mapping of knownMappings) {
+    if (mapping.keys.some(k => clientId.includes(k))) {
+      let candidate = path.join(baseAppsDir, mapping.folder);
+      if (fs.existsSync(candidate)) return candidate;
+      candidate = path.join(baseAppsDir, 'Plantillas Core', mapping.folder);
+      if (fs.existsSync(candidate)) return candidate;
+      candidate = path.join('D:\\Aplicaciones', mapping.folder);
+      if (fs.existsSync(candidate)) return candidate;
+    }
+  }
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/project/sync-database
+// Compara y sincroniza las reglas e índices de Firestore/Storage del cliente
+// contra la plantilla original definida en su archivo de metadatos (.prototipe.json).
+// Body: { clientId: string, sync: boolean }
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/project/sync-database', async (req, res) => {
+  const { clientId, sync } = req.body;
+
+  if (!clientId) {
+    return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+  }
+
+  try {
+    const projectDir = await findProjectDir(clientId);
+    if (!projectDir) {
+      return res.status(404).json({ error: `No se encontró el directorio del proyecto local para el cliente: ${clientId}` });
+    }
+
+    const metaPath = path.join(projectDir, '.prototipe.json');
+    if (!await fs.pathExists(metaPath)) {
+      return res.status(404).json({ error: `El proyecto no tiene metadatos (.prototipe.json).` });
+    }
+
+    const meta = await fs.readJson(metaPath);
+    const templateName = meta.template || 'template-core-seed';
+    const firebaseProjectId = meta.firebaseProjectId || meta.clientId || clientId;
+
+    const templateDir = path.join(TEMPLATES_DIR, templateName);
+    const filesToSync = ['firestore.rules', 'firestore.indexes.json', 'storage.rules'];
+    const auditResults = [];
+    let differencesCount = 0;
+
+    for (const fileName of filesToSync) {
+      const srcPath = path.join(templateDir, fileName);
+      const destPath = path.join(projectDir, fileName);
+
+      const srcExists = await fs.pathExists(srcPath);
+      const destExists = await fs.pathExists(destPath);
+
+      let status = 'identical';
+      let srcContent = '';
+      let destContent = '';
+
+      if (srcExists) srcContent = await fs.readFile(srcPath, 'utf-8');
+      if (destExists) destContent = await fs.readFile(destPath, 'utf-8');
+
+      if (!srcExists) {
+        status = 'source_missing';
+      } else if (!destExists) {
+        status = 'destination_missing';
+        differencesCount++;
+      } else if (srcContent.trim() !== destContent.trim()) {
+        status = 'different';
+        differencesCount++;
+      }
+
+      auditResults.push({
+        file: fileName,
+        status,
+        srcExists,
+        destExists
+      });
+
+      // Si se solicita sincronización y hay diferencias/falta el archivo destino
+      if (sync && srcExists && (status === 'different' || status === 'destination_missing')) {
+        await fs.copy(srcPath, destPath, { overwrite: true });
+        // Actualizar el estado en el reporte
+        auditResults[auditResults.length - 1].status = 'synced';
+      }
+    }
+
+    let deployed = false;
+    let deployOutput = '';
+
+    if (sync && differencesCount > 0) {
+      console.log(`[Database Sync] Desplegando reglas e índices para: ${firebaseProjectId}`);
+      try {
+        const { stdout } = await execAsync(
+          `firebase deploy --only firestore:rules,firestore:indexes,storage -P ${firebaseProjectId}`,
+          { cwd: projectDir, timeout: 120000 }
+        );
+        deployed = true;
+        deployOutput = stdout;
+      } catch (deployErr) {
+        console.warn(`[Database Sync Warning] Falló el despliegue automático: ${deployErr.message}`);
+        deployOutput = deployErr.message;
+      }
+    }
+
+    res.json({
+      success: true,
+      clientId,
+      template: templateName,
+      firebaseProjectId,
+      differencesCount,
+      synced: !!sync,
+      deployed,
+      deployOutput,
+      audit: auditResults
+    });
+
+  } catch (err) {
+    console.error(`[API /project/sync-database] Error: ${err.message}`);
+    res.status(500).json({ error: `Error en auditoría/sincronización de base de datos: ${err.message}` });
+  }
+});
+
 app.post('/api/cores/:clave/deactivate', async (req, res) => {
   const { clave } = req.params;
   const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');

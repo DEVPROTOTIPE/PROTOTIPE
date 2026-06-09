@@ -4,6 +4,7 @@ import {
   Play, StopCircle, Copy, ChevronDown, ChevronRight,
   Zap, Package, Settings, Trash2, ArrowRight, Check, X
 } from 'lucide-react'
+import CustomSelect from '../ui/CustomSelect'
 
 const CLI_URL = 'http://localhost:3001'
 
@@ -68,6 +69,7 @@ export default function CoreManagerPanel({ showToast }) {
 
   // ── Scaffold ─────────────────
   const [scaffoldBase, setScaffoldBase] = useState({}) // clave → baseCore seleccionado
+  const [openDropdown, setOpenDropdown] = useState(null) // clave del dropdown abierto
 
   // ─── Cargar lista de cores ──────────────────────────────────────────────────
   const loadCores = useCallback(async () => {
@@ -264,13 +266,15 @@ export default function CoreManagerPanel({ showToast }) {
             return (
               <div
                 key={core.clave}
-                className={`bg-[var(--color-surface)]/60 border rounded-2xl overflow-hidden transition-all backdrop-blur-sm ${
+                className={`bg-[var(--color-surface)]/60 border rounded-2xl transition-all backdrop-blur-sm relative ${
+                  isExpanded ? 'z-20' : 'z-0'
+                } ${
                   core.activo ? 'border-emerald-500/20' : 'border-[var(--color-border)]'
                 }`}
               >
                 {/* Header del core */}
                 <div
-                  className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-[var(--color-surface-2)]/30 transition-colors"
+                  className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-[var(--color-surface-2)]/30 rounded-t-2xl transition-colors"
                   onClick={() => setExpandedCore(isExpanded ? null : core.clave)}
                 >
                   <div className="flex items-center gap-3">
@@ -338,16 +342,19 @@ export default function CoreManagerPanel({ showToast }) {
                             <span className="text-xs font-semibold text-[var(--color-text)]">Scaffold</span>
                           </div>
                           <p className="text-[10px] text-slate-500">Copia código base de otro core como punto de partida.</p>
-                          <select
-                            value={baseForScaffold}
-                            onChange={e => setScaffoldBase(p => ({ ...p, [core.clave]: e.target.value }))}
-                            className="w-full bg-slate-900/60 border border-slate-700/50 rounded-lg px-2 py-1.5 text-[11px] text-slate-300 outline-none focus:border-violet-500"
-                          >
-                            <option value="">-- Core base --</option>
-                            {coreOptions.filter(k => k !== core.clave).map(k => (
-                              <option key={k} value={k}>{k}</option>
-                            ))}
-                          </select>
+                          <CustomSelect
+                            value={scaffoldBase[core.clave] || ''}
+                            onChange={(val) => setScaffoldBase(p => ({ ...p, [core.clave]: val }))}
+                            options={[
+                              { value: '', label: '-- Seleccionar --' },
+                              ...coreOptions.filter(k => k !== core.clave).map(k => ({
+                                value: k,
+                                label: `App ${k.charAt(0).toUpperCase() + k.slice(1)}`
+                              }))
+                            ]}
+                            placeholder="-- Seleccionar Core base --"
+                            icon={Layers}
+                          />
                           <button
                             onClick={() => {
                               if (!scaffoldBase[core.clave]) { showToast?.('Selecciona un core base.', 'error'); return }

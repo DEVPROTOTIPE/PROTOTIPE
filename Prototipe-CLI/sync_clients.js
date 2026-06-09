@@ -6,6 +6,7 @@ import { execSync } from 'child_process';
 import crypto from 'crypto';
 import { getWorkspaceRoot, getTemplatesDir, getRegistroPath } from './config.js';
 import { logger } from './logger.js';
+import * as Diff from 'diff';
 
 // Expresión regular para ignorar archivos del cliente al comparar/copiar
 const EXCLUDED_PATHS = [
@@ -222,17 +223,34 @@ async function main() {
     });
 
     // 5. Confirmar sincronización
-    const confirmAnswer = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'proceed',
-        message: `¿Deseas aplicar estos ${changes.length} cambios a ${client.meta.projectName}?`,
-        default: false
-      }
-    ]);
+    let action = '';
+    while (true) {
+      const { choice } = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'choice',
+          message: `¿Qué deseas hacer con los cambios detectados en ${client.meta.projectName}?`,
+          choices: [
+            { name: `${pc.green('✅')} Aplicar Cambios (Sincronización Física)`, value: 'aplicar' },
+            { name: `${pc.cyan('🔍')} Ver Diffs de Cambios (Simulación/Dry Run)`, value: 'diff' },
+            { name: `${pc.red('❌')} Omitir Cliente / Siguiente`, value: 'omitir' }
+          ]
+        }
+      ]);
 
-    if (!confirmAnswer.proceed) {
-      logger.info('Sincronización cancelada por el usuario.');
+      if (choice === 'omitir') {
+        action = 'omitir';
+        break;
+      } else if (choice === 'aplicar') {
+        action = 'aplicar';
+        break;
+      } else if (choice === 'diff') {
+        await showDiffs(templatePath, client.path, changes);
+      }
+    }
+
+    if (action === 'omitir') {
+      logger.info('Sincronización omitida para este cliente.');
       continue;
     }
 
@@ -319,6 +337,64 @@ function rollbackBackup(clientPath, backupDir, changes) {
   } catch (err) {
     logger.error(`Fallo crítico durante el rollback: ${err.message}. Los archivos pueden estar en un estado inconsistente.`);
   }
+}
+
+/**
+ * Calcula y muestra los diffs de los archivos comparándolos línea por línea
+ */
+async function showDiffs(templatePath, clientPath, changes) {
+  logger.info(`🔍 Mostrando simulación de diferencias (Dry Run) para el cliente...`);
+  
+  for (const c of changes) {
+    const templateFilePath = path.join(templatePath, c.file);
+    const clientFilePath = path.join(clientPath, c.file);
+    
+    console.log('\n' + pc.bold(pc.cyan(`--- Archivo: ${c.file} [${c.type}] ---`)));
+    
+    if (c.type === 'NUEVO') {
+      try {
+        const content = fs.readFileSync(templateFilePath, 'utf8');
+        const lines = content.split('\n');
+        lines.forEach(line => {
+          console.log(pc.green(`+ ${line}`));
+        });
+      } catch (err) {
+        console.log(pc.red(`Error al leer archivo nuevo: ${err.message}`));
+      }
+    } else if (c.type === 'MODIFICADO') {
+      try {
+        const clientContent = fs.readFileSync(clientFilePath, 'utf8');
+        const templateContent = fs.readFileSync(templateFilePath, 'utf8');
+        
+        const diffResult = Diff.diffLines(clientContent, templateContent);
+        
+        diffResult.forEach(part => {
+          const color = part.added ? pc.green : part.removed ? pc.red : pc.gray;
+          const prefix = part.added ? '+ ' : part.removed ? '- ' : '  ';
+          
+          const lines = part.value.split('\n');
+          
+          // Omitir bloques de más de 8 líneas sin cambios para evitar saturar la terminal
+          if (!part.added && !part.removed && lines.length > 8) {
+            console.log(pc.gray(`  ... (${lines.length - 2} líneas sin cambios omitidas por legibilidad) ...`));
+            // Mostrar al menos un par de líneas como contexto
+            if (lines[0]) console.log(pc.gray(`  ${lines[0]}`));
+            if (lines[lines.length - 1]) console.log(pc.gray(`  ${lines[lines.length - 1]}`));
+          } else {
+            lines.forEach(line => {
+              // Si la línea no es vacía o es una línea añadida/removida, mostrarla
+              if (line || part.added || part.removed) {
+                console.log(color(`${prefix}${line}`));
+              }
+            });
+          }
+        });
+      } catch (err) {
+        console.log(pc.red(`Error al comparar archivo: ${err.message}`));
+      }
+    }
+  }
+  console.log('\n' + pc.cyan('─────────────────────────────────────────────────────────────────────────────'));
 }
 
 // Ejecutar

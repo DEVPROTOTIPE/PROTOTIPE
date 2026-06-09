@@ -6,6 +6,53 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
 ---
 
 ### 💼 Negocio y Modularidad Ecosistema (Prioridad Alta)
+* **[x] ~~Tarea 308: Estandarización de Selectores Desplegables Premium en dev-dashboard~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - Estandarizar todos los selectores del dashboard reemplazando los `<select>` nativos e interfaces customizadas inconsistentes por el componente premium unificado `CustomSelect` (con su menú flotante oscuro con check, dots e íconos).
+    - Resolver el conflicto de compilación en `App.jsx` limpiando las importaciones duplicadas y dotando al `CustomSelect` local de `App.jsx` de la misma estética y comportamiento de animación.
+    - Integrar `CustomSelect` en `CoreManagerPanel.jsx` (Scaffold de cores base), y en los sandboxes del panel administrador: `CreditosSaldosSandbox.jsx`, `CustomCursorSandbox.jsx` y `ReservasAgendaCitasSandbox.jsx`.
+    - Resolver el bug crítico de renderizado ("queda por detrás") implementando z-index dinámico (`z-20` vs `z-0` condicionado a `isExpanded`) en el contenedor de las tarjetas de cores en `CoreManagerPanel.jsx`, garantizando que la lista flotante se dibuje sobre las tarjetas subsiguientes.
+  - Archivos creados/modificados:
+    - `D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx` [MODIFY]
+    - `D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx` [MODIFY]
+    - `D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CreditosSaldosSandbox.jsx` [MODIFY]
+    - `D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CustomCursorSandbox.jsx` [MODIFY]
+    - `D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ReservasAgendaCitasSandbox.jsx` [MODIFY]
+
+* **[x] ~~Tarea 307: Robustecimiento y Automatización del CLI Daemon (Puerto 3001)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - Implementar validación de contraste HSL (tasa mínima de diferencia de 30% en luminosidad) en el pre-aprovisionamiento del servidor para impedir la creación de instancias con paletas rotas.
+    - Robustecer la generación de iconos PWA con Jimp, aplicando redimensionamiento proporcional y padding del 10% (safe area) para iconos maskables.
+    - Integrar Smoke Test Headless con Playwright post-aprovisionamiento para levantar temporalmente la aplicación en el puerto 5190 y verificar que renderiza sin errores de consola React antes de confirmar la creación.
+    - Generar de forma dinámica el mapa semántico de IA (`mapa_arquitectura_ia.md`) de la instancia síncronamente al crear el proyecto.
+    - Crear endpoint de auditoría y sincronización de Firestore (`/api/project/sync-database`) para auditar, sincronizar y desplegar automáticamente las reglas e índices del cliente contra su plantilla de origen.
+  - Archivos creados/modificados:
+    - `D:/PROTOTIPE/Prototipe-CLI/server.js` [MODIFY]
+    - `D:/PROTOTIPE/Prototipe-CLI/generator.js` [MODIFY]
+    - `D:/PROTOTIPE/Prototipe-CLI/worker_create_project.js` [MODIFY]
+
+* **[x] ~~Tarea 306: Optimización de Rendimiento por manualChunks y Modo Simulación de Diffs en CLI Sincronizador~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - Configurar segmentación de dependencias pesadas (`manualChunks` para `firebase`, `jspdf`/`html2canvas`, `framer-motion` y `lucide-react`) en el empaquetador de Vite de `App Ventas (Core)` para reducir el tamaño del bundle principal de 1.13 MB a 132.6 kB (reducción del 90%).
+    - Propagar la configuración de chunks optimizados y la actualización de exclusiones del `.gitignore` (añadiendo `.vite/`, `playwright-report/`, `test-results/`) al template global del CLI en `Prototipe-CLI/templates/template-ventas/` para que los nuevos proyectos e instancias de marca blanca se generen con estas optimizaciones por defecto.
+    - Dotar al CLI de sincronización interactivo (`sync_clients.js`) con un menú de decisión para el desarrollador: Aplicar cambios, Ver diffs de simulación/Dry Run, u Omitir cliente.
+    - Implementar visualización inteligente de diferencias en terminal usando la dependencia `diff`, resaltando adiciones en verde (`+`), eliminaciones en rojo (`-`) y colapsando bloques extensos de texto sin cambios.
+  - Archivos creados/modificados:
+    - `D:/PROTOTIPE/Plantillas Core/App Ventas/vite.config.js` [MODIFY]
+    - `D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js` [MODIFY]
+    - `D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/.gitignore` [MODIFY]
+    - `D:/PROTOTIPE/Prototipe-CLI/sync_clients.js` [MODIFY]
+    - `D:/PROTOTIPE/Prototipe-CLI/package.json` [MODIFY]
+
 * **[x] ~~Tarea 305: Automatización del Ciclo de Vida de Cores y Panel CoreManagerPanel en dev-dashboard~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-09
