@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 > nul
 title Respaldo Maestro PROTOTIPE
 echo Lanzando script de respaldo fisico y sincronizacion automatica con GitHub...
 echo.
