@@ -1,3 +1,22 @@
+### [2026-06-09] - Migración SSH + Blindaje Definitivo del Engine de Respaldo Git
+* **Tipo:** DevOps / Seguridad / Automatización / Bugfix
+* **Descripción de Cambios:**
+  1. **Migración de autenticación Git HTTPS → SSH:** Las credenciales del Windows Credential Manager expiraron, rompiendo la verificación de conectividad. Se generó una llave ED25519 (`C:\Users\Sergio\.ssh\id_ed25519`), se registró en GitHub (`DEVPROTOTIPE`) y se actualizó el remote de todos los repos del workspace de HTTPS a SSH (`git@github.com:DEVPROTOTIPE/PROTOTIPE.git`). La autenticación SSH no tiene fecha de expiración y no depende de ningún gestor de credenciales de Windows.
+  2. **Limpieza del parche GIT_ASKPASS/GIT_TERMINAL_PROMPT:** Con SSH activo, el workaround temporal que inyectaba `GIT_ASKPASS=true` y `GIT_TERMINAL_PROMPT=0` para evitar bloqueos por credenciales fue eliminado de `git_backup.ps1` y `subproject_backup.ps1`. El check de conectividad pasó de un doble ping + ls-remote con env vars parcheadas a un único `git ls-remote origin HEAD 2>$null` limpio cuyo exit code determina si el remote es accesible.
+  3. **Corrección flash de error rojo en consola:** El stderr de `git ls-remote` se redirigía con `2>&1` que causaba un flash visual rojo en PowerShell. Cambiado a `2>$null | Out-Null` para silenciar completamente el stream de error sin afectar la captura del exit code.
+  4. **Corrección de `Rename-Item: Acceso denegado` en `menu_backup.ps1`:** La rutina de auto-recuperación al abrir el menú usaba `Rename-Item` sin manejo de errores. Si Vite tenía el `.git-backup-temp` bloqueado, mostraba un error rojo y continuaba. Se envolvió con el mismo bucle de reintentos inteligente (6 intentos, 400ms) que ya existía en `git_backup.ps1`.
+  5. **Optimización del scan recursivo en `menu_backup.ps1`:** El `Get-ChildItem -Recurse` sin límite de profundidad recorría miles de archivos (incluido `node_modules`) causando delay de 1-3s al abrir el menú. Limitado a `-Depth 3`, suficiente para cubrir todos los subrepos del ecosistema sin penalidad de rendimiento.
+  6. **Solución definitiva al bloqueo de Vite sobre `.git` de dev-dashboard:** El backup maestro renombra `.git → .git-backup-temp` en todos los subrepos antes del snapshot, pero Vite (`npm run dev`) retiene un file lock sobre la carpeta `.git` del dev-dashboard impidiendo el renombrado y dejando el estado corrupto. Implementado en `git_backup.ps1`: detección automática del proceso `node.exe` de Vite via WMI (`Win32_Process` filtrando por `CommandLine` que contenga la ruta del dashboard), terminación controlada (`Stop-Process -Force`) antes del renombrado, y relanzamiento automático en nueva ventana PowerShell (`Start-Process`) tras restaurar todos los `.git` en el bloque `finally`. Si Vite no estaba corriendo, el flujo es transparente sin ningún cambio de comportamiento.
+  7. **Añadido `-Depth 3` al scan de `.git` del backup maestro:** Consistente con `menu_backup.ps1`, el `Get-ChildItem` del engine principal también fue limitado a 3 niveles de profundidad para evitar recorrer `node_modules`.
+* **Archivos Modificados:**
+  - [`D:/PROTOTIPE/git_backup.ps1`](file:///D:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`D:/PROTOTIPE/subproject_backup.ps1`](file:///D:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+  - [`D:/PROTOTIPE/menu_backup.ps1`](file:///D:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+* **Infraestructura:**
+  - Llave SSH: `C:\Users\Sergio\.ssh\id_ed25519` (ED25519, sin passphrase)
+  - Remote actualizado: `git@github.com:DEVPROTOTIPE/PROTOTIPE.git` (todos los repos del workspace)
+* **Verificación:** `ssh -T git@github.com` retorna `Hi DEVPROTOTIPE! You've successfully authenticated`. `git ls-remote origin HEAD` retorna exit code 0 sin prompts ni bloqueos.
+
 ### [2026-06-09] - Bugfix: Blindaje de Scripts de Respaldo Git (.ps1)
 * **Tipo:** Bugfix / DevOps / Scripts
 * **Descripción de Cambios:**

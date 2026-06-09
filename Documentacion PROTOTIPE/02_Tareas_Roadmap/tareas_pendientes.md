@@ -6,6 +6,24 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
 ---
 
 ### 💼 Negocio y Modularidad Ecosistema (Prioridad Alta)
+* **[x] ~~Tarea 310: Migración SSH + Blindaje Definitivo del Engine de Respaldo Git~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - Migrar autenticación Git de HTTPS (Windows Credential Manager expirado) a SSH con llave ED25519. Generar llave, registrarla en GitHub y actualizar todos los remotes del workspace.
+    - Eliminar el parche temporal `GIT_ASKPASS`/`GIT_TERMINAL_PROMPT` de `git_backup.ps1` y `subproject_backup.ps1` reemplazándolo por un check SSH limpio con `git ls-remote origin HEAD 2>$null`.
+    - Corregir flash de error rojo en consola causado por `2>&1` redirigiendo stderr de git al error stream de PowerShell. Solucionado con `2>$null | Out-Null`.
+    - Corregir `Rename-Item: Acceso denegado` al abrir `menu_backup.ps1` añadiendo bucle de reintentos (6 intentos, 400ms) en la rutina de auto-recuperación de `.git-backup-temp`.
+    - Optimizar scan de auto-recuperación en `menu_backup.ps1` limitando `Get-ChildItem` a `-Depth 3` para evitar recorrer `node_modules` y eliminar el delay de 1-3s al abrir el menú.
+    - Solución definitiva al bloqueo de Vite sobre `.git` del dev-dashboard: detectar y terminar el proceso `node.exe` de Vite antes del renombrado de `.git` y relanzarlo automáticamente al finalizar el backup.
+    - Añadir `-Depth 3` al scan de `.git` del backup maestro para consistencia con `menu_backup.ps1`.
+  - Archivos creados/modificados:
+    - `D:/PROTOTIPE/git_backup.ps1` [MODIFY]
+    - `D:/PROTOTIPE/subproject_backup.ps1` [MODIFY]
+    - `D:/PROTOTIPE/menu_backup.ps1` [MODIFY]
+  - Infraestructura: `C:\Users\Sergio\.ssh\id_ed25519` (ED25519) registrada en GitHub DEVPROTOTIPE. Remotes actualizados a `git@github.com:DEVPROTOTIPE/PROTOTIPE.git`.
+
 * **[x] ~~Tarea 309: Bugfix y Blindaje de Scripts de Respaldo Git (.ps1)~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-09

@@ -86,6 +86,21 @@ if ($vitePids.Count -gt 0) {
     Write-Host "    -> Servidor detenido. Se reiniciara automaticamente al finalizar." -ForegroundColor DarkGray
 }
 
+# Auto-saneamiento: restaurar .git-backup-temp residuales de backups anteriores fallidos
+# Ahora que Vite esta detenido, el rename tiene exito garantizado
+$residualTemps = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git-backup-temp" -Recurse -Depth 3 -ErrorAction SilentlyContinue
+if ($residualTemps) {
+    Write-Host " [INFO] Restaurando directorios .git residuales de backups anteriores..." -ForegroundColor Yellow
+    foreach ($temp in $residualTemps) {
+        try {
+            Rename-Item -Path $temp.FullName -NewName ".git" -ErrorAction Stop -Force
+            Write-Host "    -> Restaurado: $($temp.Parent.Name)/.git" -ForegroundColor DarkGray
+        } catch {
+            Write-Host "    [!] No se pudo restaurar: $($temp.FullName)" -ForegroundColor Red
+        }
+    }
+}
+
 # Buscar repositorios Git de desarrollo
 Write-Host " [1/6] Escaneando directorios en busqueda de Git locales..." -ForegroundColor Cyan
 $gitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git" -Recurse -Depth 3 -ErrorAction SilentlyContinue | Where-Object {
@@ -93,6 +108,7 @@ $gitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git" -Recur
 }
 
 $renamedDirs = @()
+
 
 try {
     # 1. Renombrar temporalmente los .git locales para evitar Git Links vacios
