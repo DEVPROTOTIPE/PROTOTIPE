@@ -2,6 +2,23 @@
 
 Historial de cambios, mejoras y correcciones técnicas aplicadas sobre la plantilla core de Ventas.
 
+### [2026-06-09] - Sincronización de Créditos y Optimización de Paginación de Deudas
+* **Tipo:** Bugfix / Optimización / Firestore
+* **Severidad:** Media
+* **Síntoma:** 
+  1. En pedidos a domicilio, el valor del envío y descuento se registraba en la tarjeta de pedido pero no se sumaba al saldo de los créditos, causando que el pedido se marcara como "Completado" sin cobrar el domicilio.
+  2. La pestaña de créditos en el administrador demoraba en cargar las deudas activas y pagadas.
+* **Causa Raíz:**
+  1. Al aprobar el crédito no se leían los datos en caliente más recientes de la orden en Firestore y no se actualizaban los créditos al cambiar el costo de envío.
+  2. Cada render realizaba un fetch secuencial (`checkNext`) para verificar de forma anticipada la existencia de páginas siguientes.
+* **Archivos Modificados:**
+  - `src/services/orderService.js` → Aprobación lee `latestOrderDoc` directamente de la DB; `updateOrderDeliveryCost` sincroniza automáticamente la diferencia de envío con créditos asociados.
+  - `src/services/creditService.js` → Paginación optimizada a `limitSize + 1` elementos para retornar `hasNextPage` de manera atómica.
+  - `src/pages/admin/AdminCredits.jsx` → Consumir flag `hasNextPage` y eliminar fetch secuencial redundante.
+* **Desplegado:** Local build verificado ✅
+
+---
+
 ### [2026-06-09] - Corrección crítica: Firestore allow read vs allow get/list en /orders
 * **Tipo:** Bug Fix / Seguridad / Base de Datos
 * **Severidad:** Crítico

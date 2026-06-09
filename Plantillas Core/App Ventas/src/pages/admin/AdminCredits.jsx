@@ -35,18 +35,11 @@ export default function AdminCredits() {
       try {
         const startAfterDoc = pagesHistory[currentPageIdx] || null
         
-        // 1. Obtener la página actual (10 elementos)
+        // Obtener la página actual y si existe una página siguiente de forma atómica
         const result = await creditService.getCreditsPaged(activeTab, 10, startAfterDoc)
         setCredits(result.credits)
         setLastVisibleDoc(result.lastDoc)
-
-        // 2. Verificar si hay página siguiente (haciendo consulta anticipada rápida con límite 1)
-        if (result.lastDoc) {
-          const checkNext = await creditService.getCreditsPaged(activeTab, 1, result.lastDoc)
-          setHasNextPage(checkNext.credits.length > 0)
-        } else {
-          setHasNextPage(false)
-        }
+        setHasNextPage(result.hasNextPage)
       } catch (err) {
         console.error('Error al cargar créditos paginados:', err)
       } finally {

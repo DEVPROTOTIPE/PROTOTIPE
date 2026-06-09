@@ -158,7 +158,7 @@ export async function getCreditsPaged(estado = 'activo', limitSize = 10, startAf
   const constraints = [
     where('estado', '==', estado),
     orderBy('createdAt', 'desc'),
-    limit(limitSize)
+    limit(limitSize + 1) // Traemos 1 elemento extra para comprobar de forma eficiente si hay una página siguiente
   ]
   
   if (startAfterDoc) {
@@ -168,10 +168,14 @@ export async function getCreditsPaged(estado = 'activo', limitSize = 10, startAf
   const q = query(creditsRef, ...constraints)
   const snap = await getDocs(q)
   
-  const credits = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  const docs = snap.docs
+  const hasNextPage = docs.length > limitSize
+  const creditsToShow = hasNextPage ? docs.slice(0, limitSize) : docs
+  
   return {
-    credits,
-    lastDoc: snap.docs[snap.docs.length - 1] || null
+    credits: creditsToShow.map(doc => ({ id: doc.id, ...doc.data() })),
+    lastDoc: creditsToShow[creditsToShow.length - 1] || null,
+    hasNextPage
   }
 }
 

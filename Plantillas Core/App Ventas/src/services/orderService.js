@@ -425,17 +425,21 @@ export async function updateOrderStatus(orderId, newStatus, currentOrder) {
       })
     }
 
+    // Obtener los datos más recientes del pedido directamente de la base de datos
+    const latestOrderDoc = await getDoc(orderRef)
+    const latestOrderData = latestOrderDoc.exists() ? latestOrderDoc.data() : currentOrder
+
     // Generar documento en Colección Credits
     const creditsRef = collection(db, 'credits')
     await addDoc(creditsRef, {
       orderId,
-      orderNumber: currentOrder.orderNumber || '—',
-      cliente: currentOrder.cliente,
-      clienteNombre: currentOrder.cliente?.nombre || '',
-      clienteCelular: currentOrder.cliente?.celular || '',
-      total: currentOrder.total,
-      montoTotal: currentOrder.total,
-      saldoPendiente: currentOrder.total,
+      orderNumber: latestOrderData.orderNumber || '—',
+      cliente: latestOrderData.cliente,
+      clienteNombre: latestOrderData.cliente?.nombre || '',
+      clienteCelular: latestOrderData.cliente?.celular || '',
+      total: latestOrderData.total,
+      montoTotal: latestOrderData.total,
+      saldoPendiente: latestOrderData.total,
       abonos: [],
       estado: 'activo',
       createdAt: serverTimestamp(),
@@ -554,11 +558,37 @@ export async function createPhysicalOrder(orderData, adminId) {
 export async function updateOrderDeliveryCost(orderId, newCost, currentTotal, currentDeliveryCost) {
   const orderRef = doc(db, COLLECTIONS.ORDERS, orderId)
   const diff = newCost - (currentDeliveryCost || 0)
+  
+  // 1. Actualizar el pedido en la colección orders
+  const newTotal = Math.max(0, (currentTotal || 0) + diff)
   await updateDoc(orderRef, {
     costoEnvio: newCost,
-    total: Math.max(0, (currentTotal || 0) + diff),
+    total: newTotal,
     updatedAt: serverTimestamp()
   })
+
+  // 2. Buscar si existe un crédito asociado para este pedido y actualizarlo
+  try {
+    const creditsRef = collection(db, 'credits')
+    const q = query(creditsRef, where('orderId', '==', orderId))
+    const querySnapshot = await getDocs(q)
+    
+    if (!querySnapshot.empty) {
+      const creditDoc = querySnapshot.docs[0]
+      const creditData = creditDoc.data()
+      const newCreditTotal = Math.max(0, (creditData.total || 0) + diff)
+      const newSaldo = Math.max(0, (creditData.saldoPendiente || 0) + diff)
+      
+      await updateDoc(doc(db, 'credits', creditDoc.id), {
+        total: newCreditTotal,
+        montoTotal: newCreditTotal,
+        saldoPendiente: newSaldo,
+        updatedAt: serverTimestamp()
+      })
+    }
+  } catch (error) {
+    console.error('[orderService] Error al sincronizar el costo de envío con el crédito:', error)
+  }
 }
 
 /**

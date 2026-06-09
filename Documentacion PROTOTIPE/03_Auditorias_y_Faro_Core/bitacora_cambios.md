@@ -1,3 +1,16 @@
+### [2026-06-09] - Sincronización de Créditos con Domicilio/Descuento y Optimización de Carga Paginada
+* **Tipo:** Bugfix / Optimización de Rendimiento / Transaccionalidad
+* **Descripción de Cambios:**
+  1. **Sincronización Transaccional en Aprobación de Deuda:** Se modificó `updateOrderStatus` en `orderService.js`. Al aprobar un crédito, ahora se consultan primero los datos en caliente del pedido de Firestore (`latestOrderDoc`) para registrar la deuda con el total real, incluyendo el costo del domicilio y descuentos aplicados.
+  2. **Actualización de Envío en Créditos Existentes:** Se actualizó `updateOrderDeliveryCost` en `orderService.js`. Al cambiar el costo de envío, si el pedido tiene un crédito activo asociado (`credits`), se actualizan automáticamente sus campos `total`, `montoTotal` y `saldoPendiente` con la diferencia respectiva.
+  3. **Optimización de Carga Paginada de Créditos:** Se optimizó `getCreditsPaged` en `creditService.js` para consultar `limitSize + 1` elementos en lugar de hacer un segundo fetch redundante secuencial (`checkNext`) para verificar páginas siguientes.
+  4. **Adaptación de Interfaz:** Se adaptó `AdminCredits.jsx` para consumir directamente el flag `hasNextPage` devuelto por la consulta optimizada de `getCreditsPaged`.
+* **Archivos Modificados:**
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/services/orderService.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/orderService.js) [MODIFY]
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/services/creditService.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/creditService.js) [MODIFY]
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/AdminCredits.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminCredits.jsx) [MODIFY]
+* **Verificación:** Sincronizado downstream y validado mediante build exitoso de Vite.
+
 ### [2026-06-09] - Corrección de ReferenceError: CheckCircle is not defined en Zona de Desarrollador
 * **Tipo:** Bugfix / Estabilidad
 * **Descripción de Cambios:**

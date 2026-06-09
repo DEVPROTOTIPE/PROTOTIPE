@@ -6,6 +6,20 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
 ---
 
 ### 💼 Negocio y Modularidad Ecosistema (Prioridad Alta)
+* **[x] ~~Tarea 320: Sincronización de Créditos con Domicilio/Descuento y Optimización de Carga Paginada~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Sincronización de Totales en Deudas:** Modificada la aprobación de créditos para consultar previamente Firestore y capturar el total real (con domicilio y descuento) de la orden más actualizada.
+    - **Sincronización al Editar Domicilios:** Modificado el actualizador de costo de envío para buscar el crédito asociado del pedido y sumarle/restarle automáticamente la diferencia.
+    - **Optimización de Carga Paginada:** Modificada la paginación a `limitSize + 1` elementos para determinar el indicador de página siguiente de forma atómica. Adaptada la interfaz del panel para consumirlo eliminando el fetch secuencial `checkNext` redundante.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/services/orderService.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/orderService.js) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/services/creditService.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/creditService.js) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/AdminCredits.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminCredits.jsx) [MODIFY]
+  - Verificación: Compilación local de producción exitosa y validada.
+
 * **[x] ~~Tarea 319: Corrección de ReferenceError por CheckCircle no definido en Zona de Desarrollador~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-09
