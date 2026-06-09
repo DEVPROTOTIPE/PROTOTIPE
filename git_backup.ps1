@@ -89,11 +89,47 @@ try {
         Write-Host "    -> Snapshot local creado con exito." -ForegroundColor Gray
 
         # 5. Sincronizar con GitHub
-        Write-Host " [5/6] Sincronizando cambios con GitHub (git push)..." -ForegroundColor Cyan
+        $branchName = (git rev-parse --abbrev-ref HEAD 2>$null)
+        Write-Host " [5/6] Sincronizando cambios con GitHub (git push origin $branchName)..." -ForegroundColor Cyan
         Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
-        git push
+        git push origin $branchName
         Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
-        Write-Host " [SUCCESS] Sincronizacion con el repositorio remoto completada con exito." -ForegroundColor Green
+        Write-Host " [OK] Sincronizacion con la rama [$branchName] completada con exito." -ForegroundColor Green
+        
+        # Regla de Seguridad de Ramas para el Maestro
+        if ($branchName -ne "main" -and $branchName -ne "master") {
+            Write-Host ""
+            Write-Host " [Git Strategies] Has subido cambios a la rama de desarrollo: [$branchName]" -ForegroundColor Yellow
+            Write-Host " ¿Desea fusionar y subir estos cambios tambien a la rama de produccion 'main'? (S/N): " -NoNewline -ForegroundColor Cyan
+            $confirmMerge = Read-Host
+            
+            if ($confirmMerge -like "s" -or $confirmMerge -like "S") {
+                $mainBranch = "main"
+                $hasMaster = (git branch --list "master" 2>$null)
+                if ($hasMaster) { $mainBranch = "master" }
+                
+                Write-Host ""
+                Write-Host " [Merge] Cambiando a la rama de produccion [$mainBranch]..." -ForegroundColor Cyan
+                git checkout $mainBranch 2>&1 | Out-Null
+                
+                Write-Host " [Merge] Trayendo ultimos cambios del servidor remoto..." -ForegroundColor Cyan
+                git pull origin $mainBranch 2>&1 | Out-Null
+                
+                Write-Host " [Merge] Fusionando rama [$branchName] en [$mainBranch]..." -ForegroundColor Cyan
+                git merge $branchName -m "merge: consolidar $branchName en $mainBranch" 2>&1 | Out-Null
+                
+                Write-Host " [Merge] Subiendo consolidacion a GitHub (git push origin $mainBranch)..." -ForegroundColor Cyan
+                Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
+                git push origin $mainBranch
+                Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
+                
+                Write-Host " [Merge] Regresando a tu rama de trabajo [$branchName]..." -ForegroundColor Cyan
+                git checkout $branchName 2>&1 | Out-Null
+                Write-Host " [OK] Proceso completado. Cambios sincronizados en [$branchName] y [$mainBranch]." -ForegroundColor Green
+            } else {
+                Write-Host " [INFO] Cambios resguardados unicamente en la rama de desarrollo [$branchName]." -ForegroundColor Gray
+            }
+        }
     }
 }
 catch {
