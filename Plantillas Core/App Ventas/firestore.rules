@@ -1,0 +1,178 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper para verificar si la petición viene de un Administrador autenticado en Firebase Auth
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // Configuración global y Filtros
+    match /config/{document} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Subcolecciones de configuración
+    match /config/delivery/messengers/{messengerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Perfiles de clientes y sus subcolecciones (como favoritos)
+    match /users/{userId} {
+      allow get, create, update: if true;
+      allow list, delete: if isAdmin();
+      
+      match /favorites/{favoriteId} {
+        allow read, write: if true;
+      }
+    }
+
+    // Catálogo e Inventario
+    match /products/{document} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['variantes', 'salesCount', 'updatedAt'])
+      );
+    }
+    match /categories/{document} {
+      allow read: if true;
+      allow write, delete: if isAdmin();
+    }
+
+    // Pedidos (Retail y Mayoristas)
+    match /orders/{document} {
+      allow create: if true;
+      allow read: if isAdmin() || 
+                  (resource.data.cliente.celular != null) ||
+                  (resource.data.trackingToken != null);
+      allow update: if isAdmin() || (
+        resource.data.cliente.celular != null &&
+        (
+          (request.resource.data.estado == 'cancelado' && resource.data.estado == 'pendiente') ||
+          (request.resource.data.ocultoCliente == true)
+        )
+      );
+      allow delete: if isAdmin();
+    }
+    
+    match /wholesaleOrders/{document} {
+      allow create: if true;
+      allow read: if isAdmin() || (resource.data.clienteCelular != null);
+      allow update, delete: if isAdmin();
+    }
+
+    // Créditos / Fiados
+    match /credits/{document} {
+      allow read: if isAdmin() || (resource.data.cliente.celular != null);
+      allow write: if isAdmin();
+    }
+
+    // Publicidad y Promociones
+    match /ads/{document} {
+      allow read: if true;
+      allow write, delete: if isAdmin();
+    }
+
+    // Cupones
+    match /coupons/{document} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Garantías y Reclamos
+    match /claims/{document} {
+      allow create: if true;
+      allow read: if isAdmin() || (resource.data.clienteCelular != null);
+      allow update, delete: if isAdmin();
+    }
+
+    // [NUEVO] Centro de Notificaciones Centralizado
+    // Escritura abierta solo para creación (clientes, empleados y servicios internos).
+    // Lectura y actualización para admins o clientes.
+    match /notifications/{document} {
+      allow create: if true;
+      allow read: if isAdmin() || resource.data.recipientRole == 'client';
+      allow update: if isAdmin() || resource.data.recipientRole == 'client';
+      allow delete: if isAdmin();
+    }
+
+    // [NUEVO] Registro de Tokens FCM (Dispositivos)
+    match /fcmTokens/{document} {
+      allow read: if isAdmin();
+      allow create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    // Notificaciones del Cliente (Legacy compatibility)
+    match /clientNotifications/{document} {
+      allow read: if isAdmin() || (resource.data.clienteCelular != null);
+      allow create: if true;
+      allow update: if isAdmin() || (resource.data.clienteCelular != null);
+      allow delete: if isAdmin();
+    }
+
+    // Configuración y PINs de empleados (Altamente sensible)
+    match /employees/{employeeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Mesas de servicio en salón
+    match /tables/{tableId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Solicitudes y llamados de mesas en salón
+    match /tableRequests/{requestId} {
+      allow read, write: if true;
+    }
+
+    // Órdenes en cola de producción
+    match /production/{prodId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Entregas y despachos
+    match /deliveries/{deliveryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Kardex y Movimientos de Stock
+    match /stockMovements/{movementId} {
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Historial de Accesos y Sesiones QR
+    match /accessLogs/{logId} {
+      allow read: if isAdmin();
+      allow create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    // Analíticas de Códigos QR
+    match /qrAnalytics/{analyticsId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Telemetría y Analíticas
+    match /trackingAnalytics/{analyticsId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Colección de diagnóstico temporal para desarrolladores
+    match /_diagnostics/{document} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

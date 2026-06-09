@@ -1,0 +1,14 @@
+{
+  "niche": "retail_clothing",
+  "projectName": "Template Core Seed",
+  "theme": "rosa-elegante",
+  "primaryColor": "hsl(346, 84%, 61%)",
+  "attributes": [],
+  "features": {
+    "showSizes": true,
+    "showColors": true,
+    "enableKitchen": false,
+    "enableDelivery": true,
+    "enableCredits": true
+  }
+}

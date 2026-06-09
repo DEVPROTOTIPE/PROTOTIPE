@@ -1,0 +1,958 @@
+import fs from 'fs-extra';
+import path from 'path';
+import pc from 'picocolors';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+import webpush from 'web-push';
+import ora from 'ora';
+import { Jimp } from 'jimp';
+import { getWorkspaceRoot } from './config.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const CLI_ROOT = __dirname;
+const TEMPLATES_DIR = path.join(CLI_ROOT, 'templates');
+
+// Paletas HSL por defecto
+export const PALETTES = {
+  emerald: { primary: 'hsl(142, 70%, 45%)', accent: 'hsl(142, 76%, 36%)', theme: 'verde-esmeralda' },
+  ruby: { primary: 'hsl(346, 84%, 61%)', accent: 'hsl(346, 84%, 49%)', theme: 'rosa-elegante' },
+  violet: { primary: 'hsl(262, 83%, 58%)', accent: 'hsl(262, 83%, 45%)', theme: 'purpura-mora' },
+  amber: { primary: 'hsl(38, 92%, 50%)', accent: 'hsl(38, 92%, 40%)', theme: 'dorado-premium' }
+};
+
+/**
+ * Valida el entorno local asegurando que las dependencias CLI (firebase, gh si se requiere) estén
+ * instaladas y con sesión iniciada.
+ * @param {Object} answers Datos de configuración
+ */
+function checkEnvironment(answers) {
+  const spinner = ora('🔍 Ejecutando preflight check del entorno...').start();
+  
+  // 1. Validar Firebase CLI
+  try {
+    execSync('firebase --version', { stdio: 'ignore' });
+  } catch (err) {
+    spinner.fail();
+    throw new Error('Firebase CLI no está instalado en el sistema global. Por favor instálalo (npm install -g firebase-tools).');
+  }
+
+  try {
+    execSync('firebase projects:list', { stdio: 'ignore' });
+  } catch (err) {
+    spinner.fail();
+    throw new Error('Firebase CLI no tiene sesión iniciada. Ejecuta: firebase login');
+  }
+
+  // 2. Validar GitHub CLI si se requiere subir a GitHub
+  if (answers.enableGithub) {
+    try {
+      execSync('gh --version', { stdio: 'ignore' });
+    } catch (err) {
+      spinner.fail();
+      throw new Error('GitHub CLI (gh) no está instalado. Instálalo o desactiva la opción de subir a GitHub.');
+    }
+
+    try {
+      execSync('gh auth status', { stdio: 'ignore' });
+    } catch (err) {
+      spinner.fail();
+      throw new Error('GitHub CLI (gh) no tiene sesión iniciada. Ejecuta: gh auth login');
+    }
+  }
+
+  spinner.succeed('Preflight check completado con éxito. Entorno verificado.');
+}
+
+/**
+ * Lógica pura de aprovisionamiento de un nuevo proyecto con automatización extrema.
+ * @param {Object} answers Datos recolectados del Briefing
+ */
+export async function createProject(answers) {
+  // Validaciones de preflight
+  checkEnvironment(answers);
+
+  const targetDir = path.resolve(answers.targetPath);
+  const srcTemplateDir = path.join(TEMPLATES_DIR, answers.template);
+
+  console.log('\n' + pc.yellow(`⚡ Iniciando aprovisionamiento automatizado en: ${targetDir}`));
+
+  // 1. Crear directorio de destino y copiar plantilla
+  const step1 = ora('Copiar estructura base de plantilla').start();
+  try {
+    if (await fs.pathExists(targetDir)) {
+      step1.info('La ruta de destino ya existe. Los archivos se sobrescribirán.');
+      step1.start('Copiar estructura base de plantilla');
+    }
+    await fs.ensureDir(targetDir);
+    await fs.copy(srcTemplateDir, targetDir);
+    step1.succeed('Estructura base de plantilla copiada correctamente.');
+  } catch (err) {
+    step1.fail(`Fallo al copiar plantilla: ${err.message}`);
+    throw err;
+  }
+
+  // 1.1 Configurar documentación local de la instancia/proyecto (Estándar v2 — 12 archivos)
+  const stepDoc = ora('Configurar carpeta de documentación local (12 archivos estándar)').start();
+  try {
+    const docDirName = `Documentacion ${answers.projectName}`;
+    const targetDocDir = path.join(targetDir, docDirName);
+
+    // Si el template trae carpeta de documentación con otro nombre, renombrarla
+    const files = await fs.readdir(targetDir);
+    const tempDocFolder = files.find(f => f.startsWith('Documentacion') && f !== docDirName);
+    if (tempDocFolder) {
+      await fs.move(path.join(targetDir, tempDocFolder), targetDocDir, { overwrite: true });
+    } else {
+      await fs.ensureDir(targetDocDir);
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+
+    // Definición canónica de los 12 archivos estándar de documentación
+    const docStandard = [
+      {
+        name: 'tareas_pendientes.md',
+        content: `# 📋 Control de Tareas — ${answers.projectName}\n\nRoadmap de tareas específicas para esta instancia.\n\n- [ ] Configuración inicial completada\n- [ ] Revisar y completar \`contexto_negocio.md\` con el briefing del cliente\n- [ ] Completar \`esquema_colecciones.md\` con el modelo de datos real\n- [ ] Completar \`guia_estilos_ui.md\` con la paleta y tokens confirmados\n`
+      },
+      {
+        name: 'bitacora_cambios.md',
+        content: `# 📝 Bitácora de Cambios — ${answers.projectName}\n\n### [${today}] - Aprovisionamiento Inicial\n* **Tipo:** Sistema\n* **Plantilla:** \`${answers.template}\`\n* **Nicho:** ${answers.niche || 'general_custom'}\n* **Descripción:** Proyecto inicializado y documentación estándar provisionada automáticamente.\n`
+      },
+      {
+        name: 'mapa_aplicacion.md',
+        content: `# 🗺️ Mapa de la Aplicación — ${answers.projectName}\n\nEstructura física y lógica de los archivos de la instancia.\n\n> Actualiza este documento cuando agregues módulos, rutas o vistas nuevas.\n\n## Rutas y Vistas\n*(Por completar)*\n\n## Módulos de Negocio\n*(Por completar)*\n`
+      },
+      {
+        name: 'esquema_colecciones.md',
+        content: `# 🗄️ Esquema de Colecciones Firestore — ${answers.projectName}\n\nModelado de datos específico para esta instancia.\n\n> Copia la estructura de colecciones del core \`${answers.template}\` y adapta los campos al cliente.\n\n## Colecciones Principales\n*(Por completar — ver core fuente para referencia base)*\n`
+      },
+      {
+        name: 'plan_implementacion_ia.md',
+        content: `# 🤖 Plan de Implementación IA — ${answers.projectName}\n\nPropuestas de integraciones con inteligencia artificial para esta instancia.\n\n## Automatizaciones Prioritarias\n*(Por definir con el cliente)*\n`
+      },
+      {
+        name: 'manual_migracion.md',
+        content: `# 🚀 Manual de Despliegue — ${answers.projectName}\n\n## Proyecto Firebase\n- **Project ID:** ${answers.firebaseProjectId || '*(pendiente)*'}\n- **Plantilla base:** \`${answers.template}\`\n\n## Variables de Entorno\nVer \`.env.local\` en la raíz del proyecto.\n\n## Comandos de Despliegue\n\`\`\`bash\nnpm run build\nfirebase deploy --only hosting\n\`\`\`\n`
+      },
+      {
+        name: 'flujos_aplicacion.md',
+        content: `# 🔄 Flujos Operativos — ${answers.projectName}\n\nDiagramas de secuencia y flujos de datos críticos de esta instancia.\n\n> Adaptar los flujos del core \`${answers.template}\` a la lógica específica del cliente.\n\n## Flujo Principal\n*(Por documentar)*\n`
+      },
+      {
+        name: 'mapa_arquitectura.md',
+        content: `# 🏗️ Mapa de Arquitectura Física — ${answers.projectName}\n\nÁrbol de directorios y responsabilidades por capa.\n\n> Ejecutar \`node scratch/generate_ia_map.js\` para auto-generar este mapa.\n`
+      },
+      {
+        name: 'mapa_arquitectura_ia.md',
+        content: `# 🧠 Mapa Semántico para IA — ${answers.projectName}\n\nReferencia directa de archivos clave para que la IA navegue el proyecto sin búsquedas ciegas.\n\n> Ejecutar \`npm run map\` para regenerar este mapa con la estructura actual.\n\n## Archivos Críticos\n| Archivo | Propósito |\n|---|---|\n| \`src/App.jsx\` | Entrada principal, enrutador y providers |\n| \`src/store/\` | Stores de estado global (Zustand) |\n| \`src/hooks/\` | Hooks personalizados de lógica de negocio |\n| \`.env.local\` | Variables de entorno — NO editar en código |\n`
+      },
+      // ─── NUEVOS: CRÍTICOS PARA CONTEXTO DE IA ───────────────────────────────
+      {
+        name: 'contexto_negocio.md',
+        content: `# 🏢 Contexto de Negocio — ${answers.projectName}\n\n> **CRÍTICO PARA LA IA:** Este archivo define la semántica del negocio. Sin él, la IA puede generar código técnicamente correcto pero operativamente incorrecto.\n\n## Cliente\n- **Nombre del negocio:** ${answers.projectName}\n- **Nicho / Vertical:** ${answers.niche || 'general_custom'}\n- **Requerimientos especiales:** ${answers.customRequirements || '*(Ninguno especificado)*'}\n\n## Usuario Final\n*(Describir: quién usa la app, nivel técnico, dispositivos principales)*\n\n## Flujos de Negocio en Lenguaje Natural\n*(Describir los procesos core del negocio paso a paso, sin términos técnicos)*\n\n## Reglas de Dominio Implícitas\n*(Reglas de negocio no obvias que la IA debe respetar. Ej: "Un pedido no puede cancelarse si ya fue despachado")*\n\n## KPIs y Métricas Importantes para el Cliente\n*(Qué mide el dueño del negocio para saber si le va bien)*\n`
+      },
+      {
+        name: 'restricciones_tecnicas.md',
+        content: `# 🚫 Restricciones Técnicas — ${answers.projectName}\n\n> La IA debe consultar este archivo antes de actualizar dependencias, cambiar patterns o sugerir librerías.\n\n## Stack Fijo (No Negociable)\n- **Framework:** React + Vite\n- **Estilos:** Tailwind CSS v4 con tokens HSL en \`@theme\`\n- **DB:** Firebase Firestore\n- **Estado:** Zustand\n- **Plantilla base:** \`${answers.template}\`\n\n## Dependencias con Versión Fijada\n| Dependencia | Versión | Razón del bloqueo |\n|---|---|---|\n| firebase | Ver package.json | Compatibilidad con reglas de seguridad existentes |\n\n## Patrones Prohibidos en Este Proyecto\n- ❌ Hardcodear Project IDs o credenciales en código fuente\n- ❌ \`onSnapshot\` sin validar Auth y sin retornar cleanup\n- ❌ Modificar stock/inventario sin \`runTransaction\`\n- ❌ Despliegues automáticos sin aprobación explícita\n- ❌ Bordes negros crudos — usar \`border-app\` o HSL bajos\n\n## Limitaciones Conocidas de Esta Instancia\n*(Ej: "El cliente usa solo dispositivos Android con conexión 4G inestable")*\n`
+      },
+      {
+        name: 'guia_estilos_ui.md',
+        content: `# 🎨 Guía de Estilos UI — ${answers.projectName}\n\n> La IA debe respetar estos tokens antes de agregar cualquier color, tipografía o espaciado.\n\n## Paleta de Colores (HSL)\n- **Primario:** \`${answers.branding?.primaryColor || answers.customPrimary || 'Ver .env.local → VITE_INITIAL_THEME'}\`\n- **Acento:** \`${answers.branding?.secondaryColor || answers.customAccent || '*(derivar del primario -10% lightness)*'}\`\n- **Fondo:** \`${answers.branding?.bgColor || 'hsl(224, 71%, 4%)'}\`\n- **Texto:** \`${answers.branding?.textColor || 'hsl(213, 31%, 91%)'}\`\n\n## Tipografía\n- **Google Font:** \`${answers.branding?.googleFont || 'Inter'}\`\n- **Escala:** base 14px (móvil) / 16px (escritorio)\n\n## Tokens de Diseño\n| Token | Valor |\n|---|---|\n| Radius | 0.75rem (cards), 0.5rem (botones) |\n| Shadow | \`0 4px 24px hsl(var(--primary)/0.15)\` |\n| Blur glassmorphism | \`backdrop-blur-xl\` |\n\n## Componentes Atómicos Disponibles\n- \`/src/components/ui/\` — Consultar antes de crear nuevos elementos base\n\n## Convenciones de IDs y Clases\n- IDs en kebab-case descriptivo: \`btn-confirm-sale\`, \`input-product-name\`\n- No usar IDs genéricos como \`btn1\`, \`div2\`\n`
+      }
+    ];
+
+    // Generar cada archivo: respetar contenido existente (no sobreescribir)
+    for (const doc of docStandard) {
+      const filePath = path.join(targetDocDir, doc.name);
+      if (!await fs.pathExists(filePath)) {
+        await fs.writeFile(filePath, doc.content, 'utf-8');
+      } else {
+        // Si existe pero viene del core con contenido genérico de placeholder, adaptar el nombre del proyecto
+        let existing = await fs.readFile(filePath, 'utf-8');
+        if (existing.includes('Plantilla Core') || existing.includes('App Ventas')) {
+          existing = existing.replace(/Plantilla Core/g, answers.projectName).replace(/App Ventas/g, answers.projectName);
+          await fs.writeFile(filePath, existing, 'utf-8');
+        }
+      }
+    }
+
+    stepDoc.succeed(`Documentación estándar (12 archivos) provisionada en \`${docDirName}/\`.`);
+  } catch (docErr) {
+    stepDoc.warn(`No se pudo inicializar la documentación local: ${docErr.message}`);
+  }
+
+  // 2. Configurar Paleta HSL
+  let primaryColor = '';
+  let accentColor = '';
+  let themeName = 'custom-brand';
+
+  if (answers.paletteChoice === 'custom') {
+    primaryColor = answers.customPrimary || answers.branding?.primaryColor || 'hsl(262, 83%, 58%)';
+    accentColor  = answers.customAccent  || answers.branding?.secondaryColor || 'hsl(262, 83%, 45%)';
+  } else {
+    const palette = PALETTES[answers.paletteChoice] || PALETTES.emerald;
+    primaryColor = palette.primary;
+    accentColor = palette.accent;
+    themeName = palette.theme;
+  }
+
+  // 3. Generar llaves FCM VAPID criptográficas automáticamente
+  const step3 = ora('Generar claves FCM VAPID criptográficas').start();
+  let vapidPublicKey = '';
+  try {
+    const vapidKeys = webpush.generateVAPIDKeys();
+    vapidPublicKey = vapidKeys.publicKey;
+    step3.succeed('Claves VAPID autogeneradas con éxito.');
+  } catch (err) {
+    step3.warn(`No se pudieron autogenerar las llaves VAPID: ${err.message}`);
+  }
+
+  // 4. Crear el archivo .env.local
+  const step4 = ora('Generar variables de entorno (.env.local)').start();
+  const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const uniqueToken = (answers.telemetryToken || `${clientId}-token-${Date.now()}`).trim();
+
+  // Sanitizar todos los inputs eliminando espacios accidentales
+  const fbApiKey = String(answers.firebaseApiKey || '').trim();
+  const fbAuthDomain = String(answers.firebaseAuthDomain || '').trim();
+  const fbProjectId = String(answers.firebaseProjectId || '').trim();
+  const fbStorageBucket = String(answers.firebaseStorageBucket || '').trim();
+  const fbSenderId = String(answers.firebaseMessagingSenderId || '').trim();
+  const fbAppId = String(answers.firebaseAppId || '').trim();
+
+  const centralApiKey = String(answers.centralApiKey || '').trim();
+  const centralSenderId = String(answers.centralMessagingSenderId || '').trim();
+  const centralAppId = String(answers.centralAppId || '').trim();
+
+  const envContent = `VITE_FIREBASE_API_KEY=${fbApiKey}
+VITE_FIREBASE_AUTH_DOMAIN=${fbAuthDomain}
+VITE_FIREBASE_PROJECT_ID=${fbProjectId}
+VITE_FIREBASE_STORAGE_BUCKET=${fbStorageBucket}
+VITE_FIREBASE_MESSAGING_SENDER_ID=${fbSenderId}
+VITE_FIREBASE_APP_ID=${fbAppId}
+VITE_INITIAL_THEME=${themeName}
+VITE_DEVELOPER_EMAIL=${answers.developerEmail || ''}
+
+# Credenciales del Administrador de la Instancia (Autogeneradas)
+VITE_DEVELOPER_ADMIN_EMAIL=admin@${clientId}.com
+VITE_DEVELOPER_ADMIN_PASSWORD=Admin2026!
+
+# Credenciales de Sincronización del Ecosistema con la Consola Central (Developer Cockpit)
+# IMPORTANTE: Estas variables apuntan a prototipe-ecosistema-control, NO al proyecto del cliente
+VITE_DEVELOPER_CENTRAL_API_KEY=${centralApiKey}
+VITE_DEVELOPER_CENTRAL_AUTH_DOMAIN=prototipe-ecosistema-control.firebaseapp.com
+VITE_DEVELOPER_CENTRAL_PROJECT_ID=prototipe-ecosistema-control
+VITE_DEVELOPER_CENTRAL_STORAGE_BUCKET=prototipe-ecosistema-control.firebasestorage.app
+VITE_DEVELOPER_CENTRAL_MESSAGING_SENDER_ID=${centralSenderId}
+VITE_DEVELOPER_CENTRAL_APP_ID=${centralAppId}
+VITE_DEVELOPER_CLIENT_ID=${clientId}
+VITE_DEVELOPER_TELEMETRY_TOKEN=${uniqueToken}
+
+# Configuración Local de Facturación de Instancias (Fallback)
+VITE_DEVELOPER_BILLING_MODE=${answers.billingMode || 'percentage'}
+VITE_DEVELOPER_COMMISSION_PERCENT=${answers.comisionPorcentaje ?? 1.5}
+VITE_DEVELOPER_FIXED_SERVICE_FEE=${answers.montoFijoServicio ?? 0}
+VITE_DEVELOPER_FLAT_MONTHLY_FEE=${answers.pagoMensualFijo ?? 0}
+VITE_DEVELOPER_ENABLE_DIAN_BILLING=${answers.enableDianBilling ?? false}
+VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN=${answers.costoPorFacturaDian ?? 0}
+
+# FCM Push
+VITE_FIREBASE_VAPID_KEY=${vapidPublicKey}
+
+# Nicho / Vertical de Negocio (usado por telemetría para contextualizar reportes de error)
+VITE_NICHE=${answers.niche || 'general'}
+`;
+
+  await fs.writeFile(path.join(targetDir, '.env.local'), envContent, 'utf-8');
+  step4.succeed('Variables de entorno (.env.local) generadas e inyectadas.');
+
+  // 5. Crear archivo .firebaserc de forma nativa
+  const step5 = ora('Generar archivo de vinculación .firebaserc').start();
+  const firebasercContent = JSON.stringify({
+    projects: {
+      default: answers.firebaseProjectId
+    }
+  }, null, 2);
+  await fs.writeFile(path.join(targetDir, '.firebaserc'), firebasercContent, 'utf-8');
+  step5.succeed('Archivo de vinculación .firebaserc generado automáticamente.');
+
+  // 5.1 Crear archivo firebase.json de forma nativa para configurar Firestore y Storage
+  const step5_1 = ora('Generar configuración firebase.json').start();
+  const firebaseJsonContent = JSON.stringify({
+    firestore: {
+      rules: "firestore.rules",
+      indexes: "firestore.indexes.json"
+    },
+    storage: {
+      rules: "storage.rules"
+    },
+    hosting: {
+      public: "dist",
+      ignore: [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      rewrites: [
+        {
+          source: "**",
+          destination: "/index.html"
+        }
+      ]
+    }
+  }, null, 2);
+  await fs.writeFile(path.join(targetDir, 'firebase.json'), firebaseJsonContent, 'utf-8');
+  step5_1.succeed('Configuración firebase.json generada correctamente.');
+
+  // 5.2 Crear reglas de storage.rules por defecto
+  const step5_2 = ora('Generar reglas de Storage storage.rules').start();
+  const storageRulesContent = `rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
+`;
+  await fs.writeFile(path.join(targetDir, 'storage.rules'), storageRulesContent, 'utf-8');
+  step5_2.succeed('Reglas de almacenamiento (storage.rules) generadas correctamente.');
+
+  // 5.5 Crear archivo src/config/niche.json con especificaciones del nicho
+  const stepNiche = ora('Generar metadatos de nicho (niche.json)').start();
+  const configDir = path.join(targetDir, 'src', 'config');
+  await fs.ensureDir(configDir);
+  
+  let nicheData = {
+    niche: answers.niche || 'general_custom',
+    projectName: answers.projectName,
+    theme: themeName,
+    primaryColor,
+    attributes: [],
+    features: {
+      showSizes: answers.flags?.showSizes ?? (answers.niche === 'retail_clothing'),
+      showColors: answers.flags?.showColors ?? (answers.niche === 'retail_clothing'),
+      enableKitchen: answers.flags?.enableKitchen ?? false,
+      enableDelivery: answers.flags?.enableDelivery ?? false,
+      enableCredits: answers.flags?.enableCredits ?? false
+    }
+  };
+
+  if (answers.niche === 'grocery_food') {
+    nicheData.attributes = [
+      { name: 'presentacion', label: 'Presentación', type: 'select', options: ['Libra', 'Kilo', 'Atado', 'Unidad'] }
+    ];
+  } else if (answers.niche === 'technical_services') {
+    nicheData.attributes = [
+      { name: 'material', label: 'Material', type: 'text', placeholder: 'Ej. Bronce SAE 64' },
+      { name: 'especificaciones', label: 'Especificación Técnica', type: 'text', placeholder: 'Ej. Rosca NPT 1/2' }
+    ];
+  } else if (answers.niche === 'refrigeration_ac') {
+    nicheData.attributes = [
+      { name: 'marca_equipo', label: 'Marca del Equipo', type: 'text', placeholder: 'Ej. LG, Carrier' },
+      { name: 'tipo_refrigerante', label: 'Tipo de Refrigerante', type: 'select', options: ['R-410A', 'R-22', 'R-134a', 'R-404A'] }
+    ];
+  } else if (answers.niche === 'contractors') {
+    nicheData.attributes = [
+      { name: 'unidad_medida', label: 'Unidad de Medida', type: 'select', options: ['Metro Lineal (m)', 'Metro Cuadrado (m2)', 'Metro Cúbico (m3)', 'Global (glb)', 'Día Operario'] }
+    ];
+  } else if (answers.niche === 'machinery_rental') {
+    nicheData.attributes = [
+      { name: 'numero_serial', label: 'Número Serial / Placa', type: 'text', placeholder: 'Ej. CAT-924G-01' },
+      { name: 'tarifa_tiempo', label: 'Modo de Alquiler', type: 'select', options: ['Por Hora', 'Por Día', 'Por Semana', 'Por Mes'] }
+    ];
+  } else if (answers.niche === 'carpentry') {
+    nicheData.attributes = [
+      { name: 'tipo_madera', label: 'Tipo de Madera', type: 'select', options: ['Pino', 'Cedro', 'Roble', 'Teca', 'MDF / Melamina'] },
+      { name: 'acabado', label: 'Acabado', type: 'select', options: ['Poliuretano', 'Laca Catalizada', 'Barniz', 'Aceite / Natural', 'Pintado'] }
+    ];
+  } else if (answers.niche === 'laundry') {
+    nicheData.attributes = [
+      { name: 'peso_estimado', label: 'Rango de Peso', type: 'select', options: ['1-5 kg', '6-10 kg', '11-15 kg', 'Más de 15 kg'] },
+      { name: 'tipo_prenda', label: 'Tipo de Prenda / Servicio', type: 'text', placeholder: 'Ej. Plumón, Traje, Cortina' }
+    ];
+  } else if (answers.niche === 'furniture_repair') {
+    nicheData.attributes = [
+      { name: 'tipo_tela', label: 'Tipo de Tela / Tapizado', type: 'text', placeholder: 'Ej. Microfibra Antirrasguño, Cuero' },
+      { name: 'estado_ingreso', label: 'Estado del Mueble', type: 'text', placeholder: 'Ej. Estructura rota / Solo espuma' }
+    ];
+  } else if (answers.niche === 'wellness_podology') {
+    nicheData.attributes = [
+      { name: 'duracion', label: 'Duración Estimada', type: 'select', options: ['30 min', '45 min', '1 hora', '1.5 horas', '2 horas'] },
+      { name: 'profesional', label: 'Profesional / Especialista', type: 'text', placeholder: 'Ej. Podólogo Principal / Esteticista' }
+    ];
+  }
+
+  await fs.writeJson(path.join(configDir, 'niche.json'), nicheData, { spaces: 2 });
+  stepNiche.succeed('Metadatos de nicho (niche.json) generados en src/config.');
+
+  // 5.6 Crear archivo .prototipe.json de metadatos del proyecto para control de sincronización
+  const stepMeta = ora('Generar metadatos de sincronización del proyecto (.prototipe.json)').start();
+  const prototipeMeta = {
+    clientId,
+    projectName: answers.projectName,
+    template: answers.template,
+    niche: answers.niche || 'general_custom',
+    version: '1.0.0',
+    createdAt: new Date().toISOString()
+  };
+  await fs.writeJson(path.join(targetDir, '.prototipe.json'), prototipeMeta, { spaces: 2 });
+  stepMeta.succeed('Metadatos de sincronización (.prototipe.json) generados en la raíz.');
+
+  // 6. Configurar en caliente public/firebase-messaging-sw.js
+  const stepSW = ora('Configurar Service Worker de notificaciones').start();
+  const swPath = path.join(targetDir, 'public', 'firebase-messaging-sw.js');
+  if (await fs.pathExists(swPath)) {
+    let swContent = await fs.readFile(swPath, 'utf-8');
+    const replaceFirebaseField = (content, fieldName, value) => {
+      const regex = new RegExp(`${fieldName}:\\s*['"\`][^'"\`]*['"\`]`, 'g');
+      return content.replace(regex, `${fieldName}: "${value}"`);
+    };
+
+    swContent = replaceFirebaseField(swContent, 'apiKey', answers.firebaseApiKey);
+    swContent = replaceFirebaseField(swContent, 'authDomain', answers.firebaseAuthDomain);
+    swContent = replaceFirebaseField(swContent, 'projectId', answers.firebaseProjectId);
+    swContent = replaceFirebaseField(swContent, 'storageBucket', answers.firebaseStorageBucket);
+    swContent = replaceFirebaseField(swContent, 'messagingSenderId', answers.firebaseMessagingSenderId);
+    swContent = replaceFirebaseField(swContent, 'appId', answers.firebaseAppId);
+    
+    // Inyectar la llave VAPID auto-generada
+    if (vapidPublicKey) {
+      if (swContent.includes('// VAPID_KEY:')) {
+        swContent = swContent.replace(/\/\/ VAPID_KEY:\s*.*/, `// VAPID_KEY: ${vapidPublicKey}`);
+      } else {
+        swContent = `// VAPID_KEY: ${vapidPublicKey}\n` + swContent;
+      }
+    }
+    
+    await fs.writeFile(swPath, swContent, 'utf-8');
+    stepSW.succeed('Service Worker de notificaciones (firebase-messaging-sw.js) actualizado.');
+  } else {
+    stepSW.info('No se encontró firebase-messaging-sw.js en el template.');
+  }
+
+  // 6.2. Reemplazar dinámicamente etiquetas SEO, título y descripción en index.html
+  const indexPath = path.join(targetDir, 'index.html');
+  if (await fs.pathExists(indexPath)) {
+    let indexContent = await fs.readFile(indexPath, 'utf-8');
+    
+    const seoTitle = answers.seoTitle || answers.projectName || 'Prototipe App';
+    const seoDescription = answers.seoDescription || `${seoTitle} - Plataforma a la medida para la gestión de ventas, inventario y servicios.`;
+    const seoKeywords = answers.seoKeywords || `${seoTitle}, ventas, inventario, facturación, ecosistema, control`;
+    
+    // Reemplazar <title>
+    if (indexContent.includes('<title>')) {
+      indexContent = indexContent.replace(/<title>[^<]*<\/title>/, `<title>${seoTitle}</title>`);
+    } else {
+      indexContent = indexContent.replace('</head>', `    <title>${seoTitle}</title>\n  </head>`);
+    }
+
+    // Limpiar metatags SEO viejos si existen en el template (tolerancia HTML5)
+    indexContent = indexContent.replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/gi, '');
+    indexContent = indexContent.replace(/<meta\s+name="keywords"\s+content="[^"]*"\s*\/?>/gi, '');
+    indexContent = indexContent.replace(/<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/gi, '');
+    indexContent = indexContent.replace(/<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/gi, '');
+    indexContent = indexContent.replace(/<meta\s+name="twitter:title"\s+content="[^"]*"\s*\/?>/gi, '');
+    indexContent = indexContent.replace(/<meta\s+name="twitter:description"\s+content="[^"]*"\s*\/?>/gi, '');
+    
+    // Actualizar apple-mobile-web-app-title
+    indexContent = indexContent.replace(/<meta\s+name="apple-mobile-web-app-title"\s+content="[^"]*"\s*\/?>/gi, `<meta name="apple-mobile-web-app-title" content="${seoTitle}" />`);
+
+    const metaTags = `
+    <meta name="description" content="${seoDescription}" />
+    <meta name="keywords" content="${seoKeywords}" />
+    <meta property="og:title" content="${seoTitle}" />
+    <meta property="og:description" content="${seoDescription}" />
+    <meta name="twitter:title" content="${seoTitle}" />
+    <meta name="twitter:description" content="${seoDescription}" />`;
+
+    // Insertar nuevos metatags antes de </head>
+    indexContent = indexContent.replace('</head>', `${metaTags}\n  </head>`);
+    
+    await fs.writeFile(indexPath, indexContent, 'utf-8');
+    console.log(pc.green('✅ Metatags SEO, título y descripción inyectados en index.html.'));
+  }
+
+  // 6.3. Generar SVG logo y favicon si no se suministra uno
+  console.log(pc.cyan('🎨 Configurando logo y favicon de la marca...'));
+  const publicFaviconPath = path.join(targetDir, 'public', 'favicon.svg');
+  const assetsLogoPath = path.join(targetDir, 'src', 'assets', 'logo.svg');
+  
+  // Extraer iniciales
+  const initials = (answers.projectName || 'P')
+    .split(/[\s-_]+/)
+    .filter(Boolean)
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 3) || 'P';
+
+  const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="24" fill="${primaryColor}"/>
+  <text x="50" y="55" dominant-baseline="middle" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-weight="bold" font-size="42" fill="#ffffff">${initials}</text>
+</svg>`;
+
+  const stepLogo = ora('Configurando logo y favicon de la marca...').start();
+  let userProvidedLogo = false;
+  if (answers.logoPath && await fs.pathExists(answers.logoPath)) {
+    try {
+      const ext = path.extname(answers.logoPath).toLowerCase();
+      const validExtensions = ['.svg', '.png', '.jpg', '.jpeg', '.webp'];
+      
+      if (validExtensions.includes(ext)) {
+        await fs.ensureDir(path.dirname(assetsLogoPath));
+        // Copiar logo a su ruta de assets con su extensión correspondiente
+        const targetLogoPath = path.join(targetDir, 'src', 'assets', `logo${ext}`);
+        await fs.copy(answers.logoPath, targetLogoPath, { overwrite: true });
+
+        // Si es SVG, se usa de favicon. Si no es SVG, copiamos de todos modos como fallback pero mantenemos el favicon SVG autogenerado
+        if (ext === '.svg') {
+          await fs.copy(answers.logoPath, publicFaviconPath, { overwrite: true });
+        } else {
+          // Generar favicon a partir de iniciales como fallback
+          await fs.ensureDir(path.dirname(publicFaviconPath));
+          await fs.writeFile(publicFaviconPath, svgContent, 'utf-8');
+
+          // Generar favicon e iconos PWA rasterizados usando Jimp
+          const stepPwaIcons = ora('Generando iconos PWA (Jimp)...').start();
+          try {
+            const image192 = await Jimp.read(answers.logoPath);
+            image192.resize({ w: 192, h: 192 });
+            await image192.write(path.join(targetDir, 'public', 'pwa-192x192.png'));
+            await image192.write(path.join(targetDir, 'public', 'apple-touch-icon.png'));
+
+            const image512 = await Jimp.read(answers.logoPath);
+            image512.resize({ w: 512, h: 512 });
+            await image512.write(path.join(targetDir, 'public', 'pwa-512x512.png'));
+
+            stepPwaIcons.succeed('Iconos PWA (192x192, 512x512, apple-touch-icon) redimensionados y generados con éxito.');
+          } catch (jimpErr) {
+            stepPwaIcons.fail(`Error al redimensionar iconos con Jimp: ${jimpErr.message}`);
+          }
+        }
+
+        stepLogo.succeed(`Logo personalizado (${ext}) copiado desde: ${answers.logoPath}`);
+        userProvidedLogo = true;
+      } else {
+        stepLogo.warn(`El logo suministrado no tiene una extensión compatible. Extensiones válidas: SVG, PNG, JPG, JPEG, WEBP.`);
+      }
+    } catch (err) {
+      stepLogo.fail(`Error al copiar el logo suministrado: ${err.message}`);
+    }
+  }
+
+  if (!userProvidedLogo) {
+    await fs.ensureDir(path.dirname(publicFaviconPath));
+    await fs.writeFile(publicFaviconPath, svgContent, 'utf-8');
+    
+    await fs.ensureDir(path.dirname(assetsLogoPath));
+    await fs.writeFile(assetsLogoPath, svgContent, 'utf-8');
+    stepLogo.succeed(`Logo y favicon de iniciales ("${initials}") autogenerados usando el color primario.`);
+  }
+
+
+  // 7. Inyectar carpeta /scratch/ y generar primer mapa de IA
+  const stepScratch = ora('Inyectar scripts de automatización en /scratch/').start();
+  const scratchDir = path.join(targetDir, 'scratch');
+  await fs.ensureDir(scratchDir);
+
+  const mapScriptContent = `import fs from 'fs';
+import path from 'path';
+
+const projectRoot = process.cwd();
+const outputFile = path.join(projectRoot, 'mapa_arquitectura_ia.md');
+
+function scanDirectory(dir, depth = 0) {
+  let markdown = '';
+  const files = fs.readdirSync(dir);
+  
+  files.forEach(file => {
+    if (['node_modules', '.git', 'dist', '.firebase', '.temp', 'tmp'].includes(file)) return;
+    const fullPath = path.join(dir, file);
+    const stat = fs.statSync(fullPath);
+    const indent = '  '.repeat(depth);
+    
+    if (stat.isDirectory()) {
+      markdown += \`\${indent}- 📁 **\${file}**/\\n\`;
+      markdown += scanDirectory(fullPath, depth + 1);
+    } else {
+      markdown += \`\${indent}- 📄 [\${file}](file:///\${fullPath.replace(/\\\\/g, '/')})\\n\`;
+    }
+  });
+  return markdown;
+}
+
+const map = \`# 🗺️ Mapa de Arquitectura Física del Código\\n\\nEste mapa se autogenera para orientar a la IA sobre la estructura de archivos.\\n\\n\${scanDirectory(projectRoot)}\`;
+fs.writeFileSync(outputFile, map, 'utf-8');
+console.log('✅ Mapa de arquitectura para la IA generado.');
+`;
+
+  await fs.writeFile(path.join(scratchDir, 'generate_ia_map.js'), mapScriptContent, 'utf-8');
+
+  // 7.2. Configurar dinámicamente Playwright E2E si existe en la plantilla
+  const stepE2E = ora('Configurando suite de pruebas Playwright E2E').start();
+  try {
+    const targetPkgPath = path.join(targetDir, 'package.json');
+    const playwrightConfigPath = path.join(targetDir, 'playwright.config.js');
+    if (await fs.pathExists(playwrightConfigPath)) {
+      // 1. Configurar package.json agregando scripts E2E si no existen
+      const pkg = await fs.readJson(targetPkgPath);
+      pkg.scripts = pkg.scripts || {};
+      pkg.scripts['test:ci'] = 'playwright test';
+      pkg.scripts['test:ui'] = 'playwright test --ui';
+      pkg.scripts['test:ui:show'] = 'playwright show-report';
+      
+      // Asegurar dependencias de testing
+      pkg.devDependencies = pkg.devDependencies || {};
+      if (!pkg.devDependencies['@playwright/test']) {
+        pkg.devDependencies['@playwright/test'] = '^1.49.0';
+      }
+      await fs.writeJson(targetPkgPath, pkg, { spaces: 2 });
+
+      // 2. Renombrar y adaptar tests/config/app-ventas.config.js a tests/config/[clientId].config.js
+      const oldConfigPath = path.join(targetDir, 'tests', 'config', 'app-ventas.config.js');
+      const newConfigPath = path.join(targetDir, 'tests', 'config', `${clientId}.config.js`);
+      if (await fs.pathExists(oldConfigPath)) {
+        let configContent = await fs.readFile(oldConfigPath, 'utf-8');
+        
+        // Reemplazar nombre, baseURL
+        configContent = configContent.replace(/name:\s*['"`].*?['"`]/, `name: '${answers.projectName}'`);
+        configContent = configContent.replace(/baseURL:\s*['"`].*?['"`]/, `baseURL: 'http://localhost:5173'`); // O puerto de Vite
+        
+        await fs.writeFile(newConfigPath, configContent, 'utf-8');
+        await fs.remove(oldConfigPath);
+
+        // 3. Modificar tests/checkout.spec.js para importar el archivo config correcto del cliente
+        const specPath = path.join(targetDir, 'tests', 'checkout.spec.js');
+        if (await fs.pathExists(specPath)) {
+          let specContent = await fs.readFile(specPath, 'utf-8');
+          specContent = specContent.replace(
+            /import\s+\{\s*APP_CONFIG\s*\}\s+from\s+['"`]\.\/config\/app-ventas\.config\.js['"`]/,
+            `import { APP_CONFIG } from './config/${clientId}.config.js'`
+          );
+          await fs.writeFile(specPath, specContent, 'utf-8');
+        }
+      }
+      stepE2E.succeed('Suite de pruebas Playwright E2E configurada con éxito.');
+    } else {
+      stepE2E.info('Esta plantilla no incluye soporte Playwright E2E.');
+    }
+  } catch (err) {
+    stepE2E.fail(`Error al configurar Playwright E2E: ${err.message}`);
+  }
+
+  stepScratch.succeed('Scripts de mapeo de arquitectura inyectados en /scratch/ y package.json.');
+
+  // 7.5. Garantizar la existencia de GEMINI.md en la raíz del proyecto nuevo
+  const stepGemini = ora('Aprovisionar archivo de reglas GEMINI.md').start();
+  const backupGeminiPath = path.join(getWorkspaceRoot(), 'Documentacion PROTOTIPE', '04_Estandares_y_Skills', 'Copia_Seguridad_Reglas_y_Skills', 'GEMINI.md');
+  const targetGeminiPath = path.join(targetDir, 'GEMINI.md');
+  try {
+    if (await fs.pathExists(backupGeminiPath)) {
+      await fs.copy(backupGeminiPath, targetGeminiPath);
+      
+      // Adaptar las rutas absolutas del GEMINI.md del cliente para que sean locales
+      let geminiContent = await fs.readFile(targetGeminiPath, 'utf-8');
+      const wsRoot = getWorkspaceRoot();
+      const wsRootEscaped = wsRoot.replace(/\\/g, '\\\\');
+      
+      // Reemplazo dinámico usando la ruta configurada
+      const cleanRegex = (subpath) => new RegExp(wsRootEscaped + subpath, 'g');
+      geminiContent = geminiContent.replace(cleanRegex('\\\\Documentacion PROTOTIPE\\\\02_Tareas_Roadmap\\\\tareas_pendientes\\.md'), './tareas_pendientes.md');
+      geminiContent = geminiContent.replace(cleanRegex('\\\\Documentacion PROTOTIPE\\\\03_Auditorias_y_Faro_Core\\\\bitacora_cambios\\.md'), './bitacora_cambios.md');
+      geminiContent = geminiContent.replace(cleanRegex('\\\\Documentacion PROTOTIPE\\\\04_Estandares_y_Skills\\\\mapa_aplicacion\\.md'), './mapa_arquitectura_ia.md');
+      
+      // Fallback genérico: captura cualquier ruta absoluta que termine en los mismos subpaths
+      geminiContent = geminiContent.replace(/[A-Za-z]:\\[^"'\n]*?Documentacion PROTOTIPE\\02_Tareas_Roadmap\\tareas_pendientes\.md/g, './tareas_pendientes.md');
+      geminiContent = geminiContent.replace(/[A-Za-z]:\\[^"'\n]*?Documentacion PROTOTIPE\\03_Auditorias_y_Faro_Core\\bitacora_cambios\.md/g, './bitacora_cambios.md');
+      geminiContent = geminiContent.replace(/[A-Za-z]:\\[^"'\n]*?Documentacion PROTOTIPE\\04_Estandares_y_Skills\\mapa_aplicacion\.md/g, './mapa_arquitectura_ia.md');
+
+      await fs.writeFile(targetGeminiPath, geminiContent, 'utf-8');
+      stepGemini.succeed('Archivo GEMINI.md inyectado y adaptado localmente.');
+    } else {
+      stepGemini.warn('No se encontró GEMINI.md en el backup global. Se conservará la del template.');
+    }
+  } catch (err) {
+    stepGemini.fail(`Aviso al copiar y adaptar GEMINI.md: ${err.message}`);
+  }
+
+  // 8. Crear archivo de Onboarding para Antigravity en la raíz
+  const flagsList = Object.entries(answers.flags || {})
+    .map(([key, val]) => `  - **${key}**: ${val ? '🟢 Habilitado' : '🔴 Deshabilitado'}`)
+    .join('\n');
+
+  const isSeed = answers.template === 'template-core-seed';
+
+  const promptContent = `# 🚀 Prompt de Arranque para Google Antigravity (Proyecto: ${answers.projectName})
+
+Copia y pega todo el contenido de este bloque en tu primer mensaje del chat de Antigravity en este proyecto:
+
+---
+
+Hola. Vamos a trabajar sobre este nuevo proyecto: **${answers.projectName}** (${clientId}). 
+La carpeta física está creada en la ruta: \`${targetDir}\`
+
+Por favor, lee e indiza obligatoriamente los siguientes archivos y carpetas de navegación e instrucciones antes de proponer tu plan de implementación. Son tu GPS de arquitectura y estándares:
+1. **Mapa de Código de este Proyecto** → [mapa_arquitectura_ia.md](file:///${targetDir.replace(/\\/g, '/')}/mapa_arquitectura_ia.md): contiene la estructura física de todos los archivos y carpetas locales.
+2. **Mapa de Documentación Global** → [mapa_documentacion_ia.md](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md): índice de navegación semántica de toda la documentación central.
+3. **Instrucciones del Proyecto** → [GEMINI.md](file:///${targetDir.replace(/\\/g, '/')}/GEMINI.md): reglas de comportamiento, estándares del stack y disparadores locales.
+4. **Documentación Obligatoria del Proyecto (Carpeta Local):**
+   - 🏢 **[contexto_negocio.md](file:///${targetDir.replace(/\\/g, '/')}/Documentacion%20${encodeURIComponent(answers.projectName)}/contexto_negocio.md)**: Lee esto PRIMERO — define quién es el cliente, sus reglas de negocio y KPIs. Determina si el código que generas tiene sentido operativo.
+   - 🚫 **[restricciones_tecnicas.md](file:///${targetDir.replace(/\\/g, '/')}/Documentacion%20${encodeURIComponent(answers.projectName)}/restricciones_tecnicas.md)**: Dependencias fijadas, patrones prohibidos y limitaciones conocidas de esta instancia. Consulta antes de instalar librerías o cambiar arquitectura.
+   - 🎨 **[guia_estilos_ui.md](file:///${targetDir.replace(/\\/g, '/')}/Documentacion%20${encodeURIComponent(answers.projectName)}/guia_estilos_ui.md)**: Paleta HSL, tokens de diseño y convenciones de componentes. Obligatorio antes de tocar cualquier estilo.
+   - 🗄️ **[esquema_colecciones.md](file:///${targetDir.replace(/\\/g, '/')}/Documentacion%20${encodeURIComponent(answers.projectName)}/esquema_colecciones.md)**: Modelo de datos Firestore de esta instancia.
+5. **Directorios Clave de Estándares y Componentes (Auditoría Obligatoria):**
+   - 📂 **[04_Estandares_y_Skills](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/)**: Lee \`inicializacion_nuevos_proyectos.md\` y \`Firebase_Listeners_Clean.md\` para entender el blindaje de base de datos y la PWA.
+   - 📂 **[06_Biblioteca_Componentes](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/)**: Consulta el catálogo de componentes listos para portar y reutilizar sin reescribir código.
+   - 📂 **[07_Manuales_Desarrollo](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/)**: Contiene la especificación de Sharding Multitenant y manuales de arquitectura.
+   - 📂 **[10_Modulos_Completos](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/10_Modulos_Completos/)**: Consulta el catálogo de módulos completos (Features) listos para portar.
+   - 📂 **[03_Auditorias_y_Faro_Core](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/)**: Revisa \`bitacora_cambios.md\` para entender el historial de desarrollo y parches.
+
+### 📋 Contexto del Cliente (Briefing)
+- **Nombre**: ${answers.projectName}
+- **Client ID**: ${clientId}
+- **Modo de Facturación de la Instancia**: ${answers.billingMode || 'percentage'}
+- **Tasa de Comisión / Costo**: 
+  - Porcentaje: ${answers.comisionPorcentaje ?? 1.5}%
+  - Pago Mensual Fijo: $${answers.pagoMensualFijo ?? 0} COP
+- **Facturación Electrónica (DIAN)**: ${answers.enableDianBilling ? '🟢 Activa' : '🔴 Inactiva'} (Costo por factura: $${answers.costoPorFacturaDian ?? 0} COP)
+- **Token de Telemetría**: ${uniqueToken}
+- **Colores de Marca**: Tema HSL ${themeName}
+  - Primario: \`${primaryColor}\`
+  - Secundario: \`${answers.branding?.secondaryColor || ''}\`
+  - Fondo: \`${answers.branding?.bgColor || ''}\`
+  - Texto: \`${answers.branding?.textColor || ''}\`
+  - Tipografía (Google Font): \`${answers.branding?.googleFont || 'Inter'}\`
+
+### ⚙️ Módulos y Capacidades Tecnológicas Seleccionadas:
+${flagsList}
+
+### 📝 Requerimientos Especiales del Cliente:
+${answers.customRequirements || '*(Ninguno especificado)*'}
+
+### 📦 Componentes y Módulos Recomendados de la Biblioteca (Preferentes):
+${Array.isArray(answers.selectedRecomendations) && answers.selectedRecomendations.length > 0 
+  ? answers.selectedRecomendations.map(r => `  - **${r.name}** [${r.technicalName || 'Helper/Servicio'}] (Ficha técnica y código listo en: [Ver Documentación](file:///${r.link.replace(/\\/g, '/')}))`).join('\n')
+  : '  *(Ninguno sugerido preferentemente; utiliza libremente la biblioteca global)*'}
+
+> [!NOTE]
+> **Autonomía Creativa de la IA:** Las recomendaciones anteriores son sugerencias preferentes de reutilización. Si para cumplir con el briefing del negocio requieres interfaces, hooks o bases de datos ausentes en la biblioteca, tienes total autonomía de diseñarlas y programarlas desde cero, garantizando el stack de calidad de la plataforma.
+
+---
+
+${isSeed ? `### ⚠️ ATENCIÓN: ESTE PROYECTO SE INICIALIZA DESDE UN LIENZO LIMPIO (Core Seed)
+Este proyecto no ha sido copiado de una plantilla vertical. Contiene únicamente el cascarón de infraestructura de Prototipe:
+- Configuración de Firebase y PWA.
+- Sincronización síncrona/asíncrona de Temas HSL y Modo Oscuro en index.html y App.jsx.
+- Módulos contables de facturación/billing de comisiones locales y telemetría de cobros en tiempo real conectada a la Consola Central (Spark/Blaze).
+- Stores base de Zustand y hooks de inicialización de Auth.
+- Un enrutador de React Router vacío (AppRoutes.jsx) y un componente loader (AppLoader.jsx).
+
+Queda bajo tu total responsabilidad el desarrollo de las pantallas, la base de datos de negocio y la navegación desde cero, adaptadas a los requerimientos específicos de este cliente.` : ''}
+
+### 🛡️ DIRECTIVAS DE ROBUSTEZ Y CALIDAD (OBLIGATORIO)
+
+Para asegurar que esta aplicación cumpla con los estándares premium del ecosistema de instancias y evitar código basura o inestable, debes seguir estrictamente estas reglas desde tu primer cambio:
+
+1. **Aislamiento de Sharding (Portabilidad):**
+   - Queda estrictamente prohibido hardcodear IDs de proyectos Firebase o credenciales. Consume todo dinámicamente desde el entorno local (\`.env.local\`).
+2. **Robustez en Escuchas Firebase (Listeners Seguros):**
+   - No te suscribas a oyentes en tiempo real (\`onSnapshot\`) de colecciones privadas/restringidas sin validar que el usuario de Firebase Auth esté inicializado y logueado.
+   - Todo listener debe retornar su función de limpieza (\`cleanup\`) al desmontar.
+3. **Consistencia Cromática y Tailwind v4:**
+   - Adapta el archivo \`src/index.css\` aplicando la paleta de colores de marca bajo el bloque \`@theme\` de Tailwind CSS v4.
+   - Evita el uso de bordes negros o colores crudos; utiliza contornos discretos (\`border-app\` o escalas HSL bajas) y acabados con glassmorphism.
+4. **Seguridad y Transacciones:**
+   - Toda deducción o adición de stock en base de datos debe ejecutarse mediante transacciones atómicas (\`runTransaction\`) para prevenir condiciones de carrera.
+   - La visualización pública de datos sensibles o seguimiento de pedidos debe estar protegida bajo URLs parametrizadas por tokens UUID seguros.
+5: **Reutilización e Integración de Estándares (Auditoría de Documentación):**
+   - Antes de escribir cualquier línea de lógica, audita obligatoriamente:
+     - El catálogo en [Biblioteca de Componentes](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/) para verificar si ya existe un componente que resuelva la interfaz.
+     - La carpeta de [Módulos Completos](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/10_Modulos_Completos/) para portar módulos de negocio complejos (Features) ya estructurados.
+     - La carpeta [04_Estandares_y_Skills](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/) para seguir las guías de inicialización y listeners sin romper las reglas de Firebase.
+     - El [Informe de Investigación del Ecosistema 2026](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/09_Plan_Escalabilidad_Negocio/informe_investigacion_ecosistema_2026.md) para emplear librerías Open Source aprobadas en lugar de codificar soluciones personalizadas desde cero.
+${isSeed ? `6. **Desarrollo Modular (Component-First) - OBLIGATORIO:**
+   - Para este proyecto limpio, debes construir la interfaz de forma estrictamente modular y componentizada.
+   - Cada componente o pantalla debe vivir en su propio archivo exclusivo bajo \`src/components/\` o \`src/pages/\`. Queda prohibido agrupar múltiples elementos de lógica compleja en un solo archivo plano.
+   - Extrae la lógica pesada a hooks personalizados en \`src/hooks/\` o a stores en \`src/store/\`, dejando los componentes puramente visuales y fáciles de mantener.` : `6. **Mantener estructura modular:**
+   - Queda prohibido mezclar lógica de múltiples vistas en archivos monolíticos. Cada componente nuevo debe colocarse en su propio archivo descriptivo en la ruta correspondiente.`}
+7. **Compilación de Integridad y Bitácora Obligatoria:**
+   - **Antes de dar por completada cualquier tarea o hito, debes ejecutar localmente \`npm run build\`** en la consola del proyecto. Esta comprobación garantiza que no se introduzcan errores sintácticos o fallos de compilación.
+   - Registra de forma obligatoria los cambios técnicos en \`bitacora_cambios.md\` y actualiza la lista de tareas en \`tareas_pendientes.md\` en el mismo paso que realizas los cambios de código.
+8. **Despliegues controlados:**
+   - NUNCA realices despliegues a producción o hosting de forma automática; solicita aprobación.
+9. **Lectura de navegación:**
+   - Usa las rutas de los mapas de navegación directamente para leer y editando archivos. Evita búsquedas ciegas (\`grep\` o \`list_dir\`).
+
+Comencemos presentándote e indexando los archivos. ¿Estás listo?
+`;
+  await fs.writeFile(path.join(targetDir, 'antigravity_bootstrap_prompt.md'), promptContent, 'utf-8');
+  console.log(pc.green('✅ Archivo antigravity_bootstrap_prompt.md creado con éxito en la raíz del proyecto.'));
+
+
+  // 9. Ejecutar npm install y primera indexación
+  await installDependencies(targetDir);
+
+  // 10. Git e integración con GitHub
+  await setupGitHub(answers, targetDir, clientId);
+
+  // 11. Despliegue en Firebase del Cliente
+  await deployFirebase(answers, targetDir);
+
+  // 12. Auto-registro en la Consola Central (Developer Cockpit)
+  await registerInCentralConsole(answers, clientId, uniqueToken);
+
+  return {
+    clientId,
+    uniqueToken,
+    targetDir,
+    themeName,
+    primaryColor,
+    vapidPublicKey,
+    prompt: promptContent
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FUNCIONES PRIVADAS DE APROVISIONAMIENTO (no exportadas)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Paso 9: Instala dependencias npm y genera el mapa de arquitectura inicial.
+ * @param {string} targetDir Ruta absoluta del proyecto generado
+ */
+async function installDependencies(targetDir) {
+  console.log('\n' + pc.cyan('📦 Instalando dependencias en el nuevo proyecto. Por favor espera...'));
+  try {
+    execSync('npm install', { cwd: targetDir, stdio: 'inherit', shell: true });
+    console.log(pc.green('✅ Dependencias de npm instaladas.'));
+
+    console.log(pc.cyan('🔍 Generando mapa de arquitectura inicial...'));
+    execSync('npm run map', { cwd: targetDir, stdio: 'inherit', shell: true });
+    console.log(pc.green('✅ Mapa de arquitectura del nuevo proyecto indexado con éxito.'));
+  } catch (err) {
+    console.warn(pc.yellow(`⚠️  Aviso en instalación/mapeo de dependencias: ${err.message}`));
+  }
+}
+
+/**
+ * Paso 10: Inicializa Git e integra con GitHub si está habilitado.
+ * @param {Object} answers Payload de aprovisionamiento
+ * @param {string} targetDir Ruta absoluta del proyecto generado
+ * @param {string} clientId ID normalizado del cliente
+ */
+async function setupGitHub(answers, targetDir, clientId) {
+  if (!answers.enableGithub) return;
+
+  console.log(pc.cyan('🐙 Inicializando repositorio Git y subiendo a GitHub...'));
+  try {
+    execSync('git init', { cwd: targetDir, stdio: 'ignore' });
+
+    // Inyectar el Git Hook de validación de reglas
+    const hookSource = path.join(process.cwd(), 'hooks', 'pre-commit');
+    const hookDestDir = path.join(targetDir, '.git', 'hooks');
+    const hookDestPath = path.join(hookDestDir, 'pre-commit');
+
+    if (await fs.pathExists(hookSource)) {
+      await fs.ensureDir(hookDestDir);
+      await fs.copy(hookSource, hookDestPath);
+      try {
+        execSync(`chmod +x "${hookDestPath}"`, { stdio: 'ignore' });
+      } catch (_) {}
+      console.log(pc.gray('   - Git Hook de reglas inyectado con éxito.'));
+    }
+
+    execSync('git add .', { cwd: targetDir, stdio: 'ignore' });
+    execSync('git commit -m "feat: scaffolding inicial del ecosistema"', { cwd: targetDir, stdio: 'ignore' });
+
+    const repoName = `app-${clientId}`;
+    execSync(`gh repo create ${repoName} --private --source=. --push`, { cwd: targetDir, stdio: 'ignore' });
+    console.log(pc.green(`✅ Repositorio GitHub creado y subido con éxito: ${repoName}`));
+  } catch (err) {
+    console.warn(pc.yellow(`⚠️  No se pudo subir a GitHub automáticamente: ${err.message}. Asegúrate de tener gh CLI logueado.`));
+  }
+}
+
+/**
+ * Paso 11: Despliega reglas e índices en Firebase y siembra datos iniciales.
+ * @param {Object} answers Payload de aprovisionamiento
+ * @param {string} targetDir Ruta absoluta del proyecto generado
+ */
+async function deployFirebase(answers, targetDir) {
+  if (!answers.enableFirebaseDeploy) return;
+
+  console.log(pc.cyan('🔥 Desplegando reglas e índices en Firebase del cliente...'));
+  try {
+    execSync(
+      `firebase deploy --only firestore:rules,firestore:indexes,storage -P ${answers.firebaseProjectId}`,
+      { cwd: targetDir, stdio: 'ignore' }
+    );
+    console.log(pc.green('✅ Reglas e índices de Firestore y Storage desplegados correctamente.'));
+
+    const seedScriptPath = path.join(targetDir, 'scratch', 'seed_brand.js');
+    if (await fs.pathExists(seedScriptPath)) {
+      console.log(pc.cyan('🌱 Sembrando datos de marca iniciales y usuario Administrador en Firestore/Auth...'));
+      execSync('node scratch/seed_brand.js', { cwd: targetDir, stdio: 'inherit', shell: true });
+      console.log(pc.green('✅ Datos iniciales y usuario Administrador sembrados con éxito.'));
+    } else {
+      console.warn(pc.yellow('⚠️  No se encontró el script scratch/seed_brand.js para sembrado automático.'));
+    }
+  } catch (err) {
+    console.warn(pc.yellow(`⚠️  Fallo al desplegar o sembrar en Firebase: ${err.message}. Asegúrate de tener firebase-cli logueado.`));
+  }
+}
+
+/**
+ * Paso 12: Auto-registra la instancia y el token de telemetría en la Consola Central.
+ * @param {Object} answers Payload de aprovisionamiento
+ * @param {string} clientId ID normalizado del cliente
+ * @param {string} uniqueToken Token único de telemetría ya generado
+ */
+async function registerInCentralConsole(answers, clientId, uniqueToken) {
+  const activeCentralApiKey = answers.centralApiKey || process.env.VITE_DEVELOPER_CENTRAL_API_KEY;
+  if (!activeCentralApiKey) return;
+
+  console.log(pc.cyan('📡 Auto-registrando la nueva instancia en la Consola Central...'));
+  try {
+    const centralUrl = 'https://firestore.googleapis.com/v1/projects/prototipe-ecosistema-control/databases/(default)/documents';
+
+    const formatREST = (data) => {
+      const fields = {};
+      for (const [k, v] of Object.entries(data)) {
+        if (typeof v === 'string')  fields[k] = { stringValue: v };
+        else if (typeof v === 'number')  fields[k] = { doubleValue: v };
+        else if (typeof v === 'boolean') fields[k] = { booleanValue: v };
+      }
+      return { fields };
+    };
+
+    await fetch(`${centralUrl}/clientes_control/${clientId}?key=${activeCentralApiKey}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formatREST({
+        nombre: answers.projectName,
+        billingMode: answers.billingMode || 'percentage',
+        comisionPorcentaje: Number(answers.comisionPorcentaje ?? 1.5),
+        pagoMensualFijo: Number(answers.pagoMensualFijo ?? 0),
+        active: true,
+        createdAt: new Date().toISOString()
+      }))
+    });
+
+    await fetch(`${centralUrl}/tokens/${uniqueToken}?key=${activeCentralApiKey}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formatREST({
+        active: true,
+        clientId,
+        createdAt: new Date().toISOString()
+      }))
+    });
+
+    console.log(pc.green('✅ Instancia y Token auto-registrados correctamente en la Consola Central.'));
+  } catch (err) {
+    console.warn(pc.yellow(`⚠️  No se pudo realizar el auto-registro en la Consola Central: ${err.message}`));
+  }
+}

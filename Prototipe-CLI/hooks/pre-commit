@@ -1,0 +1,34 @@
+#!/bin/sh
+# Git Pre-commit Hook — Sincronizador de Reglas e IA (GEMINI.md)
+# -------------------------------------------------------------
+# Corre sync_rules.js para asegurar que cualquier cambio en las directivas de
+# IA se propague a todos los proyectos del ecosistema y agrega los archivos
+# modificados al commit actual de forma silenciosa y selectiva.
+
+# Verificar si node está disponible en el entorno
+if ! command -v node >/dev/null 2>&1; then
+  echo "⚠️  [Git Hook] Advertencia: Node.js no está en el PATH. Omitiendo sincronización de reglas."
+  exit 0
+fi
+
+SCRIPT_PATH="D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/verify_ecosystem_integrity.js"
+
+if [ ! -f "$SCRIPT_PATH" ]; then
+  echo "⚠️  [Git Hook] Advertencia: No se encontró el script central de integridad. Omitiendo."
+  exit 0
+fi
+
+echo "🔄 [Git Hook] Ejecutando control de integridad del ecosistema..."
+node "$SCRIPT_PATH"
+
+if [ $? -ne 0 ]; then
+  echo "❌ [Git Hook] ERROR: Falló la verificación de integridad. Commit abortado."
+  exit 1
+fi
+
+# Añadir de forma selectiva y silenciosa los GEMINI.md, mapas y documentación modificados
+git diff --name-only | grep -E "GEMINI\.md$|mapa_documentacion_ia\.md$|mapa_aplicacion\.md$|Documentacion .*\.md$" | while read -r file; do
+  git add "$file" 2>/dev/null
+done
+
+exit 0
