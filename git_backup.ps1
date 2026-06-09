@@ -67,7 +67,11 @@ try {
         Write-Host "Creando commit de respaldo general..." -ForegroundColor Cyan
         git commit -m $CommitMessage
         Write-Host "Snapshot guardado exitosamente en el historial local." -ForegroundColor Green
-        Write-Host "Puedes subirlo a tu repositorio remoto ejecutando: git push" -ForegroundColor Yellow
+        
+        # 4.5. Subir automáticamente a GitHub
+        Write-Host "Subiendo cambios automáticamente a GitHub (git push)..." -ForegroundColor Cyan
+        git push
+        Write-Host "Repositorio remoto sincronizado con éxito." -ForegroundColor Green
     }
 
 }
