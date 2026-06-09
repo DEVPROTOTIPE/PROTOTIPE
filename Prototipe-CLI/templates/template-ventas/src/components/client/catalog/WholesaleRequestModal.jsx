@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useAlertConfirm } from '../../../components/common/AlertConfirmContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, PackagePlus, Send } from 'lucide-react'
 import { COLLECTIONS, WHOLESALE_STATES, SUPPORT_WHATSAPP } from '../../../constants'
@@ -11,6 +12,7 @@ import { createWholesaleOrder } from '../../../services/wholesaleService'
 export default function WholesaleRequestModal({ product, type, isOpen, onClose }) {
   const { user } = useAuthStore()
   const { whatsappAdmin } = useAppConfigStore()
+  const { showAlert } = useAlertConfirm()
   const [cantidad, setCantidad] = useState('')
   const [observaciones, setObservaciones] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -34,7 +36,7 @@ export default function WholesaleRequestModal({ product, type, isOpen, onClose }
     e.preventDefault()
     const minQty = isWholesale ? 12 : 1
     if (!cantidad || Number(cantidad) < minQty) {
-      alert(`La cantidad mínima para esta solicitud es de ${minQty} unidad(es).`)
+      showAlert({ title: 'Cantidad insuficiente', message: `La cantidad mínima para esta solicitud es de ${minQty} unidad(es).`, variant: 'warning' })
       return
     }
 
@@ -73,7 +75,7 @@ export default function WholesaleRequestModal({ product, type, isOpen, onClose }
       }, 2500)
     } catch (error) {
       console.error('Error enviando solicitud:', error)
-      alert('Ocurrió un error. Intenta nuevamente.')
+      showAlert({ title: 'Error', message: 'Ocurrió un error al enviar la solicitud. Intenta nuevamente.', variant: 'error' })
     } finally {
       setIsSubmitting(false)
     }

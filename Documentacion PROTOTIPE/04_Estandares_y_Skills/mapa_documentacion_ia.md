@@ -97,6 +97,7 @@
 | **contexto_negocio.md (App Ventas)** | Contexto de Negocio y Reglas Operativas del Dominio | Consultar tareas, bitácora o flujos específicos de este core. | [Ver Documento](file:///D:/PROTOTIPE/Plantillas%20Core/App Ventas/Documentacion App Ventas/contexto_negocio.md) |
 | **restricciones_tecnicas.md (App Ventas)** | Restricciones Técnicas y Patrones Prohibidos | Consultar tareas, bitácora o flujos específicos de este core. | [Ver Documento](file:///D:/PROTOTIPE/Plantillas%20Core/App Ventas/Documentacion App Ventas/restricciones_tecnicas.md) |
 | **guia_estilos_ui.md (App Ventas)** | Guía de Estilos de UI y Sistema de Diseño del Core | Consultar tareas, bitácora o flujos específicos de este core. | [Ver Documento](file:///D:/PROTOTIPE/Plantillas%20Core/App Ventas/Documentacion App Ventas/guia_estilos_ui.md) |
+| **estructura_ajustes.md (App Ventas)** | Estructura Jerárquica y Ramificación de Ajustes | Consultar la arquitectura detallada de ajustes del panel administrativo antes de modularizar. | [Ver Documento](file:///D:/PROTOTIPE/Plantillas%20Core/App Ventas/Documentacion App Ventas/estructura_ajustes.md) |
 
 <!-- END_AUTO_CORES_DOCS -->
 

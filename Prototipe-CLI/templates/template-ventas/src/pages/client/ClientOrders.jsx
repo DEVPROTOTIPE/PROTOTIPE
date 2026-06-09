@@ -15,6 +15,8 @@ import { ORDER_STATES, ORDER_STATE_LABELS, PAYMENT_METHOD_LABELS, GUIDED_MESSAGE
 import { formatCurrency } from '../../utils/formatters'
 import Pagination from '../../components/ui/Pagination'
 import EmptyState from '../../components/ui/EmptyState'
+import { useAlertConfirm } from '../../components/common/AlertConfirmContext'
+import { reportAppFailureToDeveloper } from '../../services/telemetryService'
 
 // Lazy-load complex modals only when they are needed by the user
 const ClaimRequestModal = lazy(() => import('../../components/client/claims/ClaimRequestModal'))
@@ -75,6 +77,7 @@ export default function ClientOrders() {
   const { whatsappAdmin, appName, appIcon, claimsEnabled, wholesaleSettings, orderTrackingEnabled } = useAppConfigStore()
   const navigate = useNavigate()
   const location = useLocation()
+  const { showAlert } = useAlertConfirm()
 
   const [activeTab, setActiveTab] = useState('normal') // 'normal' o 'especial'
   const [currentPage, setCurrentPage] = useState(1)
@@ -185,7 +188,7 @@ export default function ClientOrders() {
       })
 
       if (someMissing) {
-        alert('Algunos productos ya no están disponibles o están agotados, por lo que no se agregaron al carrito.')
+        showAlert({ title: 'Productos no disponibles', message: 'Algunos productos ya no están disponibles o están agotados, por lo que no se agregaron al carrito.', variant: 'warning' })
       }
       
       openCart()
@@ -331,7 +334,8 @@ export default function ClientOrders() {
       queryClient.invalidateQueries({ queryKey: ['orders'] })
     } catch (error) {
       console.error("Error al vaciar historial:", error)
-      alert("Hubo un error al vaciar el historial. Por favor intenta de nuevo.")
+      reportAppFailureToDeveloper(`[ClientOrders] Error al vaciar historial: ${error?.message}`, error?.stack)
+      showAlert({ title: 'Error', message: 'Hubo un error al vaciar el historial. Por favor intenta de nuevo.', variant: 'error' })
     }
   }
 
@@ -344,7 +348,8 @@ export default function ClientOrders() {
       queryClient.invalidateQueries({ queryKey: ['clientWholesaleRequests', user?.celular] })
     } catch (error) {
       console.error("Error al vaciar historial de especiales:", error)
-      alert("Hubo un error al vaciar el historial de pedidos especiales. Por favor intenta de nuevo.")
+      reportAppFailureToDeveloper(`[ClientOrders] Error al vaciar historial de especiales: ${error?.message}`, error?.stack)
+      showAlert({ title: 'Error', message: 'Hubo un error al vaciar el historial de pedidos especiales. Por favor intenta de nuevo.', variant: 'error' })
     }
   }
 

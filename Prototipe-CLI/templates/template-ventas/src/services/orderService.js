@@ -16,6 +16,7 @@ import {
 import { db } from '../config/firebaseConfig'
 import { COLLECTIONS, ORDER_STATES, PAYMENT_METHODS } from '../constants'
 import { createCentralNotification, NC_TYPES } from './notificationCenterService'
+import { reportAppFailureToDeveloper } from './telemetryService'
 
 const ordersRef = collection(db, COLLECTIONS.ORDERS)
 
@@ -180,6 +181,7 @@ export function subscribeToOrders(callback) {
     callback(list)
   }, (error) => {
     console.error('[orderService] Error al escuchar todos los pedidos:', error)
+    reportAppFailureToDeveloper(`[orderService] subscribeToOrders: ${error?.message}`, error?.stack)
     callback([])
   })
 }
@@ -213,6 +215,7 @@ export function subscribeToClientOrders(celular, callback) {
     callback(sorted)
   }, (error) => {
     console.error('[orderService] Error al escuchar pedidos del cliente:', error)
+    reportAppFailureToDeveloper(`[orderService] subscribeToClientOrders (${celular}): ${error?.message}`, error?.stack)
     callback([])
   })
 }
@@ -243,7 +246,7 @@ export async function clearClientOrderHistory(orders) {
   const promises = orders.map(o => {
     const docRef = doc(db, COLLECTIONS.ORDERS, o.id)
     return updateDoc(docRef, {
-      clienteOculto: true,
+      ocultoCliente: true,
       updatedAt: serverTimestamp()
     })
   })

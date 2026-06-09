@@ -223,19 +223,33 @@ export async function createProject(answers) {
     stepDoc.warn(`No se pudo inicializar la documentación local: ${docErr.message}`);
   }
 
-  // 2. Configurar Paleta HSL
-  let primaryColor = '';
-  let accentColor = '';
-  let themeName = 'custom-brand';
-
-  if (answers.paletteChoice === 'custom') {
-    primaryColor = answers.customPrimary || answers.branding?.primaryColor || 'hsl(262, 83%, 58%)';
-    accentColor  = answers.customAccent  || answers.branding?.secondaryColor || 'hsl(262, 83%, 45%)';
-  } else {
-    const palette = PALETTES[answers.paletteChoice] || PALETTES.emerald;
-    primaryColor = palette.primary;
-    accentColor = palette.accent;
-    themeName = palette.theme;
+  // 2.1 Inyectar colores HSL en caliente en src/index.css
+  const stepCSS = ora('Inyectando variables de tema HSL en src/index.css').start();
+  try {
+    const indexPathCSS = path.join(targetDir, 'src', 'index.css');
+    if (await fs.pathExists(indexPathCSS)) {
+      let cssContent = await fs.readFile(indexPathCSS, 'utf-8');
+      
+      // Declaración de variables Tailwind v4 para los colores
+      const themeBlock = `@theme {
+  --color-primary: ${primaryColor};
+  --color-accent: ${accentColor};
+}`;
+      
+      if (cssContent.includes('@theme')) {
+        // Reemplazar bloque @theme existente o adjuntar
+        cssContent = cssContent.replace(/@theme\s*\{[^}]*\}/g, themeBlock);
+      } else {
+        cssContent = themeBlock + '\n\n' + cssContent;
+      }
+      
+      await fs.writeFile(indexPathCSS, cssContent, 'utf-8');
+      stepCSS.succeed('Variables de tema HSL inyectadas en src/index.css.');
+    } else {
+      stepCSS.info('No se encontró src/index.css para inyectar colores en caliente.');
+    }
+  } catch (cssErr) {
+    stepCSS.warn(`Aviso al configurar variables en src/index.css: ${cssErr.message}`);
   }
 
   // 3. Generar llaves FCM VAPID criptográficas automáticamente
@@ -346,20 +360,23 @@ VITE_NICHE=${answers.niche || 'general'}
   await fs.writeFile(path.join(targetDir, 'firebase.json'), firebaseJsonContent, 'utf-8');
   step5_1.succeed('Configuración firebase.json generada correctamente.');
 
-  // 5.2 Crear reglas de storage.rules por defecto
-  const step5_2 = ora('Generar reglas de Storage storage.rules').start();
-  const storageRulesContent = `rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /{allPaths=**} {
+  await fs.writeFile(path.join(targetDir, 'storage.rules'), storageRulesContent, 'utf-8');
+  step5_2.succeed('Reglas de almacenamiento (storage.rules) generadas correctamente.');
+
+  // 5.3 Crear reglas de Firestore firestore.rules por defecto
+  const step5_3 = ora('Generar reglas de Firestore firestore.rules').start();
+  const firestoreRulesContent = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
       allow read: if true;
       allow write: if request.auth != null;
     }
   }
 }
 `;
-  await fs.writeFile(path.join(targetDir, 'storage.rules'), storageRulesContent, 'utf-8');
-  step5_2.succeed('Reglas de almacenamiento (storage.rules) generadas correctamente.');
+  await fs.writeFile(path.join(targetDir, 'firestore.rules'), firestoreRulesContent, 'utf-8');
+  step5_3.succeed('Reglas de base de datos (firestore.rules) generadas correctamente.');
 
   // 5.5 Crear archivo src/config/niche.json con especificaciones del nicho
   const stepNiche = ora('Generar metadatos de nicho (niche.json)').start();
@@ -468,10 +485,58 @@ service firebase.storage {
       }
     }
     
-    await fs.writeFile(swPath, swContent, 'utf-8');
-    stepSW.succeed('Service Worker de notificaciones (firebase-messaging-sw.js) actualizado.');
+    stepSW.succeed('Service Worker de notificaciones (firebase-messaging-sw.js) updated.');
   } else {
     stepSW.info('No se encontró firebase-messaging-sw.js en el template.');
+  }
+
+  // 6.1. Configurar manifest.json / site.webmanifest dinámicamente con los colores HSL convertidos a Hex
+  const stepManifest = ora('Configurando manifest PWA con colores e identidad de marca').start();
+  try {
+    const manifestPath = path.join(targetDir, 'public', 'manifest.json');
+    const webmanifestPath = path.join(targetDir, 'public', 'site.webmanifest');
+    const targetManifest = await fs.pathExists(manifestPath) ? manifestPath : (await fs.pathExists(webmanifestPath) ? webmanifestPath : null);
+    
+    // Obtener colores Hex de marca en caliente para theme_color y background_color
+    const primaryHex = '#' + hslToRgbaHex(primaryColor, 255).toString(16).slice(0, 6);
+    const bgHex = '#' + hslToRgbaHex(answers.branding?.bgColor || 'hsl(224, 71%, 4%)', 255).toString(16).slice(0, 6);
+    
+    if (targetManifest) {
+      const manifest = await fs.readJson(targetManifest);
+      manifest.name = answers.projectName;
+      manifest.short_name = initials;
+      manifest.theme_color = primaryHex;
+      manifest.background_color = bgHex;
+      
+      await fs.writeJson(targetManifest, manifest, { spaces: 2 });
+      stepManifest.succeed(`Manifest PWA (${path.basename(targetManifest)}) actualizado con colores e identidad de marca.`);
+    } else {
+      // Si no existe, crear uno básico
+      const basicManifest = {
+        name: answers.projectName,
+        short_name: initials,
+        start_url: "/",
+        display: "standalone",
+        background_color: bgHex,
+        theme_color: primaryHex,
+        icons: [
+          {
+            src: "/pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png"
+          },
+          {
+            src: "/pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png"
+          }
+        ]
+      };
+      await fs.writeJson(manifestPath, basicManifest, { spaces: 2 });
+      stepManifest.succeed('Manifest PWA (manifest.json) creado y configurado con éxito.');
+    }
+  } catch (manifestErr) {
+    stepManifest.warn(`Aviso al configurar manifest PWA: ${manifestErr.message}`);
   }
 
   // 6.2. Reemplazar dinámicamente etiquetas SEO, título y descripción en index.html
@@ -732,22 +797,15 @@ console.log('✅ Mapa de arquitectura para la IA generado.');
       
       // Adaptar las rutas absolutas del GEMINI.md del cliente para que sean locales
       let geminiContent = await fs.readFile(targetGeminiPath, 'utf-8');
-      const wsRoot = getWorkspaceRoot();
-      const wsRootEscaped = wsRoot.replace(/\\/g, '\\\\');
       
-      // Reemplazo dinámico usando la ruta configurada
-      const cleanRegex = (subpath) => new RegExp(wsRootEscaped + subpath, 'g');
-      geminiContent = geminiContent.replace(cleanRegex('\\\\Documentacion PROTOTIPE\\\\02_Tareas_Roadmap\\\\tareas_pendientes\\.md'), './tareas_pendientes.md');
-      geminiContent = geminiContent.replace(cleanRegex('\\\\Documentacion PROTOTIPE\\\\03_Auditorias_y_Faro_Core\\\\bitacora_cambios\\.md'), './bitacora_cambios.md');
-      geminiContent = geminiContent.replace(cleanRegex('\\\\Documentacion PROTOTIPE\\\\04_Estandares_y_Skills\\\\mapa_aplicacion\\.md'), './mapa_arquitectura_ia.md');
-      
-      // Fallback genérico: captura cualquier ruta absoluta que termine en los mismos subpaths
-      geminiContent = geminiContent.replace(/[A-Za-z]:\\[^"'\n]*?Documentacion PROTOTIPE\\02_Tareas_Roadmap\\tareas_pendientes\.md/g, './tareas_pendientes.md');
-      geminiContent = geminiContent.replace(/[A-Za-z]:\\[^"'\n]*?Documentacion PROTOTIPE\\03_Auditorias_y_Faro_Core\\bitacora_cambios\.md/g, './bitacora_cambios.md');
-      geminiContent = geminiContent.replace(/[A-Za-z]:\\[^"'\n]*?Documentacion PROTOTIPE\\04_Estandares_y_Skills\\mapa_aplicacion\.md/g, './mapa_arquitectura_ia.md');
+      // Reemplazo robusto e insensible a mayúsculas/minúsculas y tipo de barra (\ o /)
+      const absoluteDocsRegex = /[A-Z]:[\\/][^"'\n]*?Documentacion\s+PROTOTIPE/gi;
+      geminiContent = geminiContent.replace(new RegExp(absoluteDocsRegex.source + '[\\\\/]02_Tareas_Roadmap[\\\\/]tareas_pendientes\\.md', 'gi'), './tareas_pendientes.md');
+      geminiContent = geminiContent.replace(new RegExp(absoluteDocsRegex.source + '[\\\\/]03_Auditorias_y_Faro_Core[\\\\/]bitacora_cambios\\.md', 'gi'), './bitacora_cambios.md');
+      geminiContent = geminiContent.replace(new RegExp(absoluteDocsRegex.source + '[\\\\/]04_Estandares_y_Skills[\\\\/]mapa_aplicacion\\.md', 'gi'), './mapa_arquitectura_ia.md');
 
       await fs.writeFile(targetGeminiPath, geminiContent, 'utf-8');
-      stepGemini.succeed('Archivo GEMINI.md inyectado y adaptado localmente.');
+      stepGemini.succeed('Archivo GEMINI.md inyectado y adaptado localmente de forma robusta.');
     } else {
       stepGemini.warn('No se encontró GEMINI.md en el backup global. Se conservará la del template.');
     }

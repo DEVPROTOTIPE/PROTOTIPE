@@ -5,12 +5,12 @@
  *   Bienvenida → Login → Catálogo → Detalle Producto → Checkout → Éxito
  *
  * Este spec es AGNÓSTICO al cliente. Toda la configuración de la instancia
- * a testear se importa desde `./config/app-ventas.config.js`.
+ * a testear se importa desde `./config/proyecto-cliente-saas.config.js`.
  * Para testear otro cliente, simplemente cambia esa importación.
  */
 
 import { test, expect } from '@playwright/test';
-import { APP_CONFIG } from './config/app-ventas.config.js';
+import { APP_CONFIG } from './config/proyecto-cliente-saas.config.js';
 import {
   passWelcomePage,
   loginAsClient,

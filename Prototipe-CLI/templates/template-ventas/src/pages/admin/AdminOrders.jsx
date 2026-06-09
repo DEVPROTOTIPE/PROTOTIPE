@@ -19,6 +19,7 @@ import LeafletMapPicker from '../../components/ui/LeafletMapPicker'
 import OrderShareModal from '../../components/admin/orders/OrderShareModal'
 import OrderDeliveryPanel from '../../components/admin/orders/OrderDeliveryPanel'
 import NumberInput from '../../components/ui/NumberInput'
+import { useAlertConfirm } from '../../components/common/AlertConfirmContext'
 
 const STATE_ICONS = {
   [ORDER_STATES.PENDING]: Clock,
@@ -51,6 +52,7 @@ export default function AdminOrders() {
   const { data: wholesaleRequests = [] } = useWholesaleRequests()
   const { mutate: updateWholesaleStatus } = useUpdateWholesaleStatus()
   const navigate = useNavigate()
+  const { showAlert, showConfirm } = useAlertConfirm()
   
   const [searchTerm, setSearchTerm] = useState('')
   const [pendingClaimsCount, setPendingClaimsCount] = useState(0)
@@ -191,25 +193,30 @@ export default function AdminOrders() {
   }, [archivedOrders])
 
   const handleArchiveCompleteds = async () => {
-    // Filtrar pedidos que sean de estado Completado o Cancelado y no estén archivados
-    const toArchive = orders.filter(o => 
-      (o.estado === ORDER_STATES.COMPLETED || o.estado === ORDER_STATES.CANCELLED) && 
+    const toArchive = orders.filter(o =>
+      (o.estado === ORDER_STATES.COMPLETED || o.estado === ORDER_STATES.CANCELLED) &&
       !o.archivado
     )
 
     if (toArchive.length === 0) {
-      alert('No hay pedidos completados o cancelados activos para archivar.')
+      showAlert({ title: 'Sin pedidos', message: 'No hay pedidos completados o cancelados activos para archivar.', variant: 'info' })
       return
     }
 
-    if (window.confirm(`¿Estás seguro de que deseas archivar ${toArchive.length} pedidos completados/cancelados?`)) {
+    const ok = await showConfirm({
+      title: 'Archivar pedidos',
+      message: `¿Estás seguro de que deseas archivar ${toArchive.length} pedidos completados/cancelados?`,
+      confirmLabel: 'Archivar',
+      variant: 'warning',
+    })
+    if (ok) {
       try {
         setIsArchiving(true)
         await orderService.archiveOrders(toArchive)
-        alert('Pedidos archivados correctamente.')
+        showAlert({ title: 'Hecho', message: 'Pedidos archivados correctamente.', variant: 'success' })
       } catch (err) {
         console.error(err)
-        alert('Ocurrió un error al archivar los pedidos.')
+        showAlert({ title: 'Error', message: 'Ocurrió un error al archivar los pedidos.', variant: 'error' })
       } finally {
         setIsArchiving(false)
       }
@@ -580,7 +587,7 @@ export default function AdminOrders() {
                                 })
                               } catch (error) {
                                 console.error('Error al actualizar costo de envío:', error)
-                                alert('No se pudo actualizar el costo de envío.')
+                                showAlert({ title: 'Error', message: 'No se pudo actualizar el costo de envío.', variant: 'error' })
                               }
                             }}
                             className="px-4 h-10 bg-primary text-white rounded-xl text-xs font-bold transition-all active:scale-95 hover:opacity-90 shrink-0 cursor-pointer"

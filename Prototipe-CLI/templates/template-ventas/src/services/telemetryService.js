@@ -1,31 +1,153 @@
 import { doc, setDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
+import { getCentralFirestore } from './centralFirebaseService';
+import { auth } from '../config/firebaseConfig';
 
 // Variables de entorno para modo Blaze (HTTP)
 const CENTRAL_ENDPOINT = import.meta.env.VITE_DEVELOPER_TELEMETRY_ENDPOINT;
 const DEV_TOKEN = import.meta.env.VITE_DEVELOPER_TELEMETRY_TOKEN;
 
 // Variables de entorno para modo Spark (Direct Firestore)
-const CENTRAL_API_KEY = import.meta.env.VITE_DEVELOPER_CENTRAL_API_KEY;
-const CENTRAL_AUTH_DOMAIN = import.meta.env.VITE_DEVELOPER_CENTRAL_AUTH_DOMAIN;
-const CENTRAL_PROJECT_ID = import.meta.env.VITE_DEVELOPER_CENTRAL_PROJECT_ID;
-const CENTRAL_STORAGE_BUCKET = import.meta.env.VITE_DEVELOPER_CENTRAL_STORAGE_BUCKET;
-const CENTRAL_MESSAGING_SENDER_ID = import.meta.env.VITE_DEVELOPER_CENTRAL_MESSAGING_SENDER_ID;
-const CENTRAL_APP_ID = import.meta.env.VITE_DEVELOPER_CENTRAL_APP_ID;
 const CLIENT_ID = import.meta.env.VITE_DEVELOPER_CLIENT_ID;
 const CLIENT_NICHE = import.meta.env.VITE_NICHE || 'general';
 
-import { getCentralFirestore } from './centralFirebaseService';
+// Almacenamiento en memoria para prevenir duplicados de error
+const reportedErrorsCache = {};
+
+// Constantes de almacenamiento local
+const OFFLINE_QUEUE_KEY = 'telemetry_offline_queue';
+
+/**
+ * Genera un hash/firma simple para identificar errores idénticos.
+ */
+function getErrorHash(errorMsg, stack) {
+  const cleanStack = (stack || '').split('\n')[0] || '';
+  return `${errorMsg}_${cleanStack}`.replace(/[^a-zA-Z0-9_]/g, '_');
+}
+
+/**
+ * Agrega un reporte a la cola local en localStorage.
+ */
+function enqueueOfflineReport(type, payload) {
+  try {
+    const queue = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+    // Limitar la cola a un tamaño máximo para evitar desbordar el localStorage (ej: max 30 elementos)
+    if (queue.length > 30) {
+      queue.shift();
+    }
+    queue.push({ type, payload, timestamp: new Date().toISOString() });
+    localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
+    console.debug(`[Telemetry] Reporte de tipo '${type}' encolado localmente (Offline).`);
+  } catch (err) {
+    console.error('[Telemetry] Error al encolar reporte localmente:', err);
+  }
+}
+
+/**
+ * Procesa y vacía la cola local de reportes cuando hay internet.
+ */
+export async function processOfflineQueue() {
+  if (!navigator.onLine) return;
+
+  try {
+    const queue = JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
+    if (queue.length === 0) return;
+
+    console.log(`[Telemetry] Procesando cola local de telemetría (${queue.length} pendientes)...`);
+    const remainingQueue = [];
+
+    for (const report of queue) {
+      try {
+        if (report.type === 'billing') {
+          await executeBillingReport(report.payload);
+        } else if (report.type === 'failure') {
+          await executeFailureReport(report.payload);
+        }
+      } catch (err) {
+        console.warn('[Telemetry] Reintento fallido para reporte encolado. Se conservará en la cola.', err);
+        remainingQueue.push(report);
+      }
+    }
+
+    localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(remainingQueue));
+    if (remainingQueue.length === 0) {
+      console.log('[Telemetry] Todos los reportes locales pendientes fueron enviados con éxito.');
+    }
+  } catch (err) {
+    console.error('[Telemetry] Error al procesar la cola de telemetría local:', err);
+  }
+}
+
+// Escuchar cambios en la conexión de red del navegador
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', processOfflineQueue);
+  // Intentar procesar en frío al arrancar
+  setTimeout(processOfflineQueue, 3000);
+}
+
+/**
+ * Lógica pura de envío del reporte mensual de facturación (Billing)
+ */
+async function executeBillingReport(payload) {
+  // 1. MODO BLAZE: HTTP Endpoint (Cloud Function)
+  if (CENTRAL_ENDPOINT && DEV_TOKEN) {
+    console.log("[Telemetry] Reportando facturación vía Cloud Function...");
+    const response = await fetch(CENTRAL_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${DEV_TOKEN}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("[Telemetry] Reporte billing HTTP enviado exitosamente:", data);
+    return;
+  }
+
+  // 2. MODO SPARK: Conexión directa a Firestore Central
+  const centralDb = getCentralFirestore();
+  if (centralDb && DEV_TOKEN && CLIENT_ID) {
+    console.log("[Telemetry] Reportando facturación vía Firestore Directo...");
+    const reportId = `${CLIENT_ID}_${payload.periodo}`;
+    const reportRef = doc(centralDb, "reportesBilling", reportId);
+
+    await setDoc(reportRef, {
+      ...payload,
+      token: DEV_TOKEN,
+      updatedAt: serverTimestamp()
+    });
+
+    console.log("[Telemetry] Reporte billing Firestore directo enviado exitosamente.");
+    return;
+  }
+
+  throw new Error("No hay conexión central configurada para Billing.");
+}
+
+/**
+ * Lógica pura de envío de reportes de error/fallo de la App.
+ */
+async function executeFailureReport(payload) {
+  const centralDb = getCentralFirestore();
+  if (!centralDb || !DEV_TOKEN || !CLIENT_ID) {
+    throw new Error("Credenciales de la consola central no disponibles.");
+  }
+
+  const failuresRef = collection(centralDb, 'app_failures');
+  await addDoc(failuresRef, {
+    ...payload,
+    token: DEV_TOKEN
+  });
+  console.log('[Telemetry] Reporte de fallo enviado con éxito a la Consola Central.');
+}
 
 /**
  * Reporta los acumulados mensuales de la tienda al panel central del desarrollador.
- * Soporta de forma híbrida e inteligente:
- * - Modo Blaze (HTTP POST) si VITE_DEVELOPER_TELEMETRY_ENDPOINT está definido.
- * - Modo Spark (Conexión Directa Firestore) si no está el endpoint pero hay credenciales de base de datos.
- * 
- * @param {number} totalVentas - Monto total acumulado facturado en el mes.
- * @param {object|number} billingConfigOrPercent - Configuración de facturación (o porcentaje legado).
- * @param {string} periodo - Periodo formateado en año-mes (ej: "2026-05").
- * @param {number} orderCount - Cantidad de pedidos en el periodo.
  */
 export async function reportMonthlyBillingToDeveloper(
   totalVentas,
@@ -52,8 +174,6 @@ export async function reportMonthlyBillingToDeveloper(
     enableDianBilling = billingConfigOrPercent.enableDianBilling === true;
     costoPorFacturaDian = billingConfigOrPercent.costoPorFacturaDian ?? 0;
 
-    // Si la DIAN está activa, la base comisionable es el subtotal/ventas netas (antes de IVA/impuestos).
-    // Si no está activa, la base comisionable es el total bruto de ventas.
     const baseComisionable = enableDianBilling ? (totalVentasNetas ?? totalVentas) : totalVentas;
 
     if (billingMode === 'percentage') {
@@ -64,7 +184,6 @@ export async function reportMonthlyBillingToDeveloper(
       comisionValor = pagoMensualFijo;
     }
 
-    // Agregar el cobro fijo por amortización de emisión de facturas DIAN
     if (enableDianBilling && facturasDianCount > 0) {
       comisionValor += (facturasDianCount * costoPorFacturaDian);
     }
@@ -73,113 +192,87 @@ export async function reportMonthlyBillingToDeveloper(
     comisionValor = (totalVentas * comisionPorcentaje) / 100;
   }
 
-  // 1. MODO BLAZE: HTTP Endpoint (Cloud Function)
-  if (CENTRAL_ENDPOINT && DEV_TOKEN) {
-    try {
-      console.log("[Telemetry] Reportando vía Cloud Function...");
-      const response = await fetch(CENTRAL_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${DEV_TOKEN}`
-        },
-        body: JSON.stringify({
-          clientId: CLIENT_ID || "desconocido",
-          totalVentas,
-          totalVentasNetas: totalVentasNetas ?? totalVentas,
-          totalImpuestos,
-          facturasDianCount,
-          costoPorFacturaDian,
-          comisionPorcentaje,
-          comisionValor,
-          billingMode,
-          montoFijoServicio,
-          pagoMensualFijo,
-          periodo,
-          orderCount,
-          enableDianBilling
-        })
-      });
+  const payload = {
+    clientId: CLIENT_ID || "desconocido",
+    totalVentas,
+    totalVentasNetas: totalVentasNetas ?? totalVentas,
+    totalImpuestos,
+    facturasDianCount,
+    costoPorFacturaDian,
+    comisionPorcentaje,
+    comisionValor,
+    billingMode,
+    montoFijoServicio,
+    pagoMensualFijo,
+    periodo,
+    orderCount,
+    enableDianBilling
+  };
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("[Telemetry] Reporte HTTP enviado exitosamente:", data);
-      return;
-    } catch (error) {
-      console.error("[Telemetry] Error en reporte HTTP:", error);
-    }
-  }
-
-  // 2. MODO SPARK: Conexión directa a Firestore Central (Escritura segura)
-  const centralDb = getCentralFirestore();
-  if (centralDb && DEV_TOKEN && CLIENT_ID) {
-    try {
-      console.log("[Telemetry] Reportando vía Firestore Directo...");
-      const reportId = `${CLIENT_ID}_${periodo}`;
-      const reportRef = doc(centralDb, "reportesBilling", reportId);
-
-      await setDoc(reportRef, {
-        clientId: CLIENT_ID,
-        token: DEV_TOKEN, // Enviamos el token para validación por reglas de seguridad
-        periodo,
-        totalVentas,
-        totalVentasNetas: totalVentasNetas ?? totalVentas,
-        totalImpuestos,
-        facturasDianCount,
-        costoPorFacturaDian,
-        comisionPorcentaje,
-        comisionValor,
-        billingMode,
-        montoFijoServicio,
-        pagoMensualFijo,
-        orderCount,
-        enableDianBilling,
-        updatedAt: serverTimestamp(),
-      });
-
-      console.log("[Telemetry] Reporte Firestore directo enviado exitosamente.");
-    } catch (error) {
-      console.error("[Telemetry] Error en reporte Firestore directo:", error);
-    }
+  if (!navigator.onLine) {
+    enqueueOfflineReport('billing', payload);
     return;
   }
 
-  console.debug("[Telemetry] Modo local: sin conexión central configurada.");
+  try {
+    await executeBillingReport(payload);
+  } catch (error) {
+    console.error("[Telemetry] Error en reporte de facturación. Encolando...", error);
+    enqueueOfflineReport('billing', payload);
+  }
 }
 
 /**
  * Reporta un error o excepción de la aplicación a la base de datos central de errores.
- *
- * @param {string} errorMsg - Mensaje del error.
- * @param {string} stack - Stack trace completo del error.
  */
 export async function reportAppFailureToDeveloper(errorMsg, stack) {
-  // Requiere token y clientId para pasar la validación de Firestore Rules de la Central
   if (!DEV_TOKEN || !CLIENT_ID) return;
 
-  const centralDb = getCentralFirestore();
-  if (!centralDb) return;
+  // Mecanismo Anti-Duplicado (Throttle de 60 segundos por firma de error)
+  const errorHash = getErrorHash(errorMsg, stack);
+  const now = Date.now();
+  if (reportedErrorsCache[errorHash] && (now - reportedErrorsCache[errorHash] < 60000)) {
+    console.debug(`[Telemetry] Reporte de error duplicado omitido (Throttled): ${errorMsg}`);
+    return;
+  }
+  reportedErrorsCache[errorHash] = now;
+
+  // Contexto del usuario logueado en Firebase Auth (Seguro sin datos sensibles)
+  let userContext = null;
+  if (auth && auth.currentUser) {
+    userContext = {
+      uid: auth.currentUser.uid,
+      email: auth.currentUser.email
+    };
+  }
+
+  // Información extendida del Entorno y Cliente
+  const extendedPayload = {
+    clientId: CLIENT_ID,
+    niche: CLIENT_NICHE,
+    timestamp: new Date().toISOString(),
+    errorMsg: errorMsg || 'Unknown Error',
+    stack: stack || 'No stack trace available',
+    resolved: false,
+    environment: {
+      url: typeof window !== 'undefined' ? window.location.href : 'N/A',
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Server/Node',
+      language: typeof navigator !== 'undefined' ? navigator.language : 'N/A',
+      screenResolution: typeof window !== 'undefined' ? `${window.screen.width}x${window.screen.height}` : 'N/A',
+      viewport: typeof window !== 'undefined' ? `${window.innerWidth}x${window.innerHeight}` : 'N/A'
+    },
+    user: userContext
+  };
+
+  if (!navigator.onLine) {
+    enqueueOfflineReport('failure', extendedPayload);
+    return;
+  }
 
   try {
-    const newFailure = {
-      clientId: CLIENT_ID,
-      token: DEV_TOKEN,       // Requerido por firestore.rules de la Central para validar la escritura
-      niche: CLIENT_NICHE,    // Leído dinámicamente desde VITE_NICHE (inyectado por el CLI en .env.local)
-      timestamp: new Date().toISOString(),
-      errorMsg: errorMsg || 'Unknown Error',
-      stack: stack || 'No stack trace available',
-      deviceInfo: navigator.userAgent || 'Unknown Device',
-      resolved: false
-    };
-
-    const failuresRef = collection(centralDb, 'app_failures');
-    await addDoc(failuresRef, newFailure);
-    console.log('[Telemetry] Fallo reportado con éxito a la Consola Central.');
+    await executeFailureReport(extendedPayload);
   } catch (error) {
-    console.error('[Telemetry] Error al enviar reporte de fallo a la Consola Central:', error);
+    console.error('[Telemetry] Falló reporte inmediato de error. Encolando...', error);
+    enqueueOfflineReport('failure', extendedPayload);
   }
 }
-

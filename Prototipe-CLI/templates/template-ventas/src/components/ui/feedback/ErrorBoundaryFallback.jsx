@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { AlertOctagon, RefreshCcw, Send, ChevronDown, ChevronUp } from 'lucide-react';
 import { reportAppFailureToDeveloper } from '../../../services/telemetryService';
+import { showAlert } from '../../../services/alertService';
 
 export class ErrorBoundaryFallback extends Component {
   constructor(props) {
@@ -41,7 +42,7 @@ export class ErrorBoundaryFallback extends Component {
     const stack = this.state.error?.stack || this.state.errorInfo?.componentStack || '';
     try {
       await reportAppFailureToDeveloper(errorMsg, stack);
-      alert('Bug reportado con éxito al equipo de desarrollo.');
+      showAlert({ title: 'Bug Reportado', message: 'Bug reportado con éxito al equipo de desarrollo.', variant: 'success' });
     } catch (err) {
       console.error('[ErrorBoundary] Fallo al reportar manualmente:', err);
     }

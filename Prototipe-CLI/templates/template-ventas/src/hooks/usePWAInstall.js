@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { showAlert } from '../services/alertService'
 
 export default function usePWAInstall() {
   const [installPrompt, setInstallPrompt] = useState(null)
@@ -41,9 +42,17 @@ export default function usePWAInstall() {
     if (!installPrompt) {
       const isIOS = typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
       if (isIOS) {
-        alert('📱 Para instalar esta aplicación en tu iPhone o iPad:\n\n1. Pulsa el botón "Compartir" (el ícono de la caja con la flecha hacia arriba ↑ en la barra inferior de Safari).\n2. Desliza hacia abajo y selecciona "Agregar a la pantalla de inicio" (Add to Home Screen).\n3. Confirma pulsando "Agregar" en la esquina superior derecha.')
+        showAlert({
+          title: 'Instalar en iOS',
+          message: '1. Pulsa el botón "Compartir" (↑) en la barra inferior de Safari.\n2. Desliza y selecciona "Agregar a la pantalla de inicio".\n3. Confirma pulsando "Agregar".',
+          variant: 'info'
+        })
       } else {
-        alert('💻 Para instalar la aplicación en tu pantalla de inicio:\n\n1. Haz clic en el botón de menú de tu navegador (los tres puntos "⋮" o barras "≡" en la esquina superior derecha).\n2. Selecciona la opción "Instalar aplicación", "Instalar Tienda" o "Agregar a la pantalla de inicio".')
+        showAlert({
+          title: 'Instalar en Android/Chrome',
+          message: '1. Abre el menú del navegador (⋮ o ≡ en la esquina superior derecha).\n2. Selecciona "Instalar aplicación" o "Agregar a la pantalla de inicio".',
+          variant: 'info'
+        })
       }
       return
     }
@@ -62,7 +71,11 @@ export default function usePWAInstall() {
       })
     } catch (err) {
       console.warn('[PWA Install] El prompt nativo falló, mostrando instrucciones manuales:', err)
-      alert('💻 Para instalar la aplicación en tu pantalla de inicio:\n\n1. Haz clic en el botón de menú de tu navegador (los tres puntos "⋮" o barras "≡" en la esquina superior derecha).\n2. Selecciona la opción "Instalar aplicación", "Instalar Tienda" o "Agregar a la pantalla de inicio".')
+      showAlert({
+        title: 'Instalar aplicación',
+        message: '1. Abre el menú del navegador (⋮ o ≡ en la esquina superior derecha).\n2. Selecciona "Instalar aplicación" o "Agregar a la pantalla de inicio".',
+        variant: 'info'
+      })
     }
   }
 

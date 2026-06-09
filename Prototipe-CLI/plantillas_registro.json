@@ -14,7 +14,7 @@
       "destino": "D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas",
       "nicho": "Retail / Ecommerce / POS",
       "activo": true,
-      "version": "1.0.0"
+      "version": "1.0.2"
     },
     "servicios": {
       "fuente": "D:/PROTOTIPE/Plantillas Core/App Servicios",

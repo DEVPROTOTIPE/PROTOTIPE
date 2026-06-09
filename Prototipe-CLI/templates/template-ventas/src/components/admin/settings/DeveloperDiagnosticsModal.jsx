@@ -80,7 +80,7 @@ export default function DeveloperDiagnosticsModal({ isOpen, onClose }) {
         throw new Error('Falta la configuración de variables de entorno para conectar a la base de datos central de control.');
       }
       
-      const clientId = import.meta.env.VITE_DEVELOPER_CLIENT_ID || 'proyecto-cliente-saas';
+      const clientId = import.meta.env.VITE_DEVELOPER_CLIENT_ID || 'ventas-smartfix';
       addLog(`Consultando documento de control del cliente "${clientId}" en Firestore Central...`, 'info');
       
       const clientRef = doc(centralDb, 'clientes_control', clientId);

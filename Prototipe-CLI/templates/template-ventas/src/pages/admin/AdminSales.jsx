@@ -50,10 +50,12 @@ import {
 
 // Mapeador de colores visual
 import { getCssColor } from '../../utils/colors'
+import { useAlertConfirm } from '../../components/common/AlertConfirmContext'
 
 export default function AdminSales() {
   const navigate = useNavigate()
   const isOnline = useConnectivityStore((state) => state.isOnline)
+  const { showAlert } = useAlertConfirm()
   const { data: products = [], isLoading: loadingProducts } = useProducts(true)
   const { data: categories = [] } = useCategories()
   const { user: currentAdmin } = useAuthStore()
@@ -329,7 +331,7 @@ export default function AdminSales() {
   const handleFinalizeSale = async () => {
     if (cart.length === 0) return
     if (!foundClient) {
-      alert('Por favor selecciona o registra un cliente primero.')
+      showAlert({ title: 'Cliente requerido', message: 'Por favor selecciona o registra un cliente primero.', variant: 'warning' })
       return
     }
 
@@ -426,7 +428,7 @@ export default function AdminSales() {
       setNotes('')
     } catch (e) {
       console.error(e)
-      alert(`Error al procesar la venta: ${e.message}`)
+      showAlert({ title: 'Error al procesar', message: `Error al procesar la venta: ${e.message}`, variant: 'error' })
     }
   }
 

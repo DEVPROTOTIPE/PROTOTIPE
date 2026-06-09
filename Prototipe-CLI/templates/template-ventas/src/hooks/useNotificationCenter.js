@@ -64,18 +64,17 @@ export default function useNotificationCenter({
     return () => clearTimeout(t)
   }, [])
 
-  // ─── Listener en tiempo real (solo lote reciente) ──────────────────────────
   useEffect(() => {
-    if (!recipientId || !recipientRole) return
-    if (recipientRole === 'client' && (recipientId === 'client' || recipientId === 'anonimo')) return
-
-    // Reset al cambiar de usuario
+    // Reset al cambiar de usuario o desloguearse (evita leak de datos al quedar nulo)
     isInitializedRef.current = false
     seenIdsRef.current = new Set()
     idsInListRef.current = new Set()
     lastDocRef.current = null
     setNotifications([])
     setHasMore(false)
+
+    if (!recipientId || !recipientRole) return
+    if (recipientRole === 'client' && (recipientId === 'client' || recipientId === 'anonimo')) return
 
     const unsub = subscribeToCentralNotifications(
       recipientId,

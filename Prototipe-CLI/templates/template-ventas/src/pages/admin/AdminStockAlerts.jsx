@@ -5,12 +5,14 @@ import { useNavigate } from 'react-router-dom'
 import BackButton from '../../components/ui/BackButton'
 import QuantitySelector from '../../components/ui/QuantitySelector'
 import { useProducts, useUpdateProduct } from '../../hooks/useInventory'
+import { useAlertConfirm } from '../../components/common/AlertConfirmContext'
 
 
 export default function AdminStockAlerts() {
   const navigate = useNavigate()
   const { data: products = [], isLoading } = useProducts()
   const { mutateAsync: updateProduct, isPending: isUpdating } = useUpdateProduct()
+  const { showAlert } = useAlertConfirm()
 
   // Buscador local de alertas
   const [searchTerm, setSearchTerm] = useState('')
@@ -111,7 +113,7 @@ export default function AdminStockAlerts() {
 
     } catch (error) {
       console.error('Error al actualizar el inventario:', error)
-      alert('Ocurrió un error al cargar el inventario.')
+      showAlert({ title: 'Error de inventario', message: 'Ocurrió un error al cargar el inventario.', variant: 'error' })
     }
   }
 

@@ -9,6 +9,7 @@
  * enviar mensaje por WhatsApp con plantilla configurable, y retirar asignación.
  */
 import { useState, useEffect, useCallback } from 'react'
+import { useAlertConfirm } from '../../../components/common/AlertConfirmContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Bike, User, Phone, MessageCircle, Copy, Check, ChevronDown,
@@ -107,6 +108,7 @@ function FailNoteModal({ onConfirm, onClose, estado }) {
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function OrderDeliveryPanel({ order }) {
   const { deliverySettings } = useAppConfigStore()
+  const { showAlert } = useAlertConfirm()
   const cd = deliverySettings?.customDelivery || {}
   const template = cd.messengerTemplate || DEFAULT_MESSENGER_TEMPLATE
 
@@ -193,7 +195,7 @@ export default function OrderDeliveryPanel({ order }) {
   // ─── Acción: cambiar estado ────────────────────────────────────────────────
   const handleStateChange = useCallback(async (estado, nota = '') => {
     if (!delivery && estado !== DELIVERY_STATES.PENDING) {
-      alert('Primero asigna un mensajero para avanzar el estado.')
+      showAlert({ title: 'Acción requerida', message: 'Primero asigna un mensajero para avanzar el estado.', variant: 'warning' })
       return
     }
     setBusy(true)

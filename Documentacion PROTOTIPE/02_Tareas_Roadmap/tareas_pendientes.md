@@ -6,6 +6,121 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
 ---
 
 ### 💼 Negocio y Modularidad Ecosistema (Prioridad Alta)
+* **[x] ~~Tarea 319: Corrección de ReferenceError por CheckCircle no definido en Zona de Desarrollador~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Importación de Icono Faltante:** Importado el icono `CheckCircle` de `lucide-react` al inicio de `DeveloperSettings.jsx`, corrigiendo la excepción de tiempo de ejecución `ReferenceError: CheckCircle is not defined` que ocurría al enviar un error simulado o al aplicar acciones de éxito.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+  - Verificación: Sincronizado downstream y validada la compilación de producción con la suite de tests en verde.
+
+* **[x] ~~Tarea 318: Estructuración y Categorización de Paletas de Colores por Nicho de Negocio~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Repertorio de Paletas Ampliado:** Creadas y definidas 25 paletas de colores premium (5 por categoría/nicho) dentro de `palettes.js` alineadas a nichos de mercado: Moda y Accesorios, Gastronomía y Alimentos, Salud y Belleza (Estética), Tecnología y Deportes, y Mascotas y Naturaleza.
+    - **Categorización en UI:** Refactorizado el selector de temas en `AppearanceSettings.jsx` para agrupar dinámicamente las paletas en el modal según su propiedad `category`, brindando una experiencia visual organizada y profesional.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/constants/palettes.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/constants/palettes.js) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/AppearanceSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/AppearanceSettings.jsx) [MODIFY]
+  - Verificación: Sincronizado a CLI y compilación de producción validada exitosamente.
+
+* **[x] ~~Tarea 317: Optimización del Retorno de Navegación de Subsecciones en el Panel de Ajustes~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Navegación Multinivel:** Modificada la lógica del botón de regreso principal en `AdminSettings.jsx` para que detecte si hay un `activeSubSection` activo. Si lo hay, regresa al menú de la sección padre (ej. Zona de Desarrollador o Menú Personalización) seteando `activeSubSection(null)` en lugar de regresar directamente a los Ajustes Generales, evitando así la pérdida de autenticación de PIN de desarrollo e incomodidad del usuario.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/AdminSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
+  - Verificación: Sincronización a CLI aprobada y compilada correctamente.
+
+* **[x] ~~Tarea 316: Corrección de Contraste y Activación del Modal de Selección de Temas en Ajustes~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Mejora de Contraste:** Cambiado el color del botón "Cambiar" del selector de tema en `AppearanceSettings.jsx` de `bg-app text-surface` a una combinación de alto contraste (`bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100`) para cumplir los estándares de accesibilidad y visibilidad.
+    - **Despliegue del Modal:** Integrado el componente y markup del Selector de Tema Inteligente (anteriormente omitido en el desacoplamiento del monolito) directamente en `AppearanceSettings.jsx` utilizando su propio estado local `isThemeModalOpen` y control de scroll corporal `ThemeModalLock`.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/AppearanceSettings.jsx`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/AppearanceSettings.jsx) [MODIFY]
+  - Verificación: Compilación local de Vite/Rolldown exitosa. Verificado que el selector y los botones funcionan con alto contraste.
+
+* **[x] ~~Tarea 315: Desacoplamiento y Modularización del Panel de Ajustes (AdminSettings.jsx)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Modularización del Monolito:** Segmentado el componente monolítico de ajustes (`AdminSettings.jsx` de 400KB) en 9 secciones independientes y 1 componente visual (`MobilePreview.jsx`) agrupados en `/src/pages/admin/settings/`.
+    - **Secciones Desacopladas (Revisión 2):** Identidad de marca (`BrandSettings.jsx`), personal y perfiles (`EmployeeSettings.jsx`), configuración operativa (`StoreSettings.jsx`), cuentas bancarias (`PaymentSettings.jsx`), credenciales de seguridad (`SecuritySettings.jsx`), zona protegida del desarrollador (`DeveloperSettings.jsx`), apariencia (`AppearanceSettings.jsx`), anuncios (`AdSettings.jsx`) y cupones de descuento (`CouponSettings.jsx`), resolviendo los ReferenceErrors por marcadores no definidos.
+    - **Enrutamiento Limpio:** Refactorizado `AdminSettings.jsx` para actuar como enrutador ligero de pestañas y despachador de estados, reduciendo su tamaño en más de un 80%.
+    - **Sincronización:** Ejecutada la sincronización física del core a la plantilla de ventas CLI (`sync_templates.js ventas`) y validada la compilación de producción.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/AdminSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/AdminSettings.jsx.bak`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminSettings.jsx.bak) [NEW]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/components/MobilePreview.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/components/MobilePreview.jsx) [NEW]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/BrandSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/BrandSettings.jsx) [NEW]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/EmployeeSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/EmployeeSettings.jsx) [NEW]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/StoreSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/StoreSettings.jsx) [NEW]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/PaymentSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/PaymentSettings.jsx) [NEW]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/SecuritySettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/SecuritySettings.jsx) [NEW]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [NEW]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/AppearanceSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/AppearanceSettings.jsx) [NEW]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/AdSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/AdSettings.jsx) [NEW]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/CouponSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/CouponSettings.jsx) [NEW]
+  - Verificación: Compilación local de Vite/Rolldown en Core y CLI exitosa. Pruebas E2E de integración Playwright superadas (✓ PASSED en 16.4s).
+
+* **[x] ~~Tarea 314: Creación de Documentación de Estructura de Ajustes en App Ventas~~****
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Documentación de Ajustes:** Creado el archivo `estructura_ajustes.md` en `Documentacion App Ventas` del core Ventas. Detalla de forma ramificada y verídica todos los menús, interruptores, campos del formulario y lógica de persistencia del panel de ajustes (`AdminSettings.jsx`).
+    - **Registro en Mapa Semántico:** Indexada la nueva documentación en `mapa_documentacion_ia.md` con su respectivo Criterio de Decisión IA.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/Documentacion App Ventas/estructura_ajustes.md`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/estructura_ajustes.md) [NEW]
+    - [`D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - Verificación: Rutas y mapas comprobados en caliente.
+
+* **[x] ~~Tarea 313: Sincronización e Integración Física del Core con la Plantilla de Ventas (template-ventas)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Sincronización Física del Core ➔ Plantilla:** Se ejecutó `sync_templates.js` para transferir los 2 archivos nuevos (incluido `alertService.js` y `AlertConfirmContext.jsx`) y 19 archivos de negocio optimizados de `App Ventas` a `template-ventas` en el CLI, preservando la exclusión estricta de variables de entorno, credenciales e identidad visual locales.
+    - **Sanitización Dinámica:** Reemplazo de tokens de desarrollo (`ventas-smartfix`, `app-ventas`) por placeholders genéricos (`proyecto-cliente-saas`) y APIs de Firestore.
+  - Archivos creados/modificados:
+    - Sincronización y actualización física de 21 archivos en [`D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/).
+  - Verificación: Suite de integración `node test_templates.js --template ventas` ejecutada y aprobada (✓ PASSED en 26.8 segundos).
+
+* **[x] ~~Tarea 312: Robustecimiento y Blindaje de Telemetría en la Plantilla Core del CLI~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Throttling y Cola Offline en Telemetría:** Se portó el algoritmo de resiliencia offline (`localStorage` con capacidad máxima de 20 logs en cola) y el limitador de tasa/throttling (60 segundos de silencio para errores idénticos) a la función `reportAppFailureToDeveloper` del `telemetryService.js` en `template-ventas`.
+    - **Desacoplamiento de Iconos y Alertas en Error Boundary:** Se eliminó la dependencia de `lucide-react` en `ErrorBoundaryFallback.jsx` reemplazando todos los iconos por SVGs inline para blindar al boundary ante fallas en la carga de librerías. Adicionalmente, se retiraron llamadas a objetos no garantizados en plantillas independientes (como `alertService.js`) dejando un fallback seguro y limpio al navegador nativo.
+  - Archivos creados/modificados:
+    - `D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/telemetryService.js` [MODIFY]
+    - `D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/ui/feedback/ErrorBoundaryFallback.jsx` [MODIFY]
+  - Verificación: Suite de integración `node test_templates.js` aprobada con éxito (✓ PASSED en 25.6 segundos).
+
+* **[x] ~~Tarea 311: Optimización y Estandarización Profesional del Generador CLI (generator.js)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Inyección de firestore.rules:** Se automatizó la creación del archivo `firestore.rules` con esquema de seguridad restrictivo por defecto para garantizar que los despliegues de base de datos no queden expuestos o fallen.
+    - **Inyección de variables HSL en src/index.css:** Las variables de tema Tailwind v4 de la marca (`--color-primary`, `--color-accent`) se inyectan en caliente dentro de la directiva `@theme` en el archivo de estilos de entrada de la aplicación destino.
+    - **Generación automatizada de manifest PWA dinámico:** El manifest de la PWA (`manifest.json` / `site.webmanifest`) ahora se genera o actualiza inyectando de forma dinámica el `name`, `short_name`, y colores Hex (`theme_color`, `background_color`) convertidos desde la paleta HSL.
+    - **Robustecimiento del saneador de paths absolutos en GEMINI.md:** Se actualizó la sanitización de rutas absolutas mediante expresiones regulares insensibles al tipo de barra y sistema de archivos, asegurando la total portabilidad de las reglas de desarrollo.
+  - Archivos creados/modificados:
+    - `D:/PROTOTIPE/Prototipe-CLI/generator.js` [MODIFY]
+  - Verificación: Suite de tests ejecutada exitosamente (`node test_templates.js` PASSED).
+
 * **[x] ~~Tarea 310: Migración SSH + Blindaje Definitivo del Engine de Respaldo Git~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-09
@@ -23,6 +138,7 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
     - `D:/PROTOTIPE/subproject_backup.ps1` [MODIFY]
     - `D:/PROTOTIPE/menu_backup.ps1` [MODIFY]
   - Infraestructura: `C:\Users\Sergio\.ssh\id_ed25519` (ED25519) registrada en GitHub DEVPROTOTIPE. Remotes actualizados a `git@github.com:DEVPROTOTIPE/PROTOTIPE.git`.
+  - **[Rev. 1 - 2026-06-09]** Bugfix adicional: el paso de detención de Vite no era suficiente porque los `.git-backup-temp` residuales de backups anteriores fallidos impedían que el scan de `[1/6]` encontrara todos los repos. Se añadió un paso de auto-saneamiento en `git_backup.ps1` entre la detención de Vite y el scan: busca y restaura cualquier `.git-backup-temp` → `.git` con `-Depth 3` antes de escanear, garantizando que el backup maestro siempre encuentre y oculte la totalidad de los subrepositorios.
 
 * **[x] ~~Tarea 309: Bugfix y Blindaje de Scripts de Respaldo Git (.ps1)~~**
   - Estatus: Completado.

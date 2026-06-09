@@ -14,6 +14,7 @@ import useAppConfigSync from './hooks/useAppConfigSync'
 import useAuthInit from './hooks/useAuthInit'
 import { getActiveColors } from './constants/palettes'
 import { FONTS } from './constants/fonts'
+import { AlertConfirmProvider } from './components/common/AlertConfirmContext'
 
 // ─── Cliente de TanStack Query (caché global, reintentos automáticos) ─────────
 const queryClient = new QueryClient({
@@ -320,55 +321,57 @@ export default function App() {
     >
       <QueryClientProvider client={queryClient}>
         <MotionConfig reducedMotion={animationsEnabled ? "user" : "always"}>
-          <BrowserRouter>
-            <ScrollToTop />
-            <ThemeApplier />
-            <AppRoutes />
-            <CartDrawer />
-            <GuidedToast />
-            <ConnectivityToast />
-            <PWAInstallBanner />
-            
-            {/* Modal Premium de Sincronización de Ventas Offline */}
-            <AnimatePresence>
-              {syncNotification && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-                  {/* Backdrop */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setSyncNotification(null)}
-                    style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
-                  />
-                  {/* Card */}
-                  <motion.div
-                    initial={{ scale: 0.88, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.88, opacity: 0, y: 20 }}
-                    transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                    className="relative bg-surface rounded-3xl border border-app shadow-2xl p-6 max-w-xs w-full flex flex-col items-center text-center gap-4 z-10"
-                  >
-                    <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 flex items-center justify-center text-emerald-500">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-wifi"><path d="M12 20h.01"/><path d="M8.5 16.5c3-3 4-3 7 0"/><path d="M5 13a10 9 0 0 1 14 0"/><path d="M2 9.5a15.75 15.75 0 0 1 20 0"/></svg>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-bold text-app">¡Ventas Sincronizadas!</p>
-                      <p className="text-xs text-muted leading-relaxed">
-                        Se han subido exitosamente <span className="font-extrabold text-emerald-500">{syncNotification.count}</span> venta(s) que habías registrado de forma local (offline).
-                      </p>
-                    </div>
-                    <button
+          <AlertConfirmProvider>
+            <BrowserRouter>
+              <ScrollToTop />
+              <ThemeApplier />
+              <AppRoutes />
+              <CartDrawer />
+              <GuidedToast />
+              <ConnectivityToast />
+              <PWAInstallBanner />
+              
+              {/* Modal Premium de Sincronización de Ventas Offline */}
+              <AnimatePresence>
+                {syncNotification && (
+                  <div style={{ position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                    {/* Backdrop */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
                       onClick={() => setSyncNotification(null)}
-                      className="w-full h-11 rounded-2xl font-bold text-sm text-white active:scale-95 transition-all shadow-sm bg-emerald-500 hover:bg-emerald-600"
+                      style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
+                    />
+                    {/* Card */}
+                    <motion.div
+                      initial={{ scale: 0.88, opacity: 0, y: 20 }}
+                      animate={{ scale: 1, opacity: 1, y: 0 }}
+                      exit={{ scale: 0.88, opacity: 0, y: 20 }}
+                      transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                      className="relative bg-surface rounded-3xl border border-app shadow-2xl p-6 max-w-xs w-full flex flex-col items-center text-center gap-4 z-10"
                     >
-                      Entendido
-                    </button>
-                  </motion.div>
-                </div>
-              )}
-            </AnimatePresence>
-          </BrowserRouter>
+                      <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 flex items-center justify-center text-emerald-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-wifi"><path d="M12 20h.01"/><path d="M8.5 16.5c3-3 4-3 7 0"/><path d="M5 13a10 9 0 0 1 14 0"/><path d="M2 9.5a15.75 15.75 0 0 1 20 0"/></svg>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-bold text-app">¡Ventas Sincronizadas!</p>
+                        <p className="text-xs text-muted leading-relaxed">
+                          Se han subido exitosamente <span className="font-extrabold text-emerald-500">{syncNotification.count}</span> venta(s) que habías registrado de forma local (offline).
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setSyncNotification(null)}
+                        className="w-full h-11 rounded-2xl font-bold text-sm text-white active:scale-95 transition-all shadow-sm bg-emerald-500 hover:bg-emerald-600"
+                      >
+                        Entendido
+                      </button>
+                    </motion.div>
+                  </div>
+                )}
+              </AnimatePresence>
+            </BrowserRouter>
+          </AlertConfirmProvider>
         </MotionConfig>
       </QueryClientProvider>
     </ErrorBoundary>
