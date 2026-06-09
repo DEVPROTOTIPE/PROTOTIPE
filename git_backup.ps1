@@ -73,18 +73,37 @@ Write-Host " [Ruta de Trabajo] $rootDir" -ForegroundColor Gray
 Write-Host ""
 Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
 
-# Detectar y detener el servidor Vite del dev-dashboard para liberar bloqueos sobre .git
+# Detectar y detener servidores Vite (dev-dashboard, App Ventas, etc.) para liberar bloqueos sobre carpetas .git
 $viteWasStopped = $false
-$dashboardDir = "$rootDir\Central PROTOTIPE\dev-dashboard"
-$vitePids = @(Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue |Where-Object { $_.CommandLine -match [regex]::Escape($dashboardDir) -or ($_.CommandLine -match 'vite' -and $_.CommandLine -match 'dev') } |Select-Object -ExpandProperty ProcessId)
+$stoppedVitePaths = @()
 
-if ($vitePids.Count -gt 0) {
-    Write-Host " [INFO] Pausando servidor Vite del dev-dashboard para liberar bloqueos..." -ForegroundColor Yellow
-    $vitePids | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }
-    Start-Sleep -Milliseconds 800
-    $viteWasStopped = $true
-    Write-Host "    -> Servidor detenido. Se reiniciara automaticamente al finalizar." -ForegroundColor DarkGray
+# Obtener todos los procesos node.exe activos
+$nodeProcesses = Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue
+
+foreach ($proc in $nodeProcesses) {
+    # Validar si el comando de ejecución contiene 'vite' o está dentro de nuestra ruta D:\PROTOTIPE
+    if ($proc.CommandLine -match 'vite' -and $proc.CommandLine -match 'dev') {
+        # Extraer la ruta de trabajo aproximada desde la línea de comandos
+        $procPath = ""
+        if ($proc.CommandLine -match '(?i)"?D:\\PROTOTIPE\\[^"\r\n]+') {
+            $procPath = $matches[0] -replace '"', ''
+        }
+        
+        Write-Host " [INFO] Detectado servidor de desarrollo Vite activo (PID: $($proc.ProcessId)). Deteniendo para liberar bloqueos..." -ForegroundColor Yellow
+        Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
+        $viteWasStopped = $true
+        
+        if ($procPath) {
+            $stoppedVitePaths += $procPath
+        }
+    }
 }
+
+if ($viteWasStopped) {
+    Start-Sleep -Milliseconds 1000
+    Write-Host "    -> Servidores de desarrollo detenidos. Se restaurarán al finalizar." -ForegroundColor DarkGray
+}
+
 
 # Auto-saneamiento: restaurar .git-backup-temp residuales de backups anteriores fallidos
 # Ahora que Vite esta detenido, el rename tiene exito garantizado
@@ -302,12 +321,18 @@ finally {
             }
         }
     }
-    # Reiniciar Vite si fue detenido al inicio
-    if ($viteWasStopped) {
-        Write-Host " [INFO] Reiniciando servidor Vite del dev-dashboard..." -ForegroundColor Cyan
-        Start-Process powershell -ArgumentList "-NoProfile -NoExit -Command `"Set-Location '$dashboardDir'; npm run dev`"" -WindowStyle Normal
-        Write-Host "    -> Servidor Vite reiniciado en nueva ventana." -ForegroundColor DarkGray
+    # Reiniciar todos los servidores Vite que fueron detenidos al inicio
+    if ($viteWasStopped -and $stoppedVitePaths.Count -gt 0) {
+        Write-Host " [INFO] Reiniciando servidores de desarrollo Vite..." -ForegroundColor Cyan
+        foreach ($path in $stoppedVitePaths) {
+            if (Test-Path $path) {
+                $projName = Split-Path -Path $path -Leaf
+                Write-Host "    -> Iniciando: $projName..." -ForegroundColor DarkGray
+                Start-Process powershell -ArgumentList "-NoProfile -NoExit -Command `"Set-Location '$path'; npm run dev`"" -WindowStyle Normal
+            }
+        }
     }
+
     Write-Host ""
     Write-Host "======================================================================" -ForegroundColor Cyan
     Write-Host "  [OK] Snapshot completado | Entorno de desarrollo restaurado con exito" -ForegroundColor Green
