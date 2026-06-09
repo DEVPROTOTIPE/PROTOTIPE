@@ -1,10 +1,10 @@
 # ==============================================================================
 #                 PROTOTIPE ECOSISTEMA - GESTOR MAESTRO DE RESPALDOS
 # ==============================================================================
-# Menú interactivo dinámico para control de versiones y snapshots generales.
-# Detecta de forma autónoma plantillas y clientes en el disco.
+# Menu interactivo dinamico para control de versiones y snapshots generales.
+# Detecta de forma autonoma plantillas y clientes en el disco.
 
-# Forzar consola a UTF-8 para evitar caracteres extraños en Windows
+# Forzar consola a UTF-8 para evitar caracteres extranos en Windows
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
@@ -19,7 +19,7 @@ Set-Location -Path $rootDir
 function Show-Header {
     Clear-Host
     Write-Host "======================================================================" -ForegroundColor Cyan
-    Write-Host "         ⚡ PROTOTIPE ECOSISTEMA - GESTOR DE RESPALDOS GIT ⚡" -ForegroundColor Cyan
+    Write-Host "         [PROTOTIPE ECOSISTEMA - GESTOR DE RESPALDOS GIT]" -ForegroundColor Cyan
     Write-Host "======================================================================" -ForegroundColor Cyan
     Write-Host ""
 }
@@ -42,7 +42,7 @@ function Run-Subproject-Backup {
 
 function Manage-Cores {
     Show-Header
-    Write-Host " [GESTIÓN DE PLANTILLAS CORE]" -ForegroundColor Cyan
+    Write-Host " [GESTION DE PLANTILLAS CORE]" -ForegroundColor Cyan
     Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
     
     if (-not (Test-Path $coresDir)) {
@@ -53,7 +53,7 @@ function Manage-Cores {
     
     $cores = Get-ChildItem -Path $coresDir -Directory
     if ($cores.Count -eq 0) {
-        Write-Host " [INFO] No hay plantillas core registradas físicamente en el disco." -ForegroundColor Yellow
+        Write-Host " [INFO] No hay plantillas core registradas fisicamente en el disco." -ForegroundColor Yellow
         Start-Sleep -Seconds 2
         return
     }
@@ -79,13 +79,13 @@ function Manage-Cores {
         $selectedPath = $cores[$index].FullName
         if (-not (Test-Path "$selectedPath\.git")) {
             Show-Header
-            Write-Host " ⚠️ El subproyecto $($cores[$index].Name) no tiene un repositorio Git activo." -ForegroundColor Yellow
+            Write-Host " [WARNING] El subproyecto $($cores[$index].Name) no tiene un repositorio Git activo." -ForegroundColor Yellow
             Write-Host " ¿Desea inicializarlo ahora? (S/N): " -NoNewline
             $initGit = Read-Host
             if ($initGit -like "s" -or $initGit -like "S") {
                 Set-Location -Path $selectedPath
                 git init | Out-Null
-                Write-Host " Repositorio Git inicializado con éxito." -ForegroundColor Green
+                Write-Host " Repositorio Git inicializado con exito." -ForegroundColor Green
                 Start-Sleep -Seconds 1
             } else {
                 return
@@ -100,7 +100,7 @@ function Manage-Cores {
 
 function Manage-Instances {
     Show-Header
-    Write-Host " [GESTIÓN DE INSTANCIAS DE CLIENTES]" -ForegroundColor Cyan
+    Write-Host " [GESTION DE INSTANCIAS DE CLIENTES]" -ForegroundColor Cyan
     Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
     
     if (-not (Test-Path $instancesDir)) {
@@ -111,7 +111,7 @@ function Manage-Instances {
     
     $instances = Get-ChildItem -Path $instancesDir -Directory
     if ($instances.Count -eq 0) {
-        Write-Host " [INFO] No hay instancias de clientes registradas físicamente en el disco." -ForegroundColor Yellow
+        Write-Host " [INFO] No hay instancias de clientes registradas fisicamente en el disco." -ForegroundColor Yellow
         Start-Sleep -Seconds 2
         return
     }
@@ -137,13 +137,13 @@ function Manage-Instances {
         $selectedPath = $instances[$index].FullName
         if (-not (Test-Path "$selectedPath\.git")) {
             Show-Header
-            Write-Host " ⚠️ La instancia $($instances[$index].Name) no tiene un repositorio Git activo." -ForegroundColor Yellow
+            Write-Host " [WARNING] La instancia $($instances[$index].Name) no tiene un repositorio Git activo." -ForegroundColor Yellow
             Write-Host " ¿Desea inicializarla ahora? (S/N): " -NoNewline
             $initGit = Read-Host
             if ($initGit -like "s" -or $initGit -like "S") {
                 Set-Location -Path $selectedPath
                 git init | Out-Null
-                Write-Host " Repositorio Git inicializado con éxito." -ForegroundColor Green
+                Write-Host " Repositorio Git inicializado con exito." -ForegroundColor Green
                 Start-Sleep -Seconds 1
             } else {
                 return
@@ -156,22 +156,22 @@ function Manage-Instances {
     }
 }
 
-# Bucle principal del menú
+# Bucle principal del menu
 do {
     Show-Header
-    Write-Host " Seleccione qué acción de control de versiones desea realizar:" -ForegroundColor Cyan
-    Write-Host "   [0] RESPALDO MAESTRO DE TODO PROTOTIPE (Snapshot Físico Completo)" -ForegroundColor Yellow
+    Write-Host " Seleccione que accion de control de versiones desea realizar:" -ForegroundColor Cyan
+    Write-Host "   [0] RESPALDO MAESTRO DE TODO PROTOTIPE (Snapshot Fisico Completo)" -ForegroundColor Yellow
     Write-Host "   [1] Guardar / Subir Consola Central (dev-dashboard)" -ForegroundColor White
     Write-Host "   [2] Guardar / Subir una Plantilla Core (Molde)" -ForegroundColor White
-    Write-Host "   [3] Guardar / Subir una Instancia de Cliente (Producción/Dev)" -ForegroundColor White
+    Write-Host "   [3] Guardar / Subir una Instancia de Cliente (Produccion/Dev)" -ForegroundColor White
     Write-Host "   [Q] Salir" -ForegroundColor Gray
     Write-Host ""
     Write-Host " > Ingrese su opcion: " -NoNewline
     $menuOption = Read-Host
     
     switch ($menuOption) {
-        "0" { Run-Master-Backup; Write-Host " Presione cualquier tecla para volver al menú..."; Read-Host | Out-Null }
-        "1" { Run-Subproject-Backup -Path $dashboardDir; Write-Host " Presione cualquier tecla para volver al menú..."; Read-Host | Out-Null }
+        "0" { Run-Master-Backup; Write-Host " Presione cualquier tecla para volver al menu..."; Read-Host | Out-Null }
+        "1" { Run-Subproject-Backup -Path $dashboardDir; Write-Host " Presione cualquier tecla para volver al menu..."; Read-Host | Out-Null }
         "2" { Manage-Cores }
         "3" { Manage-Instances }
         "q" { break }
