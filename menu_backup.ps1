@@ -16,6 +16,17 @@ $dashboardDir = "$rootDir\Central PROTOTIPE\dev-dashboard"
 # Asegurar que estamos en el directorio de trabajo
 Set-Location -Path $rootDir
 
+# Rutina de auto-recuperacion ante cierres abruptos (restaurar .git-backup-temp a .git)
+$tempGitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git-backup-temp" -Recurse -ErrorAction SilentlyContinue
+if ($tempGitDirs) {
+    foreach ($tempDir in $tempGitDirs) {
+        $parentPath = $tempDir.Parent.FullName
+        if (Test-Path $tempDir.FullName) {
+            Rename-Item -Path $tempDir.FullName -NewName ".git" -Force
+        }
+    }
+}
+
 function Show-Header {
     Clear-Host
     Write-Host "======================================================================" -ForegroundColor Cyan

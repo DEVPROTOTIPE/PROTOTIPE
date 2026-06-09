@@ -61,10 +61,41 @@ if ([string]::IsNullOrWhiteSpace($CommitMessage)) {
     $inputMessage = Read-Host
     
     if ([string]::IsNullOrWhiteSpace($inputMessage)) {
-        $currentDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-        $CommitMessage = "Snapshot [$branchName] - $currentDate"
-    } else {
-        $CommitMessage = $inputMessage
+        # Analizar cambios para generar un mensaje con contexto real
+        $rawStatus = git status --porcelain
+        $added = @()
+        $modified = @()
+        $deleted = @()
+        
+        foreach ($line in ($rawStatus -split "`r?`n")) {
+            if ([string]::IsNullOrWhiteSpace($line)) { continue }
+            $statusType = $line.Substring(0, 2).Trim()
+            $filePath = $line.Substring(3).Trim()
+            # Quitar comillas si el path las contiene
+            $filePath = $filePath -replace '"', ''
+            $fileName = Split-Path -Path $filePath -Leaf
+            
+            if ($statusType -eq "M") { $modified += $fileName }
+            elseif ($statusType -eq "??" -or $statusType -eq "A") { $added += $fileName }
+            elseif ($statusType -eq "D") { $deleted += $fileName }
+        }
+        
+        $summaryParts = @()
+        if ($modified.Count -gt 0) { $summaryParts += "Mod: $($modified -join ', ')" }
+        if ($added.Count -gt 0) { $summaryParts += "Add: $($added -join ', ')" }
+        if ($deleted.Count -gt 0) { $summaryParts += "Del: $($deleted -join ', ')" }
+        
+        if ($summaryParts.Count -gt 0) {
+            $contextText = $summaryParts -join " | "
+            # Limitar longitud para evitar desbordes en el mensaje de commit
+            if ($contextText.Length -gt 120) {
+                $contextText = $contextText.Substring(0, 117) + "..."
+            }
+            $CommitMessage = "Auto-Snapshot [$branchName]: $contextText"
+        } else {
+            $currentDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+            $CommitMessage = "Snapshot [$branchName] - $currentDate"
+        }
     }
 }
 

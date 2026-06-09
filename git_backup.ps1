@@ -31,9 +31,41 @@ if (-not (Test-Path "$rootDir\.git")) {
 }
 
 # Determinar mensaje de commit
-$currentDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 if ([string]::IsNullOrWhiteSpace($CommitMessage)) {
-    $CommitMessage = "Snapshot general PROTOTIPE - $currentDate"
+    # Analizar cambios para generar un mensaje con contexto real
+    $rawStatus = git status --porcelain
+    $added = @()
+    $modified = @()
+    $deleted = @()
+    
+    foreach ($line in ($rawStatus -split "`r?`n")) {
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        $statusType = $line.Substring(0, 2).Trim()
+        $filePath = $line.Substring(3).Trim()
+        $filePath = $filePath -replace '"', ''
+        $fileName = Split-Path -Path $filePath -Leaf
+        
+        if ($statusType -eq "M") { $modified += $fileName }
+        elseif ($statusType -eq "??" -or $statusType -eq "A") { $added += $fileName }
+        elseif ($statusType -eq "D") { $deleted += $fileName }
+    }
+    
+    $summaryParts = @()
+    if ($modified.Count -gt 0) { $summaryParts += "Mod: $($modified -join ', ')" }
+    if ($added.Count -gt 0) { $summaryParts += "Add: $($added -join ', ')" }
+    if ($deleted.Count -gt 0) { $summaryParts += "Del: $($deleted -join ', ')" }
+    
+    if ($summaryParts.Count -gt 0) {
+        $contextText = $summaryParts -join " | "
+        if ($contextText.Length -gt 120) {
+            $contextText = $contextText.Substring(0, 117) + "..."
+        }
+        $branchName = (git rev-parse --abbrev-ref HEAD 2>$null)
+        $CommitMessage = "Auto-Snapshot [$branchName]: $contextText"
+    } else {
+        $currentDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        $CommitMessage = "Snapshot general PROTOTIPE - $currentDate"
+    }
 }
 
 Write-Host " [Commit Info] $CommitMessage" -ForegroundColor Gray

@@ -3,10 +3,19 @@
 * **Descripción de Cambios:**
   1. **Evitación de Cierre Abrupto (backup.bat):** Se añadió control de errores en `backup.bat` evaluando `%errorlevel%` y agregando una instrucción `pause` condicionada para impedir que la consola de CMD de Windows se cierre automáticamente si ocurre un fallo fatal de PowerShell.
   2. **Manejo Seguro del Cursor en PowerShell (menu_backup.ps1):** Se previno la excepción fatal al asignar `$Host.UI.RawUI.CursorSize = 0` en entornos de consola no estándar o Terminales modernas (donde la API del Host restringe el tamaño de cursor de 1 a 100). Se envolvió la llamada en un bloque `try-catch` silencioso y se reemplazó por secuencias de escape ANSI VT (`[?25l` y `[?25h`) para ocultar/mostrar el cursor de forma universal.
+  3. **Auto-Recuperación de Subproyectos Git (menu_backup.ps1):** Se implementó una rutina inteligente de auto-recuperación al arrancar el menú principal que escanea y restaura automáticamente directorios `.git-backup-temp` a `.git` en caso de que alguna ejecución del snapshot maestro se haya cancelado de forma forzada a mitad de camino. Se restauraron manualmente los repositorios de `App Ventas` y `dev-dashboard`.
+  4. **Optimización de Historial (.gitignore de App Ventas):** Se agregaron reglas de exclusión en `.gitignore` para omitir la caché de compilación local de Vite (`.vite/`) y los reportes/resultados de pruebas de Playwright (`playwright-report/` y `test-results/`), previniendo la subida de basura técnica al repositorio.
+  5. **Mensajes de Commit Contextuales Inteligentes (subproject_backup.ps1 y git_backup.ps1):** Se modificó la generación de mensaje automático (cuando el usuario presiona Enter). En lugar de usar la fecha estática, los scripts analizan dinámicamente los cambios pendientes en caliente (`git status --porcelain`) y construyen un mensaje conciso detallando qué archivos fueron modificados (`Mod: ...`), creados/añadidos (`Add: ...`) o eliminados (`Del: ...`), manteniendo el historial de GitHub descriptivo sin esfuerzo manual.
 * **Archivos Modificados:**
   - [`D:/PROTOTIPE/backup.bat`](file:///d:/PROTOTIPE/backup.bat) [MODIFY]
   - [`D:/PROTOTIPE/menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
-* **Verificación:** Ejecución aislada simulada con éxito. Mensajes de depuración agregados al archivo batch.
+  - [`D:/PROTOTIPE/git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`D:/PROTOTIPE/subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/.gitignore`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/.gitignore) [MODIFY]
+* **Verificación:** Ejecución aislada simulada con éxito. Mensajes de depuración agregados al archivo batch. Comando de restauración de carpetas .git ejecutado exitosamente. Reglas del .gitignore añadidas y verificadas. Lógica de commits contextuales testeada con éxito.
+
+
+
 
 ### [2026-06-09] - Limpieza y Centralización de Documentación en App Ventas
 

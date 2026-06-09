@@ -26,3 +26,10 @@ dist-ssr
 # Scratch folder
 scratch/
 
+# Vite cache
+.vite/
+
+# Testing reports and results
+playwright-report/
+test-results/
+
