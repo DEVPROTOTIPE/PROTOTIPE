@@ -80,7 +80,7 @@ function Manage-Cores {
         if (-not (Test-Path "$selectedPath\.git")) {
             Show-Header
             Write-Host " [WARNING] El subproyecto $($cores[$index].Name) no tiene un repositorio Git activo." -ForegroundColor Yellow
-            Write-Host " ¿Desea inicializarlo ahora? (S/N): " -NoNewline
+            Write-Host " Desea inicializarlo ahora? (S/N): " -NoNewline
             $initGit = Read-Host
             if ($initGit -like "s" -or $initGit -like "S") {
                 Set-Location -Path $selectedPath
@@ -138,7 +138,7 @@ function Manage-Instances {
         if (-not (Test-Path "$selectedPath\.git")) {
             Show-Header
             Write-Host " [WARNING] La instancia $($instances[$index].Name) no tiene un repositorio Git activo." -ForegroundColor Yellow
-            Write-Host " ¿Desea inicializarla ahora? (S/N): " -NoNewline
+            Write-Host " Desea inicializarla ahora? (S/N): " -NoNewline
             $initGit = Read-Host
             if ($initGit -like "s" -or $initGit -like "S") {
                 Set-Location -Path $selectedPath
@@ -181,5 +181,5 @@ do {
 } while ($true)
 
 Write-Host ""
-Write-Host " ¡Hasta luego! Entorno de desarrollo seguro." -ForegroundColor Green
+Write-Host " Hasta luego! Entorno de desarrollo seguro." -ForegroundColor Green
 Start-Sleep -Seconds 1

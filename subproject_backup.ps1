@@ -85,7 +85,7 @@ Write-Host "--------------------------------------------------------------------
 if ($branchName -ne "main" -and $branchName -ne "master") {
     Write-Host ""
     Write-Host "  [Git Strategies] Has subido cambios a la rama de desarrollo: [$branchName]" -ForegroundColor Yellow
-    Write-Host "  ¿Desea fusionar y subir estos cambios tambien a la rama de produccion 'main'? (S/N): " -NoNewline -ForegroundColor Cyan
+    Write-Host "  Desea fusionar y subir estos cambios tambien a la rama de produccion 'main'? (S/N): " -NoNewline -ForegroundColor Cyan
     $confirmMerge = Read-Host
     
     if ($confirmMerge -like "s" -or $confirmMerge -like "S") {
