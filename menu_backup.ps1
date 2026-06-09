@@ -17,12 +17,20 @@ $dashboardDir = "$rootDir\Central PROTOTIPE\dev-dashboard"
 Set-Location -Path $rootDir
 
 # Rutina de auto-recuperacion ante cierres abruptos (restaurar .git-backup-temp a .git)
-$tempGitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git-backup-temp" -Recurse -ErrorAction SilentlyContinue
-if ($tempGitDirs) {
-    foreach ($tempDir in $tempGitDirs) {
-        $parentPath = $tempDir.Parent.FullName
-        if (Test-Path $tempDir.FullName) {
-            Rename-Item -Path $tempDir.FullName -NewName ".git" -Force
+# Depth 3 cubre todos los subrepos sin recorrer node_modules ni carpetas profundas
+$tempGitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git-backup-temp" -Recurse -Depth 3 -ErrorAction SilentlyContinue
+foreach ($tempDir in $tempGitDirs) {
+    if (Test-Path $tempDir.FullName) {
+        $retries = 6
+        $restored = $false
+        while (-not $restored -and $retries -gt 0) {
+            try {
+                Rename-Item -Path $tempDir.FullName -NewName ".git" -ErrorAction Stop -Force
+                $restored = $true
+            } catch {
+                $retries--
+                if ($retries -gt 0) { Start-Sleep -Milliseconds 400 }
+            }
         }
     }
 }

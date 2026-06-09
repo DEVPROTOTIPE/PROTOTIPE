@@ -126,27 +126,15 @@ Write-Host "  [2/3] Creando commit local..." -ForegroundColor Cyan
 git commit -m $CommitMessage 2>&1 | Out-Null
 Write-Host "    -> Commit exitoso: '$CommitMessage'" -ForegroundColor Gray
 
-# Verificar conexion con el servidor remoto
-Write-Host "  [3/3] Verificando conexion con GitHub..." -ForegroundColor Cyan
-$isOnline = Test-Connection -ComputerName "github.com" -Count 1 -Quiet -ErrorAction SilentlyContinue
-if ($isOnline) {
-    # Evitar prompts interactivos de credenciales durante la prueba de conexion
-    $oldPrompt = $env:GIT_TERMINAL_PROMPT
-    $oldAskpass = $env:GIT_ASKPASS
-    $env:GIT_TERMINAL_PROMPT = "0"
-    $env:GIT_ASKPASS = "true"
-
-    git ls-remote --exit-code -h origin HEAD 2>$null | Out-Null
-    if ($LASTEXITCODE -ne 0) { $isOnline = $false }
-
-    # Restaurar entorno
-    $env:GIT_TERMINAL_PROMPT = $oldPrompt
-    $env:GIT_ASKPASS = $oldAskpass
-}
+# Verificar conexion con el servidor remoto via SSH
+ Write-Host "  [3/3] Verificando conexion con GitHub (SSH)..." -ForegroundColor Cyan
+$isOnline = $false
+git ls-remote origin HEAD 2>$null | Out-Null
+if ($LASTEXITCODE -eq 0) { $isOnline = $true }
 
 if (-not $isOnline) {
     Write-Host ""
-    Write-Host "  [WARN] No se pudo establecer conexion con el repositorio remoto de GitHub (Offline/Error de credenciales)." -ForegroundColor Yellow
+    Write-Host "  [WARN] No se pudo conectar al repositorio remoto via SSH. Verifica tu conexion a internet o ejecuta: ssh -T git@github.com" -ForegroundColor Yellow
     Write-Host "  Desea realizar un respaldo local (Commit local en tu disco) unicamente? (S/N): " -NoNewline -ForegroundColor Cyan
     $confirmLocal = Read-Host
     if ($confirmLocal -like "s" -or $confirmLocal -like "S") {
