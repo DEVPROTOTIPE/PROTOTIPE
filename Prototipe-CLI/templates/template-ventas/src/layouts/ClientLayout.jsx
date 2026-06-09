@@ -96,12 +96,6 @@ export default function ClientLayout() {
     if (!toastReadyRef.current) {
       // Primera snapshot de Firestore: registrar como listo SIN disparar toasts
       toastReadyRef.current = true
-      // Si hay no leídas pre-existentes, animar la campana para invitar a abrirla
-      if (notifications.some(n => n.status === 'unread')) {
-        setIsBellAttentive(true)
-        const t = setTimeout(() => setIsBellAttentive(false), 3200)
-        return () => clearTimeout(t)
-      }
       return
     }
 
@@ -109,6 +103,10 @@ export default function ClientLayout() {
     const unread = notifications.filter(n => n.status === 'unread')
     if (unread.length > 0) {
       const mostRecent = unread[0]
+      // Ignorar notificaciones con más de 20 segundos de antigüedad (acumuladas antes de entrar)
+      const createdTime = mostRecent.createdAt?.toDate ? mostRecent.createdAt.toDate().getTime() : (mostRecent.createdAt ? new Date(mostRecent.createdAt).getTime() : Date.now())
+      if (Date.now() - createdTime > 20000) return
+
       setToasts(prev => {
         if (prev.some(t => t.id === mostRecent.id)) return prev
         const newToast = {
@@ -312,6 +310,8 @@ export default function ClientLayout() {
                 soundEnabled={soundEnabled}
                 onToggleSound={() => setSoundEnabled(!soundEnabled)}
                 onMarkRead={markRead}
+                onMarkAllRead={markAllRead}
+                onClearAll={clearAll}
                 onClose={() => setIsNotificationsOpen(false)}
                 onNavigate={(path) => {
                   setIsNotificationsOpen(false)

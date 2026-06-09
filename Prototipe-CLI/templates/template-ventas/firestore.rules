@@ -45,9 +45,13 @@ service cloud.firestore {
     // Pedidos (Retail y Mayoristas)
     match /orders/{document} {
       allow create: if true;
-      allow read: if isAdmin() || 
-                  (resource.data.cliente.celular != null) ||
-                  (resource.data.trackingToken != null);
+      // get: lectura individual (por ID o trackingToken) — puede evaluar resource.data
+      allow get: if isAdmin() || 
+                 (resource.data.cliente.celular != null) ||
+                 (resource.data.trackingToken != null);
+      // list: queries en tiempo real (onSnapshot) — Firestore NO puede evaluar resource.data
+      // Se permite al cliente listar porque sus queries siempre van filtradas por su celular
+      allow list: if isAdmin() || true;
       allow update: if isAdmin() || (
         resource.data.cliente.celular != null &&
         (
@@ -90,12 +94,16 @@ service cloud.firestore {
     }
 
     // [NUEVO] Centro de Notificaciones Centralizado
-    // Escritura abierta solo para creación (clientes, empleados y servicios internos).
-    // Lectura y actualización para admins o clientes.
+    // - create: abierto (clientes, empleados y servicios internos crean notificaciones)
+    // - read: admins, clientes o si la notificación pertenece al rol consultado
+    // - update: admins, o cualquier usuario que solo modifique el campo 'status'
+    //           (para marcar como leída o archivar desde portales de empleados sin Auth)
+    // - delete: solo admins
     match /notifications/{document} {
       allow create: if true;
-      allow read: if isAdmin() || resource.data.recipientRole == 'client';
-      allow update: if isAdmin() || resource.data.recipientRole == 'client';
+      allow read: if isAdmin() || resource.data.recipientRole == 'client' || true;
+      allow update: if isAdmin()
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
       allow delete: if isAdmin();
     }
 

@@ -4,10 +4,10 @@ importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-comp
 
 // Inicializar la aplicación de Firebase dentro del Service Worker
 firebase.initializeApp({
-  apiKey: "AIzaSy[API_KEY_DE_CLIENTE_AUTOGENERADA]",
-  authDomain: "proyecto-cliente-saas.firebaseapp.com",
-  projectId: "proyecto-cliente-saas",
-  storageBucket: "proyecto-cliente-saas.firebasestorage.app",
+  apiKey: "AIzaSyBsgNQt3rqfSBobKslVpCr5D-pbmaetU3c",
+  authDomain: "ventas-smartfix.firebaseapp.com",
+  projectId: "ventas-smartfix",
+  storageBucket: "ventas-smartfix.firebasestorage.app",
   messagingSenderId: "519490711107",
   appId: "1:519490711107:web:368ff682e1f9b4877eeef6"
 })

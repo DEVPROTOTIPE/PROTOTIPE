@@ -88,19 +88,19 @@ export default function AdminLayout() {
     if (!toastReadyRef.current) {
       // Primera snapshot de Firestore: registrar como listo SIN disparar toasts
       toastReadyRef.current = true
-      // Si hay no leídas pre-existentes, animar la campana para invitar a abrirla
-      if (notifications.some(n => n.status === 'unread')) {
-        setIsBellAttentive(true)
-        const t = setTimeout(() => setIsBellAttentive(false), 3200)
-        return () => clearTimeout(t)
-      }
       return
     }
 
     // Post-carga: solo la notificación más reciente no leída genera un toast
     const unread = notifications.filter(n => n.status === 'unread')
     if (unread.length > 0) {
+      // Filtrar por notificaciones que se crearon en los últimos 20 segundos para evitar fugas/toasts viejos
       const mostRecent = unread[0]
+      const createdTime = mostRecent.createdAt?.toDate ? mostRecent.createdAt.toDate().getTime() : (mostRecent.createdAt ? new Date(mostRecent.createdAt).getTime() : Date.now())
+      if (Date.now() - createdTime > 20000) {
+        return // Omitir notificaciones antiguas acumuladas
+      }
+
       setToasts(prev => {
         if (prev.some(t => t.id === mostRecent.id)) return prev
         const newToast = {

@@ -186,6 +186,8 @@ export default function AdminLayout() {
               className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-105 active:scale-95 ${
                 isBellAttentive
                   ? 'bg-primary/10 border border-primary text-primary shadow-[0_0_14px_3px_hsl(var(--primary)/0.30)]'
+                  : unreadCount > 0
+                  ? 'bg-red-500/5 border border-red-500/30 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.1)]'
                   : 'bg-surface-2 border border-app text-muted hover:text-app'
               }`}
               aria-label="Notificaciones"
@@ -196,9 +198,23 @@ export default function AdminLayout() {
                     ? { rotate: [0, -22, 18, -14, 10, -6, 4, -2, 0, -20, 16, -10, 6, -3, 0], scale: [1, 1.28, 1.1, 1.22, 1.05, 1.18, 1, 1.05, 1, 1.22, 1.1, 1.18, 1, 1.05, 1] }
                     : isRinging
                     ? { rotate: [0, -20, 18, -14, 10, -6, 4, 0] }
+                    : unreadCount > 0
+                    ? { rotate: [0, -12, 12, -12, 12, 0] }
                     : {}
                 }
-                transition={{ duration: isBellAttentive ? 2.8 : 0.6, ease: 'easeInOut' }}
+                transition={
+                  isBellAttentive
+                    ? { duration: 2.8, ease: 'easeInOut' }
+                    : unreadCount > 0
+                    ? {
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        duration: 1.8,
+                        ease: "easeInOut",
+                        repeatDelay: 4
+                      }
+                    : { duration: 0.6, ease: 'easeInOut' }
+                }
               >
                 <Bell size={14} />
               </motion.div>
@@ -383,11 +399,11 @@ export default function AdminLayout() {
       <div className="md:hidden fixed top-4 right-4 z-40">
         <motion.button
           onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-          animate={isBellAttentive ? { scale: [1, 1.12, 1, 1.08, 1] } : {}}
-          transition={{ duration: 1.4, ease: 'easeInOut', repeat: isBellAttentive ? 1 : 0 }}
           className={`w-11 h-11 rounded-2xl text-white shadow-xl flex items-center justify-center relative active:scale-90 transition-all ${
             isBellAttentive
               ? 'bg-primary shadow-[0_0_18px_4px_hsl(var(--primary)/0.50)]'
+              : unreadCount > 0
+              ? 'bg-red-500 shadow-[0_0_14px_rgba(239,68,68,0.4)]'
               : 'bg-primary hover:opacity-90'
           }`}
           aria-label="Notificaciones Mobile"
@@ -398,9 +414,23 @@ export default function AdminLayout() {
                 ? { rotate: [0, -22, 18, -14, 10, -6, 4, -2, 0, -20, 16, -10, 6, -3, 0], scale: [1, 1.2, 1.05, 1.15, 1, 1.1, 1, 1.05, 1, 1.15, 1.05, 1.1, 1, 1.05, 1] }
                 : isRinging
                 ? { rotate: [0, -20, 18, -14, 10, -6, 4, 0] }
+                : unreadCount > 0
+                ? { rotate: [0, -12, 12, -12, 12, 0] }
                 : {}
             }
-            transition={{ duration: isBellAttentive ? 2.8 : 0.6, ease: 'easeInOut' }}
+            transition={
+              isBellAttentive
+                ? { duration: 2.8, ease: 'easeInOut' }
+                : unreadCount > 0
+                ? {
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    duration: 1.8,
+                    ease: "easeInOut",
+                    repeatDelay: 4
+                  }
+                : { duration: 0.6, ease: 'easeInOut' }
+            }
           >
             <Bell size={18} />
           </motion.div>

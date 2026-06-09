@@ -2,7 +2,7 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { LogOut, Wifi, Bell, WifiOff } from 'lucide-react'
 import usePortalStore from '../store/portalStore'
 import { ROLES, PORTAL_CONFIG } from '../constants'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useConnectivityStore } from '../store/connectivityStore'
 
 import useNotificationCenter from '../hooks/useNotificationCenter'
@@ -45,10 +45,23 @@ export default function PortalLayout() {
   const [toasts, setToasts] = useState([])
 
   // Generar toasts en tiempo real cuando llega una notificación no leída genuinamente nueva
+  const toastReadyRef = useRef(false)
   useEffect(() => {
+    if (notifications.length === 0) return
+
+    if (!toastReadyRef.current) {
+      // Primera snapshot: registrar como listo SIN disparar toasts
+      toastReadyRef.current = true
+      return
+    }
+
     const unread = notifications.filter(n => n.status === 'unread')
     if (unread.length > 0) {
       const mostRecent = unread[0]
+      // Solo disparar toast si la notificación llegó en los últimos 20 segundos
+      const createdTime = mostRecent.createdAt?.toDate ? mostRecent.createdAt.toDate().getTime() : (mostRecent.createdAt ? new Date(mostRecent.createdAt).getTime() : Date.now())
+      if (Date.now() - createdTime > 20000) return
+
       setToasts(prev => {
         if (prev.some(t => t.id === mostRecent.id)) return prev
         const newToast = {
