@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Trash2, ShoppingBag, ArrowRight, Image as ImageIcon, Minus, Plus } from 'lucide-react'
+import { X, Trash2, ShoppingBag, ShoppingCart, ArrowRight, Image as ImageIcon, Minus, Plus } from 'lucide-react'
 import { formatCurrency, truncate } from '../../../utils/formatters'
 import useCartStore from '../../../store/cartStore'
 import useGuidedStore from '../../../store/guidedStore'
@@ -271,95 +271,98 @@ export default function CartDrawer() {
                         ))}
                       </div>
                     ) : (
-                      <motion.div
-                        initial="hidden"
-                        animate="show"
-                        variants={{
-                          hidden: { opacity: 0 },
-                          show: {
-                            opacity: 1,
-                            transition: { staggerChildren: 0.07 }
-                          }
-                        }}
-                        className="flex gap-3 overflow-x-auto pb-3 scrollbar-none snap-x"
-                      >
-                        {recommendedProducts.map((p) => {
-                          const isPromo = p.tienePromocion && p.precioPromo < p.precioBase
-                          const pPrice = isPromo ? p.precioPromo : p.precioBase
+                      <div className="flex flex-col gap-2">
+                        <SwipeableCardStack
+                          items={recommendedProducts.map(p => {
+                            const isPromo = p.tienePromocion && p.precioPromo < p.precioBase
+                            const pPrice = isPromo ? p.precioPromo : p.precioBase
 
-                          return (
-                            <motion.div
-                              key={p.id}
-                              variants={{
-                                hidden: { opacity: 0, y: 20, scale: 0.92 },
-                                show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 280, damping: 22 } }
-                              }}
-                              whileHover={{ y: -5, scale: 1.03, transition: { type: 'spring', stiffness: 400, damping: 18 } }}
-                              whileTap={{ scale: 0.97 }}
-                              onClick={() => setSelectedProductDetail(p)}
-                              className="w-[130px] shrink-0 snap-start cursor-pointer group relative"
-                            >
-                              {/* Tarjeta con imagen dominante */}
-                              <div className="w-full h-[160px] rounded-2xl overflow-hidden relative shadow-md group-hover:shadow-xl transition-shadow duration-300">
-                                {p.imageUrl ? (
-                                  <img
-                                    src={p.imageUrl}
-                                    alt={p.nombre}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
-                                    <ImageIcon size={28} className="opacity-25" />
-                                  </div>
-                                )}
-
-                                {/* Gradiente oscuro en la parte inferior */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent pointer-events-none" />
-
-                                {/* Badge PROMO */}
-                                {isPromo && (
-                                  <div className="absolute top-2 left-2">
-                                    <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-lg shadow-lg tracking-wider flex items-center gap-0.5">
-                                      <span className="w-1 h-1 rounded-full bg-white animate-ping" />
-                                      PROMO
-                                    </span>
-                                  </div>
-                                )}
-
-                                {/* Info sobre la imagen (overlay inferior) */}
-                                <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                                  <h4 className="text-[11px] font-bold text-white line-clamp-2 leading-tight drop-shadow-sm">
-                                    {p.nombre}
-                                  </h4>
-                                  <div className="flex items-center justify-between mt-1">
-                                    <span className="text-[12px] font-black text-white drop-shadow-sm">
-                                      {formatCurrency(pPrice)}
-                                    </span>
+                            return {
+                              id: p.id,
+                              product: p,
+                              render: () => (
+                                <div className="flex gap-4 items-center h-full w-full">
+                                  {/* Imagen del Producto */}
+                                  <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-gray-50 border border-gray-100 relative">
+                                    {p.imageUrl ? (
+                                      <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover" />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-muted"><ImageIcon size={18} /></div>
+                                    )}
                                     {isPromo && (
-                                      <span className="text-[9px] text-red-300 line-through">
-                                        {formatCurrency(p.precioBase)}
+                                      <span className="absolute top-1 left-1 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md shadow-sm">
+                                        {p.promocion?.discountType === 'percentage' 
+                                          ? `${p.promocion.discountValue}% OFF` 
+                                          : 'OFERTA'}
                                       </span>
                                     )}
                                   </div>
-                                </div>
-                              </div>
 
-                              {/* Botón "+" flotante */}
-                              <motion.div
-                                className="absolute -bottom-2 right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/40 text-white font-black text-lg leading-none"
-                                whileHover={{ scale: 1.2, rotate: 15 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setSelectedProductDetail(p)
-                                }}
-                              >
-                                +
-                              </motion.div>
-                            </motion.div>
-                          )
-                        })}
-                      </motion.div>
+                                  {/* Detalles del Producto */}
+                                  <div className="flex-1 flex flex-col justify-between h-full py-0.5 text-left">
+                                    <div className="space-y-0.5">
+                                      <span className="text-[9px] text-primary font-black uppercase tracking-widest">{p.categoria || 'Sugerido'}</span>
+                                      <h4 className="text-xs font-bold text-gray-900 line-clamp-2 leading-snug">{p.nombre}</h4>
+                                    </div>
+                                    <div className="flex items-end justify-between">
+                                      <div className="flex flex-col">
+                                        <span className="text-xs font-black text-primary">{formatCurrency(pPrice)}</span>
+                                        {isPromo && <span className="text-[9px] text-gray-400 line-through">{formatCurrency(p.precioBase)}</span>}
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setSelectedProductDetail(p)
+                                        }}
+                                        className="px-3 h-7 bg-primary hover:bg-primary/95 text-white text-[10px] font-bold rounded-lg flex items-center gap-1 shadow-md shadow-primary/10 border-none cursor-pointer"
+                                      >
+                                        <Plus size={10} className="stroke-[3]" /> Detalles
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            }
+                          })}
+                          onSwipe={(direction, product) => {
+                            if (direction === 'right' && product) {
+                              const isPromo = product.tienePromocion && product.precioPromo < product.precioBase
+                              const price = isPromo ? product.precioPromo : product.precioBase
+                              
+                              // Buscar variante con stock o usar la primera
+                              const vars = product.variantes?.filter(v => v.stock > 0) || []
+                              const variant = vars[0] || (product.variantes && product.variantes[0])
+                              
+                              if (variant) {
+                                addItem({
+                                  productId: product.id,
+                                  variantId: variant.id,
+                                  nombre: product.nombre,
+                                  precio: price,
+                                  talla: variant.talla || null,
+                                  color: variant.color || null,
+                                  imageUrl: variant.imageUrl || product.imageUrl,
+                                  maxStock: variant.stock,
+                                }, 1)
+                              } else {
+                                // Fallback si no tiene variantes explícitas con stock
+                                addItem({
+                                  productId: product.id,
+                                  variantId: 'default',
+                                  nombre: product.nombre,
+                                  precio: price,
+                                  talla: null,
+                                  color: null,
+                                  imageUrl: product.imageUrl,
+                                  maxStock: product.stock || 10,
+                                }, 1)
+                              }
+                            }
+                          }}
+                          onSelectDetail={(product) => setSelectedProductDetail(product)}
+                        />
+                      </div>
                     )}
                   </div>
                 )}
@@ -417,3 +420,246 @@ export default function CartDrawer() {
     </>
   )
 }
+
+function SwipeableCardStack({
+  items = [],
+  onSwipe = () => {},
+  onEmpty = () => {},
+  onSelectDetail = () => {},
+  threshold = 100
+}) {
+  const [localItems, setLocalItems] = useState([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [isAutoSwiping, setIsAutoSwiping] = useState(false)
+  const dragStart = useRef({ x: 0, y: 0 })
+  const topCardRef = useRef(null)
+  const autoPlayTimer = useRef(null)
+
+  // Sincronizar items locales
+  useEffect(() => {
+    setLocalItems(items)
+    setCurrentIndex(0)
+  }, [items])
+
+  const activeItem = localItems[currentIndex]
+
+  // Reset y control de autoplay por inactividad (5 segundos)
+  const resetAutoPlayTimer = () => {
+    if (autoPlayTimer.current) {
+      clearInterval(autoPlayTimer.current)
+    }
+    if (localItems.length <= 1 || isDragging || isAutoSwiping) return
+
+    autoPlayTimer.current = setInterval(() => {
+      autoRotateCard()
+    }, 5000)
+  }
+
+  useEffect(() => {
+    resetAutoPlayTimer()
+    return () => {
+      if (autoPlayTimer.current) clearInterval(autoPlayTimer.current)
+    }
+  }, [currentIndex, localItems, isDragging, isAutoSwiping])
+
+  // Desliza la tarjeta automáticamente al fondo de la pila para que sigan variando
+  const autoRotateCard = () => {
+    if (isDragging || isAutoSwiping || localItems.length <= 1) return
+    setIsAutoSwiping(true)
+
+    // Animación de salida hacia la izquierda (descarte suave por inactividad)
+    setDragOffset({ x: -150, y: -10 })
+
+    setTimeout(() => {
+      // Mandar el elemento actual al final del array para que siga rotando
+      setLocalItems(prev => {
+        const next = [...prev]
+        const current = next.shift()
+        if (current) next.push(current)
+        return next
+      })
+      setDragOffset({ x: 0, y: 0 })
+      setIsAutoSwiping(false)
+    }, 450)
+  }
+
+  const handlePointerDown = (e) => {
+    if (isAutoSwiping) return
+    setIsDragging(true)
+    if (autoPlayTimer.current) clearInterval(autoPlayTimer.current)
+    dragStart.current = { x: e.clientX, y: e.clientY }
+    if (topCardRef.current) {
+      topCardRef.current.setPointerCapture(e.pointerId)
+    }
+  }
+
+  const handlePointerMove = (e) => {
+    if (!isDragging) return
+    const deltaX = e.clientX - dragStart.current.x
+    const deltaY = e.clientY - dragStart.current.y
+    setDragOffset({ x: deltaX, y: deltaY })
+  }
+
+  const handlePointerUp = (e) => {
+    if (!isDragging) return
+    setIsDragging(false)
+    if (topCardRef.current) {
+      topCardRef.current.releasePointerCapture(e.pointerId)
+    }
+
+    if (Math.abs(dragOffset.x) > threshold) {
+      const direction = dragOffset.x > 0 ? 'right' : 'left'
+      swipeCard(direction)
+    } else {
+      setDragOffset({ x: 0, y: 0 })
+      resetAutoPlayTimer()
+    }
+  }
+
+  const swipeCard = (direction) => {
+    if (isAutoSwiping) return
+    setIsAutoSwiping(true)
+    if (autoPlayTimer.current) clearInterval(autoPlayTimer.current)
+
+    const exitX = direction === 'right' ? 400 : -400
+    setDragOffset({ x: exitX, y: dragOffset.y })
+
+    setTimeout(() => {
+      onSwipe(direction, activeItem?.product)
+      
+      // Remover de la pila local permanentemente en swipe manual
+      setLocalItems(prev => {
+        const next = [...prev]
+        next.shift()
+        return next
+      })
+
+      setDragOffset({ x: 0, y: 0 })
+      setIsAutoSwiping(false)
+
+      if (localItems.length <= 1) {
+        onEmpty()
+      }
+    }, 250)
+  }
+
+  if (localItems.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 border border-dashed border-gray-200 rounded-3xl h-32 text-center bg-white/50">
+        <span className="text-[10px] font-black uppercase tracking-widest text-muted">¡Viste todas las sugerencias!</span>
+      </div>
+    )
+  }
+
+  const swipeOpacityLeft = isDragging && dragOffset.x < 0 ? Math.min(Math.abs(dragOffset.x) / threshold, 1) : 0
+  const swipeOpacityRight = isDragging && dragOffset.x > 0 ? Math.min(Math.abs(dragOffset.x) / threshold, 1) : 0
+
+  return (
+    <div className="flex flex-col items-center w-full">
+      {/* Contenedor del Mazo */}
+      <div className="relative w-full h-[145px] select-none touch-none">
+        {/* Tarjeta de Respaldo Terciaria */}
+        {localItems.length > 2 && (
+          <div 
+            style={{
+              transform: 'scale(0.90) translate3d(0, 16px, 0)',
+            }}
+            className="absolute inset-x-4 top-0 h-[120px] rounded-3xl bg-slate-100 dark:bg-neutral-900 border border-gray-200/50 opacity-40 transition-all duration-300 shadow-sm z-0" 
+          />
+        )}
+
+        {/* Tarjeta de Respaldo Secundaria */}
+        {localItems.length > 1 && (
+          <div 
+            style={{
+              transform: isDragging 
+                ? `scale(${0.95 + Math.min(Math.abs(dragOffset.x), threshold) / threshold * 0.05}) translate3d(0, ${8 - Math.min(Math.abs(dragOffset.x), threshold) / threshold * 8}px, 0)` 
+                : 'scale(0.95) translate3d(0, 8px, 0)'
+            }}
+            className="absolute inset-x-4 top-0 h-[120px] rounded-3xl bg-slate-50 dark:bg-neutral-800 border border-gray-200/85 opacity-90 z-10 transition-transform duration-300 pointer-events-none shadow-md"
+          />
+        )}
+
+        {/* Tarjeta Superior Activa */}
+        <div
+          ref={topCardRef}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          style={{
+            transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0) rotate(${dragOffset.x * 0.06}deg)`,
+            transition: isDragging ? 'none' : 'transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.1)'
+          }}
+          onClick={() => onSelectDetail(activeItem?.product)}
+          className="absolute inset-x-4 top-0 h-[120px] rounded-3xl bg-white dark:bg-neutral-900 border border-gray-200 shadow-[0_12px_32px_rgba(0,0,0,0.06),0_2px_4px_rgba(0,0,0,0.02)] z-20 cursor-grab active:cursor-grabbing overflow-hidden p-3.5 flex items-center justify-between"
+        >
+          {/* Overlay Badge LADO IZQUIERDO (Descartar/Ignorar) */}
+          {isDragging && dragOffset.x < 0 && (
+            <div 
+              style={{ opacity: swipeOpacityLeft }}
+              className="absolute inset-0 bg-red-500/10 dark:bg-red-500/20 flex items-center justify-center pointer-events-none z-30 transition-opacity"
+            >
+              <span className="bg-red-500 text-white text-[9px] font-black px-2.5 py-1 rounded-lg shadow-lg tracking-widest uppercase flex items-center gap-1">
+                <X size={10} className="stroke-[3]" /> Ignorar
+              </span>
+            </div>
+          )}
+
+          {/* Overlay Badge LADO DERECHO (Agregar/Comprar) */}
+          {isDragging && dragOffset.x > 0 && (
+            <div 
+              style={{ opacity: swipeOpacityRight }}
+              className="absolute inset-0 bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center pointer-events-none z-30 transition-opacity"
+            >
+              <span className="bg-green-500 text-white text-[9px] font-black px-2.5 py-1 rounded-lg shadow-lg tracking-widest uppercase flex items-center gap-1">
+                <ShoppingCart size={10} className="stroke-[3]" /> Comprar
+              </span>
+            </div>
+          )}
+
+          <div className="pointer-events-none w-full h-full flex items-center justify-between">
+            {activeItem?.render()}
+          </div>
+        </div>
+      </div>
+
+      {/* Controles de Acción (Tinder-Style) */}
+      <div className="flex justify-center items-center gap-6 mt-1.5 shrink-0 select-none">
+        <button
+          type="button"
+          onClick={() => swipeCard('left')}
+          className="w-10 h-10 rounded-full bg-red-50 text-red-500 hover:bg-red-100/80 dark:bg-red-950/20 dark:text-red-400 flex items-center justify-center shadow-xs border border-red-200 dark:border-red-900/50 transition-all active:scale-90 cursor-pointer"
+          title="Ignorar sugerencia"
+        >
+          <X size={18} className="stroke-[3]" />
+        </button>
+
+        <span className="text-[9px] text-muted font-bold tracking-widest uppercase opacity-50 select-none">
+          Desliza o Presiona
+        </span>
+
+        <motion.button
+          type="button"
+          onClick={() => swipeCard('right')}
+          animate={{ 
+            scale: [1, 1.12, 1],
+            boxShadow: [
+              "0 4px 6px -1px rgba(34, 197, 94, 0.1), 0 2px 4px -1px rgba(34, 197, 94, 0.06)",
+              "0 10px 15px -3px rgba(34, 197, 94, 0.3), 0 4px 6px -2px rgba(34, 197, 94, 0.15)",
+              "0 4px 6px -1px rgba(34, 197, 94, 0.1), 0 2px 4px -1px rgba(34, 197, 94, 0.06)"
+            ]
+          }}
+          transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+          className="w-10 h-10 rounded-full bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-950/20 dark:text-green-400 flex items-center justify-center border border-green-200 dark:border-green-900/50 transition-all cursor-pointer"
+          title="Agregar al carrito"
+        >
+          <ShoppingCart size={16} className="stroke-[3]" />
+        </motion.button>
+      </div>
+    </div>
+  )
+}
+

@@ -171,34 +171,57 @@ export default function ClientLayout() {
         aria-label="Navegación del cliente"
       >
         {/* Header del sidebar */}
-        <div className="flex items-center justify-between p-4 border-b border-app gap-2">
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+        <div className="flex flex-col p-4 border-b border-app gap-3">
+          {/* Fila 1: Identidad de Marca */}
+          <div className="flex items-center gap-3 min-w-0 w-full">
             {appIcon ? (
               <img
                 src={appIcon}
                 alt={`Logo ${appName}`}
-                className="w-10 h-10 rounded-xl object-cover shrink-0"
+                className="w-11 h-11 rounded-xl object-cover shrink-0"
               />
             ) : (
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
-                <ShoppingCart size={18} className="text-white" aria-hidden="true" />
+              <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center shrink-0">
+                <ShoppingCart size={20} className="text-white" aria-hidden="true" />
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="font-extrabold text-sm text-app truncate leading-tight">{appName}</p>
+              <p className="font-black text-[15px] text-app truncate leading-tight">{appName}</p>
               <p className="text-[10px] text-muted truncate">Tienda Virtual</p>
             </div>
           </div>
 
-          {/* Carrito y Campana de notificaciones (Desktop Sidebar) */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Fila 2: Centro de Control / Panel Rápido (3 columnas uniformes) */}
+          <div className="grid grid-cols-3 gap-2 w-full mt-1">
             {/* Carrito de Compras Permanente */}
             <button
               onClick={openCart}
-              className="relative w-10 h-10 rounded-xl bg-surface hover:bg-surface-2 border border-app flex items-center justify-center text-muted hover:text-app transition-all hover:scale-105 active:scale-95 shadow-xs"
+              className={`relative h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-xs w-full ${
+                cartCount > 0
+                  ? 'bg-primary/5 border-primary text-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.15)]'
+                  : 'bg-surface hover:bg-surface-2 border-app text-muted hover:text-app'
+              }`}
               aria-label="Carrito de compras"
             >
-              <ShoppingCart size={18} />
+              <motion.div
+                animate={
+                  cartCount > 0
+                    ? {
+                        scale: [1, 1.15, 1, 1.15, 1],
+                        rotate: [0, -8, 8, -8, 0],
+                      }
+                    : {}
+                }
+                transition={{
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  duration: 2.5,
+                  ease: "easeInOut",
+                  repeatDelay: 3
+                }}
+              >
+                <ShoppingCart size={18} />
+              </motion.div>
               {cartCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-surface animate-bounce [animation-duration:3s]">
                   {cartCount}
@@ -207,12 +230,14 @@ export default function ClientLayout() {
             </button>
 
             {/* Campana de notificaciones */}
-            <div className="relative">
+            <div className="relative w-full">
               <button
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className={`relative w-10 h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-xs ${
+                className={`relative h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-xs w-full ${
                   isBellAttentive
                     ? 'bg-primary/10 border-primary text-primary shadow-[0_0_14px_3px_hsl(var(--primary)/0.30)]'
+                    : unreadCount > 0
+                    ? 'bg-red-500/5 border-red-500/40 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.1)]'
                     : 'bg-surface hover:bg-surface-2 border-app text-muted hover:text-app'
                 }`}
                 aria-label="Notificaciones"
@@ -223,9 +248,25 @@ export default function ClientLayout() {
                       ? { rotate: [0, -22, 18, -14, 10, -6, 4, -2, 0, -20, 16, -10, 6, -3, 0], scale: [1, 1.28, 1.1, 1.22, 1.05, 1.18, 1, 1.05, 1, 1.22, 1.1, 1.18, 1, 1.05, 1] }
                       : isRinging
                       ? { rotate: [0, -20, 18, -14, 10, -6, 4, 0] }
+                      : unreadCount > 0
+                      ? {
+                          rotate: [0, -12, 12, -12, 12, 0],
+                        }
                       : {}
                   }
-                  transition={{ duration: isBellAttentive ? 2.8 : 0.6, ease: 'easeInOut' }}
+                  transition={
+                    isBellAttentive
+                      ? { duration: 2.8, ease: 'easeInOut' }
+                      : unreadCount > 0
+                      ? {
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                          duration: 1.8,
+                          ease: "easeInOut",
+                          repeatDelay: 4
+                        }
+                      : { duration: 0.6, ease: 'easeInOut' }
+                  }
                 >
                   <Bell size={18} />
                 </motion.div>
@@ -239,11 +280,11 @@ export default function ClientLayout() {
               </button>
             </div>
 
-            {/* Avatar de Perfil en Desktop Sidebar */}
+            {/* Avatar de Perfil */}
             <NavLink
               to="/tienda/perfil"
               className={({ isActive }) =>
-                `w-10 h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-xs ${
+                `h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-xs w-full ${
                   isActive 
                     ? 'bg-primary text-white border-primary shadow-sm ring-1 ring-white/20 ring-inset' 
                     : 'bg-surface border-app text-muted hover:bg-surface-2 hover:text-app'
@@ -350,10 +391,32 @@ export default function ClientLayout() {
               {/* Carrito de Compras Permanente en Header Móvil */}
               <button
                 onClick={openCart}
-                className="relative w-10 h-10 rounded-xl bg-surface hover:bg-surface-2 border border-app flex items-center justify-center text-muted hover:text-app transition-all hover:scale-105 active:scale-95 shadow-xs"
+                className={`relative w-10 h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-xs ${
+                  cartCount > 0
+                    ? 'bg-primary/5 border-primary text-primary'
+                    : 'bg-surface hover:bg-surface-2 border-app text-muted hover:text-app'
+                }`}
                 aria-label="Carrito de compras"
               >
-                <ShoppingCart size={18} />
+                <motion.div
+                  animate={
+                    cartCount > 0
+                      ? {
+                          scale: [1, 1.15, 1, 1.15, 1],
+                          rotate: [0, -8, 8, -8, 0],
+                        }
+                      : {}
+                  }
+                  transition={{
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    duration: 2.5,
+                    ease: "easeInOut",
+                    repeatDelay: 3
+                  }}
+                >
+                  <ShoppingCart size={18} />
+                </motion.div>
                 {cartCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-surface animate-bounce [animation-duration:3s]">
                     {cartCount}
@@ -364,11 +427,11 @@ export default function ClientLayout() {
               {/* Campana de Notificaciones en Header Móvil */}
               <motion.button
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                animate={isBellAttentive ? { scale: [1, 1.12, 1, 1.08, 1] } : {}}
-                transition={{ duration: 1.4, ease: 'easeInOut', repeat: isBellAttentive ? 1 : 0 }}
                 className={`relative w-10 h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-xs ${
                   isBellAttentive
                     ? 'bg-primary/10 border-primary text-primary shadow-[0_0_14px_3px_hsl(var(--primary)/0.30)]'
+                    : unreadCount > 0
+                    ? 'bg-red-500/5 border-red-500/40 text-red-500'
                     : 'bg-surface hover:bg-surface-2 border-app text-muted hover:text-app'
                 }`}
                 aria-label="Campana de Notificaciones"
@@ -379,9 +442,25 @@ export default function ClientLayout() {
                       ? { rotate: [0, -22, 18, -14, 10, -6, 4, -2, 0, -20, 16, -10, 6, -3, 0], scale: [1, 1.28, 1.1, 1.22, 1.05, 1.18, 1, 1.05, 1, 1.22, 1.1, 1.18, 1, 1.05, 1] }
                       : isRinging
                       ? { rotate: [0, -20, 18, -14, 10, -6, 4, 0] }
+                      : unreadCount > 0
+                      ? {
+                          rotate: [0, -12, 12, -12, 12, 0],
+                        }
                       : {}
                   }
-                  transition={{ duration: isBellAttentive ? 2.8 : 0.6, ease: 'easeInOut' }}
+                  transition={
+                    isBellAttentive
+                      ? { duration: 2.8, ease: 'easeInOut' }
+                      : unreadCount > 0
+                      ? {
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                          duration: 1.8,
+                          ease: "easeInOut",
+                          repeatDelay: 4
+                        }
+                      : { duration: 0.6, ease: 'easeInOut' }
+                  }
                 >
                   <Bell size={18} />
                 </motion.div>

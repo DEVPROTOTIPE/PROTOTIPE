@@ -70,6 +70,30 @@ export default function ProductPublicDetail() {
         promocion: ad,
       }
     }
+
+    // Fallback: Descuento directo del producto
+    if (rawProduct.discountActive && Number(rawProduct.discountValue) > 0) {
+      const dVal = Number(rawProduct.discountValue)
+      let precioPromocional = baseProduct.precioBase
+      if (rawProduct.discountType === 'percentage') {
+        precioPromocional = baseProduct.precioBase - (baseProduct.precioBase * dVal) / 100
+      } else {
+        precioPromocional = baseProduct.precioBase - dVal
+      }
+      precioPromocional = Math.max(0, precioPromocional)
+
+      return {
+        ...baseProduct,
+        precioPromo: precioPromocional,
+        tienePromocion: true,
+        promocion: {
+          discountType: rawProduct.discountType || 'percentage',
+          discountValue: dVal,
+          title: 'Descuento Especial'
+        }
+      }
+    }
+
     return baseProduct
   }, [rawProduct, categories, ads])
 
@@ -294,6 +318,56 @@ export default function ProductPublicDetail() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     return diffDays <= limitDays
   }, [product?.createdAt, commercialOptimization])
+
+  const stockConsolidado = useMemo(() => {
+    if (!product) return 0
+    return (product.variantes || []).reduce((sum, v) => sum + (v.stock || 0), 0)
+  }, [product])
+
+  const activeSmartTag = useMemo(() => {
+    const smartTags = commercialOptimization?.tools?.smartTags || {}
+    if (!product || !smartTags.enabled) return null
+
+    // 1. Última Unidad (Prioridad Alta)
+    if (smartTags.lastUnit?.enabled !== false && stockConsolidado > 0 && stockConsolidado <= (smartTags.lastUnit?.threshold || 3)) {
+      return {
+        text: smartTags.lastUnit?.text || 'Última Unidad',
+        bg: smartTags.lastUnit?.bg || '#3b82f6',
+        textCol: smartTags.lastUnit?.textCol || '#ffffff'
+      }
+    }
+
+    // 2. Oferta Imperdible (Si tiene descuento o es combo)
+    const hasPromo = product.tienePromocion || product.discountActive
+    if (smartTags.unmissableOffer?.enabled !== false && hasPromo) {
+      return {
+        text: smartTags.unmissableOffer?.text || 'Oferta Imperdible',
+        bg: smartTags.unmissableOffer?.bg || '#f59e0b',
+        textCol: smartTags.unmissableOffer?.textCol || '#ffffff'
+      }
+    }
+
+    // 3. Más Vendido (Basado en salesCount real)
+    const salesVal = product.salesCount || 0
+    if (smartTags.bestSeller?.enabled !== false && salesVal >= (smartTags.bestSeller?.minSales || 5)) {
+      return {
+        text: smartTags.bestSeller?.text || 'Más Vendido',
+        bg: smartTags.bestSeller?.bg || '#ef4444',
+        textCol: smartTags.bestSeller?.textCol || '#ffffff'
+      }
+    }
+
+    // 4. Nuevo
+    if (smartTags.newProduct?.enabled !== false && isNewProduct) {
+      return {
+        text: smartTags.newProduct?.text || 'Nuevo',
+        bg: smartTags.newProduct?.bg || '#10b981',
+        textCol: smartTags.newProduct?.textCol || '#ffffff'
+      }
+    }
+
+    return null
+  }, [product, commercialOptimization, stockConsolidado, isNewProduct])
 
   const actualPrice = useMemo(() => {
     if (!product) return 0
@@ -542,39 +616,33 @@ export default function ProductPublicDetail() {
         {/* Ficha técnica y comercial SUPERIOR - arriba de la foto, matching Screenshots 1 & 4 */}
         <div className="space-y-2">
           {/* Metadatos Comerciales Superiores */}
-          {smartTagsEnabled && (
+          {activeSmartTag && (
             <div className="flex items-center gap-2 flex-wrap text-xs text-muted font-medium">
-              {isNewProduct && newProductTagEnabled ? (
-                <span className="font-semibold text-[#333] dark:text-[#ccc]">
-                  Nuevo
-                </span>
-              ) : null}
-              {product.salesCount && product.salesCount > 0 && bestSellerTagEnabled ? (
+              <span className="font-semibold text-[#333] dark:text-[#ccc]">
+                {activeSmartTag.text}
+              </span>
+              {product.salesCount && product.salesCount > 0 && bestSellerTagEnabled && (
                 <span className="font-semibold">
                   +{product.salesCount} vendidos
                 </span>
-              ) : null}
+              )}
             </div>
           )}
 
           <h1 className="text-xl font-bold text-app leading-tight tracking-tight">{product.nombre}</h1>
 
           {/* Smart Badges Row matching Screenshot 1 */}
-          {smartTagsEnabled && (
+          {activeSmartTag && (
             <div className="flex items-center gap-2 pt-0.5 flex-wrap text-xs font-semibold">
-              {product.salesCount && product.salesCount >= 5 && bestSellerTagEnabled ? (
-                <span className="bg-[#ff5a00] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-sm">
-                  MÁS VENDIDO
-                </span>
-              ) : product.tienePromocion && commercialOptimization?.tools?.smartTags?.unmissableOffer?.enabled !== false ? (
-                <span className="bg-[#2968c8] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-sm">
-                  OFERTA IMPERDIBLE
-                </span>
-              ) : isNewProduct && newProductTagEnabled ? (
-                <span className="bg-[#00a650] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-sm">
-                  NUEVO
-                </span>
-              ) : null}
+              <span 
+                className="px-2 py-0.5 rounded-sm text-[9px] font-black uppercase text-center flex items-center justify-center shrink-0 shadow-sm border border-black/5"
+                style={{ 
+                  backgroundColor: activeSmartTag.bg,
+                  color: activeSmartTag.textCol
+                }}
+              >
+                {activeSmartTag.text}
+              </span>
             </div>
           )}
 

@@ -3,6 +3,10 @@
 Roadmap y control de tareas del proyecto dev-dashboard.
 
 ## Siguiente Hito: Mejoras de Interfaz de Usuario (UI/UX)
+- [x] **~~Tarea 234: Centrado y Distribución Equitativa de Botones en Navegación Móvil~~**
+  - [x] Cambiar el contenedor de flexbox a CSS Grid con 5 columnas de igual tamaño (`grid-cols-5`) en la barra de navegación móvil de `src/App.jsx`.
+  - [x] Eliminar anchos mínimos (`min-w`) y márgenes asimétricos individuales en los botones de navegación, homogeneizándolos a `w-full` y `py-2` para garantizar un reparto perfectamente centrado del botón "NUEVO" y una distancia equivalente en los costados.
+  - [x] Compilar y verificar el empaquetado del bundle de producción sin errores.
 - [x] **~~Tarea 179: Historial de Aprovisionamientos con Archivador y Paginación Fluida en Onboarding~~**
   - [x] Crear el componente modular `Pagination.jsx` en `src/components/ui/` basado en la biblioteca.
   - [x] Añadir una tabla de historial y botón para archivar provisionamientos (sincronizando con Firestore central).

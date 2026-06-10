@@ -625,15 +625,61 @@ app.get('/api/project/file', async (req, res) => {
       cleanRelativePath = cleanRelativePath.slice(1);
     }
 
-    const filePath = path.resolve(targetProjectDir, cleanRelativePath);
+    let filePath = path.resolve(targetProjectDir, cleanRelativePath);
 
     // 4. Validación de seguridad contra directory traversal
     if (!filePath.toLowerCase().startsWith(targetProjectDir.toLowerCase() + path.sep)) {
-      return res.status(403).json({ error: 'Acceso denegado. La ruta está fuera del proyecto.' });
+      if (filePath.toLowerCase() !== targetProjectDir.toLowerCase()) {
+        return res.status(403).json({ error: 'Acceso denegado. La ruta está fuera del proyecto.' });
+      }
     }
 
     if (!await fs.pathExists(filePath)) {
-      return res.status(404).json({ error: `El archivo no existe en la ruta física: ${filePath}` });
+      // Intentar búsqueda recursiva por nombre de archivo y mapear alias comunes
+      const fileName = path.basename(cleanRelativePath);
+      const candidates = [fileName];
+      
+      if (fileName.toLowerCase() === 'categoriasview.jsx') {
+        candidates.push('CategoryManager.jsx');
+      } else if (fileName.toLowerCase() === 'categorymanager.jsx') {
+        candidates.push('CategoriasView.jsx');
+      }
+
+      let foundPath = null;
+      const searchFileRecursively = async (dir) => {
+        if (foundPath) return;
+        const items = await fs.readdir(dir).catch(() => []);
+        for (const item of items) {
+          const full = path.join(dir, item);
+          const stat = await fs.stat(full).catch(() => null);
+          if (stat?.isDirectory()) {
+            const lowerItem = item.toLowerCase();
+            if (
+              lowerItem === 'node_modules' ||
+              lowerItem === 'dist' ||
+              lowerItem === 'build' ||
+              lowerItem === '.git' ||
+              lowerItem === '.vite' ||
+              item.startsWith('.')
+            ) {
+              continue;
+            }
+            await searchFileRecursively(full);
+          } else if (stat?.isFile()) {
+            if (candidates.some(c => item.toLowerCase() === c.toLowerCase())) {
+              foundPath = full;
+              break;
+            }
+          }
+        }
+      };
+
+      await searchFileRecursively(targetProjectDir);
+      if (foundPath) {
+        filePath = foundPath;
+      } else {
+        return res.status(404).json({ error: `El archivo no existe en la ruta física: ${filePath}` });
+      }
     }
 
     const content = await fs.readFile(filePath, 'utf-8');
@@ -1246,7 +1292,7 @@ async function findProjectDir(clientId) {
     if (mapping.keys.some(k => clientId.includes(k))) {
       let candidate = path.join(baseAppsDir, mapping.folder);
       if (fs.existsSync(candidate)) return candidate;
-      candidate = path.join(baseAppsDir, 'Plantillas Core', mapping.folder);
+      candidate = path.join(path.dirname(baseAppsDir), 'Plantillas Core', mapping.folder);
       if (fs.existsSync(candidate)) return candidate;
       candidate = path.join('D:\\Aplicaciones', mapping.folder);
       if (fs.existsSync(candidate)) return candidate;

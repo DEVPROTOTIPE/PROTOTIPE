@@ -85,6 +85,8 @@ import ComponentLibraryView from './components/admin/ComponentLibraryView'
 import Pagination from './components/ui/Pagination'
 import E2EPanel from './components/admin/E2EPanel'
 import CoreManagerPanel from './components/admin/CoreManagerPanel'
+import ComponentSandbox, { getSandboxKey } from './components/admin/ComponentSandbox'
+
 
 
 
@@ -765,6 +767,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
+  const [livePreviewComponent, setLivePreviewComponent] = useState(null)
+
   const [failures, setFailures] = useState([])
   const [selectedErrorClientFilter, setSelectedErrorClientFilter] = useState('todos')
   const [expandedErrorId, setExpandedErrorId] = useState(null)
@@ -2452,36 +2456,60 @@ export default function App() {
                                 </div>
                       </div>
 
-                      {/* Selector de Recomendaciones de la Biblioteca */}
+                      {/* Selector de Recomendaciones de la Biblioteca — Premium Toggle Cards */}
                       <div className="border-t border-[var(--color-border)] pt-3.5 space-y-2">
-                        <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Recomendaciones de Biblioteca y Módulos</label>
-                        <div className="bg-[var(--color-bg)]/80 border border-[var(--color-border)] rounded-xl p-3 max-h-56 overflow-y-auto space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Recomendaciones de Biblioteca y Módulos</label>
+                          {selectedRecomendations.length > 0 && (
+                            <span className="text-[9px] font-bold bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 rounded-full px-2 py-0.5">
+                              {selectedRecomendations.length} seleccionado{selectedRecomendations.length > 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                        <div className="bg-[var(--color-bg)]/60 border border-[var(--color-border)] rounded-xl p-2.5 max-h-64 overflow-y-auto space-y-3 scrollbar-thin">
                           {libraryList.length === 0 ? (
-                            <span className="text-[10px] text-[var(--color-text-muted)] italic block">Cargando catálogo de componentes...</span>
+                            <div className="flex items-center gap-2 py-3 justify-center">
+                              <div className="w-3 h-3 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+                              <span className="text-[10px] text-[var(--color-text-muted)] italic">Cargando catálogo de componentes...</span>
+                            </div>
                           ) : (
                             libraryList.map((cat, catIdx) => {
                               if (!cat.components || cat.components.length === 0) return null;
                               return (
                                 <div key={catIdx} className="space-y-1.5">
-                                  <span className="text-[10px] uppercase font-extrabold text-indigo-400 tracking-wider flex items-center gap-1">
-                                    {cat.isModule ? '📦' : '📂'} {cat.name}
-                                  </span>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pl-2">
+                                  {/* Category header */}
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[9px] uppercase font-extrabold tracking-widest" style={{ color: cat.isModule ? '#a78bfa' : '#60a5fa' }}>
+                                      {cat.isModule ? '📦' : '📂'} {cat.name}
+                                    </span>
+                                    <div className="flex-1 h-px bg-[var(--color-border)]" />
+                                    <span className="text-[8px] text-[var(--color-text-muted)] font-mono">{cat.components.length}</span>
+                                  </div>
+                                  {/* Component toggle cards */}
+                                  <div className="grid grid-cols-2 gap-1.5">
                                     {cat.components.map((comp, compIdx) => {
                                       const isSelected = selectedRecomendations.some(r => r.link === comp.link);
+                                      const isModule = comp.resourceType === 'module' || cat.isModule;
                                       return (
-                                        <label
+                                        <div
                                           key={compIdx}
-                                          className={`flex items-start gap-2 p-2 rounded-lg border text-left cursor-pointer transition-colors select-none ${
-                                            isSelected
-                                              ? 'bg-indigo-600/10 border-indigo-500/30'
-                                              : 'bg-[var(--color-surface-2)]/20 border-transparent hover:border-[var(--color-border)]'
-                                          }`}
-                                        >
-                                          <input
-                                            type="checkbox"
-                                            checked={isSelected}
-                                            onChange={() => {
+                                          role="button"
+                                          tabIndex={0}
+                                          onClick={() => {
+                                            if (isSelected) {
+                                              setSelectedRecomendations(prev => prev.filter(r => r.link !== comp.link));
+                                            } else {
+                                              setSelectedRecomendations(prev => [...prev, {
+                                                name: comp.name,
+                                                technicalName: comp.technicalName,
+                                                link: comp.link,
+                                                resourceType: comp.resourceType
+                                              }]);
+                                            }
+                                          }}
+                                          onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                              e.preventDefault();
                                               if (isSelected) {
                                                 setSelectedRecomendations(prev => prev.filter(r => r.link !== comp.link));
                                               } else {
@@ -2492,16 +2520,69 @@ export default function App() {
                                                   resourceType: comp.resourceType
                                                 }]);
                                               }
-                                            }}
-                                            className="w-3.5 h-3.5 mt-0.5 rounded accent-indigo-600 focus:ring-0 focus:outline-none shrink-0"
-                                          />
-                                          <div className="leading-none">
-                                            <span className="text-[10px] font-bold text-[var(--color-text)] block">{comp.name}</span>
+                                            }
+                                          }}
+                                          className={`relative flex flex-col items-start gap-1 p-2.5 rounded-xl border text-left cursor-pointer transition-all duration-200 group select-none overflow-hidden focus:outline-none focus:ring-1 focus:ring-indigo-500/40 ${
+                                            isSelected
+                                              ? 'bg-indigo-600/15 border-indigo-500/50 shadow-[0_0_12px_rgba(99,102,241,0.15)]'
+                                              : 'bg-[var(--color-surface-2)]/25 border-[var(--color-border)]/50 hover:bg-[var(--color-surface-2)]/50 hover:border-[var(--color-border)]'
+                                          }`}
+                                        >
+                                          {/* Glow top edge when selected */}
+                                          {isSelected && (
+                                            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-400/60 to-transparent" />
+                                          )}
+
+                                          {/* Check indicator + badge row */}
+                                          <div className="flex items-center justify-between w-full">
+                                            <div className="flex items-center gap-1.5 min-w-0">
+                                              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full border shrink-0 ${
+                                                isModule
+                                                  ? 'text-violet-400 bg-violet-500/10 border-violet-500/20'
+                                                  : 'text-sky-400 bg-sky-500/10 border-sky-500/20'
+                                              }`}>
+                                                {isModule ? '📦 Módulo' : '📂 Comp.'}
+                                              </span>
+                                              {getSandboxKey(comp.name, comp.technicalName) && (
+                                                <button
+                                                  type="button"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setLivePreviewComponent(comp);
+                                                  }}
+                                                  className="flex items-center gap-1 text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 text-emerald-400 hover:text-white transition-all hover:scale-105 active:scale-95 cursor-pointer shrink-0"
+                                                  title="Ver demo en vivo"
+                                                >
+                                                  <Play size={8} fill="currentColor" />
+                                                  Demo
+                                                </button>
+                                              )}
+                                            </div>
+                                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all duration-200 shrink-0 ${
+                                              isSelected
+                                                ? 'bg-indigo-600 border-indigo-500 shadow-[0_0_6px_rgba(99,102,241,0.5)]'
+                                                : 'border-[var(--color-border)] group-hover:border-indigo-500/40'
+                                            }`}>
+                                              {isSelected && (
+                                                <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
+                                                  <path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                                </svg>
+                                              )}
+                                            </div>
+                                          </div>
+
+                                          {/* Name */}
+                                          <div className="w-full">
+                                            <span className={`text-[10px] font-bold block leading-tight ${isSelected ? 'text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}>
+                                              {comp.name}
+                                            </span>
                                             {comp.technicalName && (
-                                              <span className="text-[8px] font-mono text-[var(--color-text-muted)] block mt-0.5">{comp.technicalName}</span>
+                                              <span className="text-[8px] font-mono text-[var(--color-text-muted)]/60 block mt-0.5 truncate">
+                                                {comp.technicalName}
+                                              </span>
                                             )}
                                           </div>
-                                        </label>
+                                        </div>
                                       );
                                     })}
                                   </div>
@@ -3281,6 +3362,86 @@ export default function App() {
             </div>
           </div>
         )}
+        {/* Modal de Previsualización en Vivo */}
+        {livePreviewComponent && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-md animate-fade-in p-4">
+            <div 
+              className="absolute inset-0 bg-transparent" 
+              onClick={() => setLivePreviewComponent(null)} 
+            />
+            <div className="w-full max-w-4xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl shadow-2xl flex flex-col h-[85vh] relative z-10 overflow-hidden">
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)] z-10 flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] uppercase font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Play size={8} fill="currentColor" /> Previsualización en Vivo
+                  </span>
+                  <span className="text-xs font-black text-[var(--color-text)]">
+                    {livePreviewComponent.name}
+                  </span>
+                  {livePreviewComponent.technicalName && (
+                    <span className="text-[9px] font-mono text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/50 px-2 py-0.5 rounded border border-[var(--color-border)]/50">
+                      {livePreviewComponent.technicalName}
+                    </span>
+                  )}
+                </div>
+                <button 
+                  onClick={() => setLivePreviewComponent(null)}
+                  className="p-1.5 bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:bg-[var(--color-surface-2)]/80 text-[var(--color-text-muted)] hover:text-[var(--color-text)] rounded-xl cursor-pointer transition-all active:scale-95"
+                  title="Cerrar previsualización"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+
+              {/* Sandbox Render Container */}
+              <div className="flex-1 overflow-y-auto p-6 bg-[var(--color-bg)]/40 scrollbar-thin">
+                <ComponentSandbox 
+                  componentName={livePreviewComponent.name} 
+                  technicalName={livePreviewComponent.technicalName} 
+                />
+              </div>
+              
+              {/* Footer */}
+              <div className="px-6 py-3 border-t border-[var(--color-border)] bg-[var(--color-surface)] z-10 flex items-center justify-end gap-3 shadow-md">
+                <button
+                  type="button"
+                  onClick={() => setLivePreviewComponent(null)}
+                  className="px-4 py-2 border border-[var(--color-border)] text-xs font-bold rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)]/80 transition-all cursor-pointer"
+                >
+                  Cerrar
+                </button>
+                {(() => {
+                  const isSelected = selectedRecomendations.some(r => r.link === livePreviewComponent.link);
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedRecomendations(prev => prev.filter(r => r.link !== livePreviewComponent.link));
+                        } else {
+                          setSelectedRecomendations(prev => [...prev, {
+                            name: livePreviewComponent.name,
+                            technicalName: livePreviewComponent.technicalName,
+                            link: livePreviewComponent.link,
+                            resourceType: livePreviewComponent.resourceType
+                          }]);
+                        }
+                      }}
+                      className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-95 shadow ${
+                        isSelected 
+                          ? 'bg-red-650/80 hover:bg-red-600 text-white' 
+                          : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                      }`}
+                    >
+                      {isSelected ? 'Remover de Recomendaciones' : 'Añadir a Recomendaciones'}
+                    </button>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -3943,14 +4104,16 @@ export default function App() {
                         <p className="text-[10px] text-[var(--color-text-muted)]">{client.reportCount} reportes · {client.pendingCount} pendientes</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-6 text-center">
-                      <div>
-                        <span className="text-[8px] uppercase font-bold text-[var(--color-text-muted)] block">Ventas</span>
-                        <span className="text-xs font-black font-mono text-[var(--color-text)]">${client.totalSales.toLocaleString('es-CO')}</span>
-                      </div>
-                      <div>
-                        <span className="text-[8px] uppercase font-bold text-[var(--color-text-muted)] block">Comisión</span>
-                        <span className="text-xs font-black font-mono text-indigo-600 dark:text-indigo-400">${client.totalCommission.toLocaleString('es-CO')}</span>
+                    <div className="flex items-center justify-between w-full md:w-auto gap-4 mt-2 md:mt-0 pt-3 md:pt-0 border-t border-[var(--color-border)] md:border-t-0">
+                      <div className="flex items-center gap-6">
+                        <div className="text-left md:text-center">
+                          <span className="text-[8px] uppercase font-bold text-[var(--color-text-muted)] block">Ventas</span>
+                          <span className="text-xs font-black font-mono text-[var(--color-text)]">${client.totalSales.toLocaleString('es-CO')}</span>
+                        </div>
+                        <div className="text-left md:text-center">
+                          <span className="text-[8px] uppercase font-bold text-[var(--color-text-muted)] block">Comisión</span>
+                          <span className="text-xs font-black font-mono text-indigo-600 dark:text-indigo-400">${client.totalCommission.toLocaleString('es-CO')}</span>
+                        </div>
                       </div>
                       <button onClick={() => { 
                         const cfg = clientesSaas.find(c => c.id.toLowerCase() === client.name.toLowerCase()) || {};
@@ -3964,7 +4127,7 @@ export default function App() {
                         setSelectedCrmClientId(client.name); 
                         setActiveMetricModal('clientes'); 
                       }}
-                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-bold cursor-pointer flex items-center gap-1.5 transition-all active:scale-95 shadow-sm">
+                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-bold cursor-pointer flex items-center gap-1.5 transition-all active:scale-95 shadow-sm shrink-0">
                         Gestionar
                         <ChevronRight size={12} />
                       </button>
@@ -4493,29 +4656,29 @@ export default function App() {
                   </h1>
                   <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Monitoreo en tiempo real de fallos e incidentes en aplicaciones de clientes.</p>
                 </div>
-                <div className="flex flex-wrap gap-2.5">
+                <div className="flex flex-row items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto">
                   <button 
                     onClick={handleSimulateFailure}
-                    className="px-3 py-1.5 bg-violet-600/10 hover:bg-violet-600/20 border border-violet-500/25 text-violet-400 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 shadow-sm"
+                    className="flex-1 sm:flex-none justify-center px-2.5 py-1.5 sm:px-3 sm:py-1.5 bg-violet-600/10 hover:bg-violet-600/20 border border-violet-500/25 text-violet-400 text-[10px] sm:text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 active:scale-95 shadow-sm shrink-0"
                   >
                     <Activity size={13} className="animate-pulse" />
-                    Simular Fallo
+                    Simular<span className="hidden sm:inline"> Fallo</span>
                   </button>
                   <button 
                     onClick={handleResolveAllFailures}
                     disabled={failures.filter(f => !f.resolved).length === 0}
-                    className="px-3 py-1.5 bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/25 text-emerald-400 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-30 disabled:pointer-events-none active:scale-95 shadow-sm"
+                    className="flex-1 sm:flex-none justify-center px-2.5 py-1.5 sm:px-3 sm:py-1.5 bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/25 text-emerald-400 text-[10px] sm:text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 disabled:opacity-30 disabled:pointer-events-none active:scale-95 shadow-sm shrink-0"
                   >
                     <CheckCircle size={13} />
-                    Resolver Todos
+                    Resolver<span className="hidden sm:inline"> Todos</span>
                   </button>
                   <button 
                     onClick={handleClearAllFailures}
                     disabled={failures.length === 0}
-                    className="px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 border border-red-500/25 text-red-400 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-30 disabled:pointer-events-none active:scale-95 shadow-sm"
+                    className="flex-1 sm:flex-none justify-center px-2.5 py-1.5 sm:px-3 sm:py-1.5 bg-red-600/10 hover:bg-red-600/20 border border-red-500/25 text-red-400 text-[10px] sm:text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 disabled:opacity-30 disabled:pointer-events-none active:scale-95 shadow-sm shrink-0"
                   >
                     <Trash2 size={13} />
-                    Vaciar Historial
+                    Vaciar<span className="hidden sm:inline"> Historial</span>
                   </button>
                 </div>
               </div>
@@ -5038,7 +5201,7 @@ export default function App() {
 
       {/* BOTTOM NAVIGATION - Móvil */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur-xl pb-safe animate-slide-up">
-        <div className="flex items-center justify-around px-2 py-1.5">
+        <div className="grid grid-cols-5 items-center justify-items-center px-1 py-1.5">
           {NAV_TABS.filter(tab => tab.id !== 'e2e' && tab.id !== 'cores').map(tab => {
             const Icon = tab.icon
             const isActive = activeTab === tab.id
@@ -5050,7 +5213,7 @@ export default function App() {
                   key={tab.id}
                   id={`bottom-tab-${tab.id}`}
                   onClick={() => setActiveTab(tab.id)}
-                  className="relative -mt-3.5 flex flex-col items-center cursor-pointer transition-all duration-300 active:scale-95 group min-w-[64px]"
+                  className="relative -mt-3.5 flex flex-col items-center cursor-pointer transition-all duration-300 active:scale-95 group w-full"
                 >
                   <div className={`w-13 h-13 rounded-full flex items-center justify-center bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-500 border border-violet-400/20 text-white shadow-[0_0_15px_rgba(124,58,237,0.5)] onboarding-center-btn ${
                     isActive ? 'scale-105 animate-pulse-glow' : 'animate-center-float'
@@ -5069,7 +5232,7 @@ export default function App() {
                 key={tab.id}
                 id={`bottom-tab-${tab.id}`}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all duration-200 cursor-pointer min-w-[52px] ${
+                className={`flex flex-col items-center gap-0.5 py-2 rounded-xl transition-all duration-200 cursor-pointer w-full ${
                   isActive ? 'text-indigo-400' : 'text-[var(--color-text-muted)]'
                 }`}
               >
@@ -5467,22 +5630,38 @@ VITE_DEVELOPER_CLIENT_ID=${onboardingData.clientId}`}
             </div>
 
             {/* Información del Sistema / Base de Datos */}
-            <div className="p-4 bg-[var(--color-surface-2)]/30 border border-[var(--color-border)] rounded-2xl space-y-2.5 text-xs text-left">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] text-[var(--color-text-muted)] font-semibold uppercase">Base de Datos</span>
-                <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold border ${
+            <div className="p-4 bg-gradient-to-br from-[var(--color-surface-2)]/40 to-[var(--color-surface)]/60 border border-[var(--color-border)] rounded-2xl shadow-[inset_0_1px_2px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.15)] backdrop-blur-md space-y-3 text-xs text-left relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-500/10 transition-all duration-500"></div>
+              
+              <div className="flex justify-between items-center relative z-10">
+                <span className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <Database size={13} className="text-violet-400" />
+                  Base de Datos
+                </span>
+                <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black border uppercase tracking-wider shadow-sm transition-all duration-300 flex items-center gap-1 ${
                   !isOnline 
-                    ? 'bg-red-500/10 text-red-400 border-red-500/25'
+                    ? 'bg-red-500/10 text-red-400 border-red-500/25 shadow-red-500/5'
                     : (dbStatus === 'conectado' && !isSimulated
-                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25'
-                        : 'bg-amber-500/10 text-amber-400 border-amber-500/25')
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25 shadow-emerald-500/5'
+                        : 'bg-amber-500/10 text-amber-400 border-amber-500/25 shadow-amber-500/5')
                 }`}>
-                  {!isOnline ? 'Offline' : (dbStatus === 'conectado' && !isSimulated ? 'Firestore Online' : 'Modo Sandbox')}
+                  <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                    !isOnline ? 'bg-red-500' : (dbStatus === 'conectado' && !isSimulated ? 'bg-emerald-500' : 'bg-amber-500')
+                  }`} />
+                  {!isOnline ? 'Offline' : (dbStatus === 'conectado' && !isSimulated ? 'Firestore Online' : 'Sandbox')}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] text-[var(--color-text-muted)] font-semibold uppercase">Entorno</span>
-                <span className="font-semibold text-[var(--color-text)]">Vite + React 19</span>
+              
+              <div className="h-px bg-gradient-to-r from-[var(--color-border)]/50 via-[var(--color-border)] to-transparent" />
+              
+              <div className="flex justify-between items-center relative z-10">
+                <span className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <Layers size={13} className="text-cyan-400" />
+                  Entorno
+                </span>
+                <span className="font-extrabold text-[var(--color-text)] flex items-center gap-1 bg-[var(--color-surface-2)]/60 px-2 py-0.5 rounded-lg border border-[var(--color-border)] text-[10px]">
+                  Vite + React 19
+                </span>
               </div>
             </div>
 
@@ -5546,7 +5725,7 @@ VITE_DEVELOPER_CLIENT_ID=${onboardingData.clientId}`}
             onClick={() => setSelectedDiagnosticError(null)}
           />
 
-          <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
+          <div className="absolute inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
             <div className="w-screen max-w-md bg-[var(--color-surface)] border-l border-[var(--color-border)] shadow-2xl flex flex-col justify-between select-text animate-slide-in-right">
               {/* Header */}
               <div className="p-6 border-b border-[var(--color-border)] flex justify-between items-start">
@@ -5692,7 +5871,8 @@ VITE_DEVELOPER_CLIENT_ID=${onboardingData.clientId}`}
                         <button
                           onClick={async () => {
                             try {
-                              await navigator.clipboard.writeText(detectedFile);
+                              const finalPath = codeSnippet?.file || detectedFile;
+                              await navigator.clipboard.writeText(finalPath);
                               showToast('Ruta de archivo copiada', { type: 'success' });
                             } catch (err) {
                               showToast('Error al copiar ruta', { type: 'error' });
@@ -5701,7 +5881,7 @@ VITE_DEVELOPER_CLIENT_ID=${onboardingData.clientId}`}
                           className="w-full py-2.5 bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-2)]/80 border border-[var(--color-border)] text-[var(--color-text)] font-extrabold text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                         >
                           <Database size={12} className="text-slate-400" />
-                          Copiar Ruta de Archivo ({detectedFile.split('/').pop()})
+                          Copiar Ruta de Archivo ({(codeSnippet?.file || detectedFile).split(/[\\/]/).pop()})
                         </button>
                       </div>
                     </>
@@ -5867,6 +6047,87 @@ VITE_DEVELOPER_CLIENT_ID=${onboardingData.clientId}`}
                   </button>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Previsualización en Vivo */}
+      {livePreviewComponent && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-md animate-fade-in p-4">
+          <div 
+            className="absolute inset-0 bg-transparent" 
+            onClick={() => setLivePreviewComponent(null)} 
+          />
+          <div className="w-full max-w-4xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl shadow-2xl flex flex-col h-[85vh] relative z-10 overflow-hidden">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)] z-10 flex items-center justify-between shadow-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Play size={8} fill="currentColor" /> Previsualización en Vivo
+                </span>
+                <span className="text-xs font-black text-[var(--color-text)]">
+                  {livePreviewComponent.name}
+                </span>
+                {livePreviewComponent.technicalName && (
+                  <span className="text-[9px] font-mono text-[var(--color-text-muted)] bg-[var(--color-surface-2)]/50 px-2 py-0.5 rounded border border-[var(--color-border)]/50">
+                    {livePreviewComponent.technicalName}
+                  </span>
+                )}
+              </div>
+              <button 
+                onClick={() => setLivePreviewComponent(null)}
+                className="p-1.5 bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:bg-[var(--color-surface-2)]/80 text-[var(--color-text-muted)] hover:text-[var(--color-text)] rounded-xl cursor-pointer transition-all active:scale-95"
+                title="Cerrar previsualización"
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            {/* Sandbox Render Container */}
+            <div className="flex-1 overflow-y-auto p-6 bg-[var(--color-bg)]/40 scrollbar-thin">
+              <ComponentSandbox 
+                componentName={livePreviewComponent.name} 
+                technicalName={livePreviewComponent.technicalName} 
+              />
+            </div>
+            
+            {/* Footer */}
+            <div className="px-6 py-3 border-t border-[var(--color-border)] bg-[var(--color-surface)] z-10 flex items-center justify-end gap-3 shadow-md">
+              <button
+                type="button"
+                onClick={() => setLivePreviewComponent(null)}
+                className="px-4 py-2 border border-[var(--color-border)] text-xs font-bold rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-2)]/80 transition-all cursor-pointer"
+              >
+                Cerrar
+              </button>
+              {(() => {
+                const isSelected = selectedRecomendations.some(r => r.link === livePreviewComponent.link);
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedRecomendations(prev => prev.filter(r => r.link !== livePreviewComponent.link));
+                      } else {
+                        setSelectedRecomendations(prev => [...prev, {
+                          name: livePreviewComponent.name,
+                          technicalName: livePreviewComponent.technicalName,
+                          link: livePreviewComponent.link,
+                          resourceType: livePreviewComponent.resourceType
+                        }]);
+                      }
+                    }}
+                    className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-95 shadow ${
+                      isSelected 
+                        ? 'bg-red-600/20 border border-red-500/30 hover:bg-red-600/35 text-red-400' 
+                        : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                    }`}
+                  >
+                    {isSelected ? 'Remover de Recomendaciones' : 'Añadir a Recomendaciones'}
+                  </button>
+                );
+              })()}
             </div>
           </div>
         </div>

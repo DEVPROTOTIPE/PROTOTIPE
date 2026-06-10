@@ -8,6 +8,11 @@ Historial técnico de cambios realizados en el proyecto.
 
 
 
+## [2026-06-10] Centrado de Botones en Navegación Móvil (Tarea 234)
+- **Centrado Perfecto mediante Grid:** Se modificó la barra de navegación inferior móvil en `App.jsx` de `flex justify-around` a un `grid grid-cols-5 items-center justify-items-center` de 5 columnas idénticas de 20% de ancho de pantalla cada una.
+- **Homogeneización de Ancho de Botones:** Se eliminaron las restricciones de ancho mínimo `min-w-[64px]` y `min-w-[52px]` y paddings horizontales variables que causaban que etiquetas largas como "Biblioteca" y "Monitoreo" empujaran el botón central "NUEVO" hacia la izquierda, logrando que el botón central quede 100% centrado matemáticamente en todos los dispositivos móviles y los demás distribuidos de forma equitativa.
+- **Verificación de Compilación:** Compilación exitosa mediante `npm run build` en 1.10s.
+
 ## [2026-06-09] Modularización del Panel E2E (Tarea 300 Rev.6)
 - **Modularización del Panel de Pruebas:** Se extrajo el panel E2E de [`App.jsx`](file:///d:/Aplicaciones/dev-dashboard/src/App.jsx) a un componente independiente y modular [`E2EPanel.jsx`](file:///d:/Aplicaciones/dev-dashboard/src/components/admin/E2EPanel.jsx). Esto eliminó más de 200 líneas redundantes de código en el archivo principal y mejoró la mantenibilidad del dashboard.
 - **Log dinámico por SSE y robustez en la cancelación:** Integrada la conexión fluida al CLI Bridge Server para streaming de logs en tiempo real por Server-Sent Events, con un control de timeout de seguridad de 120s y prevención de desconexión prematura de los procesos en Windows.

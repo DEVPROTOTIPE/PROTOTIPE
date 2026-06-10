@@ -238,7 +238,7 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
           )}
         </div>
         
-        <div className="flex items-center justify-between gap-2 mt-auto pt-1">
+        <div className="flex items-end justify-between gap-2 mt-auto pt-1">
           <div className="min-w-0">
             {product.tienePromocion && product.precioPromo < product.precioBase ? (
               <div className="flex items-center gap-1.5 flex-wrap">

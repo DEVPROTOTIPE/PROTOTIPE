@@ -70,6 +70,30 @@ export default function ProductPublicDetail() {
         promocion: ad,
       }
     }
+
+    // Fallback: Descuento directo del producto
+    if (rawProduct.discountActive && Number(rawProduct.discountValue) > 0) {
+      const dVal = Number(rawProduct.discountValue)
+      let precioPromocional = baseProduct.precioBase
+      if (rawProduct.discountType === 'percentage') {
+        precioPromocional = baseProduct.precioBase - (baseProduct.precioBase * dVal) / 100
+      } else {
+        precioPromocional = baseProduct.precioBase - dVal
+      }
+      precioPromocional = Math.max(0, precioPromocional)
+
+      return {
+        ...baseProduct,
+        precioPromo: precioPromocional,
+        tienePromocion: true,
+        promocion: {
+          discountType: rawProduct.discountType || 'percentage',
+          discountValue: dVal,
+          title: 'Descuento Especial'
+        }
+      }
+    }
+
     return baseProduct
   }, [rawProduct, categories, ads])
 
@@ -286,14 +310,74 @@ export default function ProductPublicDetail() {
 
   const isNewProduct = useMemo(() => {
     if (!product?.createdAt) return false
-    const createdDate = typeof product.createdAt.toMillis === 'function' 
-      ? product.createdAt.toMillis() 
-      : (product.createdAt instanceof Date ? product.createdAt.getTime() : new Date(product.createdAt).getTime())
+    let createdDateMs = 0
+    if (typeof product.createdAt.toMillis === 'function') {
+      createdDateMs = product.createdAt.toMillis()
+    } else if (product.createdAt && typeof product.createdAt.seconds === 'number') {
+      createdDateMs = product.createdAt.seconds * 1000
+    } else if (product.createdAt instanceof Date) {
+      createdDateMs = product.createdAt.getTime()
+    } else {
+      createdDateMs = new Date(product.createdAt).getTime()
+    }
+
+    if (isNaN(createdDateMs)) return false
+
     const limitDays = commercialOptimization?.tools?.smartTags?.newProduct?.daysLimit || 7
-    const diffTime = Math.abs(Date.now() - createdDate)
+    const diffTime = Math.abs(Date.now() - createdDateMs)
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     return diffDays <= limitDays
   }, [product?.createdAt, commercialOptimization])
+
+  const stockConsolidado = useMemo(() => {
+    if (!product) return 0
+    return (product.variantes || []).reduce((sum, v) => sum + (v.stock || 0), 0)
+  }, [product])
+
+  const activeSmartTag = useMemo(() => {
+    const smartTags = commercialOptimization?.tools?.smartTags || {}
+    if (!product || !smartTags.enabled) return null
+
+    // 1. Última Unidad (Prioridad Alta)
+    if (smartTags.lastUnit?.enabled !== false && stockConsolidado > 0 && stockConsolidado <= (smartTags.lastUnit?.threshold || 3)) {
+      return {
+        text: smartTags.lastUnit?.text || 'Última Unidad',
+        bg: smartTags.lastUnit?.bg || '#3b82f6',
+        textCol: smartTags.lastUnit?.textCol || '#ffffff'
+      }
+    }
+
+    // 2. Oferta Imperdible (Si tiene descuento activo y el precio promo es menor que el base)
+    const hasPromo = typeof product.precioPromo === 'number' && product.precioPromo > 0 && product.precioPromo < product.precioBase
+    if (smartTags.unmissableOffer?.enabled !== false && hasPromo) {
+      return {
+        text: smartTags.unmissableOffer?.text || 'Oferta Imperdible',
+        bg: smartTags.unmissableOffer?.bg || '#f59e0b',
+        textCol: smartTags.unmissableOffer?.textCol || '#ffffff'
+      }
+    }
+
+    // 3. Más Vendido (Basado en salesCount real)
+    const salesVal = product.salesCount || 0
+    if (smartTags.bestSeller?.enabled !== false && salesVal >= (smartTags.bestSeller?.minSales || 5)) {
+      return {
+        text: smartTags.bestSeller?.text || 'Más Vendido',
+        bg: smartTags.bestSeller?.bg || '#ef4444',
+        textCol: smartTags.bestSeller?.textCol || '#ffffff'
+      }
+    }
+
+    // 4. Nuevo
+    if (smartTags.newProduct?.enabled !== false && isNewProduct) {
+      return {
+        text: smartTags.newProduct?.text || 'Nuevo',
+        bg: smartTags.newProduct?.bg || '#10b981',
+        textCol: smartTags.newProduct?.textCol || '#ffffff'
+      }
+    }
+
+    return null
+  }, [product, commercialOptimization, stockConsolidado, isNewProduct])
 
   const actualPrice = useMemo(() => {
     if (!product) return 0
@@ -487,22 +571,44 @@ export default function ProductPublicDetail() {
           </p>
 
           {/* Alternativas Recomendadas */}
-          <div className="w-full space-y-4">
+          <div className="w-full space-y-3">
             <h3 className="text-xs font-bold text-muted text-left uppercase tracking-widest">Recomendados para ti</h3>
             <div className="grid grid-cols-2 gap-3">
-              {allProducts.slice(0, 4).map(p => (
-                <div 
-                  key={p.id} 
-                  onClick={() => navigate(`/compra-qr/${p.id}`)}
-                  className="bg-surface border border-app rounded-2xl p-2 cursor-pointer shadow-sm hover:shadow-md transition-all text-left"
-                >
-                  <div className="aspect-square rounded-xl bg-surface-2 overflow-hidden mb-2">
-                    <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover" />
+              {allProducts.slice(0, 4).map(p => {
+                const isPromo = p.tienePromocion && p.precioPromo < p.precioBase
+                const displayPrice = isPromo ? p.precioPromo : p.precioBase
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => navigate(`/compra-qr/${p.id}`)}
+                    className="bg-surface border border-app rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 text-left group"
+                  >
+                    {/* Imagen cuadrada */}
+                    <div className="aspect-square bg-surface-2 overflow-hidden relative">
+                      {p.imageUrl ? (
+                        <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted opacity-30">
+                          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                      )}
+                      {isPromo && (
+                        <span className="absolute top-1.5 left-1.5 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md shadow-sm">
+                          {p.promocion?.discountType === 'percentage' ? `${p.promocion.discountValue}% OFF` : 'OFERTA'}
+                        </span>
+                      )}
+                    </div>
+                    {/* Info */}
+                    <div className="p-2.5 space-y-1">
+                      <p className="font-bold text-xs text-app leading-snug line-clamp-2">{p.nombre}</p>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-sm font-black text-primary">{formatCurrency(displayPrice)}</span>
+                        {isPromo && <span className="text-[10px] text-muted line-through font-medium">{formatCurrency(p.precioBase)}</span>}
+                      </div>
+                    </div>
                   </div>
-                  <p className="font-bold text-xs text-app truncate">{p.nombre}</p>
-                  <p className="text-xs font-black text-primary mt-0.5">${Number(p.precioBase).toLocaleString()}</p>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
@@ -542,39 +648,33 @@ export default function ProductPublicDetail() {
         {/* Ficha técnica y comercial SUPERIOR - arriba de la foto, matching Screenshots 1 & 4 */}
         <div className="space-y-2">
           {/* Metadatos Comerciales Superiores */}
-          {smartTagsEnabled && (
+          {activeSmartTag && (
             <div className="flex items-center gap-2 flex-wrap text-xs text-muted font-medium">
-              {isNewProduct && newProductTagEnabled ? (
-                <span className="font-semibold text-[#333] dark:text-[#ccc]">
-                  Nuevo
-                </span>
-              ) : null}
-              {product.salesCount && product.salesCount > 0 && bestSellerTagEnabled ? (
+              <span className="font-semibold text-[#333] dark:text-[#ccc]">
+                {activeSmartTag.text}
+              </span>
+              {product.salesCount && product.salesCount > 0 && bestSellerTagEnabled && (
                 <span className="font-semibold">
                   +{product.salesCount} vendidos
                 </span>
-              ) : null}
+              )}
             </div>
           )}
 
           <h1 className="text-xl font-bold text-app leading-tight tracking-tight">{product.nombre}</h1>
 
           {/* Smart Badges Row matching Screenshot 1 */}
-          {smartTagsEnabled && (
+          {activeSmartTag && (
             <div className="flex items-center gap-2 pt-0.5 flex-wrap text-xs font-semibold">
-              {product.salesCount && product.salesCount >= 5 && bestSellerTagEnabled ? (
-                <span className="bg-[#ff5a00] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-sm">
-                  MÁS VENDIDO
-                </span>
-              ) : product.tienePromocion && commercialOptimization?.tools?.smartTags?.unmissableOffer?.enabled !== false ? (
-                <span className="bg-[#2968c8] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-sm">
-                  OFERTA IMPERDIBLE
-                </span>
-              ) : isNewProduct && newProductTagEnabled ? (
-                <span className="bg-[#00a650] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-sm">
-                  NUEVO
-                </span>
-              ) : null}
+              <span 
+                className="px-2 py-0.5 rounded-sm text-[9px] font-black uppercase text-center flex items-center justify-center shrink-0 shadow-sm border border-black/5"
+                style={{ 
+                  backgroundColor: activeSmartTag.bg,
+                  color: activeSmartTag.textCol
+                }}
+              >
+                {activeSmartTag.text}
+              </span>
             </div>
           )}
 
@@ -884,22 +984,44 @@ export default function ProductPublicDetail() {
             </div>
           </div>
         ) : relatedProducts.length > 0 ? (
-          <div className="border-t border-app pt-6 space-y-4">
+          <div className="border-t border-app pt-6 space-y-3">
             <h3 className="text-xs font-bold text-app uppercase tracking-widest">Te podría interesar</h3>
             <div className="grid grid-cols-2 gap-3">
-              {relatedProducts.map(p => (
-                <div 
-                  key={p.id} 
-                  onClick={() => navigate(`/compra-qr/${p.id}`)}
-                  className="bg-surface border border-app rounded-2xl p-2 cursor-pointer shadow-sm hover:shadow-md transition-all"
-                >
-                  <div className="aspect-square rounded-xl bg-surface-2 overflow-hidden mb-2">
-                    <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover" />
+              {relatedProducts.map(p => {
+                const isPromo = p.tienePromocion && p.precioPromo < p.precioBase
+                const displayPrice = isPromo ? p.precioPromo : p.precioBase
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => navigate(`/compra-qr/${p.id}`)}
+                    className="bg-surface border border-app rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group"
+                  >
+                    {/* Imagen cuadrada */}
+                    <div className="aspect-square bg-surface-2 overflow-hidden relative">
+                      {p.imageUrl ? (
+                        <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted opacity-30">
+                          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                      )}
+                      {isPromo && (
+                        <span className="absolute top-1.5 left-1.5 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md shadow-sm">
+                          {p.promocion?.discountType === 'percentage' ? `${p.promocion.discountValue}% OFF` : 'OFERTA'}
+                        </span>
+                      )}
+                    </div>
+                    {/* Info */}
+                    <div className="p-2.5 space-y-1">
+                      <p className="font-bold text-xs text-app leading-snug line-clamp-2">{p.nombre}</p>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-sm font-black text-primary">{formatCurrency(displayPrice)}</span>
+                        {isPromo && <span className="text-[10px] text-muted line-through font-medium">{formatCurrency(p.precioBase)}</span>}
+                      </div>
+                    </div>
                   </div>
-                  <p className="font-bold text-xs text-app truncate">{p.nombre}</p>
-                  <p className="text-xs font-black text-primary mt-0.5">${Number(p.precioBase).toLocaleString()}</p>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         ) : null}

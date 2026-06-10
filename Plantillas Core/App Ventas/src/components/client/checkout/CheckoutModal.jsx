@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, MapPin, CreditCard, CheckCircle2, ChevronRight, Store, Truck, User, Phone, Tag, Check, AlertCircle, Copy } from 'lucide-react'
+import { X, MapPin, CreditCard, CheckCircle2, ChevronRight, Store, Truck, User, Phone, Tag, Check, AlertCircle, Copy, Calendar, ShoppingBag } from 'lucide-react'
 import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS, PAYMENT_METHOD_MESSAGES, SUPPORT_WHATSAPP } from '../../../constants'
 import ModalTemplate from '../../common/ModalTemplate'
 import { checkoutSchema } from '../../../schemas/orderSchemas'
@@ -321,6 +321,22 @@ export default function CheckoutModal({ isOpen, onClose }) {
   }
 
   // ── Lógica de Cupones ────────────────────────────────────────────────────
+  // Lanzar animación de confeti dinámicamente al aplicar cupón con éxito
+  const triggerConfetti = async () => {
+    try {
+      const module = await import('canvas-confetti')
+      const confetti = module.default || module
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.75 },
+        colors: ['#7c3aed', '#0ea5e9', '#059669', '#dc2626', '#f43f5e', '#fbbf24']
+      })
+    } catch (e) {
+      console.warn('Librería canvas-confetti no cargada:', e.message)
+    }
+  }
+
   const isCouponCompatible = (coupon, paymentMethod) => {
     if (!coupon.metodosPago || coupon.metodosPago.length === 0) return true
     return coupon.metodosPago.includes(paymentMethod)
@@ -371,6 +387,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
     setAppliedCoupon(coupon)
     setCouponCodeInput('')
     setShowCouponSelector(false)
+    triggerConfetti()
   }
 
   const calculateDiscount = () => {
@@ -1104,38 +1121,127 @@ ${e.dinero} *Total:* ${formatCurrency(snap?.total || 0)}${notasLine}`
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="overflow-hidden space-y-2 pt-2 border-t border-app border-dashed"
+                          className="overflow-hidden space-y-3 pt-3 border-t border-app border-dashed"
                         >
+                          <style>{`
+                            @keyframes coupon-shine {
+                              0%   { transform: translateX(-100%) skewX(-20deg); }
+                              100% { transform: translateX(250%)  skewX(-20deg); }
+                            }
+                            .coupon-card-shine::after {
+                              content: '';
+                              position: absolute;
+                              inset: 0;
+                              background: linear-gradient(
+                                90deg,
+                                transparent 0%,
+                                rgba(255,255,255,0.18) 45%,
+                                rgba(255,255,255,0.32) 50%,
+                                rgba(255,255,255,0.18) 55%,
+                                transparent 100%
+                              );
+                              transform: translateX(-100%) skewX(-20deg);
+                              animation: coupon-shine 3.5s ease-in-out infinite;
+                              pointer-events: none;
+                            }
+                            .coupon-card-shine:hover::after {
+                              animation-duration: 1.2s;
+                            }
+                          `}</style>
                           <p className="text-[10px] text-muted font-bold uppercase tracking-wider mb-1">Elige un cupón elegible:</p>
-                          <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
-                            {activeCoupons.map((coupon) => {
+                          <div className="flex flex-col gap-3 max-h-60 overflow-y-auto pr-1">
+                            {activeCoupons.map((coupon, index) => {
                               const isPercent = coupon.tipoDescuento === 'porcentaje'
-                              const discountLabel = isPercent ? `${coupon.valorDescuento}%` : formatCurrency(coupon.valorDescuento)
+                              const displayDiscount = isPercent ? `${coupon.valorDescuento}%` : formatCurrency(coupon.valorDescuento)
                               
+                              const gradients = [
+                                'linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #6d28d9 100%)',
+                                'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 50%, #0284c7 100%)',
+                                'linear-gradient(135deg, #059669 0%, #34d399 50%, #047857 100%)',
+                                'linear-gradient(135deg, #dc2626 0%, #f87171 50%, #b91c1c 100%)',
+                              ]
+                              const gradient = gradients[index % gradients.length]
+
                               return (
-                                <button
+                                <div
                                   key={coupon.id}
-                                  type="button"
                                   onClick={() => handleApplyCoupon(coupon.codigo)}
-                                  className="w-full p-3 bg-surface-2 hover:bg-primary/5 rounded-xl text-left transition-all active:scale-[0.98] flex items-center justify-between group cursor-pointer"
+                                  className="coupon-card-shine relative flex items-stretch rounded-2xl overflow-hidden shadow hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer select-none"
+                                  style={{ background: gradient }}
                                 >
-                                  <div className="min-w-0 flex-1 pr-2">
-                                    <div className="flex items-center gap-1.5">
-                                      <span className="font-mono text-xs font-black text-app uppercase tracking-wide bg-surface px-2 py-0.5 rounded">
+                                  {/* Capa de glassmorphism superior */}
+                                  <div
+                                    className="absolute inset-0 opacity-20 pointer-events-none"
+                                    style={{
+                                      background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 60%)',
+                                    }}
+                                  />
+
+                                  {/* Columna izquierda: descuento */}
+                                  <div className="relative flex flex-col items-center justify-center px-4 py-3 min-w-[76px] shrink-0 gap-0.5">
+                                    <span
+                                      className="font-black leading-none text-white text-base"
+                                      style={{ textShadow: '0 2px 8px rgba(0,0,0,0.25)' }}
+                                    >
+                                      {displayDiscount}
+                                    </span>
+                                    <span className="text-[8px] font-bold text-white/70 uppercase tracking-widest mt-0.5">
+                                      {isPercent ? 'desc.' : 'ahorro'}
+                                    </span>
+                                  </div>
+
+                                  {/* Separador vertical con muescas arriba y abajo */}
+                                  <div className="relative flex flex-col items-center justify-center shrink-0">
+                                    <div
+                                      className="absolute -top-2 w-4 h-4 rounded-full"
+                                      style={{ background: 'rgba(0,0,0,0.18)' }}
+                                    />
+                                    <div
+                                      className="w-px h-full"
+                                      style={{
+                                        background: 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 5px, transparent 5px, transparent 10px)',
+                                      }}
+                                    />
+                                    <div
+                                      className="absolute -bottom-2 w-4 h-4 rounded-full"
+                                      style={{ background: 'rgba(0,0,0,0.18)' }}
+                                    />
+                                  </div>
+
+                                  {/* Columna derecha: info */}
+                                  <div className="relative flex-1 flex flex-col justify-center px-3.5 py-3 gap-1.5 min-w-0">
+                                    {/* Código + botón */}
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span
+                                        className="font-mono font-black text-white uppercase tracking-widest text-xs truncate"
+                                        style={{ textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}
+                                      >
                                         {coupon.codigo}
                                       </span>
-                                      <span className="text-[10px] font-bold text-primary">
-                                        -{discountLabel}
-                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); handleApplyCoupon(coupon.codigo); }}
+                                        className="shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all active:scale-95 cursor-pointer bg-white/20 border border-white/30 text-white"
+                                      >
+                                        Aplicar
+                                      </button>
                                     </div>
-                                    <p className="text-[10px] text-muted mt-1">
-                                      Compra Mín: {formatCurrency(coupon.minimoCompra || 0)}
-                                    </p>
+
+                                    {/* Detalles */}
+                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                      <span className="flex items-center gap-0.5 text-[9px] text-white/70 font-medium">
+                                        <ShoppingBag size={9} className="shrink-0" />
+                                        Mín. {formatCurrency(coupon.minimoCompra || 0)}
+                                      </span>
+                                      {coupon.fechaExpiracion && (
+                                        <span className="flex items-center gap-0.5 text-[9px] text-white/70 font-medium">
+                                          <Calendar size={9} className="shrink-0" />
+                                          Vence {new Date(coupon.fechaExpiracion).toLocaleDateString()}
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
-                                  <span className="shrink-0 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wider border border-primary/20 group-hover:bg-primary group-hover:text-white transition-all">
-                                    Aplicar
-                                  </span>
-                                </button>
+                                </div>
                               )
                             })}
                           </div>

@@ -2,6 +2,34 @@
 
 Historial de cambios, mejoras y correcciones técnicas aplicadas sobre la plantilla core de Ventas.
 
+### [2026-06-09] - Rediseño del Perfil de Cliente, Optimización de Sidebar, Animaciones y Stacking Context de Emojis
+* **Tipo:** UI/UX / Optimización / Estilo / Bugfix
+* **Severidad:** Media
+* **Síntoma:** 
+  1. El selector de emojis en el perfil de cliente aparecía por detrás de las tarjetas inferiores y el clic en el botón de edición no abría el modal consistentemente.
+  2. El sidebar de escritorio tenía una distribución desbalanceada de la marca y las notificaciones.
+* **Causa Raíz:**
+  1. El contenedor interno de la cabecera del perfil estaba configurado con `z-10`, lo cual creaba un stacking context de menor nivel que la clase `z-20` de las tarjetas inferiores. El icono del lápiz de edición interceptaba los eventos de puntero.
+  2. La distribución de filas en el sidebar no estaba optimizada.
+* **Archivos Modificados:**
+  - `src/pages/client/ClientProfile.jsx` → Cabecera elevada a `z-40` y modal de emojis a `z-50`; añadido `pointer-events-none` al icono del lápiz.
+  - `src/layouts/ClientLayout.jsx` → Rediseño del sidebar con cabecera arriba y botones en grilla en la base; añadidas animaciones de campana/carrito.
+  - `src/layouts/AdminLayout.jsx` → Añadida animación interactiva de campana.
+* **Desplegado:** Local build verificado ✅
+
+---
+
+### [2026-06-09] - Solución a la Detección de Repositorios Git en el Gestor de Respaldos
+* **Tipo:** DevOps / Bugfix / Scripts
+* **Severidad:** Baja
+* **Síntoma:** El script de menú de respaldos reportaba a App Ventas como "Sin Git".
+* **Causa Raíz:** La carpeta `.git` estaba temporalmente como `.git-backup-temp` debido a bloqueos de archivos remanentes que mantenían los servidores de desarrollo Vite activos al concluir backups anteriores, impidiendo que el renombrado de restauración se completara de forma autónoma.
+* **Archivos Modificados:**
+  - `D:/PROTOTIPE/menu_backup.ps1` → Añadida detención controlada de procesos Node/Vite antes de la restauración de carpetas `.git-backup-temp`.
+* **Desplegado:** Cambios probados y validados físicamente en disco ✅
+
+---
+
 ### [2026-06-09] - Sincronización de Créditos y Optimización de Paginación de Deudas
 * **Tipo:** Bugfix / Optimización / Firestore
 * **Severidad:** Media

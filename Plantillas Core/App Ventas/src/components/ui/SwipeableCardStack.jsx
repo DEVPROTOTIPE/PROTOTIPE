@@ -1,28 +1,3 @@
-# Mazo de Tarjetas Deslizables (`SwipeableCardStack`)
-
-Componente de visualización tridimensional en forma de pila de tarjetas interactiva de marca blanca. Permite al usuario arrastrar la tarjeta superior hacia la izquierda o derecha (utilizando el ratón en escritorio o gestos táctiles en pantallas móviles) para descartarla u operar acciones con transiciones fluidas de rotación, escala y opacidad. Incluye además mecánicas de autoplay por inactividad e instrucciones visuales dinámicas.
-
----
-
-## 1. Propósito y Casos de Uso
-- **Promociones y Cupones:** Mostrar una pila de ofertas comerciales deslizando para ver la siguiente.
-- **Catálogo de Productos Destacados:** Descubrimiento interactivo y gamificado de productos sugeridos.
-- **Autoplay de Sugerencias:** Carrusel dinámico autogiratorio que cambia de producto tras un periodo de inactividad para incentivar compras de antojo.
-- **Instrucción de Interacción:** Mostrar al usuario cómo operar el mazo mediante leyendas explicativas en la parte superior.
-
----
-
-## 2. Especificación Visual y Estilos (Tailwind CSS)
-- **Perspectiva 3D:** Tarjetas secundarias y terciarias posicionadas en segundo plano con desfase de escala (`scale-95`, `scale-90`) y traducción vertical (`translate-y-4`, `translate-y-8`) para simular profundidad física.
-- **Física de Deslizamiento (Swipe):** Rotación angular progresiva e inclinación proporcional a la distancia de arrastre horizontal (`rotate-[deg]`).
-- **Compatibilidad Pointer API:** Utiliza los eventos unificados `PointerEvents` para garantizar soporte simultáneo fluido en móviles iOS/Android y ratón en PC.
-- **Instrucciones Pulsantes:** Barra superior con bordes redondeados y efecto `animate-pulse` para captar la atención del usuario de manera sutil pero clara.
-
----
-
-## 3. Código React Completo
-
-```jsx
 import React, { useState, useEffect, useRef } from 'react';
 
 export default function SwipeableCardStack({
@@ -111,8 +86,8 @@ export default function SwipeableCardStack({
 
   if (currentIndex >= items.length) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 border border-dashed border-[var(--color-border)] rounded-3xl h-64 text-center bg-white/50 dark:bg-neutral-900/40">
-        <span className="text-xs font-black uppercase tracking-widest text-[var(--color-text-muted)]">¡Viste todas las sugerencias!</span>
+      <div className="flex flex-col items-center justify-center p-8 border border-dashed border-gray-200 dark:border-neutral-800 rounded-3xl h-64 text-center bg-white/50 dark:bg-neutral-900/40">
+        <span className="text-xs font-black uppercase tracking-widest text-muted">¡Viste todas las sugerencias!</span>
       </div>
     );
   }
@@ -133,7 +108,7 @@ export default function SwipeableCardStack({
       <div className="relative w-full h-[288px] min-h-0">
         {/* Tarjeta de Respaldo Terciaria (debajo) */}
         {currentIndex + 2 < items.length && (
-          <div className="absolute inset-x-4 bottom-0 h-[288px] rounded-3xl bg-[var(--color-surface-2)]/40 border border-[var(--color-border)] opacity-40 scale-90 translate-y-8 z-0 transition-all duration-300" />
+          <div className="absolute inset-x-4 bottom-0 h-[288px] rounded-3xl bg-surface-2/40 border border-gray-100 dark:border-neutral-800 opacity-40 scale-90 translate-y-8 z-0 transition-all duration-300" />
         )}
 
         {/* Tarjeta de Respaldo Secundaria */}
@@ -144,7 +119,7 @@ export default function SwipeableCardStack({
                 ? `scale(${0.95 + Math.min(Math.abs(dragOffset.x), threshold) / threshold * 0.05}) translate3d(0, ${16 - Math.min(Math.abs(dragOffset.x), threshold) / threshold * 16}px, 0)` 
                 : 'scale(0.95) translate3d(0, 16px, 0)'
             }}
-            className="absolute inset-x-2 bottom-0 h-[288px] rounded-3xl bg-[var(--color-surface-2)] border border-[var(--color-border)] opacity-85 z-10 transition-transform duration-300 pointer-events-none"
+            className="absolute inset-x-2 bottom-0 h-[288px] rounded-3xl bg-surface-2 border border-gray-100 dark:border-neutral-800 opacity-85 z-10 transition-transform duration-300 pointer-events-none"
           />
         )}
 
@@ -159,7 +134,7 @@ export default function SwipeableCardStack({
             transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0) rotate(${dragOffset.x * 0.06}deg)`,
             transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
           }}
-          className="absolute inset-x-0 top-0 h-[288px] rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl z-20 cursor-grab active:cursor-grabbing overflow-hidden"
+          className="absolute inset-x-0 top-0 h-[288px] rounded-3xl bg-surface border border-gray-100 dark:border-neutral-800 shadow-xl z-20 cursor-grab active:cursor-grabbing overflow-hidden"
         >
           {/* Overlays informativos */}
           {swipeLeft && (
@@ -182,30 +157,3 @@ export default function SwipeableCardStack({
     </div>
   );
 }
-```
-
----
-
-## 4. Lógica de Estado y Ciclo de Vida
-1. **Captura de Puntero (`Pointer Capture`):** Al activar `onPointerDown` se invoca `setPointerCapture` para obligar al navegador a redirigir todos los movimientos subsecuentes al nodo de la tarjeta activa, incluso si el cursor se sale físicamente del elemento durante un arrastre rápido.
-2. **Transformaciones e Inercia:** La rotación (`dragOffset.x * 0.06`) se acopla dinámicamente con el eje X. Al soltarla, se evalúa si sobrepasa el umbral (`threshold`) para desencadenar el descarte acelerado o volver elásticamente al centro con un efecto rebote (*spring reset*).
-3. **Escalamiento del Fondo:** La tarjeta en segundo plano se expande progresivamente de `scale(0.95)` a `scale(1)` a medida que la superior se aleja, logrando una sensación tridimensional de avance.
-4. **Ciclo de Autoplay:** Utiliza `setInterval` con un temporizador de `5000ms`. Al completarse el tiempo, si `isDragging` e `isHovered` son falsos, invoca a `swipeCard('left')` para avanzar el mazo automáticamente de forma fluida.
-
----
-
-## 5. Secuencia de Interacción (Flujo de Estados)
-
-```mermaid
-stateDiagram-v2
-    [*] --> PilaLista: Mazo cargado
-    PilaLista --> Arrastrando: onPointerDown
-    Arrastrando --> Arrastrando: onPointerMove (actualiza delta X/Y y rotación)
-    Arrastrando --> RebotandoAlCentro: onPointerUp (distancia < threshold)
-    RebotandoAlCentro --> PilaLista: Reset coordenadas
-    Arrastrando --> Descartando: onPointerUp (distancia >= threshold)
-    Descartando --> PilaLista: Incrementa currentIndex (tras 200ms)
-    Descartando --> MazoVacio: No quedan items
-    
-    PilaLista --> Descartando: 5s Inactividad (Autoplay y mouse out)
-```

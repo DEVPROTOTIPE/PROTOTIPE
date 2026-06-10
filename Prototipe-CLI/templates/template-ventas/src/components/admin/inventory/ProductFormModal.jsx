@@ -15,6 +15,7 @@ import CustomSelect from '../../ui/CustomSelect'
 import { getCssColor } from '../../../utils/colors'
 import { uploadImage, deleteImage } from '../../../services/uploadService'
 import { Loader2 } from 'lucide-react'
+import ProductCard from '../../client/catalog/ProductCard'
 
 const initialVariant = { id: '', talla: '', color: '', genero: '', stock: 0, nombre: '', sku: '', imageUrl: '', precio: '', precioCosto: '' }
 const initialForm = {
@@ -1096,28 +1097,27 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                   </div>
                 </div>
 
-                {/* Previsualización */}
-                <div className="relative h-32 rounded-2xl border border-app bg-surface-2 overflow-hidden flex items-center justify-center">
-                  {loadingIA ? (
-                    <div className="flex flex-col items-center justify-center p-4 text-center space-y-2">
-                      <div className="relative flex items-center justify-center">
-                        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-                        <Sparkles size={14} className="text-primary absolute animate-pulse" />
+                {/* Previsualización como Tarjeta Real */}
+                <div className="flex flex-col items-center justify-center border border-app rounded-2xl bg-surface-2 p-3 relative min-h-[200px]">
+                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2 block text-center">Previsualización de Tarjeta (Cliente)</span>
+                  <div className="relative w-[185px] rounded-xl border border-app shadow-md overflow-hidden bg-surface shrink-0">
+                    {loadingIA ? (
+                      <div className="absolute inset-0 bg-surface/85 backdrop-blur-xs z-30 flex flex-col items-center justify-center p-3 text-center space-y-2">
+                        <div className="relative flex items-center justify-center">
+                          <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                          <Sparkles size={14} className="text-primary absolute animate-pulse" />
+                        </div>
+                        <p className="text-[10px] font-black text-primary animate-pulse">
+                          IA Analizando...
+                        </p>
+                        <p className="text-[9px] text-muted">
+                          {uploadProgress < 100 ? `Subiendo: ${uploadProgress}%` : 'Sugerencias...'}
+                        </p>
                       </div>
-                      <p className="text-[11px] font-extrabold text-primary animate-pulse">
-                        Gemini IA Analizando Producto...
-                      </p>
-                      <p className="text-[9px] text-muted">
-                        {uploadProgress < 100 ? `Subiendo: ${uploadProgress}%` : 'Generando sugerencias comerciales...'}
-                      </p>
-                    </div>
-                  ) : formData.imageUrl ? (
-                    <div className="w-full h-full relative group">
-                      <img 
-                        src={formData.imageUrl} 
-                        alt="Vista previa" 
-                        className="w-full h-full object-cover"
-                      />
+                    ) : null}
+
+                    {/* Botón de eliminar imagen flotante */}
+                    {formData.imageUrl && !loadingIA && (
                       <button
                         type="button"
                         onClick={async () => {
@@ -1128,17 +1128,36 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                           }
                           setFormData({ ...formData, imageUrl: '' })
                         }}
-                        className="absolute top-2 right-2 bg-black/60 text-white hover:bg-red-500 rounded-lg p-1.5 transition-colors"
+                        className="absolute top-2 right-2 bg-black/60 text-white hover:bg-red-500 rounded-lg p-1.5 transition-colors z-20"
+                        title="Eliminar imagen"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={12} />
                       </button>
-                    </div>
-                  ) : (
-                    <div className="text-center p-4">
-                      <ImageIcon size={24} className="text-muted mx-auto mb-1.5 opacity-40" />
-                      <p className="text-[11px] text-muted">Sin imagen cargada</p>
-                    </div>
-                  )}
+                    )}
+
+                    <ProductCard 
+                      product={{
+                        id: formData.id || 'preview-id',
+                        nombre: formData.nombre || 'Nombre del Producto',
+                        categoria: categories.find(c => c.id === formData.categoriaId)?.nombre || 'Categoría',
+                        imageUrl: formData.imageUrl || '',
+                        precioBase: Number(formData.precioBase || 0),
+                        discountActive: formData.discountActive || false,
+                        discountType: formData.discountType || 'percentage',
+                        discountValue: Number(formData.discountValue || 0),
+                        precioPromo: formData.discountActive 
+                          ? (formData.discountType === 'percentage'
+                              ? Number(formData.precioBase || 0) * (1 - Number(formData.discountValue || 0) / 100)
+                              : Math.max(0, Number(formData.precioBase || 0) - Number(formData.discountValue || 0)))
+                          : Number(formData.precioBase || 0),
+                        tienePromocion: formData.discountActive || false,
+                        variantes: formData.variantes || [],
+                        isTemporal: true
+                      }}
+                      layout="grid"
+                      onOpenDetail={() => {}}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1365,6 +1384,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                       })}
                       options={attr.options?.map(opt => ({ value: opt, label: opt }))}
                       placeholder="Seleccione..."
+                      dropUp={true}
                     />
                   ) : (
                     <input
@@ -1488,6 +1508,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                         { value: 'amount', label: 'Monto Fijo (COP $)' },
                       ]}
                       placeholder="Seleccione..."
+                      dropUp={true}
                     />
                   </div>
                   <div>

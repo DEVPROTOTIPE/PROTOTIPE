@@ -6,6 +6,387 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
 ---
 
 ### 💼 Negocio y Modularidad Ecosistema (Prioridad Alta)
+* **[x] ~~Tarea 358: Efecto Confeti al Aplicar Cupón en Checkout de App Ventas~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-10
+  - Fecha de finalización: 2026-06-10
+  - Descripción:
+    - **Instalación:** Añadimos e instalamos la dependencia `canvas-confetti` en App Ventas.
+    - **Lógica e Importación:** Creamos la utilidad `triggerConfetti` de importación dinámica en `CheckoutModal.jsx` y la llamamos tras aplicar con éxito el cupón de descuento.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/checkout/CheckoutModal.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/checkout/CheckoutModal.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/package.json`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/package.json) [MODIFY]
+
+* **[x] ~~Tarea 357: Creación de SwipeableCardStack e Importaciones en App Ventas~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-10
+  - Fecha de finalización: 2026-06-10
+  - Descripción:
+    - **Creación de Componente:** Creamos el componente físico `SwipeableCardStack.jsx` en la carpeta `src/components/ui/` de App Ventas.
+    - **Importación y Lógica:** Importamos el componente en `CartDrawer.jsx`, añadimos `ShoppingCart` en el destructurado de `lucide-react` y definimos `handleViewDetail`.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/ui/SwipeableCardStack.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/ui/SwipeableCardStack.jsx) [NEW]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+
+* **[x] ~~Tarea 356: Botón de Visualización en Vivo para Recomendaciones de Dashboard~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-10
+  - Fecha de finalización: 2026-06-10
+  - Descripción:
+    - **Botón Demo en Tarjetas:** Insertamos un botón interactivo "Demo" con animación de escalado y colores premium en las tarjetas de recomendación del Onboarding Wizard si disponen de playground (verificado dinámicamente con `getSandboxKey`).
+    - **Modal de Playground:** Implementamos un modal flotante con efecto blur (`backdrop-blur-md`) que carga el playground de `<ComponentSandbox />` en tiempo real y permite añadir/remover el componente directamente desde el pie del modal.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 355: Contenedor Glassmorphic para Botones de Pago y Total en Carrito~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-10
+  - Fecha de finalización: 2026-06-10
+  - Descripción:
+    - **Contenedor Translúcido y Desenfocado:** Rediseñamos el pie del carrito de compras en `CartDrawer.jsx` introduciendo una barra flotante unificada tipo pastilla glassmorphic (`absolute bottom-6 inset-x-6 h-20 bg-white/70 dark:bg-neutral-900/70 backdrop-blur-md border border-black/5 dark:border-white/10 rounded-3xl px-6 flex items-center justify-between z-30 shadow-[0_8px_32px_rgba(0,0,0,0.08)]`) para los botones de total e "Ir a pedir".
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+
+* **[x] ~~Tarea 354: Autoplay y Leyenda de Instrucciones en Mazo Swipe~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-10
+  - Fecha de finalización: 2026-06-10
+  - Descripción:
+    - **Autoplay en Mazo Deslizable:** Agregamos una rutina de autoplay con useEffect y setInterval que desliza automáticamente la tarjeta hacia la izquierda cada 5 segundos si no hay interacción (drag u hover del mouse), de modo que el cliente siempre vea variedad y se antoje.
+    - **Instrucciones Visuales:** Añadimos un banner superior dinámico con micro-animaciones (pulse) indicando claramente al usuario la mecánica del swipe: "👈 DESLIZA IZQ (PASAR)" y "DESLIZA DER (AGREGAR) 👉".
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+
+* **[x] ~~Tarea 353: Ajuste de Espacio Vertical en Sección de Recomendados~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Compactación del Layout del Carrito:** Optimizamos y estandarizamos el recomendador de compras en `CartDrawer.jsx` (plantilla **App Ventas**) restaurando el mazo 3D original que permite el autoplay y apilamiento interactivo de sugerencias, pero reduciendo su altura de `190px` a un punto óptimo de `h-[148px]` (`h-[152px]` en contenedor) para que no ocupe demasiado espacio, conservando sus esquinas redondeadas (`rounded-2xl`), imagen escalada a `w-24 h-24` con bordes `rounded-2xl` y un resplandor rosa. Ajustamos el scroll padding general a `pb-[172px]`.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+
+* **[x] ~~Tarea 352: Retorno Automático al Carrito desde Detalles de Recomendados~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Persistencia de Flujo Atrás:** Implementamos paso de estado en la navegación de sugeridos de `CartDrawer.jsx` enviando el flag `fromCart: true`. En `ProductDetailPage.jsx`, detectamos este estado y configuramos el botón de retroceso (`ChevronLeft`) para invocar la acción `openCart()` de `useCartStore` justo antes de retornar con `navigate(-1)`.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+
+* **[x] ~~Tarea 351: Redirección Directa de Sugeridos a la Página de Detalle de Producto~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Navegación Unificada para Recomendados:** Refactorizamos el comportamiento de clics en las tarjetas recomendadas (`SwipeableCardStack`) y en el botón "Ver Detalles" del carrito en `CartDrawer.jsx` (plantilla **App Ventas**). En lugar de abrir la vista de modal con etiquetas o estilos inconsistentes, cerramos el carrito (`closeCart()`) y redirigimos al cliente directamente a su respectiva página física del catálogo general (`/tienda/producto/:id`).
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+
+* **[x] ~~Tarea 350: Transformación de Botón Flotante de Checkout a Botón con Texto "Ir a pedir"~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Cambio de FAB de Icono a Pastilla Descriptiva:** Modificamos el botón de checkout flotante en `CartDrawer.jsx` (plantilla **App Ventas**) que anteriormente era solo una burbuja con una flecha. Ahora es un botón en formato de pastilla estilizada (`px-6 h-14 rounded-full`) con fondo acento sólido (`bg-action`) que lee claramente **"Ir a pedir"** junto al icono de flecha.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+
+* **[x] ~~Tarea 349: Reubicación Superior de Botones de Swipe en Recomendaciones~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Reposicionamiento de Acciones Tinder-Style:** Para evitar el solapamiento con los nuevos controles de checkout flotantes y mejorar la comodidad táctil, reubicamos el bloque de botones (verde y rojo) de `SwipeableCardStack` en `CartDrawer.jsx` (plantilla **App Ventas**) a la parte superior de la tarjeta interactiva activa, reemplazando el margen superior `mt-1.5` por un margen inferior `mb-2.5`.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+
+* **[x] ~~Tarea 348: Rediseño Compacto y Ajuste de Selector en Carrito~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Compactación de Tarjetas y Corrección de Desbordes:** Rediseñamos las tarjetas de producto en `CartDrawer.jsx` (plantilla **App Ventas**) reduciendo el tamaño de la imagen a `w-20 h-20` (80px), ajustando textos a `text-sm` y `text-[10px]`, y encogiendo el botón de eliminación a `w-7 h-7`. Reemplazamos la reducción por escala CSS (`scale-[0.7]`) en el selector de cantidades por su versión nativa compacta `size="sm"`, eliminando el desbordamiento horizontal y alineándolo de manera natural.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+
+* **[x] ~~Tarea 347: Controles de Checkout Flotantes Asimétricos en el Carrito~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Visualización Despejada y FAB:** Eliminamos el fondo de pie de página completo en `CartDrawer.jsx` (plantilla **App Ventas**). Implementamos una burbuja de checkout flotante (FAB) a la derecha (`absolute right-6 bottom-6`) y un badge del total estimado acoplado a la izquierda (`absolute left-0 bottom-6`) con un diseño asimétrico (cuadrado contra el borde exterior y redondeado hacia el interior). Ajustamos el scroll padding a `pb-24` para optimizar el espacio útil.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+
+* **[x] ~~Tarea 346: Estilización Glassmorphic del Footer del Carrito~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Visual Glassmorphic y Profundidad:** Se transformó el pie de página del carrito en `CartDrawer.jsx` (plantilla **App Ventas**) en una capa flotante absoluta (`absolute bottom-0 inset-x-0`) con fondo translúcido (`bg-white/70 backdrop-blur-lg`) y sombra superior invertida. Esto permite que los elementos en scroll pasen de forma visible y borrosa por detrás del footer, logrando un efecto de cristal premium.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+
+* **[x] ~~Tarea 345: Ajuste de Scroll y Padding en el Carrito~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Corrección de Oclusiones en el Drawer:** Se modificó `CartDrawer.jsx` de la plantilla **App Ventas**. Se configuró la altura estricta del drawer a `h-[100dvh]`, se añadió `overflow-hidden` al contenedor principal y se aplicó un padding inferior de resguardo (`pb-56`) en la zona interna de scroll. Esto garantiza que la sección de productos recomendados suba por completo sobre el pie de página de pago al hacer scroll.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+
+* **[x] ~~Tarea 344: Reubicación de Badges Inteligentes en Tarjeta de Producto~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Prevención de Solapamientos de Capa:** Se cambiaron de posición las etiquetas de promoción y estado en `ProductCard.jsx` de la plantilla **App Ventas**. Se movieron a la esquina inferior izquierda de la imagen (`absolute bottom-3 left-3`) para evitar colisiones con el botón de favoritos flotante que se ubica arriba a la derecha.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/catalog/ProductCard.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductCard.jsx) [MODIFY]
+
+* **[x] ~~Tarea 343: Limpieza y Simplificación de Tarjetas de Producto~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Alineación de Contraste y Simplificación:** Se simplificó la visual en `ProductCard.jsx` de la plantilla **App Ventas**. Se eliminó la línea divisoria horizontal gris (`border-t`) por encima del pie de precios, se sustituyó el degradado de fondo de la tarjeta por un color blanco sólido (`bg-surface`) para mejorar el contraste contra el fondo general del catálogo y se suavizó el contorno de la tarjeta a `border-black/5`.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/catalog/ProductCard.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductCard.jsx) [MODIFY]
+
+* **[x] ~~Tarea 342: Rediseño Estético Ultra-Premium de Tarjetas de Producto~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Alineación con Estética Premium Ecosistema:** Se actualizó por completo el componente `ProductCard.jsx` en la plantilla **App Ventas** para lograr un acabado visual premium: fondos en gradiente sutil, bordes de baja opacidad, sombras dinámicas y profundas de color-mix en hover, efecto glassmorphic translúcido con desenfoque de fondo en las etiquetas inteligentes, efectos suaves de zoom de imagen y transiciones elásticas en hover, categoría en mayúsculas con tracking ancho y un botón de favoritos estilizado de tipo burbuja de cristal.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/catalog/ProductCard.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductCard.jsx) [MODIFY]
+
+* **[x] ~~Tarea 341: Rediseño de Layout de Precios en Tarjetas de Producto~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Reestructuración de Precios en Tarjeta:** Para evitar colisiones entre cifras largas de precios y el botón de acción "+", se rediseñó el pie de `ProductCard.jsx` en la plantilla **App Ventas**. Se implementó apilamiento vertical para los precios original y en oferta, se aplicaron clases de tamaño responsivas (`text-sm sm:text-base`) con soporte para truncamiento, se redujo el tamaño del botón "+" a `w-8 h-8` y se añadió una sutil línea divisora superior.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/catalog/ProductCard.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductCard.jsx) [MODIFY]
+
+* **[x] ~~Tarea 340: Corrección de Etiquetas Inteligentes y Detección de Nuevos en App Ventas~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Validación Estricta de Descuentos y Detección de Fechas Serializadas:** Se corrigió en el catálogo (`ProductCard.jsx`, `ProductDetailPage.jsx`, y `ProductPublicDetail.jsx`) de la plantilla **App Ventas** el bug que activaba "Oferta Imperdible" en todos los productos mediante una comparación numérica estricta (`precioPromo < precioBase`). Adicionalmente, se implementó un parseador seguro de marcas de tiempo de Firestore (`seconds * 1000`) para evitar que la evaluación de "Nuevo" arrojara `NaN` al deserializar datos almacenados en disco, restaurando el funcionamiento correcto de la etiqueta "Nuevo".
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/catalog/ProductCard.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductCard.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ProductPublicDetail.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+
+* **[x] ~~Tarea 339: Corrección de Responsividad en Toasts de Retroalimentación~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Posicionamiento Seguro de Toasts en Móviles:** Se adaptó la posición flotante del componente de notificaciones `GuidedToast.jsx` utilizando clases responsivas. Se cambió la posición rígida por `bottom-6 left-4 right-4 w-auto` en dispositivos móviles (previniendo cortes y desbordamiento lateral a la izquierda) y `md:left-auto md:right-6 md:w-full md:max-w-sm` para anchos de escritorio.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/ui/GuidedToast.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/ui/GuidedToast.jsx) [MODIFY]
+
+* **[x] ~~Tarea 338: Rediseño Premium de Tarjeta de Estado de Base de Datos en Perfil~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Tarjeta de Base de Datos Premium en Perfil:** Se sustituyó el contenedor plano de información del sistema en el modal del perfil de administrador en `App.jsx` por una tarjeta con fondo en gradiente, efecto glassmorphic (`backdrop-blur-md` y sombreado interno/externo), iconos SVG (`Database`, `Layers`), e indicador visual animado de pulso (`animate-pulse`) en el estado de conexión de la base de datos.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 337: Rediseño Responsivo de Tarjetas CRM de Clientes~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Optimización de Espacio en Tarjeta CRM:** Se rediseñó el bloque de métricas y botones en la tarjeta de cliente para móviles en `App.jsx`. Se incorporó un borde separador (`border-t`), distribución espaciada de extremos (`justify-between`), y alineación a la izquierda (`text-left`) para las métricas de Ventas y Comisión. Esto permite que el botón "Gestionar" se posicione a la derecha de manera simétrica y el contenido respire de manera estética en el viewport móvil.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 336: Unificación Horizontal de Botones en Consola de Monitoreo~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Alineación en Fila Única y Contención:** Se reemplazó el flex-wrap por flex-row e inyectó shrink-0 en los botones de "Simular Fallo", "Resolver Todos" y "Vaciar Historial" de la consola de diagnóstico de `App.jsx`. Adicionalmente se aplicó `overflow-x-auto max-w-full pb-1 scrollbar-none` en el contenedor, permitiendo un desplazamiento horizontal táctil e impidiendo que los botones se salgan del margen del viewport en dispositivos móviles o pantallas muy angostas.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 335: Resolución Inteligente de Alias y Búsqueda Recursiva de Código de Proyectos en CLI Bridge~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Resolución de Plantillas Core:** Corregido el helper `findProjectDir` en `server.js` para resolver correctamente la ruta a la carpeta de plantillas `Plantillas Core` del proyecto al utilizar `path.dirname(baseAppsDir)`.
+    - **Búsqueda Recursiva y Sinónimos:** Se robusteció el endpoint `/api/project/file` para realizar búsquedas de archivo recursivas dentro del directorio del proyecto si la ruta relativa directa no existe. Asimismo, se implementó mapeo de sinónimos para resolver discrepancias de nombres (ej. buscando `CategoryManager.jsx` cuando se solicita `CategoriasView.jsx`), permitiendo cargar fragmentos de código de diagnóstico de producción sobre los fuentes del core local de forma fluida.
+    - **Optimización de Recursión:** Se ajustó la búsqueda recursiva para ignorar directorios pesados y del sistema (como `node_modules`, `.git`, `dist`, `.vite` y carpetas que inician con `.`), resolviendo fallas por timeouts y errores 404 por búsquedas infinitas.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Prototipe-CLI/server.js`](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+* **[x] ~~Tarea 334: Corrección de Oclusión y Layout en Drawer de Diagnóstico de Incidente~~****
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Ajuste de Padding Responsivo:** Se corrigió la oclusión y recorte del drawer en la versión móvil cambiando la clase de padding `pl-10` a `pl-0 sm:pl-10` en el contenedor flex padre. Esto evita que el ancho absoluto del drawer (`w-screen`) se desfase 40px fuera de la pantalla en dispositivos móviles y anchos reducidos.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 333: Corrección de Enlaces Rotos (404) de Módulos Completos en Biblioteca de Componentes~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Corrección de Nombres de Archivos:** Se corrigieron los nombres de los enlaces a los archivos markdown físicos para los módulos "Créditos y Saldos" (`creditos_saldos.md` en lugar de `creditos_y_saldos.md`) y "Omnicanalidad WhatsApp" (`omnicanalidad.md` en lugar de `omnicanalidad_whatsapp.md`) en el catálogo oficial de la biblioteca.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+
+* **[x] ~~Tarea 332: Ajuste de Alineación en Botón Agregar de Tarjeta de Producto~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Alineación a la Base (items-end):** Se cambió la alineación vertical del contenedor de precios y botón de agregar de `items-center` a `items-end` en `ProductCard.jsx`. Esto corrige la desalineación visual donde la existencia de múltiples líneas de precio (precio promo, precio base y badge de OFERTA) empujaba el botón "+" hacia arriba de forma asimétrica.
+    - **Paridad de Márgenes:** Ahora el botón "+" se alinea perfectamente con la línea inferior de la tarjeta, manteniendo el mismo margen inferior y derecho (16px / p-4).
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/catalog/ProductCard.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductCard.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/client/catalog/ProductCard.jsx`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/client/catalog/ProductCard.jsx) [MODIFY]
+
+* **[x] ~~Tarea 331: Visualización de Chips de Color en Filtros de Catálogo (Mapeo COLOR_NAMES)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Reemplazo de Hexadecimales por Nombres Legibles:** Se implementó un diccionario `COLOR_NAMES` en `ClientFilterModal.jsx` para mapear los códigos de color hexadecimales (como `#171717` o `#F5F5DC`) a sus nombres en lenguaje natural (como "Negro" o "Beige").
+    - **Chips de Color Premium:** Se rediseñó el renderizado del listado de colores en el modal para mostrar chips redondeados interactivos (`rounded-full`) que incluyen un círculo con la previsualización del color real y el nombre legible al lado, eliminando la visualización tosca del código hexadecimal crudo.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/catalog/ClientFilterModal.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ClientFilterModal.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/client/catalog/ClientFilterModal.jsx`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/client/catalog/ClientFilterModal.jsx) [MODIFY]
+
+* **[x] ~~Tarea 330: Flexibilización Multivariante en Filtros del Catálogo (Lógica OR Global Absoluto)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Filtrado OR Global Absoluto:** Se refactorizó la lógica de filtrado de variantes y atributos dinámicos en `ClientCatalog.jsx` para implementar un OR absoluto a nivel de producto. Ahora, cuando hay filtros activos, un producto se muestra si coincide con AL MENOS UNO de los parámetros de filtro seleccionados (ya sea la marca, el color de variante o la talla de variante).
+    - **Compatibilidad e Incremento de Visibilidad:** Esto permite que si el cliente selecciona Marca: Nike, Color: Negro Mate y Talla: S, el sistema traiga cualquier producto Nike (tenga o no esos atributos), cualquier producto talla S (sea de la marca que sea), y cualquier producto Negro Mate, maximizando la oferta visible en el catálogo de acuerdo a la preferencia explícita del usuario.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ClientCatalog.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCatalog.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/client/ClientCatalog.jsx`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/client/ClientCatalog.jsx) [MODIFY]
+
+* **[x] ~~Tarea 329: Solución a la Oclusión y Apertura de Dropdowns en Formulario de Inventario (Vista Móvil)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Apertura de Selectores hacia Arriba:** Se implementó la prop `dropUp={true}` en los selectores CustomSelect de Atributos Personalizados (como la Marca) y de Tipo de Descuento dentro del modal de creación/edición de productos (`ProductFormModal.jsx`). Esto corrige el error de UX en la versión móvil donde las opciones del dropdown se desplegaban hacia abajo, siendo tapadas por el botón "Siguiente" o cortadas por el pie fijo del modal.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/admin/inventory/ProductFormModal.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/inventory/ProductFormModal.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/admin/inventory/ProductFormModal.jsx`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/admin/inventory/ProductFormModal.jsx) [MODIFY]
+
+* **[x] ~~Tarea 328: Icono de Carrito Animado y Auto-Rotación por Inactividad en Sugerencias del Carrito (Mazo Tinder)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Reemplazo de Icono:** Se cambió el icono de "+" por un carrito de compras interactivo (`ShoppingCart` de Lucide) en el botón de acción inferior derecho del mazo Tinder.
+    - **Animación Premium de Compra:** Se le dotó de una micro-animación pulsante continua y dinámica con sombras reactivas (`scale: [1, 1.12, 1]` y `boxShadow` de framer-motion) para guiar intuitivamente al cliente a agregar el producto.
+    - **Auto-Rotación Comercial por Inactividad:** Se implementó una lógica de auto-autoplay mediante temporizador (5 segundos de inactividad) que desliza automáticamente la tarjeta de arriba y la inserta al final de la pila, garantizando que el usuario siempre vea variedad de productos disponibles sin necesidad de deslizar manualmente.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/client/cart/CartDrawer.jsx`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/client/cart/CartDrawer.jsx) [MODIFY]
+
+* **[x] ~~Tarea 327: Unificación y Dinamismo de Etiquetas Inteligentes en Detalle de Producto y Portal QR~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Dinamización de Cabecera Desktop:** Se actualizó la cabecera en vista de escritorio de `ProductDetailPage.jsx` para consumir la constante reactiva `activeSmartTag` con sus estilos HSL/Hex y texto personalizado, reemplazando la lógica estática anterior.
+    - **Implementación de Hooks en Portal QR:** Se agregaron los hooks de resolución `stockConsolidado` y `activeSmartTag` en `ProductPublicDetail.jsx` idénticos a los del detalle de producto.
+    - **Integración en Vista Pública:** Se reemplazaron las etiquetas e insignias estáticas y colores fijos ("bg-[#ff5a00]", "bg-[#2968c8]", etc.) del portal público QR por la constante `activeSmartTag` dinámica y configurable por el administrador.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ProductPublicDetail.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+
+* **[x] ~~Tarea 326: Blindaje Preventivo y Estandarización de Cierre de Sesión Administrador en Ecosistema (GEMINI.md)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Inyección de Directiva de Calidad:** Añadida una nueva regla mandatoria en las directivas de comportamiento del archivo `GEMINI.md` maestro, exigiendo que todo cierre de sesión de administrador o del sistema asocie asíncronamente `signOut(auth)` de Firebase Auth.
+    - **Propagación en Ecosistema:** Ejecutado el sincronizador en cascada `sync_rules.js` para actualizar las directivas en 9 destinos, blindando el desarrollo de futuros cores y clientes generados por la CLI.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md) [MODIFY]
+    - Sincronización en cascada a 9 destinos del disco.
+
+* **[x] ~~Tarea 325: Corrección de Cierre de Sesión Administrador en Pestaña Ajustes (Auto-login recarga)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Cierre de Sesión en Firebase Auth:** Corregido el bug donde cerrar sesión de Administrador desde la pestaña de Ajustes (`AdminSettings.jsx`) limpiaba el store de Zustand (`logout()`) pero no destruía la sesión activa de Firebase Auth. Esto provocaba que al recargar la página la app hiciera auto-login automático del administrador, bloqueando la posibilidad de alternar limpiamente con el rol de cliente en el mismo navegador.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/AdminSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
+
+* **[x] ~~Tarea 324: Consistencia y Renderizado de Descuentos en Ficha de Detalle de Producto y Portal QR~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Unificación de Precios Promocionales:** Corregido el bug de consistencia de precios donde los descuentos directos configurados en el inventario del producto (`discountActive`, `discountType`, `discountValue`) solo se reflejaban si el producto tenía un anuncio publicitario (`ad`) activo vinculado.
+    - **Fallback de Descuento Directo:** Implementada lógica de fallback en el mapeo de productos del catálogo (`ClientCatalog.jsx`), la página de detalle de la tienda (`ProductDetailPage.jsx`) y el portal público de compra por QR (`ProductPublicDetail.jsx`) para procesar el descuento nativo del producto.
+    - **Visualización de Precio Tachado:** Habilitado el precio base original tachado y la etiqueta de descuento correspondiente ("% OFF" u "OFERTA") en las vistas móviles y de escritorio de ambas fichas.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ClientCatalog.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCatalog.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ProductPublicDetail.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+
+* **[x] ~~Tarea 323: Previsualización en Vivo de Tarjeta de Producto en Formulario de Inventario~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Live Product Card Preview:** Reemplazada la simple vista previa de imagen en el Paso 1 (Imagen) del modal de creación/edición de productos por el componente `ProductCard` real.
+    - **Reactividad Completa:** La tarjeta se actualiza en caliente según los campos ingresados por el administrador en el formulario (nombre, categoría, precio, descuento/oferta, variantes y foto de portada).
+    - **Bloqueo y Seguridad:** Añadida una máscara con efecto blur difuminado cuando la IA de Gemini está analizando la imagen y el flag `isTemporal: true` en el componente para prevenir redirecciones al clickear la tarjeta previa.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/components/admin/inventory/ProductFormModal.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/inventory/ProductFormModal.jsx) [MODIFY]
+
+* **[x] ~~Tarea 322: Solución a la Detección de Repositorios Git en el Gestor de Respaldos~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Detección de Repositorios Inactivos (Sin Git):** Identificado que `.git` de App Ventas quedó renombrado como `.git-backup-temp` por bloqueos de archivos de servidores Vite en un backup anterior fallido.
+    - **Detención de Vite en Menú de Respaldos:** Refactorizada la rutina de auto-recuperación de `menu_backup.ps1` para buscar y detener cualquier servidor Vite activo en Node.exe antes de intentar renombrar, garantizando la liberación del lock y la detección limpia de los repositorios Git del core.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/menu_backup.ps1`](file:///D:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+
+* **[x] ~~Tarea 321: Rediseño del Perfil de Cliente, Optimización de Sidebar, Animaciones de Carrito y Notificaciones y Stacking Context de Emojis~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-09
+  - Fecha de finalización: 2026-06-09
+  - Descripción:
+    - **Optimización de Sidebar de Escritorio:** Rediseñado con cabecera de marca e identidad visual arriba, y panel rápido de 3 botones en grid abajo (Carrito, Notificaciones, Perfil).
+    - **Animaciones de Carrito y Campana:** Agregado wiggle/bounce interactivo y sutil en base a conteos mayores a cero.
+    - **Rediseño del Perfil Cliente:** Reorganizado en tarjetas premium agrupando historial de pedidos, créditos y descarga PWA, además del banner dinámico del desarrollador.
+    - **Resolución de Selector de Emojis:** Corregido el bug del lápiz selector sobre el avatar agregando pointer-events-none al icono interior.
+    - **Solución del Stacking Context:** Elevado el `z-index` del header del perfil y del selector de emojis a `z-40`/`z-50` para evitar que se renderice por detrás del contenedor de tarjetas inferiores (`z-20`).
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ClientProfile.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientProfile.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/layouts/ClientLayout.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/ClientLayout.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/layouts/AdminLayout.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/AdminLayout.jsx) [MODIFY]
+
 * **[x] ~~Tarea 320: Sincronización de Créditos con Domicilio/Descuento y Optimización de Carga Paginada~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-09

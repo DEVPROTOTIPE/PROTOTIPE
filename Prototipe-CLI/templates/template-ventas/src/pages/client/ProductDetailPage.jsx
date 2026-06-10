@@ -77,6 +77,30 @@ export default function ProductDetailPage() {
         promocion: ad,
       }
     }
+
+    // Fallback: Descuento directo del producto
+    if (rawProduct.discountActive && Number(rawProduct.discountValue) > 0) {
+      const dVal = Number(rawProduct.discountValue)
+      let precioPromocional = baseProduct.precioBase
+      if (rawProduct.discountType === 'percentage') {
+        precioPromocional = baseProduct.precioBase - (baseProduct.precioBase * dVal) / 100
+      } else {
+        precioPromocional = baseProduct.precioBase - dVal
+      }
+      precioPromocional = Math.max(0, precioPromocional)
+
+      return {
+        ...baseProduct,
+        precioPromo: precioPromocional,
+        tienePromocion: true,
+        promocion: {
+          discountType: rawProduct.discountType || 'percentage',
+          discountValue: dVal,
+          title: 'Descuento Especial'
+        }
+      }
+    }
+
     return baseProduct
   }, [rawProduct, allCategories, ads])
 
@@ -90,6 +114,56 @@ export default function ProductDetailPage() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     return diffDays <= limitDays
   }, [product?.createdAt, commercialOptimization])
+
+  const stockConsolidado = useMemo(() => {
+    if (!product) return 0
+    return (product.variantes || []).reduce((sum, v) => sum + (v.stock || 0), 0)
+  }, [product])
+
+  const activeSmartTag = useMemo(() => {
+    const smartTags = commercialOptimization?.tools?.smartTags || {}
+    if (!product || !smartTags.enabled) return null
+
+    // 1. Última Unidad (Prioridad Alta)
+    if (smartTags.lastUnit?.enabled !== false && stockConsolidado > 0 && stockConsolidado <= (smartTags.lastUnit?.threshold || 3)) {
+      return {
+        text: smartTags.lastUnit?.text || 'Última Unidad',
+        bg: smartTags.lastUnit?.bg || '#3b82f6',
+        textCol: smartTags.lastUnit?.textCol || '#ffffff'
+      }
+    }
+
+    // 2. Oferta Imperdible (Si tiene descuento o es combo)
+    const hasPromo = product.tienePromocion || product.discountActive
+    if (smartTags.unmissableOffer?.enabled !== false && hasPromo) {
+      return {
+        text: smartTags.unmissableOffer?.text || 'Oferta Imperdible',
+        bg: smartTags.unmissableOffer?.bg || '#f59e0b',
+        textCol: smartTags.unmissableOffer?.textCol || '#ffffff'
+      }
+    }
+
+    // 3. Más Vendido (Basado en salesCount real)
+    const salesVal = product.salesCount || 0
+    if (smartTags.bestSeller?.enabled !== false && salesVal >= (smartTags.bestSeller?.minSales || 5)) {
+      return {
+        text: smartTags.bestSeller?.text || 'Más Vendido',
+        bg: smartTags.bestSeller?.bg || '#ef4444',
+        textCol: smartTags.bestSeller?.textCol || '#ffffff'
+      }
+    }
+
+    // 4. Nuevo
+    if (smartTags.newProduct?.enabled !== false && isNewProduct) {
+      return {
+        text: smartTags.newProduct?.text || 'Nuevo',
+        bg: smartTags.newProduct?.bg || '#10b981',
+        textCol: smartTags.newProduct?.textCol || '#ffffff'
+      }
+    }
+
+    return null
+  }, [product, commercialOptimization, stockConsolidado, isNewProduct])
 
   const { user, role } = useAuthStore()
   const { favoriteIds, toggleFavorite } = useFavoritesStore()
@@ -421,19 +495,23 @@ export default function ProductDetailPage() {
         <div className="w-10 h-10" />
       </header>
 
-      <div className="max-w-5xl mx-auto pt-16 md:pt-24 px-4 md:px-6">
+      <div className="max-w-5xl mx-auto pt-20 md:pt-24 px-4 md:px-6">
         
         {/* Cabecera Móvil (Oculta en Desktop) */}
         <div className="md:hidden pb-4 px-2 text-left space-y-1.5">
           <span className="text-[10px] text-muted uppercase tracking-widest font-black block leading-none">{product.categoria}</span>
           <h1 className="text-2xl font-black text-app leading-tight block">{product.nombre}</h1>
-          {((isNewProduct && newProductTagEnabled) || (product.salesCount && product.salesCount > 0 && bestSellerTagEnabled)) && (
+          {activeSmartTag && (
             <div className="flex items-center justify-start gap-2 pt-0.5">
-              {isNewProduct && newProductTagEnabled && (
-                <span className="font-semibold text-green-600 dark:text-green-400 bg-green-500/10 px-2 py-0.5 rounded-lg text-[9px] uppercase tracking-wider">
-                  Nuevo
-                </span>
-              )}
+              <span 
+                className="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase shadow-sm border border-black/10 text-center flex items-center justify-center shrink-0"
+                style={{ 
+                  backgroundColor: activeSmartTag.bg,
+                  color: activeSmartTag.textCol
+                }}
+              >
+                {activeSmartTag.text}
+              </span>
               {product.salesCount && product.salesCount > 0 && bestSellerTagEnabled && (
                 <span className="font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-lg text-[9px] uppercase tracking-wider">
                   +{product.salesCount} vendidos
@@ -624,13 +702,17 @@ export default function ProductDetailPage() {
             <div className="hidden md:block space-y-2">
               <span className="text-xs text-muted uppercase tracking-widest font-black block leading-none">{product.categoria}</span>
               <h1 className="text-3xl font-black text-app leading-tight block">{product.nombre}</h1>
-              {((isNewProduct && newProductTagEnabled) || (product.salesCount && product.salesCount > 0 && bestSellerTagEnabled)) && (
+              {activeSmartTag && (
                 <div className="flex items-center gap-2 mt-2">
-                  {isNewProduct && newProductTagEnabled && (
-                    <span className="font-semibold text-green-600 dark:text-green-400 bg-green-500/10 px-2.5 py-0.5 rounded-lg text-[10px] uppercase tracking-wider">
-                      Nuevo
-                    </span>
-                  )}
+                  <span 
+                    className="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase shadow-sm border border-black/10 text-center flex items-center justify-center shrink-0"
+                    style={{ 
+                      backgroundColor: activeSmartTag.bg,
+                      color: activeSmartTag.textCol
+                    }}
+                  >
+                    {activeSmartTag.text}
+                  </span>
                   {product.salesCount && product.salesCount > 0 && bestSellerTagEnabled && (
                     <span className="font-semibold bg-primary/10 text-primary px-2.5 py-0.5 rounded-lg text-[10px] uppercase tracking-wider">
                       +{product.salesCount} vendidos

@@ -15,6 +15,8 @@ import { updateAppConfig, updateCatalogFilters } from '../../services/appConfigS
 import useAppConfigStore from '../../store/appConfigStore'
 import useAuthStore from '../../store/authStore'
 import BackButton from '../../components/ui/BackButton'
+import { signOut } from 'firebase/auth'
+import { auth } from '../../config/firebaseConfig'
 
 import { ADVANCED_PALETTES, getActiveColors } from '../../constants/palettes'
 import { FONTS, FONT_CATEGORIES, FONTS_BY_CATEGORY } from '../../constants/fonts'
@@ -771,6 +773,7 @@ export default function AdminSettings() {
   const handleLogout = async () => {
     try {
       logout()
+      await signOut(auth)
       navigate('/login')
     } catch (error) {
       console.error('Error al cerrar sesión:', error)

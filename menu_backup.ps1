@@ -19,17 +19,30 @@ Set-Location -Path $rootDir
 # Rutina de auto-recuperacion ante cierres abruptos (restaurar .git-backup-temp a .git)
 # Depth 3 cubre todos los subrepos sin recorrer node_modules ni carpetas profundas
 $tempGitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git-backup-temp" -Recurse -Depth 3 -ErrorAction SilentlyContinue
-foreach ($tempDir in $tempGitDirs) {
-    if (Test-Path $tempDir.FullName) {
-        $retries = 6
-        $restored = $false
-        while (-not $restored -and $retries -gt 0) {
-            try {
-                Rename-Item -Path $tempDir.FullName -NewName ".git" -ErrorAction Stop -Force
-                $restored = $true
-            } catch {
-                $retries--
-                if ($retries -gt 0) { Start-Sleep -Milliseconds 400 }
+if ($tempGitDirs.Count -gt 0) {
+    # Detectar y detener servidores Vite si hay carpetas por recuperar
+    $nodeProcesses = Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue
+    $viteStopped = $false
+    foreach ($proc in $nodeProcesses) {
+        if ($proc.CommandLine -match 'vite' -and $proc.CommandLine -match 'dev') {
+            Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
+            $viteStopped = $true
+        }
+    }
+    if ($viteStopped) { Start-Sleep -Milliseconds 1000 }
+
+    foreach ($tempDir in $tempGitDirs) {
+        if (Test-Path $tempDir.FullName) {
+            $retries = 6
+            $restored = $false
+            while (-not $restored -and $retries -gt 0) {
+                try {
+                    Rename-Item -Path $tempDir.FullName -NewName ".git" -ErrorAction Stop -Force
+                    $restored = $true
+                } catch {
+                    $retries--
+                    if ($retries -gt 0) { Start-Sleep -Milliseconds 400 }
+                }
             }
         }
     }

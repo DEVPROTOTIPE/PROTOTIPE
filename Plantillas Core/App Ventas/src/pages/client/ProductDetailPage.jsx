@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { 
   ShoppingBag, Image as ImageIcon, ChevronLeft, ChevronRight, 
@@ -23,11 +23,13 @@ import { openWhatsAppChat } from '../../services/whatsappService'
 export default function ProductDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  const fromCart = location.state?.fromCart
   const { data: rawProduct, isLoading: isLoadingProduct } = useProduct(id)
   const { data: allCategories = [] } = useCategories()
   const { data: ads = [] } = useAds()
 
-  const { addItem } = useCartStore()
+  const { addItem, openCart } = useCartStore()
   const { markStepCompleted } = useGuidedStore()
   const { commercialOptimization, catalogFilters, appName } = useAppConfigStore()
 
@@ -77,19 +79,103 @@ export default function ProductDetailPage() {
         promocion: ad,
       }
     }
+
+    // Fallback: Descuento directo del producto
+    if (rawProduct.discountActive && Number(rawProduct.discountValue) > 0) {
+      const dVal = Number(rawProduct.discountValue)
+      let precioPromocional = baseProduct.precioBase
+      if (rawProduct.discountType === 'percentage') {
+        precioPromocional = baseProduct.precioBase - (baseProduct.precioBase * dVal) / 100
+      } else {
+        precioPromocional = baseProduct.precioBase - dVal
+      }
+      precioPromocional = Math.max(0, precioPromocional)
+
+      return {
+        ...baseProduct,
+        precioPromo: precioPromocional,
+        tienePromocion: true,
+        promocion: {
+          discountType: rawProduct.discountType || 'percentage',
+          discountValue: dVal,
+          title: 'Descuento Especial'
+        }
+      }
+    }
+
     return baseProduct
   }, [rawProduct, allCategories, ads])
 
   const isNewProduct = useMemo(() => {
     if (!product?.createdAt) return false
-    const createdDate = typeof product.createdAt.toMillis === 'function' 
-      ? product.createdAt.toMillis() 
-      : (product.createdAt instanceof Date ? product.createdAt.getTime() : new Date(product.createdAt).getTime())
+    let createdDateMs = 0
+    if (typeof product.createdAt.toMillis === 'function') {
+      createdDateMs = product.createdAt.toMillis()
+    } else if (product.createdAt && typeof product.createdAt.seconds === 'number') {
+      createdDateMs = product.createdAt.seconds * 1000
+    } else if (product.createdAt instanceof Date) {
+      createdDateMs = product.createdAt.getTime()
+    } else {
+      createdDateMs = new Date(product.createdAt).getTime()
+    }
+
+    if (isNaN(createdDateMs)) return false
+
     const limitDays = commercialOptimization?.tools?.smartTags?.newProduct?.daysLimit || 7
-    const diffTime = Math.abs(Date.now() - createdDate)
+    const diffTime = Math.abs(Date.now() - createdDateMs)
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     return diffDays <= limitDays
   }, [product?.createdAt, commercialOptimization])
+
+  const stockConsolidado = useMemo(() => {
+    if (!product) return 0
+    return (product.variantes || []).reduce((sum, v) => sum + (v.stock || 0), 0)
+  }, [product])
+
+  const activeSmartTag = useMemo(() => {
+    const smartTags = commercialOptimization?.tools?.smartTags || {}
+    if (!product || !smartTags.enabled) return null
+
+    // 1. Última Unidad (Prioridad Alta)
+    if (smartTags.lastUnit?.enabled !== false && stockConsolidado > 0 && stockConsolidado <= (smartTags.lastUnit?.threshold || 3)) {
+      return {
+        text: smartTags.lastUnit?.text || 'Última Unidad',
+        bg: smartTags.lastUnit?.bg || '#3b82f6',
+        textCol: smartTags.lastUnit?.textCol || '#ffffff'
+      }
+    }
+
+    // 2. Oferta Imperdible (Si tiene descuento activo y el precio promo es menor que el base)
+    const hasPromo = typeof product.precioPromo === 'number' && product.precioPromo > 0 && product.precioPromo < product.precioBase
+    if (smartTags.unmissableOffer?.enabled !== false && hasPromo) {
+      return {
+        text: smartTags.unmissableOffer?.text || 'Oferta Imperdible',
+        bg: smartTags.unmissableOffer?.bg || '#f59e0b',
+        textCol: smartTags.unmissableOffer?.textCol || '#ffffff'
+      }
+    }
+
+    // 3. Más Vendido (Basado en salesCount real)
+    const salesVal = product.salesCount || 0
+    if (smartTags.bestSeller?.enabled !== false && salesVal >= (smartTags.bestSeller?.minSales || 5)) {
+      return {
+        text: smartTags.bestSeller?.text || 'Más Vendido',
+        bg: smartTags.bestSeller?.bg || '#ef4444',
+        textCol: smartTags.bestSeller?.textCol || '#ffffff'
+      }
+    }
+
+    // 4. Nuevo
+    if (smartTags.newProduct?.enabled !== false && isNewProduct) {
+      return {
+        text: smartTags.newProduct?.text || 'Nuevo',
+        bg: smartTags.newProduct?.bg || '#10b981',
+        textCol: smartTags.newProduct?.textCol || '#ffffff'
+      }
+    }
+
+    return null
+  }, [product, commercialOptimization, stockConsolidado, isNewProduct])
 
   const { user, role } = useAuthStore()
   const { favoriteIds, toggleFavorite } = useFavoritesStore()
@@ -404,7 +490,10 @@ export default function ProductDetailPage() {
       <header className="fixed top-0 inset-x-0 h-16 bg-surface/80 backdrop-blur-md border-b border-app flex items-center justify-between px-4 z-50">
         <button 
           onClick={() => {
-            if (window.history.state && window.history.state.idx > 0) {
+            if (fromCart) {
+              openCart()
+              navigate(-1)
+            } else if (window.history.state && window.history.state.idx > 0) {
               navigate(-1)
             } else {
               navigate('/tienda')
@@ -421,19 +510,23 @@ export default function ProductDetailPage() {
         <div className="w-10 h-10" />
       </header>
 
-      <div className="max-w-5xl mx-auto pt-16 md:pt-24 px-4 md:px-6">
+      <div className="max-w-5xl mx-auto pt-20 md:pt-24 px-4 md:px-6">
         
         {/* Cabecera Móvil (Oculta en Desktop) */}
         <div className="md:hidden pb-4 px-2 text-left space-y-1.5">
           <span className="text-[10px] text-muted uppercase tracking-widest font-black block leading-none">{product.categoria}</span>
           <h1 className="text-2xl font-black text-app leading-tight block">{product.nombre}</h1>
-          {((isNewProduct && newProductTagEnabled) || (product.salesCount && product.salesCount > 0 && bestSellerTagEnabled)) && (
+          {activeSmartTag && (
             <div className="flex items-center justify-start gap-2 pt-0.5">
-              {isNewProduct && newProductTagEnabled && (
-                <span className="font-semibold text-green-600 dark:text-green-400 bg-green-500/10 px-2 py-0.5 rounded-lg text-[9px] uppercase tracking-wider">
-                  Nuevo
-                </span>
-              )}
+              <span 
+                className="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase shadow-sm border border-black/10 text-center flex items-center justify-center shrink-0"
+                style={{ 
+                  backgroundColor: activeSmartTag.bg,
+                  color: activeSmartTag.textCol
+                }}
+              >
+                {activeSmartTag.text}
+              </span>
               {product.salesCount && product.salesCount > 0 && bestSellerTagEnabled && (
                 <span className="font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-lg text-[9px] uppercase tracking-wider">
                   +{product.salesCount} vendidos
@@ -624,13 +717,17 @@ export default function ProductDetailPage() {
             <div className="hidden md:block space-y-2">
               <span className="text-xs text-muted uppercase tracking-widest font-black block leading-none">{product.categoria}</span>
               <h1 className="text-3xl font-black text-app leading-tight block">{product.nombre}</h1>
-              {((isNewProduct && newProductTagEnabled) || (product.salesCount && product.salesCount > 0 && bestSellerTagEnabled)) && (
+              {activeSmartTag && (
                 <div className="flex items-center gap-2 mt-2">
-                  {isNewProduct && newProductTagEnabled && (
-                    <span className="font-semibold text-green-600 dark:text-green-400 bg-green-500/10 px-2.5 py-0.5 rounded-lg text-[10px] uppercase tracking-wider">
-                      Nuevo
-                    </span>
-                  )}
+                  <span 
+                    className="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase shadow-sm border border-black/10 text-center flex items-center justify-center shrink-0"
+                    style={{ 
+                      backgroundColor: activeSmartTag.bg,
+                      color: activeSmartTag.textCol
+                    }}
+                  >
+                    {activeSmartTag.text}
+                  </span>
                   {product.salesCount && product.salesCount > 0 && bestSellerTagEnabled && (
                     <span className="font-semibold bg-primary/10 text-primary px-2.5 py-0.5 rounded-lg text-[10px] uppercase tracking-wider">
                       +{product.salesCount} vendidos

@@ -35,8 +35,8 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
   * **`Monetizacion_Desarrollador/Facturacion_Comisional/facturacion_comisional.md`**: Panel de facturación del desarrollador con cálculo comisional multi-modo y firma táctil en canvas.
 * **`/Documentacion PROTOTIPE/09_Modulos_Completos/`**: Catálogo de Módulos Completos (Ecosistema Features).
   * **`Caja_Diaria_POS/caja_diaria_pos.md`**: Apertura de caja, transacciones de flujo auxiliar, arqueo físico vs esperado HSL y lienzo interactivo para firmas.
-  * **`Creditos_y_Saldos/creditos_y_saldos.md`**: Lógica de créditos, cuentas por cobrar, abonos y estado de cuentas de clientes.
-  * **`Omnicanalidad_WhatsApp/omnicanalidad_whatsapp.md`**: Módulo de redirecciones y plantillas dinámicas de WhatsApp.
+  * **`Creditos_y_Saldos/creditos_saldos.md`**: Lógica de créditos, cuentas por cobrar, abonos y estado de cuentas de clientes.
+  * **`Omnicanalidad_WhatsApp/omnicanalidad.md`**: Módulo de redirecciones y plantillas dinámicas de WhatsApp.
   * **`Telemetria_Centralizada/telemetria_centralizada.md`**: Monitoreo y subida de telemetría de facturación y logs a Firestore.
   * **`Pantalla_Cocina_KDS/pantalla_cocina_kds.md`**: Sistema de pantalla interactiva en vivo para control de comandas en cocina ordenadas por prioridad de tiempo.
   * **`Reservas_Agenda_Citas/reservas_agenda_citas.md`**: Agenda interactiva semanal y cuadrícula de horarios asignables para servicios y reservas profesionales.

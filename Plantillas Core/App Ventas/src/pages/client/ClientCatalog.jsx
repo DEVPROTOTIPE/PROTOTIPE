@@ -115,6 +115,30 @@ export default function ClientCatalog() {
           promocion: ad,
         }
       }
+
+      // Fallback: Descuento directo del producto
+      if (p.discountActive && Number(p.discountValue) > 0) {
+        const dVal = Number(p.discountValue)
+        let precioPromocional = baseProduct.precioBase
+        if (p.discountType === 'percentage') {
+          precioPromocional = baseProduct.precioBase - (baseProduct.precioBase * dVal) / 100
+        } else {
+          precioPromocional = baseProduct.precioBase - dVal
+        }
+        precioPromocional = Math.max(0, precioPromocional)
+
+        return {
+          ...baseProduct,
+          precioPromo: precioPromocional,
+          tienePromocion: true,
+          promocion: {
+            discountType: p.discountType || 'percentage',
+            discountValue: dVal,
+            title: 'Descuento Especial'
+          }
+        }
+      }
+
       return baseProduct
     })
 
@@ -189,30 +213,42 @@ export default function ClientCatalog() {
       })
     }
 
-    // Filtros Avanzados (para atributos dinámicos)
-    catalogFilters.customAttributes?.forEach(attr => {
-      if (activeFilters[attr.id]?.length > 0) {
-        result = result.filter(p => activeFilters[attr.id].includes(p.atributos?.[attr.id]))
-      }
-    })
-    
-    // Filtros de Talla y Color de variante
-    if (activeFilters.sizes?.length > 0 || activeFilters.colors?.length > 0) {
+    // Aplicación de Filtros Avanzados y Variantes con Lógica OR Global Absoluto
+    const hasFiltersActive = Object.values(activeFilters).some(arr => arr && arr.length > 0)
+    if (hasFiltersActive) {
       result = result.filter(p => {
-        if (!p.variantes || p.variantes.length === 0) return false
-        
-        return p.variantes.some(v => {
-          const matchSize = activeFilters.sizes?.length > 0 ? activeFilters.sizes.includes(v.talla) : true
-          const matchColor = activeFilters.colors?.length > 0 ? activeFilters.colors.includes(v.color) : true
-          return matchSize && matchColor
+        // 1. Coincidencia en atributos dinámicos (Marca, etc.)
+        let matchAttr = false
+        catalogFilters.customAttributes?.forEach(attr => {
+          if (activeFilters[attr.id]?.length > 0) {
+            const val = p.atributos?.[attr.id]
+            if (val && activeFilters[attr.id].includes(val)) {
+              matchAttr = true
+            }
+          }
         })
+
+        // 2. Coincidencia en tallas de variante
+        let matchSize = false
+        if (activeFilters.sizes?.length > 0 && p.variantes && p.variantes.length > 0) {
+          matchSize = p.variantes.some(v => activeFilters.sizes.includes(v.talla))
+        }
+
+        // 3. Coincidencia en colores de variante
+        let matchColor = false
+        if (activeFilters.colors?.length > 0 && p.variantes && p.variantes.length > 0) {
+          matchColor = p.variantes.some(v => activeFilters.colors.includes(v.color))
+        }
+
+        // El producto pasa si cumple AL MENOS UNO de los filtros seleccionados (OR Absoluto)
+        return matchAttr || matchSize || matchColor
       })
     }
 
     return result
   }, [processedProducts, searchTerm, selectedCategoryId, catalogFilters, activeFilters])
 
-  const hasActiveFilters = Object.values(activeFilters).flat().length > 0
+  const hasActiveFilters = Object.values(activeFilters).some(arr => arr && arr.length > 0)
 
   // Manejar clics de CTA y banners
   const handleAdAction = (action) => {

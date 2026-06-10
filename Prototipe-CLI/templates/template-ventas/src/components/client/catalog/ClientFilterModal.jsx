@@ -3,6 +3,49 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Filter, Trash2 } from 'lucide-react'
 import useAppConfigStore from '../../../store/appConfigStore'
 
+const COLOR_NAMES = {
+  '#EF4444': 'Rojo',
+  '#3B82F6': 'Azul',
+  '#10B981': 'Verde',
+  '#F59E0B': 'Amarillo',
+  '#F97316': 'Naranja',
+  '#8B5CF6': 'Morado',
+  '#EC4899': 'Rosa',
+  '#171717': 'Negro',
+  '#FFFFFF': 'Blanco',
+  '#6B7280': 'Gris',
+  '#78350F': 'Café',
+  '#F5F5DC': 'Beige',
+  // Extended colors
+  '#FCA5A5': 'Rojo Pastel',
+  '#F87171': 'Rojo Coral',
+  '#EF4444': 'Rojo Fuerte',
+  '#991B1B': 'Vino Tinto',
+  '#FDBA74': 'Naranja Suave',
+  '#FDE047': 'Amarillo Pastel',
+  '#EAB308': 'Amarillo Oro',
+  '#86EFAC': 'Verde Menta',
+  '#10B981': 'Verde Esmeralda',
+  '#15803D': 'Verde Bosque',
+  '#84CC16': 'Oliva',
+  '#7DD3FC': 'Celeste',
+  '#06B6D4': 'Azul Turquesa',
+  '#3B82F6': 'Azul Cielo',
+  '#1E3A8A': 'Azul Marino',
+  '#C084FC': 'Lavanda',
+  '#8B5CF6': 'Morado Real',
+  '#FBCFE8': 'Rosa Pastel',
+  '#F472B6': 'Rosa Chicle',
+  '#D946EF': 'Fucsia',
+  '#C2410C': 'Terracota',
+  '#78350F': 'Café Madera',
+  '#F9FAFB': 'Hueso',
+  '#E5E7EB': 'Gris Claro',
+  '#9CA3AF': 'Gris Medio',
+  '#4B5563': 'Gris Oscuro',
+  '#171717': 'Negro Mate'
+}
+
 export default function ClientFilterModal({ isOpen, onClose, allProducts, onApplyFilters, currentFilters }) {
   const { catalogFilters } = useAppConfigStore()
   
@@ -158,19 +201,29 @@ export default function ClientFilterModal({ isOpen, onClose, allProducts, onAppl
               <div>
                 <h3 className="text-sm font-bold text-app mb-3">Color</h3>
                 <div className="flex flex-wrap gap-2">
-                  {uniqueOptions.colors.map(color => (
-                    <button
-                      key={color}
-                      onClick={() => toggleFilter('colors', color)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border-2 ${
-                        localFilters.colors?.includes(color)
-                          ? 'bg-primary text-white border-primary shadow-md'
-                          : 'bg-surface border-app text-app hover:border-primary/50'
-                      }`}
-                    >
-                      {color}
-                    </button>
-                  ))}
+                  {uniqueOptions.colors.map(color => {
+                    const isHex = color.startsWith('#')
+                    const colorName = isHex ? (COLOR_NAMES[color.toUpperCase()] || color) : color
+                    const bgVal = isHex ? color : color.toLowerCase()
+                    const isActive = localFilters.colors?.includes(color)
+                    return (
+                      <button
+                        key={color}
+                        onClick={() => toggleFilter('colors', color)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border-2 ${
+                          isActive
+                            ? 'bg-primary text-white border-primary shadow-md'
+                            : 'bg-surface border-app text-app hover:border-primary/50'
+                        }`}
+                      >
+                        <span 
+                          className="w-4 h-4 rounded-full border border-black/10 shrink-0" 
+                          style={{ backgroundColor: bgVal }}
+                        />
+                        <span>{colorName}</span>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )}
