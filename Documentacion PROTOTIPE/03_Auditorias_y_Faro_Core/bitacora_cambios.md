@@ -1,3 +1,15 @@
+### [2026-06-11] - Hotfix: Corrección de Sintaxis de Scripts Git y Reinicio del CLI Bridge (targets)
+* **Tipo:** Corrección de Bug / Git / Scripting / Estabilidad
+* **Descripción de Cambios:**
+  1. **Resolución de Error de Sintaxis en `git_backup.ps1`:** Se removió una llave de cierre `}` extra en la línea 307 del script de respaldo maestro `git_backup.ps1`, la cual causaba que fallara la ejecución del respaldo SSE mostrando errores de bloque Catch/Finally faltante.
+  2. **Resolución de Error de Sintaxis en `menu_backup.ps1`:** Se añadió la llave de cierre `}` faltante en la línea 49 de `menu_backup.ps1` para cerrar correctamente el bloque `if ($tempGitDirs.Count -gt 0)`, permitiendo ejecutar el menú premium sin errores de "MissingEndCurlyBrace".
+  3. **Reinicio de Procesos en Puerto 3001 (CLI Bridge):** Se detuvieron de forma segura y forzada todas las instancias activas de `node server.js` (incluyendo PIDs 17772, 20620 y 19328) para liberar el puerto 3001, y se inició una nueva instancia en caliente cargando el código actualizado. Esto hace efectiva la nueva lógica basada en `git rev-parse` que detecta correctamente el Maestro, la Consola y App Ventas como repositorios activos en la UI, eliminando el badge "Sin .git" y habilitando sus botones de respaldo.
+  4. **Reconstrucción Estática de Dashboard:** Se ejecutó con éxito `npm run build` en `dev-dashboard` para asegurar la paridad de la build.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`d:/PROTOTIPE/menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+* **Verificación:** Pruebas de sintaxis de PowerShell y llamadas del API targets locales ejecutadas con éxito.
+
 ### [2026-06-11] - Hotfix: Saneamiento de Carpetas Git Temporales y Robustez de Detención de Vite
 * **Tipo:** Corrección de Bug / Git / Automatización / Respaldo / CLI Bridge
 * **Descripción de Cambios:**
