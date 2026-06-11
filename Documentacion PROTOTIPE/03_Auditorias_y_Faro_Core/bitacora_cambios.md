@@ -1,3 +1,79 @@
+### [2026-06-11] - Fase 3: Git Strategies UI + Trazabilidad Firestore (GitBackupPanel + CLI Bridge)
+* **Tipo:** Nueva Característica / Control de Versiones / Trazabilidad / UX
+* **Descripción de Cambios:**
+  1. **`subproject_backup.ps1` (No-Interactivo):** Refactorizado completamente el script de respaldo. Se añadieron los parámetros `[switch]$Push` (default `$true`) y `[switch]$AutoMerge` (default `$false`). Se eliminaron todos los bloqueos `Read-Host` que impedían el streaming SSE: la decisión de push/merge ahora es controlada por parámetros de línea de comandos, no por input interactivo. Si no hay conexión SSH, el commit queda local sin abortar el proceso.
+  2. **`server.js` — Endpoint `backup-stream`:** Añadidos los query params `push` y `autoMerge`. Se pasan como flags `-Push:$false` y `-AutoMerge` al invocación del script PS. Al completar el proceso exitosamente, el endpoint emite un evento SSE adicional `metadata` con `{ path, targetName, branch, message, push, autoMerge, timestamp }` para trazabilidad en el frontend.
+  3. **`firebase.js` — Singleton compartido [NEW]:** Creado módulo `src/firebase.js` que reutiliza la instancia de Firebase mediante `getApps/getApp` (evita double-init). Exporta `db` para uso en componentes hijos sin acoplar con la lógica de `App.jsx`.
+  4. **`GitBackupPanel.jsx` — Estrategia Git UI + Trazabilidad:** Añadidos estados `doPush` y `doAutoMerge`. Renderizados 2 toggles estilo switch con animación de deslizamiento: "Sincronizar a GitHub" (índigo) y "Auto-Merge a producción" (ámbar, solo visible si rama ≠ main). El toggle de Auto-Merge se oculta/resetea automáticamente al desactivar Push. Integrado listener SSE para el evento `metadata`: al completar un respaldo exitoso de una **instancia de cliente** (`Instancias Clientes`), se escribe automáticamente en Firestore colección `historial_respaldos` con todos los metadatos del respaldo.
+* **Archivos Modificados/Creados:**
+  - [`d:/PROTOTIPE/subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/firebase.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/firebase.js) [NEW]
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+* **Verificación:** Compilación `vite build` exitosa en 1.09s. Sin errores de sintaxis ni imports rotos.
+
+### [2026-06-11] - Módulo Control Git (Frontend) — GitBackupPanel + Navegación (dev-dashboard)
+* **Tipo:** Nueva Característica / UI / Control de Versiones
+* **Descripción de Cambios:**
+  1. **Tab `git` en NAV_TABS:** Verificado que el id `git` ya estaba registrado con icono `GitCommit`. No se requirió adición.
+  2. **`GitBackupPanel.jsx`:** Componente completamente funcional (597 líneas) que incluye selector de targets por categoría (Maestro, Consola, Core, Cliente), visor de cambios Git con badges por tipo (A/M/D/R), alerta de fuga `.env`, auto-generador de mensaje de commit, acción de backup via SSE (`/api/git/backup-stream`) con terminal estilo UNIX oscuro y estado del proceso (running/done/error/abort).
+  3. **Corrección del Bottom Nav Móvil:** Excluido `git` del filtro del `grid-cols-5` del bottom nav para evitar overflow con 6 items. El tab queda accesible desde el menú de perfil.
+  4. **Menú de Perfil Móvil:** Expandido el grid de accesos de desarrollador de `grid-cols-2` a `grid-cols-3` añadiendo un botón `GitCommit` → `setActiveTab('git')`.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+* **Verificación:** Compilación `vite build` exitosa (✓ built in 1.05s). Sin errores de sintaxis ni dependencias rotas.
+
+### [2026-06-11] - Corrección de Fijación en Scroll de Smartphone Mockup (dev-dashboard)
+* **Tipo:** Corrección de Interfaz / CSS / Layout
+* **Descripción de Cambios:**
+  - **Fijación de Contenedor de Vista Previa:** Añadimos las clases `relative h-full` al wrapper de columna de la grilla principal (`lg:col-span-5`) en el Onboarding Wizard en `App.jsx`. Esto asegura que el elemento hijo con clase `sticky` tenga una altura contenedora de referencia (la del track completo de la grilla lateral izquierda) y no colapse a la altura de sí mismo, permitiendo que el smartphone mockup flote estáticamente al hacer scroll en lugar de esconderse hacia arriba.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Compilación exitosa en producción (`npm run build` en dev-dashboard).
+
+### [2026-06-11] - Propuesta Técnica de Módulo Visual de Commits y Despliegues (Dashboard)
+* **Tipo:** Documentación / Arquitectura / Propuesta Técnica
+* **Descripción de Cambios:**
+  - **Generación del Documento de Propuesta:** Elaboramos la propuesta técnica completa en `propuesta_commits_despliegues.md` dentro de `09_Modulos_Completos`. Detalla el flujo de Server-Sent Events (SSE), el diseño visual HSL a doble panel con terminal integrada y switches de fusión automáticos, el diseño de la API REST del CLI Bridge (`server.js`) y la estrategia de escala multi-tenant con logs guardados en Firestore.
+  - **Actualización de Mapeo de Documentación:** Agregamos el registro en el mapa semántico `mapa_documentacion_ia.md` de la IA para facilitar búsquedas contextuales.
+* **Archivos Creados/Modificados:**
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/09_Modulos_Completos/Modulo_Commits_Despliegues/propuesta_commits_despliegues.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Modulo_Commits_Despliegues/propuesta_commits_despliegues.md) [NEW]
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+* **Verificación:** Coherencia de rutas y convenciones de documentación verificada.
+
+### [2026-06-11] - Vista Previa Interactiva de Productos/Servicios en Smartphone Mockup
+* **Tipo:** Nueva Característica / CRM / Branding / UX
+* **Descripción de Cambios:**
+  1. **Sección Dinámica de Catálogo en Mockup:** Implementamos un nuevo apartado de "Catálogo" (representado con el icono 📦) en el simulador interactivo de smartphone dentro del Wizard de Onboarding.
+  2. **Etiquetas Contextuales según Nicho:** El botón y el título de la sección se adaptan dinámicamente según el nicho de mercado configurado por el desarrollador. Si corresponde a nichos de servicios (ej. `technical_services`, `wellness_podology`, `refrigeration_ac`), la pestaña se titula "Servicios" / "Servicios de la Marca"; de lo contrario, se etiqueta como "Catálogo" / "Catálogo de Productos".
+  3. **Base de Datos Realista por Nicho:** Creamos la constante `MOCK_CATALOG` mapeando 3 ítems realistas (con nombre, emoji representativo y costo financiero) para cada uno de los 10 nichos de mercado disponibles.
+  4. **Interconectividad de Balances:** Al pulsar el botón "+ Registrar" en cualquiera de las tarjetas del catálogo simulado, el ítem se añade dinámicamente a la lista histórica de órdenes en el mockup y su costo impacta el balance diario acumulado del cliente en tiempo real en la pantalla de inicio, logrando un flujo de interactividad 100% real.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Compilación limpia en producción (`vite build`) completada con éxito.
+
+### [2026-06-11] - Paletas de Colores de Marca por Categorías de Nicho
+* **Tipo:** Nueva Característica / CRM / Branding / UX
+* **Descripción de Cambios:**
+  1. **Estructura Dinámica de Nichos (100 Paletas Premium):** Agregamos una base de datos de 100 paletas cromáticas premium distribuidas en 10 categorías de nicho específicas (Tecnología, Moda, Bienestar/Salud, Comida, Automotriz, Finanzas/Corporativo, Infantil/Juguetes, Deportes/Fitness, Hogar/Decoración, Educación/Cultura) con 10 paletas para cada una.
+  2. **Interfaz de Acordeón para Dashboard Central (`dev-dashboard`):** Sustituimos la grilla estática de 8 paletas por un control interactivo de acordeones colapsables para las categorías de nicho. Al abrir una sección, las demás se cierran automáticamente (comportamiento de acordeón puro) para optimizar el espacio vertical del Wizard de Onboarding.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Construcción en producción exitosa (`vite build`) verificada localmente sin errores de sintaxis.
+
+### [2026-06-11] - Integración de Branding Studio HSL y Validador WCAG 2.1 en Onboarding Wizard
+* **Tipo:** Nueva Característica / CRM / Accesibilidad / Wizard
+* **Descripción de Cambios:**
+  1. **Algoritmo de Accesibilidad WCAG 2.1:** Implementamos helpers matemáticos para calcular el contraste relativo basado en la luminancia relativa conforme al estándar WCAG 2.1 de la W3C.
+  2. **Widget de Estudio de Accesibilidad y Contraste:** Añadimos un widget visual interactivo dentro de la pestaña de "Branding" del Wizard de Aprovisionamiento. Muestra la relación de contraste en tiempo real y badges dinámicos con los niveles de conformidad (`AAA (Excelente)`, `AA (Óptimo)`, `AA Grande (Regular)` o `Fail (Bajo Contraste)`) para:
+     - El botón primario (contra fondo blanco).
+     - La interfaz general de la app (color de fondo contra color de texto).
+  3. **Simulador y Previsualizador en Vivo:** Al alterar las coordenadas cromáticas en los selectores, el previsualizador simula instantáneamente la relación de contraste y retroalimenta al desarrollador.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Compilación exitosa en producción (`vite build`) verificada localmente.
+
 ### [2026-06-11] - Botón "Desplegar en Local" y Control de Servidores de Desarrollo en CRM (dev-dashboard)
 * **Tipo:** Nueva Característica / CRM / Gestión Local / CLI
 * **Descripción de Cambios:**

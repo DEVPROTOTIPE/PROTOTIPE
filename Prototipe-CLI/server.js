@@ -2589,6 +2589,261 @@ app.post('/api/project/dev/stop', async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/git/targets
+// Auto-detecta todos los repositorios Git del ecosistema PROTOTIPE.
+// Retorna: maestro, consola central, plantillas core e instancias de clientes.
+// ─────────────────────────────────────────────────────────────────────────────
+const GIT_ROOT         = 'D:\\PROTOTIPE';
+const GIT_CORES_DIR    = path.join(GIT_ROOT, 'Plantillas Core');
+const GIT_INSTANCES_DIR= path.join(GIT_ROOT, 'Instancias Clientes');
+const GIT_DASHBOARD_DIR= path.join(GIT_ROOT, 'Central PROTOTIPE', 'dev-dashboard');
+
+async function getGitBranch(dir) {
+  try {
+    const { stdout } = await execAsync('git rev-parse --abbrev-ref HEAD', { cwd: dir, timeout: 5000 });
+    return stdout.trim();
+  } catch (_) { return null; }
+}
+
+// Detecta si un directorio está dentro de CUALQUIER repo git
+// (incluyendo subdirectorios del repo maestro o submodules con .git file)
+async function isInsideGitRepo(dir) {
+  try {
+    await execAsync('git rev-parse --git-dir', { cwd: dir, timeout: 5000 });
+    return true;
+  } catch (_) { return false; }
+}
+
+async function hasGitChanges(dir) {
+  try {
+    const { stdout } = await execAsync('git status --porcelain', { cwd: dir, timeout: 5000 });
+    return stdout.trim().length > 0;
+  } catch (_) { return false; }
+}
+
+app.get('/api/git/targets', async (req, res) => {
+  try {
+    const targets = {
+      master: null,
+      dashboard: null,
+      cores: [],
+      instances: []
+    };
+
+    // 1. Repositorio maestro
+    if (await isInsideGitRepo(GIT_ROOT)) {
+      const branch = await getGitBranch(GIT_ROOT);
+      const hasChanges = await hasGitChanges(GIT_ROOT);
+      targets.master = { name: 'PROTOTIPE Ecosistema (Maestro)', path: GIT_ROOT, branch, hasChanges, hasGit: true };
+    }
+
+    // 2. Consola central (dev-dashboard)
+    if (await fs.pathExists(GIT_DASHBOARD_DIR) && await isInsideGitRepo(GIT_DASHBOARD_DIR)) {
+      const branch = await getGitBranch(GIT_DASHBOARD_DIR);
+      const hasChanges = await hasGitChanges(GIT_DASHBOARD_DIR);
+      targets.dashboard = { name: 'Consola Central (dev-dashboard)', path: GIT_DASHBOARD_DIR, branch, hasChanges, hasGit: true };
+    }
+
+    // 3. Plantillas Core
+    if (await fs.pathExists(GIT_CORES_DIR)) {
+      const dirs = await fs.readdir(GIT_CORES_DIR);
+      for (const dir of dirs) {
+        const fullPath = path.join(GIT_CORES_DIR, dir);
+        const stat = await fs.stat(fullPath).catch(() => null);
+        if (!stat || !stat.isDirectory()) continue;
+        const hasGit = await isInsideGitRepo(fullPath);
+        const branch = hasGit ? await getGitBranch(fullPath) : null;
+        const hasChanges = hasGit ? await hasGitChanges(fullPath) : false;
+        targets.cores.push({ name: dir, path: fullPath, hasGit, branch, hasChanges });
+      }
+    }
+
+    // 4. Instancias de Clientes
+    if (await fs.pathExists(GIT_INSTANCES_DIR)) {
+      const dirs = await fs.readdir(GIT_INSTANCES_DIR);
+      for (const dir of dirs) {
+        const fullPath = path.join(GIT_INSTANCES_DIR, dir);
+        const stat = await fs.stat(fullPath).catch(() => null);
+        if (!stat || !stat.isDirectory()) continue;
+        const hasGit = await isInsideGitRepo(fullPath);
+        const branch = hasGit ? await getGitBranch(fullPath) : null;
+        const hasChanges = hasGit ? await hasGitChanges(fullPath) : false;
+        targets.instances.push({ name: dir, path: fullPath, hasGit, branch, hasChanges });
+      }
+    }
+
+    res.json({ success: true, targets });
+  } catch (err) {
+    console.error('[API /git/targets] Error:', err.message);
+    res.status(500).json({ error: `Error al escanear repositorios: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/git/status?path=...
+// Retorna: rama activa, lista de cambios por archivo y detección de fugas .env
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/git/status', async (req, res) => {
+  const targetPath = req.query.path;
+  if (!targetPath) return res.status(400).json({ error: 'El parámetro "path" es obligatorio.' });
+
+  // Seguridad: evitar path traversal fuera del ecosistema
+  const resolvedPath = path.resolve(targetPath);
+  if (!resolvedPath.startsWith(GIT_ROOT)) {
+    return res.status(403).json({ error: 'Ruta fuera del ecosistema PROTOTIPE. Acceso denegado.' });
+  }
+  if (!await fs.pathExists(resolvedPath)) {
+    return res.status(404).json({ error: 'La ruta especificada no existe.' });
+  }
+
+  try {
+    const branch = await getGitBranch(resolvedPath);
+    if (!branch) {
+      return res.status(400).json({ error: 'El directorio no es un repositorio Git válido.' });
+    }
+
+    const { stdout: statusOutput } = await execAsync('git status --porcelain', { cwd: resolvedPath, timeout: 10000 });
+    const changes = [];
+    let envLeak = false;
+    let envLeakFiles = [];
+
+    for (const line of statusOutput.split('\n')) {
+      if (!line.trim()) continue;
+      const typeCode = line.substring(0, 2).trim();
+      const filePath = line.substring(3).trim().replace(/"/g, '');
+
+      // Detectar fugas de .env (excluyendo .env.example)
+      if (filePath.match(/\.env/) && !filePath.match(/\.env\.example/)) {
+        envLeak = true;
+        envLeakFiles.push(filePath);
+      }
+
+      let type = 'M';
+      if (typeCode === '??' || typeCode === 'A') type = 'A';
+      else if (typeCode === 'D') type = 'D';
+      else if (typeCode === 'R') type = 'R';
+      changes.push({ file: filePath, type });
+    }
+
+    res.json({ success: true, branch, changes, envLeak, envLeakFiles });
+  } catch (err) {
+    console.error('[API /git/status] Error:', err.message);
+    res.status(500).json({ error: `Error al leer estado Git: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/git/backup-stream (SSE)
+// Ejecuta subproject_backup.ps1 (o git_backup.ps1 para el maestro)
+// y retransmite su stdout en tiempo real por Server-Sent Events.
+// Query: path, message (opcional), push (true/false), isMaster (true/false)
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/git/backup-stream', async (req, res) => {
+  const targetPath = req.query.path;
+  const commitMessage = req.query.message || '';
+  const isMaster = req.query.isMaster === 'true';
+  const doPush = req.query.push !== 'false';          // default true
+  const doAutoMerge = req.query.autoMerge === 'true'; // default false
+
+  if (!targetPath) {
+    return res.status(400).json({ error: 'El parámetro "path" es obligatorio.' });
+  }
+
+  // Seguridad: evitar path traversal
+  const resolvedPath = path.resolve(targetPath);
+  if (!resolvedPath.startsWith(GIT_ROOT)) {
+    return res.status(403).json({ error: 'Ruta fuera del ecosistema PROTOTIPE. Acceso denegado.' });
+  }
+  if (!await fs.pathExists(resolvedPath)) {
+    return res.status(404).json({ error: 'La ruta especificada no existe.' });
+  }
+
+  // Configurar cabeceras SSE
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const send = (type, line) => {
+    if (!res.writableEnded) {
+      res.write(`event: ${type}\ndata: ${JSON.stringify({ line })}\n\n`);
+    }
+  };
+
+  // Seleccionar script: maestro usa git_backup.ps1, subproyectos usan subproject_backup.ps1
+  const scriptFile = isMaster
+    ? path.join(GIT_ROOT, 'git_backup.ps1')
+    : path.join(GIT_ROOT, 'subproject_backup.ps1');
+
+  const psArgs = ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', scriptFile];
+  if (!isMaster) {
+    psArgs.push('-SubprojectPath', resolvedPath);
+    if (!doPush)     psArgs.push('-Push:$false');
+    if (doAutoMerge) psArgs.push('-AutoMerge');
+  }
+  if (commitMessage) {
+    psArgs.push('-CommitMessage', commitMessage);
+  }
+
+  send('log', `🔒 Iniciando respaldo Git: ${path.basename(resolvedPath)}`);
+  send('log', `📜 Script: ${path.basename(scriptFile)}`);
+  send('log', '─────────────────────────────────────');
+
+  const ps = spawn('powershell.exe', psArgs, {
+    cwd: resolvedPath,
+    env: { ...process.env }
+  });
+
+  // Pipe stdout en tiempo real
+  ps.stdout.on('data', (data) => {
+    const lines = data.toString('utf8').split(/\r?\n/).filter(l => l.trim());
+    lines.forEach(line => send('log', line));
+  });
+
+  // stderr como advertencias (no como errores fatales — PS usa stderr para info también)
+  ps.stderr.on('data', (data) => {
+    const lines = data.toString('utf8').split(/\r?\n/).filter(l => l.trim());
+    lines.forEach(line => send('log', `⚠ ${line}`));
+  });
+
+  ps.on('close', (code) => {
+    if (code === 0) {
+      send('log', '─────────────────────────────────────');
+      send('log', '✅ Respaldo completado con éxito.');
+      // Metadata para trazabilidad Firestore en el frontend
+      if (!res.writableEnded) {
+        res.write(`event: metadata\ndata: ${JSON.stringify({
+          path: resolvedPath,
+          targetName: path.basename(resolvedPath),
+          branch: 'auto',
+          message: commitMessage,
+          push: doPush,
+          autoMerge: doAutoMerge,
+          timestamp: new Date().toISOString()
+        })}\n\n`);
+      }
+      send('complete', `Proceso finalizado con código ${code}.`);
+    } else {
+      send('log', `❌ El proceso finalizó con código de error: ${code}`);
+      send('error', `Proceso finalizado con código ${code}.`);
+    }
+    if (!res.writableEnded) res.end();
+  });
+
+  ps.on('error', (err) => {
+    send('log', `❌ No se pudo iniciar PowerShell: ${err.message}`);
+    send('error', err.message);
+    if (!res.writableEnded) res.end();
+  });
+
+  // Limpiar proceso si el cliente cierra la conexión
+  req.on('close', () => {
+    if (!ps.killed) ps.kill();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 app.listen(PORT, '127.0.0.1', () => {
   console.log(`\n🚀 [Prototipe CLI Bridge] Servidor local escuchando en: http://127.0.0.1:${PORT}`);
   console.log(`Endpoints activos:`);
@@ -2604,6 +2859,11 @@ app.listen(PORT, '127.0.0.1', () => {
   console.log(` - GET  http://localhost:${PORT}/api/project/audit                   → Auditoría física y PWA`);
   console.log(` - POST http://localhost:${PORT}/api/e2e/run                         → Ejecutar tests (SSE Logs)`);
   console.log(` - GET  http://localhost:${PORT}/api/e2e/last-result?projectId=[id]`);
+  console.log(` `);
+  console.log(` 🔒 Control de Versiones Git:`);
+  console.log(` - GET  http://localhost:${PORT}/api/git/targets                     → Auto-detectar repositorios`);
+  console.log(` - GET  http://localhost:${PORT}/api/git/status?path=[ruta]          → Estado de cambios`);
+  console.log(` - GET  http://localhost:${PORT}/api/git/backup-stream?path=[ruta]   → Backup SSE en vivo`);
   console.log(` `);
   console.log(` 🏗️  Gestión de Plantillas Core:`);
   console.log(` - POST http://localhost:${PORT}/api/register-core              → Registrar nueva plantilla`);

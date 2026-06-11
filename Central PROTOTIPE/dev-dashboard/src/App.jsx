@@ -52,8 +52,11 @@ import {
   Play,
   StopCircle,
   CircleCheck,
-  CircleX
+  CircleX,
+  GitCommit,
+  Upload
 } from 'lucide-react'
+import GitBackupPanel from './components/admin/GitBackupPanel'
 import { initializeApp, getApps, getApp } from 'firebase/app'
 import { 
   getFirestore, 
@@ -87,7 +90,58 @@ import E2EPanel from './components/admin/E2EPanel'
 import CoreManagerPanel from './components/admin/CoreManagerPanel'
 import ComponentSandbox, { getSandboxKey } from './components/admin/ComponentSandbox'
 
-
+const MOCK_CATALOG = {
+  retail_clothing: [
+    { id: 'c1', name: 'Camiseta Oversize Algodón', price: 59900, emoji: '👕' },
+    { id: 'c2', name: 'Jeans Slim Fit Denim', price: 120000, emoji: '👖' },
+    { id: 'c3', name: 'Chaqueta Impermeable Acolchada', price: 180000, emoji: '🧥' }
+  ],
+  technical_services: [
+    { id: 't1', name: 'Mecanizado de Eje Rotatorio', price: 350000, emoji: '⚙️' },
+    { id: 't2', name: 'Fabricación de Buje de Bronce', price: 85000, emoji: '🔩' },
+    { id: 't3', name: 'Rectificación de Volante de Motor', price: 120000, emoji: '🚗' }
+  ],
+  refrigeration_ac: [
+    { id: 'r1', name: 'Mantenimiento Preventivo Split', price: 95000, emoji: '❄️' },
+    { id: 'r2', name: 'Instalación de Aire Acondicionado', price: 320000, emoji: '🌬️' },
+    { id: 'r3', name: 'Recarga de Gas Refrigerante R410a', price: 140000, emoji: '🧪' }
+  ],
+  contractors: [
+    { id: 'ct1', name: 'Instalación Drywall (m2)', price: 45000, emoji: '📐' },
+    { id: 'ct2', name: 'Pintura de Fachada Exterior', price: 280000, emoji: '🎨' },
+    { id: 'ct3', name: 'Enchape Cerámico Baño/Cocina', price: 60000, emoji: '🧱' }
+  ],
+  machinery_rental: [
+    { id: 'm1', name: 'Alquiler Mini-Excavadora (Día)', price: 450000, emoji: '🚜' },
+    { id: 'm2', name: 'Alquiler Planta Eléctrica 5kW', price: 150000, emoji: '⚡' },
+    { id: 'm3', name: 'Alquiler Mezcladora Concreto', price: 80000, emoji: '🌀' }
+  ],
+  carpentry: [
+    { id: 'cp1', name: 'Fabricación de Closet (m2)', price: 250000, emoji: '🪚' },
+    { id: 'cp2', name: 'Restauración de Puerta Madera', price: 110000, emoji: '🚪' },
+    { id: 'cp3', name: 'Mesa de Centro Madera Maciza', price: 190000, emoji: '🪵' }
+  ],
+  laundry: [
+    { id: 'l1', name: 'Lavado/Secado Edredón Plumas', price: 28000, emoji: '🧺' },
+    { id: 'l2', name: 'Lavado/Aplanchado Traje Formal', price: 22000, emoji: '👔' },
+    { id: 'l3', name: 'Tintura de Prenda Algodón', price: 18000, emoji: '🎨' }
+  ],
+  furniture_repair: [
+    { id: 'f1', name: 'Tapizado de Sofá 3 Puestos', price: 680000, emoji: '🛋️' },
+    { id: 'f2', name: 'Restauración Barniz Silla', price: 75000, emoji: '🪑' },
+    { id: 'f3', name: 'Reparación Rieles de Cajonera', price: 45000, emoji: '🔧' }
+  ],
+  wellness_podology: [
+    { id: 'w1', name: 'Perfilaxis Podológica Completa', price: 90000, emoji: '🦶' },
+    { id: 'w2', name: 'Tratamiento Onicomicosis (Láser)', price: 120000, emoji: '🔦' },
+    { id: 'w3', name: 'Masaje Relajante Espalda/Cuello', price: 75000, emoji: '💆' }
+  ],
+  grocery_food: [
+    { id: 'g1', name: 'Canasta de Verduras Orgánicas', price: 35000, emoji: '🍎' },
+    { id: 'g2', name: 'Café Tostado Especial (500g)', price: 24000, emoji: '☕' },
+    { id: 'g3', name: 'Aceite de Oliva Extra Virgen', price: 42000, emoji: '🫒' }
+  ]
+};
 
 
 // Variables de entorno para conectar al Firebase Central de Control
@@ -552,6 +606,209 @@ function CustomSelect({ value, onChange, options, className }) {
   )
 }
 
+function hexToRgb(hex) {
+  if (!hex || typeof hex !== 'string') return { r: 0, g: 0, b: 0 };
+  let cleaned = hex.trim().replace('#', '');
+  if (cleaned.length === 3) {
+    cleaned = cleaned.split('').map(c => c + c).join('');
+  }
+  if (cleaned.length !== 6) return { r: 0, g: 0, b: 0 };
+  const num = parseInt(cleaned, 16);
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255
+  };
+}
+
+function getRelativeLuminance(rgb) {
+  const a = [rgb.r, rgb.g, rgb.b].map((v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+}
+
+function getContrastRatio(hex1, hex2) {
+  const rgb1 = hexToRgb(hex1);
+  const rgb2 = hexToRgb(hex2);
+  const l1 = getRelativeLuminance(rgb1);
+  const l2 = getRelativeLuminance(rgb2);
+  const brightest = Math.max(l1, l2);
+  const darkest = Math.min(l1, l2);
+  return (brightest + 0.05) / (darkest + 0.05);
+}
+
+function getContrastFeedback(ratio) {
+  if (ratio >= 7) return { text: 'AAA (Excelente)', badgeClass: 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400', isPass: true };
+  if (ratio >= 4.5) return { text: 'AA (Óptimo)', badgeClass: 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400', isPass: true };
+  if (ratio >= 3) return { text: 'AA Grande (Regular)', badgeClass: 'bg-amber-500/10 border border-amber-500/20 text-amber-400', isPass: true };
+  return { text: 'Fail (Bajo Contraste)', badgeClass: 'bg-red-500/10 border border-red-500/20 text-red-400', isPass: false };
+}
+
+const PALETTE_CATEGORIES = [
+  {
+    id: "retail_clothing",
+    name: "🛍️ Ropa y Retail Tradicional",
+    palettes: [
+      { name: 'Royal Indigo', primary: '#6366f1', secondary: '#a855f7', bg: '#070b13', text: '#f8fafc' },
+      { name: 'Soft Rose', primary: '#f43f5e', secondary: '#fb7185', bg: '#0f0507', text: '#fff1f2' },
+      { name: 'Elegant Lilac', primary: '#8b5cf6', secondary: '#d8b4fe', bg: '#0a0410', text: '#fdf4ff' },
+      { name: 'Nordic Sage', primary: '#14b8a6', secondary: '#99f6e4', bg: '#05100f', text: '#f0fdfa' },
+      { name: 'Midnight Chic', primary: '#f43f5e', secondary: '#ec4899', bg: '#09090b', text: '#fafafa' },
+      { name: 'Luxury Gold', primary: '#d97706', secondary: '#fde047', bg: '#110d06', text: '#fefdfa' },
+      { name: 'Classic Denim', primary: '#2563eb', secondary: '#93c5fd', bg: '#0a1128', text: '#f0fdfa' },
+      { name: 'Peach Pastel', primary: '#fb923c', secondary: '#ffedd5', bg: '#1c0d02', text: '#fffcf9' },
+      { name: 'Vibrant Fuchsia', primary: '#d946ef', secondary: '#f5d0fe', bg: '#0f0312', text: '#fdf4ff' },
+      { name: 'Urban Olive', primary: '#84cc16', secondary: '#bef264', bg: '#101407', text: '#f7fee7' }
+    ]
+  },
+  {
+    id: "technical_services",
+    name: "⚙️ Tornerías y Mecanizado de Precisión",
+    palettes: [
+      { name: 'Steel Precision', primary: '#475569', secondary: '#94a3b8', bg: '#0f172a', text: '#f8fafc' },
+      { name: 'Industrial Amber', primary: '#f59e0b', secondary: '#d97706', bg: '#0f0f0c', text: '#fffdfa' },
+      { name: 'Titanium Blue', primary: '#0284c7', secondary: '#38bdf8', bg: '#080f1e', text: '#f0f9ff' },
+      { name: 'Iron Red', primary: '#b91c1c', secondary: '#f87171', bg: '#110606', text: '#fef2f2' },
+      { name: 'Carbon Dark', primary: '#1e293b', secondary: '#64748b', bg: '#020617', text: '#f1f5f9' },
+      { name: 'Laser Green', primary: '#22c55e', secondary: '#86efac', bg: '#021608', text: '#f0fdf4' },
+      { name: 'Brass Glow', primary: '#ca8a04', secondary: '#fef08a', bg: '#161305', text: '#fefdf0' },
+      { name: 'Copper Oxide', primary: '#ea580c', secondary: '#fdba74', bg: '#180b05', text: '#fff7ed' },
+      { name: 'Graphite Matte', primary: '#52525b', secondary: '#a1a1aa', bg: '#09090b', text: '#f4f4f5' },
+      { name: 'Cobalt Tough', primary: '#1d4ed8', secondary: '#60a5fa', bg: '#050b18', text: '#eff6ff' }
+    ]
+  },
+  {
+    id: "refrigeration_ac",
+    name: "❄️ Refrigeración y Climatización",
+    palettes: [
+      { name: 'Arctic Ice', primary: '#0ea5e9', secondary: '#38bdf8', bg: '#030f1d', text: '#f0f9ff' },
+      { name: 'Cyan Thermal', primary: '#06b6d4', secondary: '#22d3ee', bg: '#021114', text: '#ecfeff' },
+      { name: 'Deep Glacier', primary: '#2563eb', secondary: '#60a5fa', bg: '#08132e', text: '#eff6ff' },
+      { name: 'Frost Teal', primary: '#0d9488', secondary: '#5eead4', bg: '#021110', text: '#f2fbf9' },
+      { name: 'Winter Blue', primary: '#1e40af', secondary: '#93c5fd', bg: '#0b1836', text: '#f8fafc' },
+      { name: 'Breeze Green', primary: '#10b981', secondary: '#6ee7b7', bg: '#031810', text: '#f0fdf4' },
+      { name: 'Airflow Silver', primary: '#64748b', secondary: '#cbd5e1', bg: '#0f172a', text: '#f8fafc' },
+      { name: 'Polar Aurora', primary: '#06b6d4', secondary: '#34d399', bg: '#031214', text: '#f0fdfa' },
+      { name: 'Thermal Balance', primary: '#0284c7', secondary: '#f97316', bg: '#060f1b', text: '#f0f9ff' },
+      { name: 'Neon Frost', primary: '#00f0ff', secondary: '#7000ff', bg: '#05030f', text: '#f6f3ff' }
+    ]
+  },
+  {
+    id: "contractors",
+    name: "📐 Contratistas y Construcción",
+    palettes: [
+      { name: 'Safety Orange', primary: '#f97316', secondary: '#fdba74', bg: '#160d06', text: '#fffaf5' },
+      { name: 'Hard Hat Yellow', primary: '#eab308', secondary: '#fef08a', bg: '#141103', text: '#fefdf0' },
+      { name: 'Cement Gray', primary: '#4b5563', secondary: '#9ca3af', bg: '#111827', text: '#f9fafb' },
+      { name: 'Structure Blue', primary: '#1d4ed8', secondary: '#93c5fd', bg: '#0b122c', text: '#f0f7ff' },
+      { name: 'Forest Timber', primary: '#15803d', secondary: '#86efac', bg: '#051608', text: '#f0fdf4' },
+      { name: 'Brick Red', primary: '#b91c1c', secondary: '#fca5a5', bg: '#1a0505', text: '#fff5f5' },
+      { name: 'Asphalt Dark', primary: '#1f2937', secondary: '#6b7280', bg: '#030712', text: '#f9fafb' },
+      { name: 'Copper Pipes', primary: '#d97706', secondary: '#fbbf24', bg: '#130f04', text: '#fefdf5' },
+      { name: 'Slate Roof', primary: '#334155', secondary: '#475569', bg: '#0f172a', text: '#f8fafc' },
+      { name: 'Safety Green', primary: '#84cc16', secondary: '#bef264', bg: '#0e1405', text: '#f7fee7' }
+    ]
+  },
+  {
+    id: "machinery_rental",
+    name: "🚜 Alquiler de Maquinaria y Equipos",
+    palettes: [
+      { name: 'Caterpillar Yellow', primary: '#eab308', secondary: '#ca8a04', bg: '#0d0b01', text: '#fefdf0' },
+      { name: 'Deere Green', primary: '#16a34a', secondary: '#ca8a04', bg: '#061208', text: '#f0fdf4' },
+      { name: 'Kubota Orange', primary: '#ea580c', secondary: '#f97316', bg: '#140904', text: '#fff7ed' },
+      { name: 'Heavy Steel', primary: '#374151', secondary: '#9ca3af', bg: '#111827', text: '#f9fafb' },
+      { name: 'Warning Amber', primary: '#f59e0b', secondary: '#fbbf24', bg: '#161105', text: '#fffbeb' },
+      { name: 'Hydraulic Blue', primary: '#0252cf', secondary: '#2563eb', bg: '#080d1e', text: '#f0f7ff' },
+      { name: 'Industrial Black', primary: '#111827', secondary: '#4b5563', bg: '#030712', text: '#f9fafb' },
+      { name: 'Safety Contrast', primary: '#d97706', secondary: '#475569', bg: '#0e0d06', text: '#fefdfa' },
+      { name: 'High Vis Green', primary: '#a3e635', secondary: '#84cc16', bg: '#0c1203', text: '#f7fee7' },
+      { name: 'Rust Steel', primary: '#9a3412', secondary: '#c2410c', bg: '#180803', text: '#fff7ed' }
+    ]
+  },
+  {
+    id: "carpentry",
+    name: "🪚 Carpinterías y Muebles",
+    palettes: [
+      { name: 'Cedar Wood', primary: '#854d0e', secondary: '#a16207', bg: '#130c04', text: '#fefcf0' },
+      { name: 'Mahogany Red', primary: '#7f1d1d', secondary: '#991b1b', bg: '#160404', text: '#fff5f5' },
+      { name: 'Pine Fresh', primary: '#166534', secondary: '#15803d', bg: '#061208', text: '#f0fdf4' },
+      { name: 'Natural Oak', primary: '#b45309', secondary: '#d97706', bg: '#170e05', text: '#fefaf0' },
+      { name: 'Charcoal Modern', primary: '#1e293b', secondary: '#475569', bg: '#0f172a', text: '#f8fafc' },
+      { name: 'Warm Chestnut', primary: '#c2410c', secondary: '#ea580c', bg: '#190d05', text: '#fff7ed' },
+      { name: 'Birch Minimal', primary: '#d97706', secondary: '#fcd34d', bg: '#181308', text: '#fefdf5' },
+      { name: 'Forest Green', primary: '#065f46', secondary: '#0f766e', bg: '#030f0c', text: '#f2fbf9' },
+      { name: 'Varnish Gold', primary: '#ca8a04', secondary: '#fbbf24', bg: '#141103', text: '#fefdf0' },
+      { name: 'Nordic Slate', primary: '#9ca3af', secondary: '#4b5563', bg: '#111827', text: '#e5e7eb' }
+    ]
+  },
+  {
+    id: "laundry",
+    name: "🧺 Lavanderías y Tintorerías",
+    palettes: [
+      { name: 'Clean Breeze', primary: '#06b6d4', secondary: '#0891b2', bg: '#041113', text: '#ecfeff' },
+      { name: 'Soft Lavender', primary: '#a855f7', secondary: '#c084fc', bg: '#0d0515', text: '#faf5ff' },
+      { name: 'Oxygen Blue', primary: '#2563eb', secondary: '#60a5fa', bg: '#0b132c', text: '#eff6ff' },
+      { name: 'Fresh Mint', primary: '#10b981', secondary: '#a7f3d0', bg: '#031710', text: '#ecfdf5' },
+      { name: 'Suds White', primary: '#3b82f6', secondary: '#60a5fa', bg: '#0c101d', text: '#f8fafc' },
+      { name: 'Sunny Cotton', primary: '#fbbf24', secondary: '#fef08a', bg: '#161103', text: '#fefdf0' },
+      { name: 'Marine Splash', primary: '#0ea5e9', secondary: '#67e8f9', bg: '#040f1a', text: '#f0fdfa' },
+      { name: 'Gentle Rose', primary: '#ec4899', secondary: '#fbcfe8', bg: '#170511', text: '#fdf2f8' },
+      { name: 'Pure Linen', primary: '#64748b', secondary: '#cbd5e1', bg: '#0f172a', text: '#f8fafc' },
+      { name: 'Citrus Fresh', primary: '#84cc16', secondary: '#a3e635', bg: '#0d1403', text: '#f7fee7' }
+    ]
+  },
+  {
+    id: "furniture_repair",
+    name: "🛋️ Restauración y Tapicería de Muebles",
+    palettes: [
+      { name: 'Vintage Leather', primary: '#7c2d12', secondary: '#9a3412', bg: '#140905', text: '#fff7ed' },
+      { name: 'Velvet Plum', primary: '#701a75', secondary: '#86198f', bg: '#140316', text: '#fdf4ff' },
+      { name: 'Classic Walnut', primary: '#5c2c16', secondary: '#78350f', bg: '#100803', text: '#fffbeb' },
+      { name: 'Brass Detail', primary: '#b45309', secondary: '#fbbf24', bg: '#160e03', text: '#fefdf0' },
+      { name: 'Emerald Weave', primary: '#047857', secondary: '#059669', bg: '#02120e', text: '#ecfdf5' },
+      { name: 'Linen Beige', primary: '#ca8a04', secondary: '#fde047', bg: '#161304', text: '#fffbeb' },
+      { name: 'Antique Indigo', primary: '#312e81', secondary: '#4338ca', bg: '#080718', text: '#e0e7ff' },
+      { name: 'Sage Weave', primary: '#15803d', secondary: '#4ade80', bg: '#051608', text: '#f0fdf4' },
+      { name: 'Bronze Classic', primary: '#854d0e', secondary: '#d97706', bg: '#150f04', text: '#fffbf0' },
+      { name: 'Terracotta Earth', primary: '#c2410c', secondary: '#f97316', bg: '#170903', text: '#fffaf0' }
+    ]
+  },
+  {
+    id: "wellness_podology",
+    name: "💆 Estética, Podología y Bienestar",
+    palettes: [
+      { name: 'Zen Teal', primary: '#0d9488', secondary: '#2dd4bf', bg: '#031312', text: '#f2fbf9' },
+      { name: 'Rose Petal', primary: '#ec4899', secondary: '#f472b6', bg: '#170511', text: '#fdf2f8' },
+      { name: 'Lavender Calm', primary: '#8b5cf6', secondary: '#a78bfa', bg: '#0b0518', text: '#f5f3ff' },
+      { name: 'Sakura Blossom', primary: '#db2777', secondary: '#f472b6', bg: '#170410', text: '#fff1f2' },
+      { name: 'Eucalyptus Fresh', primary: '#10b981', secondary: '#34d399', bg: '#031610', text: '#ecfdf5' },
+      { name: 'Orchid Dream', primary: '#d946ef', secondary: '#f5d0fe', bg: '#120316', text: '#fdf4ff' },
+      { name: 'Mineral Clay', primary: '#475569', secondary: '#cbd5e1', bg: '#0f172a', text: '#f8fafc' },
+      { name: 'Warm Peach', primary: '#f97316', secondary: '#fdba74', bg: '#170d06', text: '#fffaf0' },
+      { name: 'Soft Sky', primary: '#0ea5e9', secondary: '#38bdf8', bg: '#080f1e', text: '#f0f9ff' },
+      { name: 'Pure Herbal', primary: '#15803d', secondary: '#a3e635', bg: '#051608', text: '#f7fee7' }
+    ]
+  },
+  {
+    id: "grocery_food",
+    name: "🍎 Minimarkets y Alimentos",
+    palettes: [
+      { name: 'Tomato Fresh', primary: '#ef4444', secondary: '#f87171', bg: '#1a0505', text: '#fff5f5' },
+      { name: 'Organic Green', primary: '#16a34a', secondary: '#4ade80', bg: '#051508', text: '#f0fdf4' },
+      { name: 'Banana Sweet', primary: '#eab308', secondary: '#fde047', bg: '#131001', text: '#fefdf0' },
+      { name: 'Blueberry Rich', primary: '#1d4ed8', secondary: '#3b82f6', bg: '#050a1b', text: '#eff6ff' },
+      { name: 'Citrus Orange', primary: '#f97316', secondary: '#fb923c', bg: '#170c04', text: '#fffaf0' },
+      { name: 'Carrot Glow', primary: '#ea580c', secondary: '#fdba74', bg: '#160802', text: '#fff7ed' },
+      { name: 'Apple Green', primary: '#84cc16', secondary: '#bef264', bg: '#0f1505', text: '#f7fee7' },
+      { name: 'Cacao Brown', primary: '#78350f', secondary: '#b45309', bg: '#140a04', text: '#fffbeb' },
+      { name: 'Clean Dairy', primary: '#0ea5e9', secondary: '#38bdf8', bg: '#09101d', text: '#f0f9ff' },
+      { name: 'Wine Red', primary: '#991b1b', secondary: '#f87171', bg: '#180404', text: '#fff5f5' }
+    ]
+  }
+];
+
 export default function App() {
   const { showAlert, showConfirm } = useAlertConfirm()
   const { toast, showToast, hideToast } = useToast()
@@ -635,6 +892,7 @@ export default function App() {
   const [costoPorFacturaDian, setCostoPorFacturaDian] = useState(150)
   const [customRequirements, setCustomRequirements] = useState('')
   const [wizardTab, setWizardTab] = useState('server')
+  const [expandedPaletteCategory, setExpandedPaletteCategory] = useState('retail_clothing')
   const [isFontModalOpen, setIsFontModalOpen] = useState(false)
   const [fontSearchQuery, setFontSearchQuery] = useState('')
   const [fontCategoryFilter, setFontCategoryFilter] = useState('all')
@@ -2411,7 +2669,7 @@ export default function App() {
   // RENDER PANEL PRINCIPAL
   if (isOnboardingActive) {
     return (
-      <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-sans pb-12 overflow-x-hidden transition-colors duration-300">
+      <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-sans pb-12 overflow-x-clip transition-colors duration-300">
         {/* Background decorativos */}
         <div className="absolute top-0 right-0 w-[50%] h-[400px] rounded-full bg-gradient-to-b from-violet-500/5 to-cyan-500/0 blur-[150px] pointer-events-none opacity-50 dark:opacity-100" />
         
@@ -2433,10 +2691,10 @@ export default function App() {
         </nav>
 
         <div className="max-w-7xl mx-auto px-6 mt-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             {/* WIZARD PANEL (Left) */}
-            <div className="lg:col-span-7 bg-[var(--color-surface)] p-6 rounded-3xl shadow-sm border border-[var(--color-border)] flex flex-col gap-6">
+            <div className="lg:col-span-7 self-start bg-[var(--color-surface)] p-6 rounded-3xl shadow-sm border border-[var(--color-border)] flex flex-col gap-6">
               <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-4">
                 <div>
                   <h2 className="text-lg font-black text-[var(--color-text)] flex items-center gap-2">
@@ -2776,46 +3034,72 @@ export default function App() {
 
                 {wizardTab === 'branding' && (
                   <div className="space-y-6 animate-fade-in">
-                    {/* Paletas de Colores Preestablecidas */}
-                    <div className="space-y-2">
+                    {/* Paletas de Colores Preestablecidas (Por Categorías de Nicho) */}
+                    <div className="space-y-3">
                       <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Paletas de Colores de Marca Recomendadas</span>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        {[
-                          { name: 'Royal Indigo', primary: '#6366f1', secondary: '#a855f7', bg: '#070b13', text: '#f8fafc' },
-                          { name: 'Esmeralda Tech', primary: '#10b981', secondary: '#06b6d4', bg: '#06130e', text: '#ecfdf5' },
-                          { name: 'Cyberpunk Neon', primary: '#ff007f', secondary: '#00f0ff', bg: '#0c0714', text: '#fdf6ff' },
-                          { name: 'Sunset Glow', primary: '#f97316', secondary: '#ef4444', bg: '#140c0b', text: '#fffcfb' },
-                          { name: 'Crimson Rose', primary: '#e11d48', secondary: '#be123c', bg: '#18080f', text: '#fff1f2' },
-                          { name: 'Amber Warm', primary: '#f59e0b', secondary: '#d97706', bg: '#15120c', text: '#fffdfa' },
-                          { name: 'Ocean Wave', primary: '#0ea5e9', secondary: '#3b82f6', bg: '#080f1e', text: '#f0f7ff' },
-                          { name: 'Slate Clean', primary: '#475569', secondary: '#94a3b8', bg: '#0f172a', text: '#f8fafc' }
-                        ].map((preset, pIdx) => {
-                          const isSelected = primaryColor === preset.primary && secondaryColor === preset.secondary && bgColor === preset.bg && textColor === preset.text;
+                      
+                      <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar">
+                        {PALETTE_CATEGORIES.map((category) => {
+                          const isOpen = expandedPaletteCategory === category.id;
                           return (
-                            <button
-                              key={pIdx}
-                              type="button"
-                              onClick={() => {
-                                setPrimaryColor(preset.primary);
-                                setSecondaryColor(preset.secondary);
-                                setBgColor(preset.bg);
-                                setTextColor(preset.text);
-                                showToast(`Aplicada paleta: ${preset.name}`, { type: 'success' });
-                              }}
-                              className={`p-2.5 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
-                                isSelected 
-                                  ? 'bg-indigo-600/15 border-indigo-500 shadow-md scale-[1.02]' 
-                                  : 'bg-[var(--color-surface-2)]/30 border-[var(--color-border)] hover:bg-[var(--color-surface-2)]/60'
+                            <div 
+                              key={category.id} 
+                              className={`border rounded-2xl overflow-hidden transition-all duration-200 ${
+                                isOpen 
+                                  ? 'border-indigo-500/40 bg-indigo-500/[0.02]' 
+                                  : 'border-[var(--color-border)] bg-[var(--color-surface-2)]/10 hover:border-indigo-500/20'
                               }`}
                             >
-                              <div className="flex items-center gap-1.5 mb-1.5">
-                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: preset.primary }} />
-                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: preset.secondary }} />
-                                <div className="w-2.5 h-2.5 rounded-full border border-white/10" style={{ backgroundColor: preset.bg }} />
-                                <div className="w-2.5 h-2.5 rounded-full border border-black/10" style={{ backgroundColor: preset.text }} />
-                              </div>
-                              <span className="text-[10px] font-bold block text-[var(--color-text)] truncate">{preset.name}</span>
-                            </button>
+                              {/* Header del acordeón */}
+                              <button
+                                type="button"
+                                onClick={() => setExpandedPaletteCategory(isOpen ? null : category.id)}
+                                className="w-full flex items-center justify-between px-4 py-3 bg-[var(--color-surface-2)]/30 hover:bg-[var(--color-surface-2)]/60 transition-colors text-xs font-bold text-[var(--color-text)] cursor-pointer select-none"
+                              >
+                                <span className="flex items-center gap-2">{category.name}</span>
+                                <ChevronDown 
+                                  size={14} 
+                                  className={`text-[var(--color-text-muted)] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                                />
+                              </button>
+
+                              {/* Contenido (grilla de paletas) */}
+                              {isOpen && (
+                                <div className="p-4 bg-[var(--color-surface)]/20 border-t border-[var(--color-border)] animate-scale-up origin-top">
+                                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                                    {category.palettes.map((preset, pIdx) => {
+                                      const isSelected = primaryColor === preset.primary && secondaryColor === preset.secondary && bgColor === preset.bg && textColor === preset.text;
+                                      return (
+                                        <button
+                                          key={pIdx}
+                                          type="button"
+                                          onClick={() => {
+                                            setPrimaryColor(preset.primary);
+                                            setSecondaryColor(preset.secondary);
+                                            setBgColor(preset.bg);
+                                            setTextColor(preset.text);
+                                            showToast(`Aplicada paleta: ${preset.name}`, { type: 'success' });
+                                          }}
+                                          className={`p-2 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
+                                            isSelected 
+                                              ? 'bg-indigo-600/20 border-indigo-500 shadow-md scale-[1.02]' 
+                                              : 'bg-[var(--color-surface-2)]/40 border-[var(--color-border)] hover:bg-[var(--color-surface-2)]/80'
+                                          }`}
+                                        >
+                                          <div className="flex items-center gap-1 mb-1.5 justify-start">
+                                            <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: preset.primary }} title="Primario" />
+                                            <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: preset.secondary }} title="Secundario" />
+                                            <div className="w-2.5 h-2.5 rounded-full border border-white/10 shadow-sm" style={{ backgroundColor: preset.bg }} title="Fondo" />
+                                            <div className="w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: preset.text }} title="Texto" />
+                                          </div>
+                                          <span className="text-[9px] font-bold block text-[var(--color-text)] truncate" title={preset.name}>{preset.name}</span>
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           );
                         })}
                       </div>
@@ -3031,6 +3315,68 @@ export default function App() {
                             Seleccionar fuente
                           </button>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Sección de Validación de Accesibilidad WCAG 2.1 */}
+                    <div className="p-4 bg-slate-500/5 dark:bg-slate-900/40 border border-[var(--color-border)] rounded-2xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Estudio de Accesibilidad y Contraste WCAG 2.1</span>
+                        <span className="text-[9px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full px-2 py-0.5">Estándar W3C</span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Contraste Botón Primario */}
+                        {(() => {
+                          const ratio = getContrastRatio(primaryColor, '#ffffff');
+                          const feedback = getContrastFeedback(ratio);
+                          return (
+                            <div className="p-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl space-y-2 flex flex-col justify-between">
+                              <div>
+                                <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase block">Contraste del Botón Primario</span>
+                                <span className="text-xs font-black text-[var(--color-text)] block mt-0.5">{ratio.toFixed(2)} : 1</span>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full ${feedback.badgeClass}`}>
+                                  {feedback.text}
+                                </span>
+                                <div 
+                                  className="px-2 py-1 rounded text-[9px] font-bold text-white shadow-sm"
+                                  style={{ backgroundColor: primaryColor }}
+                                >
+                                  Botón Primario
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Contraste Fondo vs Texto */}
+                        {(() => {
+                          const ratio = getContrastRatio(bgColor, textColor);
+                          const feedback = getContrastFeedback(ratio);
+                          return (
+                            <div className="p-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl space-y-2 flex flex-col justify-between">
+                              <div>
+                                <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase block">Contraste Fondo vs Texto</span>
+                                <span className="text-xs font-black text-[var(--color-text)] block mt-0.5">{ratio.toFixed(2)} : 1</span>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full ${feedback.badgeClass}`}>
+                                  {feedback.text}
+                                </span>
+                                <div 
+                                  className="p-1 rounded text-[8px] border font-medium truncate max-w-[120px]"
+                                  style={{ backgroundColor: bgColor, color: textColor, borderColor: `${textColor}20` }}
+                                >
+                                  Texto de Ejemplo
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -3554,8 +3900,9 @@ export default function App() {
             </div>
 
             {/* MOCKUP PREVIEW PANEL (Right) */}
-            <div className="lg:col-span-5 flex flex-col items-center justify-center bg-[var(--color-surface)]/50 p-6 rounded-3xl border border-[var(--color-border)] shadow-sm sticky top-24">
-              <div className="text-center mb-4">
+            <div className="lg:col-span-5 relative h-full">
+              <div className="flex flex-col items-center justify-center bg-[var(--color-surface)]/50 p-5 rounded-3xl border border-[var(--color-border)] shadow-sm sticky top-24">
+              <div className="text-center mb-3">
                 <span className="text-[9px] uppercase font-bold text-indigo-400 tracking-wider flex items-center justify-center gap-1">
                   <Smartphone size={10} />
                   Vista Previa Interactiva
@@ -3565,19 +3912,19 @@ export default function App() {
 
               {/* Smartphone mockup */}
               <div 
-                className="w-[280px] h-[550px] rounded-[36px] p-2.5 relative shadow-2xl transition-all duration-300 ease-in-out border border-slate-700/50 flex flex-col"
+                className="w-[240px] h-[480px] rounded-[30px] p-2 relative shadow-2xl transition-all duration-300 ease-in-out border border-slate-700/50 flex flex-col"
                 style={{ 
                   backgroundColor: mockTheme === 'dark' ? bgColor : '#ffffff', 
                   color: mockTheme === 'dark' ? textColor : '#0f172a',
                   fontFamily: `'${googleFont}', sans-serif`,
-                  boxShadow: `0 25px 50px -12px ${primaryColor}20, 0 0 2px 2px ${primaryColor}40`
+                  boxShadow: `0 20px 40px -10px ${primaryColor}20, 0 0 2px 2px ${primaryColor}40`
                 }}
               >
                 {/* Glass reflection effect overlay */}
-                <div className="absolute inset-0 rounded-[36px] bg-gradient-to-tr from-white/0 via-white/5 to-white/10 pointer-events-none z-20" />
+                <div className="absolute inset-0 rounded-[30px] bg-gradient-to-tr from-white/0 via-white/5 to-white/10 pointer-events-none z-20" />
 
                 {/* Inner Screen Container */}
-                <div className="h-full w-full flex flex-col justify-between relative overflow-hidden rounded-[28px] p-3 pt-6">
+                <div className="h-full w-full flex flex-col justify-between relative overflow-hidden rounded-[22px] p-3 pt-5">
                   
                   {/* Dynamic Island / Camera Notch */}
                   <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-20 h-4 bg-slate-900 rounded-full z-40 flex items-center justify-center">
@@ -3797,6 +4144,52 @@ export default function App() {
                       </div>
                     )}
 
+                    {mockActiveTab === 'catalogo' && (
+                      <div className="space-y-3 animate-fade-in">
+                        <span className="text-[8px] opacity-70 uppercase font-bold tracking-wider block">
+                          {['technical_services', 'refrigeration_ac', 'contractors', 'machinery_rental', 'laundry', 'furniture_repair', 'wellness_podology'].includes(niche) ? '📌 Servicios de la Marca' : '🏷️ Catálogo de Productos'}
+                        </span>
+                        
+                        <div className="space-y-2 max-h-[260px] overflow-y-auto pr-0.5 scrollbar-none">
+                          {(MOCK_CATALOG[niche] || MOCK_CATALOG.retail_clothing).map((item) => (
+                            <div 
+                              key={item.id} 
+                              className="p-2 rounded-xl bg-slate-500/5 border border-slate-500/10 flex items-center justify-between gap-2 transition-all hover:bg-slate-500/10"
+                            >
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-sm shrink-0">{item.emoji}</span>
+                                <div className="min-w-0">
+                                  <p className="font-bold text-[8.5px] leading-tight truncate">{item.name}</p>
+                                  <p className="text-[8px] font-mono opacity-85 mt-0.5" style={{ color: primaryColor }}>
+                                    ${item.price.toLocaleString('es-CO')}
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMockOrders([
+                                    {
+                                      id: Date.now(),
+                                      title: item.name,
+                                      time: 'Hace un momento',
+                                      val: item.price
+                                    },
+                                    ...mockOrders
+                                  ]);
+                                  showToast(`Añadido: ${item.name}`, { type: 'success' });
+                                }}
+                                className="px-2 py-1 rounded-lg text-[8px] font-bold text-white transition-all hover:scale-105 active:scale-95 shrink-0 cursor-pointer"
+                                style={{ backgroundColor: primaryColor }}
+                              >
+                                + Registrar
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {mockActiveTab === 'ajustes' && (
                       <div className="space-y-3">
                         <span className="text-[8px] opacity-70 uppercase font-bold tracking-wider block">Ajustes de Branding</span>
@@ -3873,6 +4266,17 @@ export default function App() {
                     </button>
                     <button 
                       type="button"
+                      onClick={() => setMockActiveTab('catalogo')}
+                      className="flex flex-col items-center gap-0.5 transition-colors cursor-pointer bg-transparent border-0 p-0"
+                      style={{ color: mockActiveTab === 'catalogo' ? primaryColor : 'inherit', opacity: mockActiveTab === 'catalogo' ? 1 : 0.6 }}
+                    >
+                      <span>📦</span>
+                      <span className="font-bold">
+                        {['technical_services', 'refrigeration_ac', 'contractors', 'machinery_rental', 'laundry', 'furniture_repair', 'wellness_podology'].includes(niche) ? 'Servicios' : 'Catálogo'}
+                      </span>
+                    </button>
+                    <button 
+                      type="button"
                       onClick={() => setMockActiveTab('ventas')}
                       className="flex flex-col items-center gap-0.5 transition-colors cursor-pointer bg-transparent border-0 p-0"
                       style={{ color: mockActiveTab === 'ventas' ? primaryColor : 'inherit', opacity: mockActiveTab === 'ventas' ? 1 : 0.6 }}
@@ -3892,6 +4296,7 @@ export default function App() {
                   </div>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         </div>
@@ -4124,6 +4529,7 @@ export default function App() {
     { id: 'onboarding', label: 'Nuevo Cliente', icon: Sparkles, shortLabel: 'Nuevo' },
     { id: 'library', label: 'Biblioteca', icon: BookOpen, shortLabel: 'Biblioteca' },
     { id: 'errors', label: 'Consola de Errores', icon: AlertTriangle, shortLabel: 'Monitoreo' },
+    { id: 'git', label: 'Control Git', icon: GitCommit, shortLabel: 'Git' },
     { id: 'e2e', label: 'Tests E2E', icon: FlaskConical, shortLabel: 'E2E' },
     { id: 'cores', label: 'Plantillas Core', icon: Layers, shortLabel: 'Cores' },
   ]
@@ -5611,6 +6017,11 @@ export default function App() {
             <CoreManagerPanel showToast={(msg, type) => showToast(msg, { type })} />
           )}
 
+          {/* ===== TAB: CONTROL GIT ===== */}
+          {activeTab === 'git' && (
+            <GitBackupPanel showToast={showToast} />
+          )}
+
           {/* ===== TAB: SETTINGS ===== */}
           {activeTab === 'settings' && (
             <div className="space-y-6 tab-content-enter">
@@ -5952,7 +6363,7 @@ export default function App() {
       {/* BOTTOM NAVIGATION - Móvil */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur-xl pb-safe animate-slide-up">
         <div className="grid grid-cols-5 items-center justify-items-center px-1 py-1.5">
-          {NAV_TABS.filter(tab => tab.id !== 'e2e' && tab.id !== 'cores').map(tab => {
+          {NAV_TABS.filter(tab => tab.id !== 'e2e' && tab.id !== 'cores' && tab.id !== 'git').map(tab => {
             const Icon = tab.icon
             const isActive = activeTab === tab.id
             const isCenterAction = tab.id === 'onboarding'
@@ -6617,7 +7028,7 @@ VITE_DEVELOPER_CLIENT_ID=${onboardingData.clientId}`}
             </div>
 
             {/* Accesos a Herramientas de Desarrollador en Móvil */}
-            <div className="lg:hidden grid grid-cols-2 gap-2 w-full mb-2">
+            <div className="lg:hidden grid grid-cols-3 gap-2 w-full mb-2">
               <button 
                 onClick={() => {
                   setIsProfileModalOpen(false)
@@ -6637,6 +7048,16 @@ VITE_DEVELOPER_CLIENT_ID=${onboardingData.clientId}`}
               >
                 <FlaskConical size={13} />
                 Tests E2E
+              </button>
+              <button 
+                onClick={() => {
+                  setIsProfileModalOpen(false)
+                  setActiveTab('git')
+                }}
+                className="py-2.5 rounded-xl bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 text-violet-400 text-xs font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 shadow-md"
+              >
+                <GitCommit size={13} />
+                Git
               </button>
             </div>
 

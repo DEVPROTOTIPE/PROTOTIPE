@@ -3,6 +3,38 @@
 Roadmap y control de tareas del proyecto dev-dashboard.
 
 ## Siguiente Hito: Mejoras de Interfaz de Usuario (UI/UX)
+- [x] **~~Tarea 245: Fijación de la Vista Previa del Mockup de Smartphone al hacer Scroll~~**
+  - [x] Refactorizar la estructura de rejilla CSS Grid en el Wizard de Onboarding de `items-start` a la alineación por defecto `stretch`.
+  - [x] Agregar la clase `self-start` al panel izquierdo del Wizard para mantener su altura nativa basada en el contenido.
+  - [x] Envolver el panel de la vista previa del mockup (col-span-5 de la derecha) en un contenedor estructural que permite el estiramiento de columna y aplicar `sticky top-24` directamente sobre la tarjeta del mockup para fijarla en pantalla al hacer scroll.
+- [x] **~~Tarea 244: Vista Previa Interactiva de Productos/Servicios en Mockup de Smartphone~~**
+  - [x] Diseñar e implementar un nuevo apartado de "Catálogo" (representado con el icono 📦) en el simulador interactivo de smartphone dentro del Wizard de Onboarding.
+  - [x] Adaptar dinámicamente el botón y el título de la sección según el nicho de negocio seleccionado (titulándose "Servicios" o "Catálogo").
+  - [x] Integrar base de datos realista `MOCK_CATALOG` con 3 ítems con nombre, emoji y costo para cada uno de los 10 nichos de mercado.
+  - [x] Habilitar la interactividad para que al pulsar "+ Registrar", el valor financiero del ítem impacte el balance acumulado y se añada a la lista de órdenes del mockup en tiempo real.
+- [x] **~~Tarea 243: Paletas de Colores de Marca por Categorías de Nicho (100 Paletas Premium)~~**
+  - [x] Implementar base de datos de 100 paletas cromáticas premium distribuidas en 10 categorías de nicho específicas en la pestaña Branding del Onboarding.
+  - [x] Sustituir la grilla estática de 8 paletas por un control interactivo de acordeones colapsables para las categorías de nicho con colapso mutuo automático.
+- [x] **~~Tarea 242: Integración del Branding Studio HSL y Validador WCAG 2.1 en Onboarding Wizard~~**
+  - [x] Desarrollar helpers matemáticos para calcular la luminancia relativa y el contraste relativo en tiempo real basado en el estándar WCAG 2.1.
+  - [x] Diseñar un widget visual interactivo dentro de la pestaña de "Branding" del Wizard para validar el contraste del Botón Primario contra fondo blanco e interfaz general (Fondo vs Texto) con badges de cumplimiento (`AAA`, `AA`, `Fail`).
+- [x] **~~Tarea 241: Control de Servidores de Desarrollo en CRM (npm run dev)~~**
+  - [x] Integrar control de estado y botones contextuales individuales por cliente en el listado del CRM para Desplegar en Local, Detener e Ir a Local (redirección a puerto dinámico asignado por el CLI bridge).
+- [x] **~~Tarea 240: Selector de Clientes para Solicitud de Telemetría Global~~**
+  - [x] Refactorizar el botón global de obtención de telemetría en la cabecera del CRM para abrir un modal interactivo con checklist multicliente pre-seleccionada por defecto.
+- [x] **~~Tarea 239: Selector de Clientes en Sincronización Global y Despliegue en Lote~~**
+  - [x] Diseñar modales de configuración `isGlobalSyncConfigModalOpen` y `isGlobalDeployConfigModalOpen` con checklist multicliente antes de arrancar.
+  - [x] Implementar cola reactiva de despliegues secuenciales asíncronos con tiempo de espera de 3 segundos e indicador de estado de cola en terminal.
+- [x] **~~Tarea 238: Sincronización en Lote de Drift y Consola de Despliegue de Hosting en CRM~~**
+  - [x] Desarrollar modal interactivo de sincronización inteligente por lotes (`BulkSyncModal`) agrupando y pre-marcando archivos core seguros por encima de branding sensible.
+  - [x] Diseñar la terminal interactiva UNIX oscura (`DeployTerminalModal`) para ver logs en vivo mediante Server-Sent Events (SSE) con botón para forzar bypass de auditoría de calidad.
+- [x] **~~Tarea 237: Simulador de Fallos Multicliente Dirigido y Personalizado~~**
+  - [x] Implementar modal interactivo `SimulationFailureModal` reemplazando los errores aleatorios por un panel con selección de cliente, plantillas de error, severidad (FAIL/WARN/INFO) y origen (Manual/Automático).
+- [x] **~~Tarea 236: Corrección Visual y de Idioma en Consola de Telemetría~~**
+  - [x] Cambiar la clase incorrecta `border-slate-850` por `border-slate-800` en el input del buscador de logs.
+  - [x] Traducir la señal técnica a `~/telemetria $ escuchando_eventos_en_vivo...`.
+- [x] **~~Tarea 235: Fijación de Encabezado y Menú en Scroll (Layout Confinado)~~**
+  - [x] Modificar clases del contenedor raíz a `h-screen overflow-hidden` y redirigir el scroll bar únicamente a la sección de contenidos `<main className="overflow-y-auto">`, manteniendo el encabezado y el sidebar fijos.
 - [x] **~~Tarea 234: Centrado y Distribución Equitativa de Botones en Navegación Móvil~~**
   - [x] Cambiar el contenedor de flexbox a CSS Grid con 5 columnas de igual tamaño (`grid-cols-5`) en la barra de navegación móvil de `src/App.jsx`.
   - [x] Eliminar anchos mínimos (`min-w`) y márgenes asimétricos individuales en los botones de navegación, homogeneizándolos a `w-full` y `py-2` para garantizar un reparto perfectamente centrado del botón "NUEVO" y una distancia equivalente en los costados.

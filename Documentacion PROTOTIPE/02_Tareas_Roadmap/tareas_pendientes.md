@@ -6,6 +6,38 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
 ---
 
 ### 💼 Negocio y Modularidad Ecosistema (Prioridad Alta)
+* **[x] ~~Tarea 378: Propuesta de Módulo Visual de Commits y Despliegues (dev-dashboard)~~**
+  - Estatus: Completado (Fase de Diseño y Propuesta Técnica).
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Diseñamos y elaboramos la propuesta técnica para integrar un panel visual de control de versiones y copias de seguridad de Git en dev-dashboard. Detalla la arquitectura de comunicación por Server-Sent Events (SSE) con el bridge CLI, el layout de dos paneles (visor de cambios y terminal de logs en vivo), la API REST en server.js y la estrategia multi-tenant.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Documentacion PROTOTIPE/09_Modulos_Completos/Modulo_Commits_Despliegues/propuesta_commits_despliegues.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Modulo_Commits_Despliegues/propuesta_commits_despliegues.md) [NEW]
+
+* **[x] ~~Tarea 377: Vista Previa Interactiva de Productos y Servicios en Mockup de Smartphone (dev-dashboard)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Añadido un nuevo e interactivo apartado de "Catálogo" (que dinámicamente cambia a "Servicios" o "Catálogo" según el nicho activo) al smartphone mockup del Onboarding Wizard. Cuenta con una base de datos con 3 productos/servicios realistas por nicho (cubriendo los 10 nichos de mercado de la consola central). Al presionar "+ Registrar", cada producto añade su valor financiero al balance de hoy en tiempo real del dashboard simulado, interactuando fluidamente.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 376: Paletas de Colores de Marca por Categorías de Nicho (dev-dashboard)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Implementado un sistema de paletas de colores extendido clasificado por nichos de mercado (10 nichos con 10 paletas premium cada uno, para un total de 100 combinaciones). Reemplazada la grilla estática de 8 paletas por un acordeón interactivo y responsivo. Cada sección de nicho se puede expandir/colapsar individualmente, cerrando de forma automática cualquier otra sección abierta para mantener la interfaz despejada.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 375: Integración del Branding Studio HSL y Validador WCAG 2.1 en Onboarding Wizard (dev-dashboard)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Diseñado e implementado el widget de validación de contraste WCAG 2.1 (AA/AAA) en la sección de Branding del asistente de aprovisionamiento (Onboarding Wizard) de la consola central. Calcula dinámicamente la luminancia relativa y el contraste relativo en tiempo real para el botón primario (contra blanco) y la interfaz general (fondo contra texto de contenido), y previsualiza los estados de cumplimiento visualmente.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
 * **[x] ~~Tarea 374: Botón "Desplegar en Local" y Control de Servidores de Desarrollo en CRM (dev-dashboard)~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-11

@@ -6,7 +6,9 @@
 
 param (
     [string]$SubprojectPath = "",
-    [string]$CommitMessage = ""
+    [string]$CommitMessage = "",
+    [switch]$Push = $true,
+    [switch]$AutoMerge = $false
 )
 
 # Forzar consola a UTF-8 para evitar caracteres extranos en Windows
@@ -73,48 +75,36 @@ if ($leakDetected) {
 Write-Host $statusShort -ForegroundColor Gray
 Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
 
-# Solicitar mensaje de commit interactivo
 if ([string]::IsNullOrWhiteSpace($CommitMessage)) {
-    Write-Host "  Escribe el mensaje para el commit (Presiona Enter para mensaje automatico):" -ForegroundColor Cyan
-    Write-Host "  > " -NoNewline
-    $inputMessage = Read-Host
+    # Generar mensaje automatico basado en los cambios reales
+    $rawStatus = git status --porcelain
+    $added = @()
+    $modified = @()
+    $deleted = @()
     
-    if ([string]::IsNullOrWhiteSpace($inputMessage)) {
-        # Analizar cambios para generar un mensaje con contexto real
-        $rawStatus = git status --porcelain
-        $added = @()
-        $modified = @()
-        $deleted = @()
+    foreach ($line in ($rawStatus -split "`r?`n")) {
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        $statusType = $line.Substring(0, 2).Trim()
+        $filePath = $line.Substring(3).Trim() -replace '"', ''
+        $fileName = Split-Path -Path $filePath -Leaf
         
-        foreach ($line in ($rawStatus -split "`r?`n")) {
-            if ([string]::IsNullOrWhiteSpace($line)) { continue }
-            $statusType = $line.Substring(0, 2).Trim()
-            $filePath = $line.Substring(3).Trim()
-            # Quitar comillas si el path las contiene
-            $filePath = $filePath -replace '"', ''
-            $fileName = Split-Path -Path $filePath -Leaf
-            
-            if ($statusType -eq "M") { $modified += $fileName }
-            elseif ($statusType -eq "??" -or $statusType -eq "A") { $added += $fileName }
-            elseif ($statusType -eq "D") { $deleted += $fileName }
-        }
-        
-        $summaryParts = @()
-        if ($modified.Count -gt 0) { $summaryParts += "Mod: $($modified -join ', ')" }
-        if ($added.Count -gt 0) { $summaryParts += "Add: $($added -join ', ')" }
-        if ($deleted.Count -gt 0) { $summaryParts += "Del: $($deleted -join ', ')" }
-        
-        if ($summaryParts.Count -gt 0) {
-            $contextText = $summaryParts -join " | "
-            # Limitar longitud para evitar desbordes en el mensaje de commit
-            if ($contextText.Length -gt 120) {
-                $contextText = $contextText.Substring(0, 117) + "..."
-            }
-            $CommitMessage = "Auto-Snapshot [$branchName]: $contextText"
-        } else {
-            $currentDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-            $CommitMessage = "Snapshot [$branchName] - $currentDate"
-        }
+        if ($statusType -eq "M") { $modified += $fileName }
+        elseif ($statusType -eq "??" -or $statusType -eq "A") { $added += $fileName }
+        elseif ($statusType -eq "D") { $deleted += $fileName }
+    }
+    
+    $summaryParts = @()
+    if ($modified.Count -gt 0) { $summaryParts += "Mod: $($modified -join ', ')" }
+    if ($added.Count -gt 0)    { $summaryParts += "Add: $($added -join ', ')" }
+    if ($deleted.Count -gt 0)  { $summaryParts += "Del: $($deleted -join ', ')" }
+    
+    if ($summaryParts.Count -gt 0) {
+        $contextText = $summaryParts -join " | "
+        if ($contextText.Length -gt 120) { $contextText = $contextText.Substring(0, 117) + "..." }
+        $CommitMessage = "Auto-Snapshot [$branchName]: $contextText"
+    } else {
+        $currentDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        $CommitMessage = "Snapshot [$branchName] - $currentDate"
     }
 }
 
@@ -126,28 +116,25 @@ Write-Host "  [2/3] Creando commit local..." -ForegroundColor Cyan
 git commit -m $CommitMessage 2>&1 | Out-Null
 Write-Host "    -> Commit exitoso: '$CommitMessage'" -ForegroundColor Gray
 
+# ── Estrategia de Push ────────────────────────────────────────────────
+if (-not $Push) {
+    Write-Host "  [3/3] Modo Solo-Local: commit guardado localmente. Push omitido por configuracion." -ForegroundColor Yellow
+    Write-Host "======================================================================" -ForegroundColor Green
+    exit 0
+}
+
 # Verificar conexion con el servidor remoto via SSH
- Write-Host "  [3/3] Verificando conexion con GitHub (SSH)..." -ForegroundColor Cyan
+Write-Host "  [3/3] Verificando conexion con GitHub (SSH)..." -ForegroundColor Cyan
 $isOnline = $false
 git ls-remote origin HEAD 2>$null | Out-Null
 if ($LASTEXITCODE -eq 0) { $isOnline = $true }
 
 if (-not $isOnline) {
     Write-Host ""
-    Write-Host "  [WARN] No se pudo conectar al repositorio remoto via SSH. Verifica tu conexion a internet o ejecuta: ssh -T git@github.com" -ForegroundColor Yellow
-    Write-Host "  Desea realizar un respaldo local (Commit local en tu disco) unicamente? (S/N): " -NoNewline -ForegroundColor Cyan
-    $confirmLocal = Read-Host
-    if ($confirmLocal -like "s" -or $confirmLocal -like "S") {
-        Write-Host "  [OK] Respaldo local guardado con exito. Los cambios se subiran a GitHub la proxima vez que tenga conexion." -ForegroundColor Green
-        Write-Host "======================================================================" -ForegroundColor Green
-        exit 0
-    } else {
-        Write-Host "  Deshaciendo commit local para mantener el estado original..." -ForegroundColor Yellow
-        git reset --soft HEAD~1 2>&1 | Out-Null
-        Write-Host "  [CANCELADO] Proceso abortado por el usuario." -ForegroundColor Red
-        Write-Host "======================================================================" -ForegroundColor Red
-        exit 1
-    }
+    Write-Host "  [WARN] Sin conexion SSH con GitHub. El commit quedo guardado localmente." -ForegroundColor Yellow
+    Write-Host "  [INFO] Ejecuta 'git push' cuando tengas conexion disponible." -ForegroundColor Gray
+    Write-Host "======================================================================" -ForegroundColor Yellow
+    exit 0
 }
 
 # Realizar un pull preventivo para evitar rechazos por cambios remotos no sincronizados
@@ -172,56 +159,45 @@ Write-Host "--------------------------------------------------------------------
 
 
 
-# Regla de Seguridad de Ramas (Git Strategies: develop -> main)
-if ($branchName -ne "main" -and $branchName -ne "master") {
+# ── Git Strategies: Auto-Merge a produccion ──────────────────────────
+if ($AutoMerge -and $branchName -ne "main" -and $branchName -ne "master") {
+    # Detectar si la rama principal se llama main o master en el repo local
+    $mainBranch = "main"
+    $hasMaster = (git branch --list "master" 2>$null)
+    if ($hasMaster) { $mainBranch = "master" }
+
     Write-Host ""
-    Write-Host "  [Git Strategies] Has subido cambios a la rama de desarrollo: [$branchName]" -ForegroundColor Yellow
-    Write-Host "  Desea fusionar y subir estos cambios tambien a la rama de produccion 'main'? (S/N): " -NoNewline -ForegroundColor Cyan
-    $confirmMerge = Read-Host
-    
-    if ($confirmMerge -like "s" -or $confirmMerge -like "S") {
-        # Detectar si la rama principal se llama main o master en el repo local
-        $mainBranch = "main"
-        $hasMaster = (git branch --list "master" 2>$null)
-        if ($hasMaster) { $mainBranch = "master" }
-        
+    Write-Host "  [Git Strategies] Auto-Merge activado. Fusionando [$branchName] -> [$mainBranch]..." -ForegroundColor Yellow
+
+    Write-Host "  [Merge] Cambiando a la rama de produccion [$mainBranch]..." -ForegroundColor Cyan
+    git checkout $mainBranch 2>&1 | Out-Null
+
+    Write-Host "  [Merge] Trayendo ultimos cambios del servidor remoto..." -ForegroundColor Cyan
+    git pull origin $mainBranch 2>&1 | Out-Null
+
+    Write-Host "  [Merge] Fusionando rama [$branchName] en [$mainBranch]..." -ForegroundColor Cyan
+    $mergeResult = git merge $branchName -m "merge: consolidar $branchName en $mainBranch" 2>&1
+
+    if ($LASTEXITCODE -ne 0 -or $mergeResult -match "CONFLICT" -or (git status --porcelain | Where-Object { $_ -match '^UU' })) {
         Write-Host ""
-        Write-Host "  [Merge] Cambiando a la rama de produccion [$mainBranch]..." -ForegroundColor Cyan
-        git checkout $mainBranch 2>&1 | Out-Null
-        
-        Write-Host "  [Merge] Trayendo ultimos cambios del servidor remoto..." -ForegroundColor Cyan
-        git pull origin $mainBranch 2>&1 | Out-Null
-        
-        Write-Host "  [Merge] Fusionando rama [$branchName] en [$mainBranch]..." -ForegroundColor Cyan
-        # Guardar salida del merge para validar conflictos
-        $mergeResult = git merge $branchName -m "merge: consolidar $branchName en $mainBranch" 2>&1
-        
-        # Validar si hubo fallos o conflictos en el merge
-        if ($LASTEXITCODE -ne 0 -or $mergeResult -match "CONFLICT" -or (git status --porcelain | Where-Object { $_ -match '^UU' })) {
-            Write-Host ""
-            Write-Host "  [CONFLICTO DETECTADO] La fusion automatica encontro conflictos de codigo." -ForegroundColor Red
-            Write-Host "  Abortando fusion para proteger la rama de produccion [$mainBranch]..." -ForegroundColor Yellow
-            git merge --abort 2>&1 | Out-Null
-            
-            Write-Host "  Regresando a tu rama de trabajo [$branchName]..." -ForegroundColor Cyan
-            git checkout $branchName 2>&1 | Out-Null
-            
-            Write-Host "  [INFO] Proceso cancelado. Por favor, resuelve los conflictos manualmente." -ForegroundColor Yellow
-            Write-Host "======================================================================" -ForegroundColor Red
-            exit 1
-        }
-        
-        Write-Host "  [Merge] Subiendo consolidacion a GitHub (git push origin $mainBranch)..." -ForegroundColor Cyan
-        Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
-        git push origin $mainBranch
-        Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
-        
-        Write-Host "  [Merge] Regresando a tu rama de trabajo [$branchName]..." -ForegroundColor Cyan
+        Write-Host "  [CONFLICTO] La fusion automatica encontro conflictos de codigo." -ForegroundColor Red
+        Write-Host "  Abortando fusion para proteger la rama de produccion [$mainBranch]..." -ForegroundColor Yellow
+        git merge --abort 2>&1 | Out-Null
         git checkout $branchName 2>&1 | Out-Null
-        Write-Host "  [OK] Proceso completado. Cambios sincronizados de forma segura en [$branchName] y [$mainBranch]." -ForegroundColor Green
-    } else {
-        Write-Host "  [INFO] Cambios resguardados unicamente en la rama de desarrollo [$branchName]." -ForegroundColor Gray
+        Write-Host "  [INFO] Resuelve los conflictos manualmente y vuelve a intentarlo." -ForegroundColor Yellow
+        Write-Host "======================================================================" -ForegroundColor Red
+        exit 1
     }
+
+    Write-Host "  [Merge] Subiendo consolidacion a GitHub (git push origin $mainBranch)..." -ForegroundColor Cyan
+    Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
+    git push origin $mainBranch
+    Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
+
+    git checkout $branchName 2>&1 | Out-Null
+    Write-Host "  [OK] Proceso completado. Cambios sincronizados en [$branchName] y [$mainBranch]." -ForegroundColor Green
+} elseif ($branchName -ne "main" -and $branchName -ne "master") {
+    Write-Host "  [INFO] Cambios resguardados en la rama de desarrollo [$branchName]. Auto-Merge omitido." -ForegroundColor Gray
 } else {
     Write-Host "  [OK] Proceso completado. Cambios guardados en la rama principal [$branchName]." -ForegroundColor Green
 }

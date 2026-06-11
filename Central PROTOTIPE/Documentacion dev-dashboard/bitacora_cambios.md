@@ -8,6 +8,45 @@ Historial técnico de cambios realizados en el proyecto.
 
 
 
+## [2026-06-11] Fijación de Mockup Smartphone en Scroll (Tarea 245)
+- **Alineación Stretch del Grid:** Removimos la clase de alineación vertical rígida `items-start` del contenedor de cuadrícula del Wizard de Onboarding en `App.jsx`, permitiendo que las columnas de la cuadrícula se estiren (`stretch` por defecto) a lo largo de todo el alto del contenedor.
+- **Alineación self-start en Panel Izquierdo:** Agregamos la clase `self-start` al panel izquierdo (formulario) para evitar que su fondo o bordes se estiren innecesariamente, manteniéndose compacto a la altura de su contenido dinámico.
+- **Contenedor Wrapper Col-Span-5:** Envolvimos el panel del mockup del teléfono (columna derecha `lg:col-span-5`) en un div estructural que se extiende a lo largo del alto total de la fila.
+- **Mockup Stickiness:** Aplicamos las propiedades `sticky top-24` directamente en el componente tarjeta del mockup. Esto habilita que la vista previa interactiva del teléfono flote y quede perfectamente fija y centrada en pantalla mientras el usuario hace scroll hacia abajo para interactuar con las opciones de Branding o Módulos.
+- **Verificación de Compilación:** Compilación exitosa en producción (`npm run build`).
+
+## [2026-06-11] Catálogo de Productos y Servicios en Mockup (Tarea 244)
+- **Apartado de Catálogo en Mockup de Smartphone:** Implementamos una pestaña de "Catálogo" (representada por el icono 📦) en el mockup interactivo del asistente de onboarding.
+- **Títulos y Botones Adaptados al Nicho:** Se cambia dinámicamente el título a "Servicios" o "Catálogo" según el nicho de negocio configurado.
+- **Base de Datos Realista por Nicho (`MOCK_CATALOG`):** Definimos una base de datos con 3 productos/servicios específicos con emojis y costos realistas para cada uno de los 10 nichos de mercado activos del ecosistema.
+- **Flujo de Interactividad Financiera:** Conectamos el botón "+ Registrar" de cada producto simulado para añadirlo a la lista de órdenes del mockup y actualizar el balance diario acumulado del Home en tiempo real.
+
+## [2026-06-11] Branding Studio HSL, WCAG y Galería de 100 Paletas por Nicho (Tareas 242 y 243)
+- **Estudio de Contraste WCAG 2.1 en Vivo:** Diseñamos un widget matemático e interactivo en la sección de Branding del Wizard de Onboarding para evaluar en tiempo real el contraste relativo (Luminancia) del botón primario (contra blanco) y la interfaz (Fondo vs Texto). Muestra badges dinámicos de conformidad (`AAA`, `AA`, `Fail`).
+- **Galería de 100 Paletas Cromáticas por Nicho:** Estructuramos una base de datos de 100 combinaciones clasificada en 10 nichos comerciales.
+- **Acordeón Desplegable Colapsable:** Diseñamos una interfaz interactiva de acordeones en React que colapsa de forma mutua las demás categorías de nicho al expandir una nueva, manteniendo el flujo limpio.
+
+## [2026-06-11] Control de Servidores de Desarrollo en CRM (Tarea 241)
+- **Endpoints `/api/project/dev/start`, `stop`, `status`:** Implementamos control de subprocesos en caliente para levantar y detener instancias locales `npm run dev` en puertos dinámicos.
+- **Botones de Control Contextuales en CRM:** Añadimos botones premium interactivos "Desplegar en Local", "Ir a Local" (apuntando al puerto dev respectivo) y "Detener" directamente en el panel de CRM por cliente.
+
+## [2026-06-11] Selectores Multicliente y Cola Secuencial de Despliegue (Tareas 239 y 240)
+- **Modal de Selección Multicliente de Telemetría Global:** Refactorizamos el botón global para abrir un modal con checklists de selección por cliente.
+- **Modales de Sincronización y Despliegue Globales:** Añadimos modales homólogos para elegir qué clientes procesar antes de iniciar operaciones en lote.
+- **Cola Reactiva de Despliegues en Lote:** Diseñamos un despachador secuencial reactivo con esperas de 3 segundos entre instancias, con panel de control para detener la cola en vivo y contador de progreso.
+
+## [2026-06-11] Sincronización de Drift y Terminal de Deploy SSE (Tarea 238)
+- **Visor de Diffs y Sincronización Selectiva:** Integramos un visor de diferencias de código línea a línea (`/api/project/drift`) y sincronización downstream selectiva de archivos.
+- **Consola de Despliegue de Hosting (`DeployTerminalModal`):** Diseñamos una terminal interactiva oscura UNIX conectada por Server-Sent Events (SSE) que visualiza el build, pre-deploy audit y despliegue a Firebase. Habilita bypass manual en caliente.
+
+## [2026-06-11] Simulador de Fallos Multicliente Dirigido y Personalizado (Tarea 237)
+- **Panel `SimulationFailureModal`:** Sustituimos el simulador de errores aleatorios por un panel donde se selecciona el cliente objetivo, tipo de excepción (TypeError, Firebase, etc.), severidad (FAIL/WARN/INFO) y origen (Manual/Automático) para inyectar diagnósticos precisos en Firestore.
+
+## [2026-06-11] Estabilidad Visual, Idioma y Scrolling Confinado (Tareas 235 y 236)
+- **Scroll Bar Confinado (`h-screen overflow-hidden`):** Bloqueamos el scroll del viewport completo en `App.jsx`, permitiéndolo únicamente dentro de `<main className="overflow-y-auto">` para fijar la cabecera y el sidebar sidebar.
+- **Correcciones Generales:** Cambiamos la clase inválida `border-slate-850` por `border-slate-800` en el buscador de logs, y simplificamos el stream signal a `~/telemetria $ escuchando_eventos_en_vivo...`.
+- **Verificación de Compilación:** Compilación exitosa en producción (`npm run build`).
+
 ## [2026-06-10] Centrado de Botones en Navegación Móvil (Tarea 234)
 - **Centrado Perfecto mediante Grid:** Se modificó la barra de navegación inferior móvil en `App.jsx` de `flex justify-around` a un `grid grid-cols-5 items-center justify-items-center` de 5 columnas idénticas de 20% de ancho de pantalla cada una.
 - **Homogeneización de Ancho de Botones:** Se eliminaron las restricciones de ancho mínimo `min-w-[64px]` y `min-w-[52px]` y paddings horizontales variables que causaban que etiquetas largas como "Biblioteca" y "Monitoreo" empujaran el botón central "NUEVO" hacia la izquierda, logrando que el botón central quede 100% centrado matemáticamente en todos los dispositivos móviles y los demás distribuidos de forma equitativa.
