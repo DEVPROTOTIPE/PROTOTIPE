@@ -2599,25 +2599,44 @@ const GIT_CORES_DIR    = path.join(GIT_ROOT, 'Plantillas Core');
 const GIT_INSTANCES_DIR= path.join(GIT_ROOT, 'Instancias Clientes');
 const GIT_DASHBOARD_DIR= path.join(GIT_ROOT, 'Central PROTOTIPE', 'dev-dashboard');
 
+async function getGitDirName(dir) {
+  if (await fs.pathExists(path.join(dir, '.git'))) return '.git';
+  if (await fs.pathExists(path.join(dir, '.git-backup-temp'))) return '.git-backup-temp';
+  return null;
+}
+
+async function hasGitFolder(dir) {
+  return (await getGitDirName(dir)) !== null;
+}
+
+async function execGitCommand(cmd, dir) {
+  const gitFolder = await getGitDirName(dir);
+  const env = { ...process.env };
+  if (gitFolder) {
+    env.GIT_DIR = path.join(dir, gitFolder);
+    env.GIT_WORK_TREE = dir;
+  }
+  return execAsync(cmd, { cwd: dir, env, timeout: 10000 });
+}
+
 async function getGitBranch(dir) {
   try {
-    const { stdout } = await execAsync('git rev-parse --abbrev-ref HEAD', { cwd: dir, timeout: 5000 });
+    const { stdout } = await execGitCommand('git rev-parse --abbrev-ref HEAD', dir);
     return stdout.trim();
   } catch (_) { return null; }
 }
 
-// Detecta si un directorio está dentro de CUALQUIER repo git
-// (incluyendo subdirectorios del repo maestro o submodules con .git file)
+// Detecta si un directorio tiene o está dentro de un repo git aislado
 async function isInsideGitRepo(dir) {
   try {
-    await execAsync('git rev-parse --git-dir', { cwd: dir, timeout: 5000 });
+    await execGitCommand('git rev-parse --git-dir', dir);
     return true;
   } catch (_) { return false; }
 }
 
 async function hasGitChanges(dir) {
   try {
-    const { stdout } = await execAsync('git status --porcelain', { cwd: dir, timeout: 5000 });
+    const { stdout } = await execGitCommand('git status --porcelain', dir);
     return stdout.trim().length > 0;
   } catch (_) { return false; }
 }
@@ -2633,7 +2652,7 @@ app.get('/api/git/targets', async (req, res) => {
 
     // 1. Consola central (dev-dashboard)
     let dashboardChanges = false;
-    if (await fs.pathExists(path.join(GIT_DASHBOARD_DIR, '.git'))) {
+    if (await hasGitFolder(GIT_DASHBOARD_DIR)) {
       const branch = await getGitBranch(GIT_DASHBOARD_DIR);
       dashboardChanges = await hasGitChanges(GIT_DASHBOARD_DIR);
       targets.dashboard = { name: 'Consola Central (dev-dashboard)', path: GIT_DASHBOARD_DIR, branch, hasChanges: dashboardChanges, hasGit: true };
@@ -2647,7 +2666,7 @@ app.get('/api/git/targets', async (req, res) => {
         const fullPath = path.join(GIT_CORES_DIR, dir);
         const stat = await fs.stat(fullPath).catch(() => null);
         if (!stat || !stat.isDirectory()) continue;
-        const hasGit = await fs.pathExists(path.join(fullPath, '.git'));
+        const hasGit = await hasGitFolder(fullPath);
         const branch = hasGit ? await getGitBranch(fullPath) : null;
         const hasChanges = hasGit ? await hasGitChanges(fullPath) : false;
         if (hasChanges) coresChanges = true;
@@ -2663,7 +2682,7 @@ app.get('/api/git/targets', async (req, res) => {
         const fullPath = path.join(GIT_INSTANCES_DIR, dir);
         const stat = await fs.stat(fullPath).catch(() => null);
         if (!stat || !stat.isDirectory()) continue;
-        const hasGit = await fs.pathExists(path.join(fullPath, '.git'));
+        const hasGit = await hasGitFolder(fullPath);
         const branch = hasGit ? await getGitBranch(fullPath) : null;
         const hasChanges = hasGit ? await hasGitChanges(fullPath) : false;
         if (hasChanges) instancesChanges = true;
@@ -2672,7 +2691,7 @@ app.get('/api/git/targets', async (req, res) => {
     }
 
     // 4. Repositorio maestro (se calcula al final para englobar los cambios del ecosistema entero)
-    if (await fs.pathExists(path.join(GIT_ROOT, '.git'))) {
+    if (await hasGitFolder(GIT_ROOT)) {
       const branch = await getGitBranch(GIT_ROOT);
       const rootChanges = await hasGitChanges(GIT_ROOT);
       const hasChanges = rootChanges || dashboardChanges || coresChanges || instancesChanges;
@@ -2709,7 +2728,7 @@ app.get('/api/git/status', async (req, res) => {
       return res.status(400).json({ error: 'El directorio no es un repositorio Git válido.' });
     }
 
-    const { stdout: statusOutput } = await execAsync('git status --porcelain', { cwd: resolvedPath, timeout: 10000 });
+    const { stdout: statusOutput } = await execGitCommand('git status --porcelain', resolvedPath);
     const changes = [];
     let envLeak = false;
     let envLeakFiles = [];
