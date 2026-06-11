@@ -2631,25 +2631,16 @@ app.get('/api/git/targets', async (req, res) => {
       instances: []
     };
 
-    // 1. Repositorio maestro
-    if (await fs.pathExists(path.join(GIT_ROOT, '.git'))) {
-      const branch = await getGitBranch(GIT_ROOT);
-      const rootChanges = await hasGitChanges(GIT_ROOT);
-      const dashboardChanges = await fs.pathExists(path.join(GIT_DASHBOARD_DIR, '.git'))
-        ? await hasGitChanges(GIT_DASHBOARD_DIR)
-        : false;
-      const hasChanges = rootChanges || dashboardChanges;
-      targets.master = { name: 'PROTOTIPE Ecosistema (Maestro)', path: GIT_ROOT, branch, hasChanges, hasGit: true };
-    }
-
-    // 2. Consola central (dev-dashboard)
+    // 1. Consola central (dev-dashboard)
+    let dashboardChanges = false;
     if (await fs.pathExists(path.join(GIT_DASHBOARD_DIR, '.git'))) {
       const branch = await getGitBranch(GIT_DASHBOARD_DIR);
-      const hasChanges = await hasGitChanges(GIT_DASHBOARD_DIR);
-      targets.dashboard = { name: 'Consola Central (dev-dashboard)', path: GIT_DASHBOARD_DIR, branch, hasChanges, hasGit: true };
+      dashboardChanges = await hasGitChanges(GIT_DASHBOARD_DIR);
+      targets.dashboard = { name: 'Consola Central (dev-dashboard)', path: GIT_DASHBOARD_DIR, branch, hasChanges: dashboardChanges, hasGit: true };
     }
 
-    // 3. Plantillas Core
+    // 2. Plantillas Core
+    let coresChanges = false;
     if (await fs.pathExists(GIT_CORES_DIR)) {
       const dirs = await fs.readdir(GIT_CORES_DIR);
       for (const dir of dirs) {
@@ -2659,11 +2650,13 @@ app.get('/api/git/targets', async (req, res) => {
         const hasGit = await fs.pathExists(path.join(fullPath, '.git'));
         const branch = hasGit ? await getGitBranch(fullPath) : null;
         const hasChanges = hasGit ? await hasGitChanges(fullPath) : false;
+        if (hasChanges) coresChanges = true;
         targets.cores.push({ name: dir, path: fullPath, hasGit, branch, hasChanges });
       }
     }
 
-    // 4. Instancias de Clientes
+    // 3. Instancias de Clientes
+    let instancesChanges = false;
     if (await fs.pathExists(GIT_INSTANCES_DIR)) {
       const dirs = await fs.readdir(GIT_INSTANCES_DIR);
       for (const dir of dirs) {
@@ -2673,8 +2666,17 @@ app.get('/api/git/targets', async (req, res) => {
         const hasGit = await fs.pathExists(path.join(fullPath, '.git'));
         const branch = hasGit ? await getGitBranch(fullPath) : null;
         const hasChanges = hasGit ? await hasGitChanges(fullPath) : false;
+        if (hasChanges) instancesChanges = true;
         targets.instances.push({ name: dir, path: fullPath, hasGit, branch, hasChanges });
       }
+    }
+
+    // 4. Repositorio maestro (se calcula al final para englobar los cambios del ecosistema entero)
+    if (await fs.pathExists(path.join(GIT_ROOT, '.git'))) {
+      const branch = await getGitBranch(GIT_ROOT);
+      const rootChanges = await hasGitChanges(GIT_ROOT);
+      const hasChanges = rootChanges || dashboardChanges || coresChanges || instancesChanges;
+      targets.master = { name: 'PROTOTIPE Ecosistema (Maestro)', path: GIT_ROOT, branch, hasChanges, hasGit: true };
     }
 
     res.json({ success: true, targets });
