@@ -279,6 +279,13 @@ export async function createProject(answers) {
   // 4. Crear el archivo .env.local
   const step4 = ora('Generar variables de entorno (.env.local)').start();
   const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const initials = (answers.projectName || 'P')
+    .split(/[\s-_]+/)
+    .filter(Boolean)
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 3) || 'P';
   const uniqueToken = (answers.telemetryToken || `${clientId}-token-${Date.now()}`).trim();
 
   // Sanitizar todos los inputs eliminando espacios accidentales
@@ -408,6 +415,17 @@ dist-ssr/
   await fs.writeFile(path.join(targetDir, 'firebase.json'), firebaseJsonContent, 'utf-8');
   step5_1.succeed('Configuración firebase.json generada correctamente.');
 
+  const step5_2 = ora('Generar reglas de almacenamiento storage.rules').start();
+  const storageRulesContent = `rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
+`;
   await fs.writeFile(path.join(targetDir, 'storage.rules'), storageRulesContent, 'utf-8');
   step5_2.succeed('Reglas de almacenamiento (storage.rules) generadas correctamente.');
 
@@ -446,7 +464,12 @@ service cloud.firestore {
     }
   };
 
-  if (answers.niche === 'grocery_food') {
+  if (answers.niche === 'retail_clothing') {
+    nicheData.attributes = [
+      { name: 'talla', label: 'Talla', type: 'select', options: ['S', 'M', 'L', 'XL', '38', '39', '40', '41', '42'] },
+      { name: 'color', label: 'Color', type: 'text', placeholder: 'Ej. Negro, Blanco, Azul' }
+    ];
+  } else if (answers.niche === 'grocery_food') {
     nicheData.attributes = [
       { name: 'presentacion', label: 'Presentación', type: 'select', options: ['Libra', 'Kilo', 'Atado', 'Unidad'] }
     ];
@@ -634,14 +657,7 @@ service cloud.firestore {
   const publicFaviconPath = path.join(targetDir, 'public', 'favicon.svg');
   const assetsLogoPath = path.join(targetDir, 'src', 'assets', 'logo.svg');
   
-  // Extraer iniciales
-  const initials = (answers.projectName || 'P')
-    .split(/[\s-_]+/)
-    .filter(Boolean)
-    .map(word => word[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 3) || 'P';
+  // Extraer iniciales (ya declaradas al inicio de la función)
 
   const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <rect width="100" height="100" rx="24" fill="${primaryColor}"/>
@@ -890,7 +906,7 @@ Por favor, lee e indiza obligatoriamente los siguientes archivos y carpetas de n
    - 📂 **[04_Estandares_y_Skills](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/)**: Lee \`inicializacion_nuevos_proyectos.md\` y \`Firebase_Listeners_Clean.md\` para entender el blindaje de base de datos y la PWA.
    - 📂 **[06_Biblioteca_Componentes](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/)**: Consulta el catálogo de componentes listos para portar y reutilizar sin reescribir código.
    - 📂 **[07_Manuales_Desarrollo](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/)**: Contiene la especificación de Sharding Multitenant y manuales de arquitectura.
-   - 📂 **[10_Modulos_Completos](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/10_Modulos_Completos/)**: Consulta el catálogo de módulos completos (Features) listos para portar.
+   - 📂 **[09_Modulos_Completos](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/09_Modulos_Completos/)**: Consulta el catálogo de módulos completos (Features) listos para portar.
    - 📂 **[03_Auditorias_y_Faro_Core](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/)**: Revisa \`bitacora_cambios.md\` para entender el historial de desarrollo y parches.
 
 ### 📋 Contexto del Cliente (Briefing)
@@ -953,7 +969,7 @@ Para asegurar que esta aplicación cumpla con los estándares premium del ecosis
 5: **Reutilización e Integración de Estándares (Auditoría de Documentación):**
    - Antes de escribir cualquier línea de lógica, audita obligatoriamente:
      - El catálogo en [Biblioteca de Componentes](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/) para verificar si ya existe un componente que resuelva la interfaz.
-     - La carpeta de [Módulos Completos](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/10_Modulos_Completos/) para portar módulos de negocio complejos (Features) ya estructurados.
+     - La carpeta de [Módulos Completos](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/09_Modulos_Completos/) para portar módulos de negocio complejos (Features) ya estructurados.
      - La carpeta [04_Estandares_y_Skills](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/) para seguir las guías de inicialización y listeners sin romper las reglas de Firebase.
      - El [Informe de Investigación del Ecosistema 2026](file:///${getWorkspaceRoot().replace(/\\\\/g, '/').replace(/\\/g, '/')}/Documentacion%20PROTOTIPE/09_Plan_Escalabilidad_Negocio/informe_investigacion_ecosistema_2026.md) para emplear librerías Open Source aprobadas en lugar de codificar soluciones personalizadas desde cero.
 ${isSeed ? `6. **Desarrollo Modular (Component-First) - OBLIGATORIO:**

@@ -29,10 +29,52 @@ Clear-Host
 # Obtener nombre del subproyecto
 $projectName = Split-Path -Path $SubprojectPath -Leaf
 
+# Si existe .git-backup-temp, lo renombramos temporalmente a .git para poder operar
+$tempRenamed = $false
+$gitTempPath = Join-Path $SubprojectPath ".git-backup-temp"
+$gitNormalPath = Join-Path $SubprojectPath ".git"
+
+if (Test-Path $gitTempPath) {
+    Write-Host "  [INFO] Detectado .git-backup-temp. Habilitando temporalmente para el respaldo..." -ForegroundColor Yellow
+    
+    # Detener procesos de Vite/Node que puedan bloquear el archivo
+    $nodeProcesses = Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue
+    $stoppedAny = $false
+    foreach ($proc in $nodeProcesses) {
+        if ($proc.CommandLine -match 'vite' -or ($proc.CommandLine -match 'npm' -and $proc.CommandLine -match 'dev')) {
+            Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
+            $stoppedAny = $true
+        }
+    }
+    if ($stoppedAny) { Start-Sleep -Milliseconds 1000 }
+
+    # Intentar renombrar con reintentos
+    $retries = 6
+    $renameSuccess = $false
+    while (-not $renameSuccess -and $retries -gt 0) {
+        try {
+            Rename-Item -Path $gitTempPath -NewName ".git" -ErrorAction Stop -Force
+            $renameSuccess = $true
+            $tempRenamed = $true
+            Write-Host "    -> Habilitado: $projectName/.git" -ForegroundColor DarkGray
+        } catch {
+            $retries--
+            if ($retries -gt 0) { Start-Sleep -Milliseconds 400 }
+        }
+    }
+    if (-not $renameSuccess) {
+        Write-Host "  [ERROR] No se pudo habilitar el repositorio Git ($gitTempPath). Carpeta bloqueada." -ForegroundColor Red
+        exit 1
+    }
+}
+
 # Auto-detectar la rama actual
 $branchName = (git rev-parse --abbrev-ref HEAD 2>$null)
 if (-not $branchName) {
     Write-Host " [ERROR] El directorio especificado no es un repositorio Git valido." -ForegroundColor Red
+    if ($tempRenamed) {
+        Rename-Item -Path $gitNormalPath -NewName ".git-backup-temp" -Force
+    }
     exit 1
 }
 
@@ -157,17 +199,29 @@ try {
     
     # Realizar un pull preventivo para evitar rechazos por cambios remotos no sincronizados
     Write-Host "  [3/3] Sincronizando repositorio local con GitHub..." -ForegroundColor Cyan
-    Write-Host "    -> Trayendo posibles actualizaciones previas del servidor..." -ForegroundColor DarkGray
-    $pullResult = git pull origin $branchName 2>&1
     
-    if ($LASTEXITCODE -ne 0 -or $pullResult -match "CONFLICT" -or (git status --porcelain | Where-Object { $_ -match '^UU' })) {
-        Write-Host ""
-        Write-Host "  [CONFLICTO DETECTADO] Hay cambios en GitHub que colisionan con tu codigo local." -ForegroundColor Red
-        Write-Host "  Deshaciendo el commit local para proteger tu entorno..." -ForegroundColor Yellow
-        git reset --soft HEAD~1 2>&1 | Out-Null
-        Write-Host "  [INFO] Proceso cancelado. Por favor, resuelve los conflictos manualmente." -ForegroundColor Yellow
-        Write-Host "======================================================================" -ForegroundColor Red
-        exit 1
+    # Verificar si la rama existe en el control remoto origin antes de hacer pull
+    $branchExistsOnRemote = $false
+    $remoteCheck = git ls-remote origin $branchName 2>$null
+    if ($remoteCheck) {
+        $branchExistsOnRemote = $true
+    }
+
+    if ($branchExistsOnRemote) {
+        Write-Host "    -> Trayendo posibles actualizaciones previas del servidor..." -ForegroundColor DarkGray
+        $pullResult = git pull origin $branchName --no-edit 2>&1
+        
+        if ($LASTEXITCODE -ne 0 -or $pullResult -match "CONFLICT" -or (git status --porcelain | Where-Object { $_ -match '^UU' })) {
+            Write-Host ""
+            Write-Host "  [CONFLICTO DETECTADO] Hay cambios en GitHub que colisionan con tu codigo local." -ForegroundColor Red
+            Write-Host "  Deshaciendo el commit local para proteger tu entorno..." -ForegroundColor Yellow
+            git reset --soft HEAD~1 2>&1 | Out-Null
+            Write-Host "  [INFO] Proceso cancelado. Por favor, resuelve los conflictos manualmente." -ForegroundColor Yellow
+            Write-Host "======================================================================" -ForegroundColor Red
+            exit 1
+        }
+    } else {
+        Write-Host "    -> La rama no existe en el servidor remoto. Omitiendo pull preventivo." -ForegroundColor Gray
     }
     
     Write-Host "    -> Subiendo tus cambios locales a GitHub (git push origin $branchName)..." -ForegroundColor DarkGray
@@ -200,7 +254,7 @@ try {
             git checkout $mainBranch 2>&1 | Out-Null
             
             Write-Host "  [Merge] Trayendo ultimos cambios del servidor remoto..." -ForegroundColor Cyan
-            git pull origin $mainBranch 2>&1 | Out-Null
+            git pull origin $mainBranch --no-edit 2>&1 | Out-Null
             
             Write-Host "  [Merge] Fusionando rama [$branchName] en [$mainBranch]..." -ForegroundColor Cyan
             $mergeResult = git merge $branchName -m "merge: consolidar $branchName en $mainBranch" 2>&1
@@ -245,6 +299,25 @@ finally {
         if ($currentBranch -and $currentBranch -ne $branchName) {
             Write-Host "  [Restauración] Regresando a la rama de trabajo original: [$branchName]..." -ForegroundColor Yellow
             git checkout $branchName 2>&1 | Out-Null
+        }
+    }
+    # Si renombramos de .git-backup-temp a .git al inicio, lo restauramos a .git-backup-temp
+    if ($tempRenamed -and (Test-Path $gitNormalPath)) {
+        Write-Host "  [Restauración] Restaurando repositorio a su estado inactivo (.git-backup-temp)..." -ForegroundColor Yellow
+        $retries = 6
+        $restored = $false
+        while (-not $restored -and $retries -gt 0) {
+            try {
+                Rename-Item -Path $gitNormalPath -NewName ".git-backup-temp" -ErrorAction Stop -Force
+                $restored = $true
+                Write-Host "    -> Resguardo inactivo configurado para $projectName." -ForegroundColor DarkGray
+            } catch {
+                $retries--
+                if ($retries -gt 0) { Start-Sleep -Milliseconds 400 }
+            }
+        }
+        if (-not $restored) {
+            Write-Host "  [WARNING] No se pudo renombrar .git a .git-backup-temp. Por favor, hágalo manualmente." -ForegroundColor Red
         }
     }
 }

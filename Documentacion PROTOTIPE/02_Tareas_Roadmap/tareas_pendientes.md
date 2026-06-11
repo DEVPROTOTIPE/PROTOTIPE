@@ -5,7 +5,36 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
 
 ---
 
-### 💼 Negocio y Modularidad Ecosistema (Prioridad Alta)
+* **[x] ~~Tarea 384: Saneamiento de Detección Git en Ecosistema (CLI & Dashboard) y Sincronización de Rutas~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Refactorizada la detección de Git en el bridge server (`server.js`) para utilizar `git rev-parse --git-dir` en lugar del chequeo físico estático de la carpeta `.git` con `fs.pathExists`, permitiendo que todos los subproyectos anidados dentro del repositorio maestro (tales como Maestro, Dashboard, App Ventas, App Servicios, App Gastronomia y App Agendamiento) sean detectados correctamente como repositorios controlados por Git. Corregido el bloqueo remanente de `Read-Host` en `subproject_backup.ps1` cuando no se provee un mensaje de commit, reemplazándolo por una generación automática de mensaje descriptivo basada en `git status --porcelain`. Sincronizadas y corregidas todas las referencias obsoletas de la carpeta de documentación `10_Modulos_Completos` a `09_Modulos_Completos` en `inicializacion_nuevos_proyectos.md` y `mapa_documentacion_ia.md`.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`d:/PROTOTIPE/subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+    - [`d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/inicializacion_nuevos_proyectos.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/inicializacion_nuevos_proyectos.md) [MODIFY]
+    - [`d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea 383: Robustez en Respaldo de Subproyectos con .git-backup-temp y Detección en Ecosistema~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Refactorizado `subproject_backup.ps1` para detectar de forma autónoma si un subproyecto está en estado inactivo con la carpeta `.git-backup-temp` en lugar de `.git`. Si se detecta, se detienen preventivamente los procesos locales de Vite/Node y se renombra temporalmente a `.git` para realizar la indexación, commit y push del repositorio individual aislado, restaurándolo a `.git-backup-temp` de forma segura en la sección `finally` para que el repositorio maestro continúe el rastreo físico completo del ecosistema. Esto garantiza que las acciones de respaldo lanzadas desde la UI funcionen perfectamente igual a como lo hace la herramienta de backup de PowerShell de la raíz.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+
+* **[x] ~~Tarea 382: Corrección de Bugs Críticos de Referencia, Falsos Conflictos de Git y Bloqueo de SSE en Automatización~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Corregido en `generator.js` el ReferenceError de `initials` (reubicando la declaración al inicio de `createProject` para que el manifest PWA no la busque vacía) y `storageRulesContent` (junto con su spinner `step5_2`). Modificados los scripts `git_backup.ps1` y `subproject_backup.ps1` para verificar mediante `git ls-remote` si la rama de trabajo existe en el repositorio remoto antes de ejecutar el `git pull` preventivo, solucionando abortos falsos en repositorios o ramas locales nuevas. Refactorizado `/api/create-project` en `server.js` eliminando el flujo de streaming SSE que causaba fallos de parseo JSON en el Onboarding Wizard del dashboard, regresando a una respuesta HTTP JSON estándar y limpia con logs de progreso directos en la consola del daemon.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`d:/PROTOTIPE/git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+    - [`d:/PROTOTIPE/subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+
 * **[x] ~~Tarea 381: Saneamiento de Carpetas Git Temporales y Robustez de Detención de Vite en Backups~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-11

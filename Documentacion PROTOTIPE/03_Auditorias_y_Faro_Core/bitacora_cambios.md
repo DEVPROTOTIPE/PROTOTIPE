@@ -1,14 +1,54 @@
-### [2026-06-11] - Hotfix: Corrección de Sintaxis de Scripts Git y Reinicio del CLI Bridge (targets)
-* **Tipo:** Corrección de Bug / Git / Scripting / Estabilidad
+### [2026-06-11] - Propuesta Técnica de Robustez y Nuevas Funcionalidades en dev-dashboard
+* **Tipo:** Documentación / Arquitectura / Propuesta Técnica
 * **Descripción de Cambios:**
-  1. **Resolución de Error de Sintaxis en `git_backup.ps1`:** Se removió una llave de cierre `}` extra en la línea 307 del script de respaldo maestro `git_backup.ps1`, la cual causaba que fallara la ejecución del respaldo SSE mostrando errores de bloque Catch/Finally faltante.
-  2. **Resolución de Error de Sintaxis en `menu_backup.ps1`:** Se añadió la llave de cierre `}` faltante en la línea 49 de `menu_backup.ps1` para cerrar correctamente el bloque `if ($tempGitDirs.Count -gt 0)`, permitiendo ejecutar el menú premium sin errores de "MissingEndCurlyBrace".
-  3. **Reinicio de Procesos en Puerto 3001 (CLI Bridge):** Se detuvieron de forma segura y forzada todas las instancias activas de `node server.js` (incluyendo PIDs 17772, 20620 y 19328) para liberar el puerto 3001, y se inició una nueva instancia en caliente cargando el código actualizado. Esto hace efectiva la nueva lógica basada en `git rev-parse` que detecta correctamente el Maestro, la Consola y App Ventas como repositorios activos en la UI, eliminando el badge "Sin .git" y habilitando sus botones de respaldo.
-  4. **Reconstrucción Estática de Dashboard:** Se ejecutó con éxito `npm run build` en `dev-dashboard` para asegurar la paridad de la build.
+  - **Generación del Documento de Propuesta Avanzada:** Redactamos y guardamos la propuesta técnica detallada en `propuesta_robustez_y_nuevas_funciones.md` dentro del directorio `07_Manuales_Desarrollo`. Describe la arquitectura de 5 módulos avanzados propuestos para el Dashboard de Control: (1) Seeding automático de base de datos Firebase, (2) Streaming y visor de logs de servidores locales dev, (3) Monitoreo global de desviación de archivos (Drift), (4) Descarte interactivo de cambios y diffs de Git, y (5) Sincronización NPM en lote.
+  - **Mapeo Semántico:** Registramos el documento y sus criterios de decisión de IA en el mapa de documentación global `mapa_documentacion_ia.md`.
+* **Archivos Creados/Modificados:**
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/propuesta_robustez_y_nuevas_funciones.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/propuesta_robustez_y_nuevas_funciones.md) [NEW]
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+* **Verificación:** Coherencia interna, formato markdown estructurado y enlaces relativos correctos.
+
+### [2026-06-11] - Hotfix: Robustez en Respaldo de Subproyectos con .git-backup-temp y Detección en Ecosistema
+* **Tipo:** Corrección de Bug / Git / Scripting / Robustez
+* **Descripción de Cambios:**
+  1. **Habilitación Dinámica de `.git-backup-temp`:** Refactorizado el script `subproject_backup.ps1` para buscar y habilitar temporalmente la carpeta `.git-backup-temp` renombrándola a `.git` al inicio del respaldo. Esto permite realizar operaciones de control de versiones locales e indexación dentro de subproyectos (como `App Ventas`) que han sido resguardados como inactivos en Git.
+  2. **Detención Preventiva de Vite/Node:** Al habilitar `.git`, el script detiene automáticamente procesos locales de Node/Vite activos que puedan estar bloqueando carpetas o archivos dentro del subproyecto.
+  3. **Restauración Segura en Bloque `finally`:** Implementado un bloque `finally` robusto en `subproject_backup.ps1` para asegurar que, tanto en caso de éxito como ante cualquier error o cancelación de la ejecución, la carpeta `.git` sea restaurada a su estado inactivo de seguridad `.git-backup-temp`. Esto protege la integridad del repositorio maestro, evitando colisiones o sobreescritura del historial por rastreo duplicado de subproyectos.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+* **Verificación:** Verificado que la lógica se ejecuta sin bloqueos de PowerShell, respeta el flujo no-interactivo y restablece de forma determinista el repositorio inactivo.
+
+### [2026-06-11] - Hotfix: Resolución de Errores de Referencia en Generator, Falsos Conflictos de Git y Bloqueo de SSE
+* **Tipo:** Corrección de Bug / Git / Aprovisionamiento / Estabilidad CLI
+* **Descripción de Cambios:**
+  1. **Correcion de ReferenceError `initials` en `generator.js`:** Se reubicó la declaración de `initials` al inicio del método `createProject` en `generator.js`. Esto evita el fallo de ejecución que ocurría cuando el generador creaba el `manifest.webmanifest` para proyectos basados en la plantilla seed u otras plantillas que no pasaban por las condicionales previas que definían la variable.
+  2. **Correcion de ReferenceError `storageRulesContent` y Spinner `step5_2` en `generator.js`:** Se corrigió el error de referencia en la inicialización de Firebase Storage. Se reestableció el spinner `step5_2` como `spinnerList.step5_2` y se definió la variable `storageRulesContent` con las reglas por defecto antes de ser invocada.
+  3. **Mitigación de Falsos Conflictos en Git Pull (`git ls-remote`):** Se refactorizaron los scripts `git_backup.ps1` y `subproject_backup.ps1` para realizar una verificación remota previa con `git ls-remote --heads origin $branch`. Ahora, si la rama no existe en el origen remoto (por ejemplo, en repositorios nuevos o ramas creadas localmente de manera reciente), se evita la ejecución de `git pull origin $branch`, previniendo fallos espurios y abortos innecesarios por conflictos inexistentes de fusión.
+  4. **Eliminación de Respuestas SSE Intermitentes en `/api/create-project`:** Se removieron las cabeceras SSE intermitentes del endpoint de aprovisionamiento en `server.js` y se reestableció una respuesta HTTP JSON tradicional limpia y confiable. Esto soluciona los errores de parseo `SyntaxError: Unexpected token` en el Onboarding Wizard (que se provocaban debido al formato híbrido del stream SSE en este endpoint de creación), redireccionando los logs de progreso hacia la consola física del daemon CLI.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+  - [`d:/PROTOTIPE/git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`d:/PROTOTIPE/subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+* **Verificación:** Compilación del dashboard (`dev-dashboard`) completada exitosamente. Verificadas las rutas de aprovisionamiento del CLI y las pruebas unitarias y de integración de Git sin atascos ni errores sintácticos en NodeJS y PowerShell.
+
+### [2026-06-11] - Hotfix: Estabilización de Conexiones SSE, Heartbeats Keep-Alive y Git Pulls No-Interactivos
+* **Tipo:** Corrección de Bug / Git / Estabilidad / SSE
+* **Descripción de Cambios:**
+  1. **Mitigación de Caídas por EPIPE (broken pipe) en SSE:** Se envolvieron las llamadas a `res.write` en el endpoint `/api/git/backup-stream` en bloques `try/catch` seguros y se introdujo la validación preventiva de `res.writableEnded`, `res.finished` y `res.socket.destroyed` para evitar cierres abruptos (crash) del servidor Node ante desconexiones accidentales del cliente.
+  2. **Keep-Alive Heartbeats en Streaming SSE:** Se implementó un intervalo de keep-alive en `/api/git/backup-stream` que escribe comentarios periódicos (`: keepalive\n\n`) cada 5 segundos. Esto evita que proxies intermedios (como el dev server de Vite) o el navegador cierren prematuramente la conexión por inactividad durante operaciones de red de Git.
+  3. **Git Pulls No-Interactivos (`--no-edit`):** Se añadió el flag `--no-edit` a todos los comandos de `git pull` en `git_backup.ps1` y `subproject_backup.ps1` para forzar la aceptación automática del mensaje de fusión por defecto, impidiendo que Git se cuelgue al intentar abrir un editor de texto interactivo en segundo plano.
+  4. **Resolución de Error de Sintaxis en `git_backup.ps1`:** Se removió una llave de cierre `}` extra en la línea 307 del script de respaldo maestro `git_backup.ps1`.
+  5. **Resolución de Error de Sintaxis en `menu_backup.ps1`:** Se añadió la llave de cierre `}` faltante en la línea 49 de `menu_backup.ps1` para cerrar correctamente el bloque `if ($tempGitDirs.Count -gt 0)`.
+  6. **Reinicio de Procesos en Puerto 3001 (CLI Bridge):** Se detuvieron y reiniciaron las instancias de `node server.js` para aplicar la lógica actualizada.
+  7. **Detección Unificada de Git y Validación:** Se verificó por medio de `Invoke-RestMethod` sobre `/api/git/targets` que el repositorio Maestro, el Dashboard y el Core de Ventas ahora reportan `hasGit: true` al resolverse por el worktree de Git (evitando el badge erróneo de "Sin .git" en el Frontend). Adicionalmente, se reconstruyeron los assets estáticos mediante `npm run build` en el dashboard.
 * **Archivos Modificados:**
   - [`d:/PROTOTIPE/git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
   - [`d:/PROTOTIPE/menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
-* **Verificación:** Pruebas de sintaxis de PowerShell y llamadas del API targets locales ejecutadas con éxito.
+  - [`d:/PROTOTIPE/subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+* **Verificación:** Pruebas locales de flujo de respaldo completadas con éxito, verificando que la conexión SSE no se interrumpe y que se regresa correctamente a la rama original sin dejar el repositorio maestro en un estado inconsistente. El endpoint de targets Git funciona con total paridad y el build de Vite se ejecuta al 100% en verde.
+
 
 ### [2026-06-11] - Hotfix: Saneamiento de Carpetas Git Temporales y Robustez de Detención de Vite
 * **Tipo:** Corrección de Bug / Git / Automatización / Respaldo / CLI Bridge

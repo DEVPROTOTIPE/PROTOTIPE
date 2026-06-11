@@ -92,7 +92,7 @@ En el **primer mensaje** de cada nueva sesión de desarrollo, copia y pega el si
 >
 > **Reglas de trabajo obligatorias:**
 > 1. Usa las rutas absolutas de ambos mapas para acceder a archivos directamente sin realizar búsquedas recursivas (`grep` o `list_dir`) innecesarias.
-> 2. Antes de implementar cualquier lógica nueva, revisa el índice [README.md de la Biblioteca de Componentes](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) y la carpeta [10_Modulos_Completos](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/10_Modulos_Completos/) para verificar si ya existe un componente portable o un módulo de negocio (Feature) que pueda reutilizarse.
+> 2. Antes de implementar cualquier lógica nueva, revisa el índice [README.md de la Biblioteca de Componentes](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) y la carpeta [09_Modulos_Completos](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/) para verificar si ya existe un componente portable o un módulo de negocio (Feature) que pueda reutilizarse.
 > 3. Al culminar cada tarea, registra proactivamente el cambio en `bitacora_cambios.md` y `tareas_pendientes.md` sin necesidad de que yo te lo recuerde."*
 
 ### Paso 6: Configurar e inyectar PWA con Auto-Actualización instantánea
@@ -172,7 +172,7 @@ Este proceso debe ser asíncrono y silencioso (capturado con `catch`), de modo q
 
 ## 📦 Cómo Reutilizar Componentes y Módulos Completos
 
-Todos los componentes de nuestra **Biblioteca de Componentes** (`D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\`) y los módulos completos de **Módulos Completos** (`D:\PROTOTIPE\Documentacion PROTOTIPE\10_Modulos_Completos\`) han sido diseñados bajo los siguientes pilares para asegurar compatibilidad en nuevos proyectos:
+Todos los componentes de nuestra **Biblioteca de Componentes** (`D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\`) y los módulos completos de **Módulos Completos** (`D:\PROTOTIPE\Documentacion PROTOTIPE\09_Modulos_Completos\`) han sido diseñados bajo los siguientes pilares para asegurar compatibilidad en nuevos proyectos:
 
 1. **Cero Dependencias Rígidas de Iconos:**
    No usan `lucide-react` ni otras librerías. Tienen SVGs inline nativos embebidos y aceptan la inyección de íconos mediante la propiedad `icons={{}}`.

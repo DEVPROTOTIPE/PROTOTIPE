@@ -230,17 +230,29 @@ try {
 
         # Realizar un pull preventivo para evitar rechazos por cambios remotos no sincronizados
         Write-Host " [5/6] Sincronizando repositorio local con GitHub..." -ForegroundColor Cyan
-        Write-Host "    -> Trayendo posibles actualizaciones previas del servidor..." -ForegroundColor DarkGray
-        $pullResult = git pull origin $branchName 2>&1
+        
+        # Verificar si la rama existe en el control remoto origin antes de hacer pull
+        $branchExistsOnRemote = $false
+        $remoteCheck = git ls-remote origin $branchName 2>$null
+        if ($remoteCheck) {
+            $branchExistsOnRemote = $true
+        }
 
-        if ($LASTEXITCODE -ne 0 -or $pullResult -match "CONFLICT" -or (git status --porcelain | Where-Object { $_ -match '^UU' })) {
-            Write-Host ""
-            Write-Host " [CONFLICTO DETECTADO] Hay cambios en GitHub que colisionan con tu codigo local." -ForegroundColor Red
-            Write-Host " Deshaciendo el commit local para proteger tu entorno..." -ForegroundColor Yellow
-            git reset --soft HEAD~1 2>&1 | Out-Null
-            Write-Host " [INFO] Proceso cancelado. Por favor, resuelve los conflictos manualmente." -ForegroundColor Yellow
-            Write-Host "======================================================================" -ForegroundColor Cyan
-            exit 1
+        if ($branchExistsOnRemote) {
+            Write-Host "    -> Trayendo posibles actualizaciones previas del servidor..." -ForegroundColor DarkGray
+            $pullResult = git pull origin $branchName --no-edit 2>&1
+
+            if ($LASTEXITCODE -ne 0 -or $pullResult -match "CONFLICT" -or (git status --porcelain | Where-Object { $_ -match '^UU' })) {
+                Write-Host ""
+                Write-Host " [CONFLICTO DETECTADO] Hay cambios en GitHub que colisionan con tu codigo local." -ForegroundColor Red
+                Write-Host " Deshaciendo el commit local para proteger tu entorno..." -ForegroundColor Yellow
+                git reset --soft HEAD~1 2>&1 | Out-Null
+                Write-Host " [INFO] Proceso cancelado. Por favor, resuelve los conflictos manualmente." -ForegroundColor Yellow
+                Write-Host "======================================================================" -ForegroundColor Cyan
+                exit 1
+            }
+        } else {
+            Write-Host "    -> La rama no existe en el servidor remoto. Omitiendo pull preventivo." -ForegroundColor Gray
         }
 
         Write-Host "    -> Subiendo tus cambios locales a GitHub (git push origin $branchName)..." -ForegroundColor DarkGray
@@ -271,7 +283,7 @@ try {
                 git checkout $mainBranch 2>&1 | Out-Null
                 
                 Write-Host " [Merge] Trayendo ultimos cambios del servidor remoto..." -ForegroundColor Cyan
-                git pull origin $mainBranch 2>&1 | Out-Null
+                git pull origin $mainBranch --no-edit 2>&1 | Out-Null
                 
                 Write-Host " [Merge] Fusionando rama [$branchName] en [$mainBranch]..." -ForegroundColor Cyan
                 $mergeResult = git merge $branchName -m "merge: consolidar $branchName en $mainBranch" 2>&1

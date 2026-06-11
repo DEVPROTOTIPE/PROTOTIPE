@@ -500,31 +500,26 @@ app.post('/api/create-project', async (req, res) => {
     console.warn(`[API Bridge] Fallo en expansión cognitiva (no crítico): ${aiErr.message}`);
   }
 
-  // ─── Aprovisionamiento en proceso hijo (con Streaming SSE de Logs) ─────────────
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders();
-
-  const send = (data) => {
-    if (!res.writableEnded) {
-      res.write(`data: ${JSON.stringify(data)}\n\n`);
-    }
-  };
-
-  send({ type: 'log', line: `🚀 Iniciando creación de proyecto: ${answers.projectName}` });
+  // ─── Aprovisionamiento en proceso hijo (con Respuesta JSON) ───────────────────
+  console.log(`[API Bridge] Iniciando creación de proyecto: ${answers.projectName}`);
 
   try {
     const result = await runCreateProjectWorker(answers, (line) => {
-      send({ type: 'log', line });
+      console.log(`[Worker] ${line}`);
     });
     console.log(`[API Bridge] Proyecto '${answers.projectName}' creado con éxito en: ${result.targetDir}\n`);
-    send({ type: 'result', success: true, message: 'Proyecto creado físicamente con éxito.', data: result });
-    if (!res.writableEnded) res.end();
+    res.json({
+      success: true,
+      message: 'Proyecto creado físicamente con éxito.',
+      prompt: result.prompt || '',
+      data: result
+    });
   } catch (err) {
     console.error(`[API Bridge] Error durante la creación: ${err.message}`);
-    send({ type: 'result', success: false, error: `Error en el aprovisionamiento local: ${err.message}` });
-    if (!res.writableEnded) res.end();
+    res.status(500).json({
+      success: false,
+      error: `Error en el aprovisionamiento local: ${err.message}`
+    });
   }
 });
 
@@ -613,7 +608,7 @@ app.get('/api/library', async (req, res) => {
       if (catMatch) {
         const catName = catMatch[1].trim();
         const folder = catMatch[2].trim();
-        const isModule = folder.includes('10_Modulos_Completos') || catName.toLowerCase().includes('módulo') || catName.toLowerCase().includes('modulo') || line.includes('📦');
+        const isModule = folder.includes('09_Modulos_Completos') || catName.toLowerCase().includes('módulo') || catName.toLowerCase().includes('modulo') || line.includes('📦');
         currentCategory = { name: catName, folder, isModule, components: [] };
         categories.push(currentCategory);
         continue;
@@ -2857,9 +2852,26 @@ app.get('/api/git/backup-stream', async (req, res) => {
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
+  // Enviar keepalive cada 5 segundos para evitar cierres prematuros de conexión
+  const keepAlive = setInterval(() => {
+    try {
+      if (!res.writableEnded && !res.finished && res.socket && !res.socket.destroyed) {
+        res.write(': keepalive\n\n');
+      }
+    } catch (_) {}
+  }, 5000);
+
+  const cleanUp = () => {
+    clearInterval(keepAlive);
+  };
+
   const send = (type, line) => {
-    if (!res.writableEnded) {
-      res.write(`event: ${type}\ndata: ${JSON.stringify({ line })}\n\n`);
+    try {
+      if (!res.writableEnded && !res.finished && res.socket && !res.socket.destroyed) {
+        res.write(`event: ${type}\ndata: ${JSON.stringify({ line })}\n\n`);
+      }
+    } catch (err) {
+      console.warn('[SSE Send Error]', err.message);
     }
   };
 
@@ -2920,37 +2932,46 @@ app.get('/api/git/backup-stream', async (req, res) => {
   });
 
   ps.on('close', (code) => {
+    cleanUp();
     if (code === 0) {
       send('log', '─────────────────────────────────────');
       send('log', '✅ Respaldo completado con éxito.');
       // Metadata para trazabilidad Firestore en el frontend
-      if (!res.writableEnded) {
-        res.write(`event: metadata\ndata: ${JSON.stringify({
-          path: resolvedPath,
-          targetName: path.basename(resolvedPath),
-          branch: 'auto',
-          message: commitMessage,
-          push: doPush,
-          autoMerge: doAutoMerge,
-          timestamp: new Date().toISOString()
-        })}\n\n`);
-      }
+      try {
+        if (!res.writableEnded && !res.finished && res.socket && !res.socket.destroyed) {
+          res.write(`event: metadata\ndata: ${JSON.stringify({
+            path: resolvedPath,
+            targetName: path.basename(resolvedPath),
+            branch: 'auto',
+            message: commitMessage,
+            push: doPush,
+            autoMerge: doAutoMerge,
+            timestamp: new Date().toISOString()
+          })}\n\n`);
+        }
+      } catch (_) {}
       send('complete', `Proceso finalizado con código ${code}.`);
     } else {
       send('log', `❌ El proceso finalizó con código de error: ${code}`);
       send('error', `Proceso finalizado con código ${code}.`);
     }
-    if (!res.writableEnded) res.end();
+    try {
+      if (!res.writableEnded && !res.finished) res.end();
+    } catch (_) {}
   });
 
   ps.on('error', (err) => {
+    cleanUp();
     send('log', `❌ No se pudo iniciar PowerShell: ${err.message}`);
     send('error', err.message);
-    if (!res.writableEnded) res.end();
+    try {
+      if (!res.writableEnded && !res.finished) res.end();
+    } catch (_) {}
   });
 
   // Limpiar proceso si el cliente cierra la conexión
   req.on('close', () => {
+    cleanUp();
     if (!ps.killed) ps.kill();
   });
 });
