@@ -1,3 +1,12 @@
+### [2026-06-11] - Hotfix: Corrección en Detección de Repositorios Git y Estado de Cambios Ecosistema
+* **Tipo:** Corrección de Bug / Git / CLI Bridge
+* **Descripción de Cambios:**
+  1. **Detección Estricta por Directorio (`.git` físico):** Refactorizado el endpoint `/api/git/targets` para validar la existencia física de la carpeta `.git` local en cada subproyecto (con `fs.pathExists`) en vez del comando `git rev-parse --git-dir` que heredaba el repositorio padre. Con esto, las plantillas core y proyectos sin Git (como `App Agendamiento`, `App Domiciliarios`, `App Gastronomia` y `App Servicios`) se detectan con paridad absoluta como "Sin .git".
+  2. **Trazabilidad de Cambios en Ecosistema Maestro:** Se modificó la validación de `hasChanges` del target Maestro (`PROTOTIPE Ecosistema (Maestro)`) para que declare cambios activos (`hasChanges = true`) si existen modificaciones en el repositorio maestro **o** en el repositorio del dashboard de desarrollo (`dev-dashboard`), garantizando que la consola muestre el estado de cambios real antes de respaldar.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+* **Verificación:** Ejecución y compilación correctas. Mapeo verificado en el dashboard.
+
 ### [2026-06-11] - Fase 3: Git Strategies UI + Trazabilidad Firestore (GitBackupPanel + CLI Bridge)
 * **Tipo:** Nueva Característica / Control de Versiones / Trazabilidad / UX
 * **Descripción de Cambios:**

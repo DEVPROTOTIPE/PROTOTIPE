@@ -2632,14 +2632,18 @@ app.get('/api/git/targets', async (req, res) => {
     };
 
     // 1. Repositorio maestro
-    if (await isInsideGitRepo(GIT_ROOT)) {
+    if (await fs.pathExists(path.join(GIT_ROOT, '.git'))) {
       const branch = await getGitBranch(GIT_ROOT);
-      const hasChanges = await hasGitChanges(GIT_ROOT);
+      const rootChanges = await hasGitChanges(GIT_ROOT);
+      const dashboardChanges = await fs.pathExists(path.join(GIT_DASHBOARD_DIR, '.git'))
+        ? await hasGitChanges(GIT_DASHBOARD_DIR)
+        : false;
+      const hasChanges = rootChanges || dashboardChanges;
       targets.master = { name: 'PROTOTIPE Ecosistema (Maestro)', path: GIT_ROOT, branch, hasChanges, hasGit: true };
     }
 
     // 2. Consola central (dev-dashboard)
-    if (await fs.pathExists(GIT_DASHBOARD_DIR) && await isInsideGitRepo(GIT_DASHBOARD_DIR)) {
+    if (await fs.pathExists(path.join(GIT_DASHBOARD_DIR, '.git'))) {
       const branch = await getGitBranch(GIT_DASHBOARD_DIR);
       const hasChanges = await hasGitChanges(GIT_DASHBOARD_DIR);
       targets.dashboard = { name: 'Consola Central (dev-dashboard)', path: GIT_DASHBOARD_DIR, branch, hasChanges, hasGit: true };
@@ -2652,7 +2656,7 @@ app.get('/api/git/targets', async (req, res) => {
         const fullPath = path.join(GIT_CORES_DIR, dir);
         const stat = await fs.stat(fullPath).catch(() => null);
         if (!stat || !stat.isDirectory()) continue;
-        const hasGit = await isInsideGitRepo(fullPath);
+        const hasGit = await fs.pathExists(path.join(fullPath, '.git'));
         const branch = hasGit ? await getGitBranch(fullPath) : null;
         const hasChanges = hasGit ? await hasGitChanges(fullPath) : false;
         targets.cores.push({ name: dir, path: fullPath, hasGit, branch, hasChanges });
@@ -2666,7 +2670,7 @@ app.get('/api/git/targets', async (req, res) => {
         const fullPath = path.join(GIT_INSTANCES_DIR, dir);
         const stat = await fs.stat(fullPath).catch(() => null);
         if (!stat || !stat.isDirectory()) continue;
-        const hasGit = await isInsideGitRepo(fullPath);
+        const hasGit = await fs.pathExists(path.join(fullPath, '.git'));
         const branch = hasGit ? await getGitBranch(fullPath) : null;
         const hasChanges = hasGit ? await hasGitChanges(fullPath) : false;
         targets.instances.push({ name: dir, path: fullPath, hasGit, branch, hasChanges });
