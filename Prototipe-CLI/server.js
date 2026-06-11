@@ -2808,7 +2808,27 @@ app.get('/api/git/backup-stream', async (req, res) => {
   // stderr como advertencias (no como errores fatales — PS usa stderr para info también)
   ps.stderr.on('data', (data) => {
     const lines = data.toString('utf8').split(/\r?\n/).filter(l => l.trim());
-    lines.forEach(line => send('log', `⚠ ${line}`));
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      // Si la línea es información estándar de Git en stderr, la enviamos como log normal
+      const isGitInfo = 
+        trimmed.startsWith('To ') || 
+        trimmed.startsWith('From ') ||
+        trimmed.startsWith('Everything up-to-date') ||
+        trimmed.includes('->') ||
+        trimmed.startsWith('Counting objects:') ||
+        trimmed.startsWith('Compressing objects:') ||
+        trimmed.startsWith('Writing objects:') ||
+        trimmed.startsWith('Total ') ||
+        trimmed.startsWith('remote:') ||
+        trimmed.match(/^[a-f0-9]+\.\.[a-f0-9]+\s+/i);
+
+      if (isGitInfo) {
+        send('log', line);
+      } else {
+        send('log', `⚠ ${line}`);
+      }
+    });
   });
 
   ps.on('close', (code) => {

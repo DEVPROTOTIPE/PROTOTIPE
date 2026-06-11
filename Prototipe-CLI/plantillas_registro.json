@@ -15,34 +15,6 @@
       "nicho": "Retail / Ecommerce / POS",
       "activo": true,
       "version": "1.0.3"
-    },
-    "servicios": {
-      "fuente": "D:/PROTOTIPE/Plantillas Core/App Servicios",
-      "destino": "D:/PROTOTIPE/Prototipe-CLI/templates/template-servicios",
-      "nicho": "Talleres / Mantenimiento / Servicios tecnicos",
-      "activo": false,
-      "version": "1.0.0"
-    },
-    "agendamiento": {
-      "fuente": "D:/PROTOTIPE/Plantillas Core/App Agendamiento",
-      "destino": "D:/PROTOTIPE/Prototipe-CLI/templates/template-agendamiento",
-      "nicho": "Citas / Reservas / Hoteles / Turnos",
-      "activo": false,
-      "version": "1.0.0"
-    },
-    "gastronomia": {
-      "fuente": "D:/PROTOTIPE/Plantillas Core/App Gastronomia",
-      "destino": "D:/PROTOTIPE/Prototipe-CLI/templates/template-gastronomia",
-      "nicho": "Restaurantes / Cafés / Bares / Comidas",
-      "activo": false,
-      "version": "1.0.0"
-    },
-    "domiciliarios": {
-      "fuente": "D:/PROTOTIPE/Plantillas Core/App Domiciliarios",
-      "destino": "D:/PROTOTIPE/Prototipe-CLI/templates/template-domiciliarios",
-      "nicho": "Gestion de domiciliario y pedidos a domicilio generalizado en alianza con los negocios.",
-      "activo": false,
-      "version": "0.0.1"
     }
   }
 }
