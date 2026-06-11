@@ -46,6 +46,8 @@ if ($tempGitDirs.Count -gt 0) {
             }
         }
     }
+}
+
 function Test-IsGitRepository {
     param (
         [string]$Path
