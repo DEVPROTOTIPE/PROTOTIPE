@@ -34,5 +34,8 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Respaldo temporal de git (por si acaso)
-**/*.git-backup-temp/
+# Temporales de respaldos de repositorios Git
+.git-backup-temp/
+.git-backup-temp
+**/.git-backup-temp
+**/.git-backup-temp/

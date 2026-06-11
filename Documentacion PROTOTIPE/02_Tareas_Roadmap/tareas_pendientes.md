@@ -6,6 +6,39 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
 ---
 
 ### 💼 Negocio y Modularidad Ecosistema (Prioridad Alta)
+* **[x] ~~Tarea 381: Saneamiento de Carpetas Git Temporales y Robustez de Detención de Vite en Backups~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Corregido el bug de bloqueo y permanencia de carpetas temporales `.git-backup-temp`. Se mejoró la detención de procesos de desarrollo en `git_backup.ps1` y `menu_backup.ps1` usando una coincidencia regex robusta que detiene tanto el wrapper de npm como los procesos de Vite directamente. Se restauró de forma segura el directorio `.git-backup-temp` residual en la carpeta de `Plantillas Core/App Ventas` a `.git` y se añadió un filtro en el CLI bridge (`server.js`) para evitar que las carpetas de respaldo se listen como cambios en el dashboard.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`d:/PROTOTIPE/git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+    - [`d:/PROTOTIPE/menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+
+* **[x] ~~Tarea 380: Hotfix de Detección de Repositorios Git y Estado de Cambios del Ecosistema~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Corregida la detección visual de repositorios Git en el endpoint `/api/git/targets` para unificar la paridad del frontend. Ahora se diferencia correctamente entre repositorios físicos que poseen su propia carpeta `.git` y subproyectos anidados. También se consolidó el estado de cambios del Maestro e implementó el aislamiento de comandos de Git mediante variables de entorno para evitar colisiones.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`d:/PROTOTIPE/git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+    - [`d:/PROTOTIPE/subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+    - [`d:/PROTOTIPE/.gitignore`](file:///d:/PROTOTIPE/.gitignore) [MODIFY]
+
+* **[x] ~~Tarea 379: Implementación de Control de Git en Dashboard y Trazabilidad en Firestore (Fase 3)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Refactorizado el flujo de respaldo del Maestro y de subproyectos (con scripts de PowerShell no interactivos que evitan `Read-Host` y toleran fallos de conexión SSH mediante confirmación condicional). Agregados los toggles de estrategia de Git ("Sincronizar a GitHub" y "Auto-Merge a producción") en el dashboard. Implementado el listener de metadatos SSE para registrar automáticamente la trazabilidad de respaldos de instancias de clientes en la colección `historial_respaldos` de Firestore Central.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/firebase.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/firebase.js) [NEW]
+    - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`d:/PROTOTIPE/subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+    - [`d:/PROTOTIPE/menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+
 * **[x] ~~Tarea 378: Propuesta de Módulo Visual de Commits y Despliegues (dev-dashboard)~~**
   - Estatus: Completado (Fase de Diseño y Propuesta Técnica).
   - Fecha de registro: 2026-06-11

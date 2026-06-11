@@ -2629,15 +2629,23 @@ async function getGitBranch(dir) {
 // Detecta si un directorio tiene o está dentro de un repo git aislado
 async function isInsideGitRepo(dir) {
   try {
-    await execGitCommand('git rev-parse --git-dir', dir);
-    return true;
+    const { stdout } = await execGitCommand('git rev-parse --is-inside-work-tree', dir);
+    return stdout.trim() === 'true';
   } catch (_) { return false; }
 }
 
 async function hasGitChanges(dir) {
   try {
-    const { stdout } = await execGitCommand('git status --porcelain', dir);
-    return stdout.trim().length > 0;
+    const { stdout } = await execGitCommand('git status --porcelain .', dir);
+    const lines = stdout.split('\n').filter(line => {
+      if (!line.trim()) return false;
+      const filePath = line.substring(3).trim().replace(/"/g, '');
+      if (filePath.startsWith('.git-backup-temp') || filePath.includes('/.git-backup-temp') || filePath.includes('\\.git-backup-temp')) {
+        return false;
+      }
+      return true;
+    });
+    return lines.length > 0;
   } catch (_) { return false; }
 }
 
@@ -2652,7 +2660,8 @@ app.get('/api/git/targets', async (req, res) => {
 
     // 1. Consola central (dev-dashboard)
     let dashboardChanges = false;
-    if (await hasGitFolder(GIT_DASHBOARD_DIR)) {
+    const dashboardHasGit = await isInsideGitRepo(GIT_DASHBOARD_DIR);
+    if (dashboardHasGit) {
       const branch = await getGitBranch(GIT_DASHBOARD_DIR);
       dashboardChanges = await hasGitChanges(GIT_DASHBOARD_DIR);
       targets.dashboard = { name: 'Consola Central (dev-dashboard)', path: GIT_DASHBOARD_DIR, branch, hasChanges: dashboardChanges, hasGit: true };
@@ -2666,7 +2675,7 @@ app.get('/api/git/targets', async (req, res) => {
         const fullPath = path.join(GIT_CORES_DIR, dir);
         const stat = await fs.stat(fullPath).catch(() => null);
         if (!stat || !stat.isDirectory()) continue;
-        const hasGit = await hasGitFolder(fullPath);
+        const hasGit = await isInsideGitRepo(fullPath);
         const branch = hasGit ? await getGitBranch(fullPath) : null;
         const hasChanges = hasGit ? await hasGitChanges(fullPath) : false;
         if (hasChanges) coresChanges = true;
@@ -2682,7 +2691,7 @@ app.get('/api/git/targets', async (req, res) => {
         const fullPath = path.join(GIT_INSTANCES_DIR, dir);
         const stat = await fs.stat(fullPath).catch(() => null);
         if (!stat || !stat.isDirectory()) continue;
-        const hasGit = await hasGitFolder(fullPath);
+        const hasGit = await isInsideGitRepo(fullPath);
         const branch = hasGit ? await getGitBranch(fullPath) : null;
         const hasChanges = hasGit ? await hasGitChanges(fullPath) : false;
         if (hasChanges) instancesChanges = true;
@@ -2691,7 +2700,8 @@ app.get('/api/git/targets', async (req, res) => {
     }
 
     // 4. Repositorio maestro (se calcula al final para englobar los cambios del ecosistema entero)
-    if (await hasGitFolder(GIT_ROOT)) {
+    const masterHasGit = await isInsideGitRepo(GIT_ROOT);
+    if (masterHasGit) {
       const branch = await getGitBranch(GIT_ROOT);
       const rootChanges = await hasGitChanges(GIT_ROOT);
       const hasChanges = rootChanges || dashboardChanges || coresChanges || instancesChanges;
@@ -2728,27 +2738,84 @@ app.get('/api/git/status', async (req, res) => {
       return res.status(400).json({ error: 'El directorio no es un repositorio Git válido.' });
     }
 
-    const { stdout: statusOutput } = await execGitCommand('git status --porcelain', resolvedPath);
-    const changes = [];
+    let changes = [];
     let envLeak = false;
     let envLeakFiles = [];
 
-    for (const line of statusOutput.split('\n')) {
-      if (!line.trim()) continue;
-      const typeCode = line.substring(0, 2).trim();
-      const filePath = line.substring(3).trim().replace(/"/g, '');
+    // Función helper para procesar cambios en un directorio y acumularlos con prefijo
+    const processDirChanges = async (dir, prefix = '') => {
+      try {
+        const { stdout: statusOutput } = await execGitCommand('git status --porcelain .', dir);
+        for (const line of statusOutput.split('\n')) {
+          if (!line.trim()) continue;
+          const typeCode = line.substring(0, 2).trim();
+          const filePath = line.substring(3).trim().replace(/"/g, '');
 
-      // Detectar fugas de .env (excluyendo .env.example)
-      if (filePath.match(/\.env/) && !filePath.match(/\.env\.example/)) {
-        envLeak = true;
-        envLeakFiles.push(filePath);
+          // Ignorar archivos y carpetas temporales de respaldo (.git-backup-temp)
+          if (filePath.startsWith('.git-backup-temp') || filePath.includes('/.git-backup-temp') || filePath.includes('\\.git-backup-temp')) {
+            continue;
+          }
+
+          const fullRelPath = prefix ? path.join(prefix, filePath).replace(/\\/g, '/') : filePath;
+
+          // Detectar fugas de .env (excluyendo .env.example)
+          if (filePath.match(/\.env/) && !filePath.match(/\.env\.example/)) {
+            envLeak = true;
+            envLeakFiles.push(fullRelPath);
+          }
+
+          let type = 'M';
+          if (typeCode === '??' || typeCode === 'A') type = 'A';
+          else if (typeCode === 'D') type = 'D';
+          else if (typeCode === 'R') type = 'R';
+          changes.push({ file: fullRelPath, type });
+        }
+      } catch (e) {
+        console.warn(`[API /git/status] Warning al leer cambios en ${dir}:`, e.message);
+      }
+    };
+
+    // Si es el Maestro, consolidamos todos los cambios de todo el ecosistema
+    if (resolvedPath === GIT_ROOT) {
+      // 1. Cambios de la raíz
+      await processDirChanges(GIT_ROOT);
+
+      // 2. Cambios de la Consola Central (dev-dashboard)
+      if (await hasGitFolder(GIT_DASHBOARD_DIR)) {
+        const relPrefix = path.relative(GIT_ROOT, GIT_DASHBOARD_DIR);
+        await processDirChanges(GIT_DASHBOARD_DIR, relPrefix);
       }
 
-      let type = 'M';
-      if (typeCode === '??' || typeCode === 'A') type = 'A';
-      else if (typeCode === 'D') type = 'D';
-      else if (typeCode === 'R') type = 'R';
-      changes.push({ file: filePath, type });
+      // 3. Cambios de Plantillas Core
+      if (await fs.pathExists(GIT_CORES_DIR)) {
+        const dirs = await fs.readdir(GIT_CORES_DIR);
+        for (const dir of dirs) {
+          const fullPath = path.join(GIT_CORES_DIR, dir);
+          const stat = await fs.stat(fullPath).catch(() => null);
+          if (!stat || !stat.isDirectory()) continue;
+          if (await hasGitFolder(fullPath)) {
+            const relPrefix = path.relative(GIT_ROOT, fullPath);
+            await processDirChanges(fullPath, relPrefix);
+          }
+        }
+      }
+
+      // 4. Cambios de Instancias de Clientes
+      if (await fs.pathExists(GIT_INSTANCES_DIR)) {
+        const dirs = await fs.readdir(GIT_INSTANCES_DIR);
+        for (const dir of dirs) {
+          const fullPath = path.join(GIT_INSTANCES_DIR, dir);
+          const stat = await fs.stat(fullPath).catch(() => null);
+          if (!stat || !stat.isDirectory()) continue;
+          if (await hasGitFolder(fullPath)) {
+            const relPrefix = path.relative(GIT_ROOT, fullPath);
+            await processDirChanges(fullPath, relPrefix);
+          }
+        }
+      }
+    } else {
+      // Si es un subproyecto individual, procesamos solo sus propios cambios
+      await processDirChanges(resolvedPath);
     }
 
     res.json({ success: true, branch, changes, envLeak, envLeakFiles });
@@ -2804,9 +2871,9 @@ app.get('/api/git/backup-stream', async (req, res) => {
   const psArgs = ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', scriptFile];
   if (!isMaster) {
     psArgs.push('-SubprojectPath', resolvedPath);
-    if (!doPush)     psArgs.push('-Push:$false');
-    if (doAutoMerge) psArgs.push('-AutoMerge');
   }
+  if (!doPush)     psArgs.push('-Push:$false');
+  if (doAutoMerge) psArgs.push('-AutoMerge');
   if (commitMessage) {
     psArgs.push('-CommitMessage', commitMessage);
   }

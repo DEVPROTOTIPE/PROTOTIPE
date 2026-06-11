@@ -5,7 +5,10 @@
 # Disenado con una interfaz visual limpia y codificacion compatible.
 
 param (
-    [string]$CommitMessage = ""
+    [string]$CommitMessage = "",
+    [switch]$Push = $true,
+    [switch]$AutoMerge = $false,
+    [switch]$Interactive = $false
 )
 
 # Forzar consola a UTF-8 para evitar caracteres extranos en Windows
@@ -81,19 +84,19 @@ $stoppedVitePaths = @()
 $nodeProcesses = Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue
 
 foreach ($proc in $nodeProcesses) {
-    # Validar si el comando de ejecución contiene 'vite' o está dentro de nuestra ruta D:\PROTOTIPE
-    if ($proc.CommandLine -match 'vite' -and $proc.CommandLine -match 'dev') {
-        # Extraer la ruta de trabajo aproximada desde la línea de comandos
+    # Validar si es un proceso npm dev o ejecucion directa de vite dentro de D:\PROTOTIPE
+    if ($proc.CommandLine -match 'vite' -or ($proc.CommandLine -match 'npm' -and $proc.CommandLine -match 'dev')) {
+        # Extraer la ruta raíz del subproyecto de forma precisa
         $procPath = ""
-        if ($proc.CommandLine -match '(?i)"?D:\\PROTOTIPE\\[^"\r\n]+') {
-            $procPath = $matches[0] -replace '"', ''
+        if ($proc.CommandLine -match '(?i)(D:\\PROTOTIPE\\(?:Plantillas Core|Instancias Clientes|Central PROTOTIPE)\\[^\\]+)') {
+            $procPath = $Matches[1]
         }
         
-        Write-Host " [INFO] Detectado servidor de desarrollo Vite activo (PID: $($proc.ProcessId)). Deteniendo para liberar bloqueos..." -ForegroundColor Yellow
+        Write-Host " [INFO] Detectado servidor de desarrollo Vite/npm activo (PID: $($proc.ProcessId)). Deteniendo para liberar bloqueos..." -ForegroundColor Yellow
         Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
         $viteWasStopped = $true
         
-        if ($procPath) {
+        if ($procPath -and $stoppedVitePaths -notcontains $procPath) {
             $stoppedVitePaths += $procPath
         }
     }
@@ -185,6 +188,12 @@ try {
         Write-Host " [4/6] Guardando snapshot en el historial local..." -ForegroundColor Cyan
         git commit -m $CommitMessage | Out-Null
         Write-Host "    -> Snapshot local creado con exito." -ForegroundColor Gray
+        # ── Estrategia de Push ────────────────────────────────────────────────
+        if (-not $Push) {
+            Write-Host " [5/6] Modo Solo-Local: commit guardado localmente. Push omitido por configuracion." -ForegroundColor Yellow
+            Write-Host "======================================================================" -ForegroundColor Cyan
+            exit 0
+        }
 
         # 5. Sincronizar con GitHub
         $branchName = (git rev-parse --abbrev-ref HEAD 2>$null)
@@ -197,18 +206,25 @@ try {
         if (-not $isOnline) {
             Write-Host ""
             Write-Host " [WARN] No se pudo conectar al repositorio remoto via SSH. Verifica tu conexion a internet o ejecuta: ssh -T git@github.com" -ForegroundColor Yellow
-            Write-Host " Desea realizar un respaldo local (Commit local en tu disco) unicamente? (S/N): " -NoNewline -ForegroundColor Cyan
-            $confirmLocal = Read-Host
-            if ($confirmLocal -like "s" -or $confirmLocal -like "S") {
+            
+            if ($Interactive) {
+                Write-Host " Desea realizar un respaldo local (Commit local en tu disco) unicamente? (S/N): " -NoNewline -ForegroundColor Cyan
+                $confirmLocal = Read-Host
+                if ($confirmLocal -like "s" -or $confirmLocal -like "S") {
+                    Write-Host " [OK] Respaldo local guardado con exito. Los cambios se subiran a GitHub la proxima vez que tenga conexion." -ForegroundColor Green
+                    Write-Host "======================================================================" -ForegroundColor Cyan
+                    exit 0
+                } else {
+                    Write-Host " Deshaciendo commit local para mantener el estado original..." -ForegroundColor Yellow
+                    git reset --soft HEAD~1 2>&1 | Out-Null
+                    Write-Host " [CANCELADO] Proceso abortado por el usuario." -ForegroundColor Red
+                    Write-Host "======================================================================" -ForegroundColor Cyan
+                    exit 1
+                }
+            } else {
                 Write-Host " [OK] Respaldo local guardado con exito. Los cambios se subiran a GitHub la proxima vez que tenga conexion." -ForegroundColor Green
                 Write-Host "======================================================================" -ForegroundColor Cyan
                 exit 0
-            } else {
-                Write-Host " Deshaciendo commit local para mantener el estado original..." -ForegroundColor Yellow
-                git reset --soft HEAD~1 2>&1 | Out-Null
-                Write-Host " [CANCELADO] Proceso abortado por el usuario." -ForegroundColor Red
-                Write-Host "======================================================================" -ForegroundColor Cyan
-                exit 1
             }
         }
 
@@ -233,16 +249,19 @@ try {
         Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
         Write-Host " [OK] Sincronizacion con la rama [$branchName] completada con exito." -ForegroundColor Green
 
-
-        
         # Regla de Seguridad de Ramas para el Maestro
         if ($branchName -ne "main" -and $branchName -ne "master") {
-            Write-Host ""
-            Write-Host " [Git Strategies] Has subido cambios a la rama de desarrollo: [$branchName]" -ForegroundColor Yellow
-            Write-Host " Desea fusionar y subir estos cambios tambien a la rama de produccion 'main'? (S/N): " -NoNewline -ForegroundColor Cyan
-            $confirmMerge = Read-Host
+            if ($Interactive) {
+                Write-Host ""
+                Write-Host " [Git Strategies] Has subido cambios a la rama de desarrollo: [$branchName]" -ForegroundColor Yellow
+                Write-Host " Desea fusionar y subir estos cambios tambien a la rama de produccion 'main'? (S/N): " -NoNewline -ForegroundColor Cyan
+                $confirmMerge = Read-Host
+                if ($confirmMerge -like "s" -or $confirmMerge -like "S") {
+                    $AutoMerge = $true
+                }
+            }
             
-            if ($confirmMerge -like "s" -or $confirmMerge -like "S") {
+            if ($AutoMerge) {
                 $mainBranch = "main"
                 $hasMaster = (git branch --list "master" 2>$null)
                 if ($hasMaster) { $mainBranch = "master" }

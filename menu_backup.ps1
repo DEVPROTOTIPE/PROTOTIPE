@@ -24,7 +24,7 @@ if ($tempGitDirs.Count -gt 0) {
     $nodeProcesses = Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue
     $viteStopped = $false
     foreach ($proc in $nodeProcesses) {
-        if ($proc.CommandLine -match 'vite' -and $proc.CommandLine -match 'dev') {
+        if ($proc.CommandLine -match 'vite' -or ($proc.CommandLine -match 'npm' -and $proc.CommandLine -match 'dev')) {
             Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
             $viteStopped = $true
         }
@@ -46,6 +46,23 @@ if ($tempGitDirs.Count -gt 0) {
             }
         }
     }
+function Test-IsGitRepository {
+    param (
+        [string]$Path
+    )
+    if (Test-Path "$Path\.git") { return $true }
+    if (Test-Path "$Path\.git-backup-temp") { return $true }
+    $prevPath = Get-Location
+    $insideGit = $false
+    try {
+        Set-Location -Path $Path -ErrorAction SilentlyContinue
+        $gitDir = (git rev-parse --git-dir 2>$null)
+        if ($gitDir) { $insideGit = $true }
+    } catch {}
+    finally {
+        Set-Location -Path $prevPath -ErrorAction SilentlyContinue
+    }
+    return $insideGit
 }
 
 function Show-Header {
@@ -139,7 +156,7 @@ function Run-Master-Backup {
     Write-Host " [INICIANDO RESPALDO MAESTRO DE TODO EL PROYECTO]" -ForegroundColor Yellow
     Write-Host ""
     # Llamar al script existente de backup general
-    powershell -NoProfile -ExecutionPolicy Bypass -File "$rootDir\git_backup.ps1"
+    powershell -NoProfile -ExecutionPolicy Bypass -File "$rootDir\git_backup.ps1" -Interactive
 }
 
 function Run-Subproject-Backup {
@@ -147,7 +164,7 @@ function Run-Subproject-Backup {
         [string]$Path
     )
     # Llamar al script de subproyectos
-    powershell -NoProfile -ExecutionPolicy Bypass -File "$rootDir\subproject_backup.ps1" -SubprojectPath $Path
+    powershell -NoProfile -ExecutionPolicy Bypass -File "$rootDir\subproject_backup.ps1" -SubprojectPath $Path -Interactive
 }
 
 function Manage-Cores {
@@ -169,7 +186,7 @@ function Manage-Cores {
     # Preparar opciones del menu
     $options = @()
     for ($i = 0; $i -lt $cores.Count; $i++) {
-        $hasGit = Test-Path "$($cores[$i].FullName)\.git"
+        $hasGit = Test-IsGitRepository -Path $cores[$i].FullName
         $gitStatus = if ($hasGit) { " (Git Activo)" } else { " (Sin Git)" }
         $options += "$($cores[$i].Name)$gitStatus"
     }
@@ -181,7 +198,7 @@ function Manage-Cores {
     if ($selectionIndex -eq -1 -or $selectionIndex -eq ($options.Count - 1)) { return }
     
     $selectedPath = $cores[$selectionIndex].FullName
-    if (-not (Test-Path "$selectedPath\.git")) {
+    if (-not (Test-IsGitRepository -Path $selectedPath)) {
         Show-Header
         Write-Host " [WARNING] El subproyecto $($cores[$selectionIndex].Name) no tiene un repositorio Git activo." -ForegroundColor Yellow
         Write-Host " Desea inicializarlo ahora? (S/N): " -NoNewline -ForegroundColor Cyan
@@ -217,7 +234,7 @@ function Manage-Instances {
     # Preparar opciones del menu
     $options = @()
     for ($i = 0; $i -lt $instances.Count; $i++) {
-        $hasGit = Test-Path "$($instances[$i].FullName)\.git"
+        $hasGit = Test-IsGitRepository -Path $instances[$i].FullName
         $gitStatus = if ($hasGit) { " (Git Activo)" } else { " (Sin Git)" }
         $options += "$($instances[$i].Name)$gitStatus"
     }
@@ -229,7 +246,7 @@ function Manage-Instances {
     if ($selectionIndex -eq -1 -or $selectionIndex -eq ($options.Count - 1)) { return }
     
     $selectedPath = $instances[$selectionIndex].FullName
-    if (-not (Test-Path "$selectedPath\.git")) {
+    if (-not (Test-IsGitRepository -Path $selectedPath)) {
         Show-Header
         Write-Host " [WARNING] La instancia $($instances[$selectionIndex].Name) no tiene un repositorio Git activo." -ForegroundColor Yellow
         Write-Host " Desea inicializarla ahora? (S/N): " -NoNewline -ForegroundColor Cyan

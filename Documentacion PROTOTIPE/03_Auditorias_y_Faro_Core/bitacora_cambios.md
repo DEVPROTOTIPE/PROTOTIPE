@@ -1,3 +1,43 @@
+### [2026-06-11] - Hotfix: Saneamiento de Carpetas Git Temporales y Robustez de Detención de Vite
+* **Tipo:** Corrección de Bug / Git / Automatización / Respaldo / CLI Bridge
+* **Descripción de Cambios:**
+  1. **Resolución de Bloqueo de Carpeta Temporal:** Se corrigió el problema de persistencia y bloqueo de la carpeta `.git-backup-temp` (que se presentaba tras las ejecuciones de respaldo en subproyectos como `App Ventas`).
+  2. **Refactorización de Detección de Procesos en PowerShell:** Se actualizó `git_backup.ps1` and `menu_backup.ps1` para usar una expresión regular OR robusta (`vite` o `npm run dev`) que detiene correctamente tanto el proceso npm padre como el proceso hijo de Vite en Windows. Se mejoró la extracción del directorio del subproyecto utilizando una regex precisa de primer nivel.
+  3. **Restauración Física de .git:** Se restauró manualmente la carpeta `.git-backup-temp` residual de `Plantillas Core/App Ventas` renombrándola de forma segura a `.git` y restableciendo sus atributos ocultos.
+  4. **Filtro del CLI Bridge (`server.js`):** Se modificó `hasGitChanges` y `processDirChanges` en `server.js` para ignorar y filtrar de forma proactiva la carpeta `.git-backup-temp`, previniendo que aparezca listada como un cambio untracked o modificado en el Dashboard.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`d:/PROTOTIPE/git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`d:/PROTOTIPE/menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+* **Verificación:** Renombrado manual completado sin problemas. Pruebas de detección y exclusión correctas.
+
+### [2026-06-11] - Hotfix: Paridad de Detección de Repositorios Git y Corrección en Backup Manual
+* **Tipo:** Corrección de Bug / Git / Scripting / CLI Bridge
+* **Descripción de Cambios:**
+  1. **Detección Unificada por Worktree:** Se corrigió el endpoint `/api/git/targets` en `server.js` reemplazando los chequeos físicos de `.git` por `isInsideGitRepo` (el cual ejecuta `git rev-parse --is-inside-work-tree`). Ahora, la Consola Central (dev-dashboard), las Plantillas Core y las Instancias de Clientes se detectan correctamente con su rama y estado de cambios reales, incluso si no tienen una carpeta `.git` local propia, siempre y cuando estén dentro del repositorio maestro.
+  2. **Aislamiento de Estado por Subproyecto:** Se añadió el argumento de directorio actual `.` a `git status --porcelain` en `hasGitChanges` y `processDirChanges` en `server.js`. Esto evita que las búsquedas de cambios en subproyectos devuelvan el estado completo del repositorio maestro, logrando que el dashboard muestre de forma aislada e independiente solo los cambios reales de cada subdirectorio.
+  3. **Corrección de Bloqueo en Menu Backup Manual:** Se refactorizó `menu_backup.ps1` introduciendo la función helper `Test-IsGitRepository` (que combina validación de rutas físicas y `git rev-parse`). Esto soluciona el error donde el menú interactivo bloqueaba el respaldo de cores e instancias que no poseían carpeta `.git` física (como `App Ventas`), forzando de manera innecesaria su inicialización.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+* **Verificación:** Compilación de Vite en `dev-dashboard` completada sin errores. Pruebas locales de estado y listado de targets de Git exitosas.
+
+### [2026-06-11] - Robustez en Git y Respaldo Interactivo (Maestro + Subproyectos)
+* **Tipo:** Refactorización / Robustez / Git / PowerShell
+* **Descripción de Cambios:**
+  1. **Evitar Acoplamiento de Git:** Se implementó el aislamiento estricto de comandos de Git en el backend (`server.js`) configurando las variables de entorno nativas de Git: `GIT_DIR` y `GIT_WORK_TREE` en cada ejecución. Esto previene que la consulta de estado de un subproyecto suba al repositorio del Maestro cuando la carpeta local `.git` no está disponible.
+  2. **Consolidación de Cambios en Maestro:** Refactorizado el endpoint `/api/git/status`. Ahora, al consultar el estado del Maestro, el servidor consolida de forma dinámica todos los cambios de la raíz y de todos los subproyectos activos (Consola Central, Plantillas Core e Instancias de Clientes), prefijándolos con su respectiva ruta relativa para consistencia visual absoluta en la UI.
+  3. **Control de Flujo de Estrategias Git Interactivas:** Añadida la bandera `-Interactive` a `git_backup.ps1` y `subproject_backup.ps1`. Los scripts solo solicitarán confirmación interactiva (`Read-Host`) para replicar cambios en `main` si esta bandera se pasa; de lo contrario, se respeta el flag `-AutoMerge` de forma binaria.
+  4. **try/catch/finally en Subproyectos:** Envuelto el cuerpo del script de subproyectos en un bloque `try/catch/finally` para asegurar el regreso a la rama de trabajo original al finalizar, evitando bloqueos inesperados en ramas de producción tras fallos.
+  5. **Ignorado de Archivos Temporales:** Actualizado el archivo `.gitignore` de la raíz para ignorar por completo las carpetas `.git-backup-temp` y evitar su carga accidental a GitHub.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/.gitignore`](file:///d:/PROTOTIPE/.gitignore) [MODIFY]
+  - [`d:/PROTOTIPE/git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`d:/PROTOTIPE/subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+  - [`d:/PROTOTIPE/menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+* **Verificación:** Compilación del dashboard exitosa en producción (`npm run build`).
+
 ### [2026-06-11] - Hotfix: Corrección en Detección de Repositorios Git y Estado de Cambios Ecosistema
 * **Tipo:** Corrección de Bug / Git / CLI Bridge
 * **Descripción de Cambios:**
