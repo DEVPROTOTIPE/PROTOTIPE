@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { subscribeToAppConfig, subscribeToCatalogFilters } from '../services/appConfigService'
 import { subscribeToBillingData } from '../services/billingService'
 import { reportMonthlyBillingToDeveloper } from '../services/telemetryService'
@@ -13,6 +13,7 @@ export default function useAppConfigSync() {
   const { setConfig, setCatalogFilters } = useAppConfigStore()
   const user = useAuthStore((state) => state.user)
   const role = useAuthStore((state) => state.role)
+  const lastProcessedTriggerRef = useRef(null)
 
   useEffect(() => {
     // Suscripción a los ajustes generales (nombre, tema, banco, whatsapp, etc.)
@@ -33,6 +34,30 @@ export default function useAppConfigSync() {
         
         const now = new Date()
         const periodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+
+        // 1. Verificar si hay un gatillo manual remoto de telemetría solicitado desde el dashboard
+        if (metrics.triggerTelemetryReport) {
+          const currentTrigger = String(metrics.triggerTelemetryReport)
+          if (currentTrigger !== lastProcessedTriggerRef.current) {
+            lastProcessedTriggerRef.current = currentTrigger
+            console.log(`[Telemetry Trigger] Solicitud manual remota detectada para el periodo ${periodo}. Reportando...`)
+            reportMonthlyBillingToDeveloper(
+              metrics.totalMes,
+              metrics,
+              periodo,
+              metrics.pedidosMes
+            ).catch((err) => {
+              console.debug("[Telemetry Trigger Sync Error]:", err)
+            })
+            return
+          }
+        }
+        
+        // 2. Regla de negocio estándar: Reportar únicamente el último día de cada mes
+        const tomorrow = new Date(now)
+        tomorrow.setDate(now.getDate() + 1)
+        const isLastDay = tomorrow.getMonth() !== now.getMonth()
+        if (!isLastDay) return
 
         // Dispara la transmisión asíncrona silenciosa
         reportMonthlyBillingToDeveloper(

@@ -7,12 +7,24 @@ import { COLLECTIONS } from '../constants'
 
 const COL = COLLECTIONS.EMPLOYEES
 
+async function hashPin(pin) {
+  if (!pin) return ''
+  // Si ya es un hash SHA-256 (64 caracteres hex), no volver a hashear
+  if (/^[a-f0-9]{64}$/i.test(pin)) return pin
+  const encoder = new TextEncoder()
+  const data = encoder.encode(pin)
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
 export async function saveEmployee(data) {
   const ref = data.id ? doc(db, COL, data.id) : doc(collection(db, COL))
+  const hashedPin = data.pin ? await hashPin(data.pin) : ''
   await setDoc(ref, {
     nombre: data.nombre || '',
     rol: data.rol || 'vendedor',
-    pin: data.pin || '',
+    pin: hashedPin,
     activo: data.activo !== false,
     salario: Number(data.salario) || 0,
     frecuenciaPago: data.frecuenciaPago || 'quincenal',
@@ -54,7 +66,8 @@ export function subscribeToEmployees(callback) {
  */
 export async function authenticateEmployeeByPin(pin) {
   if (!pin) return null
-  const q = query(collection(db, COL), where('pin', '==', pin), where('activo', '==', true))
+  const hashedPin = await hashPin(pin)
+  const q = query(collection(db, COL), where('pin', '==', hashedPin), where('activo', '==', true))
   const snap = await getDocs(q)
   if (!snap.empty) {
     const d = snap.docs[0]
@@ -92,11 +105,12 @@ export async function getEmployeesByRole(rol) {
  */
 export async function authenticateEmployeeByIdAndPin(employeeId, pin) {
   if (!employeeId || !pin) return null
+  const hashedPin = await hashPin(pin)
   const snap = await getDocs(
     query(
       collection(db, COL),
       where('__name__', '==', employeeId), // busca por doc ID
-      where('pin', '==', pin),
+      where('pin', '==', hashedPin),
       where('activo', '==', true)
     )
   )
@@ -106,7 +120,7 @@ export async function authenticateEmployeeByIdAndPin(employeeId, pin) {
     const d = await import('firebase/firestore').then(m => m.getDoc(ref))
     if (!d.exists()) return null
     const data = d.data()
-    if (data.pin !== pin || !data.activo) return null
+    if (data.pin !== hashedPin || !data.activo) return null
     return { id: d.id, ...data }
   }
   const d = snap.docs[0]

@@ -46,15 +46,16 @@ export default defineConfig({
     })
   ],
   build: {
+    manifest: true,
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('jspdf-autotable')) {
+              return; // Exclude from manual chunks, let Rolldown chunk it dynamically!
+            }
             if (id.includes('firebase')) {
               return 'firebase';
-            }
-            if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('jspdf-autotable')) {
-              return 'pdf-generator';
             }
             if (id.includes('framer-motion')) {
               return 'framer-motion';
@@ -62,7 +63,19 @@ export default defineConfig({
             if (id.includes('lucide-react')) {
               return 'icons';
             }
-            return 'vendor';
+            if (id.includes('react-router-dom') || id.includes('react-router') || id.includes('@remix-run')) {
+              return 'react-router';
+            }
+            if (id.includes('react-dom') || id.includes('react/')) {
+              return 'react-core';
+            }
+            if (id.includes('@tanstack/react-query')) {
+              return 'react-query';
+            }
+            if (id.includes('zod')) {
+              return 'zod';
+            }
+            return 'vendor-utils';
           }
         }
       }

@@ -222,16 +222,38 @@ export async function reportMonthlyBillingToDeveloper(
   }
 }
 
+// Firmas de errores ruidosos a ignorar automáticamente para evitar sobrecostos
+const NOISE_TO_IGNORE = [
+  'failed to fetch',
+  'load failed',
+  'networkerror',
+  'script error',
+  'extension',
+  'cors',
+  'canceled'
+];
+
 /**
  * Reporta un error o excepción de la aplicación a la base de datos central de errores.
  */
-export async function reportAppFailureToDeveloper(errorMsg, stack) {
+export async function reportAppFailureToDeveloper(errorMsg, stack, source = 'automatic') {
   if (!DEV_TOKEN || !CLIENT_ID) return;
 
-  // Mecanismo Anti-Duplicado (Throttle de 60 segundos por firma de error)
+  const msgLower = (errorMsg || '').toLowerCase();
+
+  // 1. Filtrar en frío errores automáticos de red/extensiones no críticos
+  if (source === 'automatic') {
+    const isNoise = NOISE_TO_IGNORE.some(patron => msgLower.includes(patron));
+    if (isNoise) {
+      console.debug(`[Telemetry] Filtro de ruido activo. Omitiendo reporte automático: ${errorMsg}`);
+      return;
+    }
+  }
+
+  // 2. Mecanismo Anti-Duplicado (Throttle de 5 minutos / 300 segundos por firma de error)
   const errorHash = getErrorHash(errorMsg, stack);
   const now = Date.now();
-  if (reportedErrorsCache[errorHash] && (now - reportedErrorsCache[errorHash] < 60000)) {
+  if (reportedErrorsCache[errorHash] && (now - reportedErrorsCache[errorHash] < 300000)) {
     console.debug(`[Telemetry] Reporte de error duplicado omitido (Throttled): ${errorMsg}`);
     return;
   }
@@ -254,6 +276,7 @@ export async function reportAppFailureToDeveloper(errorMsg, stack) {
     errorMsg: errorMsg || 'Unknown Error',
     stack: stack || 'No stack trace available',
     resolved: false,
+    source,
     environment: {
       url: typeof window !== 'undefined' ? window.location.href : 'N/A',
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Server/Node',

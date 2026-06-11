@@ -141,15 +141,49 @@ export async function reportMonthlyBillingToDeveloper(
   console.debug("[Telemetry] Modo local: sin conexión central configurada.");
 }
 
+// Almacenamiento en memoria para prevenir duplicados de error
+const reportedErrorsCache = {};
+const NOISE_TO_IGNORE = [
+  'failed to fetch',
+  'load failed',
+  'networkerror',
+  'script error',
+  'extension',
+  'cors',
+  'canceled'
+];
+
 /**
  * Reporta un error o excepción de la aplicación a la base de datos central de errores.
  *
  * @param {string} errorMsg - Mensaje del error.
  * @param {string} stack - Stack trace completo del error.
+ * @param {string} source - Origen del error ('automatic' o 'manual').
  */
-export async function reportAppFailureToDeveloper(errorMsg, stack) {
+export async function reportAppFailureToDeveloper(errorMsg, stack, source = 'automatic') {
   const centralDb = getCentralFirestore();
   if (!centralDb) return;
+
+  const msgLower = (errorMsg || '').toLowerCase();
+
+  // 1. Filtrar en frío errores automáticos de red/extensiones no críticos
+  if (source === 'automatic') {
+    const isNoise = NOISE_TO_IGNORE.some(patron => msgLower.includes(patron));
+    if (isNoise) {
+      console.debug(`[Telemetry] Filtro de ruido activo. Omitiendo reporte automático: ${errorMsg}`);
+      return;
+    }
+  }
+
+  // 2. Mecanismo Anti-Duplicado (Throttle de 5 minutos / 300 segundos por firma de error)
+  const cleanStack = (stack || '').split('\n')[0] || '';
+  const errorHash = `${errorMsg}_${cleanStack}`.replace(/[^a-zA-Z0-9_]/g, '_');
+  const now = Date.now();
+  if (reportedErrorsCache[errorHash] && (now - reportedErrorsCache[errorHash] < 300000)) {
+    console.debug(`[Telemetry] Reporte de error duplicado omitido (Throttled): ${errorMsg}`);
+    return;
+  }
+  reportedErrorsCache[errorHash] = now;
 
   try {
     const newFailure = {
@@ -159,7 +193,8 @@ export async function reportAppFailureToDeveloper(errorMsg, stack) {
       errorMsg: errorMsg || "Unknown Error",
       stack: stack || "No stack trace available",
       deviceInfo: navigator.userAgent || "Unknown Device",
-      resolved: false
+      resolved: false,
+      source
     };
 
     const failuresRef = collection(centralDb, "app_failures");

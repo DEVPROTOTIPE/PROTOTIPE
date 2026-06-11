@@ -27,6 +27,24 @@ if (!process.send) {
   process.exit(1);
 }
 
+// Redirigir logs al proceso padre mediante IPC para streaming SSE
+const originalLog = console.log;
+const originalError = console.error;
+
+console.log = (...args) => {
+  originalLog(...args);
+  if (process.send) {
+    process.send({ type: 'LOG', line: args.join(' ') });
+  }
+};
+
+console.error = (...args) => {
+  originalError(...args);
+  if (process.send) {
+    process.send({ type: 'LOG', line: `❌ ${args.join(' ')}` });
+  }
+};
+
 function killProcessTree(pid) {
   return new Promise((resolve) => {
     exec(`taskkill /PID ${pid} /T /F`, () => resolve());

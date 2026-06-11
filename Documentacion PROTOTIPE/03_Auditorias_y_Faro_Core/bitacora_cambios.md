@@ -1,3 +1,331 @@
+### [2026-06-11] - Botón "Desplegar en Local" y Control de Servidores de Desarrollo en CRM (dev-dashboard)
+* **Tipo:** Nueva Característica / CRM / Gestión Local / CLI
+* **Descripción de Cambios:**
+  1. **Endpoints de Servidor de Desarrollo en CLI Bridge:** Implementamos `/api/project/dev/start`, `/api/project/dev/stop` y `/api/project/dev/status` en `server.js`. Utilizan el gestor de subprocesos (`npm run dev`) con almacenamiento en el mapa global `runningDevServers` referenciado por el `clientId` del cliente. Implementan control de cierre limpio en Windows mediante `taskkill` y mapeo dinámico de puertos aleatorios o asignados.
+  2. **Monitoreo Automático de Servidores Locales en Dashboard:** Añadimos el estado `localServers` y un `useEffect` que realiza llamadas a `/api/project/dev/status` para todos los clientes cargados al ingresar a la vista CRM.
+  3. **Botones de Control Interactivos:** Añadimos botones premium contextulaes por cliente en el listado del CRM:
+     - **Desplegar en Local:** Llama a la API para levantar el servidor `npm run dev`.
+     - **Ir a Local (Enlace Externo):** Abre la pestaña del navegador apuntando a la URL local (ej. `http://localhost:5173`) si el servidor está activo.
+     - **Detener:** Envía señal para matar el subproceso del servidor de desarrollo del cliente.
+     - **Procesando:** Estado de carga con spinner animado `RefreshCw` durante la comunicación con el puente CLI.
+  4. **Rediseño del Botón de Telemetría Global:** Refactorizamos el estilo del botón central "Obtener Telemetría" en la cabecera del CRM. Lo renombramos a "Obtener Telemetría Global" y lo dotamos de un esquema de color púrpura translúcido (`bg-purple-600/10 border-purple-500/25 text-purple-400`), logrando una paridad estética y de proporciones exacta con los botones de sincronización (índigo) y despliegue (esmeralda).
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Compilaciones locales exitosas, pruebas de endpoints del bridge correctas.
+
+### [2026-06-11] - Selector de Clientes para Solicitud de Telemetría Global (dev-dashboard)
+* **Tipo:** UX / CRM / Telemetría
+* **Descripción de Cambios:**
+  - **Modal de Personalización de Telemetría Global (`isGlobalTelemetryModalOpen`):** Refactorizamos el botón "Obtener Telemetría" a nivel global en la cabecera del CRM. Ahora abre un modal interactivo con un listado con casillas de verificación (checkboxes) pre-seleccionados por defecto para todos los clientes activos del SaaS. Esto le permite al desarrollador solicitar reportes de telemetría y diagnóstico en caliente únicamente para los clientes seleccionados, previniendo disparos de lectura/escritura accidentales en Firestore.
+  - **Función de Ejecución (`handleExecuteGlobalTelemetry`):** Creada la rutina para mapear y actualizar asíncronamente el campo `triggerTelemetryReport` en los documentos de control de Firestore de los clientes seleccionados en el checklist.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Compilación e inicio del dev-dashboard exitosos.
+
+### [2026-06-11] - Selector de Clientes en Sincronización Global y Despliegue en Lote (dev-dashboard)
+* **Tipo:** Refactorización / UX / CRM / Control de Procesos
+* **Descripción de Cambios:**
+  1. **Modal de Configuración de Sincronización Global (`isGlobalSyncConfigModalOpen`):** Diseñamos un nuevo modal interactivo que se abre al presionar "Sincronización Global Core (Safe)", listando todos los clientes activos con checkboxes pre-seleccionados por defecto para que el desarrollador pueda elegir exactamente qué clientes sincronizar, previniendo disparos accidentales.
+  2. **Modal de Configuración de Despliegue Global (`isGlobalDeployConfigModalOpen`):** Desarrollamos un modal interactivo análogo para el "Despliegue Global Hosting", permitiendo seleccionar/deseleccionar clientes activos antes de arrancar.
+  3. **Cola Reactiva de Despliegue Global:** Refactorizamos la cola secuencial de despliegues globales mediante efectos reactivos (`useEffect`) vinculados a `deployQueueIndex` y `deployState`. Al finalizar la compilación y subida de un cliente de la cola (sea exitosa o fallida), el sistema espera 3 segundos para legibilidad en consola y avanza automáticamente al siguiente.
+  4. **Monitorización y Cancelación en Terminal:** Agregamos el indicador de estado de la cola en el encabezado de `DeployTerminalModal` (ej. `[Cola: 1/3]`) y un botón para cancelar inmediatamente la cola de despliegues secuenciales en caliente.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Compilación de Vite en producción completada exitosamente sin advertencias ni errores.
+
+### [2026-06-11] - Sincronización en Lote de Drift y Consola de Despliegue de Hosting en CRM (dev-dashboard)
+* **Tipo:** Nueva Característica / CRM / Sincronización / CLI
+* **Descripción de Cambios:**
+  1. **Sincronización Inteligente en Lote (`BulkSyncModal`):** Desarrollamos un modal interactivo que agrupa los archivos desviados (drift) del cliente. Utiliza un filtro de seguridad para diferenciar entre archivos de **Lógica Core (Seguros)** y **Configuraciones/Branding (Sensibles)**, pre-marcando los seguros y permitiendo al desarrollador seleccionar qué archivos sincronizar de un solo golpe.
+  2. **Batch Downstream API Route (`POST /api/project/sync-files`):** Implementamos un nuevo endpoint por lotes en el CLI local (`server.js`) para copiar masivamente los archivos autorizados desde el Core de referencia a la instancia del cliente.
+  3. **Consola Interactiva de Despliegue de Hosting (`DeployTerminalModal`):** Diseñamos una terminal oscura UNIX en React para visualizar los logs en tiempo real vía Server-Sent Events (SSE) del proceso de compilación (`npm run build`), auditoría de calidad/PWA y subida de Firebase Hosting (`firebase deploy`).
+  4. **Bypass de Calidad de Auditoría:** Si el guardián de calidad/PWA detiene el despliegue debido a una puntuación baja (< 90), la consola expone un botón para "Forzar Despliegue (Ignorar Auditoría)" que realiza el bypass en caliente re-ejecutando el deploy con `force=true`.
+  5. **Controles Estratégicos CRM:**
+     - **Individual por Cliente:** Integrados los botones "Sincronizar Lote" y "Desplegar Hosting" dentro de la pestaña de Drift del modal de gestión de cliente.
+     - **General de CRM:** Añadidos los botones globales de "Sincronización Global Core (Safe)" (actualiza en cascada archivos de lógica estándar para todos los clientes) y "Despliegue Global Hosting" en la cabecera principal del CRM.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Compilación exitosa en verde y API local expuesta.
+
+### [2026-06-11] - Simulador de Fallos Multicliente Dirigido y Personalizado (dev-dashboard)
+* **Tipo:** Nueva Característica / Sandbox / Telemetría
+* **Descripción de Cambios:**
+  - **Modal de Simulación:** Implementado el modal interactivo `SimulationFailureModal` que reemplaza la simulación de errores aleatorios por un panel de control completo.
+  - **Campos de Configuración:** Permite al desarrollador seleccionar dinámicamente cualquier cliente activo de la base de datos (con detección automática de su nicho) o ingresar un identificador manual, elegir entre 5 plantillas de errores predefinidos (TypeError, FirebaseError, ReferenceError, Red/CORS, Pasarela de Pagos) o redactar un mensaje y stack trace personalizados, configurar el nivel de severidad (FAIL, WARN, INFO) y el origen del reporte (Automático vs Manual).
+  - **Inyección Dirigida:** La función `handleSimulateFailure` fue refactorizada para aceptar y persistir estos parámetros directamente en Firestore Central en lugar de usar variables de prueba estáticas.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%2520PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Compilación limpia y exitosa de producción.
+
+### [2026-06-11] - Corrección Visual y de Idioma en Consola de Telemetría (dev-dashboard)
+* **Tipo:** Corrección de Interfaz / UX / Internacionalización
+* **Descripción de Cambios:**
+  - **Buscador de Logs:** Cambiamos la clase `border-slate-850` (color inexistente en el esquema estándar de Tailwind) por `border-slate-800` en el campo de entrada de búsqueda, eliminando la línea blanca/brillante de contorno y logrando una integración visual homogénea con el fondo oscuro.
+  - **Traducción de Señal:** Reemplazamos la señal técnica `~/telemetry $ await_stream_signal...` por su versión simplificada en español: `~/telemetria $ escuchando_eventos_en_vivo...`.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Compilación limpia y exitosa de producción.
+
+### [2026-06-11] - Fijación y Bloqueo de Header y Sidebar en Scroll (dev-dashboard)
+* **Tipo:** Refactorización / Layout / UX
+* **Descripción de Cambios:**
+  - Cambiamos la clase `min-h-screen overflow-x-hidden` a `h-screen overflow-hidden` en el contenedor principal de `App.jsx` del dashboard de desarrollo. Esto confina la altura de la aplicación al viewport y permite que el scroll bar se limite exclusivamente al panel de contenidos (`<main className="overflow-y-auto">`), manteniendo el encabezado (`nav` sticky) y el menú lateral (`aside` flex) completamente estáticos e inamovibles.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Construcción de producción exitosa (`vite build`).
+
+### [2026-06-11] - Optimización y Clasificación de Telemetría de Errores (Spark Saver)
+* **Tipo:** Refactorización / Optimización / UX / Calidad de Datos
+* **Descripción de Cambios:**
+  1. **Filtro de Ruido en Clientes:** Agregamos una lista de ignorados en frío (`NOISE_TO_IGNORE` en `telemetryService.js`) que previene el envío automático de errores temporales de red (`failed to fetch`, `NetworkError`), scripts CORS, cancelaciones y extensiones del navegador, protegiendo las cuotas de escritura de Firestore (plan Spark).
+  2. **Clasificación por Origen (`source`):** Introdujimos el parámetro `source` ('automatic' | 'manual') en la firma de `reportAppFailureToDeveloper` para marcar exactamente si un incidente ocurrió de forma imprevista o fue forzado manualmente por el cliente.
+  3. **Ampliación de De-duplicación:** Incrementamos la ventana de prevención de duplicados de errores a **5 minutos (300,000 ms)** en memoria por firma de hash.
+  4. **Visualización en Dashboard:** Modificamos `App.jsx` en el dashboard para renderizar dinámicamente badges distintivos (`Manual` en ámbar y `Automático` en índigo) junto a cada registro en el historial de incidentes.
+  5. **Mapeo en Plantillas:** Actualizamos tanto la app core de Ventas como los archivos seed de templates (`template-ventas`, `template-core-seed`) en el CLI.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/telemetryService.js) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/telemetryService.js) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/telemetryService.js) [MODIFY]
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Compilaciones limpias y tags visuales integrados en el dashboard de desarrollo.
+
+### [2026-06-11] - Corrección de Rutas en Registro de Plantillas Core y Scaffolding del CLI
+* **Tipo:** Bugfix / Automatización / CLI
+* **Descripción de Cambios:**
+  1. **Correcion de Path Parent:** Corregimos `/api/register-core` en `server.js` para usar `path.dirname(WORKSPACE_ROOT)` al instanciar carpetas de "Plantillas Core", evitando que se crearan erróneamente dentro de `Instancias Clientes`.
+  2. **Sanitización de Slashes en Registro:** Ajustamos la escritura en `plantillas_registro.json` para mapear las rutas de `fuente` y `destino` usando los resolved paths limpios y con forward slashes unificados (`.replace(/\\/g, '/')`).
+  3. **Migración Física:** Movimos físicamente el directorio erróneo `D:\PROTOTIPE\Instancias Clientes\Plantillas Core\App Domiciliarios` a `D:\PROTOTIPE\Plantillas Core\App Domiciliarios`, aprovisionamos el archivo base `GEMINI.md` omitido por la ruta inválida, y corregimos su registro de mapeo en el JSON central.
+  4. **Endpoint de Eliminación de Core:** Implementamos el endpoint `DELETE /api/cores/:clave` en `server.js` para remover por completo del registro y del disco (fisiamente) cualquier plantilla core inactiva si falla la inicialización o ya no se requiere.
+  5. **Botonera de Eliminación Visual:** Modificamos `CoreCard.jsx` en el dashboard para añadir un botón de bote de basura (`Trash2`) con confirmación de dos pasos ("¿Eliminar?" -> Check/Cancelar) que permite desregistrar y purgar físicamente la plantilla inactiva desde la propia interfaz de administración.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/plantillas_registro.json`](file:///d:/PROTOTIPE/Prototipe-CLI/plantillas_registro.json) [MODIFY]
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY]
+* **Verificación:** Mapeo y archivos corregidos en disco; compilado del dashboard exitoso.
+
+### [2026-06-11] - Extracción Modular de Facturación y Consolidación de Telemetría de Diagnóstico
+* **Tipo:** Refactorización / Modularización / UX / Calidad de Código
+* **Descripción de Cambios:**
+  1. **Unificación de Ajustes de Desarrollo:** Movimos los disparadores de telemetría y diagnóstico manuales ("Enviar Error de Prueba" y "Enviar Telemetría de Facturación") del menú principal de `DeveloperSettings.jsx` e integración directa en la misma interfaz de facturación del desarrollador para centralizar la experiencia.
+  2. **Creación del Panel Portable (`DeveloperBillingPanel.jsx`):** Diseñamos y extrajimos un componente de React modular 100% portable y autónomo para encapsular toda la lógica comisional, firmas táctiles en HTML5 Canvas, generación y exportación de recibos PDF e interactividad de diagnósticos.
+  3. **Purga de Código Duplicado:** Reemplazamos más de 150 líneas de código y estados en `DeveloperSettings.jsx` (tanto de `App Ventas` como de la plantilla `template-ventas` de la CLI) por una única instanciación limpia de `<DeveloperBillingPanel />`.
+  4. **Documentación del Módulo en Biblioteca:** Documentamos detalladamente el flujo operativo y el código completo del nuevo módulo en `facturacion_y_firma_digital.md` bajo el catálogo de componentes.
+  5. **Sincronización del Sandbox en Dev-Dashboard:** Modificamos el componente `FacturacionComisionalSandbox.jsx` de la biblioteca interactiva para añadir la sección "Telemetría y Diagnóstico de Canal" con sus respectivos estados de carga, alertas y botones de test de telemetría y error de prueba mockeados.
+* **Archivos Modificados/Creados:**
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx) [NEW]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx) [NEW]
+  - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/FacturacionComisionalSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/FacturacionComisionalSandbox.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/06_Biblioteca_Componentes/00_Core_Ecosistema_Obligatorios/Facturacion_y_Firma_Digital/facturacion_y_firma_digital.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/00_Core_Ecosistema_Obligatorios/Facturacion_y_Firma_Digital/facturacion_y_firma_digital.md) [MODIFY]
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+* **Verificación:** Ejecutada compilación local nativa (`npm run build` en App Ventas y dev-dashboard) exitosamente sin errores de dependencias o bundler.
+
+### [2026-06-11] - Refactorización de Reglas de Firestore y Protección de Credenciales Administrativas
+* **Tipo:** Seguridad / Reglas de Acceso / Robustez Base de Datos
+* **Descripción de Cambios:**
+  1. **Blindaje de `isAdmin()` en Reglas Firestore:** Modificamos las reglas compuestas en `firestore.rules` (tanto para `App Ventas` como para el generador `template-ventas`) para redefinir `isAdmin()`, consultando y validando la existencia de la referencia `/users/{uid}` del administrador y certificando que tenga asignado el rol de `admin`.
+  2. **Privacidad de employees:** Corregimos la regla de acceso de `/employees/{employeeId}` en el template principal de la CLI (`template-ventas`) para restringir lecturas a sesiones donde la bandera `activo` sea `true` o por verificación de rol del administrador, mitigando la exposición no autorizada de hashes de PIN y salarios.
+  3. **Auto-registro de Perfil Admin:** Modificamos la lógica de inicio de sesión y registro del administrador en `LoginPage.jsx` para instanciar proactivamente el documento de usuario en la base de datos bajo la ruta `/users/{uid}` con `role: 'admin'`, garantizando que las nuevas marcas cuenten con la infraestructura requerida para aplicar las reglas de seguridad.
+  4. **Manual Telemetry Trigger Button:** Implementamos un botón en `DeveloperSettings.jsx` ("Enviar Telemetría de Facturación") para realizar pruebas de transmisión de telemetría de facturación en vivo a Firestore Central de forma manual e inmediata, sin esperar al fin de mes, resolviendo la espera indefinida al realizar verificaciones de desarrollo.
+  5. **Remote Manual Telemetry Request:** Implementamos la funcionalidad de solicitud remota de telemetría desde el panel del desarrollador. Añadimos un botón "Obtener Telemetría" al lado de gestionar en el CRM para cada cliente, y un botón global "Obtener Telemetría de Todos". Esto actualiza el campo `triggerTelemetryReport` en Firestore Central, el cual es escuchado en tiempo real por el hook `useAppConfigSync.js` de la aplicación de ventas para forzar el reporte asíncrono inmediato.
+  6. **Alineación de Botones de Telemetría/Error:** Corregimos el desbordamiento de texto y desalineación de iconos en los botones "Enviar Error de Prueba" y "Enviar Telemetría de Facturación" en `DeveloperSettings.jsx` (tanto en `App Ventas` como en la plantilla de la CLI) reemplazando la altura fija `h-11` por `min-h-11 py-2.5` para que se expandan dinámicamente si el texto se envuelve, encapsulando el texto en un `span` con `text-center leading-tight` e inyectando la clase `shrink-0` a los iconos para prevenir distorsión.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/firestore.rules`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firestore.rules) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/LoginPage.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/services/billingService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/billingService.js) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/firestore.rules`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/firestore.rules) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/billingService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/billingService.js) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+* **Verificación:** Ejecutada compilación local del dashboard y la app de ventas, constatando que compilan limpiamente sin errores.
+
+### [2026-06-10] - Mitigación e Implementación del Plan de Auditoría Técnica de CLI & Bridge Server
+* **Tipo:** Seguridad / Rendimiento / Estabilidad / Refactorización Dashboard
+* **Descripción de Cambios:**
+  1. **Mitigación de Inyecciones de Comandos:** Sanitizamos argumentos en `server.js` al construir comandos de Firebase mediante `sanitizeShellArgument`.
+  2. **Blindaje de Path Traversal:** Validamos contención en `/api/library/extract` asegurando que la ruta del componente resida estrictamente dentro de la raíz de la plantilla base.
+  3. **Timeouts en Pruebas E2E y Terminación Recursiva:** Modificamos `/api/e2e/run` para implementar un timeout estricto de 3 minutos y finalización de árbol de procesos mediante `taskkill` en Windows para evitar procesos zombies de Playwright.
+  4. **Refinamiento de Auditoría PWA:** Corregimos el auditor para parsear el archivo `manifest.json`/`manifest.webmanifest`, extrayendo y validando el valor de `start_url` y la existencia del array de `icons`.
+  5. **Prevención de Git Leaks en Plantillas:** Inyectamos la creación automática de `.gitignore` en el generador de proyectos (`generator.js`) para evitar subir por error archivos `.env.local` o secretos.
+  6. **Optimización de React en Dashboard:** Creamos el componente modular `CoreCard.jsx` e integramos su visualización aislada en `CoreManagerPanel.jsx`. Esto elimina por completo los re-renders masivos en el panel principal ante la recepción de streams SSE en tiempo real de los logs de deploy y compilación.
+  7. **Doble Confirmación en Variables de Entorno:** Añadimos un paso de doble confirmación visual (Sí/No) para el borrado de claves de entorno locales en el componente `CoreCard.jsx`.
+* **Archivos Modificados:**
+  - [`D:/PROTOTIPE/Prototipe-CLI/server.js`](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/generator.js`](file:///D:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [NEW]
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+* **Verificación:** Ejecutada compilación local del dashboard en verde de forma exitosa.
+
+### [2026-06-10] - Reporte de Auditoría Técnica de CLI & Bridge Server
+* **Tipo:** Auditoría de Calidad y Seguridad / Documentación
+* **Descripción de Cambios:**
+  1. **Generación del Reporte:** Elaboramos el informe de auditoría técnica formal en `auditoria_cli_server_2026.md` identificando vulnerabilidades críticas y altas de inyección de comandos en shell interpolados de aprovisionamiento, path traversal en `/api/library/extract`, re-renders masivos por Logs SSE en `CoreManagerPanel.jsx`, fugas de secretos Git en aprovisionamiento y tests E2E colgados sin timeouts.
+  2. **Actualización de Mapas y Roadmaps:** Registramos la entrada del documento en el mapa semántico `mapa_documentacion_ia.md` e inyectamos la Tarea 365 de resolución en la hoja de ruta `tareas_pendientes.md`.
+* **Archivos Modificados:**
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_cli_server_2026.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_cli_server_2026.md) [NEW]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+* **Verificación:** Todos los archivos creados y actualizados respetando la jerarquía oficial y las convenciones del equipo.
+
+### [2026-06-10] - Corrección de Warning de Precarga de main.jsx en Consola Chrome
+* **Tipo:** Corrección de Bug / Optimización de Carga
+* **Descripción de Cambios:**
+  1. **Reemplazo de preload por modulepreload:** En `index.html` corregimos el warning de Chrome que reportaba que `src/main.jsx` fue precargado pero no utilizado en los primeros segundos de carga del documento. Como `main.jsx` es cargado como un módulo de JavaScript (`type="module"`), el navegador requiere que su directiva de precarga use `rel="modulepreload"` en lugar de `rel="preload" as="script"`, evitando así la doble petición de red y el warning en consola.
+* **Archivos Modificados:**
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/index.html`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/index.html) [MODIFY]
+* **Verificación:** Ejecutada compilación exitosa (`npm run build`) y suite de pruebas (`npm run test:ci`) satisfactorias.
+
+### [2026-06-10] - Tres Mejoras de Robustez y Carga de Logo en Onboarding Wizard
+* **Tipo:** Robustez / Automatización / UX / Carga de Logo
+* **Descripción de Cambios:**
+  1. **Validación del SDK de Firebase (Pre-Flight Checks):**
+     - Añadimos el endpoint `POST /api/firebase/validate` en `server.js` para pre-validar las credenciales (API Key) simulando una petición a la API de Firebase Auth.
+     - Añadimos la lógica y un botón interactivo de comprobación de conexión en la sección "Servidor" del Wizard de Onboarding en `App.jsx`.
+  2. **Carga y Compresión Automática de Logo de Marca (Jimp Compressor):**
+     - Añadimos el endpoint `POST /api/upload-logo` en `server.js` para procesar la subida del logo de marca en base64. Si la imagen del logo supera los 2MB de tamaño, el servidor utiliza `Jimp` para redimensionar la imagen a un tamaño máximo de 512x512px y re-escribir el archivo en un directorio temporal seguro del CLI.
+     - Rediseñamos el Wizard de Onboarding en su pestaña de "Branding" en `App.jsx` introduciendo un bloque de selección de archivos por drag-and-drop con carga automática base64, previsualización de carga y la alternativa de ingresar una ruta absoluta de archivo local.
+     - Integramos la variable `logoPath` del logo subido/procesado en el payload enviado al motor de creación de proyectos.
+  3. **Descarga de Logs de Despliegue de Hosting:**
+     - Implementamos la función `downloadLogs` en `CoreManagerPanel.jsx` para recolectar el listado de logs generados en tiempo real por el proceso de compilación y despliegue.
+     - Agregamos un botón interactivo para "Descargar Log" en formato de texto (.log) al panel de control de Firebase Hosting.
+* **Archivos Modificados:**
+  - [`D:/PROTOTIPE/Prototipe-CLI/server.js`](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+* **Verificación:** Compilación del proyecto exitosa. Se validaron las rutas e importaciones de Jimp y la compatibilidad con el motor de aprovisionamiento.
+* **Hotfix posterior:** Corregido el import de Jimp a su versión desestructurada `{ Jimp }` en `server.js` y reiniciado el servidor CLI en el puerto 3001, solucionando el error de despliegue por caché del proceso anterior que intentaba desplegar usando el alias incorrecto `-P ventas` en lugar de `-P ventas-smartfix`.
+
+### [2026-06-10] - Guardián de Calidad y PWA en Deploy con Auto-Resolución y Drift Detector CRM
+* **Tipo:** Automatización / Calidad / Auditoría / Sincronización Downstream
+* **Descripción de Cambios:**
+  1. **Guardián de Despliegue (SSE Pre-Deploy Audit):**
+     - Integramos un paso de auditoría física síncrona en el endpoint de despliegue (`POST /api/project/deploy`) de `server.js`.
+     - Si la puntuación de calidad cae por debajo del 90%, el deploy se detiene inmediatamente emitiendo un evento `audit_failed` con los fallos, a menos que se fuerce explícitamente mediante el parámetro `force=true`.
+  2. **Panel de Auto-Resolución Visual en Consola SSE:**
+     - Agregamos soporte para capturar los eventos `audit_failed` en `CoreManagerPanel.jsx` de `dev-dashboard`.
+     - Renderizamos un bloque informativo de error y 3 botones correctores en caliente (optimización de chunks, reparación PWA y restablecimiento de reglas de base de datos) para corregir los problemas desde la interfaz antes de reintentar.
+  3. **Drift Detector CRM (Algoritmo de Desviación):**
+     - Añadimos el endpoint `GET /api/project/drift` en `server.js` para realizar una comparación profunda recursiva de archivos entre la instancia del cliente y su respectivo Core de referencia, calculando el porcentaje de paridad física en base a firmas criptográficas y diferencias de contenido de archivos.
+     - Añadimos `POST /api/project/sync-file` para copiar de forma segura parches puntuales desde el Core hacia el cliente (sincronización selectiva downstream).
+  4. **Pestaña de Sincronización e Integración de Diffs en CRM:**
+     - Reestructuramos el modal de gestión del cliente en `App.jsx` introduciendo pestañas para Configuración Operativa y Sincronización Core (Drift).
+     - Renderizamos la paridad de código, los archivos desviados/modificados y un visor de diferencias de líneas de código coloreadas (Ver Diff) junto con botones individuales para aplicar la sincronización.
+  5. **Resolución y Auto-Creación de Proyectos Firebase sin Pasos Manuales:**
+     - Modificamos la función `resolveFirebaseProjectId` en `server.js` para automatizar completamente la vinculación de proyectos:
+       a) Lee `.prototipe.json` o `.firebaserc`.
+       b) Si no hay configuración previa, consulta `firebase projects:list --json` y auto-detecta si ya existe algún proyecto coincidente (ej. `ventas-smartfix` para `ventas`), auto-vinculándolo escribiendo el `.firebaserc` de manera transparente.
+       c) Si no existe coincidencia, **crea automáticamente un nuevo proyecto único en tu cuenta de Firebase** (`[clientId]-app-[random]`), inicializa las configuraciones necesarias (`.firebaserc` y `firebase.json` de Hosting) en la carpeta del proyecto y procede al deploy sin intervención manual.
+* **Archivos Modificados:**
+  - [`D:/PROTOTIPE/Prototipe-CLI/server.js`](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx) [MODIFY]
+  - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/analisis_automatizacion_dashboard.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/analisis_automatizacion_dashboard.md) [NEW]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/auditoria_flujo_onboarding.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/auditoria_flujo_onboarding.md) [NEW]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/propuestas_mejoras_robustez.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/propuestas_mejoras_robustez.md) [NEW]
+* **Verificación:** Compilaciones de producción exitosas. Probado el algoritmo de auto-matching de Firebase y redactado informe técnico de análisis, integración de dashboard, auditoría del flujo completo de onboarding y propuestas de robustez.
+
+### [2026-06-10] - Optimización de Chunks de Bundle y Refinamiento de Auditor PWA
+* **Tipo:** Optimización de Rendimiento / Refactorización de Build y Servidor
+* **Descripción de Cambios:**
+  1. **División de Chunks de Terceros (Code Splitting):**
+     - Modificamos la configuración `manualChunks` en `vite.config.js` de App Ventas y de las plantillas base (`template-ventas`, `template-core-seed`) para segmentar el bundle general de `vendor` en chunks individuales más pequeños y optimizados: `react-core` (React y React-DOM), `react-router` (enrutamiento), `react-query`, `zod` y `vendor-utils`.
+     - Habilitamos `build.manifest: true` en todas las configuraciones de Vite para generar el archivo de mapeo `.vite/manifest.json`.
+  2. **Refinamiento Inteligente del Auditor PWA:**
+     - Modificamos el endpoint `/api/project/audit` en `server.js` de `Prototipe-CLI` para leer y procesar el manifiesto de Vite, determinando recursivamente qué chunks forman parte de la carga estática inicial (critical path) y cuáles se importan dinámicamente bajo demanda.
+     - Ajustamos el auditor para que excluya de las penalizaciones de puntuación y advertencias críticas de peso a los archivos dinámicos/lazy-loaded (como el generador de PDFs de 630 KB), evitando falsos positivos y otorgando un puntaje preciso de acuerdo a la carga inicial.
+* **Archivos Modificados:**
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/vite.config.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/vite.config.js) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/vite.config.js`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/vite.config.js) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/server.js`](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+* **Verificación:** Compilación exitosa en App Ventas con chunks de vendors inferiores a 230 KB. Petición al auditor responde con exclusión correcta de chunks lazy-loaded para la puntuación.
+
+### [2026-06-10] - Integración de Herramientas de Automatización en CLI Bridge Server
+* **Tipo:** Automatización / Refactorización de Infraestructura Local
+* **Descripción de Cambios:**
+  1. **Streaming SSE para Logs de Aprovisionamiento:**
+     - Modificamos `worker_create_project.js` para interceptar logs globales y enviarlos al padre mediante IPC.
+     - Adaptamos el endpoint `POST /api/create-project` en `server.js` para responder con cabeceras SSE y transmitir los logs en tiempo real al frontend.
+  2. **Endpoint Extractor de Componentes:**
+     - Agregamos `POST /api/library/extract` en `server.js` para extraer componentes de código locales, estructurar su documentación Markdown estándar e indexarlos automáticamente en el README del catálogo y en el Mapa de Documentación para la IA (`mapa_documentacion_ia.md`).
+  3. **Control de Entorno y Despliegues de Hosting:**
+     - Agregamos `POST /api/project/deploy` en `server.js` para automatizar la compilación (`npm run build`) y el despliegue a Firebase Hosting con streaming SSE interactivo de los logs.
+     - Añadimos `GET /api/project/env` y `POST /api/project/env` para leer y escribir el fichero `.env.local` de cada cliente desde la interfaz visual.
+  4. **Auditoría física y PWA:**
+     - Diseñamos `GET /api/project/audit` en `server.js` para auditar la carpeta `dist/` de producción, calcular tamaños de assets, detectar chunks JS pesados (> 500 KB) y certificar la integración de Service Workers y manifiestos PWA.
+* **Archivos Modificados:**
+  - [`D:/PROTOTIPE/Prototipe-CLI/server.js`](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`D:/PROTOTIPE/Prototipe-CLI/worker_create_project.js`](file:///D:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+* **Verificación:** El servidor local del CLI inicializa y corre sin errores en el puerto 3001 con todos los nuevos endpoints listados en consola.
+
+### [2026-06-10] - Implementación del Plan de Resolución Estratégica en App Ventas
+* **Tipo:** Seguridad / Rendimiento / Modularización / Refactorización Core
+* **Descripción de Cambios:**
+  1. **Fase 1 - Blindaje de Seguridad y PIN Hashing SHA-256:**
+     - Modificamos `firestore.rules` para prohibir lecturas públicas directas sobre `/employees`, permitiéndolas solo a administradores o si el empleado tiene el flag `activo == true`. Restringimos queries a `/orders` y `/credits` requiriendo filtro obligatorio por celular del cliente (`cliente.celular`).
+     - Añadimos la función nativa asíncrona de hashing SHA-256 en `employeeService.js` para procesar y encriptar PINs de empleados localmente en el navegador antes de registrarlos o validarlos en Firestore.
+     - Adaptamos el portal de login de empleados (`PortalAuth.jsx`) y el gestor de personal en el panel de administrador (`EmployeeSettings.jsx`) para procesar el hashing SHA-256 de forma transparente y enmascarar los PINs mediante placeholders seguros (`******`).
+  2. **Fase 2 - Optimización de Facturación y Cómputo Dinámico:**
+     - Reestructuramos la query de cálculo y comisiones de facturación en `billingService.js` para restringir la búsqueda a un rango de fecha dinámico del mes en curso y limitar el historial a los últimos 6 meses, evitando búsquedas O(N) que degradaban la red.
+     - Implementamos un planificador de telemetría en `useAppConfigSync.js` para retrasar y consolidar el reporte HTTP mensual del volumen comisional de ventas strictly en el último día de cada mes calendario.
+  3. **Fase 3 - Rendimiento Core Web Vitals:**
+     - Añadimos etiquetas `<link rel="preconnect">` para las APIs y recursos de fuentes de Google en `index.html`.
+     - Insertamos instrucciones `<link rel="preload">` para acelerar la carga síncrona del script del bundle inicial (`src/main.jsx`).
+  4. **Fase 4 - Modularización de Productos y Desduplicación de Lógica:**
+     - Creamos el hook personalizado unificado `useProductVariants.js` para centralizar los cálculos redundantes de variantes con stock, tallas/colores disponibles, stock consolidado total, precios de oferta, insignias comerciales dinámicas ("Más Vendido", "Última Unidad", "Nuevo", "Oferta Imperdible") e imagen activa.
+     - Refactorizamos `ProductDetailPage.jsx` and `ProductPublicDetail.jsx` para consumir el nuevo hook, eliminando más de 120 líneas de código duplicado por archivo y logrando un desacoplamiento limpio de la interfaz visual con la lógica de negocio multivariante.
+* **Archivos Modificados:**
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/firestore.rules`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firestore.rules) [MODIFY]
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/services/employeeService.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/employeeService.js) [MODIFY]
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/EmployeeSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/EmployeeSettings.jsx) [MODIFY]
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/services/billingService.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/billingService.js) [MODIFY]
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/index.html`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/index.html) [MODIFY]
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/hooks/useProductVariants.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useProductVariants.js) [NEW]
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+  - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ProductPublicDetail.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+* **Verificación:** Ejecutada compilación local (`npm run build`) en verde y suite de pruebas End-to-End con Playwright (`npm run test:ci`) aprobada en verde (1 passed).
+
+### [2026-06-10] - Auditoría Técnica de App Ventas
+* **Tipo:** Auditoría de Calidad / Seguridad / Rendimiento
+* **Descripción de Cambios:**
+  1. **Auditoría Técnica Integral:** Se realizó una auditoría profunda de 16 ejes clave en App Ventas. Se revisaron Core Web Vitals, recursos que bloquean el renderizado, optimización de imágenes, consumo de memoria y fugas en listeners, fluidez y animaciones con throttling de CPU, solicitudes de red, errores de consola, pruebas funcionales, responsividad en 12 resoluciones, accesibilidad (foco/aria), UI/UX, seguridad frontend, SEO técnico, renders innecesarios en React, bundle/dependencias y arquitectura.
+  2. **Creación de Reportes Técnicos:** Se redactó y guardó el informe técnico completo en `auditoria_tecnica_app_ventas.md` y el plan de mitigación estratégico en `plan_resolucion_ventas.md`.
+* **Archivos Modificados:**
+  - `D:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_app_ventas.md` [NEW]
+  - `D:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/plan_resolucion_ventas.md` [NEW]
+  - `D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md` [MODIFY]
+  - `D:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md` [MODIFY]
+* **Verificación:** Reportes generados y documentados bajo los estándares del proyecto.
+
+### [2026-06-10] - Despliegue de Hosting de App Ventas y dev-dashboard
+* **Tipo:** Lanzamiento / Despliegue en Firebase
+* **Descripción de Cambios:**
+  1. **Compilación de Producción:** Compilamos localmente las versiones de producción de ambas aplicaciones mediante `npm run build`.
+  2. **Despliegue de App Ventas:** Desplegamos exitosamente el hosting del cliente final en Firebase. URL: `https://ventas-smartfix.web.app`
+  3. **Despliegue de Dashboard:** Desplegamos exitosamente el panel de control del ecosistema en Firebase. URL: `https://prototipe-ecosistema-control.web.app`
+* **Archivos Modificados:** Ninguno (despliegue de bundle de distribución).
+* **Verificación:** Hosting liberado y activo en la nube para ambos entornos.
+
+
 ### [2026-06-10] - Creación de SwipeableCardStack e Importaciones en App Ventas
 * **Tipo:** Corrección de Bug / Estabilidad Core
 * **Descripción de Cambios:**

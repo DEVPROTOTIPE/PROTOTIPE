@@ -173,7 +173,8 @@ function calcMetrics(orders, billingConfig) {
     montoFijoServicio,
     pagoMensualFijo,
     enableDianBilling,
-    costoPorFacturaDian
+    costoPorFacturaDian,
+    triggerTelemetryReport: billingConfig?.triggerTelemetryReport ?? null
   }
 }
 
@@ -191,13 +192,21 @@ export function subscribeToBillingData(onUpdate) {
     montoFijoServicio: 0,
     pagoMensualFijo: 0,
     enableDianBilling: false,
-    costoPorFacturaDian: 0
+    costoPorFacturaDian: 0,
+    triggerTelemetryReport: null
   }
 
   // ─── Suscripción a pedidos completados ───────────────────────────
+  // Para optimizar lecturas Firestore, limitamos la búsqueda a los últimos 6 meses.
+  const sixMonthsAgo = new Date()
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
+  sixMonthsAgo.setDate(1)
+  sixMonthsAgo.setHours(0, 0, 0, 0)
+
   const qOrders = query(
     ordersRef,
     where('estado', '==', ORDER_STATES.COMPLETED),
+    where('createdAt', '>=', sixMonthsAgo),
     orderBy('createdAt', 'desc')
   )
 
@@ -224,7 +233,8 @@ export function subscribeToBillingData(onUpdate) {
           montoFijoServicio: data.montoFijoServicio ?? 0,
           pagoMensualFijo: data.pagoMensualFijo ?? 0,
           enableDianBilling: data.enableDianBilling === true,
-          costoPorFacturaDian: data.costoPorFacturaDian ?? 0
+          costoPorFacturaDian: data.costoPorFacturaDian ?? 0,
+          triggerTelemetryReport: data.triggerTelemetryReport ?? null
         }
       } else {
         latestConfig = {

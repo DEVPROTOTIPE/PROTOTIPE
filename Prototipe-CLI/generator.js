@@ -116,6 +116,19 @@ export async function createProject(answers) {
   const targetDir = path.resolve(answers.targetPath);
   const srcTemplateDir = path.join(TEMPLATES_DIR, answers.template);
 
+  // Resolver colores HSL y Tema de la paleta seleccionada (Auditoría)
+  let primaryColor, accentColor, themeName;
+  if (answers.paletteChoice === 'custom') {
+    primaryColor = answers.customPrimary;
+    accentColor = answers.customAccent;
+    themeName = 'custom';
+  } else {
+    const selected = PALETTES[answers.paletteChoice] || PALETTES.ruby;
+    primaryColor = selected.primary;
+    accentColor = selected.accent;
+    themeName = selected.theme;
+  }
+
   console.log('\n' + pc.yellow(`⚡ Iniciando aprovisionamiento automatizado en: ${targetDir}`));
 
   // 1. Crear directorio de destino y copiar plantilla
@@ -321,6 +334,41 @@ VITE_NICHE=${answers.niche || 'general'}
 
   await fs.writeFile(path.join(targetDir, '.env.local'), envContent, 'utf-8');
   step4.succeed('Variables de entorno (.env.local) generadas e inyectadas.');
+
+  // 4.1. Crear archivo .gitignore de forma nativa para prevenir fugas de secretos (Auditoría)
+  const gitignorePath = path.join(targetDir, '.gitignore');
+  const gitignoreContent = `# Logs y Cachés
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Directorios de dependencias
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Firebase y Secretos
+.firebase/
+.firebaserc
+.env
+.env.local
+.env.*.local
+
+# IDEs y Editores
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+`;
+  await fs.writeFile(gitignorePath, gitignoreContent, 'utf-8');
 
   // 5. Crear archivo .firebaserc de forma nativa
   const step5 = ora('Generar archivo de vinculación .firebaserc').start();

@@ -8,7 +8,6 @@ import { useOrders } from '../../hooks/useOrders'
 import { ORDER_STATES, PAYMENT_METHODS } from '../../constants'
 import { formatCurrency } from '../../utils/formatters'
 import { useProducts } from '../../hooks/useInventory'
-import { exportSalesReportPDF, exportRotationReportPDF } from '../../services/pdfService'
 import CustomDatePicker from '../../components/ui/DatePicker'
 import useAppConfigStore from '../../store/appConfigStore'
 
@@ -40,12 +39,14 @@ export default function AdminSalesDetail() {
   const [dateTo, setDateTo] = useState(isoToday)
 
   // ─── EXPORTACIÓN PDF DE VENTAS Y CAJA ──────────────────────────────────────
-  const handleExportSalesReportPDF = () => {
+  const handleExportSalesReportPDF = async () => {
+    const { exportSalesReportPDF } = await import('../../services/pdfService')
     exportSalesReportPDF({ dateFrom, dateTo, orders, products })
   }
 
   // ─── EXPORTACIÓN PDF DE ROTACIÓN E INVENTARIO ──────────────────────────────
-  const handleExportRotationReportPDF = () => {
+  const handleExportRotationReportPDF = async () => {
+    const { exportRotationReportPDF } = await import('../../services/pdfService')
     exportRotationReportPDF({ dateFrom, dateTo, orders, products })
   }
 

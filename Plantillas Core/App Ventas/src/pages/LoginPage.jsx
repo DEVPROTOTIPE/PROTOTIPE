@@ -134,6 +134,17 @@ export default function LoginPage() {
       }
       
       const user = userCredential.user
+      const userRef = doc(db, COLLECTIONS.USERS, user.uid)
+      const adminData = {
+        email: user.email,
+        role: 'admin',
+        updatedAt: serverTimestamp()
+      }
+      if (adminSellerName.trim()) {
+        adminData.nombre = adminSellerName.trim()
+      }
+      await setDoc(userRef, adminData, { merge: true })
+
       setAdmin({
         uid: user.uid,
         email: user.email,

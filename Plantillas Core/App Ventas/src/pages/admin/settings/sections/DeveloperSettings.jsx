@@ -3,18 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   KeyRound, Lock, Filter, TrendingUp, Receipt, Trash2, Smartphone, AlertTriangle, 
   ChevronRight, Plus, X, ShoppingBag, Wallet, BarChart3, Sparkles, Tag, ChevronDown, 
-  Save, Loader2, CheckCircle
+  Save, Loader2, CheckCircle, Activity
 } from 'lucide-react'
 import { DEV_PIN, COLLECTIONS } from '../../../../constants'
 import { updateAppConfig, updateCatalogFilters, resetAppData } from '../../../../services/appConfigService'
-import { reportAppFailureToDeveloper } from '../../../../services/telemetryService'
-import { exportDeveloperReceiptPDF } from '../../../../services/pdfService'
-import { useBilling } from '../../../../hooks/useBilling'
-import { useOrders } from '../../../../hooks/useOrders'
 import { auth } from '../../../../config/firebaseConfig'
 import { signOutAdmin } from '../../../../services/authService'
 import useAuthStore from '../../../../store/authStore'
 import { useNavigate } from 'react-router-dom'
+import DeveloperBillingPanel from './DeveloperBillingPanel'
 
 export default function DeveloperSettings({ 
   formData, 
@@ -36,84 +33,8 @@ export default function DeveloperSettings({
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
 
-  // Facturación y Firmas
-  const { metrics: billingMetrics, isLoading: billingLoading } = useBilling()
-  const { data: orders = [] } = useOrders()
-  const [commissionInput, setCommissionInput] = useState(null)
-  const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false)
-  const [isDrawing, setIsDrawing] = useState(false)
-  const canvasRef = useRef(null)
-
   const handleVersionClick = () => {
     // Si queremos bloquear o resetear el estado
-  }
-
-  // --- FIRMA DIGITAL ---
-  const startDrawing = (e) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    ctx.lineWidth = 2
-    ctx.lineCap = 'round'
-    ctx.strokeStyle = '#000000'
-    
-    const rect = canvas.getBoundingClientRect()
-    const clientX = e.clientX || (e.touches && e.touches[0]?.clientX)
-    const clientY = e.clientY || (e.touches && e.touches[0]?.clientY)
-    if (!clientX || !clientY) return
-
-    const x = clientX - rect.left
-    const y = clientY - rect.top
-    
-    ctx.beginPath()
-    ctx.moveTo(x, y)
-    setIsDrawing(true)
-  }
-
-  const draw = (e) => {
-    if (!isDrawing) return
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    const rect = canvas.getBoundingClientRect()
-    
-    const clientX = e.clientX || (e.touches && e.touches[0]?.clientX)
-    const clientY = e.clientY || (e.touches && e.touches[0]?.clientY)
-    if (!clientX || !clientY) return
-
-    const x = clientX - rect.left
-    const y = clientY - rect.top
-    
-    ctx.lineTo(x, y)
-    ctx.stroke()
-  }
-
-  const stopDrawing = () => {
-    setIsDrawing(false)
-  }
-
-  const clearCanvas = () => {
-    const canvas = canvasRef.current
-    if (canvas) {
-      const ctx = canvas.getContext('2d')
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-    }
-  }
-
-  const handleExportDeveloperReceiptPDF = () => {
-    try {
-      const canvas = canvasRef.current
-      if (!canvas) {
-        console.error("Canvas ref is null")
-        return
-      }
-      const signatureDataUrl = canvas.toDataURL('image/png')
-      exportDeveloperReceiptPDF({ signatureDataUrl, orders, config, billingMetrics })
-      setIsSignatureModalOpen(false)
-    } catch (error) {
-      console.error("Error al exportar el recibo en PDF:", error)
-      setSaveMessage({ type: 'error', text: 'Error al generar PDF: ' + error.message })
-    }
   }
 
   // --- RESTAURACIÓN ---
@@ -350,14 +271,6 @@ export default function DeveloperSettings({
                 icon: Smartphone,
                 iconBg: 'bg-blue-500/10 hover:bg-blue-500/15',
                 iconColor: 'text-blue-500'
-              },
-              {
-                id: 'dev-reporte-error',
-                label: 'Reportar Error de Prueba',
-                description: 'Envía un error simulado para validar la llegada al panel central de fallas',
-                icon: AlertTriangle,
-                iconBg: 'bg-rose-500/10 hover:bg-rose-500/15',
-                iconColor: 'text-rose-500'
               }
             ].map(tool => {
               const ToolIcon = tool.icon
@@ -469,220 +382,9 @@ export default function DeveloperSettings({
       )}
 
       {/* 2. Subsección: Facturación */}
-      {activeSubSection === 'dev-facturacion' && (() => {
-        const currentPercent = billingMetrics?.commissionPercent ?? 1
-        const fmt = (v) => `$${Number(v || 0).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-
-        return (
-          <div className="space-y-4">
-            <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-surface to-teal-500/5 p-5">
-              <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-emerald-500/5 -translate-y-8 translate-x-8" />
-              <div className="relative flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 flex items-center justify-center shrink-0">
-                  <Receipt size={24} className="text-emerald-500" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-app mb-1">Módulo de Facturación</p>
-                  <p className="text-xs text-muted leading-relaxed">
-                    Inicialmente ya hiciste tu pago para iniciar el proyecto. Gracias por contribuir a mejorar tu negocio.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {billingLoading ? (
-              <div className="grid grid-cols-2 gap-3">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="bg-surface-2 border border-app rounded-2xl p-4 animate-pulse">
-                    <div className="h-3 bg-app/20 rounded-full w-16 mb-3" />
-                    <div className="h-7 bg-app/20 rounded-full w-24" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-surface-2 border border-app rounded-2xl p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                      <ShoppingBag size={14} className="text-blue-500" />
-                    </div>
-                    <p className="text-xs text-muted font-medium">Ventas del mes</p>
-                  </div>
-                  <p className="text-xl font-black text-app">{fmt(billingMetrics?.totalMes)}</p>
-                </div>
-
-                <div className="bg-surface-2 border border-emerald-500/20 rounded-2xl p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                      <Wallet size={14} className="text-emerald-500" />
-                    </div>
-                    <p className="text-xs text-muted font-medium">Mi comisión del mes</p>
-                  </div>
-                  <p className="text-xl font-black text-emerald-500">{fmt(billingMetrics?.comisionMes)}</p>
-                </div>
-
-                <div className="bg-surface-2 border border-app rounded-2xl p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                      <TrendingUp size={14} className="text-purple-500" />
-                    </div>
-                    <p className="text-xs text-muted font-medium">Pedidos completados</p>
-                  </div>
-                  <p className="text-xl font-black text-app">{billingMetrics?.pedidosMes ?? 0}</p>
-                  <p className="text-xs text-muted mt-0.5">este mes</p>
-                </div>
-
-                <div className="bg-surface-2 border border-app rounded-2xl p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                      <BarChart3 size={14} className="text-amber-500" />
-                    </div>
-                    <p className="text-xs text-muted font-medium">Comisión acumulada</p>
-                  </div>
-                  <p className="text-xl font-black text-app">{fmt(billingMetrics?.comisionHistorica)}</p>
-                  <p className="text-xs text-muted mt-0.5">histórico total</p>
-                </div>
-              </div>
-            )}
-
-            <div className="bg-surface rounded-2xl border border-app overflow-hidden">
-              <div className="px-5 py-4">
-                <p className="text-sm font-bold text-app mb-1">Modelo de Facturación de Instancia</p>
-                <p className="text-xs text-muted mb-4">Configurado de manera centralizada desde el Dashboard del Desarrollador.</p>
-                <div className="p-3.5 bg-surface-2 border border-app rounded-xl space-y-2.5">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-semibold text-muted">Método Activo:</span>
-                    <span className="font-bold text-emerald-500 uppercase">
-                      {billingMetrics?.billingMode === 'percentage' && 'Porcentaje por Venta'}
-                      {billingMetrics?.billingMode === 'fixed_per_service' && 'Valor Fijo por Servicio'}
-                      {billingMetrics?.billingMode === 'flat_monthly' && 'Pago Mensual Fijo'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs border-t border-app pt-2.5">
-                    <span className="font-semibold text-muted">Tarifa Pactada:</span>
-                    <span className="font-bold text-app">
-                      {billingMetrics?.billingMode === 'percentage' && `${billingMetrics?.comisionPorcentaje}%`}
-                      {billingMetrics?.billingMode === 'fixed_per_service' && `${fmt(billingMetrics?.montoFijoServicio)} por pedido`}
-                      {billingMetrics?.billingMode === 'flat_monthly' && `${fmt(billingMetrics?.pagoMensualFijo)} al mes`}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {!billingLoading && billingMetrics && (
-              <>
-                <div className="bg-surface rounded-2xl border border-app overflow-hidden">
-                  <div className="px-5 py-4 border-b border-app">
-                    <p className="text-sm font-bold text-app">Resumen de comisiones</p>
-                    <p className="text-xs text-muted">Totales calculados sobre pedidos completados</p>
-                  </div>
-                  <div className="divide-y divide-app">
-                    {[
-                      { label: 'Ventas del mes', value: fmt(billingMetrics.totalMes), sub: `${billingMetrics.pedidosMes} pedidos completados` },
-                      { label: 'Comisión del mes', value: fmt(billingMetrics.comisionMes), highlight: true },
-                      { label: 'Total ventas histórico', value: fmt(billingMetrics.totalHistorico), sub: 'Todos los tiempos' },
-                      { label: 'Comisión histórica acumulada', value: fmt(billingMetrics.comisionHistorica), highlight: true },
-                    ].map((row, i) => (
-                      <div key={i} className="flex items-center justify-between px-5 py-3.5">
-                        <div>
-                          <p className="text-xs font-semibold text-app">{row.label}</p>
-                          {row.sub && <p className="text-[10px] text-muted mt-0.5">{row.sub}</p>}
-                        </div>
-                        <p className={`text-sm font-black ${row.highlight ? 'text-emerald-500' : 'text-app'}`}>{row.value}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-surface rounded-2xl border border-app p-5 space-y-4">
-                  <div>
-                    <p className="text-sm font-bold text-app mb-1">Generar Recibo y Firma de Conformidad</p>
-                    <p className="text-xs text-muted leading-relaxed">
-                      Genera el recibo detallado de comisiones mensuales para que el cliente lo firme y lo exporte en PDF.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setIsSignatureModalOpen(true)
-                      setTimeout(() => clearCanvas(), 50)
-                    }}
-                    className="h-11 px-5 rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer shadow-sm border-none"
-                  >
-                    <Receipt size={16} />
-                    Firmar y Exportar Recibo del Mes
-                  </button>
-                </div>
-
-                <AnimatePresence>
-                  {isSignatureModalOpen && (
-                    <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', zIndex: 99999 }}>
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setIsSignatureModalOpen(false)}
-                        style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)' }}
-                      />
-                      <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.95, opacity: 0 }}
-                        className="bg-surface rounded-3xl p-6 shadow-2xl relative max-w-sm w-full mx-4 space-y-4"
-                      >
-                        <div className="flex items-center justify-between border-b border-app pb-3">
-                          <div>
-                            <h3 className="text-sm font-bold text-app">Firma de Conformidad</h3>
-                            <p className="text-[10px] text-muted">Dibuja la firma táctil del cliente en el recuadro</p>
-                          </div>
-                          <button
-                            onClick={() => setIsSignatureModalOpen(false)}
-                            className="w-8 h-8 rounded-xl bg-surface-2 hover:bg-surface-3 flex items-center justify-center text-muted cursor-pointer border-none"
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-
-                        <div className="bg-surface-2 rounded-2xl overflow-hidden flex flex-col items-center p-2 shadow-inner">
-                          <canvas
-                            ref={canvasRef}
-                            width={300}
-                            height={150}
-                            onMouseDown={startDrawing}
-                            onMouseMove={draw}
-                            onMouseUp={stopDrawing}
-                            onMouseLeave={stopDrawing}
-                            onTouchStart={startDrawing}
-                            onTouchMove={draw}
-                            onTouchEnd={stopDrawing}
-                            className="bg-white rounded-xl cursor-crosshair max-w-full"
-                            style={{ display: 'block', touchAction: 'none' }}
-                          />
-                        </div>
-
-                        <div className="flex gap-3 pt-2">
-                          <button
-                            onClick={clearCanvas}
-                            className="flex-1 h-11 rounded-xl font-bold text-xs bg-surface-2 hover:bg-surface-3 text-app active:scale-95 transition-all cursor-pointer border-none"
-                          >
-                            Limpiar Firma
-                          </button>
-                          <button
-                            onClick={handleExportDeveloperReceiptPDF}
-                            className="flex-1 h-11 rounded-xl font-bold text-xs bg-emerald-500 hover:bg-emerald-600 text-white active:scale-95 transition-all cursor-pointer border-none"
-                          >
-                            Generar PDF
-                          </button>
-                        </div>
-                      </motion.div>
-                    </div>
-                  )}
-                </AnimatePresence>
-              </>
-            )}
-          </div>
-        )
-      })()}
+      {activeSubSection === 'dev-facturacion' && (
+        <DeveloperBillingPanel config={config} setSaveMessage={setSaveMessage} />
+      )}
 
       {/* 3. Subsección: Restauración */}
       {activeSubSection === 'dev-restauracion' && (
@@ -1267,64 +969,7 @@ export default function DeveloperSettings({
         </div>
       )}
 
-      {/* 6. Subsección: Telemetría de Errores */}
-      {activeSubSection === 'dev-reporte-error' && (
-        <div className="bg-surface rounded-3xl shadow-sm border border-app overflow-hidden">
-          <div className="p-5 sm:p-6 text-center space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center mx-auto">
-              <AlertTriangle size={32} className="text-rose-500" />
-            </div>
-            <div>
-              <h3 className="text-base font-extrabold text-app">Canal de Telemetría de Fallos</h3>
-              <p className="text-xs text-muted mt-1 max-w-sm mx-auto leading-relaxed">
-                Esta herramienta permite gatillar de manera manual un error simulado en la aplicación de ventas actual y reportarlo en tiempo real a la consola de administración central.
-              </p>
-            </div>
-            
-            {message && (
-              <div className={`p-4 rounded-xl flex items-start gap-3 text-left border ${message.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-green-500/10 border-green-500/20 text-green-500'}`}>
-                {message.type === 'error' ? <AlertTriangle size={18} className="shrink-0" /> : <CheckCircle size={18} className="shrink-0" />}
-                <span className="text-xs font-bold leading-relaxed">{message.text}</span>
-              </div>
-            )}
 
-            <div className="pt-2">
-              <button
-                onClick={async () => {
-                  setLoading(true);
-                  setMessage(null);
-                  try {
-                    const { reportAppFailureToDeveloper } = await import('../../../../services/telemetryService');
-                    const testError = new Error('TestTelemetryError: Prueba manual desde Opciones de Desarrollo de Ventas.');
-                    await reportAppFailureToDeveloper(testError.message, testError.stack);
-                    setMessage({
-                      type: 'success',
-                      text: '¡Reporte de error de prueba enviado con éxito a Firestore Central! Verifica la consola del desarrollador.'
-                    });
-                  } catch (err) {
-                    console.error(err);
-                    setMessage({
-                      type: 'error',
-                      text: `Fallo al reportar: ${err.message || 'Error desconocido'}`
-                    });
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                disabled={loading}
-                className="w-full sm:w-auto px-6 h-11 bg-rose-500 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-rose-600 active:scale-95 disabled:opacity-50 transition-all cursor-pointer mx-auto shadow-sm border-none"
-              >
-                {loading ? (
-                  <Loader2 size={16} className="animate-spin" />
-                ) : (
-                  <AlertTriangle size={16} />
-                )}
-                Enviar Error de Prueba
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

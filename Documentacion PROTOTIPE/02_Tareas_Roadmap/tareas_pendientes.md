@@ -6,6 +6,200 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
 ---
 
 ### 💼 Negocio y Modularidad Ecosistema (Prioridad Alta)
+* **[x] ~~Tarea 374: Botón "Desplegar en Local" y Control de Servidores de Desarrollo en CRM (dev-dashboard)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Implementado el sistema de despliegue local de proyectos clientes desde la tarjeta de cada cliente en el CRM. Agregados endpoints `/api/project/dev/start`, `/api/project/dev/stop` y `/api/project/dev/status` en el CLI bridge server. En el panel CRM del dashboard central, se integró el estado reactivo `localServers`, un efecto de consulta automática de estado y los botones interactivos "Desplegar en Local", "Detener" e "Ir a Local" con redirección directa.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 373: Selector de Clientes para Solicitud de Telemetría Global (dev-dashboard)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Refactorizado el botón global de obtención de telemetría de todos los clientes. Ahora abre un modal interactivo con casillas de selección multicliente pre-seleccionadas por defecto para todos los clientes activos del SaaS. Esto le permite al desarrollador solicitar reportes de telemetría y diagnóstico en caliente únicamente para los clientes seleccionados, previniendo disparos accidentales y protegiendo las cuotas de Firestore.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 372: Selector de Clientes en Sincronización Global y Despliegue en Lote (dev-dashboard)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Implementados los modales de configuración `isGlobalSyncConfigModalOpen` y `isGlobalDeployConfigModalOpen` con checklist de selección multicliente dinámica para evitar ejecuciones incidentales generales. Refactorizado el orden del despliegue en lote global para esperar 3 segundos entre instancias y agregados los controles de estado de cola e interrupción en caliente en el encabezado y pie del terminal SSE.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 371: Sincronización en Lote de Drift y Consola de Despliegue de Hosting en CRM (dev-dashboard)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Desarrollado el modal interactivo de sincronización inteligente por lotes (`BulkSyncModal`) que separa archivos core de branding sensible, y la consola terminal oscura de despliegues (`DeployTerminalModal`) con monitoreo por EventSource y bypass por auditoría baja. Añadidos los botones globales correspondientes en la cabecera de la sección CRM y los controles individuales en la pestaña Drift de gestión de clientes.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 370: Simulador de Fallos Multicliente Dirigido y Avanzado (dev-dashboard)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Refactorizada la simulación aleatoria de telemetría por un modal interactivo `SimulationFailureModal` en `dev-dashboard/src/App.jsx`. Permite elegir dinámicamente cualquier cliente de CRM (o ingresar uno manual), seleccionar entre plantillas de errores (TypeError, Firebase, etc.) o ingresar firmas personalizadas, configurar severidad (FAIL/WARN/INFO) y definir origen (Automático/Manual).
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 369: Corrección Visual y de Idioma en Consola de Telemetría (dev-dashboard)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Corregida la clase de borde del buscador en logs `border-slate-850` a `border-slate-800` en `dev-dashboard/src/App.jsx` para remover la línea blanca. Traducido y simplificado el texto técnico de espera a `~/telemetria $ escuchando_eventos_en_vivo...`.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 368: Fijación de Encabezado y Menú en Scroll (dev-dashboard)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Refactorizado el contenedor de diseño raíz en `dev-dashboard/src/App.jsx` para cambiar `min-h-screen overflow-x-hidden` a `h-screen overflow-hidden`, confinando el scroll únicamente al contenedor principal del contenido y fijando de manera estática el encabezado y el sidebar.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 367: Optimización y Clasificación de Telemetría de Errores (Spark Saver)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Implementado el filtrado automático de ruido en `telemetryService.js` para ignorar incidentes no críticos de red y extensiones del navegador, controlando costos en Firestore. Clasificado el origen (`source` en payload: 'automatic' | 'manual') y agregado soporte visual en la consola de diagnóstico de errores del Dashboard central mediante badges dinámicos ('Manual' / 'Automático').
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/telemetryService.js) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/telemetryService.js) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/telemetryService.js) [MODIFY]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 366: Extracción Modular del Panel de Facturación y Consolidación de Telemetría de Ajustes~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Extracción del panel de facturación y telemetría de diagnósticos ("Reportar Error de Prueba" y "Enviar Telemetría de Facturación") a un componente independiente y portable (`DeveloperBillingPanel.jsx`). Refactorización de `DeveloperSettings.jsx` (App Ventas y template-ventas) para consumir el nuevo componente, eliminando más de 150 líneas de lógica redundante. Registro de la documentación en la biblioteca (`facturacion_y_firma_digital.md`), actualización de mapas e integración en el esquema de sincronización universal.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx) [NEW]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx) [NEW]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Documentacion PROTOTIPE/06_Biblioteca_Componentes/00_Core_Ecosistema_Obligatorios/Facturacion_y_Firma_Digital/facturacion_y_firma_digital.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/00_Core_Ecosistema_Obligatorios/Facturacion_y_Firma_Digital/facturacion_y_firma_digital.md) [MODIFY]
+    - [`d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+* **[x] ~~Tarea 365: Plan de Resolución y Auditoría Técnica de CLI & Bridge Server~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-10
+  - Fecha de finalización: 2026-06-10
+  - Descripción: Implementada la mitigación de inyección de comandos en `server.js`, blindado el extractor de componentes contra path traversal, añadido hard execution timeouts (3 minutos) y finalización recursiva de procesos hijo en Windows (`taskkill`) para las pruebas E2E, mejorada la auditoría de PWA para parsear manifest.json, configurada la creación obligatoria de .gitignore en nuevos proyectos, modularizada la visualización de plantillas core mediante la creación de `CoreCard.jsx` e integración de doble confirmación de borrado en variables de entorno. Adicionalmente, se refactorizó la seguridad de las reglas compuestas de Firestore (`firestore.rules`) para verificar roles en el nodo `/users`, se modificó `LoginPage.jsx` para persistir dinámicamente perfiles con rol de administrador (`role: 'admin'`), se agregó un botón de envío manual en `DeveloperSettings.jsx` ("Enviar Telemetría de Facturación") para realizar pruebas inmediatas de telemetría de facturación en vivo, y se corrigió el overflow y desalineación de los botones de test de telemetría y error adaptándolos a viewports estrechos (usando `min-h-11 py-2.5`, centrado y `shrink-0` en iconos).
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [NEW]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_cli_server_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_cli_server_2026.md) [NEW]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/firestore.rules`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firestore.rules) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/LoginPage.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/services/billingService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/billingService.js) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/firestore.rules`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/firestore.rules) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/billingService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/billingService.js) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+
+* **[x] ~~Tarea 364: Tres Mejoras de Robustez y Carga de Logo en Onboarding Wizard~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-10
+  - Fecha de finalización: 2026-06-10
+  - Descripción:
+    - **Validación del SDK de Firebase (Pre-Flight Checks):** Agregamos el endpoint `/api/firebase/validate` y un botón interactivo de validación en caliente en la pestaña "Servidor" del asistente de creación de proyectos.
+    - **Optimizador y Compresor de Logo (Asset Compressor):** Implementamos el endpoint `/api/upload-logo` y la carga de logos por drag-and-drop con base64. Si la imagen supera los 2MB, el servidor la procesa con Jimp redimensionándola a un tamaño máximo de 512x512px y re-escribiendo el archivo para PWA.
+    - **Descarga de Logs de Despliegue:** Agregamos el botón "Descargar Log" en la consola de despliegue en `CoreManagerPanel.jsx` para guardar archivos `.log` locales en el navegador.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Prototipe-CLI/server.js`](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/propuestas_mejoras_robustez.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/propuestas_mejoras_robustez.md) [NEW]
+
+* **[x] ~~Tarea 363: Guardián de Calidad y PWA en Deploy con Auto-Resolución y Drift Detector CRM~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-10
+  - Fecha de finalización: 2026-06-10
+  - Descripción:
+    - **Guardián de Despliegue (SSE Pre-Deploy Audit):** Modificamos el endpoint de deploy en `server.js` para ejecutar de forma síncrona el auditor físico antes de realizar el deploy. Si el score es inferior a 90/100, se detiene la subida y se emite un evento `audit_failed` con los detalles y tipos de fixes correspondientes, a menos que se use la opción `force=true`.
+    - **Panel de Auto-Resolución Visual:** Integramos un panel reactivo en `CoreManagerPanel.jsx` que se muestra ante fallos de auditoría de deploy, ofreciendo 3 botones correctores en caliente (optimizar chunks, reparar recursos PWA y restaurar reglas compuestas) y el botón de despliegue forzado.
+    - **Drift Detector CRM:** Implementamos los endpoints `/api/project/drift` (cálculo de desviaciones recursivas mediante comparaciones de contenido de archivos entre cliente y core de referencia) y `/api/project/sync-file` (sincronizador selectivo downstream de archivos).
+    - **Visor de Diffs e Integración CRM:** Agregamos una pestaña de "Sincronización Core (Drift)" en la gestión de clientes en `App.jsx`, con índice de paridad, visualizador de diferencias de líneas coloreadas (Diff lines) y botones de sincronización selectiva por archivo en caliente.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Prototipe-CLI/server.js`](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea 362: Optimización de Chunks de Bundle y Refinamiento de Auditor PWA~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-10
+  - Fecha de finalización: 2026-06-10
+  - Descripción:
+    - **Code Splitting de Chunks:** Dividimos el chunk `vendor` inicial en `react-core`, `react-router`, `react-query`, `zod` y `vendor-utils` en `vite.config.js` de App Ventas y plantillas de la CLI, habilitando también la generación de manifiestos (`manifest: true`).
+    - **Refinamiento del Auditor PWA:** Modificamos la API `/api/project/audit` en `server.js` para leer el manifest de Vite y omitir las penalizaciones por tamaño de chunks para aquellos cargados dinámicamente bajo demanda (como el generador de PDFs), previniendo falsos positivos de rendimiento.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/vite.config.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/vite.config.js) [MODIFY]
+    - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js) [MODIFY]
+    - [`D:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/vite.config.js`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/vite.config.js) [MODIFY]
+    - [`D:/PROTOTIPE/Prototipe-CLI/server.js`](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+* **[x] ~~Tarea 361: Integración de Herramientas de Automatización en CLI Bridge Server~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-10
+  - Fecha de finalización: 2026-06-10
+  - Descripción:
+    - **SSE Logs en Creación:** Redirigimos console.log en `worker_create_project.js` por IPC y los transmitimos por SSE en `/api/create-project`.
+    - **Extractor de Componentes:** Diseñamos `/api/library/extract` para registrar componentes locales a la biblioteca de forma autodeclarada e indexada en README y mapas de IA.
+    - **Deploy y Env:** Añadimos `/api/project/deploy` (SSE build/deploy hosting) y getters/setters para archivos `.env.local` en `/api/project/env`.
+    - **Auditoría física:** Agregamos `/api/project/audit` para validar bundle size, advertencias de chunks > 500 KB y soporte offline/PWA.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Prototipe-CLI/server.js`](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`D:/PROTOTIPE/Prototipe-CLI/worker_create_project.js`](file:///D:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+
+* **[x] ~~Tarea 360: Implementación del Plan de Resolución Estratégica en App Ventas~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-10
+  - Fecha de finalización: 2026-06-10
+  - Descripción:
+    - **Fase 1 (Seguridad y DB Rules):** Aseguramos Firestore rules de `/employees/`, `/credits/` y `/users/`, implementando client-side PIN hashing SHA-256 en `employeeService.js` y `PortalAuth.jsx`/`EmployeeSettings.jsx`.
+    - **Fase 2 (Facturación y Red):** Restringimos la query de facturación en `billingService.js` al rango dinámico del mes en curso y el historial a los últimos 6 meses. Se limitó el envío de telemetría de facturación estrictamente al último día del mes en `useAppConfigSync.js`.
+    - **Fase 3 (Core Web Vitals y PWA):** Añadimos preconnects y preloads a `index.html`.
+    - **Fase 4 (Modularización de Productos):** Creamos el hook reutilizable `useProductVariants.js` y refactorizamos `ProductDetailPage.jsx` y `ProductPublicDetail.jsx` para evitar duplicación de lógica en cálculo de variantes, stock e insignias.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/firestore.rules`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firestore.rules) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/services/employeeService.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/employeeService.js) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/admin/settings/sections/EmployeeSettings.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/EmployeeSettings.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/services/billingService.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/billingService.js) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/index.html`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/index.html) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/hooks/useProductVariants.js`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useProductVariants.js) [NEW]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+    - [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ProductPublicDetail.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+
+* **[x] ~~Tarea 359: Auditoría Técnica y Plan Estratégico de App Ventas~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-10
+  - Fecha de finalización: 2026-06-10
+  - Descripción:
+    - **Auditoría Exhaustiva:** Realizada auditoría técnica completa de la plantilla App Ventas abarcando 16 áreas críticas (rendimiento Core Web Vitals, bloqueo de renderizado, optimización de imágenes, consumo de memoria, fluidez de animaciones, auditoría de red, errores de consola, pruebas funcionales, responsividad, accesibilidad, UI/UX, seguridad, SEO técnico, React, bundles/dependencias y arquitectura).
+    - **Reporte y Plan:** Redactado el informe técnico formal `auditoria_tecnica_app_ventas.md` y el plan de resolución estratégica `plan_resolucion_ventas.md` para mitigar riesgos.
+  - Archivos creados/modificados:
+    - [`D:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_app_ventas.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_app_ventas.md) [NEW]
+    - [`D:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/plan_resolucion_ventas.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/plan_resolucion_ventas.md) [NEW]
+    - [`D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [`D:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
 * **[x] ~~Tarea 358: Efecto Confeti al Aplicar Cupón en Checkout de App Ventas~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-10

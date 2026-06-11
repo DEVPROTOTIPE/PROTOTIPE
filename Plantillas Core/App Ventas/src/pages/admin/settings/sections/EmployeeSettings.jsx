@@ -364,7 +364,7 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
     if (editEmp) {
       setNombre(editEmp.nombre || '')
       setRol(editEmp.rol || 'vendedor')
-      setPin(editEmp.pin || '')
+      setPin(editEmp.pin ? '******' : '')
       setTelefono(editEmp.telefono || '')
       setSalario(editEmp.salario || 0)
       setFrecuenciaPago(editEmp.frecuenciaPago || 'quincenal')
@@ -388,7 +388,9 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
     e.preventDefault()
     if (!nombre.trim()) return onError('El nombre es obligatorio.')
     if (!pin.trim()) return onError('El código PIN es obligatorio.')
-    if (pin.length !== 6 || isNaN(Number(pin))) {
+    
+    const isPinChanged = pin !== '******'
+    if (isPinChanged && (pin.length !== 6 || isNaN(Number(pin)))) {
       return onError('El PIN debe ser un número de exactamente 6 dígitos.')
     }
 
@@ -399,7 +401,7 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
         id: editEmp?.id,
         nombre: nombre.trim(),
         rol,
-        pin: pin.trim(),
+        pin: isPinChanged ? pin.trim() : editEmp.pin,
         telefono: telefono.trim(),
         salario: Number(salario) || 0,
         frecuenciaPago,
@@ -660,7 +662,7 @@ export default function EmployeeSettings({ formData, setFormData, setSaveMessage
                                 {portal.labelCorto}
                               </span>
                               <span>•</span>
-                              <span>PIN: <strong className="text-app tracking-widest">{emp.pin}</strong></span>
+                              <span>PIN: <strong className="text-app tracking-widest">{emp.pin ? '******' : 'Sin asignar'}</strong></span>
                               <span>•</span>
                               <span>{formatCurrency(emp.salario)} ({emp.frecuenciaPago})</span>
                             </div>

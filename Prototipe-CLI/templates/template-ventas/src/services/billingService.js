@@ -173,7 +173,8 @@ function calcMetrics(orders, billingConfig) {
     montoFijoServicio,
     pagoMensualFijo,
     enableDianBilling,
-    costoPorFacturaDian
+    costoPorFacturaDian,
+    triggerTelemetryReport: billingConfig?.triggerTelemetryReport ?? null
   }
 }
 
@@ -191,7 +192,8 @@ export function subscribeToBillingData(onUpdate) {
     montoFijoServicio: 0,
     pagoMensualFijo: 0,
     enableDianBilling: false,
-    costoPorFacturaDian: 0
+    costoPorFacturaDian: 0,
+    triggerTelemetryReport: null
   }
 
   // ─── Suscripción a pedidos completados ───────────────────────────
@@ -224,7 +226,8 @@ export function subscribeToBillingData(onUpdate) {
           montoFijoServicio: data.montoFijoServicio ?? 0,
           pagoMensualFijo: data.pagoMensualFijo ?? 0,
           enableDianBilling: data.enableDianBilling === true,
-          costoPorFacturaDian: data.costoPorFacturaDian ?? 0
+          costoPorFacturaDian: data.costoPorFacturaDian ?? 0,
+          triggerTelemetryReport: data.triggerTelemetryReport ?? null
         }
       } else {
         latestConfig = {

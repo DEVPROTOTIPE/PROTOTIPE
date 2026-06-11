@@ -4,7 +4,9 @@ service cloud.firestore {
 
     // Helper para verificar si la petición viene de un Administrador autenticado en Firebase Auth
     function isAdmin() {
-      return request.auth != null;
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // Configuración global y Filtros
@@ -124,7 +126,7 @@ service cloud.firestore {
 
     // Configuración y PINs de empleados (Altamente sensible)
     match /employees/{employeeId} {
-      allow read: if true;
+      allow read: if isAdmin() || (resource != null && resource.data.activo == true);
       allow write: if isAdmin();
     }
 

@@ -4,7 +4,9 @@ service cloud.firestore {
 
     // Helper para verificar si la petición viene de un Administrador autenticado en Firebase Auth
     function isAdmin() {
-      return request.auth != null;
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // Configuración global y Filtros
@@ -50,8 +52,8 @@ service cloud.firestore {
                  (resource.data.cliente.celular != null) ||
                  (resource.data.trackingToken != null);
       // list: queries en tiempo real (onSnapshot) — Firestore NO puede evaluar resource.data
-      // Se permite al cliente listar porque sus queries siempre van filtradas por su celular
-      allow list: if isAdmin() || true;
+      // Se permite al cliente listar si y solo si la query viene filtrada por su celular
+      allow list: if isAdmin() || (request.query.filters != null && request.query.filters['cliente.celular'] != null);
       allow update: if isAdmin() || (
         resource.data.cliente.celular != null &&
         (
@@ -70,7 +72,8 @@ service cloud.firestore {
 
     // Créditos / Fiados
     match /credits/{document} {
-      allow read: if isAdmin() || (resource.data.cliente.celular != null);
+      allow get: if isAdmin() || (resource != null && resource.data.cliente.celular != null);
+      allow list: if isAdmin() || (request.query.filters != null && request.query.filters['cliente.celular'] != null);
       allow write: if isAdmin();
     }
 
@@ -124,7 +127,7 @@ service cloud.firestore {
 
     // Configuración y PINs de empleados (Altamente sensible)
     match /employees/{employeeId} {
-      allow read: if true;
+      allow read: if isAdmin() || (resource != null && resource.data.activo == true);
       allow write: if isAdmin();
     }
 

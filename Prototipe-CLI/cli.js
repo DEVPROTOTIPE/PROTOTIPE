@@ -87,7 +87,7 @@ async function main() {
       validate: input => input.trim().length > 0 ? true : 'El nombre es obligatorio.'
     },
     {
-      type: 'targetPath',
+      type: 'input',
       name: 'targetPath',
       message: 'Ruta absoluta donde se creará el proyecto:',
       default: (ans) => {
