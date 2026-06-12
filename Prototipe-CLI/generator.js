@@ -243,21 +243,49 @@ export async function createProject(answers) {
     if (await fs.pathExists(indexPathCSS)) {
       let cssContent = await fs.readFile(indexPathCSS, 'utf-8');
       
-      // Declaración de variables Tailwind v4 para los colores
-      const themeBlock = `@theme {
-  --color-primary: ${primaryColor};
-  --color-accent: ${accentColor};
+      const brand = answers.branding || {};
+      const brandPrimary = brand.primaryColor || primaryColor || '#6366f1';
+      const brandAccent = brand.secondaryColor || accentColor || '#a855f7';
+      const brandBg = brand.bgColor || '#f8fafc';
+      const brandText = brand.textColor || '#0f172a';
+      const brandSurface = brand.surfaceColor || '#ffffff';
+      const brandSurface2 = brand.surface2Color || '#f1f5f9';
+      const brandBorder = brand.borderColor || '#cbd5e1';
+      const brandTextMuted = brand.textMutedColor || '#475569';
+      const brandRadius = brand.radiusBase || '0.75rem';
+      const brandFont = brand.googleFont || 'Inter';
+
+      const rootVarsBlock = `:root {
+  --color-primary: ${brandPrimary};
+  --color-primary-light: ${brandPrimary}dd;
+  --color-primary-dark: ${brandPrimary};
+  --color-secondary: ${brandSurface2};
+  --color-accent: ${brandAccent};
+  --color-bg: ${brandBg};
+  --color-surface: ${brandSurface};
+  --color-surface-2: ${brandSurface2};
+  --color-text: ${brandText};
+  --color-text-muted: ${brandTextMuted};
+  --color-border: ${brandBorder};
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Variables de apariencia */
+  --font-body: '${brandFont}', system-ui, sans-serif;
+  --radius-base: ${brandRadius};
+  --color-action: var(--color-primary);
 }`;
       
-      if (cssContent.includes('@theme')) {
-        // Reemplazar bloque @theme existente o adjuntar
-        cssContent = cssContent.replace(/@theme\s*\{[^}]*\}/g, themeBlock);
+      if (cssContent.includes(':root {')) {
+        cssContent = cssContent.replace(/:root\s*\{[^}]*\}/g, rootVarsBlock);
       } else {
-        cssContent = themeBlock + '\n\n' + cssContent;
+        cssContent = rootVarsBlock + '\n\n' + cssContent;
       }
       
       await fs.writeFile(indexPathCSS, cssContent, 'utf-8');
-      stepCSS.succeed('Variables de tema HSL inyectadas en src/index.css.');
+      stepCSS.succeed('Variables de marca completas inyectadas en src/index.css.');
     } else {
       stepCSS.info('No se encontró src/index.css para inyectar colores en caliente.');
     }

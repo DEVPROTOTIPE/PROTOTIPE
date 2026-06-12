@@ -13,9 +13,13 @@ Estructura física y lógica de los archivos clave en la plantilla base de Venta
 ## Componentes Críticos
 - `src/components/client/cart/CartDrawer.jsx`: Módulo lateral de carrito de compras.
 - `src/components/client/checkout/CheckoutModal.jsx`: Modal multipaso para formalizar compras.
-- `src/components/admin/inventory/ProductFormModal.jsx`: Modal de carga y edición de productos.
+- `src/components/admin/inventory/ProductFormModal.jsx`: Modal de carga y edición de productos con soporte para URLs externas de imágenes y compresión automática.
 
-## Servicios
+## Servicios e Hooks de Datos
+- `src/services/uploadService.js`: Sube y elimina imágenes a Storage con compresión transparente WebP client-side a resoluciones máximas de 800px/400px.
+- `src/services/inventoryService.js`: Servicio de inventario que provee la función `getProductsPaged` para paginación eficiente de Firestore mediante cursores.
+- `src/hooks/useInventory.js`: Expone el hook `useProductsInfinite` para consultas paginadas con TanStack Query v5.
+- `src/utils/imageCompression.js`: Helper utilitario autónomo que procesa imágenes con HTML Canvas a formato WebP optimizado (calidad 0.75).
 - `src/services/telemetryService.js`: Emisión de telemetría de facturación y logs al Firestore central.
 - `src/services/billingService.js`: Módulo de liquidación y control comisional.
 - `src/services/whatsappService.js`: Integración de notificaciones y chats.

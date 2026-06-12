@@ -2378,12 +2378,45 @@ app.get('/api/project/drift', async (req, res) => {
     const totalFiles = coreFiles.length;
     const parityPercent = totalFiles > 0 ? Math.round((matchingCount / totalFiles) * 100) : 100;
 
+    let dependenciesOutOfSync = false;
+    let dependencyDetails = null;
+    const corePkgPath = path.join(coreDir, 'package.json');
+    const clientPkgPath = path.join(projectDir, 'package.json');
+    if (await fs.pathExists(corePkgPath) && await fs.pathExists(clientPkgPath)) {
+      try {
+        const corePkg = await fs.readJson(corePkgPath);
+        const clientPkg = await fs.readJson(clientPkgPath);
+        const coreDeps = { ...(corePkg.dependencies || {}), ...(corePkg.devDependencies || {}) };
+        const clientDeps = { ...(clientPkg.dependencies || {}), ...(clientPkg.devDependencies || {}) };
+        
+        const missingDeps = [];
+        const mismatchDeps = [];
+        
+        for (const dep in coreDeps) {
+          if (!clientDeps[dep]) {
+            missingDeps.push(dep);
+          } else if (coreDeps[dep] !== clientDeps[dep]) {
+            mismatchDeps.push({ name: dep, coreVersion: coreDeps[dep], clientVersion: clientDeps[dep] });
+          }
+        }
+        
+        if (missingDeps.length > 0 || mismatchDeps.length > 0) {
+          dependenciesOutOfSync = true;
+          dependencyDetails = { missingDeps, mismatchDeps };
+        }
+      } catch (e) {
+        console.warn(`Error al comparar package.json para dependencias de ${clientId}:`, e.message);
+      }
+    }
+
     res.json({
       success: true,
       clientId,
       coreId,
       parityPercent,
-      differences
+      differences,
+      dependenciesOutOfSync,
+      dependencyDetails
     });
   } catch (err) {
     console.error(`[API /project/drift] Error: ${err.message}`);
@@ -2482,7 +2515,8 @@ app.post('/api/project/sync-files', async (req, res) => {
 });
 
 // --- GESTIÓN DE SERVIDORES DE DESARROLLO LOCAL POR CLIENTE ---
-const devServers = new Map(); // clientId -> { child, url, status }
+const devServers = new Map(); // clientId -> { child, url, status, logs }
+const devServerLogListeners = new Map(); // clientId -> Set of Response objects
 
 app.get('/api/project/dev/status', async (req, res) => {
   const { clientId } = req.query;
@@ -2493,6 +2527,40 @@ app.get('/api/project/dev/status', async (req, res) => {
     return res.json({ success: true, running: true, url: serverInfo.url });
   }
   res.json({ success: true, running: false });
+});
+
+// Endpoint SSE para streaming de logs de desarrollo en vivo
+app.get('/api/project/dev/logs-stream', (req, res) => {
+  const { clientId } = req.query;
+  if (!clientId) return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  // Enviar logs históricos si existen
+  const serverInfo = devServers.get(clientId);
+  if (serverInfo && Array.isArray(serverInfo.logs)) {
+    serverInfo.logs.forEach(line => {
+      res.write(`data: ${JSON.stringify({ type: 'log', log: line })}\n\n`);
+    });
+  }
+
+  if (!devServerLogListeners.has(clientId)) {
+    devServerLogListeners.set(clientId, new Set());
+  }
+  devServerLogListeners.get(clientId).add(res);
+
+  req.on('close', () => {
+    const listeners = devServerLogListeners.get(clientId);
+    if (listeners) {
+      listeners.delete(res);
+      if (listeners.size === 0) {
+        devServerLogListeners.delete(clientId);
+      }
+    }
+  });
 });
 
 app.post('/api/project/dev/start', async (req, res) => {
@@ -2516,6 +2584,26 @@ app.post('/api/project/dev/start', async (req, res) => {
       env: { ...process.env, FORCE_COLOR: '0' }
     });
 
+    const logsBuffer = [];
+    const pushLog = (data) => {
+      const text = data.toString();
+      const lines = text.split(/\r?\n/);
+      const serverInfo = devServers.get(clientId);
+      const targetArray = serverInfo ? serverInfo.logs : logsBuffer;
+      lines.forEach(line => {
+        targetArray.push(line);
+        if (targetArray.length > 100) {
+          targetArray.shift();
+        }
+        const listeners = devServerLogListeners.get(clientId);
+        if (listeners) {
+          listeners.forEach(res => {
+            res.write(`data: ${JSON.stringify({ type: 'log', log: line })}\n\n`);
+          });
+        }
+      });
+    };
+
     let urlResolved = false;
     let url = '';
 
@@ -2523,12 +2611,12 @@ app.post('/api/project/dev/start', async (req, res) => {
       const timeout = setTimeout(() => {
         if (!urlResolved) {
           urlResolved = true;
-          // Fallback a puerto por defecto de Vite si no se lee por stdout en 10s
           resolve('http://localhost:5173'); 
         }
       }, 10000);
 
       child.stdout.on('data', (data) => {
+        pushLog(data);
         const text = data.toString();
         const match = text.match(/(https?:\/\/(localhost|127\.0\.0\.1):\d+)/i);
         if (match && !urlResolved) {
@@ -2540,6 +2628,7 @@ app.post('/api/project/dev/start', async (req, res) => {
       });
 
       child.stderr.on('data', (data) => {
+        pushLog(data);
         console.warn(`[Dev Server ${clientId} stderr]: ${data.toString()}`);
       });
 
@@ -2549,13 +2638,20 @@ app.post('/api/project/dev/start', async (req, res) => {
           clearTimeout(timeout);
           reject(new Error(`El servidor de desarrollo se cerró inesperadamente con código ${code}`));
         } else {
+          // Notificar desconexión a oyentes y borrar del mapa
+          const listeners = devServerLogListeners.get(clientId);
+          if (listeners) {
+            listeners.forEach(res => {
+              res.write(`data: ${JSON.stringify({ type: 'status', status: 'stopped', code })}\n\n`);
+            });
+          }
           devServers.delete(clientId);
         }
       });
     });
 
     url = await urlPromise;
-    devServers.set(clientId, { child, url, status: 'running' });
+    devServers.set(clientId, { child, url, status: 'running', logs: logsBuffer });
     res.json({ success: true, url });
 
   } catch (err) {
@@ -2582,6 +2678,209 @@ app.post('/api/project/dev/stop', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: `Error al detener servidor: ${err.message}` });
   }
+});
+
+// --- DRIFT GLOBAL (MAPA DE CALOR Y MATRIZ DE PARIDAD) ---
+app.get('/api/project/drift/global', async (req, res) => {
+  if (!await fs.pathExists(GIT_INSTANCES_DIR)) {
+    return res.json({ success: true, driftMatrix: [] });
+  }
+
+  try {
+    const dirs = await fs.readdir(GIT_INSTANCES_DIR);
+    const results = [];
+
+    await Promise.all(dirs.map(async (dir) => {
+      const fullPath = path.join(GIT_INSTANCES_DIR, dir);
+      const stat = await fs.stat(fullPath).catch(() => null);
+      if (!stat || !stat.isDirectory()) return;
+
+      const clientId = dir.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const metaPath = path.join(fullPath, '.prototipe.json');
+      const meta = await fs.pathExists(metaPath) ? await fs.readJson(metaPath) : {};
+      let coreId = meta.templateId || meta.coreClave || meta.coreId;
+
+      if (!coreId) {
+        if (clientId.toLowerCase().includes('venta')) coreId = 'ventas';
+        else if (clientId.toLowerCase().includes('servicio')) coreId = 'servicios';
+        else if (clientId.toLowerCase().includes('agendamiento') || clientId.toLowerCase().includes('barber')) coreId = 'agendamiento';
+        else if (clientId.toLowerCase().includes('gastronomia') || clientId.toLowerCase().includes('restaurante')) coreId = 'gastronomia';
+      }
+
+      if (!coreId) return;
+
+      const coreDir = await findProjectDir(coreId);
+      if (!coreDir) return;
+
+      try {
+        const coreFiles = await getFilesRecursively(coreDir);
+        const clientFiles = await getFilesRecursively(fullPath);
+
+        const clientFileMap = new Map();
+        clientFiles.forEach(f => clientFileMap.set(f.relativePath, f));
+
+        let matchingCount = 0;
+        const modifiedFiles = [];
+        const missingFiles = [];
+
+        for (const coreFile of coreFiles) {
+          const clientFile = clientFileMap.get(coreFile.relativePath);
+          if (!clientFile) {
+            missingFiles.push(coreFile.relativePath);
+          } else {
+            if (coreFile.size !== clientFile.size) {
+              modifiedFiles.push(coreFile.relativePath);
+            } else {
+              const coreContent = await fs.readFile(coreFile.absolutePath, 'utf-8');
+              const clientContent = await fs.readFile(clientFile.absolutePath, 'utf-8');
+              if (coreContent !== clientContent) {
+                modifiedFiles.push(coreFile.relativePath);
+              } else {
+                matchingCount++;
+              }
+            }
+          }
+        }
+
+        const totalFiles = coreFiles.length;
+        const parityPercent = totalFiles > 0 ? Math.round((matchingCount / totalFiles) * 100) : 100;
+
+        let dependenciesOutOfSync = false;
+        const corePkgPath = path.join(coreDir, 'package.json');
+        const clientPkgPath = path.join(fullPath, 'package.json');
+        if (await fs.pathExists(corePkgPath) && await fs.pathExists(clientPkgPath)) {
+          try {
+            const corePkg = await fs.readJson(corePkgPath);
+            const clientPkg = await fs.readJson(clientPkgPath);
+            const coreDeps = { ...(corePkg.dependencies || {}), ...(corePkg.devDependencies || {}) };
+            const clientDeps = { ...(clientPkg.dependencies || {}), ...(clientPkg.devDependencies || {}) };
+            for (const dep in coreDeps) {
+              if (!clientDeps[dep] || coreDeps[dep] !== clientDeps[dep]) {
+                dependenciesOutOfSync = true;
+                break;
+              }
+            }
+          } catch (_) {}
+        }
+
+        results.push({
+          clientId,
+          projectName: dir,
+          coreId,
+          parityPercent,
+          modifiedCount: modifiedFiles.length,
+          missingCount: missingFiles.length,
+          modifiedFiles,
+          missingFiles,
+          dependenciesOutOfSync
+        });
+      } catch (err) {
+        console.warn(`Error al calcular drift global para ${clientId}:`, err.message);
+      }
+    }));
+
+    res.json({ success: true, driftMatrix: results });
+  } catch (err) {
+    res.status(500).json({ error: `Error al generar matriz global de paridad: ${err.message}` });
+  }
+});
+
+// --- CENTRO DE OPERACIONES GIT (DESHACER Y DIFF) ---
+app.post('/api/git/discard', async (req, res) => {
+  const { clientId, file, all } = req.body;
+  if (!clientId) return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+
+  const projectDir = await findProjectDir(clientId);
+  if (!projectDir) return res.status(404).json({ error: `No se encontró el proyecto para: ${clientId}` });
+
+  try {
+    if (all) {
+      await execGitCommand('git reset --hard HEAD', projectDir);
+      await execGitCommand('git clean -fd', projectDir);
+      return res.json({ success: true, message: 'Todos los cambios locales fueron descartados con éxito.' });
+    }
+
+    if (!file) return res.status(400).json({ error: 'Debes especificar el archivo a descartar ("file") o "all".' });
+
+    const safeFile = sanitizeShellArgument(file);
+    if (!safeFile) return res.status(400).json({ error: 'Nombre de archivo no válido.' });
+
+    await execGitCommand(`git checkout HEAD -- "${safeFile}"`, projectDir);
+    res.json({ success: true, message: `Cambios en el archivo ${file} descartados con éxito.` });
+  } catch (err) {
+    console.error(`[API /api/git/discard] Error:`, err.message);
+    res.status(500).json({ error: `Fallo al descartar cambios: ${err.message}` });
+  }
+});
+
+app.get('/api/git/diff-file', async (req, res) => {
+  const { clientId, file } = req.query;
+  if (!clientId || !file) {
+    return res.status(400).json({ error: 'Los parámetros "clientId" y "file" son obligatorios.' });
+  }
+
+  const projectDir = await findProjectDir(clientId);
+  if (!projectDir) return res.status(404).json({ error: `No se encontró el proyecto para: ${clientId}` });
+
+  try {
+    const safeFile = sanitizeShellArgument(file);
+    if (!safeFile) return res.status(400).json({ error: 'Nombre de archivo no válido.' });
+
+    const { stdout } = await execGitCommand(`git diff HEAD -- "${safeFile}"`, projectDir);
+    res.json({ success: true, diff: stdout || 'No hay cambios en este archivo respecto a HEAD.' });
+  } catch (err) {
+    console.error(`[API /api/git/diff-file] Error:`, err.message);
+    res.status(500).json({ error: `Error al obtener diff: ${err.message}` });
+  }
+});
+
+// --- GESTOR DE DEPENDENCIAS (NPM INSTALL SSE) ---
+app.get('/api/project/dependencies/install', async (req, res) => {
+  const { clientId } = req.query;
+  if (!clientId) return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+
+  const projectDir = await findProjectDir(clientId);
+  if (!projectDir) return res.status(404).json({ error: `No se encontró el proyecto para: ${clientId}` });
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  res.write(`data: ${JSON.stringify({ type: 'log', log: 'Iniciando instalación de dependencias (npm install)...' })}\n\n`);
+
+  const child = spawn('npm', ['install'], {
+    cwd: projectDir,
+    shell: true,
+    env: { ...process.env, FORCE_COLOR: '0' }
+  });
+
+  const sendProgress = (data) => {
+    const lines = data.toString().split(/\r?\n/);
+    lines.forEach(line => {
+      if (line.trim()) {
+        res.write(`data: ${JSON.stringify({ type: 'log', log: line })}\n\n`);
+      }
+    });
+  };
+
+  child.stdout.on('data', sendProgress);
+  child.stderr.on('data', sendProgress);
+
+  child.on('close', (code) => {
+    if (code === 0) {
+      res.write(`data: ${JSON.stringify({ type: 'status', status: 'success', message: 'Dependencias instaladas con éxito.' })}\n\n`);
+    } else {
+      res.write(`data: ${JSON.stringify({ type: 'status', status: 'error', message: `La instalación falló con código ${code}.` })}\n\n`);
+    }
+    res.end();
+  });
+
+  req.on('close', () => {
+    if (!child.killed && child.pid) {
+      killProcessTree(child.pid);
+    }
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2720,7 +3019,7 @@ app.get('/api/git/status', async (req, res) => {
 
   // Seguridad: evitar path traversal fuera del ecosistema
   const resolvedPath = path.resolve(targetPath);
-  if (!resolvedPath.startsWith(GIT_ROOT)) {
+  if (resolvedPath !== GIT_ROOT && !resolvedPath.startsWith(GIT_ROOT + path.sep)) {
     return res.status(403).json({ error: 'Ruta fuera del ecosistema PROTOTIPE. Acceso denegado.' });
   }
   if (!await fs.pathExists(resolvedPath)) {
@@ -2839,7 +3138,7 @@ app.get('/api/git/backup-stream', async (req, res) => {
 
   // Seguridad: evitar path traversal
   const resolvedPath = path.resolve(targetPath);
-  if (!resolvedPath.startsWith(GIT_ROOT)) {
+  if (resolvedPath !== GIT_ROOT && !resolvedPath.startsWith(GIT_ROOT + path.sep)) {
     return res.status(403).json({ error: 'Ruta fuera del ecosistema PROTOTIPE. Acceso denegado.' });
   }
   if (!await fs.pathExists(resolvedPath)) {

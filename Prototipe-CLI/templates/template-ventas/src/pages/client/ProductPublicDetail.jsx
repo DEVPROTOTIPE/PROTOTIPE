@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useProduct, useCategories, useProducts } from '../../hooks/useInventory'
 import { useAds } from '../../hooks/useAds'
+import { useProductVariants } from '../../hooks/useProductVariants'
 import useCartStore from '../../store/cartStore'
 import useAppConfigStore from '../../store/appConfigStore'
 import useAuthStore from '../../store/authStore'
@@ -130,9 +131,23 @@ export default function ProductPublicDetail() {
   const [cantidad, setCantidad] = useState(1)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [errorMsg, setErrorMsg] = useState('')
-  
   const [showCheckout, setShowCheckout] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
+
+  const {
+    isNewProduct,
+    stockConsolidado,
+    activeSmartTag,
+    availableVariants,
+    tallas,
+    colores,
+    currentVariant,
+    actualPrice
+  } = useProductVariants(product, selectedTalla, selectedColor, {
+    showSizes: true,
+    showColors: true,
+    commercialOptimization
+  })
   
   // Registrar analíticas de escaneo al cargar la página
   useEffect(() => {
@@ -180,36 +195,7 @@ export default function ProductPublicDetail() {
     return list
   }, [product])
 
-  // Filtrar variantes con stock
-  const availableVariants = useMemo(() => {
-    if (!product || !product.variantes) return []
-    return product.variantes.filter(v => (v.stock || 0) > 0)
-  }, [product])
 
-  // Tallas disponibles
-  const tallas = useMemo(() => {
-    const t = new Set(availableVariants.map(v => v.talla).filter(Boolean))
-    return Array.from(t)
-  }, [availableVariants])
-
-  // Colores disponibles de acuerdo a la talla seleccionada
-  const colores = useMemo(() => {
-    let validVariants = availableVariants
-    if (selectedTalla) {
-      validVariants = validVariants.filter(v => v.talla === selectedTalla)
-    }
-    const c = new Set(validVariants.map(v => v.color).filter(Boolean))
-    return Array.from(c)
-  }, [availableVariants, selectedTalla])
-
-  // Variante seleccionada actual
-  const currentVariant = useMemo(() => {
-    if (!product) return null
-    return availableVariants.find(v => 
-      (v.talla === selectedTalla || (!v.talla && !selectedTalla)) &&
-      (v.color === selectedColor || (!v.color && !selectedColor))
-    )
-  }, [availableVariants, selectedTalla, selectedColor, product])
 
   // Actualizar imagen activa al cambiar de variante de color o variante actual
   useEffect(() => {
@@ -308,76 +294,7 @@ export default function ProductPublicDetail() {
 
 
 
-  const isNewProduct = useMemo(() => {
-    if (!product?.createdAt) return false
-    const createdDate = typeof product.createdAt.toMillis === 'function' 
-      ? product.createdAt.toMillis() 
-      : (product.createdAt instanceof Date ? product.createdAt.getTime() : new Date(product.createdAt).getTime())
-    const limitDays = commercialOptimization?.tools?.smartTags?.newProduct?.daysLimit || 7
-    const diffTime = Math.abs(Date.now() - createdDate)
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays <= limitDays
-  }, [product?.createdAt, commercialOptimization])
 
-  const stockConsolidado = useMemo(() => {
-    if (!product) return 0
-    return (product.variantes || []).reduce((sum, v) => sum + (v.stock || 0), 0)
-  }, [product])
-
-  const activeSmartTag = useMemo(() => {
-    const smartTags = commercialOptimization?.tools?.smartTags || {}
-    if (!product || !smartTags.enabled) return null
-
-    // 1. Última Unidad (Prioridad Alta)
-    if (smartTags.lastUnit?.enabled !== false && stockConsolidado > 0 && stockConsolidado <= (smartTags.lastUnit?.threshold || 3)) {
-      return {
-        text: smartTags.lastUnit?.text || 'Última Unidad',
-        bg: smartTags.lastUnit?.bg || '#3b82f6',
-        textCol: smartTags.lastUnit?.textCol || '#ffffff'
-      }
-    }
-
-    // 2. Oferta Imperdible (Si tiene descuento o es combo)
-    const hasPromo = product.tienePromocion || product.discountActive
-    if (smartTags.unmissableOffer?.enabled !== false && hasPromo) {
-      return {
-        text: smartTags.unmissableOffer?.text || 'Oferta Imperdible',
-        bg: smartTags.unmissableOffer?.bg || '#f59e0b',
-        textCol: smartTags.unmissableOffer?.textCol || '#ffffff'
-      }
-    }
-
-    // 3. Más Vendido (Basado en salesCount real)
-    const salesVal = product.salesCount || 0
-    if (smartTags.bestSeller?.enabled !== false && salesVal >= (smartTags.bestSeller?.minSales || 5)) {
-      return {
-        text: smartTags.bestSeller?.text || 'Más Vendido',
-        bg: smartTags.bestSeller?.bg || '#ef4444',
-        textCol: smartTags.bestSeller?.textCol || '#ffffff'
-      }
-    }
-
-    // 4. Nuevo
-    if (smartTags.newProduct?.enabled !== false && isNewProduct) {
-      return {
-        text: smartTags.newProduct?.text || 'Nuevo',
-        bg: smartTags.newProduct?.bg || '#10b981',
-        textCol: smartTags.newProduct?.textCol || '#ffffff'
-      }
-    }
-
-    return null
-  }, [product, commercialOptimization, stockConsolidado, isNewProduct])
-
-  const actualPrice = useMemo(() => {
-    if (!product) return 0
-    if (currentVariant?.precio && Number(currentVariant.precio) > 0) {
-      return Number(currentVariant.precio)
-    }
-    return (product.tienePromocion && product.precioPromo < product.precioBase)
-      ? product.precioPromo
-      : product.precioBase
-  }, [currentVariant, product])
 
   // Productos relacionados / complementarios
   const relatedProducts = useMemo(() => {
@@ -561,22 +478,44 @@ export default function ProductPublicDetail() {
           </p>
 
           {/* Alternativas Recomendadas */}
-          <div className="w-full space-y-4">
+          <div className="w-full space-y-3">
             <h3 className="text-xs font-bold text-muted text-left uppercase tracking-widest">Recomendados para ti</h3>
             <div className="grid grid-cols-2 gap-3">
-              {allProducts.slice(0, 4).map(p => (
-                <div 
-                  key={p.id} 
-                  onClick={() => navigate(`/compra-qr/${p.id}`)}
-                  className="bg-surface border border-app rounded-2xl p-2 cursor-pointer shadow-sm hover:shadow-md transition-all text-left"
-                >
-                  <div className="aspect-square rounded-xl bg-surface-2 overflow-hidden mb-2">
-                    <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover" />
+              {allProducts.slice(0, 4).map(p => {
+                const isPromo = p.tienePromocion && p.precioPromo < p.precioBase
+                const displayPrice = isPromo ? p.precioPromo : p.precioBase
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => navigate(`/compra-qr/${p.id}`)}
+                    className="bg-surface border border-app rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 text-left group"
+                  >
+                    {/* Imagen cuadrada */}
+                    <div className="aspect-square bg-surface-2 overflow-hidden relative">
+                      {p.imageUrl ? (
+                        <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted opacity-30">
+                          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                      )}
+                      {isPromo && (
+                        <span className="absolute top-1.5 left-1.5 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md shadow-sm">
+                          {p.promocion?.discountType === 'percentage' ? `${p.promocion.discountValue}% OFF` : 'OFERTA'}
+                        </span>
+                      )}
+                    </div>
+                    {/* Info */}
+                    <div className="p-2.5 space-y-1">
+                      <p className="font-bold text-xs text-app leading-snug line-clamp-2">{p.nombre}</p>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-sm font-black text-primary">{formatCurrency(displayPrice)}</span>
+                        {isPromo && <span className="text-[10px] text-muted line-through font-medium">{formatCurrency(p.precioBase)}</span>}
+                      </div>
+                    </div>
                   </div>
-                  <p className="font-bold text-xs text-app truncate">{p.nombre}</p>
-                  <p className="text-xs font-black text-primary mt-0.5">${Number(p.precioBase).toLocaleString()}</p>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
@@ -952,22 +891,44 @@ export default function ProductPublicDetail() {
             </div>
           </div>
         ) : relatedProducts.length > 0 ? (
-          <div className="border-t border-app pt-6 space-y-4">
+          <div className="border-t border-app pt-6 space-y-3">
             <h3 className="text-xs font-bold text-app uppercase tracking-widest">Te podría interesar</h3>
             <div className="grid grid-cols-2 gap-3">
-              {relatedProducts.map(p => (
-                <div 
-                  key={p.id} 
-                  onClick={() => navigate(`/compra-qr/${p.id}`)}
-                  className="bg-surface border border-app rounded-2xl p-2 cursor-pointer shadow-sm hover:shadow-md transition-all"
-                >
-                  <div className="aspect-square rounded-xl bg-surface-2 overflow-hidden mb-2">
-                    <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover" />
+              {relatedProducts.map(p => {
+                const isPromo = p.tienePromocion && p.precioPromo < p.precioBase
+                const displayPrice = isPromo ? p.precioPromo : p.precioBase
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => navigate(`/compra-qr/${p.id}`)}
+                    className="bg-surface border border-app rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group"
+                  >
+                    {/* Imagen cuadrada */}
+                    <div className="aspect-square bg-surface-2 overflow-hidden relative">
+                      {p.imageUrl ? (
+                        <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted opacity-30">
+                          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                      )}
+                      {isPromo && (
+                        <span className="absolute top-1.5 left-1.5 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md shadow-sm">
+                          {p.promocion?.discountType === 'percentage' ? `${p.promocion.discountValue}% OFF` : 'OFERTA'}
+                        </span>
+                      )}
+                    </div>
+                    {/* Info */}
+                    <div className="p-2.5 space-y-1">
+                      <p className="font-bold text-xs text-app leading-snug line-clamp-2">{p.nombre}</p>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-sm font-black text-primary">{formatCurrency(displayPrice)}</span>
+                        {isPromo && <span className="text-[10px] text-muted line-through font-medium">{formatCurrency(p.precioBase)}</span>}
+                      </div>
+                    </div>
                   </div>
-                  <p className="font-bold text-xs text-app truncate">{p.nombre}</p>
-                  <p className="text-xs font-black text-primary mt-0.5">${Number(p.precioBase).toLocaleString()}</p>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         ) : null}

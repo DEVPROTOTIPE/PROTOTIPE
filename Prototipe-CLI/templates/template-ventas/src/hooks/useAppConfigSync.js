@@ -52,7 +52,7 @@ export default function useAppConfigSync() {
             return
           }
         }
-
+        
         // 2. Regla de negocio estándar: Reportar únicamente el último día de cada mes
         const tomorrow = new Date(now)
         tomorrow.setDate(now.getDate() + 1)

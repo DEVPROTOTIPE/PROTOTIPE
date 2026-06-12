@@ -168,6 +168,20 @@ Para garantizar la consolidación centralizada de cobros y facturación de todas
 
 Este proceso debe ser asíncrono y silencioso (capturado con `catch`), de modo que si las variables centrales del desarrollador en `.env.local` no están configuradas, los servicios detecten automáticamente el modo local y no interfieran con la experiencia de usuario ni inyecten errores en la consola.
 
+### Paso 8.6: Estándar Técnico de Facturación Mínima de Firebase (Ultra-Low Billing)
+Para garantizar que toda nueva aplicación o core funcione en el plan gratuito Spark de Firebase sin saturar las cuotas de lectura, escritura y almacenamiento, se establecen las siguientes reglas obligatorias:
+
+1. **Compresión Client-Side Obligatoria:**
+   Cualquier módulo de carga de archivos (ej: productos, variantes, marcas, perfil) debe interceptar las imágenes usando un Canvas HTML5 (como en `src/utils/imageCompression.js`) para redimensionarlas a un máximo de 800px (imágenes principales/galerías) o 400px (logos/iconos) y guardarlas como WebP con calidad 0.75 antes de enviarlas a Storage.
+2. **Soporte de Enlaces Externos:**
+   Toda interfaz que muestre o guarde imágenes de catálogo debe permitir pegar una URL directa externa, evitando almacenar físicamente en el Storage de Firebase si el cliente lo prefiere.
+3. **Paginación por Cursores de Firestore:**
+   Queda terminantemente prohibido hacer lecturas planas completas (`getDocs` sin filtros ni límites) sobre colecciones transaccionales o de catálogo en las pantallas de cara al cliente final. Se debe implementar paginación mediante cursores (`limit` y `startAfter`) combinada con scroll infinito (`IntersectionObserver`), leyendo bloques pequeños (ej: 12 ítems).
+4. **Declaración de Índices:**
+   Asegurar que todas las consultas compuestas resultantes de la paginación cuenten con su correspondiente entrada en `firestore.indexes.json` para evitar excepciones de base de datos durante el aprovisionamiento de la instancia.
+5. **Persistencia Offline Local:**
+   Configurar el bootstrap de la base de datos (generalmente en `src/config/firebaseConfig.js`) para activar la persistencia multi-pestaña IndexedDB (`localCache` y `persistentLocalCache`), de modo que las re-consultas del cliente utilicen almacenamiento local en lugar de cuotas de red si los datos en el servidor no han cambiado.
+
 ---
 
 ## 📦 Cómo Reutilizar Componentes y Módulos Completos

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { 
   ShoppingBag, Image as ImageIcon, ChevronLeft, ChevronRight, 
@@ -16,6 +16,7 @@ import SmartHint from '../../components/client/guided/SmartHint'
 import QuantitySelector from '../../components/ui/QuantitySelector'
 import { useProduct, useCategories } from '../../hooks/useInventory'
 import { useAds } from '../../hooks/useAds'
+import { useProductVariants } from '../../hooks/useProductVariants'
 import CheckoutModal from '../../components/client/checkout/CheckoutModal'
 import { getCssColor } from '../../utils/colors'
 import { openWhatsAppChat } from '../../services/whatsappService'
@@ -23,11 +24,13 @@ import { openWhatsAppChat } from '../../services/whatsappService'
 export default function ProductDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  const fromCart = location.state?.fromCart
   const { data: rawProduct, isLoading: isLoadingProduct } = useProduct(id)
   const { data: allCategories = [] } = useCategories()
   const { data: ads = [] } = useAds()
 
-  const { addItem } = useCartStore()
+  const { addItem, openCart } = useCartStore()
   const { markStepCompleted } = useGuidedStore()
   const { commercialOptimization, catalogFilters, appName } = useAppConfigStore()
 
@@ -104,66 +107,28 @@ export default function ProductDetailPage() {
     return baseProduct
   }, [rawProduct, allCategories, ads])
 
-  const isNewProduct = useMemo(() => {
-    if (!product?.createdAt) return false
-    const createdDate = typeof product.createdAt.toMillis === 'function' 
-      ? product.createdAt.toMillis() 
-      : (product.createdAt instanceof Date ? product.createdAt.getTime() : new Date(product.createdAt).getTime())
-    const limitDays = commercialOptimization?.tools?.smartTags?.newProduct?.daysLimit || 7
-    const diffTime = Math.abs(Date.now() - createdDate)
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays <= limitDays
-  }, [product?.createdAt, commercialOptimization])
+  const [selectedTalla, setSelectedTalla] = useState(null)
+  const [selectedColor, setSelectedColor] = useState(null)
+  const [cantidad, setCantidad] = useState(1)
+  const [error, setError] = useState('')
+  const [showToast, setShowToast] = useState(false)
+  const [showCheckout, setShowCheckout] = useState(false)
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
 
-  const stockConsolidado = useMemo(() => {
-    if (!product) return 0
-    return (product.variantes || []).reduce((sum, v) => sum + (v.stock || 0), 0)
-  }, [product])
-
-  const activeSmartTag = useMemo(() => {
-    const smartTags = commercialOptimization?.tools?.smartTags || {}
-    if (!product || !smartTags.enabled) return null
-
-    // 1. Última Unidad (Prioridad Alta)
-    if (smartTags.lastUnit?.enabled !== false && stockConsolidado > 0 && stockConsolidado <= (smartTags.lastUnit?.threshold || 3)) {
-      return {
-        text: smartTags.lastUnit?.text || 'Última Unidad',
-        bg: smartTags.lastUnit?.bg || '#3b82f6',
-        textCol: smartTags.lastUnit?.textCol || '#ffffff'
-      }
-    }
-
-    // 2. Oferta Imperdible (Si tiene descuento o es combo)
-    const hasPromo = product.tienePromocion || product.discountActive
-    if (smartTags.unmissableOffer?.enabled !== false && hasPromo) {
-      return {
-        text: smartTags.unmissableOffer?.text || 'Oferta Imperdible',
-        bg: smartTags.unmissableOffer?.bg || '#f59e0b',
-        textCol: smartTags.unmissableOffer?.textCol || '#ffffff'
-      }
-    }
-
-    // 3. Más Vendido (Basado en salesCount real)
-    const salesVal = product.salesCount || 0
-    if (smartTags.bestSeller?.enabled !== false && salesVal >= (smartTags.bestSeller?.minSales || 5)) {
-      return {
-        text: smartTags.bestSeller?.text || 'Más Vendido',
-        bg: smartTags.bestSeller?.bg || '#ef4444',
-        textCol: smartTags.bestSeller?.textCol || '#ffffff'
-      }
-    }
-
-    // 4. Nuevo
-    if (smartTags.newProduct?.enabled !== false && isNewProduct) {
-      return {
-        text: smartTags.newProduct?.text || 'Nuevo',
-        bg: smartTags.newProduct?.bg || '#10b981',
-        textCol: smartTags.newProduct?.textCol || '#ffffff'
-      }
-    }
-
-    return null
-  }, [product, commercialOptimization, stockConsolidado, isNewProduct])
+  const {
+    isNewProduct,
+    stockConsolidado,
+    activeSmartTag,
+    availableVariants,
+    tallas,
+    colores,
+    currentVariant,
+    actualPrice
+  } = useProductVariants(product, selectedTalla, selectedColor, {
+    showSizes,
+    showColors,
+    commercialOptimization
+  })
 
   const { user, role } = useAuthStore()
   const { favoriteIds, toggleFavorite } = useFavoritesStore()
@@ -225,35 +190,7 @@ export default function ProductDetailPage() {
     }
   }
 
-  const [selectedTalla, setSelectedTalla] = useState(null)
-  const [selectedColor, setSelectedColor] = useState(null)
-  const [cantidad, setCantidad] = useState(1)
-  const [error, setError] = useState('')
-  const [showToast, setShowToast] = useState(false)
-  const [showCheckout, setShowCheckout] = useState(false)
 
-  const [activeImageIndex, setActiveImageIndex] = useState(0)
-
-  const availableVariants = useMemo(() => {
-    if (!product) return []
-    return (product.variantes || []).filter(v => v.stock > 0)
-  }, [product])
-
-  const tallas = useMemo(() => {
-    if (!showSizes) return []
-    const t = new Set(availableVariants.map(v => v.talla).filter(Boolean))
-    return Array.from(t)
-  }, [availableVariants, showSizes])
-
-  const colores = useMemo(() => {
-    if (!showColors) return []
-    let validVariants = availableVariants
-    if (selectedTalla) {
-      validVariants = validVariants.filter(v => v.talla === selectedTalla)
-    }
-    const c = new Set(validVariants.map(v => v.color).filter(Boolean))
-    return Array.from(c)
-  }, [availableVariants, selectedTalla, showColors])
 
   useEffect(() => {
     if (product) {
@@ -271,13 +208,7 @@ export default function ProductDetailPage() {
     }
   }, [product?.id, showColors, showSizes])
 
-  const currentVariant = useMemo(() => {
-    if (!product) return null
-    return availableVariants.find(v => 
-      ((!showSizes || v.talla === selectedTalla) || (!v.talla && !selectedTalla)) &&
-      ((!showColors || v.color === selectedColor) || (!v.color && !selectedColor))
-    )
-  }, [availableVariants, selectedTalla, selectedColor, product, showColors, showSizes])
+
 
   const allImages = useMemo(() => {
     const list = []
@@ -382,15 +313,7 @@ export default function ProductDetailPage() {
     return () => clearInterval(interval)
   }, [activeImageIndex, activeImages, selectedColor])
 
-  const actualPrice = useMemo(() => {
-    if (!product) return 0
-    if (currentVariant?.precio && Number(currentVariant.precio) > 0) {
-      return Number(currentVariant.precio)
-    }
-    return (product.tienePromocion && product.precioPromo < product.precioBase)
-      ? product.precioPromo
-      : product.precioBase
-  }, [currentVariant, product])
+
 
   const handleAddToCart = (directCheckout = false) => {
     setError('')
@@ -478,7 +401,10 @@ export default function ProductDetailPage() {
       <header className="fixed top-0 inset-x-0 h-16 bg-surface/80 backdrop-blur-md border-b border-app flex items-center justify-between px-4 z-50">
         <button 
           onClick={() => {
-            if (window.history.state && window.history.state.idx > 0) {
+            if (fromCart) {
+              openCart()
+              navigate(-1)
+            } else if (window.history.state && window.history.state.idx > 0) {
               navigate(-1)
             } else {
               navigate('/tienda')

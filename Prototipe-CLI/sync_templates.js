@@ -167,8 +167,13 @@ async function main() {
     process.exit(1);
   }
 
+  // Detectar carpetas de documentación locales de la plantilla core
+  const filesInFuente = await fs.readdir(fuente);
+  const localDocFolders = filesInFuente.filter(file => file.startsWith('Documentacion') && file !== 'Documentacion PROTOTIPE');
+
   // Listas de archivos del estándar
   const SYNC_PATHS = [
+    ...localDocFolders,
     'src/components',
     'src/hooks',
     'src/services',
@@ -235,10 +240,10 @@ async function main() {
             const fullSrcPath = path.join(srcSubDir, file);
             const relativeItem = path.relative(fuente, fullSrcPath).replace(/\\/g, '/');
 
-            // Verificar exclusión
+            // Verificar exclusión (no excluimos carpetas de documentación local del core)
             const isExcluded = EXCLUDE_PATTERNS.some(exclude => {
               return relativeItem === exclude || relativeItem.startsWith(exclude + '/');
-            }) || relativeItem.startsWith('Documentacion ') || relativeItem.split('/').some(part => part.startsWith('Documentacion '));
+            });
 
             if (isExcluded) {
               ignoredFiles.push(relativeItem);

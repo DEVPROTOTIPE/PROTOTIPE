@@ -196,6 +196,7 @@
 | **colors.js** | Componente o módulo funcional de la aplicación. | Ninguna | [Abrir Archivo](file:///D:/PROTOTIPE/Plantillas Core/App Ventas/src/utils/colors.js) |
 | **dynamicManifest.js** | Dibuja un rectángulo con esquinas redondeadas. | Ninguna | [Abrir Archivo](file:///D:/PROTOTIPE/Plantillas Core/App Ventas/src/utils/dynamicManifest.js) |
 | **formatters.js** | Funciones utilitarias puras para formateo. | Ninguna | [Abrir Archivo](file:///D:/PROTOTIPE/Plantillas Core/App Ventas/src/utils/formatters.js) |
+| **imageCompression.js** | 🚀 UTILIDAD DE COMPRESIÓN DE IMÁGENES CLIENT-SIDE Ubicación: src/utils/imageCompression.js Captura un archivo de imagen, lo procesa con Canvas en el navegador para reducir su resolución de forma proporcional si excede los límites, y lo exporta como Blob WebP comprimido de alta eficiencia. | Ninguna | [Abrir Archivo](file:///D:/PROTOTIPE/Plantillas Core/App Ventas/src/utils/imageCompression.js) |
 | **search.js** | Normaliza una cadena de texto eliminando acentos/tildes y convirtiéndola a minúsculas. | Ninguna | [Abrir Archivo](file:///D:/PROTOTIPE/Plantillas Core/App Ventas/src/utils/search.js) |
 
 ---

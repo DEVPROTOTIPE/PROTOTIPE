@@ -21,15 +21,27 @@ import { storage } from '../config/firebaseConfig'
 export async function uploadImage(file, folder = 'products', customName = null, onProgress = null) {
   if (!file) throw new Error('No se ha proporcionado un archivo válido para subir.')
 
+  // Compresión transparente client-side antes de subir
+  let processedFile = file
+  if (file.type && file.type.startsWith('image/')) {
+    try {
+      const { compressImage } = await import('../utils/imageCompression')
+      const maxDim = (folder === 'products' || folder === 'products_drafts' || folder === 'products_gallery') ? 800 : 400
+      processedFile = await compressImage(file, maxDim, maxDim, 0.75)
+    } catch (err) {
+      console.warn('[Upload Service] Error de compresión, subiendo original:', err.message)
+    }
+  }
+
   // Generar un nombre único para evitar sobreescribir fotos existentes
-  const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, '_')
+  const cleanName = (processedFile.name || 'image.webp').replace(/[^a-zA-Z0-9.]/g, '_')
   const fileName = customName ? `${customName}_${cleanName}` : `${crypto.randomUUID()}_${cleanName}`
   
   // Referencia física en Storage
   const storageRef = ref(storage, `${folder}/${fileName}`)
   
   // Iniciar la tarea de subida resumible
-  const uploadTask = uploadBytesResumable(storageRef, file)
+  const uploadTask = uploadBytesResumable(storageRef, processedFile)
 
   return new Promise((resolve, reject) => {
     uploadTask.on(

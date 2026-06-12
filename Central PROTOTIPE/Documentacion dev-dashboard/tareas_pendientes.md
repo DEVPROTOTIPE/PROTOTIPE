@@ -3,6 +3,10 @@
 Roadmap y control de tareas del proyecto dev-dashboard.
 
 ## Siguiente Hito: Mejoras de Interfaz de Usuario (UI/UX)
+- [x] **~~Tarea 246: Personalización Avanzada de Colores y Tokens HSL (Estilo Studio completo)~~**
+  - [x] Agregar variables avanzadas de tema (`surfaceColor`, `surface2Color`, `borderColor`, `textMutedColor`, `radiusBase`) en el flujo de Onboarding del Dashboard y pasarlas en los payloads hacia el CLI.
+  - [x] Implementar panel colapsable interactivo `"Personalización de Colores Avanzada (Tokens HSL)"` con pickers cromáticos, inputs hexadecimales y selector de Radius.
+  - [x] Incorporar lógica inteligente para autodetectar luminancia de fondos y asignar valores óptimos a los tokens de forma automática al seleccionar presets.
 - [x] **~~Tarea 245: Fijación de la Vista Previa del Mockup de Smartphone al hacer Scroll~~**
   - [x] Refactorizar la estructura de rejilla CSS Grid en el Wizard de Onboarding de `items-start` a la alineación por defecto `stretch`.
   - [x] Agregar la clase `self-start` al panel izquierdo del Wizard para mantener su altura nativa basada en el contenido.

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query'
 import * as inventoryService from '../services/inventoryService'
 
 const KEYS = {
@@ -89,6 +89,60 @@ export function useProducts(onlyActive = false) {
       
       return products
     },
+  })
+}
+
+export function useProductsInfinite({ onlyActive = true, categoryId = 'all', pageSize = 12 } = {}) {
+  return useInfiniteQuery({
+    queryKey: [...KEYS.products, { onlyActive, categoryId, pageSize, infinite: true }],
+    queryFn: async ({ pageParam = null }) => {
+      const result = await inventoryService.getProductsPaged({
+        onlyActive,
+        categoryId,
+        lastVisibleDoc: pageParam,
+        pageSize
+      })
+
+      // Enriquecer productos con descuento directo de inventario
+      const products = result.products.map(p => {
+        if (p.discountActive && (p.discountValue || 0) > 0) {
+          const base = p.precioBase || 0
+          const val = p.discountValue || 0
+          const finalPrice = Math.max(0, p.discountType === 'percentage' ? base - (base * val) / 100 : base - val)
+          
+          return {
+            ...p,
+            tienePromocion: true,
+            precioPromo: finalPrice,
+            promocion: {
+              discountType: p.discountType || 'percentage',
+              discountValue: val,
+              glowEffect: true
+            }
+          }
+        }
+        return p
+      })
+
+      // Pre-cargar imágenes en segundo plano silenciosamente
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          products.forEach(p => {
+            if (p.imageUrl) {
+              const img = new Image()
+              img.src = p.imageUrl
+            }
+          })
+        }, 500)
+      }
+
+      return {
+        ...result,
+        products
+      }
+    },
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.lastVisible || undefined
   })
 }
 

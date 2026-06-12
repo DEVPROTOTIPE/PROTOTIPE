@@ -46,6 +46,8 @@ export default function RequirePortalAuth({ children, allowedRole }) {
       setChecking(false)
     }, (error) => {
       console.error("Error validando empleado:", error)
+      clearPortalEmployee()
+      setIsValid(false)
       setChecking(false)
     })
 

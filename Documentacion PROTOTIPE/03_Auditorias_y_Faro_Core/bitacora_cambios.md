@@ -1,3 +1,77 @@
+### [2026-06-12] - Simulador de UI en Vivo y Mejoras en Selección de Branding (Consola Central dev-dashboard)
+* **Tipo:** Nueva Característica / UI/UX / Branding / Aprovisionamiento / Simulador
+* **Descripción de Cambios:**
+  - **Simulador de Interfaz en Tiempo Real:** Implementado un mock visual completo e interactivo (Live Preview Mockup) de la aplicación de cliente en la columna derecha de la sección de Branding del asistente de onboarding.
+  - **Vinculación Reactiva de Tokens HSL:** El simulador consume de forma síncrona los estados de `bgColor`, `textColor`, `primaryColor`, `secondaryColor`, `surfaceColor`, `surface2Color`, `borderColor`, `radiusBase` y `googleFont` para mostrar el impacto exacto en el encabezado, tarjetas de productos, alertas, botones de compra e insignias.
+  - **Diseño a Dos Columnas en Branding:** Refactorizada la pestaña de Branding para aprovechar resoluciones amplias mediante una grilla responsiva: controles en columna izquierda y simulador interactivo de accesibilidad/interfaz sticky en columna derecha.
+  - **Corrección de Superposición en WCAG Contrast Study:** Se refactorizó la visualización de los badges y vistas previas de botones del estudio WCAG para apilarse verticalmente (`flex-col`), eliminando la superposición de textos provocada al angostarse la barra lateral en la grilla responsiva.
+* **Archivos Creados/Modificados:**
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+* **Verificación:** Compilado exitosamente con Vite. Validada la actualización reactiva en caliente de los estilos HSL y la tipografía dinámica en el simulador móvil del cliente.
+
+### [2026-06-12] - Robustez en Paginación (App Ventas) y Parches de Seguridad y Sincronización en Prototipe-CLI
+* **Tipo:** Robustez / Parche de Facturación / Seguridad / Sincronización / CLI
+* **Descripción de Cambios:**
+  - **Deduplicación en Frontend (App Ventas):** Modificado el `useMemo` de `allProducts` en `ClientCatalog.jsx` para remover duplicados de ID de producto mediante un `Set`, evitando advertencias de colisión de `key` de React y fallos visuales en el DOM virtual.
+  - **Mitigación de Bucle Infinito de Lectura (App Ventas):** Modificado `loadMoreRef` (`IntersectionObserver`) para suspender el trigger automático de carga de página si el usuario tiene una búsqueda activa (`searchTerm`) o filtros aplicados (`hasActiveFilters`).
+  - **Paginación Manual Controlada (App Ventas):** Agregado un botón manual de `"Buscar más en el catálogo completo"` cuando existen filtros activos y hay más páginas disponibles en Firestore.
+  - **UX de Búsqueda sin Coincidencias (App Ventas):** Si el filtro da 0 resultados en la página cargada pero Firestore tiene más páginas (`hasNextPage === true`), se renderiza un estado vacío amigable con el botón manual `"Buscar en el resto del catálogo"`, solucionando el bloqueo donde el usuario no podía seguir buscando en páginas subsecuentes.
+  - **Sincronización de Documentación en Plantillas (CLI):** Corregido un bug en `sync_templates.js` que excluía los directorios de documentación local (`Documentacion App Ventas`, etc.) del proceso de sincronización. Ahora se escanean de manera dinámica en el origen y se copian correctamente al directorio de plantillas del CLI para que las nuevas instancias se provisionen con documentación actualizada.
+  - **Parche de Path Traversal (CLI):** Corregido un fallo de seguridad lógica en `server.js` en los endpoints de Git/Backup (`/api/git/status`, `/api/git/backup-stream`) donde el método `.startsWith(GIT_ROOT)` permitía la evasión de límites de directorios (Directory Boundary Prefix Bypass) si existían carpetas adyacentes cuyo nombre iniciara con el mismo prefijo (ej: `D:\PROTOTIPE-hack`). Se robusteció la validación comprobando la igualdad exacta o agregando `path.sep`.
+* **Archivos Creados/Modificados:**
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ClientCatalog.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCatalog.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/sync_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY]
+  - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/Documentacion App Ventas/bitacora_cambios.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/bitacora_cambios.md) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/Documentacion App Ventas/tareas_pendientes.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/tareas_pendientes.md) [MODIFY]
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+* **Verificación:** Ejecutada compilación local del frontend `npm run build` terminando exitosamente. Sincronizado a plantilla CLI con validación exitosa (incluyendo carpetas de documentación). Retornos y verificaciones de path traversal validadas.
+
+### [2026-06-11] - Implementación de Optimización de Consumo de Base de Datos y Storage en App Ventas
+* **Tipo:** Optimización Costos / Base de Datos / Storage / Rendimiento / Frontend
+* **Descripción de Cambios:**
+  - **Compresión WebP Client-Side:** Modificado `uploadService.js` para interceptar dinámicamente cualquier subida de imagen y comprimirla mediante Canvas localmente en el navegador a resoluciones máximas de 800px para productos/galerías o 400px para variantes/logos, exportándolo a WebP con calidad 0.75.
+  - **Soporte de URLs de Imágenes Externas:** Validada la compatibilidad nativa en los inputs de tipo url vinculados a `imageUrl` de variantes y productos en `ProductFormModal.jsx`, facilitando que el administrador use enlaces externos sin consumir cuotas de Storage.
+  - **Paginación Firestore por Cursores:** Refactorizado `inventoryService.js` agregando `getProductsPaged` que limita la consulta a Firestore a bloques de 12 ítems y utiliza cursores (`limit`, `startAfter`) según la categoría.
+  - **Scroll Infinito con IntersectionObserver:** Reemplazada la paginación local en memoria en `ClientCatalog.jsx` por una carga perezosa interactiva con IntersectionObserver que consume la paginación de Firestore a través del nuevo hook `useProductsInfinite` de TanStack Query v5 en `useInventory.js`.
+  - **Índices Firestore:** Declarados los índices compuestos en `firestore.indexes.json` para las consultas paginadas de productos ordenados por creación.
+* **Archivos Creados/Modificados:**
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/firestore.indexes.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firestore.indexes.json) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/services/inventoryService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/inventoryService.js) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/hooks/useInventory.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useInventory.js) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ClientCatalog.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCatalog.jsx) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/Documentacion App Ventas/tareas_pendientes.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/tareas_pendientes.md) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/Documentacion App Ventas/bitacora_cambios.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/bitacora_cambios.md) [MODIFY]
+  - [`d:/PROTOTIPE/Plantillas Core/App Ventas/Documentacion App Ventas/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/mapa_aplicacion.md) [MODIFY]
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+* **Verificación:** Ejecutada compilación local del frontend `npm run build` terminando exitosamente con código de salida 0.
+
+### [2026-06-11] - Análisis y Plan de Optimización de Consumo de Base de Datos y Storage
+* **Tipo:** Documentación / Arquitectura / Optimización Costos
+* **Descripción de Cambios:**
+  - **Generación de Plan de Optimización de Consumo:** Elaborado un detallado manual técnico y de diagnóstico `plan_optimizacion_consumo_firebase.md` en `03_Auditorias_y_Faro_Core/`. Establece las bases para mitigar lecturas en Firestore mediante paginación por cursores, carga perezosa (`IntersectionObserver`), caché de configs en `LocalStorage` y persistencia local `IndexedDB`. Incluye algoritmos client-side para redimensionar y comprimir fotos a formato WebP y posibilitar el uso de enlaces de imágenes externos sin consumo en Firebase Storage.
+  - **Mapeo de Documentación:** Registrado el manual y sus criterios de decisión en el mapa semántico general `mapa_documentacion_ia.md`.
+* **Archivos Creados/Modificados:**
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/plan_optimizacion_consumo_firebase.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/plan_optimizacion_consumo_firebase.md) [NEW]
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`d:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
+### [2026-06-11] - Implementación de Módulos Avanzados de Desarrollo (Live Logs, Heatmap de Paridad, Centro Git y Gestor NPM)
+* **Tipo:** Nueva Característica / Backend / Frontend / Git / NPM / Robustez
+* **Descripción de Cambios:**
+  1. **Servidor y Logs de Desarrollo en Vivo (Propuesta 2):** Implementado el endpoint `/api/project/dev/logs-stream` para streamear asíncronamente los logs de `npm run dev` usando Server-Sent Events (SSE). Se introdujo un buffer circular en memoria de 100 líneas por cliente para evitar consumo en disco. En el frontend, se diseñó una terminal Unix oscura en drawer que se suscribe al stream SSE al levantar el servidor.
+  2. **Matriz de Paridad Ecosistema (Drift Heatmap) (Propuesta 3):** Implementado el endpoint `/api/project/drift/global` para evaluar de manera asíncrona y masiva el porcentaje de paridad de código de cada cliente contra su core original. En el frontend, se diseñó e integró la sub-pestaña "Matriz de Paridad (Drift Heatmap)" con semáforo de colores HSL (>95% verde, 80-95% amarillo, <80% rojo), listado de discrepancias de archivos y botón de sincronización masiva en lote.
+  3. **Operaciones Git en Caliente (Propuesta 4):** Creados los endpoints `/api/git/discard` (para realizar `git checkout -- <file>` o descarte total con reset y clean) y `/api/git/diff-file` (para extraer diffs planos de archivos). En el frontend, se integraron los microbotones de descarte y el modal visor de diff plano con colores rojo/verde para líneas borradas/añadidas.
+  4. **Gestor de Dependencias NPM Asíncrono (Propuesta 5):** Se actualizó el Drift Detector para parificar el estado de las dependencias (`dependencies`/`devDependencies`) de `package.json`. Añadido el endpoint `/api/project/dependencies/install` para lanzar `npm install` de forma asíncrona mediante SSE. En el frontend, se integraron las alertas visuales por desajuste y el botón "Instalar dependencias" conectado a la consola SSE.
+  5. **Hotfix JSX en dev-dashboard:** Corregido error sintáctico (div de cierre huérfano) en `App.jsx` que bloqueaba la compilación en producción del frontend.
+* **Archivos Modificados:**
+  - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Verificación:** Ejecutada compilación local del frontend `npm run build` terminando exitosamente con código de salida 0.
+
 ### [2026-06-11] - Propuesta Técnica de Robustez y Nuevas Funcionalidades en dev-dashboard
 * **Tipo:** Documentación / Arquitectura / Propuesta Técnica
 * **Descripción de Cambios:**

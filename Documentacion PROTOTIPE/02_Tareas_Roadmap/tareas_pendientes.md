@@ -5,6 +5,66 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
 
 ---
 
+* **[x] ~~Tarea 389: Personalización Avanzada de Colores y Tokens HSL en Onboarding del Ecosistema~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-12
+  - Fecha de finalización: 2026-06-12
+  - Descripción: Diseñado e implementado el panel de personalización avanzada de colores (Tokens HSL de Tailwind v4) en el Onboarding Wizard del dashboard (`App.jsx`). Soporta pickers interactivos, entradas hexadecimales y selectores de borde redondeado (Radius). Se vinculó con autodetección de luma de fondo para inicializar variables secundarias automáticamente y se propagaron los payloads en `cliPayload` y metadatos de Firestore.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/Documentacion dev-dashboard/tareas_pendientes.md`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/Documentacion%20dev-dashboard/tareas_pendientes.md) [MODIFY]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/Documentacion dev-dashboard/bitacora_cambios.md`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/Documentacion%20dev-dashboard/bitacora_cambios.md) [MODIFY]
+
+* **[x] ~~Tarea 388: Parche de Robustez y Mitigación de Bucle Infinito de Redirección y Lectura en Firestore~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-12
+  - Fecha de finalización: 2026-06-12
+  - Descripción: Implementado parche de seguridad y estabilidad en el catálogo de clientes (`ClientCatalog.jsx`). Se agregaron rutinas de deduplicación de ID de productos en el frontend para evitar advertencias de key duplicadas en React, y se desactivó el trigger del IntersectionObserver automático de scroll si existen filtros o búsquedas activas, reemplazándolo por una paginación manual para evitar bucles infinitos de lectura.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ClientCatalog.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCatalog.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/Documentacion App Ventas/tareas_pendientes.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/tareas_pendientes.md) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/Documentacion App Ventas/bitacora_cambios.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/bitacora_cambios.md) [MODIFY]
+    - [`d:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+* **[x] ~~Tarea 387: Implementación de Optimización de Consumo de Base de Datos y Storage en App Ventas~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Implementada la optimización de base de datos y storage en App Ventas. Se habilitó compresión WebP client-side transparente en subidas a Storage con Canvas (limites de 800px/400px, 0.75 de calidad), se validaron los campos para URLs de imágenes externas en productos/variantes, se implementó paginación real por cursores en Firestore en el catálogo de clientes (`limit` y `startAfter`) combinada con scroll infinito (`IntersectionObserver`), y se estructuraron los índices compuestos requeridos en `firestore.indexes.json`.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/firestore.indexes.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firestore.indexes.json) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/services/inventoryService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/inventoryService.js) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/hooks/useInventory.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useInventory.js) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/pages/client/ClientCatalog.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCatalog.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/Documentacion App Ventas/tareas_pendientes.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/tareas_pendientes.md) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/Documentacion App Ventas/bitacora_cambios.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/bitacora_cambios.md) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/Documentacion App Ventas/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/mapa_aplicacion.md) [MODIFY]
+    - [`d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+* **[x] ~~Tarea 386: Análisis de Consumo y Plan de Optimización de Base de Datos y Storage en Ecosistema~~**
+  - Estatus: Completado (Fase de Análisis y Documentación).
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Realizado un diagnóstico profundo de los consumos e ineficiencias de Firestore y Firebase Storage en `App Ventas`. Se estructuró un plan de optimización completo que incluye compresor de imágenes client-side Canvas a WebP, enlace directo a URLs externas para fotos de productos sin costo físico de almacenamiento, paginación por cursores de Firestore en catálogo de clientes con carga perezosa (`IntersectionObserver`), persistencia local en IndexedDB y almacenamiento de variables de marca en caché.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/plan_optimizacion_consumo_firebase.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/plan_optimizacion_consumo_firebase.md) [NEW]
+    - [`d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea 385: Implementación de Módulos Avanzados de Desarrollo (Live Logs, Heatmap de Paridad, Centro Git y Gestor NPM)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-11
+  - Fecha de finalización: 2026-06-11
+  - Descripción: Implementados los 4 módulos avanzados seleccionados para robustecer el dev-dashboard y el CLI Bridge:
+    1. **Live Logs de Desarrollo:** Streaming SSE nativo en `/api/project/dev/logs-stream` que lee y retransmite stdout/stderr de servidores locales de Vite con buffer circular en memoria de 100 líneas, con visor en drawer UNIX del dashboard.
+    2. **Drift Heatmap:** Matriz visual global en CRM (`/api/project/drift/global`) que evalúa y colorea el nivel de paridad física de cada cliente frente a su Core correspondiente.
+    3. **Operaciones Git:** Botones de descarte local en caliente (`/api/git/discard`) y visor interactivo de diffs planos en modal (`/api/git/diff-file`).
+    4. **Gestor NPM:** Instalador de dependencias asíncrono (`npm install`) streameado por SSE en `/api/project/dependencies/install` y alertas por desviación de versiones en `package.json`.
+    Adicionalmente se saneó un bug de parseo JSX (div extra residual) en `App.jsx` resolviendo la falla de empaquetado del frontend.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
 * **[x] ~~Tarea 384: Saneamiento de Detección Git en Ecosistema (CLI & Dashboard) y Sincronización de Rutas~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-11
@@ -75,6 +135,14 @@ Este documento registra de forma dinámica las tareas pendientes, en curso y com
   - Descripción: Diseñamos y elaboramos la propuesta técnica para integrar un panel visual de control de versiones y copias de seguridad de Git en dev-dashboard. Detalla la arquitectura de comunicación por Server-Sent Events (SSE) con el bridge CLI, el layout de dos paneles (visor de cambios y terminal de logs en vivo), la API REST en server.js y la estrategia multi-tenant.
   - Archivos creados/modificados:
     - [`d:/PROTOTIPE/Documentacion PROTOTIPE/09_Modulos_Completos/Modulo_Commits_Despliegues/propuesta_commits_despliegues.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Modulo_Commits_Despliegues/propuesta_commits_despliegues.md) [NEW]
+
+* **[x] ~~Tarea 378: Simulador de UI en Vivo y Mejoras en Selección de Branding (dev-dashboard)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-12
+  - Fecha de finalización: 2026-06-12
+  - Descripción: Refactorizada la pestaña de Branding en el Wizard de Onboarding para dividirla en una grilla responsiva de dos columnas en escritorio. La columna derecha cuenta ahora con un Simulador de Interfaz en Tiempo Real (Live Preview Mockup) que renderiza de forma reactiva la tipografía elegida y los tokens HSL (primario, secundario, fondo, texto, superficies y redondeado de bordes) aplicados sobre componentes reales de la aplicación (navbar, tarjetas de productos, insignias de estado y alertas), y se corrigió el solapamiento de textos en las tarjetas de contraste WCAG al apilarlas verticalmente.
+  - Archivos creados/modificados:
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
 
 * **[x] ~~Tarea 377: Vista Previa Interactiva de Productos y Servicios en Mockup de Smartphone (dev-dashboard)~~**
   - Estatus: Completado.

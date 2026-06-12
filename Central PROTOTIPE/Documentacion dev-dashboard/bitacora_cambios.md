@@ -2,11 +2,12 @@
 
 Historial técnico de cambios realizados en el proyecto.
 
-
-
-
-
-
+## [2026-06-12] Personalización Avanzada de Colores y Tokens HSL (Tarea 246)
+- **Estados de Tokens de Diseño:** Declarados nuevos estados reactivos para gestionar el sistema completo de colores HSL del ecosistema (`surfaceColor`, `surface2Color`, `borderColor`, `textMutedColor` y `radiusBase`) en `App.jsx`.
+- **Cálculo Inteligente de Inicialización:** Agregada función helper `handleBgColorChange` y lógica en la grilla de preestablecidos para autocalcular el luma del fondo y asignar valores por defecto óptimos para superficies y contrastes de bordes/textos atenuados, facilitando el onboarding del desarrollador.
+- **Panel Colapsable de Personalización:** Diseñado y renderizado un panel colapsable interactivo `"Personalización de Colores Avanzada (Tokens HSL)"` que le permite al usuario modificar de manera granular los 9 variables principales del diseño y la escala de bordes redondeados (Radius).
+- **Serialización en Payload de CLI:** Integrados los tokens avanzados en los objetos de payload `cliPayload` y `branding` enviados al backend del CLI y persistidos en la base de datos Firestore central.
+- **Verificación de Compilación:** Compilación exitosa en producción (`npm run build`).
 
 ## [2026-06-11] Fijación de Mockup Smartphone en Scroll (Tarea 245)
 - **Alineación Stretch del Grid:** Removimos la clase de alineación vertical rígida `items-start` del contenedor de cuadrícula del Wizard de Onboarding en `App.jsx`, permitiendo que las columnas de la cuadrícula se estiren (`stretch` por defecto) a lo largo de todo el alto del contenedor.

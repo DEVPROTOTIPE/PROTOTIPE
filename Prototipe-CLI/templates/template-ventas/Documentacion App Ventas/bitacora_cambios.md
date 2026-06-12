@@ -2,6 +2,81 @@
 
 Historial de cambios, mejoras y correcciones técnicas aplicadas sobre la plantilla core de Ventas.
 
+### [2026-06-12] - Robustez en Paginación y Prevención de Bucle de Lecturas (Exploit de Facturación)
+* **Tipo:** Robustez / Parche de Facturación / Rendimiento / UX
+* **Severidad:** Crítica (Evita consumo masivo accidental de Firestore)
+* **Descripción de Cambios:**
+  - **Deduplicación en Frontend:** Modificado el `useMemo` de `allProducts` en `ClientCatalog.jsx` para remover duplicados de ID de producto mediante un `Set`, evitando advertencias de colisión de `key` de React y fallos visuales en el DOM virtual.
+  - **Mitigación de Bucle Infinito de Lectura:** Modificado `loadMoreRef` (`IntersectionObserver`) para suspender el trigger automático de carga de página si el usuario tiene una búsqueda activa (`searchTerm`) o filtros aplicados (`hasActiveFilters`).
+  - **Paginación Manual Controlada:** Agregado un botón manual de `"Buscar más en el catálogo completo"` cuando existen filtros activos y hay más páginas disponibles en Firestore.
+  - **UX de Búsqueda sin Coincidencias:** Si el filtro da 0 resultados en la página cargada pero Firestore tiene más páginas (`hasNextPage === true`), se renderiza un estado vacío amigable con el botón manual `"Buscar en el resto del catálogo"`, solucionando el bloqueo donde el usuario no podía seguir buscando en páginas subsecuentes.
+* **Archivos Modificados:**
+  - `src/pages/client/ClientCatalog.jsx`
+* **Desplegado:** Local build verificado ✅, Sincronizado a plantilla CLI con validación exitosa.
+
+### [2026-06-11] - Implementación de la Optimización de Consumo de Base de Datos y Storage
+* **Tipo:** Optimización Costos / Base de Datos / Storage / Rendimiento / Frontend
+* **Severidad:** Alta
+* **Descripción de Cambios:**
+  - **Compresión WebP Client-Side:** Modificado `uploadService.js` para interceptar dinámicamente cualquier subida de imagen y comprimirla mediante Canvas localmente en el navegador a resoluciones máximas de 800px para productos/galerías o 400px para variantes/logos, exportándolo a WebP con calidad 0.75.
+  - **Soporte de URLs de Imágenes Externas:** Validada la compatibilidad nativa en los inputs de tipo url vinculados a `imageUrl` de variantes y productos en `ProductFormModal.jsx`, facilitando que el administrador use enlaces externos sin consumir cuotas de Storage.
+  - **Paginación Firestore por Cursores:** Refactorizado `inventoryService.js` agregando `getProductsPaged` que limita la consulta a Firestore a bloques de 12 ítems y utiliza cursores (`limit`, `startAfter`) según la categoría.
+  - **Scroll Infinito con IntersectionObserver:** Reemplazada la paginación local en memoria en `ClientCatalog.jsx` por una carga perezosa interactiva con IntersectionObserver que consume la paginación de Firestore a través del nuevo hook `useProductsInfinite` de TanStack Query v5 en `useInventory.js`.
+  - **Índices Firestore:** Declarados los índices compuestos en `firestore.indexes.json` para las consultas paginadas de productos ordenados por creación.
+* **Archivos Modificados:**
+  - `firestore.indexes.json` → Declarados los índices compuestos.
+  - `src/services/inventoryService.js` → Agregada la función `getProductsPaged`.
+  - `src/hooks/useInventory.js` → Agregado el hook `useProductsInfinite`.
+  - `src/pages/client/ClientCatalog.jsx` → Reemplazada la paginación por IntersectionObserver.
+  - `Documentacion App Ventas/tareas_pendientes.md` → Registrada la tarea completada de la implementación.
+  - `Documentacion App Ventas/bitacora_cambios.md` → Se registró esta entrada.
+  - `Documentacion App Ventas/mapa_aplicacion.md` → Se actualizó el mapa de aplicación local.
+* **Desplegado:** Local build verificado ✅
+
+---
+
+### [2026-06-11] - Análisis y Diseño del Plan de Optimización de Consumo de Base de Datos y Storage
+* **Tipo:** Documentación / Arquitectura / Optimización Costos
+* **Severidad:** Alta (Planeación de Infraestructura)
+* **Descripción de Cambios:**
+  - Realizado un diagnóstico exhaustivo de las lecturas redundantes en Firestore y el uso ineficiente de imágenes en Firebase Storage para la plantilla `App Ventas`.
+  - Diseñados los algoritmos de compresión client-side en Canvas para WebP, el soporte de URLs externas, persistencia en IndexedDB y paginación reactiva por cursores.
+  - Documentado localmente en `plan_optimizacion_consumo_firebase.md` de la documentación general.
+* **Archivos Modificados:**
+  - `Documentacion App Ventas/tareas_pendientes.md` → Registrada la tarea completada del análisis.
+  - `Documentacion App Ventas/bitacora_cambios.md` → Se registró esta entrada.
+* **Desplegado:** Documentación local verificado ✅
+
+---
+
+### [2026-06-09] - Rediseño del Perfil de Cliente, Optimización de Sidebar, Animaciones y Stacking Context de Emojis
+* **Tipo:** UI/UX / Optimización / Estilo / Bugfix
+* **Severidad:** Media
+* **Síntoma:** 
+  1. El selector de emojis en el perfil de cliente aparecía por detrás de las tarjetas inferiores y el clic en el botón de edición no abría el modal consistentemente.
+  2. El sidebar de escritorio tenía una distribución desbalanceada de la marca y las notificaciones.
+* **Causa Raíz:**
+  1. El contenedor interno de la cabecera del perfil estaba configurado con `z-10`, lo cual creaba un stacking context de menor nivel que la clase `z-20` de las tarjetas inferiores. El icono del lápiz de edición interceptaba los eventos de puntero.
+  2. La distribución de filas en el sidebar no estaba optimizada.
+* **Archivos Modificados:**
+  - `src/pages/client/ClientProfile.jsx` → Cabecera elevada a `z-40` y modal de emojis a `z-50`; añadido `pointer-events-none` al icono del lápiz.
+  - `src/layouts/ClientLayout.jsx` → Rediseño del sidebar con cabecera arriba y botones en grilla en la base; añadidas animaciones de campana/carrito.
+  - `src/layouts/AdminLayout.jsx` → Añadida animación interactiva de campana.
+* **Desplegado:** Local build verificado ✅
+
+---
+
+### [2026-06-09] - Solución a la Detección de Repositorios Git en el Gestor de Respaldos
+* **Tipo:** DevOps / Bugfix / Scripts
+* **Severidad:** Baja
+* **Síntoma:** El script de menú de respaldos reportaba a App Ventas como "Sin Git".
+* **Causa Raíz:** La carpeta `.git` estaba temporalmente como `.git-backup-temp` debido a bloqueos de archivos remanentes que mantenían los servidores de desarrollo Vite activos al concluir backups anteriores, impidiendo que el renombrado de restauración se completara de forma autónoma.
+* **Archivos Modificados:**
+  - `D:/PROTOTIPE/menu_backup.ps1` → Añadida detención controlada de procesos Node/Vite antes de la restauración de carpetas `.git-backup-temp`.
+* **Desplegado:** Cambios probados y validados físicamente en disco ✅
+
+---
+
 ### [2026-06-09] - Sincronización de Créditos y Optimización de Paginación de Deudas
 * **Tipo:** Bugfix / Optimización / Firestore
 * **Severidad:** Media

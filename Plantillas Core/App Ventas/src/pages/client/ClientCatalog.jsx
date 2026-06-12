@@ -1,8 +1,8 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, SlidersHorizontal, PackageX, Sparkles, X, Tag } from 'lucide-react'
+import { Search, SlidersHorizontal, PackageX, Sparkles, X, Tag, Loader2 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useProducts, useCategories } from '../../hooks/useInventory'
+import { useProducts, useProductsInfinite, useCategories } from '../../hooks/useInventory'
 import { getCategoryIconComponent } from '../../constants/categoryIcons'
 import { useAds } from '../../hooks/useAds'
 import useAppConfigStore from '../../store/appConfigStore'
@@ -52,18 +52,12 @@ function WholesaleButton({ product, wholesaleSettings, onRequest }) {
 
 export default function ClientCatalog() {
   const navigate = useNavigate()
-  // Datos
-  const { data: allProducts = [], isLoading: isLoadingProducts } = useProducts(true) // Solo activos
-  const { data: allCategories = [] } = useCategories()
-  const { data: ads = [] } = useAds()
   const { catalogFilters, catalogLayout, wholesaleSettings, whatsappAdmin } = useAppConfigStore()
   
   // Estado local
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategoryId, setSelectedCategoryId] = useState('all')
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false)
-  const [currentPage, setCurrentPage] = useState(1)
-  const ITEMS_PER_PAGE = 10
   
   // Modales
   const [wholesaleRequest, setWholesaleRequest] = useState(null) // { product, type: 'mayorista' | 'encargo' }
@@ -71,10 +65,56 @@ export default function ClientCatalog() {
   const [activeFilters, setActiveFilters] = useState({})
   const [promoModalAd, setPromoModalAd] = useState(null)
 
-  // Resetear paginación al cambiar filtros, búsqueda o categorías
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, selectedCategoryId, activeFilters])
+  const hasActiveFilters = useMemo(() => {
+    return Object.values(activeFilters).some(arr => arr && arr.length > 0)
+  }, [activeFilters])
+
+  // Datos paginados y perezosos de Firestore
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isLoadingProducts
+  } = useProductsInfinite({
+    onlyActive: true,
+    categoryId: selectedCategoryId,
+    pageSize: 12
+  })
+
+  // Aplanar todos los productos de las distintas páginas cargadas y remover duplicados
+  const allProducts = useMemo(() => {
+    const products = data?.pages?.flatMap(page => page.products) ?? []
+    const seen = new Set()
+    return products.filter(p => {
+      if (!p?.id || seen.has(p.id)) return false
+      seen.add(p.id)
+      return true
+    })
+  }, [data])
+
+  const { data: allCategories = [] } = useCategories()
+  const { data: ads = [] } = useAds()
+
+  // Intersection Observer para scroll infinito
+  const observerRef = useRef(null)
+  const loadMoreRef = useCallback(
+    (node) => {
+      if (isLoadingProducts) return
+      if (observerRef.current) observerRef.current.disconnect()
+
+      const isSearchingOrFiltering = searchTerm.trim() !== '' || hasActiveFilters
+
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage && !isSearchingOrFiltering) {
+          fetchNextPage()
+        }
+      })
+
+      if (node) observerRef.current.observe(node)
+    },
+    [isLoadingProducts, hasNextPage, isFetchingNextPage, fetchNextPage, searchTerm, hasActiveFilters]
+  )
 
 
 
@@ -247,8 +287,6 @@ export default function ClientCatalog() {
 
     return result
   }, [processedProducts, searchTerm, selectedCategoryId, catalogFilters, activeFilters])
-
-  const hasActiveFilters = Object.values(activeFilters).some(arr => arr && arr.length > 0)
 
   // Manejar clics de CTA y banners
   const handleAdAction = (action) => {
@@ -446,15 +484,42 @@ export default function ClientCatalog() {
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-            <div className="w-20 h-20 bg-surface-2 rounded-full flex items-center justify-center mb-4">
-              <PackageX size={32} className="text-muted" />
+          hasNextPage ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+              <div className="w-16 h-16 bg-surface-2 rounded-full flex items-center justify-center mb-4">
+                <Search size={24} className="text-muted" />
+              </div>
+              <h3 className="text-base font-bold text-app mb-1">Sin coincidencias en esta página</h3>
+              <p className="text-muted text-xs max-w-sm mb-4">
+                No hay productos cargados que coincidan con tu búsqueda o filtros. Puedes buscar en el resto del catálogo.
+              </p>
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="px-6 h-11 bg-primary text-white font-bold text-xs rounded-xl hover:opacity-90 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                style={{ borderRadius: 'var(--radius-base)' }}
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Buscando...
+                  </>
+                ) : (
+                  'Buscar en el resto del catálogo'
+                )}
+              </button>
             </div>
-            <h3 className="text-lg font-bold text-app mb-1">No encontramos productos</h3>
-            <p className="text-muted text-sm max-w-sm">
-              Intenta buscar con otras palabras o selecciona una categoría diferente.
-            </p>
-          </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+              <div className="w-20 h-20 bg-surface-2 rounded-full flex items-center justify-center mb-4">
+                <PackageX size={32} className="text-muted" />
+              </div>
+              <h3 className="text-lg font-bold text-app mb-1">No encontramos productos</h3>
+              <p className="text-muted text-sm max-w-sm">
+                Intenta buscar con otras palabras o selecciona una categoría diferente.
+              </p>
+            </div>
+          )
         ) : (
           <>
             <div className={
@@ -464,7 +529,7 @@ export default function ClientCatalog() {
                   ? "grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-4" 
                   : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"
             }>
-              {filteredProducts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map(product => (
+              {filteredProducts.map(product => (
                 <div
                   key={product.id}
                   className="flex flex-col animate-fade-in"
@@ -489,14 +554,41 @@ export default function ClientCatalog() {
               ))}
             </div>
 
-            {/* Paginación Estandarizada */}
-            {filteredProducts.length > ITEMS_PER_PAGE && (
-              <Pagination
-                currentPage={currentPage}
-                totalItems={filteredProducts.length}
-                itemsPerPage={ITEMS_PER_PAGE}
-                onPageChange={setCurrentPage}
-              />
+            {/* Elemento centinela para scroll infinito */}
+            {hasNextPage && (
+              (searchTerm.trim() !== '' || hasActiveFilters) ? (
+                <div className="flex flex-col items-center justify-center py-6 gap-2">
+                  <button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    className="px-6 h-11 bg-surface border border-primary text-primary font-bold text-xs rounded-xl hover:bg-primary/5 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                    style={{ borderRadius: 'var(--radius-base)' }}
+                  >
+                    {isFetchingNextPage ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Buscando en la siguiente página...
+                      </>
+                    ) : (
+                      'Buscar más en el catálogo completo'
+                    )}
+                  </button>
+                  <p className="text-[10px] text-muted font-medium">
+                    Las búsquedas y filtros se aplican sobre los productos cargados. Haz clic para cargar más.
+                  </p>
+                </div>
+              ) : (
+                <div ref={loadMoreRef} className="flex justify-center items-center py-10 gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <span className="text-sm text-muted font-medium">Cargando más productos...</span>
+                </div>
+              )
+            )}
+
+            {!hasNextPage && filteredProducts.length > 0 && (
+              <div className="text-center py-12 text-xs text-muted font-medium tracking-wide">
+                ✨ Has llegado al final del catálogo
+              </div>
             )}
           </>
         )}

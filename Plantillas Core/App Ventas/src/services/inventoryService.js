@@ -10,7 +10,9 @@ import {
   query,
   where,
   serverTimestamp,
-  orderBy
+  orderBy,
+  limit,
+  startAfter
 } from 'firebase/firestore'
 import { db } from '../config/firebaseConfig'
 import { COLLECTIONS } from '../constants'
@@ -90,6 +92,32 @@ export async function getProducts(onlyActive = false) {
   }
   const snap = await getDocs(q)
   return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+}
+
+export async function getProductsPaged({ onlyActive = true, categoryId = 'all', lastVisibleDoc = null, pageSize = 12 } = {}) {
+  let q = query(productsRef, where('activo', '==', onlyActive))
+
+  if (categoryId && categoryId !== 'all') {
+    q = query(q, where('categoriaId', '==', categoryId))
+  }
+
+  q = query(q, orderBy('createdAt', 'desc'))
+
+  if (lastVisibleDoc) {
+    q = query(q, startAfter(lastVisibleDoc))
+  }
+
+  q = query(q, limit(pageSize))
+
+  const snap = await getDocs(q)
+  const products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  const lastDoc = snap.docs[snap.docs.length - 1] || null
+
+  return {
+    products,
+    lastVisible: lastDoc,
+    hasMore: products.length === pageSize
+  }
 }
 
 export async function getProductById(id) {
