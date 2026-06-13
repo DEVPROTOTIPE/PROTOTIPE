@@ -20,6 +20,7 @@ export const ORDER_STATES = {
   COMPLETED: 'completado',
   CANCELLED: 'cancelado',
   CREDIT_APPROVED: 'credito_aprobado',
+  PENDING_CONCILIATION: 'pendiente_conciliacion',
 }
 
 // ─── Etiquetas UI de estados de pedidos ──────────────────────────────────────
@@ -28,6 +29,7 @@ export const ORDER_STATE_LABELS = {
   completado: 'Completado',
   cancelado: 'Cancelado',
   credito_aprobado: 'Crédito Aprobado',
+  pendiente_conciliacion: 'Conflicto de Inventario',
 }
 
 // ─── Tipos de pedido ──────────────────────────────────────────────────────────

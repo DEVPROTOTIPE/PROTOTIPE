@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Store, Smartphone, Shield, Mail, Lock, ArrowLeft, User } from 'lucide-react'
+import { Store, Smartphone, Shield, Mail, Lock, ArrowLeft } from 'lucide-react'
 import { auth, db } from '../config/firebaseConfig'
 import useAuthStore from '../store/authStore'
 import useAppConfigStore from '../store/appConfigStore'
@@ -25,13 +25,11 @@ export default function LoginPage() {
   const [celular, setCelular] = useState('')
   const [adminEmail, setAdminEmail] = useState('')
   const [adminPassword, setAdminPassword] = useState('')
-  const [adminSellerName, setAdminSellerName] = useState('')
-  const [adminWhatsapp, setAdminWhatsapp] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
   const { role, setAdmin, setClient, isLoading: isAuthLoading } = useAuthStore()
-  const { appName, appIcon, adminRegistered, primaryColor, welcomeWavesEnabled, loginTrustMessage, slogan, isLoaded, setConfig } = useAppConfigStore()
+  const { appName, appIcon, primaryColor, welcomeWavesEnabled, loginTrustMessage, slogan, isLoaded, setConfig } = useAppConfigStore()
   const navigate = useNavigate()
 
   // Leer color primario real desde CSS en runtime
@@ -63,7 +61,8 @@ export default function LoginPage() {
 
   if (isAuthLoading || !isLoaded) return null
 
-  // ─── Autenticación Administrador (Correo/Contraseña) ───────────────────────
+  // ─── Autenticación Administrador (solo email + contraseña) ─────────────────
+  // Nombre del vendedor y WhatsApp se configuran en Ajustes, no en el login.
   const handleAdminAuth = async (e) => {
     e.preventDefault()
     if (!adminEmail || !adminPassword) {
@@ -71,90 +70,56 @@ export default function LoginPage() {
       return
     }
 
-    if (!adminRegistered) {
-      if (!adminSellerName.trim()) {
-        setError('Por favor, ingresa el nombre del vendedor.')
-        return
-      }
-      if (!adminWhatsapp.trim()) {
-        setError('Por favor, ingresa el número de WhatsApp.')
-        return
-      }
-      if (adminWhatsapp.replace(/\D/g, '').length < 7) {
-        setError('Por favor, ingresa un número de WhatsApp válido.')
-        return
-      }
-    }
-
     setIsLoading(true)
     setError('')
 
     try {
       let userCredential
-      if (adminRegistered) {
-        // Inicio de sesión
+
+      // Intentar login. Si no existe la cuenta, crearla.
+      // Intentar login exclusivamente. No crear cuentas automáticas.
+      try {
         userCredential = await signInWithEmailAndPassword(auth, adminEmail, adminPassword)
-      } else {
-        // Registro por primera vez
-        try {
-          userCredential = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword)
-          const cleanWhatsapp = adminWhatsapp.replace(/\D/g, '')
-          const configUpdates = {
-            ...DEFAULT_SETTINGS,
-            adminRegistered: true,
-            sellerName: adminSellerName.trim(),
-            whatsappAdmin: cleanWhatsapp
-          }
-          await updateAppConfig(configUpdates)
-          setConfig({
-            ...useAppConfigStore.getState(),
-            ...configUpdates
-          })
-        } catch (regErr) {
-          if (regErr.code === 'auth/email-already-in-use') {
-            // El correo ya existe en Firebase Auth, pero Firestore está en blanco (adminRegistered === false).
-            // Iniciamos sesión con la contraseña provista y guardamos la configuración inicial.
-            userCredential = await signInWithEmailAndPassword(auth, adminEmail, adminPassword)
-            const cleanWhatsapp = adminWhatsapp.replace(/\D/g, '')
-            const configUpdates = {
-              ...DEFAULT_SETTINGS,
-              adminRegistered: true,
-              sellerName: adminSellerName.trim(),
-              whatsappAdmin: cleanWhatsapp
-            }
-            await updateAppConfig(configUpdates)
-            setConfig({
-              ...useAppConfigStore.getState(),
-              ...configUpdates
-            })
-          } else {
-            throw regErr
-          }
-        }
+      } catch (signInErr) {
+        console.error('[AdminAuth] Error en login:', signInErr)
+        setError('Correo o contraseña incorrectos.')
+        setIsLoading(false)
+        return
       }
-      
+
       const user = userCredential.user
       const userRef = doc(db, COLLECTIONS.USERS, user.uid)
-      const adminData = {
+      const configState = useAppConfigStore.getState()
+
+      // Leer doc existente o usar fallback del config
+      const userSnap = await getDoc(userRef)
+      const existingData = userSnap.exists() ? userSnap.data() : {}
+      const finalName = existingData.nombre || configState.sellerName || 'Administrador'
+      const finalWhatsapp = existingData.whatsapp || configState.whatsappAdmin || ''
+
+      // Crear/actualizar doc en Firestore (merge para no sobreescribir datos)
+      await setDoc(userRef, {
         email: user.email,
         role: 'admin',
+        nombre: finalName,
+        whatsapp: finalWhatsapp,
         updatedAt: serverTimestamp()
-      }
-      if (adminSellerName.trim()) {
-        adminData.nombre = adminSellerName.trim()
-      }
-      await setDoc(userRef, adminData, { merge: true })
+      }, { merge: true })
 
-      setAdmin({
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName || adminSellerName.trim() || 'Administrador',
-        photoURL: user.photoURL || null,
-      })
+      // Sincronizar adminRegistered=true en el config (resiste futuros borrados de caché)
+      const configUpdates = { adminRegistered: true }
+      await updateAppConfig(configUpdates)
+      setConfig({ ...configState, ...configUpdates })
+
+      setAdmin({ uid: user.uid, email: user.email, displayName: finalName, photoURL: user.photoURL || null })
       navigate('/admin/inicio', { replace: true })
     } catch (err) {
-      console.error(err)
-      if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+      console.error('[AdminAuth] Error:', err)
+      if (
+        err.code === 'auth/wrong-password' ||
+        err.code === 'auth/user-not-found' ||
+        err.code === 'auth/invalid-credential'
+      ) {
         setError('Correo o contraseña incorrectos.')
       } else if (err.code === 'auth/email-already-in-use') {
         setError('Ese correo ya está en uso.')
@@ -223,6 +188,7 @@ export default function LoginPage() {
         await setDoc(userRef, {
           nombre: nombre.trim(),
           celular: cleanPhone,
+          role: 'client',
           fechaRegistro: serverTimestamp(),
         })
 
@@ -399,7 +365,7 @@ export default function LoginPage() {
                             type="tel"
                             value={celular}
                             onChange={(e) => setCelular(e.target.value)}
-                            placeholder="3XXXXXXXXX"
+                            placeholder="Ingresa el número de celular (10 dígitos)"
                             className="w-full h-11 pl-10 pr-4 rounded-2xl bg-surface-2 border border-primary/15 text-app placeholder:text-muted/65 text-sm focus:outline-none focus:border-primary transition-all shadow-inner focus:ring-1 focus:ring-primary/20"
                             autoComplete="tel"
                             aria-required="true"
@@ -428,7 +394,7 @@ export default function LoginPage() {
                           type="text"
                           value={nombre}
                           onChange={(e) => setNombre(e.target.value)}
-                          placeholder="Ej. María Pérez"
+                          placeholder="Ingresa tu nombre y apellido"
                           className="w-full h-12 px-4 rounded-2xl bg-surface-2 border border-primary/15 text-app placeholder:text-muted/65 text-sm focus:outline-none focus:border-primary transition-all shadow-inner focus:ring-1 focus:ring-primary/20"
                           autoComplete="given-name"
                           aria-required="true"
@@ -483,12 +449,10 @@ export default function LoginPage() {
                 <form onSubmit={handleAdminAuth} className="space-y-4" noValidate>
                   <div className="mb-4">
                     <p className="text-xs text-app font-bold mb-1">
-                      {adminRegistered ? 'Bienvenido de nuevo' : 'Configuración Inicial'}
+                      Bienvenido de nuevo
                     </p>
                     <p className="text-[11px] text-muted">
-                      {adminRegistered 
-                        ? 'Ingresa tus credenciales para acceder al panel administrativo.' 
-                        : 'Crea el usuario y contraseña del administrador.'}
+                      Ingresa tus credenciales para acceder al panel administrativo.
                     </p>
                   </div>
 
@@ -499,7 +463,7 @@ export default function LoginPage() {
                         type="email"
                         value={adminEmail}
                         onChange={(e) => setAdminEmail(e.target.value)}
-                        placeholder="Correo electrónico"
+                        placeholder="Ingresa tu correo electrónico registrado"
                         className="w-full h-12 pl-11 pr-4 rounded-2xl bg-surface-2 border border-primary/15 text-app placeholder:text-muted/65 text-sm focus:outline-none focus:border-primary transition-all shadow-inner focus:ring-1 focus:ring-primary/20"
                         required
                       />
@@ -511,39 +475,11 @@ export default function LoginPage() {
                         type="password"
                         value={adminPassword}
                         onChange={(e) => setAdminPassword(e.target.value)}
-                        placeholder="Contraseña"
+                        placeholder="Ingresa tu contraseña de acceso"
                         className="w-full h-12 pl-11 pr-4 rounded-2xl bg-surface-2 border border-primary/15 text-app placeholder:text-muted/65 text-sm focus:outline-none focus:border-primary transition-all shadow-inner focus:ring-1 focus:ring-primary/20"
                         required
                       />
                     </div>
-
-                    {!adminRegistered && (
-                      <>
-                        <div className="relative">
-                          <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
-                          <input
-                            type="text"
-                            value={adminSellerName}
-                            onChange={(e) => setAdminSellerName(e.target.value)}
-                            placeholder="Nombre del Vendedor / Dueño"
-                            className="w-full h-12 pl-11 pr-4 rounded-2xl bg-surface-2 border border-primary/15 text-app placeholder:text-muted/65 text-sm focus:outline-none focus:border-primary transition-all shadow-inner focus:ring-1 focus:ring-primary/20"
-                            required
-                          />
-                        </div>
-
-                        <div className="relative">
-                          <Smartphone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
-                          <input
-                            type="tel"
-                            value={adminWhatsapp}
-                            onChange={(e) => setAdminWhatsapp(e.target.value)}
-                            placeholder="Número de WhatsApp (Ej: 573001234567)"
-                            className="w-full h-12 pl-11 pr-4 rounded-2xl bg-surface-2 border border-primary/15 text-app placeholder:text-muted/65 text-sm focus:outline-none focus:border-primary transition-all shadow-inner focus:ring-1 focus:ring-primary/20"
-                            required
-                          />
-                        </div>
-                      </>
-                    )}
                   </div>
 
                   {error && (
@@ -562,7 +498,7 @@ export default function LoginPage() {
                     {isLoading ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
-                      adminRegistered ? 'Iniciar Sesión' : 'Registrar Administrador'
+                      'Continuar'
                     )}
                   </button>
                 </form>

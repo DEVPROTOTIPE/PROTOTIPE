@@ -1822,7 +1822,7 @@ export function getActiveColors(themeConfig, isDarkMode, activeSeasonalEvent = '
   // Fallback a la paleta normal de la tienda si no hay evento activo
   if (!baseColors) {
     if (typeof themeConfig === 'string') {
-      const palette = ADVANCED_PALETTES[themeConfig] || ADVANCED_PALETTES['rosa-elegante'];
+      const palette = ADVANCED_PALETTES[themeConfig] || ADVANCED_PALETTES['zafiro-moderno'];
       baseColors = isDarkMode ? palette.dark : palette.light;
     } else if (themeConfig && typeof themeConfig === 'object') {
       baseColors = isDarkMode 

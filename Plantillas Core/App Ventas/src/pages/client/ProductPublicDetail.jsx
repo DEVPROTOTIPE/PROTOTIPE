@@ -22,6 +22,8 @@ import CartDrawer from '../../components/client/cart/CartDrawer'
 import QuantitySelector from '../../components/ui/QuantitySelector'
 
 import { getCssColor } from '../../utils/colors'
+import LazyImage from '../../components/ui/LazyImage'
+
 
 export default function ProductPublicDetail() {
   const { productId } = useParams()
@@ -130,9 +132,14 @@ export default function ProductPublicDetail() {
   const [selectedColor, setSelectedColor] = useState(null)
   const [cantidad, setCantidad] = useState(1)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
+  const [imageLoading, setImageLoading] = useState(true)
+  const imageRef = useRef(null)
   const [errorMsg, setErrorMsg] = useState('')
   const [showCheckout, setShowCheckout] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
+
+
+
 
   const {
     isNewProduct,
@@ -194,6 +201,14 @@ export default function ProductPublicDetail() {
     }
     return list
   }, [product])
+
+  useEffect(() => {
+    if (imageRef.current && imageRef.current.complete) {
+      setImageLoading(false)
+    } else {
+      setImageLoading(true)
+    }
+  }, [activeImageIndex, imageGallery])
 
 
 
@@ -493,7 +508,7 @@ export default function ProductPublicDetail() {
                     {/* Imagen cuadrada */}
                     <div className="aspect-square bg-surface-2 overflow-hidden relative">
                       {p.imageUrl ? (
-                        <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <LazyImage src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted opacity-30">
                           <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -627,18 +642,23 @@ export default function ProductPublicDetail() {
 
         {/* Carrusel / Galería de Imágenes con Botones Flotantes matching Screenshots 1 & 4 */}
         <div className="relative w-full aspect-square bg-surface border border-app rounded-3xl overflow-hidden shadow-sm">
+          {imageLoading && (
+            <div className="absolute inset-0 bg-surface-2 animate-pulse z-0" />
+          )}
           {imageGallery.length > 0 ? (
             <>
               <AnimatePresence mode="wait">
                 <motion.img 
+                  ref={imageRef}
                   key={activeImageIndex + '-' + imageGallery[activeImageIndex]}
                   src={imageGallery[activeImageIndex]} 
                   alt={product.nombre} 
+                  onLoad={() => setImageLoading(false)}
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  animate={{ opacity: imageLoading ? 0 : 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.25 }}
-                  className={`w-full h-full object-cover cursor-grab active:cursor-grabbing ${resolvedState === 'agotado' ? 'opacity-40 grayscale' : ''}`}
+                  className={`w-full h-full object-cover cursor-grab active:cursor-grabbing transition-opacity duration-300 ${resolvedState === 'agotado' ? 'opacity-40 grayscale' : ''} ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
                   dragElastic={0.6}
@@ -746,7 +766,7 @@ export default function ProductPublicDetail() {
                   idx === activeImageIndex ? 'scale-105 shadow-md opacity-100' : 'scale-95 opacity-60 hover:opacity-100'
                 }`}
               >
-                <img src={url} alt="Miniatura" className="w-full h-full object-cover" />
+                <LazyImage src={url} alt="Miniatura" className="w-full h-full object-cover" />
               </button>
             ))}
           </div>
@@ -906,7 +926,7 @@ export default function ProductPublicDetail() {
                     {/* Imagen cuadrada */}
                     <div className="aspect-square bg-surface-2 overflow-hidden relative">
                       {p.imageUrl ? (
-                        <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <LazyImage src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted opacity-30">
                           <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>

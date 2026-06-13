@@ -269,7 +269,7 @@ export default function ClientCredits() {
                       setAbonoError('')
                     }}
                     className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-lg font-bold"
-                    placeholder="Ej: 50000"
+                    placeholder="Ingresa el valor numérico"
                     autoFocus
                   />
                   {abonoError && <p className="text-xs text-red-500 font-semibold mt-1">{abonoError}</p>}

@@ -5,9 +5,41 @@ description: >-
   código fuente de un proyecto destino. Lee el .md, extrae el código, crea el
   archivo .jsx en la ruta correcta del proyecto, adapta imports y colecciones
   de Firestore, y verifica el build. Se activa con @portar-componente.
+trigger: "@portar-componente"
+aliases:
+  - "@portar-componente [PROYECTO_ACTIVO] [NombreComponente]"
 ---
 
 # Portar Componente
+
+## 📁 Variable de Proyecto Dinámica
+
+> **Variable `[PROYECTO_ACTIVO]`:** Ruta raíz del proyecto de destino. Se determina en este orden de prioridad:
+> 1. Si el usuario la especificó en el trigger (ej. `@portar-componente "App Reservas" "SelectorFecha"`), usar esa.
+> 2. Si hay un proyecto abierto actualmente en el contexto de la sesión, usar ese.
+> 3. Si ninguna de las anteriores aplica, preguntar al usuario antes de continuar: "¿En qué proyecto estás trabajando? Indica la ruta o el nombre de la plantilla."
+
+---
+
+## 📁 Rutas del Proyecto
+
+> Las rutas de este flujo se construyen dinámicamente usando `[PROYECTO_ACTIVO]`. Las rutas de documentación y biblioteca son siempre fijas (pertenecen al ecosistema, no a un proyecto específico):
+>
+> **Rutas fijas del ecosistema (siempre iguales):**
+> - Biblioteca: `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\`
+> - Bitácora: `D:\PROTOTIPE\Documentacion PROTOTIPE\03_Auditorias_y_Faro_Core\bitacora_cambios.md`
+> - Mapas: `D:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\`
+> - Dev-dashboard: `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\`
+>
+> **Rutas dinámicas del proyecto (dependen de `[PROYECTO_ACTIVO]`):**
+> - Código fuente: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\`
+> - Componentes: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\components\`
+> - Hooks: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\hooks\`
+> - Servicios: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\services\`
+> - Variables de entorno: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\.env.local`
+> - Package: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\package.json`
+
+---
 
 ## Overview
 Esta skill automatiza el bridge entre la Biblioteca de Componentes (documentación)
@@ -16,15 +48,7 @@ extrae el código funcional, lo adapta al contexto del proyecto destino y lo
 integra sin romper la arquitectura existente.
 
 ## Trigger / Activación
-Se activa cuando el usuario escribe **`@portar-componente [proyecto_destino] [NombreComponente]`**.
-
-Ejemplos válidos:
-- `@portar-componente "App Ventas Barberia" Paginación Fluida`
-- `@portar-componente "App Ventas" Modal Base Premium`
-- `@portar-componente "App Ventas Taller" Selector de Cantidad`
-
-El `proyecto_destino` es la carpeta del proyecto en `D:\PROTOTIPE\`.
-El `NombreComponente` es el nombre tal como aparece en el `README.md` de la biblioteca.
+Se activa cuando el usuario escribe **`@portar-componente [PROYECTO_ACTIVO] [NombreComponente]`**.
 
 ---
 
@@ -36,7 +60,7 @@ El `NombreComponente` es el nombre tal como aparece en el `README.md` de la bibl
 - **Si no existe:** reporta al usuario y detén la ejecución.
 
 ### 2. Verificar que el componente no existe ya en el proyecto destino
-- Usa `grep_search` para buscar el nombre técnico del componente (ej. `PaginationComponent`, `ModalBase`) en `D:\PROTOTIPE\[proyecto_destino]\src\`.
+- Usa `grep_search` para buscar el nombre técnico del componente (ej. `PaginationComponent`, `ModalBase`) en `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\`.
 - **Si ya existe:** informa al usuario la ruta donde está y pregunta si desea sobreescribir.
 - **Si no existe:** continúa al Paso 3.
 
@@ -64,6 +88,7 @@ Antes de escribir el archivo, aplica estas adaptaciones:
 
 **a) Imports de iconos:**
 - Verifica que `lucide-react` esté en el `package.json` del proyecto destino.
+  - Si está presente, verifica que la versión sea `>=0.263.0` (mínimo requerido para los iconos del ecosistema). Si la versión es anterior, notifica al usuario que puede haber iconos no disponibles y sugiere `npm install lucide-react@latest`.
 - Si el componente usa iconos de otra librería, adáptalos a `lucide-react`.
 
 **b) Variables CSS de tema:**
@@ -95,9 +120,16 @@ Antes de escribir el archivo, aplica estas adaptaciones:
 ```bash
 cmd /c npm run build
 ```
-Ejecuta en la ruta del proyecto destino. Si hay errores:
-- Corrígelos directamente (imports faltantes, props no tipadas, etc.).
-- No reportes éxito hasta que el build pase limpio.
+Ejecuta en la ruta del proyecto destino. 
+
+> **Si hay errores de compilación:**
+> - **Error de import roto o JSX inválido:** Corrígelo directamente en el archivo portado.
+> - **Error por dependencia npm ausente** (ej. `Cannot find module 'alguna-libreria'`): NO intentes instalarla automáticamente. En cambio:
+>   1. Identifica el nombre exacto del paquete.
+>   2. Reporta al usuario: `⚠️ Dependencia faltante: instala [paquete]@[versión-recomendada] con npm install [paquete] --save`
+>   3. Pausa la ejecución y espera confirmación del usuario de que instaló la dependencia.
+>   4. Corre el build nuevamente solo tras la confirmación.
+> - No reportes éxito hasta que el build pase limpio.
 
 ### 8. Reportar al usuario
 Informa concisamente:

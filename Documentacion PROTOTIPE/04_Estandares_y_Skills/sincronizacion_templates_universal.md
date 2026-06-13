@@ -20,7 +20,7 @@ Consultar [`plantillas_registro.json`](file:///D:/PROTOTIPE/Prototipe-CLI/planti
 
 | Nombre | Nicho | Activo en Producción | Carpeta Fuente | Carpeta Destino Template |
 |---|---|---|---|---|
-| `ventas` | Retail / Ecommerce / POS | ✅ Sí | `D:/Aplicaciones/App Ventas` | `D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas` |
+| `ventas` | Retail / Ecommerce / POS | ✅ Sí | `D:/PROTOTIPE/Plantillas Core/App Ventas` | `D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas` |
 | `servicios` | Talleres / Mantenimiento / Servicios técnicos | ⏳ Pendiente | `D:/PROTOTIPE/App Servicios` | `D:/PROTOTIPE/Prototipe-CLI/templates/template-servicios` |
 | `agendamiento` | Citas / Reservas / Hoteles / Turnos | ⏳ Pendiente | `D:/PROTOTIPE/App Agendamiento` | `D:/PROTOTIPE/Prototipe-CLI/templates/template-agendamiento` |
 | `gastronomia` | Restaurantes / Cafés / Bares / Comidas | ⏳ Pendiente | `D:/PROTOTIPE/App Gastronomia` | `D:/PROTOTIPE/Prototipe-CLI/templates/template-gastronomia` |

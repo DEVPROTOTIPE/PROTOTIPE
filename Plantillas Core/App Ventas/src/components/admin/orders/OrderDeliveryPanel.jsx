@@ -82,7 +82,7 @@ function FailNoteModal({ onConfirm, onClose, estado }) {
           <textarea
             value={nota}
             onChange={(e) => setNota(e.target.value)}
-            placeholder="Ej. No había nadie en la dirección, número errado..."
+            placeholder="Escribe los detalles o novedades del intento de entrega"
             rows={3}
             autoFocus
             className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors resize-none"

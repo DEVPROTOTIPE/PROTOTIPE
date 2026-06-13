@@ -17,7 +17,7 @@ import CustomSelect from '../../../../components/ui/CustomSelect'
 const DAYS_ES = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa']
 const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
-function CustomDatePicker({ value, onChange, placeholder = 'Seleccionar fecha' }) {
+function CustomDatePicker({ value, onChange, placeholder="Elige una fecha del calendario" }) {
   const [open, setOpen] = useState(false)
   const triggerRef = useRef(null)
 
@@ -227,7 +227,7 @@ export default function AdSettings({
                   <label className="text-xs font-bold text-app mb-1 block">Seleccionar Producto</label>
                   <CustomSelect
                     value={adFormData.productId}
-                    placeholder="Selecciona un producto..."
+                    placeholder="Elige un producto de la lista"
                     onChange={(val) => {
                       const prod = products.find(p => p.id === val)
                       setAdFormData({ ...adFormData, productId: val, customTitle: prod ? prod.nombre : '' })
@@ -256,7 +256,7 @@ export default function AdSettings({
                     <input
                       type="text"
                       inputMode="decimal"
-                      placeholder="0"
+                      placeholder="Ingresa la cantidad"
                       value={adFormData.discountValue === 0 ? '' : String(adFormData.discountValue)}
                       onChange={(e) => {
                         const raw = e.target.value.replace(/[^0-9.]/g, '');
@@ -292,7 +292,7 @@ export default function AdSettings({
                   <label className="text-xs font-bold text-app mb-1 block">Título Personalizado (Opcional)</label>
                   <input
                     type="text"
-                    placeholder="Dejar vacío para usar el nombre del producto"
+                    placeholder="Opcional (se usará el nombre del producto si se deja vacío)"
                     value={adFormData.customTitle}
                     onChange={(e) => setAdFormData({ ...adFormData, customTitle: e.target.value })}
                     className="w-full h-11 px-3 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
@@ -303,7 +303,7 @@ export default function AdSettings({
                   <label className="text-xs font-bold text-app mb-1 block">Imagen Banner Opcional (URL)</label>
                   <input
                     type="url"
-                    placeholder="https://..."
+                    placeholder="Ingresa el enlace web (http/https)"
                     value={adFormData.customBanner}
                     onChange={(e) => setAdFormData({ ...adFormData, customBanner: e.target.value })}
                     className="w-full h-11 px-3 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
@@ -450,7 +450,7 @@ export default function AdSettings({
                       value={adFormData.category}
                       onChange={(e) => setAdFormData({ ...adFormData, category: e.target.value })}
                       className="w-full h-11 px-3 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
-                      placeholder="Combos"
+                      placeholder="Ingresa el nombre de la promoción"
                     />
                   </div>
                 </div>
@@ -493,7 +493,7 @@ export default function AdSettings({
                     <label className="text-xs font-bold text-app mb-1 block">Imagen Cuadrada URL</label>
                     <input
                       type="url"
-                      placeholder="https://..."
+                      placeholder="Ingresa el enlace web (http/https)"
                       value={adFormData.image}
                       onChange={(e) => setAdFormData({ ...adFormData, image: e.target.value })}
                       className="w-full h-11 px-3 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
@@ -503,7 +503,7 @@ export default function AdSettings({
                     <label className="text-xs font-bold text-app mb-1 block">Banner Horizontal URL</label>
                     <input
                       type="url"
-                      placeholder="https://..."
+                      placeholder="Ingresa el enlace web (http/https)"
                       value={adFormData.banner}
                       onChange={(e) => setAdFormData({ ...adFormData, banner: e.target.value })}
                       className="w-full h-11 px-3 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
@@ -605,7 +605,7 @@ export default function AdSettings({
                     value={adFormData.ctaText}
                     onChange={(e) => setAdFormData({ ...adFormData, ctaText: e.target.value })}
                     className="w-full h-11 px-3 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
-                    placeholder="Ver promoción"
+                    placeholder="Ingresa el texto de llamado a la acción (ej: Ver promoción)"
                   />
                 </div>
 
@@ -663,7 +663,7 @@ export default function AdSettings({
                 <CustomDatePicker
                   value={adFormData.startDate}
                   onChange={(e) => setAdFormData({ ...adFormData, startDate: e.target.value })}
-                  placeholder="dd/mm/aaaa"
+                  placeholder="Elige una fecha (día/mes/año)"
                 />
               </div>
               <div>
@@ -671,7 +671,7 @@ export default function AdSettings({
                 <CustomDatePicker
                   value={adFormData.endDate}
                   onChange={(e) => setAdFormData({ ...adFormData, endDate: e.target.value })}
-                  placeholder="dd/mm/aaaa"
+                  placeholder="Elige una fecha (día/mes/año)"
                 />
               </div>
             </div>

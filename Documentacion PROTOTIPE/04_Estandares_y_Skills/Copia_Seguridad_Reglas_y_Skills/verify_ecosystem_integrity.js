@@ -56,7 +56,6 @@ function scanForGeminiTargets(baseDir) {
 
 // Escanear ubicaciones
 scanForGeminiTargets(WORKSPACE_DIR);
-scanForGeminiTargets('D:\\Aplicaciones');
 scanForGeminiTargets(CORES_DIR);
 scanForGeminiTargets(path.join(WORKSPACE_DIR, 'Central PROTOTIPE'));
 if (fs.existsSync(path.join(WORKSPACE_DIR, 'Prototipe-CLI', 'templates'))) {
@@ -134,6 +133,44 @@ ${fileSpec.desc}
   });
 }
 console.log(`- Carpetas de documentación verificado para ${activeCores.length} cores.`);
+
+
+// ==========================================
+// 2b. ESTANDARIZACIÓN DE DOCUMENTACIÓN EN TEMPLATES CLI
+// ==========================================
+console.log('\n📂 Verificando carpetas de documentación en templates CLI...');
+const CLI_TEMPLATES_PATH = path.join(WORKSPACE_DIR, 'Prototipe-CLI', 'templates');
+if (fs.existsSync(CLI_TEMPLATES_PATH)) {
+  const templates = fs.readdirSync(CLI_TEMPLATES_PATH, { withFileTypes: true });
+  templates.forEach(dirent => {
+    if (dirent.isDirectory()) {
+      const tmplPath = path.join(CLI_TEMPLATES_PATH, dirent.name);
+      // Nombre del core correspondiente (template-ventas -> App Ventas, template-core-seed -> Core Seed)
+      const coreName = dirent.name
+        .replace('template-', '')
+        .split('-')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+      const docDirName = `Documentacion App ${coreName}`;
+      const docPath = path.join(tmplPath, docDirName);
+
+      if (!fs.existsSync(docPath)) {
+        fs.mkdirSync(docPath, { recursive: true });
+        console.log(`  🆕 Creado directorio de documentación en template: ${dirent.name}/${docDirName}`);
+      }
+
+      standardFiles.forEach(fileSpec => {
+        const filePath = path.join(docPath, fileSpec.name);
+        if (!fs.existsSync(filePath)) {
+          const content = `# 📑 ${fileSpec.title} \u2014 ${coreName} (Template CLI)\n\nEste documento contiene el ${fileSpec.title.toLowerCase()} específico para la plantilla CLI **${dirent.name}**.\n\n---\n\n## ℹ️ Propósito\n${fileSpec.desc}\n\n---\n\n## 🗂️ Registro Inicial (${new Date().toISOString().split('T')[0]})\n* Estado inicial creado y estandarizado mediante script de control de ecosistema.\n`;
+          fs.writeFileSync(filePath, content, 'utf8');
+          console.log(`  📄 Inicializado en template CLI: ${dirent.name}/${docDirName}/${fileSpec.name}`);
+        }
+      });
+    }
+  });
+}
+console.log(`- Templates CLI verificados.`);
 
 
 // ==========================================

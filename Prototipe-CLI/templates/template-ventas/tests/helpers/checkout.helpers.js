@@ -70,7 +70,8 @@ export async function selectProductFromCatalog(page, config) {
 
   await page.waitForURL(catalog.urlPattern, { timeout: 15000 });
 
-  const productCard = page.locator(`text=${catalog.targetProductText}`).first();
+  // Buscar el primer título de producto disponible de forma dinámica (h3 con atributo title)
+  const productCard = page.locator('h3[title]').first();
   await productCard.waitFor({ state: 'visible', timeout: 10000 });
   await productCard.click();
 

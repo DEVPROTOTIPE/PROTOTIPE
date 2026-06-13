@@ -1330,14 +1330,19 @@ app.post('/api/cores/:clave/scaffold', async (req, res) => {
     const targetConfig = registro.plantillas[clave];
     if (!targetConfig) return res.status(404).json({ error: `La clave "${clave}" no existe en el registro.` });
 
-    const baseConfig = registro.plantillas[baseCore];
-    if (!baseConfig) return res.status(404).json({ error: `El core base "${baseCore}" no existe en el registro.` });
-
     const targetCorePath = targetConfig.fuente.replace(/\//g, path.sep);
-    const baseCorePath   = baseConfig.fuente.replace(/\//g, path.sep);
+    let baseCorePath;
+
+    if (baseCore === 'core-seed' || baseCore === 'template-core-seed') {
+      baseCorePath = path.join(CLI_ROOT, 'templates', 'template-core-seed');
+    } else {
+      const baseConfig = registro.plantillas[baseCore];
+      if (!baseConfig) return res.status(404).json({ error: `El core base "${baseCore}" no existe en el registro.` });
+      baseCorePath = baseConfig.fuente.replace(/\//g, path.sep);
+    }
 
     // Rutas y nombres para reemplazo de texto
-    const baseName   = path.basename(baseCorePath);   // ej. "App Ventas"
+    const baseName   = path.basename(baseCorePath);   // ej. "App Ventas" o "template-core-seed"
     const targetName = path.basename(targetCorePath); // ej. "App Contabilidad"
 
     // Archivos de código que se copian (excluye docs, secrets y configs de cliente)
@@ -1613,30 +1618,31 @@ async function resolveFirebaseProjectId(projectDir, clientId) {
 // Helper para buscar el directorio del proyecto del cliente
 async function findProjectDir(clientId) {
   const baseAppsDir = getWorkspaceRoot();
-  if (!await fs.pathExists(baseAppsDir)) return null;
 
-  try {
-    const items = await fs.readdir(baseAppsDir);
-    for (const item of items) {
-      const fullPath = path.join(baseAppsDir, item);
-      try {
-        const stat = await fs.stat(fullPath);
-        if (!stat.isDirectory()) continue;
+  if (await fs.pathExists(baseAppsDir)) {
+    try {
+      const items = await fs.readdir(baseAppsDir);
+      for (const item of items) {
+        const fullPath = path.join(baseAppsDir, item);
+        try {
+          const stat = await fs.stat(fullPath);
+          if (!stat.isDirectory()) continue;
 
-        const pkgPath = path.join(fullPath, 'package.json');
-        if (await fs.pathExists(pkgPath)) {
-          const pkg = await fs.readJson(pkgPath);
-          const pkgName = pkg.name || '';
-          if (
-            pkgName.toLowerCase() === clientId.toLowerCase() || 
-            item.toLowerCase().replace(/[^a-z0-9]+/g, '-') === clientId.toLowerCase()
-          ) {
-            return fullPath;
+          const pkgPath = path.join(fullPath, 'package.json');
+          if (await fs.pathExists(pkgPath)) {
+            const pkg = await fs.readJson(pkgPath);
+            const pkgName = pkg.name || '';
+            if (
+              pkgName.toLowerCase() === clientId.toLowerCase() || 
+              item.toLowerCase().replace(/[^a-z0-9]+/g, '-') === clientId.toLowerCase()
+            ) {
+              return fullPath;
+            }
           }
-        }
-      } catch (_) {}
-    }
-  } catch (_) {}
+        } catch (_) {}
+      }
+    } catch (_) {}
+  }
 
   const knownMappings = [
     { keys: ['ventas', 'smartfix'],              folder: 'App Ventas' },
@@ -1650,8 +1656,6 @@ async function findProjectDir(clientId) {
       let candidate = path.join(baseAppsDir, mapping.folder);
       if (fs.existsSync(candidate)) return candidate;
       candidate = path.join(path.dirname(baseAppsDir), 'Plantillas Core', mapping.folder);
-      if (fs.existsSync(candidate)) return candidate;
-      candidate = path.join('D:\\Aplicaciones', mapping.folder);
       if (fs.existsSync(candidate)) return candidate;
     }
   }
@@ -1931,6 +1935,8 @@ app.all('/api/project/deploy', async (req, res) => {
     if (!res.writableEnded) res.end();
   }
 });
+
+
 
 // Endpoint para leer variables de entorno local
 app.get('/api/project/env', async (req, res) => {

@@ -35,7 +35,6 @@ import StoreSettings from './settings/sections/StoreSettings'
 import PaymentSettings from './settings/sections/PaymentSettings'
 import SecuritySettings from './settings/sections/SecuritySettings'
 import DeveloperSettings from './settings/sections/DeveloperSettings'
-import AppearanceSettings from './settings/sections/AppearanceSettings'
 import AdSettings from './settings/sections/AdSettings'
 import CouponSettings from './settings/sections/CouponSettings'
 
@@ -43,7 +42,7 @@ import CouponSettings from './settings/sections/CouponSettings'
 const DAYS_ES = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa']
 const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
-function CustomDatePicker({ value, onChange, placeholder = 'Seleccionar fecha' }) {
+function CustomDatePicker({ value, onChange, placeholder="Elige una fecha del calendario" }) {
   const [open, setOpen] = useState(false)
   const triggerRef = useRef(null)
 
@@ -438,7 +437,7 @@ export default function AdminSettings() {
       pwaAppName: state.pwaAppName || '',
       pwaAppIcon: state.pwaAppIcon || '',
       pwaUseBrandIcon: state.pwaUseBrandIcon || false,
-      theme: state.theme || 'rosa-elegante',
+      theme: state.theme || 'zafiro-moderno',
       activeSeasonalEvent: state.activeSeasonalEvent || 'none',
       whatsappAdmin: state.whatsappAdmin || '',
       bankInfo: {
@@ -528,7 +527,7 @@ export default function AdminSettings() {
         pwaAppName: config.pwaAppName || '',
         pwaAppIcon: config.pwaAppIcon || '',
         pwaUseBrandIcon: config.pwaUseBrandIcon || false,
-        theme: config.theme || 'rosa-elegante',
+        theme: config.theme || 'zafiro-moderno',
         activeSeasonalEvent: config.activeSeasonalEvent || 'none',
         whatsappAdmin: config.whatsappAdmin || '',
         bankInfo: {
@@ -730,9 +729,9 @@ export default function AdminSettings() {
 
   const toggleCustomMode = () => {
     if (typeof formData.theme === 'object') {
-      setFormData({ ...formData, theme: 'rosa-elegante' })
+      setFormData({ ...formData, theme: 'zafiro-moderno' })
     } else {
-      const basePalette = ADVANCED_PALETTES[formData.theme] || ADVANCED_PALETTES['rosa-elegante']
+      const basePalette = ADVANCED_PALETTES[formData.theme] || ADVANCED_PALETTES['zafiro-moderno']
       setFormData({
         ...formData,
         theme: {
@@ -823,14 +822,6 @@ export default function AdminSettings() {
       icon: Sparkles,
       iconBg: 'bg-amber-500/10',
       iconColor: 'text-amber-500',
-    },
-    {
-      id: 'apariencia',
-      label: 'Apariencia y Colores',
-      description: 'Tema, paleta y modo oscuro',
-      icon: Paintbrush,
-      iconBg: 'bg-purple-500/10',
-      iconColor: 'text-purple-500',
     },
     {
       id: 'ventas',
@@ -975,13 +966,47 @@ export default function AdminSettings() {
               <p className="text-xs text-muted mt-0.5">Control global de la aplicación</p>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-app hover:bg-surface-2 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0 bg-transparent text-app"
-          >
-            <LogOut size={13} /> Cerrar Sesión
-          </button>
         </div>
+
+        {/* Administrador Profile Card */}
+        {activeSection === null && (
+          <div className="bg-primary/8 border border-primary/15 border-l-4 border-l-primary rounded-3xl p-6 mb-8 shadow-sm shadow-primary/5 relative overflow-hidden text-left">
+            {/* Ambient glow decoration dynamically matching primary color */}
+            <div className="absolute -right-12 -top-12 w-36 h-36 rounded-full bg-primary/10 blur-2xl pointer-events-none" />
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-surface border border-primary/15 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                  {config.appIcon ? (
+                    <img src={config.appIcon} alt={config.appName} className="w-full h-full object-cover" />
+                  ) : (
+                    <Shield size={24} className="text-primary" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-lg font-black text-app leading-tight tracking-tight">
+                    {config.sellerName || user?.displayName || 'Administrador'}
+                  </h2>
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-lg bg-primary/10 border border-primary/15 text-primary">
+                      {config.appName || 'Mi Negocio'}
+                    </span>
+                    <span className="text-[10px] text-muted font-medium truncate">
+                      {user?.email || ''}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="w-full sm:w-auto h-10 px-4 flex items-center justify-center gap-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold transition-all active:scale-95 cursor-pointer shrink-0 border border-red-500/20"
+              >
+                <LogOut size={14} /> Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        )}
 
         {saveMessage && (
           <div className={`p-4 rounded-2xl mb-6 border flex items-center gap-3 ${saveMessage.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-green-500/10 border-green-500/20 text-success'}`}>
@@ -1119,18 +1144,7 @@ export default function AdminSettings() {
               )
             )}
 
-            {/* SECCIÓN: APARIENCIA */}
-            {activeSection === 'apariencia' && (
-              <AppearanceSettings 
-                formData={formData} 
-                setFormData={setFormData} 
-                config={config} 
-                setSaveMessage={setSaveMessage} 
-                setIsThemeModalOpen={setIsThemeModalOpen}
-                isSaving={isSaving}
-                handleSaveConfig={handleSaveConfig}
-              />
-            )}
+
 
             {/* SECCIÓN: PUBLICIDAD */}
             {activeSection === 'publicidad' && (
@@ -1197,7 +1211,6 @@ export default function AdminSettings() {
               />
             )}
 
-            {/* SECCIÓN: DESARROLLADOR */}
             {activeSection === 'developer' && (
               <DeveloperSettings 
                 formData={formData} 
@@ -1207,7 +1220,9 @@ export default function AdminSettings() {
                 isSaving={isSaving} 
                 setIsSaving={setIsSaving} 
                 activeSubSection={activeSubSection} 
-                setActiveSubSection={setActiveSubSection} 
+                setActiveSubSection={setActiveSubSection}
+                setIsThemeModalOpen={setIsThemeModalOpen}
+                handleSaveThemeConfig={handleSaveConfig}
               />
             )}
 
@@ -1237,7 +1252,7 @@ export default function AdminSettings() {
               
               <input
                 type="text"
-                placeholder="Escribe CONFIRMAR..."
+                placeholder="Escribe CONFIRMAR para proceder con la eliminación"
                 value={criticalConfirmText}
                 onChange={(e) => setCriticalConfirmText(e.target.value)}
                 className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-amber-500 font-bold uppercase tracking-wider text-sm bg-transparent"

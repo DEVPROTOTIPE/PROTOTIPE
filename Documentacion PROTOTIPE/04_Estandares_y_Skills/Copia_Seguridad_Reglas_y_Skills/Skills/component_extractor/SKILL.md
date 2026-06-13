@@ -1,28 +1,57 @@
 ---
 name: component-extractor
 description: >-
-  Extrae un componente o funcionalidad de la app actual (App Ventas),
+  Extrae un componente o funcionalidad de la app actual de forma agnóstica al proyecto,
   lo refactoriza como componente reutilizable autónomo y lo documenta
   en la Biblioteca de Componentes del proyecto. Se activa cuando el
   usuario menciona @extraer-componente o indica que quiere guardar
   un patrón de la app en la biblioteca para reutilización futura.
+trigger: "@extraer-componente"
+aliases:
+  - "@extraer-componente [PROYECTO_ACTIVO?]"
 ---
 
 # Component Extractor (Extractor y Documentador de Componentes)
+
+## 📁 Variable de Proyecto Dinámica
+
+> **Variable `[PROYECTO_ACTIVO]`:** Ruta raíz del proyecto sobre el que se está trabajando. Se determina en este orden de prioridad:
+> 1. Si el usuario la especificó en el trigger (ej. `@extraer-componente "App Reservas" "selector"`), usar esa.
+> 2. Si hay un proyecto abierto actualmente en el contexto de la sesión, usar ese.
+> 3. Si ninguna de las anteriores aplica, preguntar al usuario antes de continuar: "¿En qué proyecto estás trabajando? Indica la ruta o el nombre de la plantilla."
+
+---
+
+## 📁 Rutas del Proyecto
+
+> Las rutas de este flujo se construyen dinámicamente usando `[PROYECTO_ACTIVO]`. Las rutas de documentación y biblioteca son siempre fijas (pertenecen al ecosistema, no a un proyecto específico):
+>
+> **Rutas fijas del ecosistema (siempre iguales):**
+> - Biblioteca: `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\`
+> - Bitácora: `D:\PROTOTIPE\Documentacion PROTOTIPE\03_Auditorias_y_Faro_Core\bitacora_cambios.md`
+> - Mapas: `D:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\`
+> - Dev-dashboard: `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\`
+>
+> **Rutas dinámicas del proyecto (dependen de `[PROYECTO_ACTIVO]`):**
+> - Código fuente: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\`
+> - Componentes: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\components\`
+> - Hooks: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\hooks\`
+> - Servicios: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\services\`
+> - Variables de entorno: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\.env.local`
+> - Package: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\package.json`
+
+---
 
 ## Overview
 Esta habilidad define el protocolo autónomo que el agente debe ejecutar cuando el usuario solicita extraer un componente o funcionalidad de la app actual y depositarlo en la Biblioteca de Componentes. El agente NO debe hacer preguntas al usuario — debe auditar el código por su cuenta, identificar toda la lógica relevante y producir el artefacto de documentación completo.
 
 ## Trigger / Activación
-Se activa cuando el usuario escribe **`@extraer-componente`** seguido del nombre o descripción del componente a extraer. Ejemplos válidos:
-- `@extraer-componente paleta de colores`
-- `@extraer-componente modal de checkout`
-- `@extraer-componente tabla de productos con filtros`
+Se activa cuando el usuario escribe **`@extraer-componente [PROYECTO_ACTIVO?] [descripción]`** seguido del nombre o descripción del componente a extraer.
 
 ## Workflow
 
 ### 1. Auditoría Autónoma del Código Fuente
-- **Acción:** Sin hacer preguntas al usuario, usa `grep_search` and `view_file` para rastrear en toda la base de código (`D:\Aplicaciones\App Ventas\src\`) el componente o funcionalidad mencionada.
+- **Acción:** Sin hacer preguntas al usuario, usa `grep_search` y `view_file` para rastrear en toda la base de código del proyecto activo (ej: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\`) el componente o funcionalidad mencionada.
 - **Busca:**
   - Archivo(s) principal(es) que implementan la lógica
   - Hooks, stores (Zustand) o contextos que consume
@@ -42,7 +71,7 @@ Antes de documentar, analiza si el componente actual es 100% portátil. Si no lo
 - **Props claras y tipadas** (con valores default)
 - **Cero hardcoding** de rutas de Firestore, colores o textos — todo debe ser configurable
 - **Separación de responsabilidades**: UI pura vs. lógica de negocio vs. persistencia
-- **Diseño atómico**: si el componente contiene elementos básicos (botones, inputs), referencia los que ya existen en `/src/components/ui/` en lugar de duplicarlos
+- **Diseño atómico**: si el componente contiene elementos básicos (botones, inputs), referencia los que ya existen en `/src/components/ui/` o `/src/components/common/` en lugar de duplicarlos
 - **Cero dependencias rígidas de librerías externas (Iconos/CSS):** Si el componente utiliza iconos de terceros (como `lucide-react`) o clases utilitarias de un framework específico (como Tailwind CSS), debe diseñarse con fallbacks seguros. Debe permitir inyectar componentes de iconos alternativos vía props (ej. `customIcon`) y aceptar estilos custom en línea (`style`) o nombres de clase flexibles (`className`) para no romper en proyectos con arquitecturas de diseño o librerías diferentes.
 - **Validación Lógica e Integridad Funcional Absoluta:** Queda estrictamente prohibido extraer componentes que contengan errores lógicos latentes, race conditions o comportamientos que se rompan bajo condiciones de datos vacíos, stock cero o deshabilitación. La lógica interna (ej. deshabilitar variantes sin stock, checkouts condicionales, límites dinámicos) debe auditarse de forma quirúrgica antes del empaquetado para asegurar que sea 100% robusta y libre de regresiones.
 
@@ -54,10 +83,9 @@ Antes de documentar, analiza si el componente actual es 100% portátil. Si no lo
   4. ¿Se validó rigurosamente la lógica funcional interna (cálculos matemáticos, checks de stock, flujo de deshabilitación, control de nulos)?
 - **Corrección obligatoria:** Modifica el código refactorizado de inmediato para solucionar cualquier falencia descubierta durante esta auto-auditoría antes de proceder a escribir la documentación.
 
-
 ### 5. Verificación de Unicidad en la Biblioteca
 - **Acción:** Lee el archivo `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\README.md` (o el índice disponible) para verificar que no exista ya un componente con propósito idéntico o muy similar.
-- **Si existe:** Propón extender el componente existente en lugar de crear un duplicado.
+- **Si ya existe un componente similar:** Abre el .md existente, identifica qué props o variantes nuevas aporta el componente extraído, y agrega una sección `## 10. Variantes y Extensiones` al final del .md existente con el código de la variante nueva. Actualiza el README.md solo si el nombre de la variante merece una entrada propia. Notifica al usuario la decisión tomada.
 - **Si no existe:** Procede con la documentación.
 
 ### 6. Creación del Documento en la Biblioteca (Carpetización Estricta en Español)
@@ -100,13 +128,21 @@ D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\<Categoria_En_Esp
 [Snippet de código que muestra cómo importar y renderizar el componente con sus props mínimas y avanzadas.]
 
 ## 9. Origen
-* **Extraído de:** [App Ventas — nombre del archivo fuente con enlace]
+* **Extraído de:** [Proyecto de origen — nombre del archivo fuente con enlace]
 * **Fecha de extracción:** [AAAA-MM-DD]
 * **Versión:** 1.0
 ```
 
 ### 7. Evaluación y Creación Obligatoria de Manuales de Desarrollo
 - **Acción:** Tras refactorizar y documentar el componente, el agente debe evaluar rigurosamente si la complejidad del componente (por flujos lógicos complejos, integraciones con Zustand/Firebase, dependencias de diseño multi-cliente o lógica de negocio atípica) requiere de un manual de desarrollo específico para otros programadores.
+
+> **Criterio objetivo:** El manual es OBLIGATORIO si el componente cumple al menos uno de estos umbrales:
+> - Usa 2 o más hooks custom propios del ecosistema.
+> - Integra directamente con Firebase (Firestore, Auth, Storage).
+> - Implementa lógica de negocio con más de 3 estados interdependientes (ej. carrito con stock, checkout con validación de sesión).
+> - Contiene efectos secundarios con condiciones de carrera documentadas.
+> Si no cumple ninguno, el manual es opcional y el agente puede omitirlo indicando la razón.
+
 - **Ruta de Almacenamiento Obligatoria para Manuales:**
   ```
   D:\PROTOTIPE\Documentacion PROTOTIPE\07_Manuales_Desarrollo\<Nombre_De_Categoria_En_Español>\<Nombre_Del_Manual_En_Español>\manual_<nombre_en_ingles_o_espanol>.md
@@ -139,6 +175,8 @@ Analiza el código del componente extraído aplicando estas reglas en orden:
 | Importa `leaflet`, `react-leaflet`, `nominatim` | 🧩 **Dependencia Externa** | Solo registrar en COMPONENT_META |
 | Importa `framer-motion` + store de Zustand | 🧩 **Módulo Complejo** | Solo registrar en COMPONENT_META |
 | Es una vista/página completa con router | 📄 **Página Completa** | Solo registrar en COMPONENT_META |
+| Usa CSS Modules, styled-components o Emotion (sin Firebase) | ✅ **Simulable con adaptación** | Recrear con Tailwind inline en el sandbox. Documentar la diferencia de estilos en el archivo Sandbox. |
+| Mezcla custom hook propio (sin Firebase) + estado local | ✅ **Simulable** | Embeber el hook directamente en el archivo Sandbox. |
 
 #### 10.2 — Si ES simulable: crear el playground independiente
 Queda estrictamente PROHIBIDO inyectar la lógica del componente o del playground inline en `ComponentSandbox.jsx`.
@@ -163,7 +201,7 @@ Queda estrictamente PROHIBIDO inyectar la lógica del componente o del playgroun
      'nombre alternativo': 'nombre_clave',
      ```
 
-**Regla de nombres**: La clave del mapa debe ser el nombre del componente en **minúsculas con tildes** — exactamente como aparece en el árbol del visor de la biblioteca.
+**Regla de nombres**: La clave del mapa debe ser el nombre del componente en **minúsculas con tildes — exactamente como aparece en el árbol del visor de la biblioteca.**
 
 #### 10.3 — Si NO es simulable: registrar en COMPONENT_META
 Agrega la entrada correspondiente en el objeto `COMPONENT_META` dentro de `ComponentSandbox.jsx`:
@@ -188,6 +226,12 @@ Agrega la entrada correspondiente en el objeto `COMPONENT_META` dentro de `Compo
 #### 10.4 — Verificar build
 Ejecuta `cmd /c npm run build` en `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard` y confirma que compile sin errores antes de reportar la extracción como completada.
 
+> **Si el build falla por el nuevo sandbox:**
+> 1. Identifica el error (import roto, JSX inválido, variable no definida).
+> 2. Corrígelo directamente en el archivo `[NombreComponente]Sandbox.jsx`.
+> 3. Si el error es una dependencia npm ausente en dev-dashboard, lista el comando de instalación exacto al usuario y espera confirmación antes de continuar.
+> 4. Corre el build nuevamente. No reportes la extracción como completada hasta que el build pase limpio.
+
 ---
 
 ## Common Mistakes
@@ -197,4 +241,3 @@ Ejecuta `cmd /c npm run build` en `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard`
 * **Ignorar la verificación de unicidad:** Crear un duplicado en la biblioteca cuando ya existía un componente base extensible.
 * **Omitir el manual si la lógica es compleja:** Todo componente con flujos de estado avanzados o integraciones complejas debe contar obligatoriamente con su manual técnico estructurado en `/Manuales/`.
 * **Omitir el Paso 10:** Todo componente extraído debe terminar con su entrada en `SANDBOXES` + `COMPONENT_SANDBOX_MAP` (si es simulable) o en `COMPONENT_META` (si no lo es). Saltarse este paso es una violación crítica del flujo de extracción.
-

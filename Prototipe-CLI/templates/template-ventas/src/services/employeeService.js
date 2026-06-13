@@ -20,11 +20,11 @@ async function hashPin(pin) {
 
 export async function saveEmployee(data) {
   const ref = data.id ? doc(db, COL, data.id) : doc(collection(db, COL))
-  const hashedPin = data.pin ? await hashPin(data.pin) : ''
-  await setDoc(ref, {
+  const isPinChanged = data.pin && data.pin !== '******'
+  
+  const empData = {
     nombre: data.nombre || '',
     rol: data.rol || 'vendedor',
-    pin: hashedPin,
     activo: data.activo !== false,
     salario: Number(data.salario) || 0,
     frecuenciaPago: data.frecuenciaPago || 'quincenal',
@@ -32,11 +32,43 @@ export async function saveEmployee(data) {
     observaciones: data.observaciones || '',
     createdAt: data.createdAt || serverTimestamp(),
     updatedAt: serverTimestamp(),
-  }, { merge: true })
+  }
+
+  if (isPinChanged) {
+    empData.hasPin = true
+  } else if (!data.id) {
+    empData.hasPin = false
+  }
+
+  await setDoc(ref, empData, { merge: true })
+
+  if (isPinChanged) {
+    const hashedPin = await hashPin(data.pin)
+    const secretsColRef = collection(db, COL, ref.id, 'secrets')
+    
+    const oldSecrets = await getDocs(secretsColRef)
+    for (const d of oldSecrets.docs) {
+      await deleteDoc(doc(db, COL, ref.id, 'secrets', d.id))
+    }
+    
+    await setDoc(doc(db, COL, ref.id, 'secrets', hashedPin), {
+      createdAt: serverTimestamp()
+    })
+  }
+
   return ref.id
 }
 
 export async function deleteEmployee(id) {
+  const secretsColRef = collection(db, COL, id, 'secrets')
+  try {
+    const oldSecrets = await getDocs(secretsColRef)
+    for (const d of oldSecrets.docs) {
+      await deleteDoc(doc(db, COL, id, 'secrets', d.id))
+    }
+  } catch (e) {
+    console.error("[employeeService] Error al eliminar secretos del empleado:", e)
+  }
   await deleteDoc(doc(db, COL, id))
 }
 
@@ -65,14 +97,7 @@ export function subscribeToEmployees(callback) {
  * @returns {Promise<object|null>}
  */
 export async function authenticateEmployeeByPin(pin) {
-  if (!pin) return null
-  const hashedPin = await hashPin(pin)
-  const q = query(collection(db, COL), where('pin', '==', hashedPin), where('activo', '==', true))
-  const snap = await getDocs(q)
-  if (!snap.empty) {
-    const d = snap.docs[0]
-    return { id: d.id, ...d.data() }
-  }
+  console.warn("authenticateEmployeeByPin está obsoleta por razones de seguridad. Usa authenticateEmployeeByIdAndPin.")
   return null
 }
 
@@ -106,25 +131,19 @@ export async function getEmployeesByRole(rol) {
 export async function authenticateEmployeeByIdAndPin(employeeId, pin) {
   if (!employeeId || !pin) return null
   const hashedPin = await hashPin(pin)
-  const snap = await getDocs(
-    query(
-      collection(db, COL),
-      where('__name__', '==', employeeId), // busca por doc ID
-      where('pin', '==', hashedPin),
-      where('activo', '==', true)
-    )
-  )
-  // Fallback: getDoc directo y comparar
-  if (snap.empty) {
-    const ref = doc(db, COL, employeeId)
-    const d = await import('firebase/firestore').then(m => m.getDoc(ref))
-    if (!d.exists()) return null
-    const data = d.data()
-    if (data.pin !== hashedPin || !data.activo) return null
-    return { id: d.id, ...data }
+  const secretRef = doc(db, COL, employeeId, 'secrets', hashedPin)
+  try {
+    const secretSnap = await getDoc(secretRef)
+    if (secretSnap.exists()) {
+      const empSnap = await getDoc(doc(db, COL, employeeId))
+      if (empSnap.exists() && empSnap.data().activo) {
+        return { id: empSnap.id, ...empSnap.data() }
+      }
+    }
+  } catch (err) {
+    console.error("[employeeService] Error durante la autenticación del empleado:", err)
   }
-  const d = snap.docs[0]
-  return { id: d.id, ...d.data() }
+  return null
 }
 
 /**

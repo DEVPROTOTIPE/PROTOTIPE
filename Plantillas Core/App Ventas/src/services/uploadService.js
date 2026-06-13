@@ -1,5 +1,13 @@
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage'
 import { storage } from '../config/firebaseConfig'
+import { compressImage } from '../utils/imageCompression'
+
+const generateUUID = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+}
 
 /**
  * 🚀 SERVICIO DE SUBIDA DE ARCHIVOS A FIREBASE STORAGE
@@ -25,7 +33,6 @@ export async function uploadImage(file, folder = 'products', customName = null, 
   let processedFile = file
   if (file.type && file.type.startsWith('image/')) {
     try {
-      const { compressImage } = await import('../utils/imageCompression')
       const maxDim = (folder === 'products' || folder === 'products_drafts' || folder === 'products_gallery') ? 800 : 400
       processedFile = await compressImage(file, maxDim, maxDim, 0.75)
     } catch (err) {
@@ -35,7 +42,7 @@ export async function uploadImage(file, folder = 'products', customName = null, 
 
   // Generar un nombre único para evitar sobreescribir fotos existentes
   const cleanName = (processedFile.name || 'image.webp').replace(/[^a-zA-Z0-9.]/g, '_')
-  const fileName = customName ? `${customName}_${cleanName}` : `${crypto.randomUUID()}_${cleanName}`
+  const fileName = customName ? `${customName}_${cleanName}` : `${generateUUID()}_${cleanName}`
   
   // Referencia física en Storage
   const storageRef = ref(storage, `${folder}/${fileName}`)

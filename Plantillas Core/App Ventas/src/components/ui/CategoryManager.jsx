@@ -462,7 +462,7 @@ export default function CategoryManager({
             type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej: Camisetas, Pantalones..."
+            placeholder="Ingresa el nombre de la nueva categoría"
             className="w-full sm:flex-1 h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors text-sm"
           />
           {editingId ? (
@@ -508,7 +508,7 @@ export default function CategoryManager({
               type="text"
               value={searchTermIcon}
               onChange={(e) => setSearchTermIcon(e.target.value)}
-              placeholder="Buscar ícono (ej: pan, ropa, computador, deporte)..."
+              placeholder="Escribe palabras clave para buscar iconos"
               className="w-full h-9 pl-9 pr-4 rounded-xl bg-surface-2 border border-app text-app text-xs focus:outline-none focus:border-primary transition-colors"
             />
           </div>

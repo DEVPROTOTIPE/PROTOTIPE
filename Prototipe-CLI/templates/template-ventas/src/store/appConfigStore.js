@@ -28,9 +28,9 @@ const useAppConfigStore = create(
       sellerName: getPersistedValue('sellerName', 'Vendedor'),
       appIcon: null,
       welcomeWavesEnabled: getPersistedValue('welcomeWavesEnabled', true),
-      theme: getPersistedValue('theme', 'rosa-elegante'),    // Paleta activa por defecto (neutral clara y elegante antes de sincronizar)
+      theme: getPersistedValue('theme', 'zafiro-moderno'),    // Paleta activa por defecto (neutral clara y elegante antes de sincronizar)
       isDarkMode: getPersistedValue('isDarkMode', false),         // Por defecto claro para evitar forzar el modo oscuro al limpiar caché
-      adminRegistered: false,    // Bandera para Auth Admin
+      adminRegistered: getPersistedValue('adminRegistered', false), // Bandera para Auth Admin
       pwaAppName: '',            // Nombre al instalarse como app móvil
       pwaAppIcon: null,          // Icono personalizado de instalación PWA
       pwaUseBrandIcon: false,    // Usar logo de la tienda como ícono PWA (con fondo)
@@ -162,7 +162,12 @@ const useAppConfigStore = create(
        * Actualiza toda la configuración desde Firestore.
        * @param {object} config - Configuración completa de Firestore
        */
-      setConfig: (config) => set({ ...config, isLoaded: true }),
+      setConfig: (newConfig) => {
+        try {
+          localStorage.setItem('app_config_loaded', 'true')
+        } catch (e) {}
+        set((state) => ({ ...state, ...newConfig, isLoaded: true }))
+      },
       setCatalogFilters: (catalogFilters) => set({ catalogFilters }),
 
       /**
@@ -217,6 +222,7 @@ const useAppConfigStore = create(
         couponsEnabled: state.couponsEnabled,
         rolesOperativosEnabled: state.rolesOperativosEnabled,
         tablesEnabled: state.tablesEnabled,
+        adminRegistered: state.adminRegistered,
         commercialOptimization: state.commercialOptimization,
       }),
     }

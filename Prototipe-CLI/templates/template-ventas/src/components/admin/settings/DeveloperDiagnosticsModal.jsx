@@ -70,33 +70,41 @@ export default function DeveloperDiagnosticsModal({ isOpen, onClose }) {
   const testCentralFirebase = async () => {
     setLoadingCentral(true);
     clearLogs();
-    addLog('Iniciando prueba de conexión con Servidor Central/DNS...', 'info');
+    addLog('Iniciando prueba de conexión HTTPS con Servidor Central (Plan Blaze)...', 'info');
     const start = performance.now();
     try {
-      addLog('Cargando servicio e inicializando Firestore Central...', 'info');
-      const { getCentralFirestore } = await import('../../../services/centralFirebaseService');
-      const centralDb = getCentralFirestore();
-      if (!centralDb) {
-        throw new Error('Falta la configuración de variables de entorno para conectar a la base de datos central de control.');
+      const endpoint = import.meta.env.VITE_DEVELOPER_TELEMETRY_ENDPOINT;
+      const token = import.meta.env.VITE_DEVELOPER_TELEMETRY_TOKEN;
+      
+      if (!endpoint || !token) {
+        throw new Error('Falta la configuración de VITE_DEVELOPER_TELEMETRY_ENDPOINT o VITE_DEVELOPER_TELEMETRY_TOKEN en .env.local.');
       }
+
+      addLog(`Enviando ping HTTPS POST a: ${endpoint}...`, 'info');
       
-      const clientId = import.meta.env.VITE_DEVELOPER_CLIENT_ID || 'ventas-smartfix';
-      addLog(`Consultando documento de control del cliente "${clientId}" en Firestore Central...`, 'info');
-      
-      const clientRef = doc(centralDb, 'clientes_control', clientId);
-      const snap = await getDoc(clientRef);
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ type: 'ping' })
+      });
+
       const end = performance.now();
       const latency = (end - start).toFixed(1);
-      
-      addLog(`¡Conexión establecida exitosamente con la central! Latencia: ${latency}ms`, 'success');
-      if (snap.exists()) {
-        addLog('Configuración de facturación cargada desde central con éxito.', 'success');
-      } else {
-        addLog('Conectado a Firestore Central, pero el documento de control de este cliente no fue encontrado. Canal activo.', 'info');
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errText}`);
       }
+
+      const resData = await response.json();
+      addLog(`¡Conexión exitosa con la central! Latencia: ${latency}ms`, 'success');
+      addLog(`Respuesta: ${resData.message || 'Canal activo'}`, 'success');
     } catch (error) {
       console.error(error);
-      addLog(`Error en Ping Central: ${error.message || 'Error de red / DNS'}`, 'error');
+      addLog(`Error en Ping Central: ${error.message || 'Error de red / HTTP'}`, 'error');
     } finally {
       setLoadingCentral(false);
     }

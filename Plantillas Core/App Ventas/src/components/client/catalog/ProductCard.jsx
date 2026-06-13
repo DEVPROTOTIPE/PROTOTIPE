@@ -8,6 +8,7 @@ import { useMemo } from 'react'
 import useAppConfigStore from '../../../store/appConfigStore'
 
 import { getCssColor } from '../../../utils/colors'
+import LazyImage from '../../ui/LazyImage'
 
 export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) {
   const { user } = useAuthStore()
@@ -20,7 +21,9 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
   const isFav = favoriteIds.includes(product.id)
 
   // Verificar si el producto está completamente agotado (todas las variantes en 0)
-  const isOutOfStock = product.variantes?.length > 0 && product.variantes.every(v => v.stock <= 0)
+  const isOutOfStock = (product.variantes || []).length > 0
+    ? (product.variantes || []).every(v => (v.stock || 0) <= 0)
+    : (product.stock !== undefined ? product.stock <= 0 : true)
 
   // Optimización Comercial
   const optEnabled = commercialOptimization?.enabled === true
@@ -28,7 +31,9 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
   const smartTags = commercialOptimization?.tools?.smartTags || {}
   
   // Calcular stock consolidado
-  const stockConsolidado = product.variantes?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0
+  const stockConsolidado = (product.variantes || []).length > 0
+    ? (product.variantes || []).reduce((sum, v) => sum + (v.stock || 0), 0)
+    : (product.stock || 0)
   
   // Obtener el precio activo (promocional o base)
   const actualPrice = product.tienePromocion && product.precioPromo < product.precioBase
@@ -153,11 +158,10 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
         layout === 'list' ? 'w-32 h-32' : 'aspect-square w-full'
       }`}>
         {product.imageUrl ? (
-          <img
+          <LazyImage
             src={product.imageUrl}
             alt={product.nombre}
-            loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            className="group-hover:scale-105 transition-transform duration-700 ease-out"
             style={{ viewTransitionName: 'product-image' }}
           />
         ) : (

@@ -13,9 +13,7 @@ import { COLLECTIONS, ORDER_STATES } from '../constants'
 const ordersRef = collection(db, COLLECTIONS.ORDERS)
 const SETTINGS_REF = doc(db, 'config', 'settings')
 
-import { getCentralFirestore } from './centralFirebaseService'
 
-const CLIENT_ID = import.meta.env.VITE_DEVELOPER_CLIENT_ID;
 
 /**
  * Guarda el nuevo porcentaje de comisión del desarrollador en Firestore.
@@ -218,73 +216,23 @@ export function subscribeToBillingData(onUpdate) {
   })
 
   // ─── Suscripción a la configuración de facturación ───────────────────
-  const centralDb = getCentralFirestore()
-  let unsubSettings = () => {}
-
-  if (centralDb && CLIENT_ID) {
-    console.log(`[Billing] Escuchando configuración de facturación en vivo desde central para ${CLIENT_ID}...`)
-    const centralClientRef = doc(centralDb, 'clientes_control', CLIENT_ID)
-    unsubSettings = onSnapshot(centralClientRef, (snap) => {
-      if (snap.exists()) {
-        const data = snap.data()
-        latestConfig = {
-          billingMode: data.billingMode || 'percentage',
-          comisionPorcentaje: data.comisionPorcentaje ?? 1,
-          montoFijoServicio: data.montoFijoServicio ?? 0,
-          pagoMensualFijo: data.pagoMensualFijo ?? 0,
-          enableDianBilling: data.enableDianBilling === true,
-          costoPorFacturaDian: data.costoPorFacturaDian ?? 0,
-          triggerTelemetryReport: data.triggerTelemetryReport ?? null
-        }
-      } else {
-        latestConfig = {
-          billingMode: 'percentage',
-          comisionPorcentaje: 1,
-          montoFijoServicio: 0,
-          pagoMensualFijo: 0,
-          enableDianBilling: false,
-          costoPorFacturaDian: 0
-        }
+  const unsubSettings = onSnapshot(SETTINGS_REF, (snap) => {
+    if (snap.exists()) {
+      const data = snap.data()
+      latestConfig = {
+        billingMode: data.developerBillingMode || 'percentage',
+        comisionPorcentaje: data.developerCommissionPercent ?? 1,
+        montoFijoServicio: data.developerFixedServiceFee ?? 0,
+        pagoMensualFijo: data.developerFlatMonthlyFee ?? 0,
+        enableDianBilling: data.enableDianBilling === true,
+        costoPorFacturaDian: data.costoPorFacturaDian ?? 0,
+        triggerTelemetryReport: data.triggerTelemetryReport ?? null
       }
       onUpdate(calcMetrics(latestOrders, latestConfig))
-    }, (err) => {
-      console.warn("[Billing] Fallo al leer configuración central, usando fallback local:", err)
-      unsubSettings = onSnapshot(SETTINGS_REF, (localSnap) => {
-        if (localSnap.exists()) {
-          const data = localSnap.data()
-          latestConfig = {
-            billingMode: data.developerBillingMode || 'percentage',
-            comisionPorcentaje: data.developerCommissionPercent ?? 1,
-            montoFijoServicio: data.developerFixedServiceFee ?? 0,
-            pagoMensualFijo: data.developerFlatMonthlyFee ?? 0,
-            enableDianBilling: data.enableDianBilling === true,
-            costoPorFacturaDian: data.costoPorFacturaDian ?? 0
-          }
-          onUpdate(calcMetrics(latestOrders, latestConfig))
-        }
-      }, (localErr) => {
-        console.error("[Billing] Error al leer fallback de configuración local:", localErr)
-      })
-    })
-
-  } else {
-    unsubSettings = onSnapshot(SETTINGS_REF, (snap) => {
-      if (snap.exists()) {
-        const data = snap.data()
-        latestConfig = {
-          billingMode: data.developerBillingMode || 'percentage',
-          comisionPorcentaje: data.developerCommissionPercent ?? 1,
-          montoFijoServicio: data.developerFixedServiceFee ?? 0,
-          pagoMensualFijo: data.developerFlatMonthlyFee ?? 0,
-          enableDianBilling: data.enableDianBilling === true,
-          costoPorFacturaDian: data.costoPorFacturaDian ?? 0
-        }
-        onUpdate(calcMetrics(latestOrders, latestConfig))
-      }
-    }, (error) => {
-      console.error("[Billing] Error al escuchar configuración local en billingService:", error)
-    })
-  }
+    }
+  }, (error) => {
+    console.error("[Billing] Error al escuchar configuración local en billingService:", error)
+  })
 
   return () => {
     unsubOrders()

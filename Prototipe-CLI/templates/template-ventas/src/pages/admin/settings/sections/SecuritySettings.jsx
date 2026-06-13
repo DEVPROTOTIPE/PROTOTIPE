@@ -60,7 +60,7 @@ export default function SecuritySettings({ setSaveMessage }) {
               </label>
               <div className="relative">
                 <input type={showCurrentPassword ? 'text' : 'password'} value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Tu contraseña actual"
+                  onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Ingresa tu contraseña actual"
                   className="w-full h-12 px-4 pr-12 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-orange-500 transition-colors bg-transparent text-sm" />
                 <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-app bg-transparent border-none cursor-pointer">
@@ -84,7 +84,7 @@ export default function SecuritySettings({ setSaveMessage }) {
                 </label>
                 <div className="relative">
                   <input type={showNewPassword ? 'text' : 'password'} value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)} placeholder="Mínimo 6 caracteres"
+                    onChange={(e) => setNewPassword(e.target.value)} placeholder="Ingresa la nueva contraseña (mínimo 6 caracteres)"
                     className="w-full h-12 px-4 pr-12 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors bg-transparent text-sm" />
                   <button type="button" onClick={() => setShowNewPassword(!showNewPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-app bg-transparent border-none cursor-pointer">

@@ -5,7 +5,7 @@ import { useState, useRef } from 'react'
 const DAYS_ES = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa']
 const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
-function CustomDatePicker({ value, onChange, placeholder = 'Seleccionar fecha' }) {
+function CustomDatePicker({ value, onChange, placeholder="Elige una fecha del calendario" }) {
   const [open, setOpen] = useState(false)
   const triggerRef = useRef(null)
 
@@ -311,7 +311,7 @@ export default function CouponSettings({
                       value={couponFormData.code}
                       onChange={(e) => setCouponFormData(p => ({ ...p, code: e.target.value.toUpperCase().trim() }))}
                       className="flex-1 min-w-0 h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary text-sm font-bold tracking-wider uppercase"
-                      placeholder="Ej: FLASH10"
+                      placeholder="Ingresa el código del cupón de descuento"
                       maxLength={15}
                     />
                     <button
@@ -437,7 +437,7 @@ export default function CouponSettings({
                       value={couponFormData.minPurchase}
                       onChange={(e) => setCouponFormData(p => ({ ...p, minPurchase: e.target.value }))}
                       className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary text-sm font-bold"
-                      placeholder="Opcional"
+                      placeholder="Ingresa información adicional (opcional)"
                     />
                   </div>
                 </div>

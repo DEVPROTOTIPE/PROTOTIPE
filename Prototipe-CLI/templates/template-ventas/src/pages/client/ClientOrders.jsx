@@ -214,6 +214,41 @@ export default function ClientOrders() {
     iframe.style.border = 'none'
     document.body.appendChild(iframe)
     
+    const paymentLabel = order.metodoPago === PAYMENT_METHODS.CREDIT 
+      ? 'Crédito (Fiado)' 
+      : order.metodoPago === PAYMENT_METHODS.TRANSFER 
+      ? 'Transferencia' 
+      : 'Efectivo'
+
+    const deliveryLabel = order.tipoEntrega === 'mesa'
+      ? `Consumo en Salón (Mesa: ${order.tableName || 'N/A'})`
+      : order.tipoEntrega === 'retiro'
+      ? 'Retiro en Tienda'
+      : 'Domicilio a domicilio'
+
+    const subtotal = order.items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0)
+    const { bankInfo } = useAppConfigStore.getState()
+
+    const bankDetailsHtml = (order.metodoPago === PAYMENT_METHODS.TRANSFER && bankInfo && bankInfo.numeroCuenta)
+      ? `
+        <div class="info-box" style="grid-column: 1 / -1; margin-top: 15px;">
+          <h3>Datos para Transferencia Bancaria</h3>
+          <p><strong>Banco:</strong> ${bankInfo.banco || ''} (${bankInfo.tipoCuenta === 'ahorros' ? 'Ahorros' : 'Corriente'})</p>
+          <p><strong>Número de Cuenta:</strong> ${bankInfo.numeroCuenta || ''}</p>
+          <p><strong>Titular:</strong> ${bankInfo.titular || ''}</p>
+          ${bankInfo.cedulaNit ? `<p><strong>Cédula/NIT:</strong> ${bankInfo.cedulaNit}</p>` : ''}
+        </div>
+      `
+      : ''
+
+    const notesHtml = order.notas
+      ? `
+        <div style="margin-top: 15px; padding: 12px; background-color: #f9f9f9; border-left: 4px solid #ccc; font-size: 13px; font-style: italic; border-radius: 4px;">
+          <strong>Notas del cliente:</strong> ${order.notas}
+        </div>
+      `
+      : ''
+
     iframe.contentDocument.write(`
       <html>
         <head>
@@ -228,11 +263,13 @@ export default function ClientOrders() {
             .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; font-size: 14px; }
             .info-box { border: 1px solid #ccc; padding: 15px; border-radius: 8px; }
             .info-box h3 { margin-top: 0; font-size: 12px; text-transform: uppercase; color: #666; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
             th { text-align: left; padding: 10px; border-bottom: 2px solid #000; }
             td { padding: 10px; border-bottom: 1px solid #eee; }
             .text-right { text-align: right; }
-            .total-row { font-size: 18px; font-weight: bold; border-top: 2px solid #000; }
+            .totals-table { width: 40%; margin-left: auto; border-collapse: collapse; font-size: 14px; margin-bottom: 30px; }
+            .totals-table td { padding: 6px 10px; border: none; }
+            .totals-table .total-row { font-size: 18px; font-weight: bold; border-top: 2px solid #000; }
             .footer { text-align: center; font-size: 12px; color: #666; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; }
           </style>
         </head>
@@ -255,10 +292,16 @@ export default function ClientOrders() {
               <p><strong>Celular:</strong> ${order.cliente?.celular || 'N/A'}</p>
             </div>
             <div class="info-box">
-              <h3>Datos de Envío</h3>
-              <p><strong>Dirección:</strong> ${order.cliente?.direccion || 'Recogida en Tienda'}</p>
-              <p><strong>Ciudad/Barrio:</strong> ${order.cliente?.ciudad || ''} - ${order.cliente?.barrio || ''}</p>
+              <h3>Datos de Entrega / Pago</h3>
+              <p><strong>Tipo Entrega:</strong> ${deliveryLabel}</p>
+              ${order.tipoEntrega !== 'mesa' && order.tipoEntrega !== 'retiro'
+                ? `<p><strong>Dirección:</strong> ${order.cliente?.direccion || 'N/A'}</p>
+                   <p><strong>Ciudad/Barrio:</strong> ${order.cliente?.ciudad || ''} - ${order.cliente?.barrio || ''}</p>`
+                : ''
+              }
+              <p><strong>Método de Pago:</strong> ${paymentLabel}</p>
             </div>
+            ${bankDetailsHtml}
           </div>
 
           <table>
@@ -277,9 +320,19 @@ export default function ClientOrders() {
                     <strong>${item.nombre}</strong><br/>
                     <small style="color: #666;">
                       ${item.atributos && Object.values(item.atributos).length > 0
-                        ? Object.values(item.atributos).join(' • ')
-                        : item.talla || item.color 
-                          ? [item.talla, item.color].filter(Boolean).join(' • ')
+                        ? Object.entries(item.atributos).map(([key, val]) => {
+                            if (typeof val === 'string' && val.startsWith('#')) {
+                              return `${key}: <span style="display:inline-block; width:12px; height:12px; border-radius:50%; border:1px solid #ccc; background-color:${val}; vertical-align:middle; margin-right:4px;"></span> ${val}`
+                            }
+                            return `${key}: ${val}`
+                          }).join(' • ')
+                        : (item.talla || item.color)
+                          ? [
+                              item.talla ? `Talla: ${item.talla}` : '',
+                              item.color ? (item.color.startsWith('#') 
+                                ? `Color: <span style="display:inline-block; width:12px; height:12px; border-radius:50%; border:1px solid #ccc; background-color:${item.color}; vertical-align:middle; margin-right:4px;"></span> ${item.color}`
+                                : `Color: ${item.color}`) : ''
+                            ].filter(Boolean).join(' • ')
                           : ''}
                     </small>
                   </td>
@@ -289,13 +342,36 @@ export default function ClientOrders() {
                 </tr>
               `).join('')}
             </tbody>
-            <tfoot>
-              <tr class="total-row">
-                <td colspan="3" class="text-right" style="padding-top: 15px;">TOTAL A PAGAR:</td>
-                <td class="text-right" style="padding-top: 15px;">${formatCurrency(order.total)}</td>
-              </tr>
-            </tfoot>
           </table>
+
+          <table class="totals-table">
+            <tbody>
+              <tr>
+                <td class="text-right">Subtotal:</td>
+                <td class="text-right">${formatCurrency(subtotal)}</td>
+              </tr>
+              ${order.costoEnvio > 0
+                ? `<tr>
+                    <td class="text-right">Costo de Envío:</td>
+                    <td class="text-right">+${formatCurrency(order.costoEnvio)}</td>
+                   </tr>`
+                : ''
+              }
+              ${order.descuento > 0
+                ? `<tr>
+                    <td class="text-right">Descuento:</td>
+                    <td class="text-right">-${formatCurrency(order.descuento)}</td>
+                   </tr>`
+                : ''
+              }
+              <tr class="total-row">
+                <td class="text-right">TOTAL A PAGAR:</td>
+                <td class="text-right">${formatCurrency(order.total)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          ${notesHtml}
 
           <div class="footer">
             <p>Gracias por tu compra.</p>
@@ -631,11 +707,47 @@ export default function ClientOrders() {
                         <div className="flex-1">
                           <p className="text-sm font-bold text-app leading-tight mb-1">{item.nombre}</p>
                           <p className="text-xs text-muted leading-tight">
-                            {item.atributos && Object.values(item.atributos).length > 0
-                              ? Object.values(item.atributos).join(' • ')
-                              : item.talla || item.color 
-                                ? [item.talla, item.color].filter(Boolean).join(' • ')
-                                : 'Única'}
+                            {item.atributos && Object.keys(item.atributos).length > 0 ? (
+                              <span className="inline-flex items-center gap-1.5 flex-wrap">
+                                {Object.entries(item.atributos).map(([key, val], idx) => {
+                                  const isHex = typeof val === 'string' && val.startsWith('#')
+                                  return (
+                                    <span key={key} className="inline-flex items-center gap-1">
+                                      {idx > 0 && <span className="text-muted mr-1.5">•</span>}
+                                      <span className="capitalize">{key}:</span>
+                                      {isHex ? (
+                                        <span 
+                                          className="w-3.5 h-3.5 rounded-full border border-app shadow-xs inline-block align-middle" 
+                                          style={{ backgroundColor: val }} 
+                                          title={val}
+                                        />
+                                      ) : (
+                                        <span>{val}</span>
+                                      )}
+                                    </span>
+                                  )
+                                })}
+                              </span>
+                            ) : (item.talla || item.color) ? (
+                                  <span className="inline-flex items-center gap-1.5 flex-wrap">
+                                    {item.talla && <span>Talla: {item.talla}</span>}
+                                    {item.talla && item.color && <span>•</span>}
+                                    {item.color && (
+                                      <span className="inline-flex items-center gap-1">
+                                        Color: 
+                                        {item.color.startsWith('#') ? (
+                                          <span 
+                                            className="w-3.5 h-3.5 rounded-full border border-app shadow-xs inline-block align-middle" 
+                                            style={{ backgroundColor: item.color }} 
+                                            title={item.color}
+                                          />
+                                        ) : (
+                                          <span>{item.color}</span>
+                                        )}
+                                      </span>
+                                    )}
+                                  </span>
+                                ) : 'Única'}
                           </p>
                           {item.descripcion && (
                             <p className="text-[11px] text-muted italic mt-1 bg-surface-2 px-1.5 py-0.5 rounded border border-app/20 w-fit">

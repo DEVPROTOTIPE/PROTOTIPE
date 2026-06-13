@@ -8,6 +8,7 @@ import useGuidedStore from '../../../store/guidedStore'
 import SmartHint from '../guided/SmartHint'
 import ModalTemplate from '../../common/ModalTemplate'
 import QuantitySelector from '../../ui/QuantitySelector'
+import LazyImage from '../../ui/LazyImage'
 
 import { getCssColor } from '../../../utils/colors'
 
@@ -49,7 +50,7 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
 
   const availableVariants = useMemo(() => {
     if (!product) return []
-    return product.variantes.filter(v => v.stock > 0)
+    return (product.variantes || []).filter(v => (v.stock || 0) > 0)
   }, [product])
 
   const tallas = useMemo(() => {
@@ -75,7 +76,7 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
       setActiveImageIndex(0)
       setVariantOverrideImage(null)
       
-      const vars = product.variantes.filter(v => v.stock > 0)
+      const vars = (product.variantes || []).filter(v => (v.stock || 0) > 0)
       const t = Array.from(new Set(vars.map(v => v.talla).filter(Boolean)))
       const c = Array.from(new Set(vars.map(v => v.color).filter(Boolean)))
       
@@ -344,7 +345,7 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
                   idx === activeImageIndex ? 'border-primary scale-95' : 'border-transparent opacity-70 hover:opacity-100'
                 }`}
               >
-                <img src={img} className="w-full h-full object-cover" />
+                <LazyImage src={img} />
               </button>
             ))}
           </div>

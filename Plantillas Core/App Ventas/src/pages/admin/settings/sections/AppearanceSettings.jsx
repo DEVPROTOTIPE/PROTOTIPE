@@ -29,9 +29,9 @@ export default function AppearanceSettings({
 
   const toggleCustomMode = () => {
     if (typeof formData.theme === 'object') {
-      setFormData({ ...formData, theme: 'rosa-elegante' })
+      setFormData({ ...formData, theme: 'zafiro-moderno' })
     } else {
-      const basePalette = ADVANCED_PALETTES[formData.theme] || ADVANCED_PALETTES['rosa-elegante']
+      const basePalette = ADVANCED_PALETTES[formData.theme] || ADVANCED_PALETTES['zafiro-moderno']
       setFormData({
         ...formData,
         theme: {

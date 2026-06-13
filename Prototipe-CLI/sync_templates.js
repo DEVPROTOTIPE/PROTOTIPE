@@ -197,7 +197,9 @@ async function main() {
     'GEMINI.md',
     'flujos_aplicacion.md',
     'mapa_arquitectura.md',
-    'mapa_arquitectura_ia.md'
+    'mapa_arquitectura_ia.md',
+    'package.json',
+    'scripts'
   ];
 
   const EXCLUDE_PATTERNS = [

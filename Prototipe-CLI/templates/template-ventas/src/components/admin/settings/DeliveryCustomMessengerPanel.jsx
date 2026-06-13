@@ -189,7 +189,7 @@ function MessengerFormModal({ initial, onClose, onSave }) {
             <textarea
               value={form.notes}
               onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))}
-              placeholder="Zona de cobertura, horario, vehículo..."
+              placeholder="Ingresa la descripción de cobertura, horarios y vehículos"
               rows={2}
               className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors resize-none"
             />
@@ -318,7 +318,7 @@ export default function DeliveryCustomMessengerPanel({ formData, setFormData }) 
                   type="text"
                   value={cd.serviceLabel || ''}
                   onChange={(e) => updateCd({ serviceLabel: e.target.value })}
-                  placeholder="Ej. Domicilios Propios"
+                  placeholder="Ingresa el nombre del servicio de mensajería"
                   className="w-full h-10 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
                 />
               </div>
@@ -355,7 +355,7 @@ export default function DeliveryCustomMessengerPanel({ formData, setFormData }) 
                       min={0}
                       value={cd.fixedCost}
                       onChange={(val) => updateCd({ fixedCost: val })}
-                      placeholder="Ej. 5000"
+                      placeholder="Ingresa el valor numérico"
                       className="w-full h-10 px-4 rounded-xl bg-surface-2 border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
                     />
                   </motion.div>
@@ -386,7 +386,7 @@ export default function DeliveryCustomMessengerPanel({ formData, setFormData }) 
                   type="text"
                   value={cd.estimatedTime || ''}
                   onChange={(e) => updateCd({ estimatedTime: e.target.value })}
-                  placeholder="Ej. 20 a 40 min"
+                  placeholder="Ingresa el tiempo estimado de entrega"
                   className="w-full h-10 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
                 />
               </div>

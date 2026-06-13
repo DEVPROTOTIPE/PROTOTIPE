@@ -1,35 +1,75 @@
 const DB_NAME = 'AppVentasPOS_v2'
 const DB_VERSION = 2
 
+let isRecovering = false
+
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION)
+    try {
+      const request = indexedDB.open(DB_NAME, DB_VERSION)
 
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => resolve(request.result)
+      request.onerror = () => {
+        const err = request.error
+        console.error('[IndexedDB] Error al abrir base de datos local:', err)
+        
+        // Si hay corrupción o fallo de versión persistente, intentar purgar la base de datos
+        if (!isRecovering) {
+          isRecovering = true
+          console.warn('[IndexedDB] Detectado posible estado corrupto. Intentando purgar y auto-recuperar DB...')
+          
+          try {
+            const deleteRequest = indexedDB.deleteDatabase(DB_NAME)
+            deleteRequest.onsuccess = () => {
+              console.log('[IndexedDB] Purgado de base de datos local exitoso. Re-inicializando...')
+              isRecovering = false
+              openDB().then(resolve).catch(reject)
+            }
+            deleteRequest.onerror = () => {
+              console.error('[IndexedDB] No se pudo purgar la base de datos corrupta:', deleteRequest.error)
+              isRecovering = false
+              reject(err)
+            }
+          } catch (deleteErr) {
+            console.error('[IndexedDB] Excepción al borrar DB:', deleteErr)
+            isRecovering = false
+            reject(err)
+          }
+        } else {
+          reject(err)
+        }
+      }
 
-    request.onupgradeneeded = (event) => {
-      const db = request.result
-      
-      // Store de productos
-      if (!db.objectStoreNames.contains('products')) {
-        db.createObjectStore('products', { keyPath: 'id' })
-      }
-      
-      // Store de categorías
-      if (!db.objectStoreNames.contains('categories')) {
-        db.createObjectStore('categories', { keyPath: 'id' })
-      }
-      
-      // Store de ventas offline
-      if (!db.objectStoreNames.contains('offline_sales')) {
-        db.createObjectStore('offline_sales', { keyPath: 'id' })
+      request.onsuccess = () => {
+        isRecovering = false
+        resolve(request.result)
       }
 
-      // Store de clientes offline
-      if (!db.objectStoreNames.contains('clients')) {
-        db.createObjectStore('clients', { keyPath: 'id' })
+      request.onupgradeneeded = (event) => {
+        const db = request.result
+        
+        // Store de productos
+        if (!db.objectStoreNames.contains('products')) {
+          db.createObjectStore('products', { keyPath: 'id' })
+        }
+        
+        // Store de categorías
+        if (!db.objectStoreNames.contains('categories')) {
+          db.createObjectStore('categories', { keyPath: 'id' })
+        }
+        
+        // Store de ventas offline
+        if (!db.objectStoreNames.contains('offline_sales')) {
+          db.createObjectStore('offline_sales', { keyPath: 'id' })
+        }
+
+        // Store de clientes offline
+        if (!db.objectStoreNames.contains('clients')) {
+          db.createObjectStore('clients', { keyPath: 'id' })
+        }
       }
+    } catch (e) {
+      console.error('[IndexedDB] Excepción síncrona al abrir DB:', e)
+      reject(e)
     }
   })
 }

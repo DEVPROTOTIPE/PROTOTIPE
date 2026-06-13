@@ -1,14 +1,41 @@
 ---
 name: component-creator
-description: Automatiza la creación, documentación, inyección en sandbox y catalogación de nuevos componentes de interfaz reactivos en el ecosistema PROTOTIPE.
+description: Automatiza la creación, documentación, inyección en sandbox y catalogación de nuevos componentes de interfaz reactivos en el ecosistema PROTOTIPE de forma agnóstica al proyecto.
 trigger: "@crear-componente"
+aliases:
+  - "@crear-componente [PROYECTO_ACTIVO?]"
 ---
 
 # Skill de Creación de Componentes (`component-creator`)
 
 Esta skill automatiza de manera estricta el ciclo de vida completo al crear e integrar un nuevo componente premium en el catálogo reutilizable de **PROTOTIPE** y en el playground interactivo del **dev-dashboard**.
 
-Su objetivo principal es garantizar que todo componente nuevo sea portátil, consuma variables HSL de marca, esté documentado correctamente en Markdown y tenga una previsualización interactiva simulada en el Sandbox sin fallos de "playground no configurado".
+## 📁 Variable de Proyecto Dinámica
+
+> **Variable `[PROYECTO_ACTIVO]`:** Ruta raíz del proyecto sobre el que se está trabajando. Se determina en este orden de prioridad:
+> 1. Si el usuario la especificó en el trigger (ej. `@crear-componente "App Reservas" NombreComponente`), usar esa.
+> 2. Si hay un proyecto abierto actualmente en el contexto de la sesión, usar ese.
+> 3. Si ninguna de las anteriores aplica, preguntar al usuario antes de continuar: "¿En qué proyecto estás trabajando? Indica la ruta o el nombre de la plantilla."
+
+---
+
+## 📁 Rutas del Proyecto
+
+> Las rutas de este flujo se construyen dinámicamente usando `[PROYECTO_ACTIVO]`. Las rutas de documentación y biblioteca son siempre fijas (pertenecen al ecosistema, no a un proyecto específico):
+>
+> **Rutas fijas del ecosistema (siempre iguales):**
+> - Biblioteca: `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\`
+> - Bitácora: `D:\PROTOTIPE\Documentacion PROTOTIPE\03_Auditorias_y_Faro_Core\bitacora_cambios.md`
+> - Mapas: `D:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\`
+> - Dev-dashboard: `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\`
+>
+> **Rutas dinámicas del proyecto (dependen de `[PROYECTO_ACTIVO]`):**
+> - Código fuente: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\`
+> - Componentes: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\components\`
+> - Hooks: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\hooks\`
+> - Servicios: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\services\`
+> - Variables de entorno: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\.env.local`
+> - Package: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\package.json`
 
 ---
 
@@ -21,9 +48,28 @@ Su objetivo principal es garantizar que todo componente nuevo sea portátil, con
 
 ---
 
+## 📂 Categorías Válidas de la Biblioteca
+
+> Las únicas categorías permitidas al crear la ruta en `06_Biblioteca_Componentes/` son las siguientes. Usar un nombre fuera de esta lista rompe el árbol lateral del dashboard:
+> - `01_Navegacion_y_Layout`
+> - `02_Formularios_y_UI`
+> - `03_Datos_y_Listas`
+> - `04_Feedback_y_Notificaciones`
+> - `05_Ecommerce_y_Carrito`
+> - `06_Mapas_y_Ubicacion`
+> - `07_Autenticacion`
+> - `08_Dashboard_y_Metricas`
+> - `09_Utilitarios`
+> 
+> Si el componente no encaja en ninguna, usar `09_Utilitarios` y notificar al usuario para que evalúe crear una nueva categoría formal.
+>
+> **Nota de Ecosistema:** Estas categorías aplican para todos los proyectos del ecosistema PROTOTIPE. Un componente documentado en la biblioteca es reutilizable por cualquier plantilla o app a la medida, independientemente de en qué proyecto fue creado originalmente.
+
+---
+
 ## 🛠️ Flujo de Trabajo Secuencial Obligatorio
 
-Cuando el usuario invoque el comando `@crear-componente [NombreComponente] [Requerimientos/Idea]`, la IA debe ejecutar rigurosamente los siguientes 5 pasos consecutivos:
+Cuando el usuario invoque el comando `@crear-componente [PROYECTO_ACTIVO?] [NombreComponente] [Requerimientos/Idea]`, la IA debe ejecutar rigurosamente los siguientes 5 pasos consecutivos:
 
 ```mermaid
 graph TD
@@ -76,7 +122,8 @@ Crear un archivo `.md` de documentación en español bajo el directorio específ
      ),
      ```
   4. **aliases en `COMPONENT_SANDBOX_MAP`:** Registrar todos los aliases en minúsculas (nombre natural, técnico, variantes ES/EN).
-  5. **Fuzzy en `getSandboxKey`:** Agregar regla `str.includes(...)` en la función `check()`.
+  
+  > **Regla fuzzy en getSandboxKey:** En la función `check()` de `ComponentSandbox.jsx`, agregar la regla `str.includes('nombre_clave')` para el nuevo componente, usando las mismas variantes en minúsculas registradas en COMPONENT_SANDBOX_MAP.
 
 ---
 
@@ -89,6 +136,9 @@ Ejecutar **todos** los sub-pasos en una sola ronda de edición:
 
 #### 4.1 — `README.md` del Catálogo ← **EL MÁS CRÍTICO**
 Editar `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\README.md`:
+
+> **Verificación previa de unicidad:** Antes de insertar la entrada, busca en el README.md si ya existe un componente con el mismo nombre técnico. Si existe: (a) informa al usuario, (b) propón versionar como `NombreComponenteV2` o extender el existente, (c) espera confirmación antes de continuar.
+
 - Localizar la sección de categoría correcta (ej: `### 2. 📂 Formularios y UI`).
 - Agregar la entrada con link markdown absoluto en el formato estándar:
   ```
@@ -101,7 +151,7 @@ Agregar la entrada del nuevo archivo con su Criterio de Decisión técnica en:
 `D:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\mapa_documentacion_ia.md`
 
 #### 4.3 — `mapa_aplicacion.md` (condicional)
-Si el componente se instala físicamente en `App Ventas`, actualizar:
+Si el componente se instala físicamente en el proyecto activo, actualizar:
 `D:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\mapa_aplicacion.md`
 
 #### 4.4 — `bitacora_cambios.md`
@@ -112,6 +162,9 @@ Con: tipo, archivos modificados, causa raíz, solución técnica y estatus.
 ---
 
 ### Paso 5: Compilación de Integridad y Verificación
+
+> ⛔ **PASO BLOQUEANTE:** Si el build falla, el checklist NO puede marcarse como superado. Corrige los errores de compilación antes de reportar el componente como completado. No escribas en bitácora hasta que el build sea exitoso.
+
 - **Comando:** `cmd /c npm run build` en `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard`
 - **Verificación:** Sin errores de sintaxis, variables no definidas ni fallos de Vite.
 

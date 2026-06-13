@@ -368,9 +368,11 @@ export async function updateOrderStatus(orderId, newStatus, currentOrder) {
 
   // ─── CRÉDITO APROBADO ──────────────────────────────────────────────────────
   if (newStatus === ORDER_STATES.CREDIT_APPROVED) {
-    if (!stockYaDescontado) {
-      const items = currentOrder?.items || []
-      await runTransaction(db, async (transaction) => {
+    const creditIdRef = doc(db, COLLECTIONS.CREDITS, `credit_${orderId}`)
+
+    await runTransaction(db, async (transaction) => {
+      if (!stockYaDescontado) {
+        const items = currentOrder?.items || []
         const productsCache = {}
         for (const item of items) {
           if (item.productId?.startsWith('custom-')) continue
@@ -411,39 +413,30 @@ export async function updateOrderStatus(orderId, newStatus, currentOrder) {
             updatedAt: serverTimestamp()
           })
         })
+      }
 
-        transaction.update(orderRef, {
-          estado: newStatus,
-          stockDescontado: true,
-          updatedAt: serverTimestamp()
-        })
-      })
-    } else {
-      await updateDoc(orderRef, {
+      // Actualizar estado del pedido
+      transaction.update(orderRef, {
         estado: newStatus,
+        stockDescontado: true,
         updatedAt: serverTimestamp()
       })
-    }
 
-    // Obtener los datos más recientes del pedido directamente de la base de datos
-    const latestOrderDoc = await getDoc(orderRef)
-    const latestOrderData = latestOrderDoc.exists() ? latestOrderDoc.data() : currentOrder
-
-    // Generar documento en Colección Credits
-    const creditsRef = collection(db, 'credits')
-    await addDoc(creditsRef, {
-      orderId,
-      orderNumber: latestOrderData.orderNumber || '—',
-      cliente: latestOrderData.cliente,
-      clienteNombre: latestOrderData.cliente?.nombre || '',
-      clienteCelular: latestOrderData.cliente?.celular || '',
-      total: latestOrderData.total,
-      montoTotal: latestOrderData.total,
-      saldoPendiente: latestOrderData.total,
-      abonos: [],
-      estado: 'activo',
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      // Crear el crédito atómicamente
+      transaction.set(creditIdRef, {
+        orderId,
+        orderNumber: currentOrder.orderNumber || '—',
+        cliente: currentOrder.cliente,
+        clienteNombre: currentOrder.cliente?.nombre || '',
+        clienteCelular: currentOrder.cliente?.celular || '',
+        total: currentOrder.total,
+        montoTotal: currentOrder.total,
+        saldoPendiente: currentOrder.total,
+        abonos: [],
+        estado: 'activo',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      })
     })
 
     await notifyClient()
@@ -461,11 +454,27 @@ export async function updateOrderStatus(orderId, newStatus, currentOrder) {
 /**
  * Crea un pedido físico directamente en el portal admin (venta POS/Local)
  */
-export async function createPhysicalOrder(orderData, adminId) {
-  const orderNumber = `OR-POS-${Math.floor(100000 + Math.random() * 900000)}`
-  const orderIdRef = doc(collection(db, COLLECTIONS.ORDERS))
+export async function createPhysicalOrder(orderData, adminId, forcedOrderId = null) {
+  const orderNumber = orderData.orderNumber || `OR-POS-${Math.floor(100000 + Math.random() * 900000)}`
+  const orderIdRef = forcedOrderId
+    ? doc(db, COLLECTIONS.ORDERS, forcedOrderId)
+    : doc(collection(db, COLLECTIONS.ORDERS))
+
+  const creditIdRef = doc(db, COLLECTIONS.CREDITS, `credit_${orderIdRef.id}`)
+  let isStockConflict = false
+  let orderAlreadyExists = false
+  let existingOrderNumber = null
 
   await runTransaction(db, async (transaction) => {
+    if (forcedOrderId) {
+      const existingDoc = await transaction.get(orderIdRef)
+      if (existingDoc.exists()) {
+        orderAlreadyExists = true
+        existingOrderNumber = existingDoc.data()?.orderNumber
+        return
+      }
+    }
+
     const items = orderData.items || []
 
     const productsCache = {}
@@ -491,7 +500,12 @@ export async function createPhysicalOrder(orderData, adminId) {
       if (variantIndex !== -1) {
         const stockActual = variantes[variantIndex].stock
         if (stockActual < item.cantidad) {
-          throw new Error(`Stock insuficiente para "${item.nombre}"`)
+          if (orderData.offline === true) {
+            isStockConflict = true
+            continue
+          } else {
+            throw new Error(`Stock insuficiente para "${item.nombre}"`)
+          }
         }
         variantes[variantIndex].stock = stockActual - item.cantidad
         updatedProducts[item.productId] = {
@@ -501,48 +515,74 @@ export async function createPhysicalOrder(orderData, adminId) {
       }
     }
 
-    Object.values(updatedProducts).forEach(productInfo => {
-      const productItems = items.filter(item => item.productId === productInfo.ref.id)
-      const totalQtySold = productItems.reduce((sum, item) => sum + item.cantidad, 0)
+    if (!isStockConflict) {
+      Object.values(updatedProducts).forEach(productInfo => {
+        const productItems = items.filter(item => item.productId === productInfo.ref.id)
+        const totalQtySold = productItems.reduce((sum, item) => sum + item.cantidad, 0)
 
-      transaction.update(productInfo.ref, {
-        variantes: productInfo.data.variantes,
-        salesCount: (productInfo.data.salesCount || 0) + totalQtySold,
-        updatedAt: serverTimestamp()
+        transaction.update(productInfo.ref, {
+          variantes: productInfo.data.variantes,
+          salesCount: (productInfo.data.salesCount || 0) + totalQtySold,
+          updatedAt: serverTimestamp()
+        })
       })
-    })
+    }
 
-    const resolvedStatus = (orderData.metodoPago === PAYMENT_METHODS.CASH || orderData.metodoPago === PAYMENT_METHODS.TRANSFER)
-      ? ORDER_STATES.COMPLETED
-      : (orderData.metodoPago === PAYMENT_METHODS.CREDIT ? ORDER_STATES.CREDIT_APPROVED : ORDER_STATES.PENDING)
+    let resolvedStatus
+    if (isStockConflict) {
+      resolvedStatus = ORDER_STATES.PENDING_CONCILIATION
+    } else {
+      resolvedStatus = (orderData.metodoPago === PAYMENT_METHODS.CASH || orderData.metodoPago === PAYMENT_METHODS.TRANSFER)
+        ? ORDER_STATES.COMPLETED
+        : (orderData.metodoPago === PAYMENT_METHODS.CREDIT ? ORDER_STATES.CREDIT_APPROVED : ORDER_STATES.PENDING)
+    }
 
     transaction.set(orderIdRef, {
       ...orderData,
       orderNumber,
       estado: resolvedStatus,
-      stockDescontado: true,
+      stockDescontado: !isStockConflict,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     })
+
+    if (orderData.metodoPago === PAYMENT_METHODS.CREDIT) {
+      transaction.set(creditIdRef, {
+        orderId: orderIdRef.id,
+        orderNumber,
+        cliente: orderData.cliente,
+        clienteNombre: orderData.cliente?.nombre || '',
+        clienteCelular: orderData.cliente?.celular || '',
+        total: orderData.total,
+        montoTotal: orderData.total,
+        saldoPendiente: orderData.total,
+        abonos: [],
+        estado: 'activo',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      })
+    }
   })
 
-  // Generar deuda si es método Crédito
-  if (orderData.metodoPago === PAYMENT_METHODS.CREDIT) {
-    const creditsRef = collection(db, 'credits')
-    await addDoc(creditsRef, {
-      orderId: orderIdRef.id,
-      orderNumber,
-      cliente: orderData.cliente,
-      clienteNombre: orderData.cliente?.nombre || '',
-      clienteCelular: orderData.cliente?.celular || '',
-      total: orderData.total,
-      montoTotal: orderData.total,
-      saldoPendiente: orderData.total,
-      abonos: [],
-      estado: 'activo',
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    })
+  if (orderAlreadyExists) {
+    return { id: orderIdRef.id, orderNumber: existingOrderNumber || orderNumber }
+  }
+
+  if (isStockConflict) {
+    try {
+      const { NC_TYPES } = await import('./notificationCenterService')
+      await createCentralNotification({
+        recipientId: 'admin',
+        recipientRole: 'admin',
+        title: 'Conflicto de Stock Offline',
+        body: `El pedido ${orderNumber} de ${orderData.cliente?.nombre || 'Cliente'} se sincronizó pero entró en conflicto por stock insuficiente.`,
+        type: NC_TYPES.STOCK_BAJO,
+        orderId: orderIdRef.id,
+        orderNumber
+      })
+    } catch (err) {
+      console.error('[orderService] Error al notificar conflicto:', err)
+    }
   }
 
   return { id: orderIdRef.id, orderNumber }
@@ -627,7 +667,7 @@ export async function syncOfflineSales(retryCount = 0) {
       const orderData = { ...sale.orderData }
       const adminId = sale.adminId || 'admin'
       
-      await createPhysicalOrder(orderData, adminId)
+      await createPhysicalOrder(orderData, adminId, sale.id)
       
       // Si tiene éxito, remover del IndexedDB local
       await removeOfflineSale(sale.id)

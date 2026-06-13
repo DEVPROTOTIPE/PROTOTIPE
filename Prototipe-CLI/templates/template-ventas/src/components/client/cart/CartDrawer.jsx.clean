@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
 import { X, Trash2, ShoppingBag, ShoppingCart, ArrowRight, Image as ImageIcon, Minus, Plus } from 'lucide-react'
@@ -70,7 +70,9 @@ export default function CartDrawer() {
 
         const candidates = allProducts.filter(p => {
           if (cartProductIds.includes(p.id)) return false
-          const isOutOfStock = p.variantes?.length > 0 && p.variantes.every(v => v.stock <= 0)
+          const isOutOfStock = (p.variantes || []).length > 0
+            ? (p.variantes || []).every(v => (v.stock || 0) <= 0)
+            : (p.stock !== undefined ? p.stock <= 0 : true)
           return !isOutOfStock
         })
 
@@ -325,7 +327,7 @@ export default function CartDrawer() {
                     
                     <button
                       onClick={handleCheckoutClick}
-                      className="px-6 h-14 rounded-full bg-action text-white font-black uppercase text-[11px] tracking-widest hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(235,16,104,0.3)] border-none cursor-pointer"
+                      className="px-6 h-14 rounded-full bg-action text-white font-black uppercase text-[11px] tracking-widest hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_8px_24px_color-mix(in_srgb,var(--color-action)_30%,transparent)] border-none cursor-pointer"
                     >
                       <span>Ir a pedir</span>
                       <ArrowRight size={16} className="stroke-[3]" />

@@ -22,7 +22,7 @@ export const DEFAULT_SETTINGS = {
   appName: 'Mi Tienda',
   sellerName: 'Vendedor',
   appIcon: '',
-  theme: 'rosa-elegante',
+  theme: 'zafiro-moderno',
   tablesEnabled: false,
   whatsappAdmin: '',
   bankInfo: {

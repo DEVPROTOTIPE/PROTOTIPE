@@ -58,7 +58,7 @@ export default function PaymentSettings({
                 <label className="block text-xs font-bold text-muted mb-1.5">Entidad Bancaria</label>
                 <input type="text" value={formData.bankInfo.banco}
                   onChange={(e) => setFormData({ ...formData, bankInfo: { ...formData.bankInfo, banco: e.target.value } })}
-                  placeholder="Ej. Bancolombia, Nequi..."
+                  placeholder="Ingresa el nombre del banco o billetera"
                   className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-app focus:outline-none focus:border-primary transition-colors bg-transparent text-sm" />
               </div>
               <div>
@@ -79,28 +79,28 @@ export default function PaymentSettings({
                 <label className="block text-xs font-bold text-muted mb-1.5">Número de Cuenta</label>
                 <input type="text" value={formData.bankInfo.numeroCuenta}
                   onChange={(e) => setFormData({ ...formData, bankInfo: { ...formData.bankInfo, numeroCuenta: e.target.value } })}
-                  placeholder="Ej. 123-456789-00"
+                  placeholder="Ingresa el número de la cuenta bancaria"
                   className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-app focus:outline-none focus:border-primary transition-colors font-mono bg-transparent text-sm" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-muted mb-1.5">Titular</label>
                 <input type="text" value={formData.bankInfo.titular}
                   onChange={(e) => setFormData({ ...formData, bankInfo: { ...formData.bankInfo, titular: e.target.value } })}
-                  placeholder="Nombre de quien recibe"
+                  placeholder="Ingresa el nombre del titular de la cuenta"
                   className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-app focus:outline-none focus:border-primary transition-colors bg-transparent text-sm" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-muted mb-1.5">Cédula / NIT (Opcional)</label>
                 <input type="text" value={formData.bankInfo.cedulaNit}
                   onChange={(e) => setFormData({ ...formData, bankInfo: { ...formData.bankInfo, cedulaNit: e.target.value } })}
-                  placeholder="Ej. 1234567890"
+                  placeholder="Ingresa el documento de identidad del titular"
                   className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-app focus:outline-none focus:border-primary transition-colors bg-transparent text-sm" />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-muted mb-1.5">URL del Código QR de Pago</label>
                 <input type="text" value={formData.bankInfo.qrUrl || ''}
                   onChange={(e) => setFormData({ ...formData, bankInfo: { ...formData.bankInfo, qrUrl: e.target.value } })}
-                  placeholder="Ej. https://url-de-tu-imagen-qr.png"
+                  placeholder="Ingresa el enlace del código QR de pago"
                   className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-app focus:outline-none focus:border-primary transition-colors bg-transparent text-sm" />
               </div>
             </div>
@@ -129,7 +129,7 @@ export default function PaymentSettings({
                   <label className="block text-xs font-bold text-muted mb-1.5">Entidad Bancaria</label>
                   <input type="text" value={formData.bankInfo2.banco}
                     onChange={(e) => setFormData({ ...formData, bankInfo2: { ...formData.bankInfo2, banco: e.target.value } })}
-                    placeholder="Ej. Davivienda, Nequi..."
+                    placeholder="Ingresa el nombre del banco o billetera"
                     className="w-full h-11 px-4 rounded-xl bg-surface border border-emerald-500/30 text-app focus:outline-none focus:border-emerald-500 transition-colors bg-transparent text-sm" />
                 </div>
                 <div>
@@ -150,28 +150,28 @@ export default function PaymentSettings({
                   <label className="block text-xs font-bold text-muted mb-1.5">Número de Cuenta</label>
                   <input type="text" value={formData.bankInfo2.numeroCuenta}
                     onChange={(e) => setFormData({ ...formData, bankInfo2: { ...formData.bankInfo2, numeroCuenta: e.target.value } })}
-                    placeholder="Ej. 123-456789-00"
+                    placeholder="Ingresa el número de la cuenta bancaria"
                     className="w-full h-11 px-4 rounded-xl bg-surface border border-emerald-500/30 text-app focus:outline-none focus:border-emerald-500 transition-colors font-mono bg-transparent text-sm" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-muted mb-1.5">Titular</label>
                   <input type="text" value={formData.bankInfo2.titular}
                     onChange={(e) => setFormData({ ...formData, bankInfo2: { ...formData.bankInfo2, titular: e.target.value } })}
-                    placeholder="Nombre de quien recibe"
+                    placeholder="Ingresa el nombre del titular de la cuenta"
                     className="w-full h-11 px-4 rounded-xl bg-surface border border-emerald-500/30 text-app focus:outline-none focus:border-emerald-500 transition-colors bg-transparent text-sm" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-muted mb-1.5">Cédula / NIT (Opcional)</label>
                   <input type="text" value={formData.bankInfo2.cedulaNit}
                     onChange={(e) => setFormData({ ...formData, bankInfo2: { ...formData.bankInfo2, cedulaNit: e.target.value } })}
-                    placeholder="Ej. 1234567890"
+                    placeholder="Ingresa el documento de identidad del titular"
                     className="w-full h-11 px-4 rounded-xl bg-surface border border-emerald-500/30 text-app focus:outline-none focus:border-emerald-500 transition-colors bg-transparent text-sm" />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-bold text-muted mb-1.5">URL del Código QR de Pago</label>
                   <input type="text" value={formData.bankInfo2.qrUrl || ''}
                     onChange={(e) => setFormData({ ...formData, bankInfo2: { ...formData.bankInfo2, qrUrl: e.target.value } })}
-                    placeholder="Ej. https://url-de-tu-imagen-qr.png"
+                    placeholder="Ingresa el enlace del código QR de pago"
                     className="w-full h-11 px-4 rounded-xl bg-surface border border-emerald-500/30 text-app focus:outline-none focus:border-emerald-500 transition-colors bg-transparent text-sm" />
                 </div>
               </div>

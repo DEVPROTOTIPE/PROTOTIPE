@@ -3,6 +3,10 @@
 Roadmap y control de tareas del proyecto dev-dashboard.
 
 ## Siguiente Hito: Mejoras de Interfaz de Usuario (UI/UX)
+- [x] **~~Tarea 247: Reajustes de CRM de Clientes (Responsividad Móvil y Remoción de Base de Datos)~~**
+  - [x] Adaptar los botones globales del CRM a una grilla responsiva de 2 columnas en mobile.
+  - [x] Reestructurar las opciones de acción de tarjetas de clientes con flex-wrap y min-w para evitar truncados.
+  - [x] Remover modal, estados y manejadores de base de datos de App.jsx.
 - [x] **~~Tarea 246: Personalización Avanzada de Colores y Tokens HSL (Estilo Studio completo)~~**
   - [x] Agregar variables avanzadas de tema (`surfaceColor`, `surface2Color`, `borderColor`, `textMutedColor`, `radiusBase`) en el flujo de Onboarding del Dashboard y pasarlas en los payloads hacia el CLI.
   - [x] Implementar panel colapsable interactivo `"Personalización de Colores Avanzada (Tokens HSL)"` con pickers cromáticos, inputs hexadecimales y selector de Radius.

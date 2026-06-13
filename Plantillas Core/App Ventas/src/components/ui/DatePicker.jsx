@@ -206,7 +206,7 @@ export function DatePickerPortal({ value, onChange, open, setOpen }) {
  * Selector de fecha premium completo con botón e input, listo para usar
  * en cualquier formulario (AdminSalesDetail, AdminSettings, etc.).
  */
-export default function DatePicker({ value, onChange, placeholder = 'Seleccionar fecha' }) {
+export default function DatePicker({ value, onChange, placeholder="Elige una fecha del calendario" }) {
   const [open, setOpen] = useState(false)
   const triggerRef = useRef(null)
 

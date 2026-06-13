@@ -71,7 +71,7 @@ export default function StoreSettings({
                       ...formData,
                       dianSettings: { ...formData.dianSettings, razonSocial: e.target.value }
                     })}
-                    placeholder="Ej. Mi Negocio SAS"
+                    placeholder="Ingresa la razón social o nombre registrado"
                     className="w-full h-11 px-3.5 rounded-xl bg-surface-2 border border-app text-app text-sm focus:outline-none focus:border-primary transition-colors"
                   />
                 </div>
@@ -86,7 +86,7 @@ export default function StoreSettings({
                         ...formData,
                         dianSettings: { ...formData.dianSettings, nit: e.target.value }
                       })}
-                      placeholder="Ej. 901234567"
+                      placeholder="Ingresa el número de identificación tributaria (NIT/RUT)"
                       className="w-full h-11 px-3.5 rounded-xl bg-surface-2 border border-app text-app text-sm focus:outline-none focus:border-primary transition-colors"
                     />
                   </div>
@@ -100,7 +100,7 @@ export default function StoreSettings({
                         ...formData,
                         dianSettings: { ...formData.dianSettings, digitoVerificacion: e.target.value }
                       })}
-                      placeholder="0"
+                      placeholder="Ingresa la cantidad"
                       className="w-full h-11 text-center rounded-xl bg-surface-2 border border-app text-app text-sm focus:outline-none focus:border-primary transition-colors"
                     />
                   </div>
@@ -115,7 +115,7 @@ export default function StoreSettings({
                       ...formData,
                       dianSettings: { ...formData.dianSettings, emailFiscal: e.target.value }
                     })}
-                    placeholder="factura@minegocio.com"
+                    placeholder="Ingresa el correo para recepción de facturas"
                     className="w-full h-11 px-3.5 rounded-xl bg-surface-2 border border-app text-app text-sm focus:outline-none focus:border-primary transition-colors"
                   />
                 </div>
@@ -129,7 +129,7 @@ export default function StoreSettings({
                       ...formData,
                       dianSettings: { ...formData.dianSettings, ivaPorDefecto: Number(e.target.value) }
                     })}
-                    placeholder="19"
+                    placeholder="Ingresa el porcentaje de impuesto (IVA)"
                     className="w-full h-11 px-3.5 rounded-xl bg-surface-2 border border-app text-app text-sm focus:outline-none focus:border-primary transition-colors"
                   />
                 </div>
@@ -352,7 +352,7 @@ export default function StoreSettings({
                           pickup: { ...(formData.deliverySettings?.pickup || {}), address: e.target.value }
                         }
                       })}
-                      placeholder="Ej. Calle 10 # 4-50, Centro"
+                      placeholder="Ingresa la dirección exacta del local físico"
                       className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
                     />
                   </div>
@@ -368,7 +368,7 @@ export default function StoreSettings({
                           pickup: { ...(formData.deliverySettings?.pickup || {}), instructions: e.target.value }
                         }
                       })}
-                      placeholder="Ej. Acercarse a caja con el número de pedido"
+                      placeholder="Ingresa indicaciones claras para el retiro físico"
                       className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
                     />
                   </div>
@@ -433,7 +433,7 @@ export default function StoreSettings({
                           digital: { ...(formData.deliverySettings?.digital || {}), instructions: e.target.value }
                         }
                       })}
-                      placeholder="Ej. Te enviaremos el enlace por WhatsApp"
+                      placeholder="Ingresa indicaciones para la entrega digital"
                       className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
                     />
                   </div>
@@ -716,7 +716,7 @@ export default function StoreSettings({
                     rows={6}
                     value={formData.trackingWaTemplate}
                     onChange={(e) => setFormData({ ...formData, trackingWaTemplate: e.target.value })}
-                    placeholder="Hola {cliente}, tu pedido {pedido} está..."
+                    placeholder="Escribe el mensaje de WhatsApp usando {cliente} y {pedido}"
                     className="w-full p-3 rounded-xl border border-app bg-surface-2 focus:border-primary/40 outline-none text-xs text-app leading-relaxed transition-colors resize-none bg-transparent"
                   />
                   
@@ -786,7 +786,7 @@ export default function StoreSettings({
                             ...formData,
                             appPromo: { ...(formData.appPromo || {}), title: e.target.value }
                           })}
-                          placeholder="Ej: ¡Instala nuestra App!"
+                          placeholder="Ingresa el título del banner de instalación"
                           className="w-full h-10 px-3 rounded-xl bg-surface-2 border border-app text-xs text-app focus:outline-none focus:border-primary transition-colors bg-transparent"
                         />
                       </div>
@@ -799,7 +799,7 @@ export default function StoreSettings({
                             ...formData,
                             appPromo: { ...(formData.appPromo || {}), promoImageUrl: e.target.value }
                           })}
-                          placeholder="https://ejemplo.com/icon.png"
+                          placeholder="Ingresa el enlace web (http/https)"
                           className="w-full h-10 px-3 rounded-xl bg-surface-2 border border-app text-xs text-app focus:outline-none focus:border-primary transition-colors bg-transparent"
                         />
                       </div>
@@ -814,7 +814,7 @@ export default function StoreSettings({
                             ...formData,
                             appPromo: { ...(formData.appPromo || {}), message: e.target.value }
                         })}
-                        placeholder="Describe los beneficios de instalar la aplicación en el dispositivo..."
+                        placeholder="Escribe los beneficios clave de instalar la aplicación"
                         className="w-full p-3 rounded-xl border border-app bg-surface-2 focus:border-primary/40 outline-none text-xs text-app leading-snug transition-colors resize-none bg-transparent"
                       />
                     </div>

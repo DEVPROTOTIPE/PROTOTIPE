@@ -52,7 +52,7 @@ VITE_FIREBASE_APP_ID="tu-app-id"
 
 ### Paso 2: Siembra de Datos (Seeding de Firestore)
 1. Descarga el archivo de credenciales JSON de tu cuenta de servicio desde la consola de Firebase (`Configuración del Proyecto` -> `Cuentas de Servicio` -> `Generar nueva clave privada`).
-2. Guarda el archivo con el nombre `firebase-service-account.json` dentro del directorio `D:\Aplicaciones\App Ventas\scratch\`.
+2. Guarda el archivo con el nombre `firebase-service-account.json` dentro del directorio `scratch/` en la raíz de tu proyecto (ej: `D:\PROTOTIPE\Plantillas Core\App Ventas\scratch\`).
 3. Ejecuta el script de siembra para poblar de forma automática todas las colecciones iniciales necesarias:
    ```bash
    node scratch/seed_brand.js

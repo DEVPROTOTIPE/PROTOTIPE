@@ -341,16 +341,10 @@ VITE_DEVELOPER_EMAIL=${answers.developerEmail || ''}
 VITE_DEVELOPER_ADMIN_EMAIL=admin@${clientId}.com
 VITE_DEVELOPER_ADMIN_PASSWORD=Admin2026!
 
-# Credenciales de Sincronización del Ecosistema con la Consola Central (Developer Cockpit)
-# IMPORTANTE: Estas variables apuntan a prototipe-ecosistema-control, NO al proyecto del cliente
-VITE_DEVELOPER_CENTRAL_API_KEY=${centralApiKey}
-VITE_DEVELOPER_CENTRAL_AUTH_DOMAIN=prototipe-ecosistema-control.firebaseapp.com
-VITE_DEVELOPER_CENTRAL_PROJECT_ID=prototipe-ecosistema-control
-VITE_DEVELOPER_CENTRAL_STORAGE_BUCKET=prototipe-ecosistema-control.firebasestorage.app
-VITE_DEVELOPER_CENTRAL_MESSAGING_SENDER_ID=${centralSenderId}
-VITE_DEVELOPER_CENTRAL_APP_ID=${centralAppId}
-VITE_DEVELOPER_CLIENT_ID=${clientId}
+# Telemetría de Comisiones del Desarrollador (Centralización Central - HTTPS Blaze)
+VITE_DEVELOPER_TELEMETRY_ENDPOINT=https://reporttelemetry-bkwhzlbhlq-uc.a.run.app
 VITE_DEVELOPER_TELEMETRY_TOKEN=${uniqueToken}
+VITE_DEVELOPER_CLIENT_ID=${clientId}
 
 # Configuración Local de Facturación de Instancias (Fallback)
 VITE_DEVELOPER_BILLING_MODE=${answers.billingMode || 'percentage'}

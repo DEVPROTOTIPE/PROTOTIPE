@@ -12,6 +12,8 @@ import useAuthStore from '../../../store/authStore'
 import ProductDetailModal from '../catalog/ProductDetailModal'
 import QuantitySelector from '../../ui/QuantitySelector'
 import SwipeableCardStack from '../../ui/SwipeableCardStack'
+import LazyImage from '../../ui/LazyImage'
+
 
 
 export default function CartDrawer() {
@@ -72,7 +74,9 @@ export default function CartDrawer() {
 
         const candidates = allProducts.filter(p => {
           if (cartProductIds.includes(p.id)) return false
-          const isOutOfStock = p.variantes?.length > 0 && p.variantes.every(v => v.stock <= 0)
+          const isOutOfStock = (p.variantes || []).length > 0
+            ? (p.variantes || []).every(v => (v.stock || 0) <= 0)
+            : (p.stock !== undefined ? p.stock <= 0 : true)
           return !isOutOfStock
         })
 
@@ -198,7 +202,7 @@ export default function CartDrawer() {
                         {/* Img */}
                         <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0">
                           {item.imageUrl ? (
-                            <img src={item.imageUrl} alt={item.nombre} className="w-full h-full object-cover" />
+                            <LazyImage src={item.imageUrl} alt={item.nombre} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-muted"><ImageIcon size={18} /></div>
                           )}
@@ -291,7 +295,7 @@ export default function CartDrawer() {
                                 {/* Imagen cuadrada — full width */}
                                 <div className="relative w-full flex-1 overflow-hidden bg-gray-50 dark:bg-neutral-800 min-h-0">
                                   {p.imageUrl ? (
-                                    <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover" />
+                                    <LazyImage src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover" />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center text-muted opacity-30">
                                       <ImageIcon size={36} />
@@ -391,7 +395,7 @@ export default function CartDrawer() {
                     
                     <button
                       onClick={handleCheckoutClick}
-                      className="px-6 h-12 rounded-2xl bg-action text-white font-black uppercase text-[11px] tracking-widest hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_8px_24px_rgba(235,16,104,0.25)] border-none cursor-pointer"
+                      className="px-6 h-12 rounded-2xl bg-action text-white font-black uppercase text-[11px] tracking-widest hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_8px_24px_color-mix(in_srgb,var(--color-action)_25%,transparent)] border-none cursor-pointer"
                     >
                       <span>Ir a pedir</span>
                       <ArrowRight size={16} className="stroke-[3]" />

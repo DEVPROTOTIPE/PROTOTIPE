@@ -4,6 +4,7 @@ import useAppConfigStore from '../../store/appConfigStore'
 import useAuthStore from '../../store/authStore'
 import { formatCurrency } from '../../utils/formatters'
 import AppLoader from '../../components/ui/AppLoader'
+import LazyImage from '../../components/ui/LazyImage'
 import { ORDER_STATE_META, ROLES } from '../../constants'
 import { getEmployeesByRole } from '../../services/employeeService'
 import { trackTrackingEvent } from '../../services/trackingAnalyticsService'
@@ -457,7 +458,7 @@ export default function OrderTracking() {
                   <div key={idx} className="flex items-center gap-3 p-3.5 hover:bg-surface-2/30 transition-colors">
                     <div className="w-12 h-12 rounded-xl overflow-hidden border border-app shrink-0 bg-surface-2 flex items-center justify-center">
                       {imgSrc
-                        ? <img src={imgSrc} alt={prod.nombre} className="w-full h-full object-cover" />
+                        ? <LazyImage src={imgSrc} alt={prod.nombre} className="w-full h-full object-cover" />
                         : <Package className="w-5 h-5 text-muted" />
                       }
                     </div>
@@ -511,7 +512,7 @@ export default function OrderTracking() {
                     <div className="flex gap-4">
                       {appPromo.promoImageUrl ? (
                         <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-app bg-surface-3">
-                          <img src={appPromo.promoImageUrl} alt="App Icon" className="w-full h-full object-cover" />
+                          <LazyImage src={appPromo.promoImageUrl} alt="App Icon" />
                         </div>
                       ) : (
                         <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
@@ -582,7 +583,7 @@ export default function OrderTracking() {
                   <div className="flex gap-4">
                     {appPromo.promoImageUrl ? (
                       <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-app bg-surface-2">
-                        <img src={appPromo.promoImageUrl} alt="App Icon" className="w-full h-full object-cover" />
+                        <LazyImage src={appPromo.promoImageUrl} alt="App Icon" />
                       </div>
                     ) : (
                       <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import NumberInput from '../../components/ui/NumberInput'
 import CurrencyInput from '../../components/ui/CurrencyInput'
+import LazyImage from '../../components/ui/LazyImage'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
@@ -444,7 +445,43 @@ export default function AdminSales() {
     iframe.style.border = '0'
     document.body.appendChild(iframe)
 
-    const paymentLabel = paymentMethod === PAYMENT_METHODS.CREDIT ? 'Crédito (Fiado)' : paymentMethod === PAYMENT_METHODS.TRANSFER ? 'Transferencia' : 'Efectivo'
+    const selectedMethod = order.metodoPago || paymentMethod
+    const paymentLabel = selectedMethod === PAYMENT_METHODS.CREDIT 
+      ? 'Crédito (Fiado)' 
+      : selectedMethod === PAYMENT_METHODS.TRANSFER 
+      ? 'Transferencia' 
+      : 'Efectivo'
+
+    const deliveryLabel = order.tipoEntrega === 'mesa'
+      ? `Consumo en Salón (Mesa: ${order.tableName || 'N/A'})`
+      : order.tipoEntrega === 'retiro'
+      ? 'Física (En Tienda)'
+      : order.tipoEntrega === 'domicilio'
+      ? 'Domicilio a domicilio'
+      : 'Venta Física (POS)'
+
+    const subtotal = order.items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0)
+    const { bankInfo } = useAppConfigStore.getState()
+
+    const bankDetailsHtml = (selectedMethod === PAYMENT_METHODS.TRANSFER && bankInfo && bankInfo.numeroCuenta)
+      ? `
+        <div class="info-box" style="margin-top: 10px;">
+          <h3>Datos para Transferencia Bancaria</h3>
+          <p><strong>Banco:</strong> ${bankInfo.banco || ''} (${bankInfo.tipoCuenta === 'ahorros' ? 'Ahorros' : 'Corriente'})</p>
+          <p><strong>Número de Cuenta:</strong> ${bankInfo.numeroCuenta || ''}</p>
+          <p><strong>Titular:</strong> ${bankInfo.titular || ''}</p>
+          ${bankInfo.cedulaNit ? `<p><strong>Cédula/NIT:</strong> ${bankInfo.cedulaNit}</p>` : ''}
+        </div>
+      `
+      : ''
+
+    const notesHtml = order.notas
+      ? `
+        <div style="margin-top: 10px; padding: 8px; background-color: #f9f9f9; border-left: 3px solid #ccc; font-size: 11px; font-style: italic; border-radius: 4px;">
+          <strong>Notas:</strong> ${order.notas}
+        </div>
+      `
+      : ''
 
     iframe.contentDocument.write(`
       <html>
@@ -488,13 +525,20 @@ export default function AdminSales() {
             <h3>Datos del Cliente</h3>
             <p><strong>Nombre:</strong> ${order.cliente?.nombre || 'N/A'}</p>
             <p><strong>Celular:</strong> ${order.cliente?.celular || 'N/A'}</p>
+            ${order.tipoEntrega === 'domicilio' && order.cliente?.direccion
+              ? `<p><strong>Dirección:</strong> ${order.cliente.direccion}</p>
+                 <p><strong>Barrio/Ciudad:</strong> ${order.cliente.barrio || ''} ${order.cliente.ciudad || ''}</p>`
+              : ''
+            }
           </div>
 
           <div class="info-box">
-            <h3>Detalles de Pago</h3>
+            <h3>Detalles de Pago y Entrega</h3>
             <p><strong>Método:</strong> ${paymentLabel}</p>
-            <p><strong>Tipo:</strong> Venta Física (POS)</p>
+            <p><strong>Entrega:</strong> ${deliveryLabel}</p>
           </div>
+
+          ${bankDetailsHtml}
 
           <table>
             <thead>
@@ -510,7 +554,21 @@ export default function AdminSales() {
                   <td>
                     <strong>${item.nombre}</strong><br/>
                     <small style="color: #666;">
-                      ${[item.talla, item.color].filter(Boolean).join(' • ')}
+                      ${item.atributos && Object.values(item.atributos).length > 0
+                        ? Object.entries(item.atributos).map(([key, val]) => {
+                            if (typeof val === 'string' && val.startsWith('#')) {
+                              return `${key}: <span style="display:inline-block; width:10px; height:10px; border-radius:50%; border:1px solid #ccc; background-color:${val}; vertical-align:middle; margin-right:4px;"></span> ${val}`
+                            }
+                            return `${key}: ${val}`
+                          }).join(' • ')
+                        : (item.talla || item.color)
+                          ? [
+                              item.talla ? `Talla: ${item.talla}` : '',
+                              item.color ? (item.color.startsWith('#') 
+                                ? `Color: <span style="display:inline-block; width:10px; height:10px; border-radius:50%; border:1px solid #ccc; background-color:${item.color}; vertical-align:middle; margin-right:4px;"></span> ${item.color}`
+                                : `Color: ${item.color}`) : ''
+                            ].filter(Boolean).join(' • ')
+                          : ''}
                     </small>
                   </td>
                   <td class="text-right">${item.cantidad}</td>
@@ -519,12 +577,32 @@ export default function AdminSales() {
               `).join('')}
             </tbody>
             <tfoot>
+              <tr>
+                <td colspan="2" class="text-right" style="padding-top: 8px; font-size: 11px;">Subtotal:</td>
+                <td class="text-right" style="padding-top: 8px; font-size: 11px;">${formatCurrency(subtotal)}</td>
+              </tr>
+              ${order.costoEnvio > 0
+                ? `<tr>
+                    <td colspan="2" class="text-right" style="font-size: 11px;">Envío:</td>
+                    <td class="text-right" style="font-size: 11px;">+${formatCurrency(order.costoEnvio)}</td>
+                   </tr>`
+                : ''
+              }
+              ${order.descuento > 0
+                ? `<tr>
+                    <td colspan="2" class="text-right" style="font-size: 11px;">Descuento:</td>
+                    <td class="text-right" style="font-size: 11px;">-${formatCurrency(order.descuento)}</td>
+                   </tr>`
+                : ''
+              }
               <tr class="total-row">
-                <td colspan="2" class="text-right" style="padding-top: 15px;">TOTAL:</td>
-                <td class="text-right" style="padding-top: 15px;">${formatCurrency(order.total)}</td>
+                <td colspan="2" class="text-right" style="padding-top: 8px; font-size: 15px;">TOTAL:</td>
+                <td class="text-right" style="padding-top: 8px; font-size: 15px;">${formatCurrency(order.total)}</td>
               </tr>
             </tfoot>
           </table>
+
+          ${notesHtml}
 
           <div class="footer">
             <p>¡Gracias por tu visita!</p>
@@ -681,7 +759,7 @@ export default function AdminSales() {
                     type="text"
                     value={customItem.nombre}
                     onChange={e => setCustomItem(p => ({ ...p, nombre: e.target.value }))}
-                    placeholder="Ej: Camiseta personalizada azul"
+                    placeholder="Ingresa el nombre del producto personalizado"
                     className="w-full h-11 px-4 rounded-2xl bg-surface-2 border border-app text-sm text-app focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
@@ -691,7 +769,7 @@ export default function AdminSales() {
                     type="text"
                     value={customItem.descripcion}
                     onChange={e => setCustomItem(p => ({ ...p, descripcion: e.target.value }))}
-                    placeholder="Ej: Talla L, estampado de gato"
+                    placeholder="Ingresa las especificaciones del producto personalizado"
                     className="w-full h-11 px-4 rounded-2xl bg-surface-2 border border-app text-sm text-app focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
@@ -701,7 +779,7 @@ export default function AdminSales() {
                     <CurrencyInput
                       value={customItem.precio}
                       onChange={(val) => setCustomItem(p => ({ ...p, precio: val }))}
-                      placeholder="Ej. 25000"
+                      placeholder="Ingresa el valor numérico"
                       className="w-full h-11 px-4 rounded-2xl bg-surface-2 border border-app text-sm text-app focus:outline-none focus:border-emerald-500 transition-colors"
                     />
                   </div>
@@ -737,7 +815,7 @@ export default function AdminSales() {
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Buscar por nombre, talla o color..."
+                    placeholder="Escribe nombre, talla o color para buscar"
                     className="w-full h-11 pl-10 pr-4 rounded-2xl bg-surface-2 border border-app text-sm text-app placeholder-muted focus:outline-none focus:border-primary transition-colors"
                   />
                   {searchTerm && (
@@ -807,10 +885,10 @@ export default function AdminSales() {
                         {/* Imagen */}
                         <div className="aspect-square bg-surface-2 flex items-center justify-center overflow-hidden relative">
                           {product.imageUrl ? (
-                            <img
+                            <LazyImage
                               src={product.imageUrl}
                               alt={product.nombre}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              className="group-hover:scale-105 transition-transform duration-500"
                             />
                           ) : (
                             <Package size={32} className="text-muted/65" />
@@ -917,7 +995,7 @@ export default function AdminSales() {
                         type="text"
                         value={clientName}
                         onChange={(e) => setClientName(e.target.value)}
-                        placeholder="Nombre completo del cliente"
+                        placeholder="Ingresa el nombre y apellido del cliente"
                         className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app placeholder-muted focus:outline-none focus:border-primary transition-colors"
                       />
                     </div>
@@ -969,7 +1047,7 @@ export default function AdminSales() {
                     {/* Imagen miniatura */}
                     <div className="w-10 h-10 rounded-lg bg-surface-2 border border-app overflow-hidden flex-shrink-0 flex items-center justify-center">
                       {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.nombre} className="w-full h-full object-cover" />
+                        <LazyImage src={item.imageUrl} alt={item.nombre} className="w-full h-full object-cover" />
                       ) : (
                         <Package size={16} className="text-muted/65" />
                       )}
@@ -1140,7 +1218,7 @@ export default function AdminSales() {
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Observaciones de entrega, referencias adicionales..."
+                placeholder="Ingresa indicaciones de despacho o referencias del lugar"
                 rows={2}
                 className="w-full p-3 rounded-xl bg-surface-2 border border-app text-xs text-app placeholder-muted focus:outline-none focus:border-primary transition-colors resize-none"
               />

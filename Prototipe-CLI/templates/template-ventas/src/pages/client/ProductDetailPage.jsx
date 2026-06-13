@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { 
@@ -6,6 +6,7 @@ import {
   Heart, Share2, MessageSquare, Check 
 } from 'lucide-react'
 import BackButton from '../../components/ui/BackButton'
+import LazyImage from '../../components/ui/LazyImage'
 import useAppConfigStore from '../../store/appConfigStore'
 import useAuthStore from '../../store/authStore'
 import useFavoritesStore from '../../store/favoritesStore'
@@ -114,6 +115,9 @@ export default function ProductDetailPage() {
   const [showToast, setShowToast] = useState(false)
   const [showCheckout, setShowCheckout] = useState(false)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
+  const [imageLoading, setImageLoading] = useState(true)
+  const imageRef = useRef(null)
+
 
   const {
     isNewProduct,
@@ -252,6 +256,14 @@ export default function ProductDetailPage() {
   const activeImages = useMemo(() => {
     return allImages
   }, [allImages])
+
+  useEffect(() => {
+    if (imageRef.current && imageRef.current.complete) {
+      setImageLoading(false)
+    } else {
+      setImageLoading(true)
+    }
+  }, [activeImageIndex, activeImages])
 
   // Actualizar imagen activa al cambiar de variante de color
   useEffect(() => {
@@ -492,18 +504,23 @@ export default function ProductDetailPage() {
           <div className="space-y-4">
             {/* Galería de Imágenes Redondeada */}
             <div className="relative w-full aspect-square bg-surface-2 rounded-2xl overflow-hidden shadow-sm shrink-0 border border-app">
+              {imageLoading && (
+                <div className="absolute inset-0 bg-surface-2 animate-pulse z-0" />
+              )}
               {activeImages.length > 0 ? (
                 <>
                   <AnimatePresence mode="wait">
                     <motion.img
+                      ref={imageRef}
                       key={activeImageIndex + '-' + activeImages[activeImageIndex]}
                       src={activeImages[activeImageIndex]}
                       alt={product.nombre}
+                      onLoad={() => setImageLoading(false)}
                       initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
+                      animate={{ opacity: imageLoading ? 0 : 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.25 }}
-                      className="w-full h-full object-cover rounded-2xl cursor-grab active:cursor-grabbing"
+                      className={`w-full h-full object-cover rounded-2xl cursor-grab active:cursor-grabbing transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                       drag="x"
                       dragConstraints={{ left: 0, right: 0 }}
                       dragElastic={0.6}
@@ -614,7 +631,7 @@ export default function ProductDetailPage() {
                       idx === activeImageIndex ? 'scale-105 shadow-md opacity-100' : 'scale-95 opacity-60 hover:opacity-100'
                     }`}
                   >
-                    <img src={img} className="w-full h-full object-cover" />
+                    <LazyImage src={img} alt="Miniatura de Galería" />
                   </button>
                 ))}
               </div>

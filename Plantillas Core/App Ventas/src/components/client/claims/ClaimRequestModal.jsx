@@ -229,7 +229,7 @@ export default function ClaimRequestModal({ isOpen, onClose, order, onSuccess })
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Explica detalladamente qué sucedió con el producto..."
+                placeholder="Escribe los motivos detallados de tu reclamo o devolución"
                 className="w-full p-4.5 rounded-2xl bg-surface-2 border border-app text-xs text-app focus:outline-none focus:border-primary transition-colors resize-none leading-relaxed"
               />
             </div>

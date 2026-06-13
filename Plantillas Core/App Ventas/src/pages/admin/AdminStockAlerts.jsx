@@ -128,7 +128,7 @@ export default function AdminStockAlerts() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="p-4 md:p-8 max-w-4xl mx-auto flex flex-col gap-6"
+      className="p-4 md:p-8 max-w-7xl mx-auto flex flex-col gap-6"
     >
       {/* Cabecera */}
       <div className="flex items-center justify-between gap-4">
@@ -157,7 +157,7 @@ export default function AdminStockAlerts() {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar por nombre de producto, talla o color..."
+            placeholder="Escribe nombre, talla o color para filtrar"
             className="w-full h-11 pl-10 pr-4 rounded-2xl bg-surface-2 border border-app text-sm text-app placeholder-muted focus:outline-none focus:border-primary transition-colors"
           />
         </div>

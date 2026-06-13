@@ -14,6 +14,7 @@ import CatalogBanner from '../../components/client/catalog/CatalogBanner'
 import Pagination from '../../components/ui/Pagination'
 import { SUPPORT_WHATSAPP } from '../../constants'
 import { fuzzyMatch } from '../../utils/search'
+import LazyImage from '../../components/ui/LazyImage'
 
 /**
  * Retorna el botón de acción secundaria (al por mayor / por encargo) de una tarjeta de producto.
@@ -364,7 +365,7 @@ export default function ClientCatalog() {
               id="search-input"
               name="search"
               type="text"
-              placeholder="¿Qué estás buscando hoy?"
+              placeholder="Escribe el nombre del producto que buscas"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full h-14 pl-12 pr-14 rounded-2xl bg-surface border border-app shadow-sm text-app focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base"
@@ -632,10 +633,9 @@ export default function ClientCatalog() {
               {/* Imagen/Banner */}
               {(promoModalAd.banner || promoModalAd.image) && (
                 <div className="w-full h-48 bg-surface-2 relative">
-                  <img
+                  <LazyImage
                     src={promoModalAd.banner || promoModalAd.image}
                     alt={promoModalAd.title}
-                    className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>

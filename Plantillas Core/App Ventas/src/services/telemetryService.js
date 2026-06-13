@@ -1,12 +1,10 @@
-import { doc, setDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
-import { getCentralFirestore } from './centralFirebaseService';
 import { auth } from '../config/firebaseConfig';
 
 // Variables de entorno para modo Blaze (HTTP)
 const CENTRAL_ENDPOINT = import.meta.env.VITE_DEVELOPER_TELEMETRY_ENDPOINT;
 const DEV_TOKEN = import.meta.env.VITE_DEVELOPER_TELEMETRY_TOKEN;
 
-// Variables de entorno para modo Spark (Direct Firestore)
+// Variables de entorno de identificación del cliente
 const CLIENT_ID = import.meta.env.VITE_DEVELOPER_CLIENT_ID;
 const CLIENT_NICHE = import.meta.env.VITE_NICHE || 'general';
 
@@ -34,7 +32,7 @@ function enqueueOfflineReport(type, payload) {
     if (queue.length > 30) {
       queue.shift();
     }
-    queue.push({ type, payload, timestamp: new Date().toISOString() });
+    queue.push({ type, payload, timestamp: new Date().toISOString(), retries: 0 });
     localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
     console.debug(`[Telemetry] Reporte de tipo '${type}' encolado localmente (Offline).`);
   } catch (err) {
@@ -56,6 +54,12 @@ export async function processOfflineQueue() {
     const remainingQueue = [];
 
     for (const report of queue) {
+      const currentRetries = report.retries || 0;
+      if (currentRetries >= 5) {
+        console.warn(`[Telemetry] Descartando reporte de tipo '${report.type}' tras 5 reintentos fallidos debido a error persistente de red/CORS.`);
+        continue;
+      }
+
       try {
         if (report.type === 'billing') {
           await executeBillingReport(report.payload);
@@ -64,13 +68,14 @@ export async function processOfflineQueue() {
         }
       } catch (err) {
         console.warn('[Telemetry] Reintento fallido para reporte encolado. Se conservará en la cola.', err);
+        report.retries = currentRetries + 1;
         remainingQueue.push(report);
       }
     }
 
     localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(remainingQueue));
     if (remainingQueue.length === 0) {
-      console.log('[Telemetry] Todos los reportes locales pendientes fueron enviados con éxito.');
+      console.log('[Telemetry] Todos los reportes locales pendientes fueron procesados/enviados.');
     }
   } catch (err) {
     console.error('[Telemetry] Error al procesar la cola de telemetría local:', err);
@@ -85,65 +90,57 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * Lógica pura de envío del reporte mensual de facturación (Billing)
+ * Envía la petición HTTP POST al Cloud Function de Telemetría.
  */
-async function executeBillingReport(payload) {
-  // 1. MODO BLAZE: HTTP Endpoint (Cloud Function)
-  if (CENTRAL_ENDPOINT && DEV_TOKEN) {
-    console.log("[Telemetry] Reportando facturación vía Cloud Function...");
-    const response = await fetch(CENTRAL_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${DEV_TOKEN}`
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("[Telemetry] Reporte billing HTTP enviado exitosamente:", data);
-    return;
+async function postTelemetry(payload) {
+  if (!CENTRAL_ENDPOINT) {
+    throw new Error("CENTRAL_ENDPOINT de telemetría no configurado (VITE_DEVELOPER_TELEMETRY_ENDPOINT).");
+  }
+  if (!DEV_TOKEN) {
+    throw new Error("DEV_TOKEN de telemetría no configurado (VITE_DEVELOPER_TELEMETRY_TOKEN).");
   }
 
-  // 2. MODO SPARK: Conexión directa a Firestore Central
-  const centralDb = getCentralFirestore();
-  if (centralDb && DEV_TOKEN && CLIENT_ID) {
-    console.log("[Telemetry] Reportando facturación vía Firestore Directo...");
-    const reportId = `${CLIENT_ID}_${payload.periodo}`;
-    const reportRef = doc(centralDb, "reportesBilling", reportId);
 
-    await setDoc(reportRef, {
-      ...payload,
-      token: DEV_TOKEN,
-      updatedAt: serverTimestamp()
-    });
 
-    console.log("[Telemetry] Reporte billing Firestore directo enviado exitosamente.");
-    return;
+  const response = await fetch(CENTRAL_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${DEV_TOKEN}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`HTTP error! status: ${response.status}, message: ${errText}`);
   }
 
-  throw new Error("No hay conexión central configurada para Billing.");
+  return await response.json();
 }
 
 /**
- * Lógica pura de envío de reportes de error/fallo de la App.
+ * Lógica de envío del reporte mensual de facturación (Billing) por HTTPS (Plan Blaze)
+ */
+async function executeBillingReport(payload) {
+  console.log("[Telemetry] Reportando facturación mensual vía HTTPS (Blaze)...");
+  const data = await postTelemetry({
+    type: "billing",
+    ...payload
+  });
+  console.log("[Telemetry] Reporte billing HTTPS enviado exitosamente:", data);
+}
+
+/**
+ * Lógica de envío de reportes de error/fallo por HTTPS (Plan Blaze)
  */
 async function executeFailureReport(payload) {
-  const centralDb = getCentralFirestore();
-  if (!centralDb || !DEV_TOKEN || !CLIENT_ID) {
-    throw new Error("Credenciales de la consola central no disponibles.");
-  }
-
-  const failuresRef = collection(centralDb, 'app_failures');
-  await addDoc(failuresRef, {
-    ...payload,
-    token: DEV_TOKEN
+  console.log("[Telemetry] Reportando incidente de fallo vía HTTPS (Blaze)...");
+  const data = await postTelemetry({
+    type: "failure",
+    ...payload
   });
-  console.log('[Telemetry] Reporte de fallo enviado con éxito a la Consola Central.');
+  console.log("[Telemetry] Reporte de fallo HTTPS enviado exitosamente:", data);
 }
 
 /**

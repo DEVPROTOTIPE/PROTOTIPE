@@ -10,7 +10,7 @@ import QRCode from 'qrcode'
 const DAYS_ES = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa']
 const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
-function CustomDatePicker({ value, onChange, placeholder = 'Seleccionar fecha' }) {
+function CustomDatePicker({ value, onChange, placeholder="Elige una fecha del calendario" }) {
   const [open, setOpen] = useState(false)
   const triggerRef = useRef(null)
 
@@ -364,7 +364,7 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
     if (editEmp) {
       setNombre(editEmp.nombre || '')
       setRol(editEmp.rol || 'vendedor')
-      setPin(editEmp.pin ? '******' : '')
+      setPin(editEmp.hasPin ? '******' : '')
       setTelefono(editEmp.telefono || '')
       setSalario(editEmp.salario || 0)
       setFrecuenciaPago(editEmp.frecuenciaPago || 'quincenal')
@@ -401,7 +401,7 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
         id: editEmp?.id,
         nombre: nombre.trim(),
         rol,
-        pin: isPinChanged ? pin.trim() : editEmp.pin,
+        pin: isPinChanged ? pin.trim() : '******',
         telefono: telefono.trim(),
         salario: Number(salario) || 0,
         frecuenciaPago,
@@ -458,7 +458,7 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
             required
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej. Juan Pérez"
+            placeholder="Ingresa el nombre del empleado"
             className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
           />
         </div>
@@ -469,7 +469,7 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
             type="tel"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
-            placeholder="Ej. +573001234567"
+            placeholder="Ingresa el número de celular (10 dígitos)"
             className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
           />
         </div>
@@ -492,7 +492,7 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
             required
             value={pin}
             onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-            placeholder="Ej. 123456"
+            placeholder="******"
             className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors tracking-widest font-mono"
           />
         </div>
@@ -507,7 +507,7 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
                 min="0"
                 value={salario || ''}
                 onChange={(e) => setSalario(Math.max(0, parseFloat(e.target.value) || 0))}
-                placeholder="Monto"
+                placeholder="Ingresa el valor numérico"
                 className="w-full h-10 px-3 rounded-lg bg-surface-2 border border-app text-xs text-app focus:outline-none focus:border-primary transition-colors"
               />
             </div>
@@ -517,7 +517,7 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
                 value={frecuenciaPago}
                 onChange={setFrecuenciaPago}
                 options={frecuenciaOptions}
-                placeholder="Frecuencia"
+                placeholder="Ingresa la frecuencia de pago (ej: Quincenal)"
               />
             </div>
           </div>
@@ -526,7 +526,7 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
             <CustomDatePicker
               value={fechaPago}
               onChange={(e) => setFechaPago(e.target.value)}
-              placeholder="Próximo día de pago"
+              placeholder="Elige el próximo día de pago"
             />
           </div>
         </div>
@@ -536,7 +536,7 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
           <textarea
             value={observaciones}
             onChange={(e) => setObservaciones(e.target.value)}
-            placeholder="Detalles sobre el turno, horario, etc..."
+            placeholder="Ingresa detalles del turno, horarios o tareas"
             className="w-full min-h-[60px] p-3 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors resize-none"
           />
         </div>
@@ -662,7 +662,7 @@ export default function EmployeeSettings({ formData, setFormData, setSaveMessage
                                 {portal.labelCorto}
                               </span>
                               <span>•</span>
-                              <span>PIN: <strong className="text-app tracking-widest">{emp.pin ? '******' : 'Sin asignar'}</strong></span>
+                              <span>PIN: <strong className="text-app tracking-widest">{emp.hasPin ? '******' : 'Sin asignar'}</strong></span>
                               <span>•</span>
                               <span>{formatCurrency(emp.salario)} ({emp.frecuenciaPago})</span>
                             </div>

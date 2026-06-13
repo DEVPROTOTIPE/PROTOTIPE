@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   KeyRound, Lock, Filter, TrendingUp, Receipt, Trash2, Smartphone, AlertTriangle, 
   ChevronRight, Plus, X, ShoppingBag, Wallet, BarChart3, Sparkles, Tag, ChevronDown, 
-  Save, Loader2, CheckCircle, Activity
+  Save, Loader2, CheckCircle, Activity, Paintbrush
 } from 'lucide-react'
 import { DEV_PIN, COLLECTIONS } from '../../../../constants'
 import { updateAppConfig, updateCatalogFilters, resetAppData } from '../../../../services/appConfigService'
@@ -12,6 +12,7 @@ import { signOutAdmin } from '../../../../services/authService'
 import useAuthStore from '../../../../store/authStore'
 import { useNavigate } from 'react-router-dom'
 import DeveloperBillingPanel from './DeveloperBillingPanel'
+import AppearanceSettings from './AppearanceSettings'
 
 export default function DeveloperSettings({ 
   formData, 
@@ -21,7 +22,9 @@ export default function DeveloperSettings({
   isSaving,
   setIsSaving,
   activeSubSection,
-  setActiveSubSection
+  setActiveSubSection,
+  setIsThemeModalOpen,
+  handleSaveThemeConfig
 }) {
   const navigate = useNavigate()
   const [isDevAuthenticated, setIsDevAuthenticated] = useState(false)
@@ -190,7 +193,7 @@ export default function DeveloperSettings({
                   setDevPinInput(val)
                   if (devPinError) setDevPinError(false)
                 }}
-                placeholder="••••"
+                placeholder="****"
                 className={`w-28 h-12 text-center rounded-xl bg-surface-2 border text-xl tracking-[0.4em] font-black text-app focus:outline-none focus:border-primary transition-all bg-transparent ${
                   devPinError ? 'border-red-500 focus:border-red-500' : 'border-app'
                 }`}
@@ -232,6 +235,14 @@ export default function DeveloperSettings({
 
           <div className="grid grid-cols-1 gap-4">
             {[
+              {
+                id: 'dev-apariencia',
+                label: 'Apariencia y Colores',
+                description: 'Tema, paleta y modo oscuro de la tienda',
+                icon: Paintbrush,
+                iconBg: 'bg-purple-500/10 hover:bg-purple-500/15',
+                iconColor: 'text-purple-500'
+              },
               {
                 id: 'dev-filtros',
                 label: 'Filtros del Catálogo',
@@ -336,7 +347,7 @@ export default function DeveloperSettings({
                     {formData.catalogFilters.customAttributes?.map((attr, index) => (
                       <div key={attr.id} className="flex flex-col sm:flex-row sm:items-start gap-3 p-3 bg-surface-2 border border-app rounded-xl">
                         <div className="flex-1 w-full">
-                          <input type="text" placeholder="Nombre (Ej. Marca)" value={attr.name}
+                          <input type="text" placeholder="Ingresa el nombre del nuevo atributo" value={attr.name}
                             onChange={(e) => handleCustomAttributeChange(index, 'name', e.target.value)}
                             className="w-full h-10 px-3 rounded-lg border border-app bg-surface text-app focus:border-primary outline-none text-sm bg-transparent" />
                         </div>
@@ -349,7 +360,7 @@ export default function DeveloperSettings({
                         </div>
                         {attr.type === 'select' && (
                           <div className="flex-[1.5] w-full">
-                            <input type="text" placeholder="Opciones (Ej: Nike, Adidas)"
+                            <input type="text" placeholder="Ingresa las opciones separadas por comas"
                               value={attr.options ? attr.options.join(', ') : ''}
                               onChange={(e) => handleCustomAttributeChange(index, 'options', e.target.value)}
                               className="w-full h-10 px-3 rounded-lg border border-app bg-surface text-app focus:border-primary outline-none text-sm bg-transparent" />
@@ -413,7 +424,7 @@ export default function DeveloperSettings({
                 </label>
                 <input
                   type="text"
-                  placeholder="Escribe aquí..."
+                  placeholder="Escribe el texto detallado aquí"
                   id="confirmRestoreInput"
                   value={confirmRestoreText}
                   className="w-full h-11 px-4 rounded-xl bg-surface border border-red-500/20 text-app focus:outline-none focus:border-red-500 font-bold tracking-wider bg-transparent text-sm"
@@ -447,7 +458,7 @@ export default function DeveloperSettings({
                 type="tel"
                 value={formData.developerPhone || ''}
                 onChange={(e) => setFormData({ ...formData, developerPhone: e.target.value })}
-                placeholder="Ej. 573001234567"
+                placeholder="Ingresa el número de celular (10 dígitos)"
                 className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors bg-transparent text-sm"
               />
               <p className="text-xs text-muted mt-2">
@@ -575,7 +586,7 @@ export default function DeveloperSettings({
                             />
                             <input
                               type="text"
-                              placeholder="#EF4444"
+                              placeholder="Ingresa el color hexadecimal (ej: #000000)"
                               value={formData.commercialOptimization.tools.smartTags.bestSeller?.bg || ''}
                               onChange={(e) => {
                                 const tags = { ...formData.commercialOptimization.tools.smartTags }
@@ -601,7 +612,7 @@ export default function DeveloperSettings({
                             />
                             <input
                               type="text"
-                              placeholder="#FFFFFF"
+                              placeholder="Ingresa el color hexadecimal (ej: #000000)"
                               value={formData.commercialOptimization.tools.smartTags.bestSeller?.textCol || ''}
                               onChange={(e) => {
                                 const tags = { ...formData.commercialOptimization.tools.smartTags }
@@ -658,7 +669,7 @@ export default function DeveloperSettings({
                             />
                             <input
                               type="text"
-                              placeholder="#F59E0B"
+                              placeholder="Ingresa el color hexadecimal (ej: #000000)"
                               value={formData.commercialOptimization.tools.smartTags.unmissableOffer?.bg || ''}
                               onChange={(e) => {
                                 const tags = { ...formData.commercialOptimization.tools.smartTags }
@@ -684,7 +695,7 @@ export default function DeveloperSettings({
                             />
                             <input
                               type="text"
-                              placeholder="#FFFFFF"
+                              placeholder="Ingresa el color hexadecimal (ej: #000000)"
                               value={formData.commercialOptimization.tools.smartTags.unmissableOffer?.textCol || ''}
                               onChange={(e) => {
                                 const tags = { ...formData.commercialOptimization.tools.smartTags }
@@ -755,7 +766,7 @@ export default function DeveloperSettings({
                             />
                             <input
                               type="text"
-                              placeholder="#3B82F6"
+                              placeholder="Ingresa el color hexadecimal (ej: #000000)"
                               value={formData.commercialOptimization.tools.smartTags.lastUnit?.bg || ''}
                               onChange={(e) => {
                                 const tags = { ...formData.commercialOptimization.tools.smartTags }
@@ -781,7 +792,7 @@ export default function DeveloperSettings({
                             />
                             <input
                               type="text"
-                              placeholder="#FFFFFF"
+                              placeholder="Ingresa el color hexadecimal (ej: #000000)"
                               value={formData.commercialOptimization.tools.smartTags.lastUnit?.textCol || ''}
                               onChange={(e) => {
                                 const tags = { ...formData.commercialOptimization.tools.smartTags }
@@ -852,7 +863,7 @@ export default function DeveloperSettings({
                             />
                             <input
                               type="text"
-                              placeholder="#10B981"
+                              placeholder="Ingresa el color hexadecimal (ej: #000000)"
                               value={formData.commercialOptimization.tools.smartTags.newProduct?.bg || ''}
                               onChange={(e) => {
                                 const tags = { ...formData.commercialOptimization.tools.smartTags }
@@ -878,7 +889,7 @@ export default function DeveloperSettings({
                             />
                             <input
                               type="text"
-                              placeholder="#FFFFFF"
+                              placeholder="Ingresa el color hexadecimal (ej: #000000)"
                               value={formData.commercialOptimization.tools.smartTags.newProduct?.textCol || ''}
                               onChange={(e) => {
                                 const tags = { ...formData.commercialOptimization.tools.smartTags }
@@ -968,7 +979,19 @@ export default function DeveloperSettings({
           </div>
         </div>
       )}
-
+      
+      {/* 6. Subsección: Apariencia y Colores */}
+      {activeSubSection === 'dev-apariencia' && (
+        <AppearanceSettings 
+          formData={formData} 
+          setFormData={setFormData} 
+          config={config} 
+          setSaveMessage={setSaveMessage} 
+          setIsThemeModalOpen={setIsThemeModalOpen}
+          isSaving={isSaving}
+          handleSaveConfig={handleSaveThemeConfig}
+        />
+      )}
 
     </div>
   )

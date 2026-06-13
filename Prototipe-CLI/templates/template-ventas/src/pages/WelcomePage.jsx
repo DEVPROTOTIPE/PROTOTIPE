@@ -130,7 +130,7 @@ export default function WelcomePage() {
           {/* Solo se muestra el nombre si NO hay logo */}
           {!appIcon && (
             <h1 className="text-4xl md:text-5xl font-black text-app tracking-tight mb-3">
-              {appName || 'Mi Tienda'}
+              {appName}
             </h1>
           )}
 

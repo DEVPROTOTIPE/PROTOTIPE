@@ -18,6 +18,7 @@ import { getClientByPhone, saveClientProfile, getAllClients } from '../../servic
 import usePortalStore from '../../store/portalStore'
 import useAppConfigStore from '../../store/appConfigStore'
 import { formatCurrency } from '../../utils/formatters'
+import LazyImage from '../../components/ui/LazyImage'
 import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS } from '../../constants'
 import { getCssColor } from '../../utils/colors'
 import { useConnectivityStore } from '../../store/connectivityStore'
@@ -419,7 +420,7 @@ export default function PortalVendedor() {
           {saleMode === 'custom' ? (
             <div className="portal-custom-form">
               <p className="portal-custom-title"><FileText size={16} /> Producto personalizado</p>
-              <input className="portal-input" placeholder="Nombre del producto" value={customItem.nombre}
+              <input className="portal-input" placeholder="Ingresa el nombre del producto" value={customItem.nombre}
                 onChange={e => setCustomItem(p => ({ ...p, nombre: e.target.value }))} />
               <input className="portal-input" placeholder="Detalles / Descripción (opcional)" value={customItem.descripcion}
                 onChange={e => setCustomItem(p => ({ ...p, descripcion: e.target.value }))} />
@@ -436,7 +437,7 @@ export default function PortalVendedor() {
               {/* Búsqueda */}
               <div className="portal-search-box">
                 <Search size={16} />
-                <input className="portal-search-input" placeholder="Buscar producto..." value={searchTerm}
+                <input className="portal-search-input" placeholder="Escribe el nombre del producto para filtrar" value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)} />
                 {searchTerm && <button onClick={() => setSearchTerm('')}><X size={14} /></button>}
               </div>
@@ -461,7 +462,7 @@ export default function PortalVendedor() {
                         className={`portal-product-card ${stock <= 0 ? 'portal-product-card--agotado' : ''}`}
                         onClick={() => stock > 0 && handleProductClick(product)}>
                         <div className="portal-product-img">
-                          {product.imageUrl ? <img src={product.imageUrl} alt={product.nombre} /> : <Package size={28} />}
+                          {product.imageUrl ? <LazyImage src={product.imageUrl} alt={product.nombre} /> : <Package size={28} />}
                           <span className={`portal-stock-badge ${stock <= 0 ? 'portal-stock-badge--agotado' : stock <= 5 ? 'portal-stock-badge--low' : ''}`}>
                             {stock <= 0 ? 'Agotado' : `${stock} und.`}
                           </span>
@@ -559,7 +560,7 @@ export default function PortalVendedor() {
               <div className="portal-section">
                 <p className="portal-section-title"><User size={15} /> Cliente</p>
                 <div className="portal-client-search">
-                  <input className="portal-input" type="tel" placeholder="Celular (10 dígitos)" maxLength={10}
+                  <input className="portal-input" type="tel" placeholder="Ingresa los 10 dígitos de tu celular" maxLength={10}
                     value={celular} onChange={e => setCelular(e.target.value.replace(/\D/g, ''))} />
                   {clientSearchStatus === 'searching' && <Loader2 size={15} className="animate-spin portal-input-icon" />}
                   {clientSearchStatus === 'found' && <CheckCircle2 size={15} className="portal-input-icon portal-input-icon--ok" />}
@@ -576,7 +577,7 @@ export default function PortalVendedor() {
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                       className="portal-client-register">
                       <p>Cliente no encontrado. Registrar:</p>
-                      <input className="portal-input" placeholder="Nombre completo" value={clientName}
+                      <input className="portal-input" placeholder="Ingresa el nombre y apellido del cliente" value={clientName}
                         onChange={e => setClientName(e.target.value)} />
                       <button className="portal-register-btn" disabled={!clientName.trim() || isRegisteringClient} onClick={registerClient}>
                         {isRegisteringClient ? <Loader2 size={14} className="animate-spin" /> : null} Registrar
@@ -703,7 +704,7 @@ export default function PortalVendedor() {
                   </div>
                 )}
 
-                <textarea className="portal-notes mt-2" placeholder="Notas adicionales (opcional)" rows={2} value={notes} onChange={e => setNotes(e.target.value)} />
+                <textarea className="portal-notes mt-2" placeholder="Escribe observaciones o notas adicionales (opcional)" rows={2} value={notes} onChange={e => setNotes(e.target.value)} />
               </div>
 
               {/* Total y acción */}

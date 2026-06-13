@@ -158,7 +158,7 @@ export default function PortalBodega() {
             <>
               <div className="portal-search-box shrink-0">
                 <Search size={16} />
-                <input className="portal-search-input" placeholder="Buscar producto..." value={searchTerm}
+                <input className="portal-search-input" placeholder="Escribe el nombre del producto para filtrar" value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)} />
                 {searchTerm && <button onClick={() => setSearchTerm('')}><X size={14} /></button>}
               </div>
@@ -282,7 +282,7 @@ export default function PortalBodega() {
               {/* Cantidad */}
               <div className="portal-section">
                 <p className="portal-section-title">{moveType === 'ajuste' ? 'Nuevo stock total' : 'Cantidad'}</p>
-                <input className="portal-input" type="number" min="1" placeholder="0"
+                <input className="portal-input" type="number" min="1" placeholder="Ingresa la cantidad"
                   value={quantity} onChange={e => setQuantity(e.target.value)} />
               </div>
 

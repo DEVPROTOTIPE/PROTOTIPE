@@ -24,7 +24,19 @@ export function formatCurrency(amount) {
  */
 export function formatDate(date) {
   if (!date) return '—'
-  const d = date?.toDate ? date.toDate() : new Date(date)
+  let d
+  if (date.toDate && typeof date.toDate === 'function') {
+    d = date.toDate()
+  } else if (date instanceof Date) {
+    d = date
+  } else if (typeof date === 'object' && date.seconds !== undefined) {
+    d = new Date(date.seconds * 1000 + Math.floor((date.nanoseconds || 0) / 1000000))
+  } else {
+    d = new Date(date)
+  }
+
+  if (isNaN(d.getTime())) return '—'
+
   return d.toLocaleDateString('es-CO', {
     day: 'numeric',
     month: 'long',
@@ -39,7 +51,19 @@ export function formatDate(date) {
  */
 export function formatTime(date) {
   if (!date) return '—'
-  const d = date?.toDate ? date.toDate() : new Date(date)
+  let d
+  if (date.toDate && typeof date.toDate === 'function') {
+    d = date.toDate()
+  } else if (date instanceof Date) {
+    d = date
+  } else if (typeof date === 'object' && date.seconds !== undefined) {
+    d = new Date(date.seconds * 1000 + Math.floor((date.nanoseconds || 0) / 1000000))
+  } else {
+    d = new Date(date)
+  }
+
+  if (isNaN(d.getTime())) return '—'
+
   return d.toLocaleTimeString('es-CO', {
     hour: 'numeric',
     minute: '2-digit',

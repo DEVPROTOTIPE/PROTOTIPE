@@ -1302,3 +1302,8 @@ select option {
 .animate-shimmer-infinite {
   animation: shimmer 5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
 }
+
+/* Bloqueo global de scroll de body cuando hay un modal/overlay de pantalla completa activo */
+body:has(.fixed.inset-0) {
+  overflow: hidden !important;
+}

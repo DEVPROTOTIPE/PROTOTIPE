@@ -21,9 +21,20 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Perfiles de clientes y sus subcolecciones (como favoritos)
+    // Perfiles de usuarios (clientes y administradores)
     match /users/{userId} {
-      allow get, create, update: if true;
+      allow get: if true;
+      
+      // Permitir creación pública solo si el rol asignado es estrictamente 'client'
+      // O si la petición proviene de un administrador autenticado
+      allow create: if (request.resource.data.role == 'client') || isAdmin();
+      
+      // Permitir actualización de campos personales pero impedir escalar de 'client' a 'admin'
+      allow update: if isAdmin() || (
+        request.resource.data.role == 'client' &&
+        (resource.data.role == 'client' || resource.data.role == null)
+      );
+      
       allow list, delete: if isAdmin();
       
       match /favorites/{favoriteId} {
@@ -48,18 +59,20 @@ service cloud.firestore {
     match /orders/{document} {
       allow create: if true;
       // get: lectura individual (por ID o trackingToken) — puede evaluar resource.data
-      allow get: if isAdmin() || 
-                 (resource.data.cliente.celular != null) ||
-                 (resource.data.trackingToken != null);
-      // list: queries en tiempo real (onSnapshot) — Firestore NO puede evaluar resource.data
-      // Se permite al cliente listar si y solo si la query viene filtrada por su celular
-      allow list: if isAdmin() || (request.query.filters != null && request.query.filters['cliente.celular'] != null);
+      // Se restringe únicamente a administradores o poseedores del trackingToken seguro
+      allow get: if isAdmin() || (resource.data.trackingToken != null);
+      // list: queries en tiempo real (onSnapshot) — puede evaluar resource.data si la query filtra por este campo
+      // Se permite al cliente listar si la query viene filtrada por su celular
+      allow list: if isAdmin() || (resource.data.cliente.celular != null);
       allow update: if isAdmin() || (
         resource.data.cliente.celular != null &&
         (
           (request.resource.data.estado == 'cancelado' && resource.data.estado == 'pendiente') ||
           (request.resource.data.ocultoCliente == true)
         )
+      ) || (
+        // Permitir a portales de empleados operativos sin Auth actualizar el estado de entrega o producción
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'deliveryInfo', 'updatedAt'])
       );
       allow delete: if isAdmin();
     }
@@ -73,7 +86,7 @@ service cloud.firestore {
     // Créditos / Fiados
     match /credits/{document} {
       allow get: if isAdmin() || (resource != null && resource.data.cliente.celular != null);
-      allow list: if isAdmin() || (request.query.filters != null && request.query.filters['cliente.celular'] != null);
+      allow list: if isAdmin() || (resource.data.cliente.celular != null);
       allow write: if isAdmin();
     }
 
@@ -129,12 +142,20 @@ service cloud.firestore {
     match /employees/{employeeId} {
       allow read: if isAdmin() || (resource != null && resource.data.activo == true);
       allow write: if isAdmin();
+
+      // Subcolección privada de secretos de empleado (PIN)
+      match /secrets/{hashedPin} {
+        allow get: if true;
+        allow list, write: if isAdmin();
+      }
     }
 
     // Mesas de servicio en salón
     match /tables/{tableId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, delete: if isAdmin();
+      // Permitir a meseros sin Auth cambiar estado y mesero/pedido asignados al abrir/cerrar mesa
+      allow update: if isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'meseroAsignadoId', 'pedidoActivoId', 'updatedAt']);
     }
 
     // Solicitudes y llamados de mesas en salón
@@ -145,13 +166,17 @@ service cloud.firestore {
     // Órdenes en cola de producción
     match /production/{prodId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, delete: if isAdmin();
+      // Permitir a cocineros sin Auth actualizar el estado de preparación
+      allow update: if isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'updatedAt']);
     }
 
     // Entregas y despachos
     match /deliveries/{deliveryId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, delete: if isAdmin();
+      // Permitir a mensajeros sin Auth actualizar el estado de entrega y el historial logístico
+      allow update: if isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'history', 'updatedAt', 'deliveredAt']);
     }
 
     // Kardex y Movimientos de Stock

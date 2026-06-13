@@ -11,7 +11,7 @@ export default function CustomSelect({
   value,
   onChange,
   options = [],
-  placeholder = 'Seleccionar...',
+  placeholder="Elige una opción de la lista",
   emptyOption = null,
   dropUp = false,
 }) {

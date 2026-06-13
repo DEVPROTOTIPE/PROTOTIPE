@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../config/firebaseConfig'
+import { auth, db } from '../config/firebaseConfig'
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import useAuthStore from '../store/authStore'
-import { ROLES } from '../constants'
+import useAppConfigStore from '../store/appConfigStore'
+import { ROLES, COLLECTIONS } from '../constants'
 
 /**
  * Hook para inicializar la autenticación de la aplicación.
@@ -25,6 +27,35 @@ export default function useAuthInit() {
       if (firebaseUser) {
         // Hay un administrador autenticado en Firebase
         setAdmin(firebaseUser) // setAdmin pone isLoading en false automáticamente
+
+        // Auto-recrear el perfil del administrador en Firestore si se eliminó de la colección de users
+        const userRef = doc(db, COLLECTIONS.USERS, firebaseUser.uid)
+        getDoc(userRef)
+          .then((userSnap) => {
+            if (!userSnap.exists()) {
+              const configState = useAppConfigStore.getState()
+              const finalName = configState.sellerName || 'Administrador'
+              const finalWhatsapp = configState.whatsappAdmin || ''
+
+              const adminData = {
+                email: firebaseUser.email,
+                role: 'admin',
+                nombre: finalName,
+                whatsapp: finalWhatsapp,
+                updatedAt: serverTimestamp()
+              }
+              setDoc(userRef, adminData, { merge: true })
+                .then(() => {
+                  console.log('[useAuthInit] Admin profile recreated successfully in Firestore.')
+                })
+                .catch((err) => {
+                  console.error('[useAuthInit] Error auto-recreating admin profile in Firestore:', err)
+                })
+            }
+          })
+          .catch((err) => {
+            console.error('[useAuthInit] Error checking admin profile in Firestore:', err)
+          })
       } else {
         // Firebase dice que no hay nadie autenticado.
         // Si nuestro rol era ADMIN, cerramos su sesión local.
@@ -43,3 +74,4 @@ export default function useAuthInit() {
     }
   }, []) // Solo se ejecuta una vez al montar la App
 }
+

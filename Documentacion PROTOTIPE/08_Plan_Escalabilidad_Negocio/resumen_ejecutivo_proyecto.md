@@ -36,7 +36,7 @@ Servicio Node.js local y CLI interactivo ubicado en `D:\PROTOTIPE\Prototipe-CLI`
 *   **`generator.js` (Orquestador de Código):** Realiza la clonación física del repositorio semilla (`template-core-seed` o plantillas preconfiguradas), genera los archivos `.env.local` y `.firebaserc`, inyecta la configuración del nicho (`niche.json`) y el branding (colores HSL y metadatos SEO en `index.html`), ejecuta la instalación de dependencias `npm install` y construye el build de producción para desplegar automáticamente a Firebase Hosting.
 
 ### 2.3 — Plantilla Semilla / App Activa (`App Ventas`)
-El core de la aplicación de ventas y POS ubicado en `D:\Aplicaciones\App Ventas`.
+El core de la aplicación de ventas y POS ubicado en `D:\PROTOTIPE\Plantillas Core\App Ventas`.
 *   **Frontend Stack:** React 19 + Tailwind CSS v4 + Zustand v5.
 *   **Servicio de Base de Datos:** Firebase v12 (Firestore, Authentication, Storage, Cloud Messaging para notificaciones push PWA).
 *   **Lógica Contable y Transaccional:**

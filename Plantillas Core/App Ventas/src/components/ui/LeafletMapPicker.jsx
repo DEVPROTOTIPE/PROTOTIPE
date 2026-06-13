@@ -283,7 +283,7 @@ export default function LeafletMapPicker({
                   handleSearch()
                 }
               }}
-              placeholder="Buscar dirección (ej: Carrera 15 # 12-45)..."
+              placeholder="Escribe la dirección física a buscar"
               className="w-full h-11 pl-4 pr-12 rounded-xl bg-surface border border-app text-xs text-app focus:outline-none focus:border-primary transition-colors"
             />
             <button

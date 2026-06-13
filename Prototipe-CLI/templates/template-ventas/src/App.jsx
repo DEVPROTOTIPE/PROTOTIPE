@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useLayoutEffect } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { MotionConfig, motion, AnimatePresence } from 'framer-motion'
 import AppRoutes from './routes/AppRoutes'
@@ -53,7 +53,7 @@ function AppErrorFallback({ error }) {
 function ThemeApplier() {
   const { theme, activeSeasonalEvent, isDarkMode, appFont, appRadius, actionColor, animationsEnabled } = useAppConfigStore()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement
     
     // Aplicar atributo data-theme y clase dark para utilidades Tailwind
@@ -132,11 +132,25 @@ import { updateDynamicManifest } from './utils/dynamicManifest'
 import { useConnectivityStore } from './store/connectivityStore'
 
 export default function App() {
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    if (useAppConfigStore.persist.hasHydrated()) {
+      setHydrated(true)
+    } else {
+      const unsub = useAppConfigStore.persist.onFinishHydration(() => {
+        setHydrated(true)
+      })
+      return unsub
+    }
+  }, [])
+
   // Inicialización de la sesión global híbrida (LocalStorage + Firebase)
   useAuthInit()
   
   // Sincronización global Firestore <-> Zustand en tiempo real
   useAppConfigSync()
+
 
   const isOnline = useConnectivityStore((state) => state.isOnline)
   const [syncNotification, setSyncNotification] = useState(null)
@@ -256,7 +270,8 @@ export default function App() {
   }, []);
 
   // Determinar si es la primera carga absoluta (sin caché local) y aún no se ha descargado de Firestore
-  const isFirstLoad = !isLoaded && !localStorage.getItem('app-config-storage')
+  const hasCachedConfig = appName && appName !== 'Mi Tienda'
+  const isFirstLoad = !isLoaded && !hasCachedConfig && !localStorage.getItem('app_config_loaded')
 
   // Actualizar el manifest PWA y el favicon en tiempo real cuando cambie el nombre o logo
   useEffect(() => {
@@ -281,6 +296,8 @@ export default function App() {
       }
     }
   }, [appName, appIcon, pwaAppName, pwaAppIcon, pwaUseBrandIcon, theme, activeSeasonalEvent, isDarkMode])
+
+  if (!hydrated) return null
 
   if (isFirstLoad) {
     return (

@@ -448,7 +448,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
       const orderData = {
         cliente: {
           nombre: formData.nombre,
-          celular: formData.celular,
+          celular: formData.celular.replace(/\D/g, ''),
           ...(isDomicilio && {
             direccion: formData.direccion,
             barrio: formData.barrio,
@@ -707,7 +707,7 @@ ${e.dinero} *Total:* ${formatCurrency(snap?.total || 0)}${notasLine}`
                   <div className="relative">
                     <input
                       type="tel"
-                      placeholder="Ej: 300 123 4567"
+                      placeholder="Ingresa el número de celular (10 dígitos)"
                       value={formData.celular}
                       onChange={e => {
                         // Resetear lookup al cambiar el número
@@ -852,21 +852,21 @@ ${e.dinero} *Total:* ${formatCurrency(snap?.total || 0)}${notasLine}`
 
                     <input
                       type="text"
-                      placeholder="Ciudad *"
+                      placeholder="Ingresa la ciudad de entrega"
                       value={formData.ciudad}
                       onChange={e => setFormData({ ...formData, ciudad: e.target.value })}
                       className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors"
                     />
                     <input
                       type="text"
-                      placeholder="Barrio o sector *"
+                      placeholder="Ingresa el barrio o sector"
                       value={formData.barrio}
                       onChange={e => setFormData({ ...formData, barrio: e.target.value })}
                       className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors"
                     />
                     <input
                       type="text"
-                      placeholder="Dirección exacta *"
+                      placeholder="Ingresa la dirección detallada"
                       value={formData.direccion}
                       onChange={e => setFormData({ ...formData, direccion: e.target.value })}
                       className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors"
@@ -1093,7 +1093,7 @@ ${e.dinero} *Total:* ${formatCurrency(snap?.total || 0)}${notasLine}`
                       <div className="flex gap-2">
                         <input
                           type="text"
-                          placeholder="Ej: BIENVENIDA10"
+                          placeholder="Ingresa el código del cupón de descuento"
                           value={couponCodeInput}
                           onChange={e => setCouponCodeInput(e.target.value)}
                           className="flex-1 px-3 h-11 bg-surface-2 border border-app rounded-xl text-sm font-mono font-bold uppercase tracking-wider text-app focus:outline-none focus:border-primary transition-colors"

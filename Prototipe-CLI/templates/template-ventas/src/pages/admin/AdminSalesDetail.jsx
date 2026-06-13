@@ -1,7 +1,7 @@
 import { useMemo, useState, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { TrendingUp, BarChart2, ChevronLeft, ArrowLeft, ShoppingBag, DollarSign, Package, CalendarDays, ChevronDown, FileText } from 'lucide-react'
+import { TrendingUp, BarChart2, ChevronLeft, ArrowLeft, ShoppingBag, DollarSign, Package, CalendarDays, ChevronDown, FileText, CreditCard } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import BackButton from '../../components/ui/BackButton'
 import { useOrders } from '../../hooks/useOrders'
@@ -15,9 +15,13 @@ import useAppConfigStore from '../../store/appConfigStore'
 // ─── Helpers de fecha ────────────────────────────────────────────────────────
 function toLocalDate(ts) {
   if (!ts) return null
-  if (ts.toDate) return ts.toDate()
+  if (ts.toDate && typeof ts.toDate === 'function') return ts.toDate()
   if (ts instanceof Date) return ts
-  return new Date(ts)
+  if (typeof ts === 'object' && ts.seconds !== undefined) {
+    return new Date(ts.seconds * 1000 + Math.floor((ts.nanoseconds || 0) / 1000000))
+  }
+  const parsed = new Date(ts)
+  return isNaN(parsed.getTime()) ? null : parsed
 }
 
 function isoToday() {
@@ -42,6 +46,12 @@ export default function AdminSalesDetail() {
   const handleExportSalesReportPDF = async () => {
     const { exportSalesReportPDF } = await import('../../services/pdfService')
     exportSalesReportPDF({ dateFrom, dateTo, orders, products })
+  }
+
+  // ─── EXPORTACIÓN PDF DE CUENTAS POR COBRAR Y DEUDAS ────────────────────────
+  const handleExportCreditsReportPDF = async () => {
+    const { exportCreditsReportPDF } = await import('../../services/pdfService')
+    exportCreditsReportPDF({ orders })
   }
 
   // ─── EXPORTACIÓN PDF DE ROTACIÓN E INVENTARIO ──────────────────────────────
@@ -101,7 +111,7 @@ export default function AdminSalesDetail() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="p-4 md:p-8 max-w-4xl mx-auto flex flex-col gap-6"
+      className="p-4 md:p-8 max-w-7xl mx-auto flex flex-col gap-6"
     >
       {/* Botón de retroceso y Título */}
       <div className="flex items-center gap-3">
@@ -124,7 +134,7 @@ export default function AdminSalesDetail() {
             <CustomDatePicker
               value={dateFrom}
               onChange={e => setDateFrom(e.target.value)}
-              placeholder="Fecha inicial"
+              placeholder="Elige la fecha inicial"
             />
           </div>
           <div>
@@ -132,7 +142,7 @@ export default function AdminSalesDetail() {
             <CustomDatePicker
               value={dateTo}
               onChange={e => setDateTo(e.target.value)}
-              placeholder="Fecha final"
+              placeholder="Elige la fecha final"
             />
           </div>
         </div>
@@ -176,7 +186,7 @@ export default function AdminSalesDetail() {
               <FileText size={18} className="text-primary" />
               <h2 className="font-bold text-sm text-app uppercase tracking-wider">Reportes y Exportación</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={`grid grid-cols-1 ${creditsEnabled ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
               <button
                 onClick={handleExportSalesReportPDF}
                 className="flex items-center gap-3 p-4 bg-surface hover:bg-surface-2 active:scale-[0.98] transition-all rounded-2xl shadow-sm text-left group cursor-pointer"
@@ -202,6 +212,21 @@ export default function AdminSalesDetail() {
                   <span className="text-[10px] text-muted block">Ranking completo y recomendaciones inteligentes</span>
                 </div>
               </button>
+
+              {creditsEnabled && (
+                <button
+                  onClick={handleExportCreditsReportPDF}
+                  className="flex items-center gap-3 p-4 bg-surface hover:bg-surface-2 active:scale-[0.98] transition-all rounded-2xl shadow-sm text-left group cursor-pointer"
+                >
+                  <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <CreditCard size={20} />
+                  </div>
+                  <div>
+                    <span className="font-bold text-app text-sm block">Cuentas por Cobrar y Deudas</span>
+                    <span className="text-[10px] text-muted block">Auditoría de cartera, abonos y deudores</span>
+                  </div>
+                </button>
+              )}
             </div>
           </div>
 

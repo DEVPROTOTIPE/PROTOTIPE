@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CreditCard, Search, DollarSign, History, CheckCircle, ChevronDown, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAddPayment } from '../../hooks/useCredits'
+import { useOrders } from '../../hooks/useOrders'
 import { paymentSchema } from '../../schemas/creditSchemas'
 import { formatCurrency } from '../../utils/formatters'
 import * as creditService from '../../services/creditService'
@@ -11,6 +12,12 @@ export default function AdminCredits() {
   const [credits, setCredits] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const { mutate: addPayment, isPending } = useAddPayment()
+  const { data: orders = [] } = useOrders()
+
+  const handleExportCreditsReportPDF = async () => {
+    const { exportCreditsReportPDF } = await import('../../services/pdfService')
+    exportCreditsReportPDF({ orders })
+  }
 
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedId, setExpandedId] = useState(null)
@@ -122,7 +129,7 @@ export default function AdminCredits() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-4 md:p-8 max-w-6xl mx-auto"
+      className="p-4 md:p-8 max-w-7xl mx-auto"
     >
       <div className="flex items-center gap-3 mb-8">
         <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center">
@@ -131,17 +138,25 @@ export default function AdminCredits() {
         <h1 className="text-2xl font-bold text-app">Créditos y Fiados</h1>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
-        {/* Buscador */}
-        <div className="relative max-w-md flex-1">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-          <input
-            type="text"
-            placeholder="Buscar cliente o #pedido..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors text-sm"
-          />
+      <div className="flex flex-col md:flex-row gap-4 justify-between mb-6">
+        {/* Buscador y Botón de Reporte */}
+        <div className="flex flex-col sm:flex-row items-center gap-2.5 flex-1 max-w-2xl">
+          <div className="relative flex-1 w-full">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <input
+              type="text"
+              placeholder="Escribe el nombre del cliente o número de pedido para buscar"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors text-sm"
+            />
+          </div>
+          <button
+            onClick={handleExportCreditsReportPDF}
+            className="w-full sm:w-auto h-11 px-4 bg-surface hover:bg-surface-2 text-app border border-app rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-sm cursor-pointer whitespace-nowrap text-sm"
+          >
+            <CreditCard size={18} className="text-primary" /> <span>Exportar Cartera</span>
+          </button>
         </div>
 
         {/* Tabs */}
@@ -343,7 +358,7 @@ export default function AdminCredits() {
                     value={paymentMonto}
                     onChange={(e) => setPaymentMonto(e.target.value)}
                     className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-lg font-bold"
-                    placeholder="Ej: 50000"
+                    placeholder="Ingresa el valor numérico"
                   />
                   {paymentError && <p className="text-xs text-error mt-1">{paymentError}</p>}
                 </div>
@@ -355,7 +370,7 @@ export default function AdminCredits() {
                     value={paymentNota}
                     onChange={(e) => setPaymentNota(e.target.value)}
                     className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm"
-                    placeholder="Ej: Pago en efectivo en el local"
+                    placeholder="Ingresa una descripción del método o lugar de pago"
                   />
                 </div>
 

@@ -1,15 +1,21 @@
 import { Link, Save } from 'lucide-react'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { auth, db } from '../../../../config/firebaseConfig'
+import useAuthStore from '../../../../store/authStore'
 import { updateAppConfig } from '../../../../services/appConfigService'
 import MobilePreview from '../components/MobilePreview'
 
 export default function BrandSettings({ formData, setFormData, config, setSaveMessage }) {
   const handleSave = async () => {
     try {
+      const cleanWhatsapp = (formData.whatsappAdmin || '').replace(/\D/g, '')
+
+      // 1. Actualizar configuración global
       await updateAppConfig({ 
         appIcon: formData.appIcon, 
         appName: formData.appName, 
         sellerName: formData.sellerName,
-        whatsappAdmin: formData.whatsappAdmin || '',
+        whatsappAdmin: cleanWhatsapp,
         welcomeWavesEnabled: formData.welcomeWavesEnabled ?? true,
         loginTrustMessage: formData.loginTrustMessage || '',
         slogan: formData.slogan || '',
@@ -17,11 +23,12 @@ export default function BrandSettings({ formData, setFormData, config, setSaveMe
         pwaAppIcon: formData.pwaAppIcon || '',
         pwaUseBrandIcon: formData.pwaUseBrandIcon || false
       })
+
       config.setConfig({
         appIcon: formData.appIcon, 
         appName: formData.appName, 
         sellerName: formData.sellerName,
-        whatsappAdmin: formData.whatsappAdmin || '',
+        whatsappAdmin: cleanWhatsapp,
         welcomeWavesEnabled: formData.welcomeWavesEnabled ?? true,
         loginTrustMessage: formData.loginTrustMessage || '',
         slogan: formData.slogan || '',
@@ -29,11 +36,34 @@ export default function BrandSettings({ formData, setFormData, config, setSaveMe
         pwaAppIcon: formData.pwaAppIcon || '',
         pwaUseBrandIcon: formData.pwaUseBrandIcon || false
       })
-      setSaveMessage({ type: 'success', text: 'Identidad de marca y PWA guardados correctamente.' })
+
+      // 2. Sincronizar el perfil del usuario administrador actual en Firestore
+      const currentUser = auth.currentUser
+      if (currentUser) {
+        const userRef = doc(db, 'users', currentUser.uid)
+        await setDoc(userRef, {
+          nombre: formData.sellerName.trim(),
+          whatsapp: cleanWhatsapp,
+          updatedAt: serverTimestamp()
+        }, { merge: true })
+
+        // 3. Sincronizar el store local de auth
+        const authState = useAuthStore.getState()
+        if (authState.user && authState.role === 'admin') {
+          useAuthStore.setState({
+            user: {
+              ...authState.user,
+              displayName: formData.sellerName.trim()
+            }
+          })
+        }
+      }
+
+      setSaveMessage({ type: 'success', text: 'Identidad de marca, perfil de vendedor y PWA guardados correctamente.' })
       setTimeout(() => setSaveMessage(null), 3000)
     } catch (e) {
       console.error(e)
-      setSaveMessage({ type: 'error', text: 'Error al actualizar la identidad de marca.' })
+      setSaveMessage({ type: 'error', text: 'Error al actualizar la identidad de marca y perfil.' })
     }
   }
 
@@ -47,7 +77,7 @@ export default function BrandSettings({ formData, setFormData, config, setSaveMe
               type="text"
               value={formData.appName}
               onChange={(e) => setFormData({ ...formData, appName: e.target.value })}
-              placeholder="Ej. Mi Tienda Smart"
+              placeholder="Ingresa el nombre comercial de tu negocio"
               className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors"
             />
           </div>
@@ -57,7 +87,7 @@ export default function BrandSettings({ formData, setFormData, config, setSaveMe
               type="text"
               value={formData.sellerName}
               onChange={(e) => setFormData({ ...formData, sellerName: e.target.value })}
-              placeholder="Ej. Sergio"
+              placeholder="Ingresa el nombre del administrador de la tienda"
               className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors"
             />
           </div>
@@ -70,7 +100,7 @@ export default function BrandSettings({ formData, setFormData, config, setSaveMe
               type="tel"
               value={formData.whatsappAdmin}
               onChange={(e) => setFormData({ ...formData, whatsappAdmin: e.target.value })}
-              placeholder="Ej. 573001234567"
+              placeholder="Ingresa el número de celular (10 dígitos)"
               className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors"
             />
           </div>
@@ -83,7 +113,7 @@ export default function BrandSettings({ formData, setFormData, config, setSaveMe
                   type="text"
                   value={formData.appIcon}
                   onChange={(e) => setFormData({ ...formData, appIcon: e.target.value })}
-                  placeholder="https://ejemplo.com/logo.png"
+                  placeholder="Ingresa el enlace web (http/https)"
                   className="w-full h-12 pl-10 pr-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors"
                 />
               </div>
@@ -100,7 +130,7 @@ export default function BrandSettings({ formData, setFormData, config, setSaveMe
               type="text"
               value={formData.loginTrustMessage}
               onChange={(e) => setFormData({ ...formData, loginTrustMessage: e.target.value })}
-              placeholder="Ej. Tu tienda de confianza"
+              placeholder="Ingresa un mensaje que brinde confianza en la pasarela"
               className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors"
             />
           </div>
@@ -110,10 +140,11 @@ export default function BrandSettings({ formData, setFormData, config, setSaveMe
               type="text"
               value={formData.slogan}
               onChange={(e) => setFormData({ ...formData, slogan: e.target.value })}
-              placeholder="Ej. Lencería y Accesorios para Ti"
+              placeholder="Ingresa el eslogan o frase descriptiva de tu negocio"
               className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors"
             />
           </div>
+
           <div className="flex items-center justify-between p-4 bg-surface-2 rounded-2xl border border-app">
             <div>
               <p className="text-sm font-bold text-app">Ondas animadas en el Logotipo</p>
@@ -158,7 +189,7 @@ export default function BrandSettings({ formData, setFormData, config, setSaveMe
                   type="text"
                   value={formData.pwaAppName}
                   onChange={(e) => setFormData({ ...formData, pwaAppName: e.target.value })}
-                  placeholder="Ej. Moni App"
+                  placeholder="Ingresa el nombre con el que se instalará la aplicación móvil"
                   className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors text-sm"
                 />
               </div>
@@ -174,7 +205,7 @@ export default function BrandSettings({ formData, setFormData, config, setSaveMe
                           type="text"
                           value={formData.pwaAppIcon}
                           onChange={(e) => setFormData({ ...formData, pwaAppIcon: e.target.value })}
-                          placeholder="https://ejemplo.com/icono.png"
+                          placeholder="Ingresa el enlace web (http/https)"
                           className="w-full h-12 pl-10 pr-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors text-sm"
                         />
                       </div>

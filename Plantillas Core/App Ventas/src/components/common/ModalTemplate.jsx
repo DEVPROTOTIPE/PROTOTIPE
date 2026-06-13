@@ -133,7 +133,7 @@ export default function ModalTemplate({
 
             {/* C. Pie de Página (Sticky Footer) */}
             {footerActions && (
-              <div className="p-4 border-t border-app bg-surface shrink-0 flex gap-3">
+              <div className="p-4 border-t border-app bg-surface shrink-0 flex gap-3 relative z-10">
                 {footerActions}
               </div>
             )}

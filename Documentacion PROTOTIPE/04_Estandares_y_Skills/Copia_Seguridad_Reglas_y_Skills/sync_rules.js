@@ -4,13 +4,13 @@ const path = require('path');
 // ─── CONFIGURACIÓN ────────────────────────────────────────────────────────────
 const SOURCE_FILE = path.join(__dirname, 'GEMINI.md');
 const WORKSPACE_DIR = 'D:\\PROTOTIPE';
-const LEGACY_DIR    = 'D:\\Aplicaciones';
 const CLI_TEMPLATES_DIR = path.join(WORKSPACE_DIR, 'Prototipe-CLI', 'templates');
 
 // Delimitadores de la sección POR-CORE (rutas específicas de cada proyecto).
+// Compatibles con GEMINI.md v2.0 (formato ## SECCIÓN NN)
 // Todo lo que esté entre estos dos marcadores se PRESERVA en el destino durante el sync.
-const SECTION_START = '- CONTROL Y BITÁCORA DE TAREAS';
-const SECTION_END   = '- BIBLIOTECA DE COMPONENTES REUTILIZABLES';
+const SECTION_START = '## SECCIÓN 10';
+const SECTION_END   = '## SECCIÓN 13';
 
 console.log('🔄 Iniciando sincronización inteligente de reglas de IA (GEMINI.md)...');
 console.log(`   Fuente de verdad: ${SOURCE_FILE}\n`);
@@ -91,7 +91,6 @@ function scanDirectory(baseDir) {
 
 // Escanear raíces
 scanDirectory(WORKSPACE_DIR);
-scanDirectory(LEGACY_DIR);
 
 // Escanear subcarpetas clave
 scanDirectory(path.join(WORKSPACE_DIR, 'Plantillas Core'));
@@ -165,5 +164,5 @@ console.log(`   Destinos escaneados : ${targets.length}`);
 console.log(`   Sin cambios (ok)    : ${skipped}`);
 console.log(`   Creados nuevos      : ${created}`);
 console.log(`   Actualizados        : ${updated}`);
-console.log(`   Actualizados (rutas per-core preservadas): ${preserved}`);
+console.log(`   Actualizados (sección 10-12 preservada): ${preserved}`);
 console.log(`\n💡 La sección "${SECTION_START}" fue preservada en cada destino existente.`);

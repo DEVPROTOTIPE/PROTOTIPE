@@ -2,6 +2,18 @@
 
 Historial técnico de cambios realizados en el proyecto.
 
+## [2026-06-13] Migración de Telemetría a Firebase Functions Gen 2 (Hotfix CORS & IAM)
+- **Migración a Gen 2:** Se migró la Cloud Function `reportTelemetry` a Firebase Functions Gen 2 (`onRequest` con `cors: true`) para permitir el preflight de CORS de forma nativa.
+- **Configuración de Seguridad en GCP:** Se concedieron los roles lectores y escritores de Artifact Registry a la cuenta de servicio de Cloud Functions y de Compute Engine para solventar errores de compilación de contenedores en Cloud Build.
+- **Acceso Invocador Público:** Se configuró la política de IAM del servicio de Cloud Run (`reporttelemetry`) para otorgar `roles/run.invoker` al miembro `allUsers`, asegurando acceso público y previniendo el error 403 Forbidden previo al preflight de CORS.
+- **Despliegue Exitoso:** Se realizó el despliegue del hosting y de la Cloud Function unificada.
+
+## [2026-06-12] Reajustes de CRM de Clientes (Responsividad Móvil y Remoción de Modal DB)
+- **Responsividad Móvil:** Se rediseñó el contenedor de botones de acción global del CRM (`Sincronización Global`, `Despliegue Global`, `Telemetría Global`, `Nuevo Cliente`) para usar una cuadrícula responsiva de 2 columnas en mobile (`grid grid-cols-2 md:flex md:flex-wrap`) con botones de ancho completo, evitando desbordamientos de texto.
+- **Acciones del Directorio de Clientes:** Se reestructuraron los botones de acción del directorio de cada cliente (`Desplegar en Local`, `Instalar Deps`, `Obtener Telemetría`, `Gestionar`) con propiedades flex-wrap, anchos mínimos (`min-w`) y alineación central, permitiendo que se acomoden simétricamente en pantallas estrechas sin truncarse.
+- **Remoción de Lógica de Base de Datos:** Se removió por completo el botón de "Base de Datos", los estados de control de colecciones (`dbManageModal`, `dbCollections`, etc.), los manejadores `handleLoadDbCollections`/`handleExecuteDbCleanup` y la maquetación del modal de confirmación de borrado en `App.jsx`.
+- **Verificación de Compilación:** Compilación exitosa en producción (`npm run build`).
+
 ## [2026-06-12] Personalización Avanzada de Colores y Tokens HSL (Tarea 246)
 - **Estados de Tokens de Diseño:** Declarados nuevos estados reactivos para gestionar el sistema completo de colores HSL del ecosistema (`surfaceColor`, `surface2Color`, `borderColor`, `textMutedColor` y `radiusBase`) en `App.jsx`.
 - **Cálculo Inteligente de Inicialización:** Agregada función helper `handleBgColorChange` y lógica en la grilla de preestablecidos para autocalcular el luma del fondo y asignar valores por defecto óptimos para superficies y contrastes de bordes/textos atenuados, facilitando el onboarding del desarrollador.

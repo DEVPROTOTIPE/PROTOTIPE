@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "map": "node scratch/generate_ia_map.js",
+    "map": "node scripts/generate_ia_map.js",
     "build": "npm run map && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

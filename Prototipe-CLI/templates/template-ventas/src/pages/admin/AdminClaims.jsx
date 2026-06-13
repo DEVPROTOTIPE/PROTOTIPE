@@ -188,7 +188,7 @@ export default function AdminClaims() {
           <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
           <input
             type="text"
-            placeholder="Buscar por cliente, pedido o producto..."
+            placeholder="Escribe cliente, pedido o producto para buscar"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors text-sm"
@@ -378,7 +378,7 @@ export default function AdminClaims() {
                                     [claim.id]: e.target.value
                                   }))
                                 }
-                                placeholder="Escribe instrucciones de reembolso, cambio de producto o comentarios sobre la decisión..."
+                                placeholder="Ingresa las observaciones o resolución del caso"
                                 className="w-full p-4.5 rounded-2xl bg-surface border border-app text-xs text-app focus:outline-none focus:border-primary transition-colors resize-none leading-relaxed"
                               />
                             </div>

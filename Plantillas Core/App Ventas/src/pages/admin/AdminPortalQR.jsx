@@ -180,7 +180,7 @@ function TabHistorial() {
       <div className="qr-filters">
         <div className="qr-search-box">
           <Search size={14} />
-          <input className="qr-search-input" placeholder="Buscar empleado o rol..." value={search}
+          <input className="qr-search-input" placeholder="Escribe el nombre del empleado o su rol para buscar" value={search}
             onChange={e => { setSearch(e.target.value); setPage(1) }} />
           {search && <button onClick={() => { setSearch(''); setPage(1) }}><X size={14} /></button>}
         </div>

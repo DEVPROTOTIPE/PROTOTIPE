@@ -52,7 +52,7 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
   * **`Arquitectura_Multi_Instancia/Configuracion_Marca/manual_nichos_servicios.md`**: Manual de Verticales de Servicios y Operaciones Técnicas a la Medida, detallando modelado de atributos, workflows y lógica de 8 industrias de servicios técnicos y talleres.
   * **`Paginas/Seguimiento_Pedido/manual_order_tracking.md`**: Guía de seguridad de tokens UUID y reglas compuestas de Firestore.
   * **`Visualizacion/Alertas_Stock/manual_admin_stock_alerts.md`**: Guía del algoritmo de stock crítico y transacciones concurrentes de inventario.
-  * **`Servicios_y_Firebase/Generacion_PDF/manual_generacion_pdf.md`**: Guía técnica del procesamiento vectorial A4 y plugin de AutoTable.
+  * **`Servicios_y_Firebase/Generacion_PDF/manual_generacion_pdf.md`**: Guía técnica del procesamiento vectorial A4 y plugin de AutoTable. Detalla la lógica de reportes financieros y de caja (conciliación líquida vs cuentas por cobrar, y dinámica de empleados/vendedores) y el reporte de rotación/inventario 360° (tasa Sell-Through, Runway en días de stock, Pareto ABC del 80/20 y alertas dinámicas ante desactivación global de variantes).
   * **`Servicios_y_Firebase/Omnicanalidad_WhatsApp/manual_whatsapp_notifications.md`**: Guía técnica del parseo dinámico de templates de chat y APIs libres de cobro.
   * **`Servicios_y_Firebase/Creditos_y_Saldos/manual_credits_and_balances.md`**: Guía técnica de la mitigación de race conditions en cajas multi-vendedor con transacciones.
   * **`Arquitectura_Multi_Instancia/Mapas_IA/manual_ia_maps.md`**: Guía técnica de generación, personalización con parámetros y uso del mapa semántico de arquitectura para onboarding acelerado de IAs.
@@ -70,48 +70,6 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
   * **`tareas_pendientes.md`**: Lista general de tareas completadas, en progreso e hitos de desarrollo técnico.
   * **`tareas_pendientes_prioritarias.md`**: Backlog prioritario de desarrollo e infraestructura futura (como la centralización de comisiones) que se ejecutará bajo tu consentimiento.
 <!-- START_AUTO_CORES_APP -->
-### 📂 Carpeta del Core de App Agendamiento
-* **`/Plantillas Core/App Agendamiento/Documentacion App Agendamiento/tareas_pendientes.md`**: Control de Tareas y Estado de Implementación.
-* **`/Plantillas Core/App Agendamiento/Documentacion App Agendamiento/bitacora_cambios.md`**: Bitácora de Cambios y Control de Versiones.
-* **`/Plantillas Core/App Agendamiento/Documentacion App Agendamiento/mapa_aplicacion.md`**: Mapa de la Aplicación (Arquitectura Física).
-* **`/Plantillas Core/App Agendamiento/Documentacion App Agendamiento/esquema_colecciones.md`**: Esquema y Propósito de Colecciones de Base de Datos (Firestore).
-* **`/Plantillas Core/App Agendamiento/Documentacion App Agendamiento/plan_implementacion_ia.md`**: Plan de Implementación y Roadmaps de Inteligencia Artificial.
-* **`/Plantillas Core/App Agendamiento/Documentacion App Agendamiento/manual_migracion.md`**: Manual de Despliegue y Configuraciones Locales.
-* **`/Plantillas Core/App Agendamiento/Documentacion App Agendamiento/flujos_aplicacion.md`**: Flujos Operativos y Diagramas de Secuencia.
-* **`/Plantillas Core/App Agendamiento/Documentacion App Agendamiento/mapa_arquitectura.md`**: Mapa de Arquitectura Física y Árbol de Código.
-* **`/Plantillas Core/App Agendamiento/Documentacion App Agendamiento/mapa_arquitectura_ia.md`**: Mapa Semántico de Rutas para Inteligencia Artificial.
-* **`/Plantillas Core/App Agendamiento/Documentacion App Agendamiento/contexto_negocio.md`**: Contexto de Negocio y Reglas Operativas del Dominio.
-* **`/Plantillas Core/App Agendamiento/Documentacion App Agendamiento/restricciones_tecnicas.md`**: Restricciones Técnicas y Patrones Prohibidos.
-* **`/Plantillas Core/App Agendamiento/Documentacion App Agendamiento/guia_estilos_ui.md`**: Guía de Estilos de UI y Sistema de Diseño del Core.
-
-### 📂 Carpeta del Core de App Gastronomia
-* **`/Plantillas Core/App Gastronomia/Documentacion App Gastronomia/tareas_pendientes.md`**: Control de Tareas y Estado de Implementación.
-* **`/Plantillas Core/App Gastronomia/Documentacion App Gastronomia/bitacora_cambios.md`**: Bitácora de Cambios y Control de Versiones.
-* **`/Plantillas Core/App Gastronomia/Documentacion App Gastronomia/mapa_aplicacion.md`**: Mapa de la Aplicación (Arquitectura Física).
-* **`/Plantillas Core/App Gastronomia/Documentacion App Gastronomia/esquema_colecciones.md`**: Esquema y Propósito de Colecciones de Base de Datos (Firestore).
-* **`/Plantillas Core/App Gastronomia/Documentacion App Gastronomia/plan_implementacion_ia.md`**: Plan de Implementación y Roadmaps de Inteligencia Artificial.
-* **`/Plantillas Core/App Gastronomia/Documentacion App Gastronomia/manual_migracion.md`**: Manual de Despliegue y Configuraciones Locales.
-* **`/Plantillas Core/App Gastronomia/Documentacion App Gastronomia/flujos_aplicacion.md`**: Flujos Operativos y Diagramas de Secuencia.
-* **`/Plantillas Core/App Gastronomia/Documentacion App Gastronomia/mapa_arquitectura.md`**: Mapa de Arquitectura Física y Árbol de Código.
-* **`/Plantillas Core/App Gastronomia/Documentacion App Gastronomia/mapa_arquitectura_ia.md`**: Mapa Semántico de Rutas para Inteligencia Artificial.
-* **`/Plantillas Core/App Gastronomia/Documentacion App Gastronomia/contexto_negocio.md`**: Contexto de Negocio y Reglas Operativas del Dominio.
-* **`/Plantillas Core/App Gastronomia/Documentacion App Gastronomia/restricciones_tecnicas.md`**: Restricciones Técnicas y Patrones Prohibidos.
-* **`/Plantillas Core/App Gastronomia/Documentacion App Gastronomia/guia_estilos_ui.md`**: Guía de Estilos de UI y Sistema de Diseño del Core.
-
-### 📂 Carpeta del Core de App Servicios
-* **`/Plantillas Core/App Servicios/Documentacion App Servicios/tareas_pendientes.md`**: Control de Tareas y Estado de Implementación.
-* **`/Plantillas Core/App Servicios/Documentacion App Servicios/bitacora_cambios.md`**: Bitácora de Cambios y Control de Versiones.
-* **`/Plantillas Core/App Servicios/Documentacion App Servicios/mapa_aplicacion.md`**: Mapa de la Aplicación (Arquitectura Física).
-* **`/Plantillas Core/App Servicios/Documentacion App Servicios/esquema_colecciones.md`**: Esquema y Propósito de Colecciones de Base de Datos (Firestore).
-* **`/Plantillas Core/App Servicios/Documentacion App Servicios/plan_implementacion_ia.md`**: Plan de Implementación y Roadmaps de Inteligencia Artificial.
-* **`/Plantillas Core/App Servicios/Documentacion App Servicios/manual_migracion.md`**: Manual de Despliegue y Configuraciones Locales.
-* **`/Plantillas Core/App Servicios/Documentacion App Servicios/flujos_aplicacion.md`**: Flujos Operativos y Diagramas de Secuencia.
-* **`/Plantillas Core/App Servicios/Documentacion App Servicios/mapa_arquitectura.md`**: Mapa de Arquitectura Física y Árbol de Código.
-* **`/Plantillas Core/App Servicios/Documentacion App Servicios/mapa_arquitectura_ia.md`**: Mapa Semántico de Rutas para Inteligencia Artificial.
-* **`/Plantillas Core/App Servicios/Documentacion App Servicios/contexto_negocio.md`**: Contexto de Negocio y Reglas Operativas del Dominio.
-* **`/Plantillas Core/App Servicios/Documentacion App Servicios/restricciones_tecnicas.md`**: Restricciones Técnicas y Patrones Prohibidos.
-* **`/Plantillas Core/App Servicios/Documentacion App Servicios/guia_estilos_ui.md`**: Guía de Estilos de UI y Sistema de Diseño del Core.
-
 ### 📂 Carpeta del Core de App Ventas
 * **`/Plantillas Core/App Ventas/Documentacion App Ventas/tareas_pendientes.md`**: Control de Tareas y Estado de Implementación.
 * **`/Plantillas Core/App Ventas/Documentacion App Ventas/bitacora_cambios.md`**: Bitácora de Cambios y Control de Versiones.
@@ -220,6 +178,7 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/src/services/uploadService.js`**: Servicio de abstracción para la subida de archivos (imágenes de producto, variantes, logos) y eliminación de Storage. Intercepta y comprime dinámicamente imágenes WebP client-side a resoluciones máximas de 800px/400px.
 * **`/src/services/inventoryService.js`**: Servicio de inventario que provee la función `getProductsPaged` para paginación de Firestore mediante cursores (`limit`, `startAfter`).
 * **`/src/hooks/useInventory.js`**: Expone el hook `useProductsInfinite` para consultas paginadas con TanStack Query v5.
+* **`/src/hooks/useAuthInit.js`**: Hook para escuchar el estado de autenticación (onAuthStateChanged) y auto-recrear el perfil del administrador en Firestore si sus datos son borrados o huérfanos.
 * **`/src/utils/imageCompression.js`**: Helper utilitario autónomo que procesa imágenes con HTML Canvas a formato WebP optimizado (calidad 0.75).
 * **`/src/services/qrAnalyticsService.js`**: Servicio de telemetría y analítica para registrar escaneos, vistas y conversiones provenientes de códigos QR de venta física.
 * **`/src/services/trackingAnalyticsService.js`**: Servicio de telemetría para registrar interacciones (scans, clicks a tienda, descargas) en el portal público de seguimiento de pedidos.

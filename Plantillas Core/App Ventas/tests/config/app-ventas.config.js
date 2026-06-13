@@ -31,14 +31,14 @@ export const APP_CONFIG = {
   /** Selectores y textos de la página de Login */
   login: {
     phoneInputSelector: 'input[type="tel"]',
-    nameInputPlaceholder: 'María Pérez', // Se busca con `placeholder*=`
+    nameInputPlaceholder: 'nombre y apellido', // Se busca con `placeholder*=`
     submitButtonSelector: 'button[type="submit"]',
   },
 
   /** Configuración del catálogo de productos */
   catalog: {
     /** Texto del producto a buscar en el catálogo para el test */
-    targetProductText: 'Producto de prueba',
+    targetProductText: 'Cámara inalámbrica',
     /** URL pattern del catálogo */
     urlPattern: /\/tienda\/catalogo/,
     /** URL pattern del detalle de producto */
