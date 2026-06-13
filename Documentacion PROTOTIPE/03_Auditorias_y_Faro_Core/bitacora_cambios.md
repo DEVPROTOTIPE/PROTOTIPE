@@ -2,6 +2,16 @@
 
 Historial técnico de cambios realizados sobre el motor central de aprovisionamiento de Prototype, scripts PowerShell de respaldo y estándares del sistema.
 
+### [2026-06-13] - Rediseño de Mensaje de Confirmación a Toast Flotante Premium en Ajustes del Administrador (Core y CLI)
+* **Tipo:** UI/UX / Mejoras Visuales / AdminSettings
+* **Descripción de Cambios:**
+  - **Conversión a Toast Flotante:** Se reemplazó el renderizado estático del mensaje de guardado (`saveMessage`) por un Toast flotante premium posicionado en el centro superior del viewport (`fixed top-6 left-1/2 -translate-x-1/2 z-[9999]`), con fondo semi-translúcido con efecto de desenfoque (`backdrop-blur-md`), colores HSL e íconos dinámicos de éxito/error.
+  - **Animación Fluida:** Se integró la biblioteca `framer-motion` envolviendo el Toast con `AnimatePresence` y usando `motion.div` para aplicar transiciones de desvanecimiento, deslizamiento de entrada (`y: -20` a `y: 0`) y desvanecimiento de salida al desaparecer.
+  - **Auto-limpieza Centralizada:** Se implementó un `useEffect` centralizado que escucha los cambios en `saveMessage` y dispara un `setTimeout` automático para limpiar el estado devolviéndolo a `null` tras **2 segundos** de duración, asegurando consistencia reactiva e impidiendo que el Toast persista indefinidamente.
+* **Archivos Modificados:**
+  - [AdminSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
+  - [AdminSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
+
 ### [2026-06-13] - Restricción de Ejecución de Comandos Git sin Validación de Usuario (Reglas de Ecosistema)
 * **Tipo:** Reglas de IA / Seguridad / Control de Versiones
 * **Descripción de Cambios:**

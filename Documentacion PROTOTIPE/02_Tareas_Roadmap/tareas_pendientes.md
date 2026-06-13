@@ -4,6 +4,13 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CLI-031: Rediseño de Toast de Confirmación en Ajustes del Administrador (UI/UX)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-13
+  - Fecha de finalización: 2026-06-13
+  - Descripción: Se corrigió la UX de los mensajes de confirmación de guardado en los Ajustes del Administrador. Anteriormente aparecían estáticos en la parte superior del menú, obligando al usuario a desplazarse hacia arriba para verificar el guardado. Se reemplazó por un Toast flotante premium en la parte superior central de la pantalla utilizando `AnimatePresence` y `motion.div` de `framer-motion`, configurado con auto-limpieza mediante un `useEffect` central a los 2 segundos exactos de duración.
+  - Archivos: [AdminSettings.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminSettings.jsx) [MODIFY], [AdminSettings.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
+
 * **[x] ~~Tarea CLI-030: Fortalecimiento y Dinamización de Tests E2E (Bugfix y Mejora)~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-13

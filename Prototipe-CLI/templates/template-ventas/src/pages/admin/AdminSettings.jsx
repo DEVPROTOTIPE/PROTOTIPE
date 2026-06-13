@@ -357,6 +357,16 @@ export default function AdminSettings() {
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState(null)
 
+  // Auto-limpiar el mensaje de guardado después de 2 segundos
+  useEffect(() => {
+    if (saveMessage) {
+      const timer = setTimeout(() => {
+        setSaveMessage(null)
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [saveMessage])
+
   // Modales de Confirmación Crítica
   const [criticalConfirmModal, setCriticalConfirmModal] = useState(null)
   const [criticalConfirmText, setCriticalConfirmText] = useState('')
@@ -1008,12 +1018,24 @@ export default function AdminSettings() {
           </div>
         )}
 
-        {saveMessage && (
-          <div className={`p-4 rounded-2xl mb-6 border flex items-center gap-3 ${saveMessage.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-green-500/10 border-green-500/20 text-success'}`}>
-            {saveMessage.type === 'error' ? <AlertTriangle size={18} /> : <CheckCircle size={18} />}
-            <span className="text-xs font-bold leading-none">{saveMessage.text}</span>
-          </div>
-        )}
+        <AnimatePresence>
+          {saveMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95, x: '-50%' }}
+              animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+              exit={{ opacity: 0, y: -15, scale: 0.95, x: '-50%' }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className={`fixed top-6 left-1/2 z-[9999] p-4 rounded-2xl border flex items-center gap-3 shadow-xl backdrop-blur-md max-w-[90%] w-max min-w-[280px] ${
+                saveMessage.type === 'error'
+                  ? 'bg-red-500/95 border-red-500 text-white'
+                  : 'bg-emerald-500/95 border-emerald-500 text-white'
+              }`}
+            >
+              {saveMessage.type === 'error' ? <AlertTriangle size={18} /> : <CheckCircle size={18} />}
+              <span className="text-xs font-bold leading-none">{saveMessage.text}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* MENU PRINCIPAL */}
         {activeSection === null && (

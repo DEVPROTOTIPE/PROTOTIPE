@@ -2,6 +2,19 @@
 
 Historial de cambios, mejoras y correcciones técnicas aplicadas sobre la plantilla core de Ventas.
 
+### [2026-06-13] - Rediseño de Mensaje de Confirmación a Toast Flotante Premium
+* **Tipo:** UI/UX / Mejoras Visuales / AdminSettings
+* **Severidad:** Media
+* **Descripción de Cambios:**
+  - **Conversión a Toast Flotante:** Se reemplazó el renderizado estático del mensaje de guardado (`saveMessage`) por un Toast flotante premium en el centro superior del viewport (`fixed top-6 left-1/2 -translate-x-1/2 z-[9999]`), con fondo semi-translúcido (`backdrop-blur-md`), sombras, colores HSL e íconos dinámicos.
+  - **Animación Fluida:** Se implementó `AnimatePresence` y `motion.div` de `framer-motion` para lograr transiciones suaves de entrada y salida.
+  - **Auto-limpieza Centralizada:** Se implementó un `useEffect` que escucha cambios en `saveMessage` y ejecuta un timer de **2 segundos** (`2000` ms) para auto-limpiar el mensaje.
+* **Archivos Modificados:**
+  - `src/pages/admin/AdminSettings.jsx`
+* **Desplegado:** Local build verificado ✅
+
+---
+
 ### [2026-06-12] - Robustez en Paginación y Prevención de Bucle de Lecturas (Exploit de Facturación)
 * **Tipo:** Robustez / Parche de Facturación / Rendimiento / UX
 * **Severidad:** Crítica (Evita consumo masivo accidental de Firestore)
