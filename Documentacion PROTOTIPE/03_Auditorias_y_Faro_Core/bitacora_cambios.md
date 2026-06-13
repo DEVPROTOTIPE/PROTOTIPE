@@ -2,6 +2,34 @@
 
 Historial técnico de cambios realizados sobre el motor central de aprovisionamiento de Prototype, scripts PowerShell de respaldo y estándares del sistema.
 
+### [2026-06-13] - Migración de Métodos de Entrega y Facturación DIAN a Zona de Desarrollador protegida por PIN (Core y CLI)
+* **Tipo:** Reubicación de Ajustes / Seguridad / Control de Acceso / AdminSettings
+* **Descripción de Cambios:**
+  - **Reubicación de Interfaz:** Se removieron las opciones "Métodos de Entrega" (`entregas`) y "Facturación DIAN" (`dian`) de la sección orientada al cliente "Personalizar Tienda" en `AdminSettings.jsx` (Core y CLI).
+  - **Remoción de Lógica Original:** Se eliminaron por completo los subpaneles correspondientes y sus lógicas de guardado en `StoreSettings.jsx` (Core y CLI), así como las importaciones asociadas a `LeafletMapPicker` y `DeliveryCustomMessengerPanel`.
+  - **Inyección en Zona Protegida:** Se añadieron las opciones "Métodos de Entrega" (`dev-entregas`) y "Facturación DIAN" (`dev-dian`) en la lista de herramientas de `DeveloperSettings.jsx` (Core y CLI).
+  - **Integración de Componentes:** Se trasladaron e integraron en espejo los componentes `LeafletMapPicker` y `DeliveryCustomMessengerPanel`, junto con la lógica de persistencia de despachos (`deliverySettings`) y facturación (`dianSettings`) en `DeveloperSettings.jsx`.
+* **Archivos Modificados:**
+  - [StoreSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/StoreSettings.jsx) [MODIFY]
+  - [StoreSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/StoreSettings.jsx) [MODIFY]
+  - [DeveloperSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+  - [DeveloperSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+
+### [2026-06-13] - Migración de Módulos Activos a Zona de Desarrollador protegida por PIN (Core y CLI)
+* **Tipo:** Reubicación de Módulos / Control de Acceso / Seguridad / AdminSettings
+* **Descripción de Cambios:**
+  - **Reubicación de Interfaz:** Se removió la opción "Módulos Activos" (`modulos`) de la sección orientada al cliente "Personalizar Tienda" en `AdminSettings.jsx` (Core y CLI).
+  - **Remoción de Lógica Original:** Se eliminó por completo el sub-panel y lógica de guardado de `activeSubSection === 'modulos'` en `StoreSettings.jsx` (Core y CLI).
+  - **Inyección en Zona Protegida:** Se añadió la opción "Módulos Activos" (`dev-modulos`) en la lista de herramientas de `DeveloperSettings.jsx` (Core y CLI, protegida bajo el PIN maestro `DEV_PIN`).
+  - **Integración de Componentes:** Se re-maquetó e integró la interfaz y los interruptores correspondientes (Crédito, Cupones, Garantías y Mayorista) en `DeveloperSettings.jsx` utilizando los mismos hooks, estado global y endpoint de guardado en Firebase (`updateAppConfig`).
+* **Archivos Modificados:**
+  - [AdminSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
+  - [StoreSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/StoreSettings.jsx) [MODIFY]
+  - [DeveloperSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+  - [AdminSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
+  - [StoreSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/StoreSettings.jsx) [MODIFY]
+  - [DeveloperSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+
 ### [2026-06-13] - Rediseño de Mensaje de Confirmación a Toast Flotante Premium en Ajustes del Administrador (Core y CLI)
 * **Tipo:** UI/UX / Mejoras Visuales / AdminSettings
 * **Descripción de Cambios:**

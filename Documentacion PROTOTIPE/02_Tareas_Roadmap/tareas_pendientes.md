@@ -4,6 +4,20 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CLI-033: Migración de Métodos de Entrega y Facturación DIAN a Zona de Desarrollador protegida por PIN~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-13
+  - Fecha de finalización: 2026-06-13
+  - Descripción: Migración de los paneles de configuración "Métodos de Entrega" (`entregas`) y "Facturación DIAN" (`dian`) desde la sección cliente "Personalizar Tienda" del Administrador a la "Zona de Desarrollador" protegida por PIN maestro (`DEV_PIN`). Se eliminaron las opciones del menú superior y los bloques de renderizado en `StoreSettings.jsx`, trasladando la lógica de guardado y los componentes `LeafletMapPicker` y `DeliveryCustomMessengerPanel` a `DeveloperSettings.jsx`.
+  - Archivos: [StoreSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/StoreSettings.jsx) [MODIFY], [StoreSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/StoreSettings.jsx) [MODIFY], [DeveloperSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY], [DeveloperSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-032: Migración de Módulos Activos a Zona de Desarrollador protegida por PIN (Control de Acceso)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-13
+  - Fecha de finalización: 2026-06-13
+  - Descripción: Se migró la configuración completa de Módulos Activos desde el panel visible del cliente "Personalizar Tienda" hacia la "Zona de Desarrollador" protegida por PIN maestro en `AdminSettings.jsx`.
+  - Archivos: [AdminSettings.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminSettings.jsx) [MODIFY], [StoreSettings.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/StoreSettings.jsx) [MODIFY], [DeveloperSettings.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+
 * **[x] ~~Tarea CLI-031: Rediseño de Toast de Confirmación en Ajustes del Administrador (UI/UX)~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-13

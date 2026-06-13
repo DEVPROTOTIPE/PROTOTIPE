@@ -1107,11 +1107,8 @@ export default function AdminSettings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {[
                     { id: 'empleados', label: 'Gestión de Empleados', desc: 'Control de accesos y perfiles de nómina', icon: Users, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-                    { id: 'entregas', label: 'Métodos de Entrega', desc: 'Configura envíos, retiros en mapa y mensajeros', icon: Truck, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-                    { id: 'modulos', label: 'Módulos Activos', desc: 'Habilita crédito, cupones y garantías', icon: LayoutGrid, color: 'text-purple-500', bg: 'bg-purple-500/10' },
                     { id: 'temporada', label: 'Eventos de Temporada', desc: 'Aplica paletas de colores navideñas y de Halloween', icon: Calendar, color: 'text-pink-500', bg: 'bg-pink-500/10' },
                     { id: 'seguimiento', label: 'Seguimiento por WhatsApp', desc: 'Personaliza notificaciones automáticas y PWA', icon: MessageSquare, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-                    { id: 'dian', label: 'Facturación DIAN', desc: 'Introduce los datos fiscales colombianos', icon: Receipt, color: 'text-orange-500', bg: 'bg-orange-500/10' },
                     { id: 'movimientos', label: 'Auditoría de Ajustes de Stock', desc: 'Registro de modificaciones de inventario por empleado', icon: Database, color: 'text-indigo-500', bg: 'bg-indigo-500/10' }
                   ].map(sub => {
                     const SubIcon = sub.icon

@@ -10,6 +10,7 @@ Roadmap de desarrollo, mejoras y corrección de errores para la plantilla base d
 - [x] ~~Sincronización de créditos con domicilio/descuento y optimización de carga paginada~~
 - [x] ~~Corrección de ráfagas de toasts al iniciar sesión y vaciado de notificaciones unificado~~
 - [x] ~~Rediseño de Toast de Confirmación en Ajustes del Administrador (UI/UX)~~
+- [x] ~~Migración de Módulos Activos a Zona de Desarrollador protegida por PIN (Control de Negocio)~~
 - [ ] Optimizar bundle de producción reduciendo importaciones no utilizadas
 - [ ] Mejorar cobertura de pruebas unitarias y E2E con Playwright
 - [ ] Refactorizar el almacenamiento offline usando IndexedDB

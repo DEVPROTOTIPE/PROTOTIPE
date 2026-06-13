@@ -2,6 +2,22 @@
 
 Historial de cambios, mejoras y correcciones técnicas aplicadas sobre la plantilla core de Ventas.
 
+### [2026-06-13] - Migración de Módulos Activos a Zona de Desarrollador
+* **Tipo:** Reubicación de Módulos / Seguridad / UI/UX / AdminSettings
+* **Severidad:** Media (Control de Acceso del Comercio)
+* **Descripción de Cambios:**
+  - **Reubicación de Interfaz:** Se removió la opción "Módulos Activos" (`modulos`) de la sección orientada al cliente "Personalizar Tienda" en `AdminSettings.jsx`.
+  - **Remoción de Lógica Original:** Se eliminó por completo el sub-panel y lógica de guardado de `activeSubSection === 'modulos'` en `StoreSettings.jsx`.
+  - **Inyección en Zona Protegida:** Se añadió la opción "Módulos Activos" (`dev-modulos`) en la lista de herramientas de `DeveloperSettings.jsx` (protegida bajo el PIN maestro `DEV_PIN`).
+  - **Integración de Componentes:** Se re-maquetó e integró la interfaz y los interruptores correspondientes (Crédito, Cupones, Garantías y Mayorista) en `DeveloperSettings.jsx` utilizando los mismos hooks, estado global y endpoint de guardado en Firebase (`updateAppConfig`).
+* **Archivos Modificados:**
+  - `src/pages/admin/AdminSettings.jsx`
+  - `src/pages/admin/settings/sections/StoreSettings.jsx`
+  - `src/pages/admin/settings/sections/DeveloperSettings.jsx`
+* **Desplegado:** Local build verificado ✅
+
+---
+
 ### [2026-06-13] - Rediseño de Mensaje de Confirmación a Toast Flotante Premium
 * **Tipo:** UI/UX / Mejoras Visuales / AdminSettings
 * **Severidad:** Media

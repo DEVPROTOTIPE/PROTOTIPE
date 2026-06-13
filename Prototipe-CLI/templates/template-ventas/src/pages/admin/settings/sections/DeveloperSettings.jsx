@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   KeyRound, Lock, Filter, TrendingUp, Receipt, Trash2, Smartphone, AlertTriangle, 
   ChevronRight, Plus, X, ShoppingBag, Wallet, BarChart3, Sparkles, Tag, ChevronDown, 
-  Save, Loader2, CheckCircle, Activity, Paintbrush
+  Save, Loader2, CheckCircle, Activity, Paintbrush, LayoutGrid, Truck
 } from 'lucide-react'
 import { DEV_PIN, COLLECTIONS } from '../../../../constants'
 import { updateAppConfig, updateCatalogFilters, resetAppData } from '../../../../services/appConfigService'
@@ -13,6 +13,8 @@ import useAuthStore from '../../../../store/authStore'
 import { useNavigate } from 'react-router-dom'
 import DeveloperBillingPanel from './DeveloperBillingPanel'
 import AppearanceSettings from './AppearanceSettings'
+import LeafletMapPicker from '../../../../components/ui/LeafletMapPicker'
+import DeliveryCustomMessengerPanel from '../../../../components/admin/settings/DeliveryCustomMessengerPanel'
 
 export default function DeveloperSettings({ 
   formData, 
@@ -242,6 +244,30 @@ export default function DeveloperSettings({
                 icon: Paintbrush,
                 iconBg: 'bg-purple-500/10 hover:bg-purple-500/15',
                 iconColor: 'text-purple-500'
+              },
+              {
+                id: 'dev-modulos',
+                label: 'Módulos Activos',
+                description: 'Habilita o deshabilita los módulos globales del negocio (Crédito, Cupones, Garantías, Mayorista)',
+                icon: LayoutGrid,
+                iconBg: 'bg-purple-500/10 hover:bg-purple-500/15',
+                iconColor: 'text-purple-500'
+              },
+              {
+                id: 'dev-entregas',
+                label: 'Métodos de Entrega',
+                description: 'Configura envíos, retiros interactivos en mapa y mensajeros de entrega',
+                icon: Truck,
+                iconBg: 'bg-blue-500/10 hover:bg-blue-500/15',
+                iconColor: 'text-blue-500'
+              },
+              {
+                id: 'dev-dian',
+                label: 'Facturación DIAN',
+                description: 'Introduce los datos fiscales y el IVA por defecto (Colombia)',
+                icon: Receipt,
+                iconBg: 'bg-orange-500/10 hover:bg-orange-500/15',
+                iconColor: 'text-orange-500'
               },
               {
                 id: 'dev-filtros',
@@ -991,6 +1017,428 @@ export default function DeveloperSettings({
           isSaving={isSaving}
           handleSaveConfig={handleSaveThemeConfig}
         />
+      )}
+
+      {/* 7. Subsección: Módulos Activos */}
+      {activeSubSection === 'dev-modulos' && (
+        <div className="bg-surface rounded-3xl border border-app overflow-hidden">
+          <div className="p-5 sm:p-6 border-b border-app bg-surface-2/30">
+            <h3 className="text-sm font-black text-app">Módulos Activos</h3>
+            <p className="text-[10px] text-muted mt-1">Habilita o deshabilita los módulos globales del negocio. Los cambios se aplicarán en tiempo real para clientes y administradores.</p>
+          </div>
+
+          <div className="p-5 sm:p-6 space-y-5">
+            {/* Switch Crédito */}
+            <div className="flex items-center justify-between p-4 bg-surface-2 rounded-2xl border border-app">
+              <div>
+                <p className="text-sm font-bold text-app">Módulo de Crédito y Cuentas por Cobrar</p>
+                <p className="text-xs text-muted mt-0.5">Permite a los clientes seleccionar "Crédito" como forma de pago y habilita el control de fiados.</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                <input type="checkbox" className="sr-only peer"
+                  checked={formData.creditsEnabled || false}
+                  onChange={(e) => setFormData({ ...formData, creditsEnabled: e.target.checked })} />
+                <div className="w-11 h-6 bg-app/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+              </label>
+            </div>
+
+            {/* Switch Cupones */}
+            <div className="flex items-center justify-between p-4 bg-surface-2 rounded-2xl border border-app">
+              <div>
+                <p className="text-sm font-bold text-app">Módulo de Cupones y Ofertas Flash</p>
+                <p className="text-xs text-muted mt-0.5">Habilita cupones promocionales y barra de inserción de códigos de descuento en checkout.</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                <input type="checkbox" className="sr-only peer"
+                  checked={formData.couponsEnabled || false}
+                  onChange={(e) => setFormData({ ...formData, couponsEnabled: e.target.checked })} />
+                <div className="w-11 h-6 bg-app/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+              </label>
+            </div>
+
+            {/* Switch Reclamaciones */}
+            <div className="flex items-center justify-between p-4 bg-surface-2 rounded-2xl border border-app">
+              <div>
+                <p className="text-sm font-bold text-app">Módulo de Garantías y Reclamos</p>
+                <p className="text-xs text-muted mt-0.5">Permite a los clientes iniciar solicitudes de cambio o reclamo de garantía para pedidos completados.</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                <input type="checkbox" className="sr-only peer"
+                  checked={formData.claimsEnabled || false}
+                  onChange={(e) => setFormData({ ...formData, claimsEnabled: e.target.checked })} />
+                <div className="w-11 h-6 bg-app/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+              </label>
+            </div>
+
+            {/* Switch Mayoreo */}
+            <div className="flex items-center justify-between p-4 bg-surface-2 rounded-2xl border border-app">
+              <div>
+                <p className="text-sm font-bold text-app">Módulo de Ventas al por Mayor</p>
+                <p className="text-xs text-muted mt-0.5">Permite aplicar descuentos automáticos por volumen de compra mayorista configurado.</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                <input type="checkbox" className="sr-only peer"
+                  checked={formData.wholesaleSettings?.enabled || false}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    wholesaleSettings: { ...formData.wholesaleSettings, enabled: e.target.checked } 
+                  })} />
+                <div className="w-11 h-6 bg-app/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+              </label>
+            </div>
+          </div>
+
+          <div className="p-5 border-t border-app bg-surface-2/30">
+            <button
+              onClick={async () => {
+                setIsSaving(true)
+                try {
+                  const payload = {
+                    creditsEnabled: formData.creditsEnabled ?? true,
+                    couponsEnabled: formData.couponsEnabled ?? true,
+                    claimsEnabled: formData.claimsEnabled ?? false,
+                    tablesEnabled: formData.tablesEnabled ?? false,
+                    wholesaleSettings: formData.wholesaleSettings
+                  }
+                  await updateAppConfig(payload)
+                  config.setConfig(payload)
+                  setSaveMessage({ type: 'success', text: 'Módulos actualizados correctamente.' })
+                } catch (e) {
+                  setSaveMessage({ type: 'error', text: 'Error al guardar configuración de módulos.' })
+                } finally {
+                  setIsSaving(false)
+                }
+              }}
+              disabled={isSaving}
+              className="w-full h-12 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-sm cursor-pointer border-none disabled:opacity-50"
+            >
+              <Save size={18} /> Guardar Configuración de Módulos
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 8. Subsección: Facturación DIAN */}
+      {activeSubSection === 'dev-dian' && (
+        <div className="bg-surface rounded-3xl border border-app overflow-hidden">
+          <div className="p-5 sm:p-6 border-b border-app bg-surface-2/30">
+            <h3 className="text-sm font-black text-app">Facturación DIAN</h3>
+            <p className="text-[10px] text-muted mt-1">Introduce los datos fiscales y el IVA por defecto (Colombia)</p>
+          </div>
+
+          <div className="p-5 sm:p-6 space-y-6">
+            <div className="flex items-center justify-between p-4 bg-surface-2 rounded-2xl border border-app shadow-sm">
+              <div>
+                <p className="text-sm font-bold text-app">Habilitar Facturación Electrónica (Colombia)</p>
+                <p className="text-xs text-muted mt-0.5">Activa la recopilación de datos fiscales de la DIAN en el checkout</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                <input type="checkbox" className="sr-only peer"
+                  checked={formData.dianSettings?.enabled ?? false}
+                  onChange={async (e) => {
+                    const checked = e.target.checked
+                    const newDian = { ...(formData.dianSettings || {}), enabled: checked }
+                    setFormData({ ...formData, dianSettings: newDian })
+                    try {
+                      await updateAppConfig({ dianSettings: newDian })
+                      setSaveMessage({ type: 'success', text: checked ? 'Facturación electrónica activada.' : 'Facturación electrónica desactivada.' })
+                      setTimeout(() => setSaveMessage(null), 3000)
+                    } catch (err) {
+                      console.error(err)
+                    }
+                  }} />
+                <div className="w-11 h-6 bg-app/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+              </label>
+            </div>
+
+            {formData.dianSettings?.enabled && (
+              <div className="space-y-4 pt-2">
+                <h3 className="text-sm font-bold text-app border-b border-app pb-2">Información Fiscal del Negocio</h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-muted mb-1.5">Razón Social</label>
+                    <input
+                      type="text"
+                      value={formData.dianSettings?.razonSocial || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        dianSettings: { ...formData.dianSettings, razonSocial: e.target.value }
+                      })}
+                      placeholder="Ingresa la razón social o nombre registrado"
+                      className="w-full h-11 px-3.5 rounded-xl bg-surface-2 border border-app text-app text-sm focus:outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-2">
+                    <div className="col-span-9">
+                      <label className="block text-xs font-bold text-muted mb-1.5">NIT</label>
+                      <input
+                        type="text"
+                        value={formData.dianSettings?.nit || ''}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          dianSettings: { ...formData.dianSettings, nit: e.target.value }
+                        })}
+                        placeholder="Ingresa el número de identificación tributaria (NIT/RUT)"
+                        className="w-full h-11 px-3.5 rounded-xl bg-surface-2 border border-app text-app text-sm focus:outline-none focus:border-primary transition-colors"
+                      />
+                    </div>
+                    <div className="col-span-3">
+                      <label className="block text-xs font-bold text-muted mb-1.5">DV</label>
+                      <input
+                        type="text"
+                        maxLength={1}
+                        value={formData.dianSettings?.digitoVerificacion || ''}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          dianSettings: { ...formData.dianSettings, digitoVerificacion: e.target.value }
+                        })}
+                        placeholder="Ingresa la cantidad"
+                        className="w-full h-11 text-center rounded-xl bg-surface-2 border border-app text-app text-sm focus:outline-none focus:border-primary transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-muted mb-1.5">Correo Electrónico Fiscal</label>
+                    <input
+                      type="email"
+                      value={formData.dianSettings?.emailFiscal || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        dianSettings: { ...formData.dianSettings, emailFiscal: e.target.value }
+                      })}
+                      placeholder="Ingresa el correo para recepción de facturas"
+                      className="w-full h-11 px-3.5 rounded-xl bg-surface-2 border border-app text-app text-sm focus:outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-muted mb-1.5">IVA por defecto (%)</label>
+                    <input
+                      type="number"
+                      value={formData.dianSettings?.ivaPorDefecto ?? 19}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        dianSettings: { ...formData.dianSettings, ivaPorDefecto: Number(e.target.value) }
+                      })}
+                      placeholder="Ingresa el porcentaje de impuesto (IVA)"
+                      className="w-full h-11 px-3.5 rounded-xl bg-surface-2 border border-app text-app text-sm focus:outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4 border-t border-app">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await updateAppConfig({ dianSettings: formData.dianSettings })
+                        setSaveMessage({ type: 'success', text: 'Datos fiscales de la DIAN guardados correctamente.' })
+                        setTimeout(() => setSaveMessage(null), 3000)
+                      } catch (err) {
+                        console.error(err)
+                        setSaveMessage({ type: 'error', text: 'Error al guardar datos fiscales.' })
+                        setTimeout(() => setSaveMessage(null), 3000)
+                      }
+                    }}
+                    className="h-10 px-5 rounded-xl bg-primary text-white text-sm font-bold active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm border-none"
+                  >
+                    <Save size={16} /> Guardar Ajustes Fiscales
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 9. Subsección: Métodos de Entrega */}
+      {activeSubSection === 'dev-entregas' && (
+        <div className="bg-surface rounded-3xl border border-app overflow-hidden">
+          <div className="p-5 sm:p-6 border-b border-app bg-surface-2/30">
+            <h3 className="text-sm font-black text-app">Métodos de Entrega</h3>
+            <p className="text-[10px] text-muted mt-1">Configura envíos, retiros interactivos en mapa y mensajeros de entrega</p>
+          </div>
+
+          <div className="p-5 sm:p-6 space-y-5">
+            {/* Retiro en Local */}
+            <div className="p-4 bg-surface-2/60 rounded-2xl border border-app space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-app">Retiro en Tienda / Local</p>
+                  <p className="text-xs text-muted">Permite al cliente retirar el pedido físicamente</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input type="checkbox" className="sr-only peer"
+                    checked={formData.deliverySettings?.pickup?.enabled ?? true}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      deliverySettings: {
+                        ...formData.deliverySettings,
+                        pickup: { ...(formData.deliverySettings?.pickup || {}), enabled: e.target.checked }
+                      }
+                    })} />
+                  <div className="w-11 h-6 bg-app/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+                </label>
+              </div>
+
+              {(formData.deliverySettings?.pickup?.enabled ?? true) && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-3 pt-2">
+                  <div className="mb-4">
+                    <label className="block text-xs font-semibold text-muted mb-2">Ubicación del Local en el Mapa</label>
+                    <LeafletMapPicker
+                      address={formData.deliverySettings?.pickup?.address || ''}
+                      coords={formData.deliverySettings?.pickup?.coords || null}
+                      onChange={({ address, coords }) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          deliverySettings: {
+                            ...prev.deliverySettings,
+                            pickup: {
+                              ...(prev.deliverySettings?.pickup || {}),
+                              address: address || (prev.deliverySettings?.pickup?.address || ''),
+                              coords
+                            }
+                          }
+                        }))
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-muted mb-1">Dirección de Retiro (Manual)</label>
+                    <input
+                      type="text"
+                      value={formData.deliverySettings?.pickup?.address || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        deliverySettings: {
+                          ...formData.deliverySettings,
+                          pickup: { ...(formData.deliverySettings?.pickup || {}), address: e.target.value }
+                        }
+                      })}
+                      placeholder="Ingresa la dirección exacta del local físico"
+                      className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-muted mb-1">Instrucciones de recogida</label>
+                    <input
+                      type="text"
+                      value={formData.deliverySettings?.pickup?.instructions || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        deliverySettings: {
+                          ...formData.deliverySettings,
+                          pickup: { ...(formData.deliverySettings?.pickup || {}), instructions: e.target.value }
+                        }
+                      })}
+                      placeholder="Ingresa indicaciones claras para el retiro físico"
+                      className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Domicilio / Envío */}
+            <div className="p-4 bg-surface-2/60 rounded-2xl border border-app space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-app">Envío a Domicilio</p>
+                  <p className="text-xs text-muted">Permite despachar pedidos a la dirección del cliente</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input type="checkbox" className="sr-only peer"
+                    checked={formData.deliverySettings?.shipping?.enabled ?? true}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      deliverySettings: {
+                        ...formData.deliverySettings,
+                        shipping: { ...(formData.deliverySettings?.shipping || {}), enabled: e.target.checked }
+                      }
+                    })} />
+                  <div className="w-11 h-6 bg-app/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+                </label>
+              </div>
+            </div>
+
+            {/* Entrega Digital */}
+            <div className="p-4 bg-surface-2/60 rounded-2xl border border-app space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-app">Servicios / Entrega Digital</p>
+                  <p className="text-xs text-muted">Adecuado para servicios presenciales o productos virtuales</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input type="checkbox" className="sr-only peer"
+                    checked={formData.deliverySettings?.digital?.enabled ?? false}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      deliverySettings: {
+                        ...formData.deliverySettings,
+                        digital: { ...(formData.deliverySettings?.digital || {}), enabled: e.target.checked }
+                      }
+                    })} />
+                  <div className="w-11 h-6 bg-app/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+                </label>
+              </div>
+
+              {(formData.deliverySettings?.digital?.enabled ?? false) && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-3 pt-2">
+                  <div>
+                    <label className="block text-xs font-semibold text-muted mb-1">Instrucciones</label>
+                    <input
+                      type="text"
+                      value={formData.deliverySettings?.digital?.instructions || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        deliverySettings: {
+                          ...formData.deliverySettings,
+                          digital: { ...(formData.deliverySettings?.digital || {}), instructions: e.target.value }
+                        }
+                      })}
+                      placeholder="Ingresa indicaciones para la entrega digital"
+                      className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Mensajero Propio */}
+            <DeliveryCustomMessengerPanel formData={formData} setFormData={setFormData} />
+
+          </div>
+
+          <div className="p-5 border-t border-app bg-surface-2/30">
+            <button
+              onClick={async () => {
+                try {
+                  const pEnabled = formData.deliverySettings?.pickup?.enabled ?? true;
+                  const sEnabled = formData.deliverySettings?.shipping?.enabled ?? true;
+                  const dEnabled = formData.deliverySettings?.digital?.enabled ?? false;
+                  if (!pEnabled && !sEnabled && !dEnabled) {
+                    setSaveMessage({ type: 'error', text: 'Debes habilitar al menos un método de entrega.' })
+                    return;
+                  }
+
+                  await updateAppConfig({ 
+                    deliverySettings: formData.deliverySettings || null
+                  })
+                  setSaveMessage({ type: 'success', text: 'Métodos de entrega guardados correctamente.' })
+                  setTimeout(() => setSaveMessage(null), 3000)
+                } catch (e) {
+                  setSaveMessage({ type: 'error', text: 'Error al guardar.' })
+                }
+              }}
+              className="w-full h-12 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-sm cursor-pointer border-none"
+            >
+              <Save size={18} /> Guardar Métodos de Entrega
+            </button>
+          </div>
+        </div>
       )}
 
     </div>
