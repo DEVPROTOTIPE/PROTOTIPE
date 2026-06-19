@@ -1,82 +1,176 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
-Historial técnico de cambios realizados sobre el motor central de aprovisionamiento de Prototype, scripts PowerShell de respaldo y estándares del sistema.
-
-### [2026-06-13] - Migración de Métodos de Entrega y Facturación DIAN a Zona de Desarrollador protegida por PIN (Core y CLI)
-* **Tipo:** Reubicación de Ajustes / Seguridad / Control de Acceso / AdminSettings
+### [2026-06-19] - Stock Infinito para Productos Preparados / Ilimitados - App Ventas
+* **Tipo:** Core / Inventario / Transacciones / Firebase / UI/UX
 * **Descripción de Cambios:**
-  - **Reubicación de Interfaz:** Se removieron las opciones "Métodos de Entrega" (`entregas`) y "Facturación DIAN" (`dian`) de la sección orientada al cliente "Personalizar Tienda" en `AdminSettings.jsx` (Core y CLI).
-  - **Remoción de Lógica Original:** Se eliminaron por completo los subpaneles correspondientes y sus lógicas de guardado en `StoreSettings.jsx` (Core y CLI), así como las importaciones asociadas a `LeafletMapPicker` y `DeliveryCustomMessengerPanel`.
-  - **Inyección en Zona Protegida:** Se añadieron las opciones "Métodos de Entrega" (`dev-entregas`) y "Facturación DIAN" (`dev-dian`) en la lista de herramientas de `DeveloperSettings.jsx` (Core y CLI).
-  - **Integración de Componentes:** Se trasladaron e integraron en espejo los componentes `LeafletMapPicker` y `DeliveryCustomMessengerPanel`, junto con la lógica de persistencia de despachos (`deliverySettings`) y facturación (`dianSettings`) en `DeveloperSettings.jsx`.
+  - **Soporte en Esquemas:** Agregado el campo opcional `stockInfinito` de tipo booleano al esquema de validación Zod `productSchema` en `inventorySchemas.js` para asegurar consistencia e integridad de tipos.
+  - **Toggle UI en Formulario:** Añadido un interruptor/checkbox premium en `ProductFormModal.jsx` dentro de `renderVariantsSection` para marcar el producto como ilimitado. Si el producto tiene stock infinito activo, los inputs de stock (tanto en vista de producto simple como en variante múltiple) se ocultan o muestran un indicador de lectura "∞ Ilimitado", y se omite la validación numérica del stock en el modal.
+  - **Transformación de Datos al Guardar:** Modificada la preparación de datos del formulario en `ProductFormModal.jsx` para forzar el valor de stock de todas las variantes a `9999` cuando `stockInfinito` sea verdadero. Esto asegura compatibilidad nativa con la lógica existente de stock ilimitado en el resto del front-end.
+  - **Listados de Inventario:** Modificado `AdminInventory.jsx` (tabla de escritorio y tarjetas móviles) para detectar el flag `stockInfinito` y mostrar un badge de badge visual color morado con el texto "∞ Ilimitado" en lugar del conteo de unidades y alerta de stock bajo.
+  - **Excepción de Alertas:** Actualizadas las funciones de cálculo de stock bajo en `AdminStockAlerts.jsx` y en las métricas de `AdminHome.jsx` para omitir y silenciar alertas de reabastecimiento en productos marcados con stock infinito.
+  - **Blindaje Transaccional de Pedidos:** Modificado `orderService.js` en todos sus métodos de alteración de stock (`createOrder`, cancelación de órdenes en `updateOrderStatus`, completado de órdenes en `updateOrderStatus` y flujo de creación offline) para que verifiquen el flag `productInfo.data.stockInfinito` y omitan cualquier validación, decremento o restauración de stock de variantes, manteniendo intacta la contabilidad de ventas `salesCount`.
+  - **Visualización en Tienda de Clientes (Pulido):** Modificado `ProductDetailPage.jsx` para que muestre el badge `"Disponible"` en lugar de `"9999 disponibles"`. Modificados también `ProductCard.jsx` y `ProductDetailModal.jsx` para reescribir `isOutOfStock` (fuerza `false`), `stockConsolidado` (fuerza `9999`) y `isUnlimited` para considerar de manera proactiva el flag `stockInfinito` del producto. Se limitó el selector de cantidad máxima a `999` en productos ilimitados.
 * **Archivos Modificados:**
-  - [StoreSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/StoreSettings.jsx) [MODIFY]
-  - [StoreSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/StoreSettings.jsx) [MODIFY]
-  - [DeveloperSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
-  - [DeveloperSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+  - [inventorySchemas.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/schemas/inventorySchemas.js) [MODIFY]
+  - [ProductFormModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/inventory/ProductFormModal.jsx) [MODIFY]
+  - [AdminInventory.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminInventory.jsx) [MODIFY]
+  - [orderService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/orderService.js) [MODIFY]
+  - [AdminStockAlerts.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminStockAlerts.jsx) [MODIFY]
+  - [AdminHome.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminHome.jsx) [MODIFY]
+  - [ProductDetailPage.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+  - [ProductCard.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductCard.jsx) [MODIFY]
+  - [ProductDetailModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductDetailModal.jsx) [MODIFY]
 
-### [2026-06-13] - Migración de Módulos Activos a Zona de Desarrollador protegida por PIN (Core y CLI)
-* **Tipo:** Reubicación de Módulos / Control de Acceso / Seguridad / AdminSettings
+### [2026-06-19] - Rediseño Premium de la Gestión de Pedidos (Laboratorio Visual Fase 2) - App Ventas
+* **Tipo:** Core / UI/UX / Rediseño / Responsividad
 * **Descripción de Cambios:**
-  - **Reubicación de Interfaz:** Se removió la opción "Módulos Activos" (`modulos`) de la sección orientada al cliente "Personalizar Tienda" en `AdminSettings.jsx` (Core y CLI).
-  - **Remoción de Lógica Original:** Se eliminó por completo el sub-panel y lógica de guardado de `activeSubSection === 'modulos'` en `StoreSettings.jsx` (Core y CLI).
-  - **Inyección en Zona Protegida:** Se añadió la opción "Módulos Activos" (`dev-modulos`) en la lista de herramientas de `DeveloperSettings.jsx` (Core y CLI, protegida bajo el PIN maestro `DEV_PIN`).
-  - **Integración de Componentes:** Se re-maquetó e integró la interfaz y los interruptores correspondientes (Crédito, Cupones, Garantías y Mayorista) en `DeveloperSettings.jsx` utilizando los mismos hooks, estado global y endpoint de guardado en Firebase (`updateAppConfig`).
+  - **Tarjeta Comanda Asimétrica:** Refactorizado el maquetado de `OrderCard` en `AdminOrders.jsx` para adoptar la estructura responsiva asimétrica de 12 columnas en desktop, elástico y adaptado al tema. En móviles, se reordenaron los elementos estructurando una cabecera con el número de pedido y badges, un contenedor interno para agrupar los artículos con icono de paquete y un pie de página limpio con el monto y los botones interactivos (QR y Chevron) de forma simétrica sin eliminar ninguna variable ni funcionalidad.
+  - **Grid de Métricas Rápidas Estilo Wallet:** Rediseñado el grid de tarjetas de métricas rápidas (Pendientes, Completados, Créditos) usando bordes finos responsivos, curvatura amplia `rounded-3xl` y hover de escala suave. La tarjeta de Créditos cuenta con una animación de brillo elástica que utiliza la variable CSS `--color-primary-light` dinámica para adaptarse a cualquier tema activo (ej. SmartFix) sin colores rígidos hardcoded.
+  - **Carrusel de Filtros Planos con Contadores:** Rediseñado el carrusel de filtros de estado para mostrar tarjetas wallet compactas con contadores dinámicos alimentados por `filterCounts`. Se incorporó el espaciado `-mx-4 px-4` en móviles para que fluya hasta el borde físico de la pantalla de forma impecable sin recortes de sombras.
 * **Archivos Modificados:**
-  - [AdminSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
-  - [StoreSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/StoreSettings.jsx) [MODIFY]
-  - [DeveloperSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
-  - [AdminSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
-  - [StoreSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/StoreSettings.jsx) [MODIFY]
-  - [DeveloperSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+  - [AdminOrders.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminOrders.jsx) [MODIFY]
 
-### [2026-06-13] - Rediseño de Mensaje de Confirmación a Toast Flotante Premium en Ajustes del Administrador (Core y CLI)
-* **Tipo:** UI/UX / Mejoras Visuales / AdminSettings
+### [2026-06-19] - Estabilización de UI, Correcciones y Catálogo de Estilos - App Ventas
+* **Tipo:** Core / UI/UX / Bugfix / Documentación / Estilos
 * **Descripción de Cambios:**
-  - **Conversión a Toast Flotante:** Se reemplazó el renderizado estático del mensaje de guardado (`saveMessage`) por un Toast flotante premium posicionado en el centro superior del viewport (`fixed top-6 left-1/2 -translate-x-1/2 z-[9999]`), con fondo semi-translúcido con efecto de desenfoque (`backdrop-blur-md`), colores HSL e íconos dinámicos de éxito/error.
-  - **Animación Fluida:** Se integró la biblioteca `framer-motion` envolviendo el Toast con `AnimatePresence` y usando `motion.div` para aplicar transiciones de desvanecimiento, deslizamiento de entrada (`y: -20` a `y: 0`) y desvanecimiento de salida al desaparecer.
-  - **Auto-limpieza Centralizada:** Se implementó un `useEffect` centralizado que escucha los cambios en `saveMessage` y dispara un `setTimeout` automático para limpiar el estado devolviéndolo a `null` tras **2 segundos** de duración, asegurando consistencia reactiva e impidiendo que el Toast persista indefinidamente.
+  - **Adaptabilidad de Temas HSL:** Modificada la cabecera curvada superior y la tarjeta wallet de "Caja de Hoy" en `AdminHome.jsx` para usar el degradado dinámico de marca (`from-primary to-primary-dark`) en lugar de tonos estáticos.
+  - **Diseño Sobrio y Coherente:** Rediseñadas las tarjetas secundarias de balances (`Ventas Totales`, `Por Cobrar`, `Pedidos`) a un estilo de superficie neutral (`bg-surface border border-app text-app`) con badges e iconos vectoriales Lucide en colores pastel translúcidos, eliminando colisiones visuales cromáticas de marca.
+  - **Soporte de Hover sin Recortes:** Añadida la propiedad `md:overflow-visible` al contenedor de tarjetas, previniendo que en computadoras se corten los bordes y las sombras en el hover.
+  - **Carrusel edge-to-edge en Celulares:** Integrado el margen negativo y el padding responsivo (`-mx-4 px-4`) en móviles, permitiendo que el carrusel se desplace libremente hasta los bordes físicos de la pantalla.
+  - **Fijación de Bug de Scroll:** Modificado el componente helper `ThemeModalLock` en `AppearanceSettings.jsx` para restablecer la propiedad `overflow` del body a vacío (`''`) al desmontarse, solventando el bug de congelamiento de scroll al cerrar el modal de paleta de colores.
+  - **Catálogo de Estilos Visuales:** Creado y catalogado el archivo de estándares de estilos del ecosistema en `catalogo_estilos_ui.md`.
 * **Archivos Modificados:**
-  - [AdminSettings.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
-  - [AdminSettings.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
+  - [AdminHome.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminHome.jsx) [MODIFY], [AppearanceSettings.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/AppearanceSettings.jsx) [MODIFY], [catalogo_estilos_ui.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Estilos/catalogo_estilos_ui.md) [NEW], [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
 
-### [2026-06-13] - Restricción de Ejecución de Comandos Git sin Validación de Usuario (Reglas de Ecosistema)
-* **Tipo:** Reglas de IA / Seguridad / Control de Versiones
+### [2026-06-19] - Rediseño Premium de Inicio del Administrador (Laboratorio Visual Fase 1) - App Ventas
+* **Tipo:** Core / UI/UX / Rediseño / Responsividad
 * **Descripción de Cambios:**
-  - **Actualización de Reglas de Desarrollo (GEMINI.md):** Se modificó la Sección 4 del archivo de reglas maestras `GEMINI.md` para prohibir explícitamente a la IA ejecutar cualquier comando de Git de cualquier tipo (checkout, restore, reset, add, commit, push, pull, status, diff, etc.), tanto local como remoto, sin obtener primero el consentimiento explícito y validación del usuario en el chat.
-  - **Sincronización de Reglas en Todo el Ecosistema:** Se ejecutó el script `sync_rules.js` para propagar y aplicar esta restricción en todos los archivos de reglas del ecosistema (Core, CLI, Templates y Dashboard).
+  - **Cabecera Curva con Degradado:** Implementada una cabecera superior curvada (`rounded-b-[40px]`) con degradado elástico de color primario a índigo. Muestra un saludo contextual dinámico basado en la hora, la fecha actual formateada en español y el logo de la tienda o fallback adaptativo sin deformaciones.
+  - **Carrusel de Tarjetas Financieras (Wallet Cards):** Diseñado un grid-carrusel responsivo de tarjetas financieras con solape negativo (`-mt-12`). En móviles se desplaza de forma horizontal con comportamiento snap y ocultación de scrollbars. En computadoras se adapta a una rejilla.
+  - **Maquetación Premium de Tarjetas:** Las 4 tarjetas de balance (`Caja de Hoy`, `Ventas Totales`, `Por Cobrar / Cartera`, `Pedidos y Alertas`) cuentan con degradados vibrantes, sombras de elevación premium y desgloses de ingresos (efectivo, transferencia y crédito).
+  - **Transacciones Recientes:** Implementado un listado interactivo con los 5 pedidos más recientes. Cada ítem incluye el nombre del cliente (o "Venta POS"), identificador del pedido, fecha relativa e iconos vectoriales Lucide dinámicos rodeados por círculos en colores pastel translúcidos según su estado, con redirección inteligente.
+  - **Accesos Rápidos:** Diseñados botones minimalistas de accesos directos con animaciones framer-motion de escala e interacción fluida.
 * **Archivos Modificados:**
-  - [GEMINI.md (Master)](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md) [MODIFY]
-  - [GEMINI.md (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/GEMINI.md) [MODIFY]
-  - [GEMINI.md (Core App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/GEMINI.md) [MODIFY]
-  - [GEMINI.md (CLI Template Ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/GEMINI.md) [MODIFY]
+  - [AdminHome.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminHome.jsx)
 
-### [2026-06-13] - Restauración de ProductFormModal a la Última Versión Guardada por el Usuario
-* **Tipo:** Reversión / Git Restore / ProductFormModal
+### [2026-06-19] - Auditoría y Estabilización del Sistema de Notificaciones - App Ventas
+* **Tipo:** Core / UI/UX / Robustez / Notificaciones / Bugfix
 * **Descripción de Cambios:**
-  - **Restauración Completa de Layout y Estilos:** Se descartaron todas las modificaciones locales sobre `ProductFormModal.jsx` (Core y CLI) mediante `git checkout HEAD`, devolviendo la ventana al estado exacto correspondiente al último commit guardado en GitHub por el usuario.
-  - **Conservación de Diseños Previos:** Se preservaron sin alteraciones las alineaciones visuales de los campos de visibilidad manual, bloques SEO, productos recomendados/complementarios y las configuraciones de variantes (con botones de galería/cámara y SKU) previamente maquetadas por el usuario.
-* **Archivos Modificados (Revertidos a Limpio):**
-  - [ProductFormModal.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/inventory/ProductFormModal.jsx) [RESTORED]
-  - [ProductFormModal.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/admin/inventory/ProductFormModal.jsx) [RESTORED]
-
-### [2026-06-13] - Bugfix y Robustez: Dinamización de Tests E2E para Evitar Fallos
-* **Tipo:** E2E Testing / Bugfix / Playwright / loginAsClient
-* **Descripción de Cambios:**
-  - **Corrección de Selector por Placeholder:** Se modificó el valor de `nameInputPlaceholder` en la configuración de Playwright (`app-ventas.config.js`) en Core y CLI de `'María Pérez'` a `'nombre y apellido'` para coincidir con el atributo placeholder real (`Ingresa tu nombre y apellido`) del input de registro de cliente nuevo en `LoginPage.jsx`.
-  - **Localización Dinámica de Productos (Agnóstica a Datos):** Se refactorizó `selectProductFromCatalog` en `checkout.helpers.js` para seleccionar y hacer clic sobre el primer producto visible usando el localizador genérico `h3[title]` en lugar de buscar un texto fijo (`targetProductText`). Esto inmuniza el test ante borrados, ediciones o modificaciones en el catálogo de productos de Firestore.
-  - **Resolución de Bloqueo de Git Push:** Estas correcciones resuelven los fallos de timeout de Playwright locales, permitiendo que la suite pase con éxito (Exit Code 0) y desbloqueando el push automático a GitHub en la herramienta de backup del ecosistema.
+  - **Suscripción de Conteo en Tiempo Real:** Creada la función `subscribeToUnreadCount` en `notificationCenterService.js` para escuchar los documentos con `status == 'unread'` reactivamente desde Firestore. Refactorizado el hook `useNotificationCenter.js` para consumir esta suscripción en lugar del filtrado local en memoria del primer lote paginado, solucionando el bug de desajuste del contador de no leídos.
+  - **Diseño Visual Dinámico y Premium:** Actualizado `NotificationHistoryTray.jsx` para importar de manera selectiva y renderizar dinámicamente iconos premium de `lucide-react` en base a `meta.icon` (en lugar de la campana `🔔` estática), mapeados con clases literales de color del sistema de diseño Tailwind para evitar la depuración del linter y optimizar la UX.
+  - **Pipeline de Toasts Robustecida:** Refactorizado el useEffect generador de Toasts en `AdminLayout.jsx`, `ClientLayout.jsx` y `PortalLayout.jsx`. Ahora itera sobre todas las notificaciones no leídas recientes (edad < 20 segundos) que no estén ya encoladas localmente, asegurando que múltiples notificaciones concurrentes (por ejemplo, pedidos y abonos que llegan juntos) muestren su respectiva ventana flotante sin omitir avisos.
+  - **Limpieza de Linter:** Removida la importación no utilizada `AlertTriangle` en `PortalMensajero.jsx` para garantizar un bundle libre de variables huérfanas.
 * **Archivos Modificados:**
-  - [app-ventas.config.js (Template)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/tests/config/app-ventas.config.js) [MODIFY]
-  - [app-ventas.config.js (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/config/app-ventas.config.js) [MODIFY]
+  - `notificationCenterService.js`, `useNotificationCenter.js`, `NotificationHistoryTray.jsx`, `AdminLayout.jsx`, `ClientLayout.jsx`, `PortalLayout.jsx`, `PortalMensajero.jsx`
 
-### [2026-06-13] - Corrección de Despliegue en Menú de Visibilidad del Modal de Producto (Core y CLI)
-* **Tipo:** UI/UX / CustomSelect / Modal / Bugfix
+### [2026-06-19] - Optimización de Bundle y Depuración de Importaciones (ESLint Clean Up) - App Ventas
+* **Tipo:** Mantenimiento / Optimización / Calidad de Código
 * **Descripción de Cambios:**
-  - **Uso de dropUp en Selector de Visibilidad:** Se habilitó la propiedad `dropUp={true}` en el componente `CustomSelect` de "Visibilidad Manual del Producto" ubicado en la sección "Configuración Avanzada de Producto" del modal de producto (`ProductFormModal.jsx`), solucionando el problema de clipping y empuje visual de la UI que ocurría cuando el menú se desplegaba hacia abajo.
+  - **Limpieza de Importaciones y Parámetros:** Depuradas importaciones en desuso de Firestore (como `getDoc`, `orderBy`, `addDoc`, `updateDoc`, `setDoc`, `where`, `query`) en los servicios de anuncios, inventario, órdenes, créditos, analíticas de códigos QR y seguimiento.
+  - **Saneamiento de Firmas:** Removido el parámetro no utilizado `creditId` en `reportCreditPayment` (`creditService.js`) y `pin` en `authenticateEmployeeByPin` (`employeeService.js`).
+  - **Resolución de Warnings en PDF:** Corregido en `pdfService.js` la inicialización inútil de la variable `saldo`, reemplazando el operador nullish coalescing `??` sobre `Number(...)` por `||` para mitigar el error de expresión nullish constante en ESLint, y removida la firma no utilizada de `orders` en `exportCreditsReportPDF`.
+  - **Control de Linter en PortalVendedor:** Removidas las desestructuraciones redundantes de `appIcon` y `whatsappAdmin` en `PortalVendedor.jsx`, e inyectados comentarios de desactivación de la regla `react-hooks/set-state-in-effect` sobre llamadas de estado asíncronas / debounced seguras.
 * **Archivos Modificados:**
-  - [ProductFormModal.jsx (Core)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/inventory/ProductFormModal.jsx) [MODIFY]
-  - [ProductFormModal.jsx (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/admin/inventory/ProductFormModal.jsx) [MODIFY]
+  - `adService.js`, `clientNotificationService.js`, `creditService.js`, `employeeService.js`, `inventoryService.js`, `orderService.js`, `qrAnalyticsService.js`, `trackingAnalyticsService.js`, `pdfService.js`, `inventorySchemas.js`, `PortalVendedor.jsx`
+
+### [2026-06-19] - Auditoría y Optimización de Créditos y Saldos (Módulo 5) - App Ventas
+* **Tipo:** Core / UI/UX / Rendimiento / Base de Datos / Transacciones
+* **Descripción de Cambios:**
+  - **Estandarización de Modales:** Refactorizados los modales de abonos en `AdminCredits.jsx` y `ClientCredits.jsx` utilizando la plantilla común `ModalTemplate` de forma consistente, unificando estilos visuales, overlays y control de scroll.
+  - **Eliminación de useOrders:** Removido por completo el hook `useOrders()` en `AdminCredits.jsx` eliminando la suscripción reactiva innecesaria a todos los pedidos del comercio al consultar cartera de deudas.
+  - **Optimización de PDF de Cartera:** Modificada la función `exportCreditsReportPDF` en `pdfService.js` sustituyendo la consulta completa de la colección de créditos por una consulta filtrada a créditos activos (`where('estado', '==', 'activo')`), mitigando lecturas masivas en memoria.
+  - **Blindaje Transaccional de Saldos:** Asegurada la expresión de cálculo de saldo pendiente en la transacción `addPaymentToCredit` de `creditService.js` implementando precedencia lógica correcta: `const currentSaldo = data.saldoPendiente ?? data.saldoPending ?? data.montoTotal`, evitando fallos de carrera o valores nulos.
+* **Archivos Modificados:**
+  - [AdminCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminCredits.jsx) [MODIFY]
+  - [ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCredits.jsx) [MODIFY]
+  - [pdfService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/pdfService.js) [MODIFY]
+  - [creditService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/creditService.js) [MODIFY]
+
+### [2026-06-18] - Elaboración de Checklist de Auditoría del Core (App Ventas)
+* **Tipo:** Mantenimiento / Auditoría / Documentación
+* **Descripción de Cambios:**
+  - **Creación de Checklist Técnico:** Diseñado y estructurado un checklist específico de control de calidad y blindaje técnico para la plantilla core `App Ventas`. Cubre auditoría de fugas de sesión, persistencia de lockout PIN, viewport en móvil para modales, inconsistencias de transacciones Firebase en Bodega, cuellos de botella por sincronización masiva IndexedDB en POS y condiciones de carrera en abonos de créditos.
+  - **Sincronización de Mapas:** Registrada la entrada en `mapa_documentacion_ia.md` con su respectivo Criterio de Decisión y control en `tareas_pendientes.md`.
+* **Archivos Modificados:**
+  - [checklist_auditoria_core.md](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/checklist_auditoria_core.md) [NEW]
+  - [mapa_documentacion_ia.md](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [tareas_pendientes.md](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
+### [2026-06-12] - Registro Explícito de Rol 'client' en Nuevos Clientes (Ecosistema)
+* **Tipo:** Consistencia de Base de Datos / Seguridad
+* **Descripción de Cambios:**
+  - **Inyección de Rol en Registro:** Se corrigió la discrepancia en la colección `/users` agregando de forma explícita el campo `role: 'client'` cuando se registra un cliente nuevo. Esto garantiza consistencia de esquema (ya que los administradores guardan `role: 'admin'`) y facilita validaciones en las reglas de seguridad.
+* **Archivos Modificados:**
+  - [LoginPage.jsx](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/LoginPage.jsx) [MODIFY]
+  - [LoginPage.jsx](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx) [MODIFY]
+
+### [2026-06-12] - Fix de Sesión Huérfana de Administrador en App Ventas (Ecosistema)
+* **Tipo:** Bugfix / Autenticación / Base de Datos
+* **Descripción de Cambios:**
+  - **Auto-recreación de Perfil Admin:** Se corrigió un bug en la plantilla `App Ventas` donde, al limpiar la base de datos Firestore, un administrador logueado previamente mediante Firebase Auth era redirigido directamente al dashboard debido al listener de sesión en cache, sin recrear su documento en la colección `/users` (ya que el login manual era el único que ejecutaba la escritura).
+  - **Implementación en Hook:** Modificado `src/hooks/useAuthInit.js` en la plantilla base de Ventas para que compruebe la existencia del documento en Firestore cuando el listener de Auth detecte una sesión activa y la cree si falta.
+* **Archivos Modificados:**
+  - [useAuthInit.js](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAuthInit.js) [MODIFY]
+
+### [2026-06-12] - Remoción de Función de Gestión de Base de Datos
+* **Tipo:** Refactorización / Remoción de código
+* **Descripción de Cambios:**
+  - **Eliminación en server.js:** Se eliminaron los endpoints `/api/project/database/collections` y `/api/project/database/cleanup` junto a los imports del SDK cliente de Firebase y helpers relacionados.
+  - **Eliminación en App.jsx:** Se removió el botón "Base de Datos", los estados de React para control de colecciones (`dbManageModal`, `dbCollections`, etc.), los manejadores `handleLoadDbCollections`/`handleExecuteDbCleanup` y la maquetación del modal de confirmación de borrado.
+* **Archivos Modificados:**
+  - [App.jsx](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [server.js](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+### [2026-06-12] - Corrección de Responsividad Móvil y Estructura en CRM de Clientes
+* **Tipo:** UI/UX / Responsividad / Bugfix
+* **Descripción de Cambios:**
+  - **Grid de Cabecera:** Se rediseñó el contenedor de botones de acción global del CRM (`Sincronización Global`, `Despliegue Global`, `Telemetría Global`, `Nuevo Cliente`) para usar una cuadrícula responsiva de 2 columnas en mobile (`grid grid-cols-2 md:flex md:flex-wrap`) con botones de ancho completo, evitando desbordamientos de texto.
+  - **Flexibilidad de Directorio:** Se reestructuraron los botones de acción del directorio de cada cliente (`Desplegar en Local`, `Base de Datos`, `Instalar Deps`, `Obtener Telemetría`, `Gestionar`) con propiedades flex-wrap, anchos mínimos (`min-w`) y alineación central, permitiendo que se acomoden simétricamente en pantallas estrechas sin truncarse.
+  - **Resolución de Error de Sintaxis:** Se restauró la etiqueta contenedora de visualización de proyecciones que fue eliminada por error.
+  - **Resolución de Bug de Búsqueda de Proyectos:** Se corrigió una falla lógica en la función `findProjectDir` de `server.js` que impedía resolver las rutas de proyectos de plantillas core (`Plantillas Core`) si la carpeta de instancias de clientes (`Instancias Clientes`) no estaba creada físicamente en el disco.
+* **Archivos Modificados:**
+  - [App.jsx](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [server.js](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+### [2026-06-12] - Arquitectura General y Agnóstica de Skills de IA
+* **Tipo:** Refactorización / IA Configuración
+* **Descripción de Cambios:**
+  - **Agnosticismo de Proyecto:** Actualizadas las 7 skills del ecosistema (`component_creator`, `component_extractor`, `git_strategist`, `integrity_compiler`, `onboarder_marcas`, `portar_componente`, `sandbox_integrator`) para remover referencias hardcodeadas a la plantilla `App Ventas`. Se introdujo la variable dinámica `[PROYECTO_ACTIVO]` con su orden de prioridades de resolución y la sección de "Rutas del Proyecto".
+  - **Triggers Dinámicos:** Configurado el soporte para que los triggers acepten el parámetro opcional de proyecto (ej: `@crear-componente [PROYECTO_ACTIVO?]`).
+  - **Mejoras Específicas por Skill:**
+    * `component_creator`: Mapeo fuzzy en `getSandboxKey` en Paso 3, inyección de categorías válidas de biblioteca, y build bloqueante en Paso 5.
+    * `component_extractor`: Actualizada la tabla de simulabilidad, criterio objetivo para manuales, protocolo de rollback y variantes.
+    * `git_strategist`: Completada la descripción y agregado Paso 6 para resolución de conflictos.
+    * `integrity_compiler`: Completada la descripción y unificadas rutas.
+    * `onboarder_marcas`: Agregada plantilla para `.env.local` y reglas multi-vertical de onboarding.
+    * `portar_componente`: Agregado control de dependencias npm faltantes y validación de versión de `lucide-react`.
+    * `sandbox_integrator`: Establecida la tabla como fuente canónica de verdad y añadidas filas de simulabilidad.
+* **Archivos Modificados:**
+  - Archivos `SKILL.md` bajo `D:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\Copia_Seguridad_Reglas_y_Skills\Skills\` [MODIFY]
+
+### [2026-06-12] - Depuración de Rutas Obsoletas (D:\Aplicaciones)
+* **Tipo:** Refactorización / Mantenimiento
+* **Descripción de Cambios:**
+  - **Eliminación en server.js:** Removido el fallback redundante y obsoleto `D:\Aplicaciones` de la rutina de resolución de proyectos `findProjectDir` en el servidor del CLI (`server.js`).
+  - **Drift Detector CRM:** Implementados los endpoints `/api/project/drift` y `/api/project/sync-file` para evaluar diferencias downstream entre Cores y clientes.
+* **Archivos Modificados:**
+  - [server.js](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+### [2026-06-10] - Optimización de Chunks de Bundle y Refinamiento de Auditor PWA
+* **Tipo:** Rendimiento / Optimización / Bundles
+* **Descripción de Cambios:**
+  - **Falsos positivos de auditoría:** Refinamiento de la API `/api/project/audit` en `server.js` para leer el manifest de Vite y omitir las penalizaciones por tamaño de chunks cargados dinámicamente.
+* **Archivos Modificados:**
+  - [server.js](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+### [2026-06-10] - Integración de Herramientas de Automatización en CLI Bridge Server
+* **Tipo:** Nueva Característica / Automatización / CLI Bridge
+* **Descripción de Cambios:**
+  - **APIs de Automatización:** Redireccionados logs en `worker_create_project.js` por IPC y agregadas APIs `/api/library/extract`, `/api/project/deploy` y getters/setters de variables de entorno en `/api/project/env`.
+* **Archivos Modificados:**
+  - [server.js](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [worker_create_project.js](file:///D:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+
 
 ### [2026-06-13] - Reubicación de Apariencia y Colores a Ajustes de Desarrollador
 * **Tipo:** Reubicación de Módulos / UI/UX / AdminSettings
@@ -344,7 +438,7 @@ Historial técnico de cambios realizados sobre el motor central de aprovisionami
   - **Soporte de Scaffold Limpio:** Implementado el soporte para realizar scaffolding de nuevos Cores utilizando una plantilla limpia del sistema (`template-core-seed`). Modificado el endpoint `/api/cores/:clave/scaffold` en `server.js` (CLI).
 * **Archivos Modificados:**
   - [server.js](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
-
+  - `06_Biblioteca_Componentes/Formularios_y_UI/ConnectivityToast/` [DEL
 ### [2026-06-11] - Saneamiento de Detección Git en Ecosistema (CLI & Dashboard)
 * **Tipo:** DevOps / Bugfix / Scripts
 * **Descripción de Cambios:**
@@ -356,7 +450,7 @@ Historial técnico de cambios realizados sobre el motor central de aprovisionami
 * **Tipo:** DevOps / Automatización
 * **Descripción de Cambios:**
   - **Aislamiento de comandos de Git:** Refactorizado `subproject_backup.ps1` para detectar de forma autónoma si un subproyecto está en estado inactivo con la carpeta `.git-backup-temp` y renombrarlo temporalmente a `.git` para realizar la indexación de cambios.
-* **Archivos Modificados:**
+  - **Fase 1 — Críticos:** Eliminados 3 archivos binarios residuales de `03_Auditorias_y_Faro_Core/` (trace.json 26MB, desktop_landing.png, PDF). Corregida descripción de `03_Auditorias_y_Faro_Core` en GEMINI.m
   - [subproject_backup.ps1](file:///D:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
 
 ### [2026-06-11] - Corrección de Bugs de Referencia, Git y Bloqueo de SSE en Automatización
