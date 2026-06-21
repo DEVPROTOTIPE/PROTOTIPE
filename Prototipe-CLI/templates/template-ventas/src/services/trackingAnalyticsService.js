@@ -1,4 +1,4 @@
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore'
+import { collection, addDoc, serverTimestamp, query, getDocs } from 'firebase/firestore'
 import { db } from '../config/firebaseConfig'
 
 const COLLECTION_NAME = 'trackingAnalytics'

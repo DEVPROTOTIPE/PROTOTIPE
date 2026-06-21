@@ -6,7 +6,6 @@ import { useEffect, useState, useRef } from 'react'
 import { useConnectivityStore } from '../store/connectivityStore'
 
 import useNotificationCenter from '../hooks/useNotificationCenter'
-import useFCMPermission from '../hooks/useFCMPermission'
 import NCToastContainer from '../components/common/NCToastContainer'
 import NotificationHistoryTray from '../components/common/NotificationHistoryTray'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -17,14 +16,7 @@ export default function PortalLayout() {
   const nav = useNavigate()
   const config = PORTAL_CONFIG[portalEmployee?.rol] || { color: 'var(--color-primary)', emoji: '👤', label: 'Portal', labelCorto: 'Portal' }
 
-  // Sincronizar el permiso y tokens de FCM para Empleados (usando su employeeId o celular)
-  const { requestPermission } = useFCMPermission(portalEmployee?.celular || portalEmployee?.id || 'employee', portalEmployee?.rol || 'employee')
 
-  useEffect(() => {
-    if (portalEmployee) {
-      requestPermission()
-    }
-  }, [portalEmployee, requestPermission])
 
   // Hook central del Notification Center para el rol específico
   const [soundEnabled, setSoundEnabled] = useState(true)
@@ -57,23 +49,29 @@ export default function PortalLayout() {
 
     const unread = notifications.filter(n => n.status === 'unread')
     if (unread.length > 0) {
-      const mostRecent = unread[0]
-      // Solo disparar toast si la notificación llegó en los últimos 20 segundos
-      const createdTime = mostRecent.createdAt?.toDate ? mostRecent.createdAt.toDate().getTime() : (mostRecent.createdAt ? new Date(mostRecent.createdAt).getTime() : Date.now())
-      if (Date.now() - createdTime > 20000) return
-
       setToasts(prev => {
-        if (prev.some(t => t.id === mostRecent.id)) return prev
-        const newToast = {
-          id: mostRecent.id,
-          title: mostRecent.title,
-          body: mostRecent.body,
-          clickAction: mostRecent.clickAction
-        }
-        setTimeout(() => {
-          setToasts(current => current.filter(t => t.id !== mostRecent.id))
-        }, 5000)
-        return [...prev, newToast]
+        let updated = [...prev]
+        unread.forEach(item => {
+          if (updated.some(t => t.id === item.id)) return
+
+          const createdTime = item.createdAt?.toDate 
+            ? item.createdAt.toDate().getTime() 
+            : (item.createdAt ? new Date(item.createdAt).getTime() : Date.now())
+
+          if (Date.now() - createdTime > 20000) return
+
+          updated.push({
+            id: item.id,
+            title: item.title,
+            body: item.body,
+            clickAction: item.clickAction
+          })
+
+          setTimeout(() => {
+            setToasts(current => current.filter(t => t.id !== item.id))
+          }, 5000)
+        })
+        return updated
       })
     }
   }, [notifications])

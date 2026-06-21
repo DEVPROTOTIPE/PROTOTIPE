@@ -88,7 +88,7 @@ foreach ($proc in $nodeProcesses) {
     if ($proc.CommandLine -match 'vite' -or ($proc.CommandLine -match 'npm' -and $proc.CommandLine -match 'dev')) {
         # Extraer la ruta raíz del subproyecto de forma precisa
         $procPath = ""
-        if ($proc.CommandLine -match '(?i)(D:\\PROTOTIPE\\(?:Plantillas Core|Instancias Clientes|Central PROTOTIPE)\\[^\\]+)') {
+        if ($proc.CommandLine -match '(?i)(D:\\PROTOTIPE\\(?:Plantillas Core|Central PROTOTIPE)\\[^\\]+|D:\\PROTOTIPE\\Instancias Clientes\\[^\\]+\\[^\\]+)') {
             $procPath = $Matches[1]
         }
         
@@ -110,7 +110,7 @@ if ($viteWasStopped) {
 
 # Auto-saneamiento: restaurar .git-backup-temp residuales de backups anteriores fallidos
 # Ahora que Vite esta detenido, el rename tiene exito garantizado
-$residualTemps = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git-backup-temp" -Recurse -Depth 3 -ErrorAction SilentlyContinue
+$residualTemps = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git-backup-temp" -Recurse -Depth 5 -ErrorAction SilentlyContinue
 if ($residualTemps) {
     Write-Host " [INFO] Restaurando directorios .git residuales de backups anteriores..." -ForegroundColor Yellow
     foreach ($temp in $residualTemps) {
@@ -125,7 +125,7 @@ if ($residualTemps) {
 
 # Buscar repositorios Git de desarrollo
 Write-Host " [1/6] Escaneando directorios en busqueda de Git locales..." -ForegroundColor Cyan
-$gitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git" -Recurse -Depth 3 -ErrorAction SilentlyContinue | Where-Object {
+$gitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git" -Recurse -Depth 5 -ErrorAction SilentlyContinue | Where-Object {
     $_.FullName -ne "$rootDir\.git"
 }
 

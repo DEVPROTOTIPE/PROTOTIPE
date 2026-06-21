@@ -1,5 +1,535 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-21] - E2E-Hotfix: Control de Modal de Telemetría en Tests de Checkout
+
+* **Tipo:** Hotfix / Tests / E2E / Playwright
+* **Descripción de Cambios:**
+  - **Descarte de Modal en Test Helper:** Modificado el helper de navegación inicial `passWelcomePage` en `checkout.helpers.js`. Ahora, si al iniciar el test se presenta el modal interactivo de "Prueba de Enlace de Telemetría" (el cual puede estar activo por pings recientes en la base de datos central), Playwright hace clic automáticamente en "Entendido / Aceptar" utilizando un timeout de 3000ms. Esto previene que el modal intercepte e invalide el clic del botón principal "Comencemos", asegurando la ejecución exitosa de la suite E2E y destrabando el flujo de push del script de backup sin modificar la lógica ni los listeners de telemetría de la aplicación.
+* **Archivos Modificados:**
+  - [`Plantillas Core/App Ventas/tests/helpers/checkout.helpers.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/helpers/checkout.helpers.js) [MODIFY]
+
+---
+
+### [2026-06-21] - CORE-028: Fondo Tecnológico Premium Animado — Capas de Grid y Orbs GPU-Accelerated
+
+* **Tipo:** UI / Diseño / CSS / Performance / Modo Oscuro / Modo Claro
+* **Descripción de Cambios:**
+  - **Capa 1 — Grid de puntos adaptivo y móvil:** Implementado patrón de puntos vía `background-image: radial-gradient` en `.tech-bg-dots` con token `--dot-color` y animación de deriva lenta (`grid-drift` de 60s, traduciendo de `0px` a `32px` de forma cíclica y fluida) sobre una capa sobredimensionada (`110vw`/`110vh`), simulando un espacio digital dinámico en movimiento continuo sin cortes ni repaints.
+  - **Capa 2 — Orbs de gradiente animados:** Dos divs `.tech-bg-orb-1` y `.tech-bg-orb-2` con gradientes radiales elípticos de los colores de marca (violeta, cian, índigo) animados independientemente con drift muy lento y suave usando exclusivamente `transform` y `scale` GPU-promoted (`will-change: transform`).
+  - **Capa 3 — Viñeta perimetral:** `.tech-bg-vignette` con `radial-gradient` que oscurece los bordes usando el token `--vignette-color` para resaltar la zona de trabajo central.
+  - **Tokens CSS por tema:** Todos los tokens de fondo (`--dot-color`, `--orb-primary`, `--orb-accent`, `--orb-indigo`, `--vignette-color`) definidos dentro de los bloques `:root` y `:root.light` existentes. Zero tokens duplicados.
+  - **Impacto en rendimiento:** Nulo. Cero JS, cero Canvas, zero repaint. Solo elementos GPU-promoted.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/index.css`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/index.css) [MODIFY]
+
+---
+
+### [2026-06-21] - CORE-027: Efecto Flotante Global de Tarjetas Glassmorphic — CSS Attribute Selector Override
+
+* **Tipo:** UI / Diseño / CSS / Sistema de Diseño
+* **Descripción de Cambios:**
+  - **Tokens CSS adaptativos de sombra:** Definidos `--card-shadow` y `--card-shadow-hover` en `:root` (modo oscuro, sombras negras profundas en 3 capas) y `:root.light` (modo claro, sombras gris-pizarra sutiles).
+  - **Glassmorphism y Backdrop Blur Generalizado:** Definido token `--color-surface-glass` (`rgba(15, 23, 42, 0.6)` en modo oscuro y `rgba(255, 255, 255, 0.7)` en modo claro) aplicado con un selector de atributo general (`div[class*="rounded-2xl"][class*="border"]` y `div[class*="rounded-3xl"][class*="border"]`) junto a `backdrop-filter: blur(14px)` para hacer translúcidas todas las tarjetas de la app, permitiendo visualizar los orbs y dots del fondo en movimiento sin perder legibilidad.
+  - **Override global sin tocar JSX:** Exclusiones `not()` aplicadas en CSS para evitar flotación y glassmorphism en badges, elementos de tamaño fijo (`w-2` a `w-10`, `h-2` a `h-10`) y posiciones absolutas/fijas.
+  - **Hover de elevación:** `transform: translateY(-2px)` + `box-shadow: var(--card-shadow-hover)` en hover para tarjetas que no sean scrollable containers.
+  - **Restauración de excepciones:** `nav`, `aside`, elementos `sticky top-0`, `z-50`, `h-screen`, `min-h-screen` restaurados a `box-shadow: none; transform: none` con `!important` para evitar el float en elementos de layout estructural.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/index.css`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/index.css) [MODIFY]
+
+---
+
+### [2026-06-21] - CORE-026: Corrección de Contraste y Colores Inválidos en Consola de Telemetría y Global
+
+* **Tipo:** Hotfix / UI / UX / CSS / Modo Claro / Contraste
+* **Descripción de Cambios:**
+  - **Soporte Global para Colores Personalizados en Tailwind:**
+    1. Registrados e integrados en `@theme` en `index.css` los colores de marca e interactivos personalizados no estándar (como `-650`, `-550` y `-755`) que se usaban a lo largo de la aplicación.
+    2. En el tema oscuro (`:root`), se configuran con sus equivalentes tradicionales oscuros.
+    3. En el tema claro (`:root.light`), se mapean a versiones con alto contraste (ej: `bg-indigo-650` pasa a ser un azul índigo muy oscuro `#4338ca` en lugar de quedar transparente por no existir en Tailwind, y `text-slate-650` pasa a ser `#334155`).
+  - **Refactorización de la Consola de Telemetría:**
+    1. Reemplazados los fondos y bordes de color pizarra fijos (`bg-slate-950/40`, `border-slate-900`, `bg-slate-900`) en los contenedores de filtros e inputs en `App.jsx` por variables semánticas HSL adaptativas (`bg-[var(--color-surface-2)]/60`, `border-[var(--color-border)]`).
+    2. Solucionado el problema por el cual los textos y hovers en los botones de pestañas ("Todos", "Fallas", "Cobros", "Sistema") hacían blanco sobre blanco en Modo Claro. Ahora utilizan `text-[var(--color-text-muted)]` y reaccionan correctamente en hover a `text-[var(--color-text)]` y `bg-[var(--color-surface-2)]/80`.
+    3. Corregida la visibilidad de los botones de borrar búsqueda ("✕") y los iconos de lupa, haciéndolos adaptativos al tema actual en lugar de fijos.
+  - **Corrección de Contraste de Vista Previa:**
+    1. Modificado el botón de "Demo" en vivo de componentes del CRM para usar `text-emerald-600 dark:text-emerald-400` en lugar de `text-emerald-400 hover:text-white` sobre fondos claros translúcidos, logrando un contraste del 100% en ambos modos.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/index.css`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/index.css) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Compilaciones:** ✅ Compilación limpia con Vite (`npm run build`).
+
+---
+
+### [2026-06-21] - CORE-025: Inversión Cromática Global y Adaptación Completa de Modo Claro
+
+* **Tipo:** UI / UX / CSS / Modo Claro / Tailwind CSS
+* **Descripción de Cambios:**
+  - **Remapeo Dinámico de la Escala Slate:**
+    1. Vinculada la escala completa de colores de slate de Tailwind (`slate-50` a `slate-955`) a variables CSS custom en `@theme` en `index.css`.
+    2. En el tema oscuro por defecto, se mapean a los colores oscuros habituales de Tailwind.
+    3. En el tema claro (`:root.light`), se invierten de forma adaptativa y equilibrada (ej: `bg-slate-900` pasa a ser fondo blanco puro `#ffffff` en vez de negro, y `text-slate-200` pasa a ser texto oscuro `#334155` en vez de gris muy claro), corrigiendo instantáneamente la legibilidad y contraste del dashboard al alternar temas.
+  - **Overrides para Transparencias Hardcodeadas:**
+    1. Agregadas reglas CSS específicas para elementos con bordes y fondos blancos translúcidos hardcodeados (`border-white/[0.08]`, `bg-white/5`, etc.).
+    2. En modo claro, se transforman automáticamente a opacidades de negro (ej: `rgba(0,0,0,0.08)` para bordes y `rgba(0,0,0,0.03)` para fondos), asegurando que sigan siendo legibles y contrastados sobre fondos claros en lugar de desaparecer.
+  - **Inversión Inteligente de Textos y Hovers Blancos (text-white):**
+    1. Creados selectores CSS específicos que remapean textos y hovers en blanco (`text-white`, `hover:text-white`) a su contraparte oscura (`var(--color-text)`) cuando están ubicados dentro de contenedores de fondo claro (como tarjetas, modales o menús).
+    2. Se excluyeron de forma segura a todos los botones que tienen fondos de color (como `bg-indigo-650`, `bg-violet-600`, etc.) utilizando la pseudo-clase `:not`, garantizando que mantengan su texto blanco legible.
+  - **Ajustes en Componentes del Dashboard:**
+    1. Refactorizado el selector DatePicker de periodos en `App.jsx` para usar la variable de texto general `text-[var(--color-text)]` en lugar de `text-white`, garantizando legibilidad perfecta del año seleccionado y las flechas de navegación en modo claro.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/index.css`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/index.css) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Compilaciones:** ✅ Compilación limpia con Vite (`npm run build`).
+
+---
+
+### [2026-06-21] - CORE-024: Integración de Selector de Periodo por Calendario Premium y Gráfico Consolidado
+
+* **Tipo:** Dashboard / DatePicker / Filtros / UI / UX / Recharts
+* **Descripción de Cambios:**
+  - **Selector de Periodo por Calendario Premium (DatePicker):**
+    1. Diseñado e implementado un selector de periodo (Mes/Año) en la barra de acciones de la cabecera del Dashboard.
+    2. Cuenta con una interfaz glassmorphic con fondo translúcido blur (`backdrop-blur-xl bg-slate-950/85`), navegación interactiva de años y una cuadrícula de meses en español.
+    3. Muestra un punto indicador de color violeta en los meses que contienen reportes registrados en la base de datos, facilitando la exploración.
+    4. Cierre automático por clic fuera del selector mediante `useRef` + Listener global de eventos.
+    5. Botón para restablecer el filtro ("Ver Histórico Completo") que regresa el Dashboard al acumulado total.
+  - **Lógica de Filtrado Reactivo Multicapa:**
+    1. Agregado el estado `selectedPeriod` y el React Memo `filteredPeriodReports`.
+    2. Modificado el cálculo de todas las estadísticas agregadas (`totalComision`, `totalCobrado`, `clientesActivos`), acordeones de clientes, charts de BI, costos Dian y el listado de transacciones inferior para consumir `filteredPeriodReports` de forma reactiva.
+    3. Integrado el filtro de periodo dentro de los modales de detalle de cada tarjeta (Acumulado, Cobrado, Pendiente), asegurando que el total visualizado coincida exactamente con las filas del sub-listado.
+  - **Gráfico de Tendencia Histórica Consolidada:**
+    1. Renombrado el gráfico principal a "Comisiones Generales" para reflejar el panorama histórico global.
+    2. Mantiene la visualización de la tendencia de todos los tiempos para dar perspectiva histórica.
+    3. Se le integró un badge animado animando la presencia de un filtro activo y un indicador visual vertical (`ReferenceLine`) discontinuo sobre el mes específico filtrado para contextualizar el periodo dentro de la línea de tiempo histórica.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Compilaciones:** ✅ Compilación limpia con Vite (`npm run build`).
+
+---
+
+### [2026-06-21] - CORE-023 (Hotfix/Ajustes): Solución a Hook Order Mismatch, Alturas de Recharts (-1) y Reorganización de Botones
+
+* **Tipo:** Corrección de Errores / UI / UX / Responsive / Recharts / React Hooks
+* **Descripción de Cambios:**
+  - **Corrección de React Hook Order Mismatch:**
+    1. Se detectó que las declaraciones de `useMemo` de proyecciones y BI (líneas 5117-5208) ocurrían después del retorno temprano de la pantalla de login (`if (!user)`). Al iniciar sesión, el número y orden de hooks cambiaba, causando un crash en tiempo de ejecución.
+    2. Se movieron todos los hooks `useMemo` (`projExistingMonthly`, `projNewMonthly`, `projTotalMonthly`, `projTotalYear`, `nicheChartData`, `biMetrics`) arriba del condicional `if (!user)` (línea 2871), garantizando que se ejecuten incondicionalmente en cada render y resolviendo de raíz el error de React.
+  - **Solución a Dimensiones -1 de Recharts en Mobile:**
+    1. Se especificaron alturas fijas numéricas en los componentes `ResponsiveContainer` (`height={220}`, `height={112}`, `height={160}`) en lugar del valor porcentual `"100%"` que dependía del padre y fallaba en vistas adaptables.
+    2. Se añadió `minWidth={0}` a los contenedores de gráficos para corregir las advertencias y asegurar el renderizado correcto del gráfico de comisiones en celulares.
+  - **Reorganización de Botones de Dashboard:**
+    1. El botón de estado "Conectado" se transformó en un badge interactivo premium que se muestra discretamente al lado del título principal del Dashboard, reduciendo la carga cognitiva y el desorden.
+    2. Las tres acciones principales ("Test Telemetría", "Exportar Métricas", "Conciliación PDF") se agruparon en una cuadrícula responsiva limpia (`grid grid-cols-1 sm:flex`), permitiendo que en móviles se muestren apiladas a lo ancho y ordenadas, y se expandan horizontalmente en pantallas grandes.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+* **Compilaciones:** ✅ Compilación limpia con Vite (`npm run build`).
+
+---
+
+### [2026-06-21] - CORE-023: Rediseño Premium del Dashboard General con Gráficos Interactivos Recharts, BI Avanzado y Reportes PDF
+
+* **Tipo:** Dashboard / Visualización Interactiva / Inteligencia de Negocios / Telemetría / Reportes PDF
+* **Descripción de Cambios:**
+  - **Gráficos Interactivos Recharts & Framer Motion:**
+    1. Reemplazado el listado estático de barras de progreso por una visualización premium interactiva.
+    2. Implementado un gráfico `AreaChart` consolidado en la cabecera que muestra la tendencia histórica mensual de comisiones y ventas totales agregadas.
+    3. Diseñado un acordeón expandible dinámicamente con animaciones fluidas de `Framer Motion` (`expandedClientId`).
+    4. Cada tarjeta de cliente expandida renderiza su propio mini-gráfico `AreaChart` de tendencia histórica comisional individual, además de un panel en grilla de 3 columnas con su esquema de facturación detallado, nicho comercial y acciones.
+  - **Radar de Salud de Instancias:**
+    1. Integrado el widget visual `Radar de Salud de Instancias` en la columna derecha de Inicio (arriba de la consola de telemetría).
+    2. Procesa en tiempo real el estado de cada cliente: Rojo (errores activos sin resolver o ping fallido), Amarillo (latencia > 3000ms o última conexión > 15m), y Verde (totalmente operativo).
+    3. Los pings y latencias de telemetría están simulados con coherencia y reactividad en base Sandbox.
+    4. Redireccionamiento automático condicional al hacer clic en un cliente con fallos hacia la pestaña "Consola de Errores" aplicando el filtro del cliente.
+  - **Métricas de BI en Simulador:**
+    1. Agregada una sección de analítica de negocio bajo las tarjetas del simulador.
+    2. Muestra un gráfico de donas `PieChart` de participación comisional por nicho vertical comercial de manera proporcional.
+    3. Muestra una tabla financiera de eficiencia deduciendo costos DIAN ($150 COP por reporte con facturación DIAN habilitada) del ingreso proyectado mensual y del acumulado del horizonte de meses del simulador.
+  - **Modales de Métricas Completos:**
+    1. Diseñados y conectados síncronamente los 3 modales de detalle para *Comisión Acumulada*, *Cobrado* y *Por Recaudar*.
+    2. Muestran tablas ordenadas con buscadores y sumas de transacciones, junto a botones para registrar pagos directamente o gestionar cobros en el CRM.
+  - **Suite de Exportación PDF:**
+    1. Completada la funcionalidad en `pdfService.js` para generar: Conciliación Mensual Consolidada, Reporte de Métricas del Sistema, Directorio de Clientes y Ficha de Rendimiento Individual de Cliente.
+    2. Vinculados los botones de exportación correspondientes en el dashboard, modales y CRM.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/services/pdfService.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/services/pdfService.js) [MODIFY]
+* **Compilaciones:** ✅ `dev-dashboard` compila exitosamente (1.38s).
+
+---
+
+### [2026-06-21] - CORE-022: Auditoría y Fortalecimiento de la Gestión de Plantillas Core
+
+* **Tipo:** CLI / Dashboard / Cores / Seguridad / Robustez
+* **Descripción de Cambios:**
+  - **Endpoint de Sincronización Aislado (Sync -> CLI):**
+    1. Creada la función helper `performCoreSync(clave, CLI_ROOT)` en `server.js` para unificar y optimizar la copia de archivos y sanitización de credenciales.
+    2. Implementado el nuevo endpoint `POST /api/cores/:clave/sync` en la API Bridge del CLI.
+    3. Modificada la UI en `CoreCard.jsx` para que el botón "Sync → CLI" apunte a esta nueva ruta, evitando que se auto-active la plantilla en el wizard o se incremente su versión sin confirmación.
+  - **Seguridad en Scaffolds y Entorno:**
+    1. Asegurada la verificación del `baseCore` en el endpoint `/api/cores/:clave/scaffold` para prevenir path traversal.
+    2. Agregada validación estricta de nombres de variables de entorno `.env.local` (regex `/^[A-Z_][A-Z0-9_]*$/`) tanto en el backend (`POST /api/project/env`) como en el frontend de `CoreCard.jsx` (mostrando un toast de error descriptivo si el usuario ingresa caracteres no permitidos).
+  - **Integridad y Build:**
+    1. Compilación exitosa del dashboard con Vite (`npm run build`) verificando la compatibilidad de tipos y sintaxis.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+* **Compilaciones:** ✅ `dev-dashboard` compila exitosamente (955ms).
+
+---
+
+### [2026-06-20] - CORE-021: Fortalecimiento de la Consola de Errores e Incidentes del Dashboard Central
+
+* **Tipo:** Dashboard / Telemetría / Consola de Errores / Diagnostics Heuristics
+* **Descripción de Cambios:**
+  - **Filtros e Interactividad Avanzada:**
+    1. Agregado el estado `selectedErrorStatusFilter` para permitir filtrar incidentes por estado (Activos, Resueltos, Todos).
+    2. Agregado el estado `selectedErrorTypeFilter` para segmentar incidentes por severidad (Todos, Errores, Advertencias, Información).
+    3. Vinculadas las tarjetas de resumen estadístico de la cabecera ("Fallos Activos", "Clientes Afectados", "Uptime del Motor") como filtros interactivos rápidos de un clic.
+  - **De-duplicación y Colapso de Incidentes (Group-by):**
+    1. Implementado el interruptor `groupErrorsByMessage` en los filtros que permite de-duplicar errores repetitivos con el mismo mensaje para un cliente.
+    2. En el modo agrupado, las incidencias se colapsan a una sola tarjeta con insignia animada indicando la frecuencia de impactos (ej: `x5 Impactos`) y ordenadas por la fecha del último incidente.
+  - **Registro Histórico de Notas de Solución:**
+    1. Modificada la función `handleResolveFailure` para recibir múltiples IDs (resolviendo incidentes colapsados en bloque) y una nota de texto.
+    2. Añadido un formulario inline bajo cada tarjeta que permite escribir una Nota de Solución al marcar el incidente como resuelto, la cual se guarda de manera persistente en Firestore Central junto a `resolvedAt` y `resolutionNote`.
+    3. Si un incidente ya está resuelto, se renderiza de forma premium el historial de la solución: `✓ Resuelto (Fecha) - "Nota de Solución"`.
+  - **Motor Heurístico Enriquecido:**
+    1. Añadidas interpretaciones y planes de acción específicos para errores de CORS (`blocked by CORS policy`, `Access-Control-Allow-Origin`).
+    2. Añadidas interpretaciones para errores de deserialización (`JSON.parse`, `Unexpected token`).
+    3. Añadidas interpretaciones para permisos y cancelaciones de Firebase Storage (`storage/unauthorized`, `storage/canceled`).
+    4. Añadidas interpretaciones para fallas de red de Firestore (`unavailable`, `client is offline`).
+    5. Habilitado el botón directo de creación de índice compuesto cuando se detecta un enlace en la traza.
+  - **Integridad y Build:**
+    1. Compilada la versión de producción exitosamente con Vite sin advertencias de variables sin uso o errores de importación.
+    2. Corregido el crash de ejecución (`ReferenceError: groupErrorsByMessage is not defined`) mediante la declaración formal de los 5 estados faltantes: `selectedErrorStatusFilter`, `selectedErrorTypeFilter`, `groupErrorsByMessage`, `resolutionNoteInputId` y `resolutionNoteText` en `App.jsx`.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+### [2026-06-20] - CORE-020: Arquitectura Multi-Core Escalable en template-core-seed y CLI
+
+* **Tipo:** Ecosistema / Core / CLI / Instancias Clientes / Escalabilidad
+* **Descripción de Cambios:**
+  - **Desacoplamiento de template-core-seed:**
+    1. Agregados placeholders `ORDER_STATES` y `COLLECTIONS.ORDERS` en `constants/index.js` para evitar errores fatales de compilación.
+    2. Modificado `billingService.js` para abstraer la consulta de facturación mediante un adaptador de datos configurable (`dataAdapter`) inyectable, eliminando el acoplamiento directo con pedidos de e-commerce y añadiendo fallbacks de seguridad.
+    3. Refactorizado el hook `useBilling.js` para permitir la configuración de los 4 modelos de facturación (`saveBillingConfig`).
+    4. Limpiado `appConfigStore.js` y `appConfigService.js` de más de 15 campos específicos de ventas (e.g. deliverySettings, wholesaleSettings, couponsEnabled) para dejar una plantilla verdaderamente genérica.
+    5. Removida la dependencia e imports de FCM/messaging y el test de VAPID en `DeveloperDiagnosticsModal.jsx`.
+    6. Eliminadas las credenciales de Firebase central hardcodeadas como fallback en `centralFirebaseService.js`.
+  - **Reestructuración de Instancias:**
+    1. Creada la carpeta física `/ventas/` bajo `Instancias Clientes/`.
+    2. Reubicada la instancia activa `ventas-moni-app` a `Instancias Clientes/ventas/ventas-moni-app/`.
+    3. Actualizados los scripts de backup y automatización (`git_backup.ps1`, `menu_backup.ps1`) para soportar recursión e incrementado el escaneo a `-Depth 5` para evitar conflictos con repositorios Git en subcarpetas de cores de forma segura.
+    4. Creado el archivo instructivo `Instancias Clientes/README.md`.
+  - **Soporte Multi-Core en CLI:**
+    1. Implementada la función dinámica `getInstancePath(coreType, projectName)` en `config.js` del CLI.
+    2. Agregado el campo `coreType` a las plantillas registradas en `plantillas_registro.json` y a los metadatos de `.prototipe.json` de cada instancia.
+    3. Modificado `generator.js` para inyectar automáticamente el `coreType` en la consola central, en la metadata del proyecto y validar la preexistencia de `firestore.rules` y `storage.rules` en la plantilla de origen para evitar sobreescribir las reglas de seguridad personalizadas por defecto.
+    4. Actualizados `sync_templates.js` y `sync_clients.js` para operar dinámicamente con la estructura anidada de subcarpetas de cores.
+  - **Validación de Compilación y Mapas de IA:**
+    1. Copiado el script de generación de mapa de arquitectura semántica para IA (`generate_ia_map.js`) a la subcarpeta `scratch` de `template-core-seed` para resolver el fallo del script `npm run map` / `npm run build`.
+    2. Validado el build exitoso de `template-core-seed`, `dev-dashboard` y `App Ventas` localmente.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/config.js) [MODIFY]
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+  - [`Prototipe-CLI/plantillas_registro.json`](file:///d:/PROTOTIPE/Prototipe-CLI/plantillas_registro.json) [MODIFY]
+  - [`Prototipe-CLI/sync_clients.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_clients.js) [MODIFY]
+  - [`Prototipe-CLI/sync_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/package.json) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/scratch/generate_ia_map.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/scratch/generate_ia_map.js) [NEW]
+  - [`Prototipe-CLI/templates/template-core-seed/src/constants/index.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/constants/index.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/src/services/billingService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/billingService.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/src/hooks/useBilling.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/hooks/useBilling.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/src/services/appConfigService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/appConfigService.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/src/components/admin/settings/DeveloperDiagnosticsModal.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/components/admin/settings/DeveloperDiagnosticsModal.jsx) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/src/services/centralFirebaseService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/centralFirebaseService.js) [MODIFY]
+  - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+  - [`Instancias Clientes/README.md`](file:///d:/PROTOTIPE/Instancias%20Clientes/README.md) [NEW]
+* **Compilaciones:** ✅ `template-core-seed` (353ms), `App Ventas` (933ms) y `dev-dashboard` (789ms) compilaron exitosamente.
+
+---
+
+### [2026-06-20] - HMR-001: Corrección de Inicialización Duplicada de Firebase en Entornos de Desarrollo
+
+* **Tipo:** Plantillas Core / CLI Templates / Instancias Clientes / Calidad / Desarrollo
+* **Descripción de Cambios:**
+  - **Evitar error de inicialización duplicada (HMR):** Corregido el bug en la carga de Firebase (`firebaseConfig.js`) que causaba `FirebaseApp named [DEFAULT] already exists` durante las recargas en caliente de Vite (HMR), interrumpiendo el flujo de desarrollo local. Se implementó una verificación síncrona `getApps().length === 0 ? initializeApp(...) : getApp()` y `getFirestore(app)` para reutilizar la instancia existente de manera segura y transparente.
+* **Archivos Modificados:**
+  - [`Plantillas Core/App Ventas/src/config/firebaseConfig.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/config/firebaseConfig.js) [MODIFY]
+  - [`Instancias Clientes/ventas/ventas-moni-app/src/config/firebaseConfig.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/config/firebaseConfig.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-ventas/src/config/firebaseConfig.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/config/firebaseConfig.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/src/config/firebaseConfig.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/config/firebaseConfig.js) [MODIFY]
+* **Compilaciones:** ✅ Verificadas.
+
+---
+
+### [2026-06-20] - BILLING-001: Rediseño Funcional del Módulo de Facturación y Cobros
+
+* **Tipo:** Dashboard Central / App Ventas Core / CLI Templates / Billing / Escalabilidad
+* **Descripción de Cambios:**
+  - **Bug del 1% resuelto:** Agregado helper `getCalculatedCommission(report, clientConfig)` en `dev-dashboard/App.jsx` que calcula la comisión real en tiempo real usando la tarifa vigente del CRM, soportando los 4 modelos de cobro: `percentage`, `fixed_per_service`, `flat_monthly` y `dian`.
+  - **WhatsApp con número de destino:** `handleSendWhatsApp` ahora extrae el número del cliente desde el CRM (`whatsapp` → `telefono` fallback), limpia no-dígitos y abre `wa.me/{numero}?text={mensaje}`. Campo UI de WhatsApp de Contacto agregado con autodetección y hint visual cuando el número proviene del CRM.
+  - **Persistencia de templates en localStorage:** `waTemplates` se inicializa desde `localStorage['dev_wa_templates']` y se persiste en cada edición mediante `useEffect`, sobreviviendo recargas.
+  - **Botón Recalcular Historial en Nube:** Agregado `handleRecalculateClientReports(clientId)` con batch de 450 ops/escritura. Botón amber en el footer del modal CRM de configuración. Requiere confirmación antes de ejecutar. Modo sandbox: simulado sin escritura.
+  - **Sincronización bidireccional de tarifas (instancia ↔ CRM central):** En `useAppConfigSync.js` (App Ventas, template-ventas, template-core-seed), el listener `onSnapshot` de `clientes_control/{CLIENT_ID}` ahora detecta cambios en `billingMode`, `comisionPorcentaje`, `montoFijoServicio`, `pagoMensualFijo`, `enableDianBilling`, `costoPorFacturaDian` y los propaga silenciosamente a Zustand + `config/settings` local mediante `updateAppConfig`. Garantiza coherencia sin intervención manual del operador de tienda.
+  - **Escalabilidad:** La sincronización es automática. Nuevas instancias generadas con CLI heredarán estos comportamientos desde `template-ventas` y `template-core-seed` actualizados.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY] — `getCalculatedCommission`, `handleRecalculateClientReports`, `handleSendWhatsApp`, `waTemplates` localStorage, `waPhone` state, campo WhatsApp UI, botón Recalcular en CRM modal.
+  - [`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY] — Sincronización bidireccional de billing fields desde clientes_control.
+  - [`Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY] — Propagado desde App Ventas.
+  - [`Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js) [MODIFY] — Mismo fix de sincronización.
+* **Compilaciones:** ✅ `dev-dashboard` (1.22s) y `App Ventas` (1.22s) sin errores ni advertencias.
+
+---
+
+### [2026-06-20] - CORE-019: Estandarización Total del Sistema de Telemetría e Interactividad en ventas-moni-app
+
+* **Tipo:** Instancia Cliente / Telemetría / Sincronización / Calidad
+* **Descripción de Cambios:**
+  - **Problema Raíz Identificado:**
+    La instancia `ventas-moni-app` presentaba drift crítico respecto al Core tras la implementación de CORE-018: el hook `useAppConfigSync.js` respondía al ping de forma **automática y silenciosa** (sin mostrar el modal interactivo), y `App.jsx` carecía del estado `activePingRequest`, del listener `'ping-test-requested'` y del modal de "Prueba de Conexión". Adicionalmente, la lógica de descarte de alertas usaba la clave textual `title-message-type` en lugar del `alertId`, causando que alertas de prueba repetidas fueran ignoradas por la caché de localStorage.
+  - **Correcciones Aplicadas en `App.jsx`:**
+    1. Agregados `activePingRequest` (estado) y `pingTimeoutRef` (ref) para gestionar el ciclo de vida del modal de telemetría.
+    2. Creado el helper `getAlertDismissKey(alert)` que prioriza `alert.alertId` sobre la clave textual, garantizando descartes únicos y correctos.
+    3. Agregado `useEffect` con listener del evento `'ping-test-requested'`, autocierre en 30s y cleanup del timer al desmontar.
+    4. Actualizada la fórmula de `isAlertDismissed` para usar `getAlertDismissKey()`.
+    5. Actualizado el `alertKey` de `useEffect([sistemaAlerta])` para incluir `alertId` en el hash de comparación.
+    6. Insertado el modal interactivo de "Prueba de Conexión" con diseño idéntico al Core (glassmorphism `rgba(5,8,16,0.82)`, Framer Motion spring, botones de confirmación y descarte).
+  - **Correcciones Aplicadas en `useAppConfigSync.js`:**
+    1. Reemplazada la auto-respuesta al ping (`updateDoc` inmediato) por el despacho del evento `'ping-test-requested'` con la callback `respond()`.
+    2. Agregadas validaciones de expiración (>60s) y comparación `pingTs > responseTs` para evitar procesar pings viejos al recargar la página.
+  - **Revisión y Corrección de Bugs Activos en Central (Faro Core):**
+    1. **Click-Outside en Dropdowns**: Se agregaron referencias `useRef` y hooks `useEffect` con listeners de `mousedown` para cerrar automáticamente tanto el dropdown de plantillas en `CoreSyncPanel.jsx` como el dropdown de tipo de alerta en `App.jsx` al hacer clic en cualquier lugar fuera de su contenedor.
+    2. **Desacoplamiento de ID de Alerta**: Se eliminaron los selectores frágiles `document.getElementById('alert-type-select-wrap')` del dropdown de alerta remota en `App.jsx` del dashboard, refactorizando a un estado React limpio `alertTypeDropOpen` y utilizando una referencia directa para evitar colisiones en DOM si múltiples componentes se renderizan.
+  - **Build de Integridad:** ✅ `npm run build` en `ventas-moni-app` (1.15s) y `dev-dashboard` (1.14s) sin errores.
+* **Archivos Modificados:**
+  - [`Instancias Clientes/ventas-moni-app/src/App.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas-moni-app/src/App.jsx) [MODIFY]
+  - [`Instancias Clientes/ventas-moni-app/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas-moni-app/src/hooks/useAppConfigSync.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx) [MODIFY]
+* **Compilaciones:** ✅ `ventas-moni-app` y `dev-dashboard` compilaron exitosamente.
+
+
+* **Tipo:** Dashboard Central / App Cliente / UI/UX / Telemetría
+* **Descripción de Cambios:**
+  - **Ping Test Interactivo:**
+    1. Rediseñado el ciclo de validación de conexión (Ping Test). En lugar de responder de forma automática y silenciosa, el Dashboard incrementa su timeout de 5 a 30 segundos en [`App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) para dar tiempo a la acción manual.
+    2. Corregido el bug de desincronización de relojes locales: modificado el listener de `onSnapshot` en el Dashboard para validar la respuesta (`lastPingResponse`) directamente contra el timestamp del gatillo (`triggerPing`) de Firestore Server, garantizando inmunidad ante cualquier desfase de reloj en la máquina local del desarrollador.
+    3. Modificado [`useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) para remover la escritura automática de `lastPingResponse` y en su lugar despachar un evento personalizado `'ping-test-requested'` con una callback `respond()`.
+  - **Modal de Prueba de Conexión Reutilizado:**
+    3. En [`App.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx), se escucha el evento `'ping-test-requested'` y se almacena la callback en un estado `activePingRequest`.
+    4. Se renderiza un modal interactivo que clona y reutiliza con precisión el diseño, tipografías, colores, Framer Motion y backdrop blur (`rgba(5, 8, 16, 0.82)`) del componente `sistemaAlerta` existente, con temática de telemetría e icono de antena.
+  - **Robustez frente a Inactividad y Descarte:**
+    5. Se implementó un temporizador de autocierre de 30 segundos en la aplicación cliente para ocultar el modal de prueba automáticamente y evitar molestias si el administrador está ocupado, coincidiendo con la expiración por timeout en la central.
+    6. Se inyectó un botón secundario discreto de "Descartar prueba" para cerrar manualmente el modal en cualquier momento, además de permitir cerrarlo al presionar el backdrop, limpiando los temporizadores asociados de forma limpia sin lanzar errores.
+  - **Despliegue de Reglas de Seguridad a Producción:**
+    7. Detectada la discrepancia en las reglas de seguridad de Firestore Central en producción (que carecía del permiso de escritura no autenticada para `lastPingResponse`). Se realizó el despliegue de las reglas del desarrollador en producción en el proyecto `prototipe-ecosistema-control`, permitiendo al cliente responder al ping test con éxito.
+  - **Soporte de alertId Único para Alertas Remotas:**
+    8. Modificado el Dashboard Central para generar un identificador de alerta único `alertId` basado en un timestamp (`Date.now().toString()`) cada vez que se envía o actualiza una alerta de sistema (tanto en la alerta de prueba como en la manual).
+    9. Actualizado el validador del descarte de alertas en `App.jsx` del cliente (y plantillas CLI) para almacenar y comparar la clave `dismissed_remote_alert` contra `alertId` en lugar del texto del título y mensaje. Esto evita que alertas repetidas del Dashboard (como la alerta de prueba) no hagan nada debido a que el cliente ya tenía guardado el descarte de una prueba anterior.
+  - **Propagación en Plantillas CLI:**
+    10. Replicadas exactamente las modificaciones de `useAppConfigSync.js` y `App.jsx` en los templates base de aprovisionamiento del CLI [`template-ventas`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/) y [`template-core-seed`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/) para asegurar que las nuevas instancias hereden este comportamiento interactivo premium.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/firestore.rules`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firestore.rules) [DEPLOYED]
+  - [`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  - [`Plantillas Core/App Ventas/src/App.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
+  - [`Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-ventas/src/App.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/App.jsx) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/src/App.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/App.jsx) [MODIFY]
+* **Compilaciones:** ✅ Compilado exitosamente `dev-dashboard` y `App Ventas` (`npm run build`).
+
+### [2026-06-20] - CORE-017: Detección por Hash MD5 de Drift de Instancias, Exclusión de Mapas de Arquitectura, Consola y Perfil Theme-Aware
+* **Tipo:** Dashboard Central / CLI / Servidor / UI/UX / Calidad / Telemetría
+* **Descripción de Cambios:**
+  - **Detección por Hash MD5 del Drift:**
+    1. Reemplazada la lógica SemVer de `isOutdated` en `/api/instancias/list` dentro de `server.js` por una comparación física de hashes MD5 en tiempo real. Ahora el dashboard detecta cambios reales en los archivos del core incluso si el número de versión no se ha incrementado.
+  - **Consola de Sincronización Theme-Aware:**
+    2. Modificado `getLogStyle` en `CoreSyncPanel.jsx` para reemplazar colores oscuros hardcodeados (como `text-zinc-300` o `text-zinc-400` que resultaban invisibles en modo claro) por variables CSS del sistema de diseño y modificadores de tema (`dark:text-violet-400`, `text-[var(--color-text)]`, etc.). La consola es ahora 100% legible en modo claro y oscuro.
+  - **Exclusión de Mapas de Arquitectura Dinámicos:**
+    3. Añadidos `mapa_arquitectura.md` y `mapa_arquitectura_ia.md` a `SYNC_EXCLUDED_PATHS` en `server.js` debido a que son archivos auto-generados localmente por instancia y alteraban la paridad del drift. Esto resolvió el estado de desactualización persistente después de sincronizar con éxito.
+  - **Canal de Telemetría con Botones Separados (Ping vs Alerta de Prueba):**
+    4. Implementada la función `handleSendTestAlert` en `dev-dashboard/src/App.jsx` para inyectar una alerta remota preconfigurada de tipo "info" y actualizar la UI local.
+    5. Reemplazado el botón único "Verificar Conexión" por dos botones alineados estéticamente: "Enviar Alerta de Prueba" (que dispara el modal interactivo en el cliente) y "Verificar Conexión" (que realiza la comprobación de ping silenciosa en segundo plano).
+  - **Prevención de Reapertura y Flicker de Alertas en App Cliente:**
+    6. Modificado `App.jsx` (en `Plantillas Core/App Ventas` y `Prototipe-CLI/templates/template-ventas`) con una referencia `useRef` para comparar las propiedades de `sistemaAlerta` (`alertKey`), previniendo que la alerta cerrada por el usuario se vuelva a abrir al recibir snapshots del documento por otros campos (como `triggerPing` del ping test).
+    7. Agregada la variable lógica `isAlertDismissed` para leer síncronamente el estado de localStorage durante el render, eliminando el parpadeo de la alerta al recargar el navegador en la aplicación del cliente.
+  - **Traducción y Estilizado HSL de la Consola de Telemetría:**
+    8. Traducidos los textos del título ("Consola de Telemetría del Sistema en Vivo") y los estados ("Red Desconectada", "Modo Sandbox", "Conectado a Firestore Central") de inglés a español.
+    9. Reemplazados los fondos fijos oscuros de la consola, botones, pestañas de logs y caja de entrada de búsqueda por variables CSS (`var(--color-surface)`, `var(--color-surface-2)`, `var(--color-bg)`) y selectores interactivos adecuados, adaptándose perfectamente al tema claro y oscuro de la aplicación.
+  - **Adaptación al Modo Claro/Oscuro del Perfil de Administrador:**
+    10. Refactorizado el modal `isProfileModalOpen` en `dev-dashboard/src/App.jsx` para utilizar variables CSS del tema (`bg-[var(--color-surface)]`, `border-[var(--color-border)]`) en lugar de colores oscuros fijos de Slate.
+    11. Corregido el contraste de los botones ("Ajustes del Sistema" y "Cerrar Sesión") y las etiquetas de base de datos/entorno utilizando clases HSL responsivas (`text-violet-600 dark:text-violet-400`, `text-red-600 dark:text-red-400`) legibles en ambos modos.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Plantillas Core/App Ventas/src/App.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
+  - [`Prototipe-CLI/templates/template-ventas/src/App.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/App.jsx) [MODIFY]
+* **Compilaciones:** ✅ Servidor CLI reiniciado y escuchando en puerto 3001. `dev-dashboard` y `ventas-moni-app` compilaron exitosamente. Sincronización física de cores completada con éxito.
+
+### [2026-06-20] - CORE-016: Implementación de Ping-Pong Real, Alertas Remotas Funcionales y Corrección de Token Vinculado
+
+* **Tipo:** Dashboard Central / App Cliente / Seguridad Firestore / Telemetría
+* **Descripción de Cambios:**
+  - **Ping Test Real (Ping-Pong via Firestore):**
+    1. Modificado `handleExecutePingTest` en [`dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) para eliminar la simulación de 1.2s con latencia aleatoria. Ahora el Dashboard escribe `triggerPing: serverTimestamp()` en `clientes_control/{clientId}` y luego abre un `onSnapshot` reactivo esperando el campo `lastPingResponse`.
+    2. En el cliente (`useAppConfigSync.js`), al detectar `triggerPing` actualizado, se escribe de inmediato `lastPingResponse: serverTimestamp()` de vuelta en el mismo documento central (Ping-Pong).
+    3. El Dashboard calcula la latencia real como `Date.now() - start` al recibir el evento de Firestore. Si no hay respuesta en 5s, muestra `Timeout: El cliente no responde (5s)`.
+  - **Alertas Remotas Funcionales:**
+    1. Creado [`centralFirebaseService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/centralFirebaseService.js) como singleton perezoso de conexión a la BD central del desarrollador (segunda app de Firebase, nombre `centralDevApp`).
+    2. Añadidas variables `VITE_DEVELOPER_CENTRAL_*` al `.env.local` de la App de Ventas para habilitar la conexión secundaria.
+    3. Modificado [`useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) para suscribirse en tiempo real al documento `/clientes_control/{CLIENT_ID}` de la BD central. Al detectar `sistemaAlerta`, llama `setConfig({ sistemaAlerta })` actualizando el Zustand Store y activando de inmediato el bloqueo visual en la app cliente.
+  - **Token de Telemetría Vinculado (corregido):**
+    1. El modal de diagnóstico del Dashboard ahora resuelve el token desde dos fuentes: `cfg.telemetryToken` (campo en Firestore) o `telemetryTokens.find(...)` como fallback dinámico. Muestra estado visual `Activo`/`Sin Registro` según resultado.
+    2. Actualizado el flujo de aprovisionamiento principal (línea ~4461) y el de `CoreSyncPanel` para guardar `telemetryToken` dentro del documento de `clientes_control`, eliminando la dependencia en consultas cruzadas.
+  - **Reglas de Seguridad Firestore (firestore.rules):**
+    1. Modificada la regla de `clientes_control/{clientId}` para separar `create/delete` (solo autenticados) de `update` (autenticados O cualquiera que solo actualice el campo `lastPingResponse` usando `affectedKeys().hasOnly`). Esto permite que el cliente responda al Ping sin autenticación de forma segura.
+  - **Propagación a CLI Templates:**
+    - Propagados `centralFirebaseService.js` y `useAppConfigSync.js` actualizados a `template-ventas` y `template-core-seed`.
+* **Archivos Modificados:**
+  - [`dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`dev-dashboard/firestore.rules`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firestore.rules) [MODIFY]
+  - [`Plantillas Core/App Ventas/src/services/centralFirebaseService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/centralFirebaseService.js) [NEW]
+  - [`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  - [`Plantillas Core/App Ventas/.env.local`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/.env.local) [MODIFY]
+  - [`Prototipe-CLI/templates/template-ventas/src/services/centralFirebaseService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/centralFirebaseService.js) [NEW]
+  - [`Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/src/services/centralFirebaseService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/centralFirebaseService.js) [NEW]
+  - [`Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js) [MODIFY]
+* **Compilaciones:** ✅ `dev-dashboard` y `App Ventas` compilaron correctamente sin errores.
+
+### [2026-06-20] - CORE-015: Rediseño Premium de la Interfaz de Diagnósticos (Dashboard Central)
+* **Tipo:** Dashboard Central / UI/UX / Calidad / Glassmorphism
+* **Descripción de Cambios:**
+  - **Rediseño Estético del Modal de Diagnóstico:**
+    1. Eliminación total de bordes rígidos y toscos de color claro/gris sólido en contenedores principales, cuadros de Ping Test, Garantía de Reporte de Fin de Mes, Alertas Remotas, campos de formulario y botones.
+    2. Adopción de diseño de tipo **glassmorphism** premium: fondo translúcido (`bg-[#0d121f]/95`), desenfoque de fondo profundo (`backdrop-blur-2xl`), borde de encapsulamiento casi invisible (`border-white/[0.06]`) y sombras tridimensionales profundas (`shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)]`).
+    3. Tarjetas superiores de comisiones rediseñadas con cajas adaptativas translúcidas (`bg-white/[0.02]`) y bordes suaves (`border-white/[0.03]`) que se integran de forma nativa al layout financiero.
+    4. Pulido de inputs, selectores y textareas utilizando estilos planos oscuros semi-translúcidos y transiciones suaves de foco elástico en violeta.
+    5. Botones reconstruidos usando gradientes de marca elásticos y sombreado envolvente (Ping Test, Guardar Alerta, Cerrar Diagnóstico).
+* **Archivos Modificados:**
+  - [dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+### [2026-06-20] - CLI-019: Replicabilidad Automática de Alertas y Reinicio en CLI Templates (Ecosistema)
+* **Tipo:** Ecosistema / CLI / Plantillas / Replicabilidad
+* **Descripción de Cambios:**
+  - **Sincronización a CLI Templates (`template-ventas`):**
+    1. Ejecutado el script de sincronización universal `sync_templates.js` para propagar los cambios de la aplicación de ventas core (`Plantillas Core/App Ventas`) directamente a la plantilla del CLI (`Prototipe-CLI/templates/template-ventas`).
+    2. Con esto se asegura que absolutamente todas las futuras aplicaciones que se creen usando el CLI hereden de forma nativa e integrada:
+       - El listener en tiempo real de `sistemaAlerta` con modal de bloqueo de pago/avisos remotos.
+       - El modal de confirmación visual al reportarse con éxito la telemetría mensual de facturación.
+       - El soporte de reinicio automático mensual e inicialización a cero.
+    3. El script de validación compila correctamente la plantilla mediante `npm run build` en el entorno de destino, garantizando la integridad sintáctica y la ausencia de errores en tiempo de ejecución.
+* **Archivos Modificados:**
+  - [Prototipe-CLI/templates/template-ventas/](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/) [MODIFY]
+
+### [2026-06-19] - FIX-015: Saneamiento Definitivo de FCM, Reinicio de Comisiones y Telemetría Interactiva (Ecosistema)
+* **Tipo:** Ecosistema / Core / CLI / Dashboard Central / Calidad / Remoción de FCM
+* **Descripción de Cambios:**
+  - **Saneamiento Definitivo de FCM (Firebase Cloud Messaging):**
+    1. Eliminación física de archivos redundantes de mensajería push: `firebase-messaging-sw.js` (service worker), `useFCMPermission.js` (hook) y `SoftPushPrompt.jsx` (componente prompt) tanto del Core (`Plantillas Core/App Ventas`), del CLI (`templates/template-core-seed/` y `template-ventas/`), como de la instancia activa (`ventas-moni-app`).
+    2. Limpieza de imports e infraestructura en layouts y componentes: Removidas importaciones de `firebase/messaging` y lógica de solicitud de permisos en `firebaseConfig.js`, `DeveloperDiagnosticsModal.jsx`, `AdminLayout.jsx`, `ClientLayout.jsx`, `PortalLayout.jsx` y `OrderTracking.jsx` en el Core y Moni App.
+    3. Remoción del CLI: Eliminadas preguntas interactivas de variables de mensajería (`messagingSenderId` y `centralMessagingSenderId`) en `cli.js`, y omitida la generación de llaves criptográficas VAPID (`web-push`) y reemplazos automáticos de service workers en `generator.js`, `server.js` y `sync_templates.js`.
+  - **Optimización de Métricas de Comisiones en Dashboard Central:**
+    1. **Reinicio Automático Mensual:** Modificada la agregación del dashboard para filtrar reportes que coincidan estrictamente con el periodo actual (`currentPeriod = YYYY-MM`), logrando que al cambiar de mes las comisiones por cliente inicien automáticamente en cero sin destruir el historial en la pestaña de facturación.
+    2. **Reinicio Manual a Demanda:** Creado botón de reseteo rápido en el listado del gráfico de comisiones que invoca `handleResetClientCommission`. Al presionarlo, escribe `fechaCorteComisiones: serverTimestamp()` en `clientes_control` de Firestore (o fecha local en Sandbox), ignorando de inmediato reportes antiguos en el gráfico del dashboard.
+    3. **Corrección de Bugs en Barras de Progreso:** Resuelta la división por cero que producía `NaN` en `pctWidth` cuando todos los clientes tenían $0 de comisión, y corregido el ancho de la barra para renderizarse al 0% real si no hay comisiones (evitando el mínimo visual artificial del 3%).
+  - **Telemetría Interactiva (Live Monitor):**
+    1. Rediseñado el Live Monitor de la consola de telemetría para hacer que todos los registros sean interactivos/clickeables.
+    2. Integrado modal flotante visor de eventos estilo terminal retro que detalla el cliente, severidad del evento, fecha y hora exactas, y muestra un visor JSON formateado con opción de copia al portapapeles.
+    3. Conectado el flujo pasando los metadatos `docData` a las llamadas `addLog` en los listeners en tiempo real de `reportesBilling` y `app_failures`.
+  - **Higiene Visual:**
+    1. Eliminada comilla suelta/backtick `` ` `` que se había filtrado accidentalmente en el renderizado del listado de comisiones en `App.jsx` (línea 5350).
+* **Archivos Modificados:**
+  - [App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [firebaseConfig.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/config/firebaseConfig.js) [MODIFY]
+  - [DeveloperDiagnosticsModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/settings/DeveloperDiagnosticsModal.jsx) [MODIFY]
+  - [AdminLayout.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/AdminLayout.jsx) [MODIFY]
+  - [ClientLayout.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/ClientLayout.jsx) [MODIFY]
+  - [PortalLayout.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/PortalLayout.jsx) [MODIFY]
+  - [OrderTracking.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/OrderTracking.jsx) [MODIFY]
+  - [.env.example](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/.env.example) [MODIFY]
+  - [cli.js](file:///d:/PROTOTIPE/Prototipe-CLI/cli.js) [MODIFY]
+  - [generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+  - [server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [sync_templates.js](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY]
+  - [ventas-moni-app/.env.local](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas-moni-app/.env.local) [MODIFY]
+  - Archivos eliminados: `firebase-messaging-sw.js` (Core, CLI Seed, CLI template-ventas, Moni App), `useFCMPermission.js` (Core, Moni App), `SoftPushPrompt.jsx` (Core, Moni App) [DELETE]
+
+### [2026-06-19] - FIX-014: Visualización de Clientes Nuevos y Auto-configuración de Telemetría (Ecosistema)
+* **Tipo:** Frontend / Dashboard Central / Corrección de Bug / Automatización
+* **Descripción de Cambios:**
+  - **Diagnóstico del problema:**
+    1. Los clientes recién registrados (como `moni-app`) no aparecían en el "CRM de Clientes" ni eran contabilizados en el indicador de "Clientes Activos" del Dashboard General porque dependían únicamente de la existencia de reportes en `reportesBilling`.
+    2. Adicionalmente, al reportar facturación desde una nueva instancia, se generaba un error fatal por falta de configuración de telemetría (`VITE_DEVELOPER_TELEMETRY_ENDPOINT` y token vacíos en el `.env.local` del cliente).
+  - **Corrección en `App.jsx`**: Se modificó el cálculo de `clientesActivos` para basarse en `clientesSaas.filter(c => !c.archived).length` (el listado real de clientes en `clientes_control` de Firestore) en lugar del total de clientes con reportes.
+  - **Estandarización de `clientAggregated`**: Se inicializa la agregación mapeando primero todos los clientes registrados en `clientesSaas`. Posteriormente, se acumulan las comisiones/ventas del historial de reportes.
+  - **Automatización de Inyección de Telemetría (Blindaje)**: Se integró un flujo de inyección automática de variables de entorno en el handler de registro de la Consola Central (`onRegisterClient`). Tras completar el registro en Firestore, el dashboard lee el archivo `.env.local` de la instancia a través de la API local de control, inyecta las credenciales requeridas (`VITE_DEVELOPER_TELEMETRY_ENDPOINT`, `VITE_DEVELOPER_TELEMETRY_TOKEN` autogenerado y `VITE_DEVELOPER_CLIENT_ID`), y escribe de vuelta el archivo. Esto elimina el paso manual propenso a fallos y garantiza que el cliente quede pre-configurado de inmediato.
+  - **Instancia Moni Configurada**: Se actualizó manualmente el archivo `.env.local` de `ventas-moni-app` con su respectivo token registrado (`moni-app-token-1781921496178`) y endpoint de telemetría para corregir el bloqueo en ejecución.
+* **Archivos Modificados:**
+  - [App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [ventas-moni-app/.env.local](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas-moni-app/.env.local) [MODIFY]
+
+### [2026-06-19] - CORE-013: Sincronizador Core → Instancias Clientes Desde Dashboard (Despliegue en Lote)
+* **Tipo:** CLI / Backend / Frontend / Ecosistema
+* **Descripción de Cambios:**
+  - **Diagnóstico y corrección arquitectural:** El `CoreSyncPanel.jsx` en el dashboard estaba conectado a `/api/git/sync-core-to-clients-stream` que opera sobre ramas Git (`cliente/xxx`). Este modelo no coincide con la arquitectura real del proyecto donde los clientes son directorios físicos independientes en `Instancias Clientes/`. Se corrige implementando nuevos endpoints basados en directorios físicos.
+  - **Nuevo endpoint `GET /api/instancias/list`** en `server.js`: Escanea `D:/PROTOTIPE/Instancias Clientes/`, lee `.prototipe.json` de cada carpeta, compara versión cliente vs versión real del core (leída del `package.json` del core), y retorna lista agrupada por plantilla con delta de versión (`isOutdated`, `clientVersion`, `coreVersion`).
+  - **Nuevo endpoint SSE `GET /api/instancias/sync-and-deploy-stream`** en `server.js`: Sincronización física diferencial por hash MD5 en 6 fases: (1) Detección de diferencias, (2) Backup temporal de archivos a modificar, (3) Copia de archivos del core al cliente respetando `SYNC_EXCLUDED_PATHS`, (4) Build de integridad con `npm run build`, (5) Actualización de `version` en `.prototipe.json` y limpieza de backup, (6) Deploy opcional a Firebase Hosting. Rollback automático si el build falla.
+  - **Nueva constante `SYNC_EXCLUDED_PATHS`** y helpers `getSyncFilesRecursive()` / `getSyncFileHash()` en `server.js` para excluir consistentemente archivos de marca del cliente (`.env.local`, `.firebaserc`, `firebase.json`, `src/config/firebaseConfig.js`, etc.).
+  - **`import crypto from 'crypto'`** añadido al bloque de imports de `server.js` para soporte de hash MD5 de archivos.
+  - **Reescritura completa de `CoreSyncPanel.jsx`**: Cambio de fuente de datos de `/api/git/cores-and-clients` a `/api/instancias/list`. Nuevo toggle deploy/solo-compilar. Badges de versión por cliente (verde si al día, ámbar con flecha si desactualizado). Estados por fase por cliente: `syncing` → `building` → `deploying` → `success`/`error`. Stream SSE conectado a `/api/instancias/sync-and-deploy-stream`.
+* **Archivos Modificados:**
+  - [server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY] (+import crypto, +SYNC_EXCLUDED_PATHS, +getSyncFilesRecursive, +getSyncFileHash, +GET /api/instancias/list, +GET /api/instancias/sync-and-deploy-stream)
+  - [CoreSyncPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx) [MODIFY] (Reescritura completa con nueva fuente de datos y UI mejorada)
+  - [mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+### [2026-06-19] - Lanzamiento de Core Estable v1.0.3 e Inicialización de Instancia Cliente (Moni) - Ecosistema
+* **Tipo:** Core / Git Release / Aprovisionamiento / Despliegue
+* **Descripción de Cambios:**
+  - **Fusión en Producción (Release):** Consolidación de la rama `develop` (limpia de Cloud Functions y con rediseños visuales aprobados) en la rama estable `produccion` del repositorio Core (`prototipe-core-ventas`).
+  - **Empaquetado en CLI:** Ejecutada la sincronización de plantillas (`sync_templates.js`) a partir del Core estable para disponibilizar la plantilla oficial `template-ventas` higienizada y libre de tokens en la CLI.
+  - **Aprovisionamiento Físico de Cliente:** Creada y configurada la primera carpeta física de cliente independiente en `D:\PROTOTIPE\Instancias Clientes\ventas-moni-app` utilizando la plantilla sanitizada de la CLI.
+  - **Configuración y Seguridad Git:** Inicializado repositorio Git independiente en la instancia, inyectados Git hooks de pre-commit, configurado el archivo `.gitignore` y desindexado `node_modules` de Git.
+  - **Autogestión de Base de Datos (Onboarding Nativo):** Limpiada por completo la base de datos Firestore remota del proyecto de Firebase `ventas-moni-app` para permitir que el cliente viva el flujo de onboarding nativo (registro de administrador y configuración de marca) al entrar al hosting por primera vez.
+  - **Siembra Opcional en CLI:** Modificados `cli.js` y `generator.js` para añadir un prompt de confirmación interactivo que pregunta al desarrollador si desea inyectar datos de prueba iniciales en Firestore antes de ejecutar la acción, previniendo cargas accidentales de información de ejemplo.
+  - **Corrección de Bug de Scroll en Modales:** Corregido comportamiento en el helper `ThemeModalLock` dentro de `AppearanceSettings.jsx` en la plantilla Core y la aplicación cliente. Se sustituyó la lectura del estilo computado de overflow (que quedaba permanentemente capturado como `hidden` por doble montaje de efectos en Strict Mode) por un restablecimiento limpio a un string vacío (`""`), asegurando que el body recupere siempre su scroll al cerrar el selector de temas.
+  - **Despliegues:** Compilado e instalado localmente (`npm run dev` en `localhost:5173`) y desplegado a producción en Firebase Hosting (`https://ventas-moni-app.web.app`).
+* **Archivos Modificados:**
+  - [firebase.json](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firebase.json) [MODIFY] (Remoción de functions)
+  - Carpeta `/functions` [DELETE] (Remoción de funciones)
+  - [plantillas_registro.json](file:///d:/PROTOTIPE/Prototipe-CLI/plantillas_registro.json) [MODIFY]
+  - [walkthrough.md](file:///C:/Users/Sergio/.gemini/antigravity/brain/d5d930d0-5330-4c01-acfb-b2c584983dbc/walkthrough.md) [MODIFY]
+  - [Instancias Clientes/ventas-moni-app/](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas-moni-app/) [NEW] (Nueva instancia independiente)
+
+### [2026-06-19] - Auditoría de Rendimiento y Optimización de Base de Datos - Ecosistema
+* **Tipo:** Core / Rendimiento / Base de Datos / Calidad / Producción
+* **Descripción de Cambios:**
+  - **Identificación de Fugas:** Detectada fuga de lecturas duplicadas en el montaje de hooks de React Query + listeners de Firestore (`onSnapshot` y `getDocs` ejecutados en paralelo).
+  - **Falta de Límites:** Diagnóstico de lecturas desmedidas por falta de filtros en pedidos históricos del panel de administración.
+  - **POS Offline Sync:** Propuesta de sincronización delta para IndexedDB para evitar el consumo de ancho de banda y lecturas completas de clientes.
+  - **Documento de Auditoría:** Generado el reporte oficial de base de datos en `auditoria_rendimiento_db_2026.md` y de costos de Firebase en `analisis_costos_firebase_2026.md`, ambos sincronizados en los mapas de documentación.
+* **Archivos Modificados:**
+  - [auditoria_rendimiento_db_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_rendimiento_db_2026.md) [NEW]
+  - [analisis_costos_firebase_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/analisis_costos_firebase_2026.md) [NEW]
+  - [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+### [2026-06-19] - Rediseño Premium de la Interfaz del Catálogo (Laboratorio Visual Fase 3) - App Ventas
+* **Tipo:** Core / UI/UX / Animaciones / Responsividad / Catálogo
+* **Descripción de Cambios:**
+  - **Cabecera y Buscador Sticky Glassmorphic:** Cabecera de búsqueda con efecto glassmorphic translúcido pegajoso (`sticky top-0 z-40 bg-app/85 backdrop-blur-xl`), removiendo por completo cualquier línea de borde inferior oscura rígida (`border-none`) para que se integre elegantemente con la interfaz limpia. Se inyectaron efectos de sombreado elástico (`ring-4 ring-primary/10`) al enfocar el buscador.
+  - **Chips de Categorías Bouncy:** Rediseñados los chips de categoría a pastillas flotantes redondeadas (`rounded-full`), e implementada una animación de fondo deslizante interactivo con Framer Motion (`layoutId="activeCategoryBg"`) que fluye suavemente y con rebote de una categoría a otra.
+  - **Héroe Promocional Parallax (CatalogBanner):** Rediseñado el banner para abarcar la imagen de fondo uniformemente en toda la tarjeta (`object-cover`) e implementado un overlay asimétrico lateral que evita oscurecer el producto. Inyectado un sello circular flotante (sticker) que rota y escala en hover, un resplandor ambiental dinámico en hover y un barrido de destellos metalizados en las etiquetas de oferta.
+  - **Tarjetas de Producto (ProductCard):** Rediseñada la tarjeta con curvaturas de 20px, sombras multicapa finas y flotantes (`shadow-[0_8px_30px_rgb(0,0,0,0.03)]`) que flotan a `y: -6` en hover. Las insignias de estado se rediseñaron como píldoras de cristal translúcidas y se agregó una microinteracción de rotación/escala en el botón de agregar (`+`).
+* **Archivos Modificados:**
+  - [ClientCatalog.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCatalog.jsx) [MODIFY]
+  - [CatalogBanner.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/CatalogBanner.jsx) [MODIFY]
+  - [ProductCard.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductCard.jsx) [MODIFY]
+
 ### [2026-06-19] - Stock Infinito para Productos Preparados / Ilimitados - App Ventas
 * **Tipo:** Core / Inventario / Transacciones / Firebase / UI/UX
 * **Descripción de Cambios:**

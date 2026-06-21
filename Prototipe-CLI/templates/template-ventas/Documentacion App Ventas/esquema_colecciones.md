@@ -11,7 +11,7 @@ Este documento detalla la estructura lógica, el propósito y la justificación 
 * **Función**: 
   * Almacena datos generales (título del negocio, nombre del vendedor, contacto, slogan, términos de garantía).
   * Guarda datos de conciliación bancaria y pasarelas de pago (bancos, titulares, códigos QR).
-  * Controla de forma reactiva las banderas de módulos activos (`creditsEnabled`, `couponsEnabled`, `claimsEnabled`, `wholesaleSettings`, `tablesEnabled`).
+  * Controla de forma reactiva las banderas de módulos activos (`creditsEnabled`, `couponsEnabled`, `claimsEnabled`, `wholesaleSettings`).
   * Persiste el tema visual de marca en HSL y los eventos de temporada activos (`activeSeasonalEvent`).
   * Contiene la tasa de comisión configurada del desarrollador (`developerCommissionPercent`).
 

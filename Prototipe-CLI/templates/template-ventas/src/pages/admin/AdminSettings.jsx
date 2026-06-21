@@ -367,6 +367,7 @@ export default function AdminSettings() {
     }
   }, [saveMessage])
 
+
   // Modales de Confirmación Crítica
   const [criticalConfirmModal, setCriticalConfirmModal] = useState(null)
   const [criticalConfirmText, setCriticalConfirmText] = useState('')
@@ -512,7 +513,7 @@ export default function AdminSettings() {
         iosUrl: '',
         promoImageUrl: ''
       },
-      tablesEnabled: state.tablesEnabled ?? false,
+
       commercialOptimization: mergeCommercialOptimization(state.commercialOptimization),
       dianSettings: state.dianSettings || {
         enabled: false,
@@ -527,6 +528,13 @@ export default function AdminSettings() {
 
   const [isFormInitialized, setIsFormInitialized] = useState(false)
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false)
+
+  // Redirigir al menú principal si se desactiva "Múltiples Empleados" estando en Auditoría de Stock
+  useEffect(() => {
+    if (activeSubSection === 'movimientos' && !formData.hasMultipleEmployees) {
+      setActiveSubSection(null)
+    }
+  }, [formData.hasMultipleEmployees, activeSubSection])
 
   useEffect(() => {
     if (config.isLoaded && !isFormInitialized) {
@@ -602,7 +610,7 @@ export default function AdminSettings() {
           iosUrl: '',
           promoImageUrl: ''
         },
-        tablesEnabled: config.tablesEnabled ?? false,
+
         commercialOptimization: mergeCommercialOptimization(config.commercialOptimization),
         dianSettings: config.dianSettings || {
           enabled: false,
@@ -1110,7 +1118,12 @@ export default function AdminSettings() {
                     { id: 'temporada', label: 'Eventos de Temporada', desc: 'Aplica paletas de colores navideñas y de Halloween', icon: Calendar, color: 'text-pink-500', bg: 'bg-pink-500/10' },
                     { id: 'seguimiento', label: 'Seguimiento por WhatsApp', desc: 'Personaliza notificaciones automáticas y PWA', icon: MessageSquare, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
                     { id: 'movimientos', label: 'Auditoría de Ajustes de Stock', desc: 'Registro de modificaciones de inventario por empleado', icon: Database, color: 'text-indigo-500', bg: 'bg-indigo-500/10' }
-                  ].map(sub => {
+                  ].filter(sub => {
+                    if (sub.id === 'movimientos') {
+                      return formData.hasMultipleEmployees === true
+                    }
+                    return true
+                  }).map(sub => {
                     const SubIcon = sub.icon
                     return (
                       <button

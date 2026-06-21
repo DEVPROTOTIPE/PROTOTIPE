@@ -220,11 +220,11 @@ export default function ClientOrders() {
       ? 'Transferencia' 
       : 'Efectivo'
 
-    const deliveryLabel = order.tipoEntrega === 'mesa'
-      ? `Consumo en Salón (Mesa: ${order.tableName || 'N/A'})`
-      : order.tipoEntrega === 'retiro'
+    const deliveryLabel = order.tipoEntrega === 'retiro'
       ? 'Retiro en Tienda'
-      : 'Domicilio a domicilio'
+      : order.tipoEntrega === 'digital'
+      ? 'Digital'
+      : 'Domicilio'
 
     const subtotal = order.items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0)
     const { bankInfo } = useAppConfigStore.getState()
@@ -294,7 +294,7 @@ export default function ClientOrders() {
             <div class="info-box">
               <h3>Datos de Entrega / Pago</h3>
               <p><strong>Tipo Entrega:</strong> ${deliveryLabel}</p>
-              ${order.tipoEntrega !== 'mesa' && order.tipoEntrega !== 'retiro'
+              ${order.tipoEntrega !== 'retiro'
                 ? `<p><strong>Dirección:</strong> ${order.cliente?.direccion || 'N/A'}</p>
                    <p><strong>Ciudad/Barrio:</strong> ${order.cliente?.ciudad || ''} - ${order.cliente?.barrio || ''}</p>`
                 : ''
@@ -602,10 +602,6 @@ export default function ClientOrders() {
                   <span className="text-xs font-bold px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md">
                     🛵 Domicilio{order.costoEnvio > 0 ? ` · +${formatCurrency(order.costoEnvio)}` : ''}
                   </span>
-                ) : order.tipoEntrega === 'mesa' ? (
-                  <span className="text-xs font-bold px-2 py-0.5 bg-purple-500/10 text-purple-600 border border-purple-500/20 rounded-md">
-                    🛎️ En Mesa: {order.tableName || 'Salón'}
-                  </span>
                 ) : (
                   <span className="text-xs text-muted px-2 py-0.5 bg-surface-2 rounded-md border border-app">
                     🏪 Retiro en tienda
@@ -658,11 +654,6 @@ export default function ClientOrders() {
                         <Bike size={16} className="text-primary" />
                         <span>ENTREGA A DOMICILIO</span>
                       </>
-                    ) : order.tipoEntrega === 'mesa' ? (
-                      <>
-                        <span className="text-base leading-none">🛎️</span>
-                        <span>CONSUMO EN SALÓN — {order.tableName || 'Mesa'}</span>
-                      </>
                     ) : (
                       <>
                         <Store size={16} className="text-primary" />
@@ -684,8 +675,6 @@ export default function ClientOrders() {
                         <p className="text-xs text-muted italic mt-1 font-medium">El costo de envío será acordado con el negocio.</p>
                       )}
                     </div>
-                  ) : order.tipoEntrega === 'mesa' ? (
-                    <p className="text-sm text-muted">Tu pedido será entregado directamente en tu **{order.tableName || 'Mesa'}**.</p>
                   ) : (
                     <p className="text-xs text-muted font-medium leading-relaxed">Recoge tu pedido directamente en nuestra tienda.</p>
                   )}

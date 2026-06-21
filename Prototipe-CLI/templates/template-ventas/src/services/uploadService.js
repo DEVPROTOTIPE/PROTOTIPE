@@ -43,12 +43,18 @@ export async function uploadImage(file, folder = 'products', customName = null, 
   // Generar un nombre único para evitar sobreescribir fotos existentes
   const cleanName = (processedFile.name || 'image.webp').replace(/[^a-zA-Z0-9.]/g, '_')
   const fileName = customName ? `${customName}_${cleanName}` : `${generateUUID()}_${cleanName}`
-  
+
   // Referencia física en Storage
   const storageRef = ref(storage, `${folder}/${fileName}`)
-  
+
+  // Metadata explícita de Content-Type para que Storage sirva el MIME correcto
+  // (sin esto puede servir la imagen como application/octet-stream)
+  const uploadMetadata = {
+    contentType: processedFile.type || 'image/webp'
+  }
+
   // Iniciar la tarea de subida resumible
-  const uploadTask = uploadBytesResumable(storageRef, processedFile)
+  const uploadTask = uploadBytesResumable(storageRef, processedFile, uploadMetadata)
 
   return new Promise((resolve, reject) => {
     uploadTask.on(

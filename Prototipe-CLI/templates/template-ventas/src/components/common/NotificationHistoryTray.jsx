@@ -10,9 +10,52 @@ import {
   Inbox,
   Loader2,
   CheckCheck,
-  Trash2
+  Trash2,
+  ShoppingBag,
+  CheckCircle2,
+  PackageOpen,
+  Store,
+  Truck,
+  XCircle,
+  RefreshCw,
+  CreditCard,
+  ShieldCheck,
+  AlertTriangle,
+  Edit,
+  Package,
+  ShieldAlert,
+  Star
 } from 'lucide-react'
 import { NC_TYPE_META } from '../../services/notificationCenterService'
+
+const colorClasses = {
+  primary: 'text-primary bg-primary/10 border-primary/20',
+  emerald: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+  orange: 'text-orange-500 bg-orange-50 border-orange-100',
+  blue: 'text-blue-600 bg-blue-50 border-blue-100',
+  indigo: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+  red: 'text-rose-600 bg-rose-50 border-rose-100',
+  amber: 'text-amber-600 bg-amber-50 border-amber-100',
+  purple: 'text-purple-600 bg-purple-50 border-purple-100',
+}
+
+const iconMap = {
+  ShoppingBag,
+  CheckCircle2,
+  PackageOpen,
+  Store,
+  Truck,
+  XCircle,
+  RefreshCw,
+  CreditCard,
+  ShieldCheck,
+  AlertTriangle,
+  Edit,
+  Package,
+  ShieldAlert,
+  Star,
+  Bell
+}
 
 export default function NotificationHistoryTray({
   notifications = [],
@@ -183,9 +226,15 @@ export default function NotificationHistoryTray({
                   )}
 
                   {/* Icono de Tipo */}
-                  <div className="p-2.5 rounded-lg bg-surface flex items-center justify-center shadow-sm shrink-0">
-                    <span className="text-xl">🔔</span>
-                  </div>
+                  {(() => {
+                    const IconComponent = iconMap[meta.icon] || Bell
+                    const resolvedColorClass = colorClasses[meta.color] || colorClasses.primary
+                    return (
+                      <div className={`p-2.5 rounded-xl flex items-center justify-center shadow-sm border shrink-0 ${resolvedColorClass}`}>
+                        <IconComponent size={18} />
+                      </div>
+                    )
+                  })()}
 
                   {/* Detalles */}
                   <div className="flex-1 min-w-0 pr-2">

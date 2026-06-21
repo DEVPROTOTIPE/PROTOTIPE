@@ -2,21 +2,19 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CreditCard, Search, DollarSign, History, CheckCircle, ChevronDown, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAddPayment } from '../../hooks/useCredits'
-import { useOrders } from '../../hooks/useOrders'
 import { paymentSchema } from '../../schemas/creditSchemas'
 import { formatCurrency } from '../../utils/formatters'
 import * as creditService from '../../services/creditService'
+import ModalTemplate from '../../components/common/ModalTemplate'
 
 export default function AdminCredits() {
   const [activeTab, setActiveTab] = useState('activo') // activo | pagado
   const [credits, setCredits] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const { mutate: addPayment, isPending } = useAddPayment()
-  const { data: orders = [] } = useOrders()
-
   const handleExportCreditsReportPDF = async () => {
     const { exportCreditsReportPDF } = await import('../../services/pdfService')
-    exportCreditsReportPDF({ orders })
+    exportCreditsReportPDF({})
   }
 
   const [searchTerm, setSearchTerm] = useState('')
@@ -99,7 +97,7 @@ export default function AdminCredits() {
   }
 
   const handleAddPayment = (e) => {
-    e.preventDefault()
+    if (e && e.preventDefault) e.preventDefault()
     
     const dataToValidate = {
       monto: Number(paymentMonto),
@@ -323,82 +321,74 @@ export default function AdminCredits() {
       )}
 
       {/* MODAL PARA AGREGAR ABONO */}
-      <AnimatePresence>
-        {isPaymentModalOpen && selectedCredit && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setIsPaymentModalOpen(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
-
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative w-full max-w-md bg-surface rounded-3xl shadow-2xl p-6 border border-app"
+      <ModalTemplate
+        isOpen={isPaymentModalOpen}
+        onClose={() => {
+          setIsPaymentModalOpen(false)
+          setSelectedCredit(null)
+        }}
+        title="Registrar Abono"
+        subtitle={selectedCredit ? `Cliente: ${selectedCredit.clienteNombre}` : ''}
+        footerActions={
+          <div className="flex gap-3 w-full">
+            <button
+              type="button"
+              onClick={() => {
+                setIsPaymentModalOpen(false)
+                setSelectedCredit(null)
+              }}
+              className="flex-1 h-12 bg-surface-2 text-app rounded-xl font-bold transition-all active:scale-95 border border-app hover:bg-app/10"
             >
-              <h2 className="text-xl font-bold text-app mb-1">Registrar Abono</h2>
-              <p className="text-sm text-muted mb-6">
-                Cliente: <span className="font-bold text-app">{selectedCredit.clienteNombre}</span>
-              </p>
+              Cancelar
+            </button>
+            <button
+              onClick={handleAddPayment}
+              disabled={isPending || !paymentMonto}
+              className="flex-1 h-12 bg-primary text-white rounded-xl font-bold transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center"
+            >
+              {isPending ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                'Guardar Abono'
+              )}
+            </button>
+          </div>
+        }
+      >
+        {selectedCredit && (
+          <div className="space-y-4 pt-2">
+            <div className="bg-warning-soft border border-warning-soft rounded-2xl p-4 flex justify-between items-center">
+              <span className="text-sm font-semibold text-warning">Saldo Actual:</span>
+              <span className="text-xl font-black text-warning">
+                {formatCurrency(selectedCredit.saldoPendiente)}
+              </span>
+            </div>
 
-              <form onSubmit={handleAddPayment} className="space-y-4">
-                <div className="bg-warning-soft border border-warning-soft rounded-2xl p-4 flex justify-between items-center">
-                  <span className="text-sm font-semibold text-warning">Saldo Actual:</span>
-                  <span className="text-xl font-black text-warning">
-                    {formatCurrency(selectedCredit.saldoPendiente)}
-                  </span>
-                </div>
+            <div>
+              <label className="block text-sm font-medium text-app mb-1">Monto a abonar *</label>
+              <input
+                type="number"
+                value={paymentMonto}
+                onChange={(e) => setPaymentMonto(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-lg font-bold"
+                placeholder="Ingresa el valor numérico"
+              />
+              {paymentError && <p className="text-xs text-error mt-1">{paymentError}</p>}
+            </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-app mb-1">Monto a abonar *</label>
-                  <input
-                    type="number"
-                    value={paymentMonto}
-                    onChange={(e) => setPaymentMonto(e.target.value)}
-                    className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-lg font-bold"
-                    placeholder="Ingresa el valor numérico"
-                  />
-                  {paymentError && <p className="text-xs text-error mt-1">{paymentError}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-app mb-1">Nota (Opcional)</label>
-                  <input
-                    type="text"
-                    value={paymentNota}
-                    onChange={(e) => setPaymentNota(e.target.value)}
-                    className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm"
-                    placeholder="Ingresa una descripción del método o lugar de pago"
-                  />
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsPaymentModalOpen(false)}
-                    className="flex-1 h-12 bg-surface-2 text-app rounded-xl font-bold transition-all active:scale-95"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isPending || !paymentMonto}
-                    className="flex-1 h-12 bg-primary text-white rounded-xl font-bold transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center"
-                  >
-                    {isPending ? (
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      'Guardar Abono'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+            <div>
+              <label className="block text-sm font-medium text-app mb-1">Nota (Opcional)</label>
+              <input
+                type="text"
+                value={paymentNota}
+                onChange={(e) => setPaymentNota(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+                placeholder="Ingresa una descripción del método o lugar de pago"
+              />
+            </div>
           </div>
         )}
-      </AnimatePresence>
+      </ModalTemplate>
     </motion.div>
   )
 }

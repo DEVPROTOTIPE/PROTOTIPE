@@ -14,17 +14,58 @@ import { getCentralFirestore } from './centralFirebaseService'
 // Variables de entorno para conectar al Firebase Central de Control (Spark mode)
 const CLIENT_ID = import.meta.env.VITE_DEVELOPER_CLIENT_ID;
 
-const ordersRef = collection(db, COLLECTIONS.ORDERS)
 const SETTINGS_REF = doc(db, 'config', 'settings')
 
+/**
+ * Adaptador de datos por defecto para el core de Ventas.
+ * Permite escuchar transacciones de pedidos completados si la colección existe.
+ */
+const defaultAdapter = (callback) => {
+  if (!COLLECTIONS.ORDERS || !ORDER_STATES.COMPLETED) {
+    console.log('[BillingService] No se detectó colección de pedidos o estado completado en constantes. Retornando dataset vacío.');
+    callback([]);
+    return () => {};
+  }
+  try {
+    const ordersRef = collection(db, COLLECTIONS.ORDERS)
+    const qOrders = query(
+      ordersRef,
+      where('estado', '==', ORDER_STATES.COMPLETED),
+      orderBy('createdAt', 'desc')
+    )
+    return onSnapshot(qOrders, (snap) => {
+      const orders = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      callback(orders)
+    })
+  } catch (err) {
+    console.error('[BillingService] Error al inicializar suscripción a pedidos:', err);
+    callback([]);
+    return () => {};
+  }
+}
 
 /**
- * Guarda el nuevo porcentaje de comisión del desarrollador en Firestore.
+ * Guarda el nuevo porcentaje de comisión del desarrollador en Firestore (Retrocompatible).
  * @param {number} percent - Porcentaje (ej: 1, 2.5)
  */
 export async function updateCommissionPercent(percent) {
   // Guardar en config local de la app
   await updateAppConfig({ developerCommissionPercent: percent })
+}
+
+/**
+ * Guarda la configuración de facturación local en Firestore (Soporte 4 modelos).
+ * @param {object} config - Configuración de facturación
+ */
+export async function updateBillingSettings(config) {
+  await updateAppConfig({
+    developerBillingMode: config.billingMode || 'percentage',
+    developerCommissionPercent: config.comisionPorcentaje ?? 1,
+    developerFixedServiceFee: config.montoFijoServicio ?? 0,
+    developerFlatMonthlyFee: config.pagoMensualFijo ?? 0,
+    enableDianBilling: config.enableDianBilling === true,
+    costoPorFacturaDian: config.costoPorFacturaDian ?? 0
+  })
 }
 
 /**
@@ -180,11 +221,12 @@ function calcMetrics(orders, billingConfig) {
 
 /**
  * Suscripción en tiempo real a las métricas de facturación.
- * Escucha pedidos completados y la configuración de facturación simultáneamente.
+ * Escucha pedidos/transacciones y la configuración de facturación simultáneamente.
  * @param {function} onUpdate - Callback con las métricas calculadas
+ * @param {function} [dataAdapter] - Adaptador para obtener transacciones (opcional)
  * @returns {function} Función para cancelar ambas suscripciones
  */
-export function subscribeToBillingData(onUpdate) {
+export function subscribeToBillingData(onUpdate, dataAdapter = null) {
   let latestOrders = []
   let latestConfig = {
     billingMode: 'percentage',
@@ -195,15 +237,11 @@ export function subscribeToBillingData(onUpdate) {
     costoPorFacturaDian: 0
   }
 
-  // ─── Suscripción a pedidos completados ───────────────────────────
-  const qOrders = query(
-    ordersRef,
-    where('estado', '==', ORDER_STATES.COMPLETED),
-    orderBy('createdAt', 'desc')
-  )
+  const resolveAdapter = dataAdapter || defaultAdapter
 
-  const unsubOrders = onSnapshot(qOrders, (snap) => {
-    latestOrders = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+  // ─── Suscripción a transacciones/pedidos mediante el adaptador ───
+  const unsubOrders = resolveAdapter((orders) => {
+    latestOrders = orders
     onUpdate(calcMetrics(latestOrders, latestConfig))
   })
 

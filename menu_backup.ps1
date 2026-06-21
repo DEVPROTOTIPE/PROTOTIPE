@@ -17,8 +17,8 @@ $dashboardDir = "$rootDir\Central PROTOTIPE\dev-dashboard"
 Set-Location -Path $rootDir
 
 # Rutina de auto-recuperacion ante cierres abruptos (restaurar .git-backup-temp a .git)
-# Depth 3 cubre todos los subrepos sin recorrer node_modules ni carpetas profundas
-$tempGitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git-backup-temp" -Recurse -Depth 3 -ErrorAction SilentlyContinue
+# Depth 5 cubre todos los subrepos anidados sin recorrer node_modules ni carpetas profundas
+$tempGitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git-backup-temp" -Recurse -Depth 5 -ErrorAction SilentlyContinue
 if ($tempGitDirs.Count -gt 0) {
     # Detectar y detener servidores Vite si hay carpetas por recuperar
     $nodeProcesses = Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue
@@ -225,8 +225,10 @@ function Manage-Instances {
         return
     }
     
-    $instances = Get-ChildItem -Path $instancesDir -Directory
-    if ($instances.Count -eq 0) {
+    $instances = Get-ChildItem -Path $instancesDir -Directory -Recurse -Depth 2 | Where-Object {
+        $_.Parent.FullName -ne $instancesDir -and $_.Parent.Parent.FullName -eq $instancesDir
+    }
+    if ($null -eq $instances -or $instances.Count -eq 0) {
         Show-Header
         Write-Host " [INFO] No hay instancias de clientes registradas fisicamente en el disco." -ForegroundColor Yellow
         Start-Sleep -Seconds 2

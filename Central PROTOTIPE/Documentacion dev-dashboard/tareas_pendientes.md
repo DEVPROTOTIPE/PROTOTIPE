@@ -490,3 +490,15 @@ Roadmap y control de tareas del proyecto dev-dashboard.
   - [x] Implementar barra de pestañas de categorías dentro del modal de tipografía (Todos, Sans-Serif, Serif, Display, Monospace, Script).
   - [x] Añadir insignias visuales (Badges) en cada tarjeta para identificar la categoría de cada fuente.
   - [x] Validar compilación local exitosa con `npm run build` (631ms).
+
+- [ ] **Tarea 248: Integración del Motor de Sincronización Core a Clientes y Despliegue Secuencial Aislado**
+  - [ ] Registrar el componente `CoreSyncPanel.jsx` en la barra de navegación lateral y pestañas de `App.jsx` (tab `'sync'`).
+  - [ ] Implementar el renderizado condicional de `CoreSyncPanel` en el cuerpo principal de `App.jsx`.
+  - [ ] Refactorizar el endpoint `/api/git/sync-core-to-clients-stream` en `server.js` del CLI Bridge para resolver y actualizar por `git pull` la carpeta física de la instancia de cliente, compilando y desplegando en su respectiva ruta física local para aislar variables del entorno `.env.local`.
+
+- [x] **~~Tarea 249: Adaptación del Perfil y Consola de Telemetría al Modo Oscuro/Claro y Traducción a Español~~**
+  - [x] Adaptar el Modal de Perfil de Administrador al modo claro y oscuro usando variables CSS y contrastes correctos.
+  - [x] Traducir el título de la consola central y sus estados de red/sandbox/firestore de inglés a español.
+  - [x] Adaptar los botones de limpiar terminal, tabs de filtrado, campo de búsqueda y la propia pantalla de terminal a variables de tema HSL para una legibilidad óptima en ambos modos.
+
+

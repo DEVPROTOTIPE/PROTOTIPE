@@ -2,8 +2,6 @@ import {
   collection,
   doc,
   getDocs,
-  getDoc,
-  addDoc,
   updateDoc,
   query,
   where,
@@ -80,6 +78,14 @@ export async function createOrder(orderData) {
       const variantIndex = variantes.findIndex(v => v.id === item.variantId)
 
       if (variantIndex !== -1) {
+        if (productInfo.data.stockInfinito === true) {
+          updatedProducts[item.productId] = {
+            ...productInfo,
+            data: { ...productInfo.data }
+          }
+          continue
+        }
+
         const stockActual = variantes[variantIndex].stock
         if (stockActual < item.cantidad) {
           const variantLabel = [variantes[variantIndex].talla, variantes[variantIndex].color]
@@ -121,7 +127,7 @@ export async function createOrder(orderData) {
     })
   })
 
-  // 5. Emitir Notificación Central de Pedido Recibido para el Administrador
+  // 5. Emitir Notificación Central de Pedido Recibido para el Administrador y Vendedor
   try {
     const isWholesale = orderData.tipo === 'wholesale' || orderData.items?.some(item => item.wholesale)
     const isCustomOrder = orderData.tipo === 'custom_order' || orderData.customOrder || orderData.items?.some(item => item.custom)
@@ -131,6 +137,16 @@ export async function createOrder(orderData) {
       recipientId: 'admin',
       recipientRole: 'admin',
       title: 'Nuevo Pedido Recibido',
+      body: `Pedido ${typeLabel} de ${orderData.cliente?.nombre || 'Cliente'} (${orderData.cliente?.celular || ''}) por valor de $${orderData.total || 0}.`,
+      type: NC_TYPES.PEDIDO_RECIBIDO,
+      orderId: orderIdRef.id,
+      orderNumber
+    })
+
+    await createCentralNotification({
+      recipientId: 'vendedor',
+      recipientRole: 'vendedor',
+      title: 'Nuevo Pedido PWA Recibido',
       body: `Pedido ${typeLabel} de ${orderData.cliente?.nombre || 'Cliente'} (${orderData.cliente?.celular || ''}) por valor de $${orderData.total || 0}.`,
       type: NC_TYPES.PEDIDO_RECIBIDO,
       orderId: orderIdRef.id,
@@ -152,6 +168,8 @@ export async function createOrder(orderData) {
         phone: orderData.cliente?.celular || '',
         items: (orderData.items || []).map(i => ({ nombre: i.nombre, cantidad: i.cantidad })),
         notas: orderData.notas || '',
+        paymentMethod: orderData.metodoPago || '',
+        total: orderData.total || 0,
       })
       console.log('[orderService] Pedido a domicilio encolado en deliveries')
     }
@@ -335,6 +353,13 @@ export async function updateOrderStatus(orderId, newStatus, currentOrder) {
           const variantIndex = variantes.findIndex(v => v.id === item.variantId)
 
           if (variantIndex !== -1) {
+            if (productInfo.data.stockInfinito === true) {
+              updatedProducts[item.productId] = {
+                ...productInfo,
+                data: { ...productInfo.data }
+              }
+              continue
+            }
             variantes[variantIndex].stock = variantes[variantIndex].stock + item.cantidad
             updatedProducts[item.productId] = {
               ...productInfo,
@@ -395,6 +420,13 @@ export async function updateOrderStatus(orderId, newStatus, currentOrder) {
           const variantIndex = variantes.findIndex(v => v.id === item.variantId)
 
           if (variantIndex !== -1) {
+            if (productInfo.data.stockInfinito === true) {
+              updatedProducts[item.productId] = {
+                ...productInfo,
+                data: { ...productInfo.data }
+              }
+              continue
+            }
             const stockActual = variantes[variantIndex].stock
             if (stockActual < item.cantidad) {
               throw new Error(`Stock insuficiente para variante de ${item.nombre}`)
@@ -448,6 +480,23 @@ export async function updateOrderStatus(orderId, newStatus, currentOrder) {
     estado: newStatus,
     updatedAt: serverTimestamp()
   })
+
+  if (newStatus === ORDER_STATES.PREPARING || newStatus === 'preparing') {
+    try {
+      await createCentralNotification({
+        recipientId: 'bodeguero',
+        recipientRole: 'bodeguero',
+        title: 'Pedido para Empacar',
+        body: `El pedido #${currentOrder?.orderNumber || orderId?.slice(-4)} ha cambiado a preparación y está listo para ser empacado.`,
+        type: NC_TYPES.PEDIDO_PREPARANDO,
+        orderId: orderId,
+        orderNumber: currentOrder?.orderNumber
+      })
+    } catch (err) {
+      console.error('[orderService] Error al notificar al bodeguero:', err)
+    }
+  }
+
   await notifyClient()
 }
 
@@ -498,6 +547,13 @@ export async function createPhysicalOrder(orderData, adminId, forcedOrderId = nu
       const variantIndex = variantes.findIndex(v => v.id === item.variantId)
 
       if (variantIndex !== -1) {
+        if (productInfo.data.stockInfinito === true) {
+          updatedProducts[item.productId] = {
+            ...productInfo,
+            data: { ...productInfo.data }
+          }
+          continue
+        }
         const stockActual = variantes[variantIndex].stock
         if (stockActual < item.cantidad) {
           if (orderData.offline === true) {
@@ -583,6 +639,20 @@ export async function createPhysicalOrder(orderData, adminId, forcedOrderId = nu
     } catch (err) {
       console.error('[orderService] Error al notificar conflicto:', err)
     }
+  }
+
+  try {
+    await createCentralNotification({
+      recipientId: 'vendedor',
+      recipientRole: 'vendedor',
+      title: 'Venta POS Registrada',
+      body: `Venta POS #${orderNumber} por valor de $${orderData.total || 0} registrada con éxito.`,
+      type: NC_TYPES.PEDIDO_RECIBIDO,
+      orderId: orderIdRef.id,
+      orderNumber
+    })
+  } catch (err) {
+    console.error('[orderService] Error al notificar venta física para vendedor:', err)
   }
 
   return { id: orderIdRef.id, orderNumber }

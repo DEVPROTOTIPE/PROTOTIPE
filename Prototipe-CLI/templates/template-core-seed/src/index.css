@@ -1129,6 +1129,9 @@ select option {
   padding: 1.5rem;
   display: flex; flex-direction: column; gap: 0.875rem;
   margin: 0 auto;
+  max-height: 90vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 .portal-table-actions-header { display: flex; align-items: center; justify-content: space-between; color: var(--color-text); }
 .portal-table-actions-title { font-weight: 900; font-size: 1.1rem; }

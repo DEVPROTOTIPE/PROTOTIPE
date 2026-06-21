@@ -2,10 +2,7 @@ import {
   collection,
   addDoc,
   getDocs,
-  query,
-  where,
-  serverTimestamp,
-  orderBy
+  serverTimestamp
 } from 'firebase/firestore'
 import { db } from '../config/firebaseConfig'
 

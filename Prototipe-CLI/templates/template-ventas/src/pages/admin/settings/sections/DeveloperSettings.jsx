@@ -45,7 +45,7 @@ export default function DeveloperSettings({
   // --- RESTAURACIÓN ---
   const handleFullReset = async () => {
     if (confirmRestoreText !== 'RESTAURAR') return
-    if (!window.confirm('¿Estás COMPLETAMENTE SEGURO de restaurar la aplicación? Se eliminarán de forma REAL y permanente absolutamente todos los productos, categorías, pedidos, créditos, cupones, anuncios, notificaciones, logs, mesas y la configuración del negocio. Serás redirigido a la pantalla de registro inicial. Esta acción no se puede deshacer.')) return
+    if (!window.confirm('¿Estás COMPLETAMENTE SEGURO de restaurar la aplicación? Se eliminarán de forma REAL y permanente absolutamente todos los productos, categorías, pedidos, créditos, cupones, anuncios, notificaciones, logs y la configuración del negocio. Serás redirigido a la pantalla de registro inicial. Esta acción no se puede deshacer.')) return
 
     setLoading(true)
     setMessage({ type: 'success', text: 'Restaurando base de datos a cero (borrado real)...' })
@@ -68,9 +68,6 @@ export default function DeveloperSettings({
         'wholesaleOrders',
         'deliveries',
         'employees',
-        'production',
-        'tableRequests',
-        'tables',
         'config'
       ]
 
@@ -1005,7 +1002,7 @@ export default function DeveloperSettings({
           </div>
         </div>
       )}
-
+      
       {/* 6. Subsección: Apariencia y Colores */}
       {activeSubSection === 'dev-apariencia' && (
         <AppearanceSettings 
@@ -1097,7 +1094,7 @@ export default function DeveloperSettings({
                     creditsEnabled: formData.creditsEnabled ?? true,
                     couponsEnabled: formData.couponsEnabled ?? true,
                     claimsEnabled: formData.claimsEnabled ?? false,
-                    tablesEnabled: formData.tablesEnabled ?? false,
+
                     wholesaleSettings: formData.wholesaleSettings
                   }
                   await updateAppConfig(payload)

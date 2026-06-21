@@ -88,7 +88,7 @@ export default function ModalTemplate({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-            className="relative w-full max-w-lg bg-surface rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh] border border-app pointer-events-auto"
+            className="relative w-full max-w-lg bg-surface rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[85dvh] sm:max-h-[90dvh] border border-app pointer-events-auto"
             style={{ willChange: 'transform' }}
           >
             {/* A. Cabecera (Header) - Renderizada condicionalmente si hay título */}

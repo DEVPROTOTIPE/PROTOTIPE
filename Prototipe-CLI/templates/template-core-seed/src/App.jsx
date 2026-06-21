@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
-import { MotionConfig } from 'framer-motion'
+import { MotionConfig, AnimatePresence } from 'framer-motion'
 import AppRoutes from './routes/AppRoutes'
 import useAppConfigStore from './store/appConfigStore'
 import useAppConfigSync from './hooks/useAppConfigSync'
@@ -129,6 +129,34 @@ export default function App() {
   // Sincronización global Firestore <-> Zustand en tiempo real
   useAppConfigSync()
 
+  const [activePingRequest, setActivePingRequest] = useState(null)
+  const pingTimeoutRef = useRef(null)
+
+  // Escuchar solicitudes de ping test interactivo (telemetría central)
+  useEffect(() => {
+    const handlePingRequest = (e) => {
+      if (e.detail?.respond) {
+        if (pingTimeoutRef.current) {
+          clearTimeout(pingTimeoutRef.current)
+        }
+        setActivePingRequest({ respond: e.detail.respond })
+        
+        // Autocierre en 30s por inactividad
+        pingTimeoutRef.current = setTimeout(() => {
+          setActivePingRequest(null)
+          console.debug('[App] La prueba de conexión ha expirado por inactividad.')
+        }, 30000)
+      }
+    }
+    window.addEventListener('ping-test-requested', handlePingRequest)
+    return () => {
+      window.removeEventListener('ping-test-requested', handlePingRequest)
+      if (pingTimeoutRef.current) {
+        clearTimeout(pingTimeoutRef.current)
+      }
+    }
+  }, [])
+
   const { 
     isLoaded, 
     appName, 
@@ -250,6 +278,86 @@ export default function App() {
           <BrowserRouter>
             <ThemeApplier />
             <AppRoutes />
+
+            {/* Modal de Prueba de Conexión (Ping Test) — Reutiliza diseño premium y contrastes */}
+            <AnimatePresence>
+              {activePingRequest && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+                  {/* Backdrop */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setActivePingRequest(null)}
+                    style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(5, 8, 16, 0.82)', backdropFilter: 'blur(8px)' }}
+                  />
+                  
+                  {/* Contenedor Alerta — theme-aware */}
+                  <motion.div
+                    initial={{ scale: 0.85, opacity: 0, y: 30 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.85, opacity: 0, y: 30 }}
+                    transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+                    className="relative rounded-3xl shadow-2xl p-7 max-w-md w-full flex flex-col items-center text-center gap-5 z-10 font-sans"
+                    style={{
+                      background: 'var(--color-surface)',
+                      border: '1px solid rgba(99, 102, 241, 0.25)'
+                    }}
+                  >
+                    {/* Icono de Telemetría */}
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center border bg-indigo-500/15 text-indigo-500 border-indigo-500/20">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2Z"/>
+                        <path d="M12 6a6 6 0 0 1 6 6c0 3.314-2.686 6-6 6s-6-2.686-6-6a6 6 0 0 1 6-6Z"/>
+                        <circle cx="12" cy="12" r="2"/>
+                      </svg>
+                    </div>
+
+                    {/* Textos */}
+                    <div className="space-y-2">
+                      <p className="text-base font-black uppercase tracking-wide text-indigo-500">Prueba de Conexión</p>
+                      <p className="text-xs leading-relaxed font-medium" style={{ color: 'var(--color-text-muted)' }}>
+                        Se ha iniciado una prueba de conectividad desde la Consola Central del desarrollador. Por favor, confirme para verificar la conexión.
+                      </p>
+                    </div>
+
+                    {/* Botón de Confirmar y Descartar */}
+                    <div className="w-full flex flex-col gap-3">
+                      <button
+                        onClick={() => {
+                          if (activePingRequest.respond) {
+                            activePingRequest.respond()
+                              .then(() => {
+                                console.log('[App] Ping respondido correctamente al dashboard.')
+                              })
+                              .catch((err) => {
+                                      console.warn('[App] Error al responder al ping:', err)
+                              })
+                          }
+                          setActivePingRequest(null)
+                        }}
+                        className="w-full h-11 rounded-2xl font-bold text-sm active:scale-95 transition-all shadow-sm border-none cursor-pointer"
+                        style={{
+                          background: 'var(--color-primary)',
+                          color: '#ffffff',
+                          boxShadow: '0 4px 15px rgba(99, 102, 241, 0.35)'
+                        }}
+                      >
+                        Confirmar Conexión
+                      </button>
+                      
+                      <button
+                        onClick={() => setActivePingRequest(null)}
+                        className="w-full bg-transparent hover:bg-neutral-500/5 h-9 rounded-xl font-semibold text-xs active:scale-95 transition-all border-none cursor-pointer"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
+                        Descartar prueba
+                      </button>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
           </BrowserRouter>
         </MotionConfig>
       </QueryClientProvider>

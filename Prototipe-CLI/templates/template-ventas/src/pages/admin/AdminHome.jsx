@@ -59,6 +59,7 @@ export default function AdminHome() {
     // Contar todas las variantes individuales bajo el umbral de alerta
     const alerts = []
     products.forEach(p => {
+      if (p.stockInfinito === true) return
       (p.variantes || []).forEach(v => {
         if (v.stock <= p.umbralAlerta) {
           alerts.push({ productId: p.id, variantId: v.id })

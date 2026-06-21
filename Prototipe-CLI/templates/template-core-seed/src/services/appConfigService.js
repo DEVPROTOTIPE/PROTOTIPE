@@ -19,11 +19,10 @@ const FILTERS_REF = doc(db, 'config', 'catalogFilters')
  * (Primera vez que se abre la app)
  */
 export const DEFAULT_SETTINGS = {
-  appName: 'Mi Tienda',
-  sellerName: 'Vendedor',
+  appName: 'Mi Aplicación',
+  sellerName: 'Administrador',
   appIcon: '',
   theme: 'rosa-elegante',
-  tablesEnabled: false,
   whatsappAdmin: '',
   bankInfo: {
     numeroCuenta: '',
@@ -38,39 +37,14 @@ export const DEFAULT_SETTINGS = {
   catalogLayout: 'grid2',
   animationsEnabled: true,
   actionColor: '',
-  deliverySettings: {
-    pickup: {
-      enabled: true,
-      address: '',
-      instructions: 'Recoge tu pedido directamente en nuestro local.'
-    },
-    shipping: {
-      enabled: true,
-      cost: 0,
-      estimatedTime: '30 a 60 min',
-      instructions: 'Recibe tu pedido en la comodidad de tu casa.'
-    },
-    digital: {
-      enabled: false,
-      instructions: 'Entrega digital o prestación de servicio presencial.'
-    }
-  },
-  wholesaleSettings: {
-    enabled: true,
-    minQuantity: 12,
-    discountType: 'percentage', // 'percentage' | 'fixed'
-    discountValue: 15
-  },
   updatedAt: null,
 }
 
 const DEFAULT_FILTERS = {
-  gender: true,
-  sizes: true,
-  colors: true,
-  brand: false,
-  material: false,
   categories: true,
+  sizes: false,
+  colors: false,
+  customAttributes: [],
 }
 
 /**

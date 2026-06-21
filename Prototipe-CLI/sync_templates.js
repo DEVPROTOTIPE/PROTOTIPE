@@ -18,7 +18,9 @@ async function extractSanitizationTokens(fuente) {
     projectId: '',
     apiKey: '',
     measurementId: '',
-    packageName: ''
+    packageName: '',
+    appId: '',
+    telemetryToken: ''
   };
 
   // 1. Leer package.json para el nombre del proyecto
@@ -39,9 +41,11 @@ async function extractSanitizationTokens(fuente) {
         const match = envContent.match(new RegExp(`^${key}\\s*=\\s*["']?([^"'\\n]+)["']?`, 'm'));
         return match ? match[1].trim() : '';
       };
-      tokens.projectId     = parseEnvValue('VITE_FIREBASE_PROJECT_ID');
-      tokens.apiKey        = parseEnvValue('VITE_FIREBASE_API_KEY');
-      tokens.measurementId = parseEnvValue('VITE_FIREBASE_MEASUREMENT_ID');
+      tokens.projectId         = parseEnvValue('VITE_FIREBASE_PROJECT_ID');
+      tokens.apiKey            = parseEnvValue('VITE_FIREBASE_API_KEY');
+      tokens.measurementId     = parseEnvValue('VITE_FIREBASE_MEASUREMENT_ID');
+      tokens.appId             = parseEnvValue('VITE_FIREBASE_APP_ID');
+      tokens.telemetryToken    = parseEnvValue('VITE_DEVELOPER_TELEMETRY_TOKEN');
     } catch { /* ignorar */ }
   }
 
@@ -79,7 +83,7 @@ function validarRegistro(registro) {
       errors.push(`La entrada "${key}" en el registro debe ser un objeto.`);
       continue;
     }
-    const required = ['fuente', 'destino', 'nicho', 'activo', 'version'];
+    const required = ['fuente', 'destino', 'nicho', 'activo', 'version', 'coreType'];
     required.forEach(f => {
       if (!(f in config)) {
         errors.push(`La plantilla "${key}" no contiene el campo requerido "${f}".`);
@@ -93,6 +97,9 @@ function validarRegistro(registro) {
     }
     if (config.nicho && typeof config.nicho !== 'string') {
       errors.push(`El campo "nicho" de "${key}" debe ser un string.`);
+    }
+    if (config.coreType && typeof config.coreType !== 'string') {
+      errors.push(`El campo "coreType" de "${key}" debe ser un string.`);
     }
     if ('activo' in config && typeof config.activo !== 'boolean') {
       errors.push(`El campo "activo" de "${key}" debe ser un booleano.`);
@@ -186,10 +193,13 @@ async function main() {
     'src/schemas',
     'src/types',
     'src/providers',
+    'src/config',
     'src/App.jsx',
     'src/App.css',
     'src/index.css',
     'src/main.jsx',
+    'index.html',
+    'public',
     'firestore.indexes.json',
     'firestore.rules',
     'vite.config.js',
@@ -206,9 +216,6 @@ async function main() {
     '.env.local',
     '.firebaserc',
     'firebase.json',
-    'src/config/firebaseConfig.js',
-    'index.html',
-    'public',
     'package-lock.json',
     'node_modules'
   ];
@@ -285,18 +292,13 @@ async function main() {
     }
   }
 
-  // 2. Simular escaneo de sanitización dinámica
-  const testWalkSanitization = async (dir) => {
-    if (!await fs.pathExists(dir)) return;
-    const files = await fs.readdir(dir);
-    for (const file of files) {
-      if (file === 'node_modules' || file === '.git' || file === 'dist' || file === '.vite') continue;
-      const fullPath = path.join(dir, file);
-      const stat = await fs.stat(fullPath);
-      if (stat.isDirectory()) {
-        await testWalkSanitization(fullPath);
-      } else if (file.endsWith('.js') || file.endsWith('.jsx') || file.endsWith('.json') || file.endsWith('.md')) {
-        let content = await fs.readFile(fullPath, 'utf8');
+  // 2. Simular/Evaluar escaneo de sanitización dinámica sobre todos los archivos que estarán en destino
+  for (const action of actionsToTake) {
+    const relative = action.relative;
+    if (relative.endsWith('.js') || relative.endsWith('.jsx') || relative.endsWith('.json') || relative.endsWith('.md') || relative.endsWith('.html')) {
+      const srcPath = path.join(fuente, relative);
+      if (await fs.pathExists(srcPath)) {
+        let content = await fs.readFile(srcPath, 'utf8');
         let needsSanitization = false;
         const matchedReasons = [];
 
@@ -313,11 +315,36 @@ async function main() {
           matchedReasons.push(`Nombre de paquete de desarrollo "${srcTokens.packageName}"`);
         }
 
-        // Patrones fijos de credenciales Firebase
-        if (/AIzaSy[A-Za-z0-9_-]{33}/g.test(content)) {
+        // Patrones de credenciales Firebase y tokens sensibles
+        if (srcTokens.apiKey && content.includes(srcTokens.apiKey)) {
+          needsSanitization = true;
+          matchedReasons.push('Firebase API Key de desarrollo');
+        } else if (/AIzaSy[A-Za-z0-9_-]{33}/g.test(content)) {
           needsSanitization = true;
           matchedReasons.push('Firebase API Key hardcodeada');
         }
+
+
+
+        if (srcTokens.appId && content.includes(srcTokens.appId)) {
+          needsSanitization = true;
+          matchedReasons.push('Firebase App ID de desarrollo');
+        }
+
+        if (srcTokens.telemetryToken && content.includes(srcTokens.telemetryToken)) {
+          needsSanitization = true;
+          matchedReasons.push('Telemetry Token de desarrollo');
+        }
+
+
+
+        if (path.basename(relative) === 'index.html') {
+          if (/<title>[^<]*<\/title>/i.test(content) || /<meta\s+name="apple-mobile-web-app-title"\s+content="[^"]*"\s*\/?>/gi.test(content)) {
+            needsSanitization = true;
+            matchedReasons.push('Metadata de título/SEO a marca blanca');
+          }
+        }
+
         if (/G-[A-Za-z0-9]{10}/g.test(content)) {
           needsSanitization = true;
           matchedReasons.push('ID analítica (G-XXXXX)');
@@ -328,18 +355,15 @@ async function main() {
 
         if (needsSanitization || matchedReasons.length > 0) {
           sanitizationsToApply.push({
-            relative: path.relative(destino, fullPath).replace(/\\/g, '/'),
-            fullPath,
+            relative,
+            fullPath: action.path,
             reasons: matchedReasons,
             needsWrite: needsSanitization
           });
         }
       }
     }
-  };
-
-  // Escanear el destino para previsualizar sanitizaciones
-  await testWalkSanitization(destino);
+  }
 
   // Mostrar el reporte de previsualización
   console.log(pc.bold(pc.white('📋 PREVISUALIZACIÓN DE CAMBIOS:')));
@@ -420,18 +444,43 @@ async function main() {
     if (s.needsWrite) {
       let content = await fs.readFile(s.fullPath, 'utf8');
 
-      // Reemplazar el Project ID real del fuente
+      // 1. Reemplazar el Project ID real del fuente
       if (srcProjectId) {
         content = content.replace(new RegExp(srcProjectId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'proyecto-cliente-saas');
       }
 
-      // Reemplazar nombre de paquete del fuente si existe
+      // 2. Reemplazar nombre de paquete del fuente si existe
       if (srcTokens.packageName) {
         content = content.replace(new RegExp(srcTokens.packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'proyecto-cliente-saas');
       }
 
-      // Limpiar API Keys y Measurement IDs de Firebase
+      // 3. Reemplazar API Keys reales
+      if (srcTokens.apiKey) {
+        content = content.replace(new RegExp(srcTokens.apiKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'AIzaSy[API_KEY_DE_CLIENTE_AUTOGENERADA]');
+      }
       content = content.replace(/AIzaSy[A-Za-z0-9_-]{33}/g, 'AIzaSy[API_KEY_DE_CLIENTE_AUTOGENERADA]');
+
+
+
+      // 5. Reemplazar App ID
+      if (srcTokens.appId) {
+        content = content.replace(new RegExp(srcTokens.appId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'APP_ID_MUTABLE');
+      }
+
+      // 6. Reemplazar Telemetry Token
+      if (srcTokens.telemetryToken) {
+        content = content.replace(new RegExp(srcTokens.telemetryToken.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'TELEMETRIA_TOKEN_MUTABLE');
+      }
+
+
+
+      // 8. Reemplazar index.html titles/metas
+      if (path.basename(s.fullPath) === 'index.html') {
+        content = content.replace(/<title>[^<]*<\/title>/gi, '<title>Prototipe App Base</title>');
+        content = content.replace(/<meta\s+name="apple-mobile-web-app-title"\s+content="[^"]*"\s*\/?>/gi, '<meta name="apple-mobile-web-app-title" content="Prototipe App Base" />');
+      }
+
+      // 9. Reemplazar IDs de medición fijos
       content = content.replace(/G-[A-Za-z0-9]{10}/g, 'G-[ID_MEDICION_TEMPORAL]');
 
       await fs.writeFile(s.fullPath, content, 'utf8');

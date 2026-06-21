@@ -16,6 +16,12 @@ export const COLLECTIONS = {
   USERS: 'users',
   NOTIFICATIONS: 'notifications',
   ACCESS_LOGS: 'accessLogs',
+  ORDERS: null, // Opcional: Específico de cores transaccionales (ej. ventas)
+}
+
+// ─── Estados de Transacciones/Pedidos (Especificar por Core si aplica) ──────────
+export const ORDER_STATES = {
+  COMPLETED: null, // Placeholder para evitar crash en billingService.js
 }
 
 // ─── Soporte Técnico Centralizado ─────────────────────────────────────────────

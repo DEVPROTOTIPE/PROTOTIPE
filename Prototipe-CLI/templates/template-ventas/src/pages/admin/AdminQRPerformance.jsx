@@ -185,7 +185,7 @@ export default function AdminQRPerformance() {
               <HelpCircle size={16} className="text-primary" /> ¿Cómo Funciona la Conversión?
             </h3>
             <p className="text-xs text-muted leading-relaxed">
-              Cada vez que un cliente escanea un código QR impreso en tus empaques, etiquetas o mesas, ingresa directamente a tu <strong>Portal Público de Compra</strong>.
+              Cada vez que un cliente escanea un código QR impreso en tus empaques o etiquetas, ingresa directamente a tu <strong>Portal Público de Compra</strong>.
             </p>
             <p className="text-xs text-muted leading-relaxed">
               El sistema registra automáticamente la visita de manera anónima y la asocia a su carrito de compras. Al completar el pedido en WhatsApp, la venta se atribuye directamente al QR de origen para darte métricas exactas.

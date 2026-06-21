@@ -2,14 +2,12 @@ import {
   collection,
   doc,
   getDocs,
-  getDoc,
   addDoc,
   updateDoc,
   deleteDoc,
   query,
   onSnapshot,
-  serverTimestamp,
-  orderBy
+  serverTimestamp
 } from 'firebase/firestore'
 import { db } from '../config/firebaseConfig'
 import { COLLECTIONS } from '../constants'

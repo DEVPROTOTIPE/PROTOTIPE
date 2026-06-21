@@ -44,15 +44,17 @@ export default function QuantitySelector({
   size = 'md',
   className = '' 
 }) {
+  const numVal = parseInt(value, 10) || 0;
+
   const handleDecrement = () => {
-    if (value > min) {
-      onChange(value - 1);
+    if (numVal > min) {
+      onChange(numVal - 1);
     }
   };
 
   const handleIncrement = () => {
-    if (value < max) {
-      onChange(value + 1);
+    if (numVal < max) {
+      onChange(numVal + 1);
     }
   };
 
@@ -67,21 +69,35 @@ export default function QuantitySelector({
       <button
         type="button"
         onClick={handleDecrement}
-        disabled={value <= min}
+        disabled={numVal <= min}
         className={`${btnSize} rounded-full flex items-center justify-center text-[var(--color-text)] bg-[var(--color-surface)] shadow-sm hover:bg-[var(--color-surface-2)] transition-transform active:scale-90 disabled:opacity-40`}
         aria-label="Disminuir cantidad"
       >
         <Minus size={iconSize} />
       </button>
       
-      <span className={`w-8 text-center font-bold text-[var(--color-text)] select-none ${fontSize}`}>
-        {value}
-      </span>
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => {
+          const val = parseInt(e.target.value, 10);
+          onChange(isNaN(val) ? '' : val);
+        }}
+        onBlur={() => {
+          const val = parseInt(value, 10);
+          if (isNaN(val) || val < min) {
+            onChange(min);
+          } else if (val > max) {
+            onChange(max);
+          }
+        }}
+        className={`w-10 text-center font-bold text-[var(--color-text)] bg-transparent outline-none focus:outline-none border-none p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${fontSize}`}
+      />
       
       <button
         type="button"
         onClick={handleIncrement}
-        disabled={value >= max}
+        disabled={numVal >= max}
         className={`${btnSize} rounded-full flex items-center justify-center text-[var(--color-text)] bg-[var(--color-surface)] shadow-sm hover:bg-[var(--color-surface-2)] transition-transform active:scale-90 disabled:opacity-40`}
         aria-label="Aumentar cantidad"
       >

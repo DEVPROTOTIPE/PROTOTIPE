@@ -545,7 +545,7 @@ export default function ProductDetailPage() {
                         currentVariant.stock === 0 ? 'bg-red-55/95 text-red-600 border border-red-200' : 'bg-green-55/95 text-green-700 border border-green-200'
                       }`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${currentVariant.stock === 0 ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`} />
-                        {currentVariant.stock === 0 ? 'Agotado' : `${currentVariant.stock} disponibles`}
+                        {currentVariant.stock === 0 ? 'Agotado' : (product?.stockInfinito || currentVariant.stock >= 9999 ? 'Disponible' : `${currentVariant.stock} disponibles`)}
                       </span>
                     </div>
                   )}
@@ -807,7 +807,7 @@ export default function ProductDetailPage() {
                     value={cantidad}
                     onChange={setCantidad}
                     min={1}
-                    max={currentVariant?.stock || 10}
+                    max={product?.stockInfinito || (currentVariant?.stock || 0) >= 9999 ? 999 : (currentVariant?.stock || 10)}
                     size="sm"
                     className="h-11 shrink-0"
                   />
@@ -876,7 +876,7 @@ export default function ProductDetailPage() {
               value={cantidad}
               onChange={setCantidad}
               min={1}
-              max={currentVariant?.stock || 10}
+              max={product?.stockInfinito || (currentVariant?.stock || 0) >= 9999 ? 999 : (currentVariant?.stock || 10)}
               size="sm"
               className="h-11 shrink-0"
             />

@@ -24,7 +24,7 @@ A continuación se detallan todos los elementos identificados en el panel admini
 | **Apariencia y Temas HSL** | `AdminSettings.jsx` (Apariencia) | Cambiar el tema de color HSL, modo oscuro y activar eventos de temporada. | Propietario de Negocio | **Nivel 1: Mi Negocio** | Control estético directo del negocio que no compromete la base de datos ni los flujos operativos. |
 | **Contacto y WhatsApp** | `AdminSettings.jsx` (Ventas) | Configurar número de celular del administrador para redirecciones del checkout. | Propietario de Negocio | **Nivel 1: Mi Negocio** | Clave para la recepción directa de pedidos. Uso sencillo. |
 | **Datos Bancarios** | `AdminSettings.jsx` (Ventas) | Configurar cuentas bancarias (Banco, cuenta, titular, QR) para transferencias. | Propietario de Negocio | **Nivel 1: Mi Negocio** | Configuración básica de recepción de cobros por parte de la tienda. |
-| **Toggles de Módulos Operativos** | `AdminSettings.jsx` (Personalizar) | Toggles rápidos para habilitar/deshabilitar Créditos, Cupones, Reclamos, Mayoreo y Cocina en la UI local. | Propietario de Negocio (Básico) / Desarrollador (Global) | **Nivel 1: Mi Negocio** (Toggles simples) / **Nivel 3: Panel Maestro** (Activación Ecosistema) | Algunos toggles operativos básicos deben ser de libre uso, pero la activación contractual de características premium pertenece al Panel Maestro. |
+| **Toggles de Módulos Operativos** | `AdminSettings.jsx` (Personalizar) | Toggles rápidos para habilitar/deshabilitar Créditos, Cupones, Reclamos y Mayoreo en la UI local. | Propietario de Negocio (Básico) / Desarrollador (Global) | **Nivel 1: Mi Negocio** (Toggles simples) / **Nivel 3: Panel Maestro** (Activación Ecosistema) | Algunos toggles operativos básicos deben ser de libre uso, pero la activación contractual de características premium pertenece al Panel Maestro. |
 | **Métodos de Entrega** | `AdminSettings.jsx` (Personalizar) | Configurar costos y tiempos de envíos, retiro físico y dirección de entrega. | Propietario de Negocio | **Nivel 1: Mi Negocio** | Regulación directa de la operación básica diaria de despacho. |
 | **Configuración de Empleados (Ficha)** | `AdminSettings.jsx` (Personalizar) | Listar personal, configurar salarios, frecuencia de pago y PIN de acceso. | Propietario de Negocio / Administrador | **Nivel 1: Mi Negocio** / **Nivel 2: Herramientas** | La configuración de la ficha del empleado va en Nivel 1. El control de nómina y turnos va en Nivel 2. |
 | **Instrucciones PWA** | `AdminSettings.jsx` (PWA) | Explicar cómo instalar la aplicación nativa/PWA en el dispositivo local. | Todos los usuarios | **Nivel 1: Mi Negocio** | Funcionalidad informativa simple y segura. |
@@ -41,7 +41,6 @@ A continuación se detallan todos los elementos identificados en el panel admini
 | **Gastos y Pagos Fijos** | `AdminSalesDetail.jsx` (Gastos) | Crear y conciliar balance real del negocio contra gastos fijos. | Propietario de Negocio | **Nivel 2: Herramientas Administrativas** | Módulo financiero básico. |
 | **Alertas de Stock** | `AdminStockAlerts.jsx` | Visualizar productos con existencias por debajo del límite mínimo. | Propietario / Administrador | **Nivel 2: Herramientas Administrativas** | Monitoreo logístico diario. |
 | **Panel de Domicilio** | `panel_domicilio.md` (Biblioteca) | Módulo específico para que el domiciliario gestione sus asignaciones. | Domiciliario | **Nivel 4: Laboratorio** (Como módulo industrial) | Módulo vertical optimizado para una industria/operación específica. |
-| **Turnero / Cocina** | `KitchenPanel.jsx` | Módulo de preparación de pedidos para restaurantes. | Personal de Cocina | **Nivel 4: Laboratorio** (Como módulo industrial) | Módulo específico de industria alimentaria. |
 
 ---
 
@@ -95,7 +94,7 @@ graph TD
     subgraph Nivel 4: Laboratorio (Innovación y Pruebas Beta)
         N4_1[Funciones Beta]
         N4_2[Motores predictivos & Asistentes IA]
-        N4_3[Módulos Verticales: Restaurante / Cocina / Barbería]
+        N4_3[Módulos Verticales: Barbería / etc.]
     end
 
     subgraph Nivel 5: Sistema (Infraestructura Interna Oculta)
@@ -116,7 +115,7 @@ graph TD
 
 ### Fase 2: Refactorización y Modularización de Vistas
 * **Crear `/src/pages/admin/MaestroPanel.jsx`:** Vista independiente protegida por contraseña maestra para centralizar la configuración de filtros, facturación comisional, telemetría y logs.
-* **Crear `/src/pages/admin/LaboratorioPanel.jsx`:** Vista protegida que listará funciones experimentales e industriales (como el panel de cocina actual).
+* **Crear `/src/pages/admin/LaboratorioPanel.jsx`:** Vista protegida que listará funciones experimentales (como paneles de diagnóstico e integración beta).
 * **Limpiar `AdminSettings.jsx`:** Dejar exclusivamente configuraciones básicas e intuitivas para el cliente final (Identidad, Contacto, Métodos de pago, etc.).
 * **Migrar Operaciones a Módulos Propios:**
   * Separar la lógica de Cupones y Publicidad a archivos de gestión operativa dedicados, accesibles desde la barra lateral bajo la jerarquía de "Herramientas".

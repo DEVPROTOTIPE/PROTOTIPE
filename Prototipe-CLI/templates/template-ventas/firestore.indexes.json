@@ -93,20 +93,6 @@
       ]
     },
     {
-      "collectionGroup": "production",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "estado",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "notifications",
       "queryScope": "COLLECTION",
       "fields": [

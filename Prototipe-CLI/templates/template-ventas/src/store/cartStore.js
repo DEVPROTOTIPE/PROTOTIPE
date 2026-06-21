@@ -92,7 +92,15 @@ const useCartStore = create(
         return items.reduce((sum, i) => sum + i.cantidad, 0)
       },
     }),
-    { name: 'cart-storage' }
+    {
+      name: 'cart-storage',
+      // Infinity no es serializable en JSON → lo excluimos del storage
+      partialize: (state) => ({
+        items: state.items.map(i =>
+          i.maxStock === Infinity ? { ...i, maxStock: undefined } : i
+        ),
+      }),
+    }
   )
 )
 

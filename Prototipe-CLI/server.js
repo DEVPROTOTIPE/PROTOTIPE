@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { exec, spawn, fork } from 'child_process';
 import { promisify } from 'util';
 import * as Diff from 'diff';
+import crypto from 'crypto';
 import { Jimp } from 'jimp';
 import webpush from 'web-push';
 // createProject se ejecuta en un proceso hijo (worker_create_project.js)
@@ -139,7 +140,7 @@ app.get('/api/firebase-config', async (req, res) => {
 
     // Extraer las variables clave del SDK
     const config = sdkData?.result?.sdkConfig || sdkData?.sdkConfig || sdkData;
-    const { apiKey, authDomain, projectId: pid, storageBucket, messagingSenderId, appId, measurementId } = config;
+    const { apiKey, authDomain, projectId: pid, storageBucket, appId, measurementId } = config;
 
     if (!apiKey || !appId) {
       return res.status(500).json({
@@ -147,19 +148,10 @@ app.get('/api/firebase-config', async (req, res) => {
       });
     }
 
-    let vapidKey = '';
-    try {
-      const keys = webpush.generateVAPIDKeys();
-      vapidKey = keys.publicKey;
-    } catch (e) {
-      console.warn('[VAPID] Falló la generación de clave VAPID:', e.message);
-    }
-
     console.log(`[API] Credenciales auto-detectadas para proyecto: ${pid}`);
     res.json({
       success: true,
-      config: { apiKey, authDomain, projectId: pid, storageBucket, messagingSenderId, appId, measurementId: measurementId || null },
-      vapidKey
+      config: { apiKey, authDomain, projectId: pid, storageBucket, appId, measurementId: measurementId || null }
     });
   } catch (err) {
     console.error(`[API] Error al obtener sdkconfig de Firebase: ${err.message}`);
@@ -359,7 +351,6 @@ app.post('/api/create-project', async (req, res) => {
     'targetPath',
     'paletteChoice',
     'centralApiKey',
-    'centralMessagingSenderId',
     'centralAppId'
   ];
 
@@ -449,17 +440,7 @@ app.post('/api/create-project', async (req, res) => {
       answers.firebaseApiKey = config.apiKey;
       answers.firebaseAuthDomain = config.authDomain;
       answers.firebaseStorageBucket = config.storageBucket;
-      answers.firebaseMessagingSenderId = config.messagingSenderId;
       answers.firebaseAppId = config.appId;
-      if (!answers.firebaseVapidKey) {
-        try {
-          const keys = webpush.generateVAPIDKeys();
-          answers.firebaseVapidKey = keys.publicKey;
-        } catch (e) {
-          console.warn('[VAPID] Falló la generación de clave VAPID durante el aprovisionamiento automático:', e.message);
-          answers.firebaseVapidKey = '';
-        }
-      }
 
       console.log(`[Firebase Automate] Credenciales integradas con éxito para ${finalProjectId}.`);
     } catch (fbAutomateErr) {
@@ -475,7 +456,6 @@ app.post('/api/create-project', async (req, res) => {
       'firebaseAuthDomain',
       'firebaseProjectId',
       'firebaseStorageBucket',
-      'firebaseMessagingSenderId',
       'firebaseAppId'
     ];
     for (const field of manualFields) {
@@ -1440,10 +1420,188 @@ app.post('/api/cores/:clave/scaffold', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Helper para sincronizar archivos del core a la plantilla del CLI (sanitizado)
+// ─────────────────────────────────────────────────────────────────────────────
+async function performCoreSync(clave, CLI_ROOT) {
+  const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+  const registro = await fs.readJson(registroPath);
+  const config = registro.plantillas[clave];
+  if (!config) throw new Error(`La clave "${clave}" no existe en el registro.`);
+
+  const corePath     = config.fuente.replace(/\//g, path.sep);
+  const templatePath = config.destino.replace(/\//g, path.sep);
+
+  // 1. Validar que el core tiene código real (más que solo docs y .gitkeep)
+  const hasCode = await fs.pathExists(path.join(corePath, 'src'));
+  if (!hasCode) {
+    throw new Error(`El core "${clave}" no tiene código en /src/ todavía. Completa el scaffold o el desarrollo antes de sincronizar.`);
+  }
+
+  // 2. Sincronizar código core → templates/
+  const SYNC_PATHS = [
+    'src/components', 'src/hooks', 'src/services', 'src/store',
+    'src/layouts', 'src/pages', 'src/routes', 'src/utils',
+    'src/constants', 'src/schemas', 'src/types', 'src/providers',
+    'src/config', 'src/App.jsx', 'src/App.css', 'src/index.css', 'src/main.jsx',
+    'firestore.indexes.json', 'firestore.rules', 'storage.rules',
+    'vite.config.js', 'eslint.config.js', 'GEMINI.md',
+    'index.html', 'public'
+  ];
+
+  const EXCLUDE_FROM_TEMPLATE = new Set([
+    '.env.local', '.env', '.firebaserc', 'firebase.json',
+    'dist', 'node_modules', '.git', '.firebase',
+    'scratch', 'playwright-report', 'test-results', '.gitkeep'
+  ]);
+
+  await fs.ensureDir(templatePath);
+  const synced = [];
+
+  for (const relPath of SYNC_PATHS) {
+    const src  = path.join(corePath, relPath);
+    const dest = path.join(templatePath, relPath);
+    if (!await fs.pathExists(src)) continue;
+    await fs.copy(src, dest, {
+      overwrite: true,
+      filter: (s) => !EXCLUDE_FROM_TEMPLATE.has(path.basename(s))
+    });
+    synced.push(relPath);
+  }
+
+  // Copiar package.json sanitizado (sin credenciales de cliente)
+  const srcPkg = path.join(corePath, 'package.json');
+  if (await fs.pathExists(srcPkg)) {
+    const pkg = await fs.readJson(srcPkg);
+    delete pkg.scripts?.deploy;
+    await fs.writeJson(path.join(templatePath, 'package.json'), pkg, { spaces: 2 });
+    synced.push('package.json');
+  }
+
+  // Copiar carpeta Documentacion del core al template (como referencia base)
+  const docDirName = `Documentacion App ${clave.charAt(0).toUpperCase() + clave.slice(1)}`;
+  const files = await fs.readdir(corePath);
+  const docDir = files.find(f => f.startsWith('Documentacion'));
+
+  if (docDir && await fs.pathExists(path.join(corePath, docDir))) {
+    const templateDocs = path.join(templatePath, docDir);
+    await fs.copy(path.join(corePath, docDir), templateDocs, { overwrite: true });
+    synced.push(docDir);
+  }
+
+  // 2.1. Sanitización de referencias de clientes en la plantilla copiada
+  const tokens = {
+    projectId: '',
+    apiKey: '',
+    measurementId: '',
+    packageName: '',
+    appId: '',
+    telemetryToken: ''
+  };
+
+  // Extraer tokens de package.json
+  if (await fs.pathExists(srcPkg)) {
+    try {
+      const pkg = await fs.readJson(srcPkg);
+      tokens.packageName = pkg.name || '';
+    } catch (_) {}
+  }
+
+  // Extraer tokens de .env.local
+  const envPath = path.join(corePath, '.env.local');
+  if (await fs.pathExists(envPath)) {
+    try {
+      const envContent = await fs.readFile(envPath, 'utf8');
+      const parseEnvValue = (key) => {
+        const match = envContent.match(new RegExp(`^${key}\\s*=\\s*["']?([^"'\\n]+)["']?`, 'm'));
+        return match ? match[1].trim() : '';
+      };
+      tokens.projectId         = parseEnvValue('VITE_FIREBASE_PROJECT_ID');
+      tokens.apiKey            = parseEnvValue('VITE_FIREBASE_API_KEY');
+      tokens.measurementId     = parseEnvValue('VITE_FIREBASE_MEASUREMENT_ID');
+      tokens.appId             = parseEnvValue('VITE_FIREBASE_APP_ID');
+      tokens.telemetryToken    = parseEnvValue('VITE_DEVELOPER_TELEMETRY_TOKEN');
+    } catch (_) {}
+  }
+
+  const srcProjectId = tokens.projectId || 'ventas-smartfix';
+
+  const sanitizeFile = async (filePath) => {
+    const stat = await fs.stat(filePath);
+    if (stat.isDirectory()) {
+      const dirFiles = await fs.readdir(filePath);
+      for (const file of dirFiles) {
+        if (file === 'node_modules' || file === '.git' || file === 'dist' || file === '.vite') continue;
+        await sanitizeFile(path.join(filePath, file));
+      }
+    } else {
+      const ext = path.extname(filePath);
+      if (['.js', '.jsx', '.json', '.md', '.html'].includes(ext)) {
+        let content = await fs.readFile(filePath, 'utf8');
+        let changed = false;
+
+        // Replace Project ID
+        if (srcProjectId && content.includes(srcProjectId)) {
+          content = content.replace(new RegExp(srcProjectId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'proyecto-cliente-saas');
+          changed = true;
+        }
+
+        // Replace Package Name
+        if (tokens.packageName && content.includes(tokens.packageName)) {
+          content = content.replace(new RegExp(tokens.packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'proyecto-cliente-saas');
+          changed = true;
+        }
+
+        // Replace API Key
+        if (tokens.apiKey && content.includes(tokens.apiKey)) {
+          content = content.replace(new RegExp(tokens.apiKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'AIzaSy[API_KEY_DE_CLIENTE_AUTOGENERADA]');
+          changed = true;
+        }
+        if (/AIzaSy[A-Za-z0-9_-]{33}/g.test(content)) {
+          content = content.replace(/AIzaSy[A-Za-z0-9_-]{33}/g, 'AIzaSy[API_KEY_DE_CLIENTE_AUTOGENERADA]');
+          changed = true;
+        }
+
+        // Replace App ID
+        if (tokens.appId && content.includes(tokens.appId)) {
+          content = content.replace(new RegExp(tokens.appId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'APP_ID_MUTABLE');
+          changed = true;
+        }
+
+        // Replace Telemetry Token
+        if (tokens.telemetryToken && content.includes(tokens.telemetryToken)) {
+          content = content.replace(new RegExp(tokens.telemetryToken.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'TELEMETRIA_TOKEN_MUTABLE');
+          changed = true;
+        }
+
+        // Replace index.html title/metas
+        if (path.basename(filePath) === 'index.html') {
+          content = content.replace(/<title>[^<]*<\/title>/gi, '<title>Prototipe App Base</title>');
+          content = content.replace(/<meta\s+name="apple-mobile-web-app-title"\s+content="[^"]*"\s*\/?>/gi, '<meta name="apple-mobile-web-app-title" content="Prototipe App Base" />');
+          changed = true;
+        }
+
+        // Replace generic measurement ID
+        if (/G-[A-Za-z0-9]{10}/g.test(content)) {
+          content = content.replace(/G-[A-Za-z0-9]{10}/g, 'G-[ID_MEDICION_TEMPORAL]');
+          changed = true;
+        }
+
+        if (changed) {
+          await fs.writeFile(filePath, content, 'utf8');
+        }
+      }
+    }
+  };
+
+  await sanitizeFile(templatePath);
+  return { synced, templatePath };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // POST /api/cores/:clave/activate
 // Sincroniza el código del core al templates/ del CLI y marca activo: true.
 // Equivale a correr sync_templates.js [clave] --yes y actualizar el registro.
-// Body: {} (sin parámetros obligatorios)
+// Body: {}
 // ─────────────────────────────────────────────────────────────────────────────
 app.post('/api/cores/:clave/activate', async (req, res) => {
   const { clave } = req.params;
@@ -1454,70 +1612,10 @@ app.post('/api/cores/:clave/activate', async (req, res) => {
     const config = registro.plantillas[clave];
     if (!config) return res.status(404).json({ error: `La clave "${clave}" no existe en el registro.` });
 
-    const corePath     = config.fuente.replace(/\//g, path.sep);
-    const templatePath = config.destino.replace(/\//g, path.sep);
+    // Sincronizar código usando el helper común
+    const { synced, templatePath } = await performCoreSync(clave, CLI_ROOT);
 
-    // 1. Validar que el core tiene código real (más que solo docs y .gitkeep)
-    const hasCode = await fs.pathExists(path.join(corePath, 'src'));
-    if (!hasCode) {
-      return res.status(422).json({
-        error: `El core "${clave}" no tiene código en /src/ todavía. Completa el scaffold o el desarrollo antes de activar.`
-      });
-    }
-
-    // 2. Sincronizar código core → templates/ usando la misma lógica que sync_templates.js
-    const SYNC_PATHS = [
-      'src/components', 'src/hooks', 'src/services', 'src/store',
-      'src/layouts', 'src/pages', 'src/routes', 'src/utils',
-      'src/constants', 'src/schemas', 'src/types', 'src/providers',
-      'src/App.jsx', 'src/App.css', 'src/index.css', 'src/main.jsx',
-      'firestore.indexes.json', 'firestore.rules', 'storage.rules',
-      'vite.config.js', 'eslint.config.js', 'GEMINI.md',
-      'index.html', 'public'
-    ];
-
-    const EXCLUDE_FROM_TEMPLATE = new Set([
-      '.env.local', '.env', '.firebaserc', 'firebase.json',
-      'dist', 'node_modules', '.git', '.firebase',
-      'scratch', 'playwright-report', 'test-results', '.gitkeep'
-    ]);
-
-    await fs.ensureDir(templatePath);
-    const synced = [];
-
-    for (const relPath of SYNC_PATHS) {
-      const src  = path.join(corePath, relPath);
-      const dest = path.join(templatePath, relPath);
-      if (!await fs.pathExists(src)) continue;
-      await fs.copy(src, dest, {
-        overwrite: true,
-        filter: (s) => !EXCLUDE_FROM_TEMPLATE.has(path.basename(s))
-      });
-      synced.push(relPath);
-    }
-
-    // Copiar package.json sanitizado (sin credenciales de cliente)
-    const srcPkg = path.join(corePath, 'package.json');
-    if (await fs.pathExists(srcPkg)) {
-      const pkg = await fs.readJson(srcPkg);
-      delete pkg.scripts?.deploy;
-      await fs.writeJson(path.join(templatePath, 'package.json'), pkg, { spaces: 2 });
-      synced.push('package.json');
-    }
-
-    // Copiar carpeta Documentacion del core al template (como referencia base)
-    const docDirName = `Documentacion App ${clave.charAt(0).toUpperCase() + clave.slice(1)}`;
-    const coreDocs   = path.join(corePath, Object.keys(await fs.readdir(corePath)
-      .then(files => files.filter(f => f.startsWith('Documentacion')))
-      .then(arr => arr.reduce((acc, f) => { acc[f] = true; return acc; }, {})))[0] || docDirName);
-
-    if (await fs.pathExists(coreDocs)) {
-      const templateDocs = path.join(templatePath, path.basename(coreDocs));
-      await fs.copy(coreDocs, templateDocs, { overwrite: true });
-      synced.push(path.basename(coreDocs));
-    }
-
-    // 3. Incrementar versión (patch) y marcar activo: true
+    // Incrementar versión (patch) y marcar activo: true
     const [major, minor, patch] = (config.version || '0.1.0').split('.').map(Number);
     const newVersion = `${major}.${minor}.${patch + 1}`;
     registro.plantillas[clave].activo  = true;
@@ -1534,6 +1632,26 @@ app.post('/api/cores/:clave/activate', async (req, res) => {
   } catch (err) {
     console.error(`[API /cores/${clave}/activate] Error: ${err.message}`);
     res.status(500).json({ error: `Error al activar la plantilla: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/cores/:clave/sync
+// Sincroniza el código del core al templates/ del CLI sin cambiar el estado activo ni la versión.
+// Body: {}
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/cores/:clave/sync', async (req, res) => {
+  const { clave } = req.params;
+  try {
+    const { synced, templatePath } = await performCoreSync(clave, CLI_ROOT);
+    res.json({
+      success: true,
+      message: `Plantilla "${clave}" sincronizada correctamente con el CLI sin alterar su estado en el wizard.`,
+      data: { clave, synced, templatePath }
+    });
+  } catch (err) {
+    console.error(`[API /cores/${clave}/sync] Error: ${err.message}`);
+    res.status(500).json({ error: `Error al sincronizar la plantilla: ${err.message}` });
   }
 });
 
@@ -1980,9 +2098,18 @@ app.post('/api/project/env', async (req, res) => {
   const envPath = path.join(projectDir, '.env.local');
   try {
     let content = '';
+    const invalidKeys = [];
+    const envKeyRegex = /^[A-Z_][A-Z0-9_]*$/;
     Object.entries(variables).forEach(([key, val]) => {
-      content += `${key}=${val}\n`;
+      const cleanKey = key.trim().toUpperCase();
+      if (!envKeyRegex.test(cleanKey)) {
+        invalidKeys.push(key);
+      }
+      content += `${cleanKey}=${val}\n`;
     });
+    if (invalidKeys.length > 0) {
+      return res.status(400).json({ error: `Nombres de variable inválidos: ${invalidKeys.join(', ')}. Deben ser letras mayúsculas, números y guiones bajos solamente.` });
+    }
     await fs.writeFile(envPath, content, 'utf-8');
     res.json({ success: true, message: 'Variables de entorno actualizadas en .env.local con éxito.' });
   } catch (err) {
@@ -3281,7 +3408,639 @@ app.get('/api/git/backup-stream', async (req, res) => {
   });
 });
 
+// --- OBTENER CORES Y SUS RAMAS CLIENTES ---
+app.get('/api/git/cores-and-clients', async (req, res) => {
+  try {
+    const coresDir = 'D:\\PROTOTIPE\\Plantillas Core';
+    if (!await fs.pathExists(coresDir)) {
+      return res.json({ success: true, cores: [] });
+    }
+
+    const items = await fs.readdir(coresDir);
+    const cores = [];
+
+    for (const item of items) {
+      const itemPath = path.join(coresDir, item);
+      const stat = await fs.stat(itemPath);
+      if (stat.isDirectory()) {
+        const isGit = await hasGitFolder(itemPath);
+        if (isGit) {
+          const currentBranch = await getGitBranch(itemPath);
+          
+          // Obtener todas las ramas locales y remotas
+          const { stdout: branchesStdout } = await execGitCommand('git branch -a', itemPath);
+          const rawBranches = branchesStdout.split(/\r?\n/).map(b => b.trim());
+          
+          const clients = [];
+          const baseBranches = [];
+          const seenClients = new Set();
+          const seenBase = new Set();
+
+          // Primer paso: recopilar todas las ramas base y clientes
+          for (const rawB of rawBranches) {
+            let cleanBranch = rawB.replace(/^\*\s+/, '').trim();
+            if (cleanBranch.includes(' -> ')) continue;
+            cleanBranch = cleanBranch.replace(/^remotes\/origin\//, '');
+            
+            if (cleanBranch.startsWith('cliente/')) {
+              const clientName = cleanBranch.replace(/^cliente\//, '');
+              if (!seenClients.has(clientName)) {
+                seenClients.add(clientName);
+                clients.push({ id: clientName, branch: `cliente/${clientName}` });
+              }
+            } else {
+              if (cleanBranch && !seenBase.has(cleanBranch)) {
+                seenBase.add(cleanBranch);
+                baseBranches.push(cleanBranch);
+              }
+            }
+          }
+
+          // Determinar la mejor rama base para cálculo de desfase
+          const defaultBase = baseBranches.includes('produccion')
+            ? 'produccion'
+            : (baseBranches.includes('main') ? 'main' : (baseBranches.includes('master') ? 'master' : currentBranch));
+
+          // Segundo paso: calcular commits behind/ahead para cada cliente de forma dinámica
+          const clientsWithParity = [];
+          for (const client of clients) {
+            let commitsBehind = 0;
+            let commitsAhead = 0;
+            try {
+              if (defaultBase) {
+                const { stdout: behindOut } = await execGitCommand(`git log cliente/${client.id}..${defaultBase} --oneline`, itemPath);
+                commitsBehind = behindOut.split(/\r?\n/).filter(Boolean).length;
+
+                const { stdout: aheadOut } = await execGitCommand(`git log ${defaultBase}..cliente/${client.id} --oneline`, itemPath);
+                commitsAhead = aheadOut.split(/\r?\n/).filter(Boolean).length;
+              }
+            } catch (_) {}
+
+            clientsWithParity.push({
+              ...client,
+              commitsBehind,
+              commitsAhead
+            });
+          }
+
+          cores.push({
+            name: item,
+            path: itemPath,
+            currentBranch,
+            availableBranches: baseBranches,
+            defaultBaseBranch: defaultBase,
+            clients: clientsWithParity
+          });
+        }
+      }
+    }
+
+    res.json({ success: true, cores });
+  } catch (err) {
+    console.error('[API /api/git/cores-and-clients] Error:', err.message);
+    res.status(500).json({ error: `Error al obtener cores y clientes: ${err.message}` });
+  }
+});
+
+
+// --- STREAM SSE PARA SINCRONIZAR CORE A CLIENTES Y DESPLEGAR ---
+app.get('/api/git/sync-core-to-clients-stream', async (req, res) => {
+  const { corePath, sourceBranch, clientBranches } = req.query;
+
+  if (!corePath || !sourceBranch || !clientBranches) {
+    return res.status(400).json({ error: 'Faltan parámetros obligatorios: corePath, sourceBranch, clientBranches.' });
+  }
+
+  const branchesToSync = clientBranches.split(',').map(b => b.trim()).filter(Boolean);
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const send = (type, data) => {
+    try {
+      if (!res.writableEnded && !res.finished && res.socket && !res.socket.destroyed) {
+        res.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
+      }
+    } catch (err) {
+      console.warn('[SSE Sync Core Send Error]', err.message);
+    }
+  };
+
+  send('log', { text: `🚀 Iniciando sincronización del Core en: ${path.basename(corePath)}`, type: 'info' });
+  send('log', { text: `📜 Rama origen (Core): ${sourceBranch}`, type: 'info' });
+  send('log', { text: `👥 Ramas cliente a actualizar: ${branchesToSync.join(', ')}`, type: 'info' });
+  send('log', { text: '──────────────────────────────────────────────────', type: 'info' });
+
+  let originalBranch = 'produccion';
+  try {
+    originalBranch = await getGitBranch(corePath) || 'produccion';
+  } catch (_) {}
+
+  const runCommandStream = (cmdStr, args, cwd) => {
+    return new Promise((resolve, reject) => {
+      send('log', { text: `👉 Ejecutando: ${cmdStr} ${args.join(' ')}`, type: 'command' });
+      
+      const child = spawn(cmdStr, args, {
+        cwd,
+        shell: true,
+        env: { ...process.env, FORCE_COLOR: '0' }
+      });
+
+      child.stdout.on('data', (data) => {
+        const lines = data.toString('utf8').split(/\r?\n/).filter(l => l.trim());
+        lines.forEach(line => send('log', { text: `   ${line}`, type: 'stdout' }));
+      });
+
+      child.stderr.on('data', (data) => {
+        const lines = data.toString('utf8').split(/\r?\n/).filter(l => l.trim());
+        lines.forEach(line => send('log', { text: `   ⚠ ${line}`, type: 'stderr' }));
+      });
+
+      child.on('close', (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`Comando falló con código ${code}`));
+        }
+      });
+
+      child.on('error', (err) => {
+        reject(err);
+      });
+    });
+  };
+
+  try {
+    send('log', { text: '📦 Resguardando cambios locales en stash...', type: 'info' });
+    try {
+      await execGitCommand('git stash', corePath);
+    } catch (_) {}
+
+    for (const clientBranch of branchesToSync) {
+      const clientName = clientBranch.replace(/^cliente\//, '');
+      send('client-status', { client: clientName, status: 'running' });
+      send('log', { text: `\n🔄 [Cliente: ${clientName}] Iniciando actualización...`, type: 'header' });
+
+      try {
+        send('log', { text: `   Checkout a rama: ${clientBranch}`, type: 'info' });
+        await execGitCommand(`git checkout ${clientBranch}`, corePath);
+
+        send('log', { text: `   Fusionando cambios de: ${sourceBranch}`, type: 'info' });
+        try {
+          await execGitCommand(`git merge ${sourceBranch} --no-verify -m "merge: Core global update"`, corePath);
+        } catch (mergeErr) {
+          send('log', { text: `❌ Conflicto de fusión detectado para ${clientName}. Abortando merge...`, type: 'error' });
+          await execGitCommand('git merge --abort', corePath);
+          throw new Error('Conflicto de fusión en Git');
+        }
+
+        send('log', { text: '   Subiendo rama actualizada a GitHub...', type: 'info' });
+        await execGitCommand(`git push origin ${clientBranch} --no-verify`, corePath);
+
+        const envPath = path.join(corePath, '.env.local');
+        let firebaseProjectId = '';
+
+        if (await fs.pathExists(envPath)) {
+          const envContent = await fs.readFile(envPath, 'utf8');
+          const match = envContent.match(/VITE_FIREBASE_PROJECT_ID\s*=\s*(.+)/);
+          if (match && match[1]) {
+            firebaseProjectId = match[1].trim().replace(/['"]/g, '');
+          }
+        }
+
+        if (firebaseProjectId) {
+          send('log', { text: `🚀 Configuración Firebase detectada: ${firebaseProjectId}`, type: 'info' });
+          
+          send('log', { text: '   Compilando assets de producción...', type: 'info' });
+          await runCommandStream('npm', ['run', 'build'], corePath);
+
+          send('log', { text: `   Desplegando a Firebase Hosting para proyecto: ${firebaseProjectId}...`, type: 'info' });
+          await runCommandStream('firebase', ['deploy', '--only', 'hosting', '-P', firebaseProjectId], corePath);
+          
+          send('log', { text: `✅ Cliente ${clientName} actualizado y desplegado correctamente en producción.`, type: 'success' });
+        } else {
+          send('log', { text: `⚠ No se detectó VITE_FIREBASE_PROJECT_ID en .env.local. Sincronización Git realizada, pero se omite el deploy.`, type: 'warn' });
+        }
+
+        send('client-status', { client: clientName, status: 'success' });
+      } catch (err) {
+        send('log', { text: `❌ Fallo en la sincronización de ${clientName}: ${err.message}`, type: 'error' });
+        send('client-status', { client: clientName, status: 'error', error: err.message });
+      }
+    }
+
+    send('log', { text: '\n🧹 Limpiando y regresando a la rama de origen...', type: 'info' });
+    try {
+      await execGitCommand(`git checkout ${originalBranch}`, corePath);
+      await execGitCommand('git stash pop', corePath);
+    } catch (_) {}
+
+    send('log', { text: '──────────────────────────────────────────────────', type: 'info' });
+    send('log', { text: '🎉 Sincronización global completada.', type: 'success' });
+    send('complete', { success: true });
+  } catch (err) {
+    send('log', { text: `❌ Error global durante la sincronización: ${err.message}`, type: 'error' });
+    send('complete', { success: false, error: err.message });
+  } finally {
+    try {
+      if (!res.writableEnded && !res.finished) res.end();
+    } catch (_) {}
+  }
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
+// Archivos/carpetas excluidos de la sincronización física Core → Cliente.
+// Preserva la identidad del cliente (Firebase, marca, configuración).
+// ─────────────────────────────────────────────────────────────────────────────
+const SYNC_EXCLUDED_PATHS = [
+  '.env.local', '.firebaserc', 'firebase.json',
+  'src/config/firebaseConfig.js', 'src/config/niche.json',
+  'index.html', 'public', 'package-lock.json',
+  'node_modules', '.git', '.git-backup-temp', '.vite', 'dist',
+  'playwright-report', 'test-results', '.prototipe.json', 'scratch',
+  'mapa_arquitectura_ia.md', 'mapa_arquitectura.md'
+];
+
+// Helper: escanea recursivamente un directorio respetando SYNC_EXCLUDED_PATHS
+function getSyncFilesRecursive(dir, baseDir = dir) {
+  let results = [];
+  let list;
+  try { list = fs.readdirSync(dir); } catch (_) { return results; }
+  for (const file of list) {
+    const fullPath = path.join(dir, file);
+    const rel = path.relative(baseDir, fullPath).replace(/\\/g, '/');
+    const isExcluded = SYNC_EXCLUDED_PATHS.some(ex => rel === ex || rel.startsWith(ex + '/'))
+      || rel.startsWith('Documentacion ') || rel.split('/').some(p => p.startsWith('Documentacion '));
+    if (isExcluded) continue;
+    let stat;
+    try { stat = fs.statSync(fullPath); } catch (_) { continue; }
+    if (stat.isDirectory()) {
+      results = results.concat(getSyncFilesRecursive(fullPath, baseDir));
+    } else {
+      results.push(rel);
+    }
+  }
+  return results;
+}
+
+// Helper: hash MD5 síncrono de un archivo para comparación rápida
+function getSyncFileHash(filePath) {
+  try {
+    const buf = fs.readFileSync(filePath);
+    return crypto.createHash('md5').update(buf).digest('hex');
+  } catch (_) { return null; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/instancias/list
+// Lista todas las instancias de clientes físicas con delta REAL vs core (MD5 hash diff).
+// Agrupa por plantilla usando .prototipe.json de cada instancia.
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/instancias/list', async (req, res) => {
+  try {
+    const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+    const registro = await fs.readJson(registroPath);
+    const plantillas = registro.plantillas || {};
+
+    // Leer versión real de cada core (registro es fuente de verdad; package.json solo como fallback)
+    const coreInfo = {};
+    for (const [key, config] of Object.entries(plantillas)) {
+      let version = config.version;
+      try {
+        const pkg = await fs.readJson(path.join(config.fuente, 'package.json'));
+        if (!version && pkg.version && pkg.version !== '0.0.0') version = pkg.version;
+      } catch (_) {}
+      coreInfo[key] = {
+        version: version || '0.0.0',
+        name: path.basename(config.fuente),
+        path: config.fuente,
+        nicho: config.nicho
+      };
+    }
+
+    // Escanear Instancias Clientes
+    const templatesMap = {};
+    if (await fs.pathExists(GIT_INSTANCES_DIR)) {
+      const dirs = await fs.readdir(GIT_INSTANCES_DIR);
+      for (const dir of dirs) {
+        const fullPath = path.join(GIT_INSTANCES_DIR, dir);
+        const stat = await fs.stat(fullPath).catch(() => null);
+        if (!stat || !stat.isDirectory()) continue;
+
+        const metaPath = path.join(fullPath, '.prototipe.json');
+        if (!await fs.pathExists(metaPath)) continue;
+
+        let meta = {};
+        try { meta = await fs.readJson(metaPath); } catch (_) { continue; }
+
+        const templateKey = meta.template;
+        if (!templateKey || !coreInfo[templateKey]) continue;
+
+        const core = coreInfo[templateKey];
+        const clientVersion = meta.version || '0.0.0';
+
+        // ── Detección REAL por hash MD5 ─────────────────────────────────
+        // Comparar cada archivo del core contra el cliente.
+        // isOutdated = true si hay al menos un archivo con hash diferente o ausente.
+        let driftCount = 0;
+        try {
+          const coreFiles = getSyncFilesRecursive(core.path);
+          for (const relFile of coreFiles) {
+            const coreHash   = getSyncFileHash(path.join(core.path, relFile));
+            const clientHash = getSyncFileHash(path.join(fullPath, relFile));
+            if (coreHash !== clientHash) driftCount++;
+          }
+        } catch (_) {
+          // Si el scan falla, fallback a comparación de versiones
+          driftCount = clientVersion !== core.version ? 1 : 0;
+        }
+        const isOutdated = driftCount > 0;
+        // ────────────────────────────────────────────────────────────────
+
+        if (!templatesMap[templateKey]) {
+          templatesMap[templateKey] = {
+            key: templateKey,
+            name: core.name,
+            coreVersion: core.version,
+            corePath: core.path,
+            nicho: core.nicho,
+            clients: []
+          };
+        }
+
+        templatesMap[templateKey].clients.push({
+          clientId: meta.clientId || dir,
+          projectName: meta.projectName || dir,
+          folderName: dir,
+          path: fullPath,
+          clientVersion,
+          coreVersion: core.version,
+          isOutdated,
+          driftCount,
+          niche: meta.niche || 'general'
+        });
+      }
+    }
+
+    res.json({ success: true, templates: Object.values(templatesMap) });
+  } catch (err) {
+    console.error('[API /instancias/list] Error:', err.message);
+    res.status(500).json({ error: `Error al listar instancias: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/instancias/sync-and-deploy-stream (SSE)
+// Sincroniza físicamente archivos Core → Instancias Cliente + build + deploy.
+// Preserva .env.local, .firebaserc, firebase.json y otros archivos de marca.
+// Query: templateKey (string), clientIds (CSV de folderNames), deploy (bool)
+// Eventos SSE: log, client-status, complete
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/instancias/sync-and-deploy-stream', async (req, res) => {
+  const { templateKey, clientIds, deploy } = req.query;
+  const doDeploy = deploy === 'true';
+
+  if (!templateKey || !clientIds) {
+    return res.status(400).json({ error: 'Faltan parámetros requeridos: templateKey, clientIds.' });
+  }
+
+  const folderNames = clientIds.split(',').map(s => s.trim()).filter(Boolean);
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  // Keepalive para evitar timeouts en builds largos
+  const keepAlive = setInterval(() => {
+    try {
+      if (!res.writableEnded && !res.finished && res.socket && !res.socket.destroyed) {
+        res.write(': keepalive\n\n');
+      }
+    } catch (_) {}
+  }, 15000);
+
+  const send = (type, data) => {
+    try {
+      if (!res.writableEnded && !res.finished && res.socket && !res.socket.destroyed) {
+        res.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
+      }
+    } catch (_) {}
+  };
+
+  const log = (text, type = 'info') => send('log', { text, type });
+  const clientStatus = (client, status, error) => send('client-status', { client, status, ...(error ? { error } : {}) });
+
+  try {
+    const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+    const registro = await fs.readJson(registroPath);
+    const templateConfig = registro.plantillas?.[templateKey];
+
+    if (!templateConfig) {
+      log(`❌ Plantilla "${templateKey}" no registrada en plantillas_registro.json.`, 'error');
+      send('complete', { success: false });
+      clearInterval(keepAlive);
+      return res.end();
+    }
+
+    const corePath = templateConfig.fuente;
+    if (!await fs.pathExists(corePath)) {
+      log(`❌ La ruta del core no existe en disco: ${corePath}`, 'error');
+      send('complete', { success: false });
+      clearInterval(keepAlive);
+      return res.end();
+    }
+
+    // Leer versión real del core (registro es fuente de verdad)
+    let coreVersion = templateConfig.version;
+    try {
+      const pkg = await fs.readJson(path.join(corePath, 'package.json'));
+      // Solo usar package.json si el registro no tiene versión y el package tiene una válida
+      if (!coreVersion && pkg.version && pkg.version !== '0.0.0') coreVersion = pkg.version;
+    } catch (_) {}
+
+    log(`🚀 Motor de Sincronización Física — Prototipe CLI`, 'header');
+    log(`📦 Core: ${path.basename(corePath)} (v${coreVersion})`, 'info');
+    log(`👥 Clientes: ${folderNames.join(', ')}`, 'info');
+    log(`🚢 Deploy Firebase: ${doDeploy ? 'ACTIVADO' : 'DESACTIVADO'}`, doDeploy ? 'success' : 'warn');
+    log('──────────────────────────────────────────────────', 'info');
+
+    let allSuccess = true;
+
+    for (const folderName of folderNames) {
+      const clientPath = path.join(GIT_INSTANCES_DIR, folderName);
+
+      log(`\n🔄 [${folderName}] Iniciando sincronización...`, 'header');
+      clientStatus(folderName, 'syncing');
+
+      if (!await fs.pathExists(clientPath)) {
+        log(`❌ Directorio de cliente no encontrado: ${clientPath}`, 'error');
+        clientStatus(folderName, 'error', 'Directorio no encontrado');
+        allSuccess = false;
+        continue;
+      }
+
+      const backupDir = path.join(clientPath, '.temp_backup_sync');
+
+      try {
+        // ── Fase 1: Detectar diferencias (copia diferencial por hash) ──────
+        log(`   📊 Comparando archivos core vs cliente...`, 'info');
+        const coreFiles = getSyncFilesRecursive(corePath);
+        const changes = [];
+
+        for (const file of coreFiles) {
+          const coreFile = path.join(corePath, file);
+          const clientFile = path.join(clientPath, file);
+          if (!await fs.pathExists(clientFile)) {
+            changes.push({ file, type: 'NUEVO' });
+          } else {
+            const hashCore = getSyncFileHash(coreFile);
+            const hashClient = getSyncFileHash(clientFile);
+            if (hashCore !== hashClient) changes.push({ file, type: 'MODIFICADO' });
+          }
+        }
+
+        if (changes.length === 0) {
+          log(`   ✨ [${folderName}] Ya está al día con la plantilla core. Sin cambios pendientes.`, 'success');
+          clientStatus(folderName, 'success');
+          continue;
+        }
+
+        const newCount = changes.filter(c => c.type === 'NUEVO').length;
+        const modCount = changes.filter(c => c.type === 'MODIFICADO').length;
+        log(`   📝 ${changes.length} cambio(s): ${newCount} nuevos, ${modCount} modificados`, 'info');
+
+        // ── Fase 2: Backup temporal de seguridad ───────────────────────────
+        log(`   💾 Creando backup temporal antes de modificar...`, 'info');
+        await fs.ensureDir(backupDir);
+
+        for (const change of changes) {
+          const clientFile = path.join(clientPath, change.file);
+          if (await fs.pathExists(clientFile)) {
+            const backupFile = path.join(backupDir, change.file);
+            await fs.ensureDir(path.dirname(backupFile));
+            await fs.copy(clientFile, backupFile);
+          }
+        }
+
+        // ── Fase 3: Copiar archivos del core al cliente ────────────────────
+        log(`   📋 Aplicando cambios del core al cliente...`, 'info');
+        for (const change of changes) {
+          const coreFile = path.join(corePath, change.file);
+          const clientFile = path.join(clientPath, change.file);
+          await fs.ensureDir(path.dirname(clientFile));
+          await fs.copy(coreFile, clientFile, { overwrite: true });
+          const prefix = change.type === 'NUEVO' ? '+ [NUEVO]      ' : '~ [ACTUALIZADO]';
+          log(`      ${prefix} ${change.file}`, 'stdout');
+        }
+
+        // ── Fase 4: Build de integridad ────────────────────────────────────
+        log(`   🛠️  Compilando proyecto para validar integridad...`, 'info');
+        clientStatus(folderName, 'building');
+
+        await new Promise((resolve, reject) => {
+          const buildProc = spawn('npm', ['run', 'build'], {
+            cwd: clientPath,
+            shell: true,
+            env: { ...process.env, FORCE_COLOR: '0' }
+          });
+          buildProc.stdout.on('data', data => {
+            data.toString().split(/\r?\n/).filter(l => l.trim())
+              .forEach(l => log(`      ${l}`, 'stdout'));
+          });
+          buildProc.stderr.on('data', data => {
+            data.toString().split(/\r?\n/).filter(l => l.trim())
+              .forEach(l => log(`      ⚠ ${l}`, 'stderr'));
+          });
+          buildProc.on('close', code => code === 0 ? resolve() : reject(new Error(`Build falló con código ${code}`)));
+          buildProc.on('error', reject);
+        });
+
+        log(`   ✅ Compilación aprobada sin errores.`, 'success');
+
+        // ── Fase 5: Limpiar backup + actualizar versión en metadata ────────
+        await fs.remove(backupDir);
+
+        const metaPath = path.join(clientPath, '.prototipe.json');
+        if (await fs.pathExists(metaPath)) {
+          const meta = await fs.readJson(metaPath);
+          meta.version = coreVersion;
+          await fs.writeJson(metaPath, meta, { spaces: 2 });
+          log(`   🏷️  Metadata actualizada: v${meta.version} → v${coreVersion} en .prototipe.json`, 'success');
+        }
+
+        // ── Fase 6: Deploy Firebase (opcional) ────────────────────────────
+        if (doDeploy) {
+          log(`   🚀 Desplegando a Firebase Hosting...`, 'info');
+          clientStatus(folderName, 'deploying');
+
+          await new Promise((resolve, reject) => {
+            const deployProc = spawn('firebase', ['deploy', '--only', 'hosting'], {
+              cwd: clientPath,
+              shell: true,
+              env: { ...process.env, FORCE_COLOR: '0' }
+            });
+            deployProc.stdout.on('data', data => {
+              data.toString().split(/\r?\n/).filter(l => l.trim())
+                .forEach(l => log(`      ${l}`, 'stdout'));
+            });
+            deployProc.stderr.on('data', data => {
+              data.toString().split(/\r?\n/).filter(l => l.trim())
+                .forEach(l => log(`      ${l}`, 'stderr'));
+            });
+            deployProc.on('close', code => code === 0 ? resolve() : reject(new Error(`Firebase deploy falló con código ${code}`)));
+            deployProc.on('error', reject);
+          });
+
+          log(`   ✅ [${folderName}] Desplegado en Firebase Hosting exitosamente.`, 'success');
+        }
+
+        log(`   🎉 [${folderName}] Sincronización completada.`, 'success');
+        clientStatus(folderName, 'success');
+
+      } catch (err) {
+        log(`   ❌ Error en [${folderName}]: ${err.message}`, 'error');
+
+        // ── Rollback automático ────────────────────────────────────────────
+        if (await fs.pathExists(backupDir)) {
+          log(`   🔄 Ejecutando rollback de seguridad...`, 'warn');
+          try {
+            const backupFiles = getSyncFilesRecursive(backupDir, backupDir);
+            for (const file of backupFiles) {
+              await fs.copy(path.join(backupDir, file), path.join(clientPath, file), { overwrite: true });
+            }
+            await fs.remove(backupDir);
+            log(`   ✅ Rollback completado. Cliente restaurado a su estado original.`, 'warn');
+          } catch (rollbackErr) {
+            log(`   💀 Fallo crítico en rollback: ${rollbackErr.message}`, 'error');
+          }
+        }
+
+        clientStatus(folderName, 'error', err.message);
+        allSuccess = false;
+      }
+    }
+
+    log('\n──────────────────────────────────────────────────', 'info');
+    log(
+      allSuccess
+        ? '🎉 Sincronización global completada con éxito.'
+        : '⚠ Sincronización finalizada con algunos errores. Revisar logs.',
+      allSuccess ? 'success' : 'warn'
+    );
+    send('complete', { success: allSuccess });
+
+  } catch (err) {
+    log(`❌ Error crítico global: ${err.message}`, 'error');
+    send('complete', { success: false, error: err.message });
+  } finally {
+    clearInterval(keepAlive);
+    try { if (!res.writableEnded && !res.finished) res.end(); } catch (_) {}
+  }
+});
+
 app.listen(PORT, '127.0.0.1', () => {
   console.log(`\n🚀 [Prototipe CLI Bridge] Servidor local escuchando en: http://127.0.0.1:${PORT}`);
   console.log(`Endpoints activos:`);

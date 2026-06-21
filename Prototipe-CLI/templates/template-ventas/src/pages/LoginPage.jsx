@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Store, Smartphone, Shield, Mail, Lock, ArrowLeft } from 'lucide-react'
+import { Store, Smartphone, Shield, Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { auth, db } from '../config/firebaseConfig'
 import useAuthStore from '../store/authStore'
 import useAppConfigStore from '../store/appConfigStore'
@@ -27,9 +27,10 @@ export default function LoginPage() {
   const [adminPassword, setAdminPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showAdminPassword, setShowAdminPassword] = useState(false)
 
   const { role, setAdmin, setClient, isLoading: isAuthLoading } = useAuthStore()
-  const { appName, appIcon, primaryColor, welcomeWavesEnabled, loginTrustMessage, slogan, isLoaded, setConfig } = useAppConfigStore()
+  const { appName, appIcon, primaryColor, welcomeWavesEnabled, loginTrustMessage, slogan, isLoaded, setConfig, adminRegistered } = useAppConfigStore()
   const navigate = useNavigate()
 
   // Leer color primario real desde CSS en runtime
@@ -76,15 +77,30 @@ export default function LoginPage() {
     try {
       let userCredential
 
-      // Intentar login. Si no existe la cuenta, crearla.
-      // Intentar login exclusivamente. No crear cuentas automáticas.
+      // Intentar iniciar sesión primero (caso común y evita errores 400 de registro redundantes)
       try {
         userCredential = await signInWithEmailAndPassword(auth, adminEmail, adminPassword)
       } catch (signInErr) {
-        console.error('[AdminAuth] Error en login:', signInErr)
-        setError('Correo o contraseña incorrectos.')
-        setIsLoading(false)
-        return
+        const isUserNotFound = 
+          signInErr.code === 'auth/user-not-found' || 
+          signInErr.code === 'auth/invalid-credential' ||
+          signInErr.code === 'auth/invalid-email';
+        
+        // Si el usuario no existe (o Firestore indica que no hay admin registrado) intentamos registrar
+        if (isUserNotFound || !adminRegistered) {
+          try {
+            userCredential = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword)
+          } catch (createErr) {
+            // Si al intentar registrar dice que el email ya existe, significa que el error original
+            // de login era por contraseña incorrecta
+            if (createErr.code === 'auth/email-already-in-use') {
+              throw signInErr
+            }
+            throw createErr
+          }
+        } else {
+          throw signInErr
+        }
       }
 
       const user = userCredential.user
@@ -138,8 +154,8 @@ export default function LoginPage() {
     e.preventDefault()
     
     if (clientStep === 1) {
-      if (celular.replace(/\D/g, '').length < 7) {
-        setError('Ingresa un número de celular válido.')
+      if (celular.replace(/\D/g, '').length !== 10) {
+        setError('El número de celular debe tener exactamente 10 dígitos.')
         return
       }
       
@@ -152,11 +168,18 @@ export default function LoginPage() {
         const userSnap = await getDoc(userRef)
 
         if (userSnap.exists()) {
+          const userData = userSnap.data()
+          if (userData.role === 'admin') {
+            setError('Acceso denegado. Este usuario es de nivel administrador.')
+            setIsLoading(false)
+            return
+          }
+
           // Cliente antiguo: entra de una vez
           setClient({
-            nombre: userSnap.data().nombre,
+            nombre: userData.nombre,
             celular: cleanPhone,
-            emoji: userSnap.data().emoji || null,
+            emoji: userData.emoji || null,
           })
           navigate('/tienda/catalogo', { replace: true })
         } else {
@@ -190,6 +213,7 @@ export default function LoginPage() {
           celular: cleanPhone,
           role: 'client',
           fechaRegistro: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         })
 
         setClient({
@@ -364,7 +388,8 @@ export default function LoginPage() {
                             id="client-celular"
                             type="tel"
                             value={celular}
-                            onChange={(e) => setCelular(e.target.value)}
+                            onChange={(e) => setCelular(e.target.value.replace(/\D/g, ''))}
+                            maxLength={10}
                             placeholder="Ingresa el número de celular (10 dígitos)"
                             className="w-full h-11 pl-10 pr-4 rounded-2xl bg-surface-2 border border-primary/15 text-app placeholder:text-muted/65 text-sm focus:outline-none focus:border-primary transition-all shadow-inner focus:ring-1 focus:ring-primary/20"
                             autoComplete="tel"
@@ -449,10 +474,12 @@ export default function LoginPage() {
                 <form onSubmit={handleAdminAuth} className="space-y-4" noValidate>
                   <div className="mb-4">
                     <p className="text-xs text-app font-bold mb-1">
-                      Bienvenido de nuevo
+                      {adminRegistered ? 'Bienvenido de nuevo' : 'Registro de Administrador'}
                     </p>
                     <p className="text-[11px] text-muted">
-                      Ingresa tus credenciales para acceder al panel administrativo.
+                      {adminRegistered 
+                        ? 'Ingresa tus credenciales para acceder al panel administrativo.' 
+                        : 'Modo Configuración Inicial: Las credenciales ingresadas registrarán al primer administrador del sistema.'}
                     </p>
                   </div>
 
@@ -472,13 +499,21 @@ export default function LoginPage() {
                     <div className="relative">
                       <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
                       <input
-                        type="password"
+                        type={showAdminPassword ? 'text' : 'password'}
                         value={adminPassword}
                         onChange={(e) => setAdminPassword(e.target.value)}
                         placeholder="Ingresa tu contraseña de acceso"
-                        className="w-full h-12 pl-11 pr-4 rounded-2xl bg-surface-2 border border-primary/15 text-app placeholder:text-muted/65 text-sm focus:outline-none focus:border-primary transition-all shadow-inner focus:ring-1 focus:ring-primary/20"
+                        className="w-full h-12 pl-11 pr-12 rounded-2xl bg-surface-2 border border-primary/15 text-app placeholder:text-muted/65 text-sm focus:outline-none focus:border-primary transition-all shadow-inner focus:ring-1 focus:ring-primary/20"
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowAdminPassword(!showAdminPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-app bg-transparent border-none cursor-pointer flex items-center justify-center p-1"
+                        tabIndex="-1"
+                      >
+                        {showAdminPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
                     </div>
                   </div>
 
@@ -498,7 +533,7 @@ export default function LoginPage() {
                     {isLoading ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
-                      'Continuar'
+                      adminRegistered ? 'Continuar' : 'Registrar Administrador'
                     )}
                   </button>
                 </form>

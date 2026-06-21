@@ -4,7 +4,7 @@ import path from 'path';
 import pc from 'picocolors';
 import { execSync } from 'child_process';
 import { createProject, PALETTES } from './generator.js';
-import { getWorkspaceRoot, getTemplatesDir } from './config.js';
+import { getWorkspaceRoot, getTemplatesDir, getRegistroPath, getInstancePath } from './config.js';
 
 const CLI_ROOT = process.cwd();
 const TEMPLATES_DIR = getTemplatesDir();
@@ -90,9 +90,17 @@ async function main() {
       type: 'input',
       name: 'targetPath',
       message: 'Ruta absoluta donde se creará el proyecto:',
-      default: (ans) => {
+      default: async (ans) => {
         const folderName = ans.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        return path.join(getWorkspaceRoot(), `App-${folderName}`);
+        let coreType = 'seed';
+        try {
+          const registro = await fs.readJson(getRegistroPath());
+          const templateConfig = Object.values(registro.plantillas).find(p => path.basename(p.destino) === ans.template);
+          if (templateConfig && templateConfig.coreType) {
+            coreType = templateConfig.coreType;
+          }
+        } catch (e) {}
+        return getInstancePath(coreType, `App-${folderName}`);
       }
     },
     {
@@ -158,12 +166,6 @@ async function main() {
     },
     {
       type: 'input',
-      name: 'firebaseMessagingSenderId',
-      message: 'Firebase Messaging Sender ID (.env.local):',
-      validate: input => input.trim().length > 0 ? true : 'El Messaging Sender ID es obligatorio.'
-    },
-    {
-      type: 'input',
       name: 'firebaseAppId',
       message: 'Firebase App ID (.env.local):',
       validate: input => input.trim().length > 0 ? true : 'El App ID es obligatorio.'
@@ -176,15 +178,22 @@ async function main() {
     },
     {
       type: 'input',
-      name: 'centralMessagingSenderId',
-      message: 'Messaging Sender ID de prototipe-ecosistema-control:',
-      default: () => process.env.VITE_DEVELOPER_CENTRAL_MESSAGING_SENDER_ID || '703542009613'
-    },
-    {
-      type: 'input',
       name: 'centralAppId',
       message: 'App ID de prototipe-ecosistema-control:',
       default: () => process.env.VITE_DEVELOPER_CENTRAL_APP_ID || '1:703542009613:web:00f9363de11a908c991a44'
+    },
+    {
+      type: 'confirm',
+      name: 'enableFirebaseDeploy',
+      message: '¿Deseas desplegar reglas e índices en Firebase en este paso?',
+      default: true
+    },
+    {
+      type: 'confirm',
+      name: 'enableSeeding',
+      message: '¿Deseas sembrar datos de prueba iniciales (productos y admin demo) en Firestore?',
+      default: false,
+      when: (ans) => ans.enableFirebaseDeploy === true
     }
   ]);
 

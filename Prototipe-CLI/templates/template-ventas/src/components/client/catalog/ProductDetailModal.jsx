@@ -12,7 +12,10 @@ import LazyImage from '../../ui/LazyImage'
 
 import { getCssColor } from '../../../utils/colors'
 
+const UNLIMITED_STOCK = 9999
+
 export default function ProductDetailModal({ product, isOpen, onClose }) {
+  const isUnlimited = (stock) => product?.stockInfinito === true || (stock || 0) >= UNLIMITED_STOCK
   const { addItem } = useCartStore()
   const { markStepCompleted } = useGuidedStore()
   const { commercialOptimization } = useAppConfigStore()
@@ -48,9 +51,11 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [variantOverrideImage, setVariantOverrideImage] = useState(null)
 
+
   const availableVariants = useMemo(() => {
     if (!product) return []
-    return (product.variantes || []).filter(v => (v.stock || 0) > 0)
+    // Incluir variantes con stock > 0 O con stock ilimitado (>= 9999)
+    return (product.variantes || []).filter(v => (v.stock || 0) > 0 || isUnlimited(v.stock))
   }, [product])
 
   const tallas = useMemo(() => {
@@ -76,7 +81,7 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
       setActiveImageIndex(0)
       setVariantOverrideImage(null)
       
-      const vars = (product.variantes || []).filter(v => (v.stock || 0) > 0)
+      const vars = (product.variantes || []).filter(v => (v.stock || 0) > 0 || isUnlimited(v.stock))
       const t = Array.from(new Set(vars.map(v => v.talla).filter(Boolean)))
       const c = Array.from(new Set(vars.map(v => v.color).filter(Boolean)))
       
@@ -155,7 +160,8 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
     const existingInCart = state.items.find(i => i.productId === product.id && i.variantId === currentVariant.id)
     const currentCartQty = existingInCart ? existingInCart.cantidad : 0
 
-    if (cantidad + currentCartQty > currentVariant.stock) {
+    const varUnlimited = isUnlimited(currentVariant.stock)
+    if (!varUnlimited && cantidad + currentCartQty > currentVariant.stock) {
       if (currentCartQty > 0) {
         setError(`Solo puedes agregar ${currentVariant.stock - currentCartQty} más (Ya tienes ${currentCartQty} en el carrito)`)
       } else {
@@ -172,7 +178,7 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
       talla: selectedTalla,
       color: selectedColor,
       imageUrl: currentVariant?.imageUrl || product.imageUrl,
-      maxStock: currentVariant.stock,
+      maxStock: varUnlimited ? Infinity : currentVariant.stock,
     }, cantidad)
 
     markStepCompleted('add_to_cart')
@@ -204,21 +210,21 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
           value={cantidad}
           onChange={setCantidad}
           min={1}
-          max={currentVariant?.stock || 10}
+          max={isUnlimited(currentVariant?.stock) ? 999 : (currentVariant?.stock || 10)}
           className="h-14"
         />
 
 
         <button
           onClick={handleAddToCart}
-          disabled={currentVariant?.stock === 0}
+          disabled={!isUnlimited(currentVariant?.stock) && currentVariant?.stock === 0}
           className={`flex-1 h-14 rounded-2xl font-bold text-base transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 ${
-            currentVariant?.stock === 0
+            !isUnlimited(currentVariant?.stock) && currentVariant?.stock === 0
               ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
               : 'bg-action text-white hover:opacity-90 shadow-lg shadow-action/20'
           }`}
         >
-          {currentVariant?.stock === 0 ? (
+          {!isUnlimited(currentVariant?.stock) && currentVariant?.stock === 0 ? (
             <span>Agotado</span>
           ) : (
             <>
@@ -498,7 +504,7 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
               currentVariant.stock === 0 ? 'text-error' : 'text-success'
             }`}
           >
-            {currentVariant.stock === 0 ? 'Esta variante está agotada' : `${currentVariant.stock} unidades disponibles`}
+            {currentVariant.stock === 0 ? 'Esta variante está agotada' : isUnlimited(currentVariant.stock) ? 'Disponible' : `${currentVariant.stock} unidades disponibles`}
           </motion.p>
         )}
 

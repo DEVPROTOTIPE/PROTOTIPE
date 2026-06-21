@@ -212,7 +212,7 @@ export default function AdminInventory() {
                     {filteredProducts.map(product => {
                       const category = categories.find(c => c.id === product.categoriaId)
                       const totalStock = product.variantes.reduce((sum, v) => sum + v.stock, 0)
-                      const isLowStock = product.variantes.some(v => v.stock <= product.umbralAlerta)
+                      const isLowStock = !product.stockInfinito && product.variantes.some(v => v.stock <= product.umbralAlerta)
 
                       return (
                         <tr key={product.id} className="hover:bg-surface-2/30 transition-colors group">
@@ -246,16 +246,24 @@ export default function AdminInventory() {
                           
                           <td className="p-4">
                             <div className="flex items-center gap-2">
-                              <span className={`text-sm font-bold ${isLowStock ? 'text-warning' : 'text-success'}`}>
-                                {totalStock} unds
-                              </span>
-                              {isLowStock && (
-                                <div className="group/tooltip relative flex items-center">
-                                  <AlertTriangle size={14} className="text-warning" />
-                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-surface border border-app rounded shadow-lg text-[10px] whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-10">
-                                    Stock bajo (Umbral: {product.umbralAlerta})
-                                  </div>
-                                </div>
+                              {product.stockInfinito ? (
+                                <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                                  ∞ Ilimitado
+                                </span>
+                              ) : (
+                                <>
+                                  <span className={`text-sm font-bold ${isLowStock ? 'text-warning' : 'text-success'}`}>
+                                    {totalStock} unds
+                                  </span>
+                                  {isLowStock && (
+                                    <div className="group/tooltip relative flex items-center">
+                                      <AlertTriangle size={14} className="text-warning" />
+                                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-surface border border-app rounded shadow-lg text-[10px] whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-10">
+                                        Stock bajo (Umbral: {product.umbralAlerta})
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
                               )}
                             </div>
                           </td>
@@ -308,7 +316,7 @@ export default function AdminInventory() {
                   {filteredProducts.map(product => {
                     const category = categories.find(c => c.id === product.categoriaId)
                     const totalStock = product.variantes.reduce((sum, v) => sum + v.stock, 0)
-                    const isLowStock = product.variantes.some(v => v.stock <= product.umbralAlerta)
+                    const isLowStock = !product.stockInfinito && product.variantes.some(v => v.stock <= product.umbralAlerta)
 
                     return (
                       <div key={product.id} className="bg-surface-2 p-4 rounded-2xl border border-app shadow-sm flex flex-col gap-4 relative">
@@ -362,10 +370,18 @@ export default function AdminInventory() {
                           <div>
                             <p className="text-[10px] text-muted uppercase tracking-wider mb-1">Inventario</p>
                             <div className="flex items-center gap-1.5">
-                              <span className={`text-sm font-bold ${isLowStock ? 'text-warning' : 'text-success'}`}>
-                                {totalStock} unds
-                              </span>
-                              {isLowStock && <AlertTriangle size={14} className="text-warning" />}
+                              {product.stockInfinito ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                                  ∞ Ilimitado
+                                </span>
+                              ) : (
+                                <>
+                                  <span className={`text-sm font-bold ${isLowStock ? 'text-warning' : 'text-success'}`}>
+                                    {totalStock} unds
+                                  </span>
+                                  {isLowStock && <AlertTriangle size={14} className="text-warning" />}
+                                </>
+                              )}
                             </div>
                           </div>
                           

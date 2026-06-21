@@ -181,7 +181,7 @@ El modelado de datos de PROTOTIPE cuenta con 17 colecciones estructuradas para g
 * **Seguridad**: Reglas de almacenamiento que restringen la subida y eliminación de assets exclusivamente a administradores validados.
 
 ### ✉️ Firebase Cloud Messaging (FCM)
-* **Notificaciones Push**: Envío de alertas en background a los dispositivos móviles de los empleados (vendedores, cocina, domiciliarios) y clientes. Consume los tokens registrados en la colección `fcmTokens`.
+* **Notificaciones Push**: Envío de alertas en background a los dispositivos móviles de los empleados (vendedores, bodegueros, domiciliarios) y clientes. Consume los tokens registrados en la colección `fcmTokens`.
 
 ### ⚡ Cloud Functions
 * **Reglas conocidas / Lógica en Servidor**: Las Cloud Functions se utilizan para flujos desacoplados como el envío automatizado de telemetría de facturación y logs de telemetría hacia la base de datos central sin bloquear la UI del cliente.

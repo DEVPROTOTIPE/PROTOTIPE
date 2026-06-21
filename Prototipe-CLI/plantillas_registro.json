@@ -10,6 +10,7 @@
   },
   "plantillas": {
     "ventas": {
+      "coreType": "ventas",
       "fuente": "D:/PROTOTIPE/Plantillas Core/App Ventas",
       "destino": "D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas",
       "nicho": "Retail / Ecommerce / POS",

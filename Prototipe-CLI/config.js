@@ -57,6 +57,19 @@ export function getRegistroPath() {
 }
 
 /**
+ * Retorna la ruta física destino de una instancia de cliente basada en su coreType
+ * @param {string} coreType Tipo de core de la plantilla (ej: 'ventas', 'reservas')
+ * @param {string} projectName Nombre del proyecto/instancia
+ * @returns {string} Ruta absoluta de destino
+ */
+export function getInstancePath(coreType, projectName) {
+  if (coreType) {
+    return path.join(APPLICATIONS_DIR, coreType, projectName);
+  }
+  return path.join(APPLICATIONS_DIR, projectName);
+}
+
+/**
  * Valida el esquema estructural de plantillas_registro.json
  * @param {Object} registro Objeto JSON leído del registro de plantillas
  * @returns {Array<string>} Lista de errores encontrados (vacía si es válido)
@@ -77,7 +90,7 @@ export function validateRegistroSchema(registro) {
       errors.push(`La entrada "${key}" en el registro debe ser un objeto.`);
       continue;
     }
-    const required = ['fuente', 'destino', 'nicho', 'activo', 'version'];
+    const required = ['fuente', 'destino', 'nicho', 'activo', 'version', 'coreType'];
     required.forEach(f => {
       if (!(f in config)) {
         errors.push(`La plantilla "${key}" no contiene el campo requerido "${f}".`);
@@ -92,6 +105,9 @@ export function validateRegistroSchema(registro) {
     }
     if (config.nicho && typeof config.nicho !== 'string') {
       errors.push(`El campo "nicho" de "${key}" debe ser un string.`);
+    }
+    if (config.coreType && typeof config.coreType !== 'string') {
+      errors.push(`El campo "coreType" de "${key}" debe ser un string.`);
     }
     if ('activo' in config && typeof config.activo !== 'boolean') {
       errors.push(`El campo "activo" de "${key}" debe ser un booleano.`);

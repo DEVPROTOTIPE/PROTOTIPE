@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { PRODUCT_GENDERS } from '../constants'
 
 /**
  * Esquema de validación para una Categoría.
@@ -95,6 +94,7 @@ export const productSchema = z.object({
     invalid_type_error: 'La alerta de stock debe ser un número',
   }).int().min(0, 'La alerta no puede ser negativa').default(5),
   variantes: z.array(variantSchema).min(1, 'El producto debe tener al menos una variante'),
+  stockInfinito: z.boolean().optional().default(false),
   
   // Descuento directo en Inventario
   discountActive: z.boolean().optional().default(false),

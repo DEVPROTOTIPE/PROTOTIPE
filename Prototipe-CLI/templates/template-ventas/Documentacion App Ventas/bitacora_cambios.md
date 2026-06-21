@@ -2,6 +2,180 @@
 
 Historial de cambios, mejoras y correcciones técnicas aplicadas sobre la plantilla core de Ventas.
 
+### [2026-06-19] - Fix 2/3/4/5: Hardening completo del pipeline de imágenes
+
+* **Tipo:** Seguridad / Robustez / Infraestructura / UX
+* **Descripción de Cambios:**
+  - **Fix 2 [ALTO] — Validación de tamaño `ProductFormModal.jsx`:** Límite de 15 MB validado en los 3 handlers (imagen principal, variante, galería) ANTES de intentar comprimir o subir. Si el archivo supera el límite, se dispara el toast de error con el tamaño real del archivo y se aborta la operación sin tocar Storage.
+  - **Fix 3 [BAJO] — `imageCompression.js`:** Reemplazado el hack `blob.name = ...` (propiedad no estándar en Blob) por `new File([blob], nombre, { type: 'image/webp' })`. El objeto resultante ahora es un `File` real con `.name`, `.type` y `.size` como propiedades nativas, garantizando compatibilidad total con la API del browser y con `uploadService`.
+  - **Fix 4 [MEDIO] — Guard de concurrencia `ProductFormModal.jsx`:** Ref `isUploadingMain` agregado. Si el admin hace doble clic o activa el input mientras ya hay un upload en curso, el segundo intento se ignora. El flag se libera siempre en el bloque `finally` sin importar si el upload fue exitoso o falló.
+  - **Fix 5 [MEDIO] — Metadata Content-Type `uploadService.js`:** `uploadBytesResumable` ahora recibe `{ contentType: processedFile.type || 'image/webp' }` como tercer argumento. Firebase Storage servirá las imágenes con `Content-Type: image/webp` correcto en lugar de `application/octet-stream`.
+* **Archivos Modificados:**
+  - [imageCompression.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/utils/imageCompression.js) [MODIFY] — Fix 3
+  - [uploadService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/uploadService.js) [MODIFY] — Fix 5
+  - [ProductFormModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/inventory/ProductFormModal.jsx) [MODIFY] — Fix 2 + Fix 4
+* **Build:** ✅ `npm run build` — 952ms sin errores — 2026-06-19
+
+### [2026-06-19] - Fix 1: Limpieza automática de Storage al eliminar producto
+
+* **Tipo:** Infraestructura / Optimización de costos / Integridad de datos
+* **Severidad:** [MINOR] corrección de fuga de almacenamiento acumulativa
+* **Descripción de Cambios:**
+  - **[MODIFY] `inventoryService.js`:** `deleteProduct()` ahora hace `getDoc()` previo al borrado, recolecta todas las URLs de imágenes del producto (`imageUrl`, `galeria[]`, `variantes[].imageUrl`) y las elimina de Firebase Storage en paralelo con `Promise.allSettled()` (tolerante a errores individuales). Si la lectura/limpieza de Storage falla, el `deleteDoc()` procede igual para no dejar el catálogo inconsistente. Import de `deleteImage` agregado desde `uploadService`.
+* **Archivos Modificados:**
+  - [inventoryService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/inventoryService.js) [MODIFY]
+* **Build:** ✅ `npm run build` — 925ms sin errores — 2026-06-19
+
+### [2026-06-19] - Fix Crítico: Firebase Storage — Reglas, Registro y Feedback de Upload
+
+* **Tipo:** Seguridad / Infraestructura / UX
+* **Severidad:** Crítica (Storage sin reglas = posible deny-all en Blaze o allow-all sin autenticación)
+* **Descripción de Cambios:**
+  - **[NEW] `storage.rules`:** Creado archivo de reglas de Firebase Storage con lectura pública para rutas de catálogo (`products/`, `products_variants/`, `products_gallery/`, `branding/`) y escritura restringida a `request.auth != null`. Bloqueo explícito por defecto en rutas no listadas.
+  - **[MODIFY] `firebase.json`:** Agregada sección `"storage": { "rules": "storage.rules" }` para que las reglas sean desplegadas con `firebase deploy --only storage`.
+  - **[MODIFY] `ProductFormModal.jsx`:** Agregado estado `uploadError` + función `showUploadError()` con auto-dismissal a 4s. Los 3 handlers de imagen (principal, variante, galería) ahora distinguen `storage/unauthorized` de otros errores de red. Toast visual animado con Framer Motion inyectado en el fragment raíz del modal. Import `AlertCircle` agregado a lucide-react.
+* **Archivos Modificados:**
+  - [storage.rules](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/storage.rules) [NEW]
+  - [firebase.json](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firebase.json) [MODIFY]
+  - [ProductFormModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/inventory/ProductFormModal.jsx) [MODIFY]
+* **Pendiente:** ~~Desplegar reglas con `cmd /c firebase deploy --only storage` cuando el usuario lo confirme.~~
+* **Desplegado:** ✅ `firebase deploy --only storage` — `proyecto-cliente-saas` — 2026-06-19
+
+### [2026-06-19] - Optimización de Bundle y Depuración de Importaciones (ESLint Clean Up)
+* **Tipo:** Mantenimiento / Optimización / Calidad de Código
+* **Severidad:** Baja (Saneamiento de warnings y errores del linter en imports y variables obsoletas)
+* **Descripción de Cambios:**
+  - **Limpieza de Importaciones y Parámetros:** Depuradas importaciones en desuso de Firestore (como `getDoc`, `orderBy`, `addDoc`, `updateDoc`, `setDoc`, `where`, `query`) en los servicios de anuncios, inventario, órdenes, créditos, analíticas de códigos QR y seguimiento.
+  - **Saneamiento de Firmas:** Removido el parámetro no utilizado `creditId` en `reportCreditPayment` (`creditService.js`) y `pin` en `authenticateEmployeeByPin` (`employeeService.js`).
+  - **Resolución de Warnings en PDF:** Corregido en `pdfService.js` la inicialización inútil de la variable `saldo`, reemplazando el operador nullish coalescing `??` sobre `Number(...)` por `||` para mitigar el error de expresión nullish constante en ESLint, y removida la firma no utilizada de `orders` en `exportCreditsReportPDF`.
+  - **Control de Linter en PortalVendedor:** Removidas las desestructuraciones redundantes de `appIcon` y `whatsappAdmin` en `PortalVendedor.jsx`, e inyectados comentarios de desactivación de la regla `react-hooks/set-state-in-effect` sobre llamadas de estado asíncronas / debounced seguras.
+* **Archivos Modificados:**
+  - [adService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/adService.js) [MODIFY]
+  - [clientNotificationService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/clientNotificationService.js) [MODIFY]
+  - [creditService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/creditService.js) [MODIFY]
+  - [employeeService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/employeeService.js) [MODIFY]
+  - [inventoryService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/inventoryService.js) [MODIFY]
+  - [orderService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/orderService.js) [MODIFY]
+  - [qrAnalyticsService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/qrAnalyticsService.js) [MODIFY]
+  - [trackingAnalyticsService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/trackingAnalyticsService.js) [MODIFY]
+  - [pdfService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/pdfService.js) [MODIFY]
+  - [inventorySchemas.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/schemas/inventorySchemas.js) [MODIFY]
+  - [PortalVendedor.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalVendedor.jsx) [MODIFY]
+* **Desplegado:** Local build verificado ✅
+
+### [2026-06-19] - Auditoría y Optimización de Créditos y Saldos (Módulo 5)
+* **Tipo:** Core / UI/UX / Rendimiento / Base de Datos / Transacciones
+* **Severidad:** Alta (Previene race conditions en saldos concurrentes, optimiza lecturas Firestore y sanea UI/UX de modales)
+* **Descripción de Cambios:**
+  - **Estandarización de Modales:** Refactorizados los modales de abonos en [AdminCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminCredits.jsx) y [ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCredits.jsx) utilizando la plantilla común `ModalTemplate` de forma consistente, unificando estilos visuales, overlays y control de scroll.
+  - **Eliminación de useOrders:** Removido por completo el hook `useOrders()` en [AdminCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminCredits.jsx) eliminando la suscripción reactiva innecesaria a todos los pedidos del comercio al consultar cartera de deudas.
+  - **Optimización de PDF de Cartera:** Modificada la función `exportCreditsReportPDF` en [pdfService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/pdfService.js) sustituyendo la consulta completa de la colección de créditos por una consulta filtrada a créditos activos (`where('estado', '==', 'activo')`), mitigando lecturas masivas en memoria.
+  - **Blindaje Transaccional de Saldos:** Asegurada la expresión de cálculo de saldo pendiente en la transacción `addPaymentToCredit` de [creditService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/creditService.js) implementando precedencia lógica correcta: `const currentSaldo = data.saldoPendiente ?? data.saldoPending ?? data.montoTotal`, evitando fallos de carrera o valores nulos.
+* **Archivos Modificados:**
+  - [AdminCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminCredits.jsx) [MODIFY]
+  - [ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCredits.jsx) [MODIFY]
+  - [pdfService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/pdfService.js) [MODIFY]
+  - [creditService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/creditService.js) [MODIFY]
+* **Desplegado:** Local build verificado ✅
+
+### [2026-06-18] - Auditoría y Optimización de Domicilios y Backoffice (Módulo 4)
+* **Tipo:** Core / UI/UX / Rendimiento / Tolerancia a Fallos / Soporte Offline
+* **Severidad:** Media-Alta (Mitiga re-renders de orders en tiempo real, sanea modales y añade resiliencia offline a reparto)
+* **Descripción de Cambios:**
+  - **Saneamiento de Modales en Reparto:** Importado `ModalTemplate` y refactorizado el modal `NoteModal` en [PortalMensajero.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalMensajero.jsx) para heredar de la plantilla global, eliminando el marcado CSS ad-hoc y backdrops duplicados, y configurándolo para renderizarse continuamente con la prop `isOpen`.
+  - **Lógica Offline de Reparto:** Configurado el encolado en `localStorage` (`portal-delivery-queue`) de las auto-asignaciones y avances de estado cuando `isOnline === false`, con un observador de red en [PortalMensajero.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalMensajero.jsx) que procesa la cola al re-establecerse la señal.
+  - **Optimización de Renders (Faro Core):** Extraída la función masiva `renderOrderCard` de [AdminOrders.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminOrders.jsx) a un componente funcional independiente `OrderCard` memoizado mediante `React.memo`. Movidos estados locales como `tempDeliveryCosts` y `expandedMapOrderIds` a estados internos de cada tarjeta (`tempCost` y `showMap`) para evitar el re-renderizado global del listado de órdenes en tiempo real ante eventos Firestore.
+* **Archivos Modificados:**
+  - [PortalMensajero.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalMensajero.jsx) [MODIFY]
+  - [AdminOrders.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminOrders.jsx) [MODIFY]
+* **Desplegado:** Local build verificado ✅
+
+### [2026-06-18] - Auditoría, Saneamiento de POS Vendedor y Bodega, y Notificaciones (Módulo 3)
+* **Tipo:** Core / Rendimiento / Tolerancia a Fallos / Notificaciones en Tiempo Real
+* **Severidad:** Alta (Previene logs de stock huérfanos, optimiza red y añade POS offline)
+* **Descripción de Cambios:**
+  - **Soporte Offline POS (IndexedDB):** Modificado [PortalVendedor.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalVendedor.jsx) para encolar ventas localmente en el object store `offline_sales` mediante `addOfflineSale` si `isOnline === false`, permitiendo facturación ininterrumpida y mostrando un modal de éxito provisional.
+  - **Efecto de Sincronización Automática:** Implementado observador de red en [PortalVendedor.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalVendedor.jsx) que al reconectarse a Internet sube secuencialmente a Firestore las ventas offline y las purga de IndexedDB.
+  - **Sincronización Delta de Clientes:** Modificado [PortalVendedor.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalVendedor.jsx) para leer la última fecha de sincronización de `localStorage` (`portal-last-client-sync`) y traer mediante `getClientsUpdatedSince` solo los clientes creados/editados recientemente.
+  - **Consistencia Transaccional de Stock:** Reubicada la llamada asíncrona de `registerStockMovement` en [PortalBodega.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalBodega.jsx) para ejecutarse de forma secuencial **después** del éxito transaccional de Firestore, evitando logs huérfanos.
+  - **Notificaciones en Tiempo Real (Múltiples Roles):**
+    - En [orderService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/orderService.js), inyectadas alertas para el rol `vendedor` al ingresar pedidos de la PWA, y alertas para el rol `bodeguero` al cambiar el estado de un pedido a `preparing`.
+    - En [deliveryService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/deliveryService.js), agregada alerta para el `mensajero` específico al asignarle un domicilio.
+    - En [PortalMensajero.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalMensajero.jsx), habilitado el envío de alertas automáticas para `admin` y `vendedor` en eventos de entregas fallidas o reprogramadas.
+* **Archivos Modificados:**
+  - [PortalBodega.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalBodega.jsx) [MODIFY]
+  - [LoginPage.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/LoginPage.jsx) [MODIFY]
+  - [userService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/userService.js) [MODIFY]
+  - [PortalVendedor.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalVendedor.jsx) [MODIFY]
+  - [offlineDB.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/offlineDB.js) [MODIFY]
+  - [orderService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/orderService.js) [MODIFY]
+  - [deliveryService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/deliveryService.js) [MODIFY]
+  - [PortalMensajero.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalMensajero.jsx) [MODIFY]
+* **Desplegado:** Local build verificado ✅
+
+### [2026-06-18] - Auditoría y Optimización de Catálogo y Experiencia de Compra (Módulo 2)
+* **Tipo:** UI/UX / Rendimiento / Core Optimización
+* **Severidad:** Media (Ajuste de responsividad y eliminación de saltos de maquetación CLS)
+* **Descripción de Cambios:**
+  - **Dynamic Viewport Height en Modales:** Modificado [ModalTemplate.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/common/ModalTemplate.jsx) para sustituir el valor fijo de `max-h-[90vh]` por `max-h-[85dvh] sm:max-h-[90dvh]`, adaptando de forma interactiva la altura del modal cuando el teclado virtual de dispositivos móviles se expanda.
+  - **Mitigación de Cumulative Layout Shift (CLS):** Refactorizado el estado de carga (`isLoadingProducts`) en [ClientCatalog.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCatalog.jsx) reemplazando las cajas de pulsación simples por skeletons de alta fidelidad con shimmer animado que simulan exactamente las dimensiones y estructura de las tarjetas reales de `ProductCard`, garantizando cero saltos visuales durante la carga inicial.
+  - **Salvaguarda de Abandono de Checkout:** Implementada la función `handleCloseVerify` en [CheckoutModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/checkout/CheckoutModal.jsx) para solicitar confirmación nativa con `window.confirm` antes de cerrar el modal si el cliente ha avanzado más allá del paso 1, evitando pérdida accidental de datos.
+* **Archivos Modificados:**
+  - [ModalTemplate.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/common/ModalTemplate.jsx) [MODIFY]
+  - [ClientCatalog.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCatalog.jsx) [MODIFY]
+  - [CheckoutModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/checkout/CheckoutModal.jsx) [MODIFY]
+* **Desplegado:** Local build verificado ✅
+
+### [2026-06-18] - Auditoría y Blindaje de Autenticación, Acceso y Seguridad (Módulo 1)
+* **Tipo:** Seguridad / UX / Corrección de Bugs / Robustez
+* **Severidad:** Alta (Corrige bypass de bloqueo PIN y previene entradas corruptas en login)
+* **Descripción de Cambios:**
+  - **Persistencia de Bloqueo de PIN:** Modificado [PortalAuth.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalAuth.jsx) para leer y escribir el estado de `lockouts` y `failedAttempts` en `localStorage` (claves `portal-lockouts` y `portal-failed-attempts`), impidiendo evadir el bloqueo de 30 segundos mediante F5.
+  - **Sanitización del Número de Celular:** Modificado [LoginPage.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/LoginPage.jsx) en el `onChange` del input para forzar caracteres puramente numéricos en tiempo real y establecer un límite estricto de longitud de `10` dígitos. Ajustado `handleClientLogin` para rechazar números con longitud distinta a 10 dígitos.
+  - **Blindaje de useAuthInit:** Modificado [useAuthInit.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAuthInit.js) agregando la bandera de control de montaje `isMounted` para salvaguardar y abortar llamadas a Firestore si el hook es destruido por cambios de vista o recarga HMR.
+* **Archivos Modificados:**
+  - [PortalAuth.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalAuth.jsx) [MODIFY]
+  - [LoginPage.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/LoginPage.jsx) [MODIFY]
+  - [useAuthInit.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAuthInit.js) [MODIFY]
+* **Desplegado:** Local build verificado ✅
+
+### [2026-06-18] - Desmantelamiento y Remoción Completa de Módulos Inactivos y Roles Operativos (Core)
+* **Tipo:** Refactorización / Remoción de Módulo / Limpieza de Código / Core Simplificación
+* **Severidad:** Media (Simplificación Estructural)
+* **Descripción de Cambios:**
+  - **Eliminación de archivos:** Remoción física de portales y servicios backend inactivos para simplificar el flujo contable y operativo.
+  - **Rutas y Entrada Principal:** Limpieza de constantes de roles inactivos en `src/constants/index.js` (`PORTAL_CONFIG` y `ROLES`). Eliminación de rutas de importación diferida (lazy) y subrutas anidadas en `src/routes/AppRoutes.jsx`.
+  - **Servicios y Estado Global:** Remoción de propiedades y métodos relacionados con banderas de módulos inactivos en `src/store/appConfigStore.js` y `src/services/appConfigService.js`.
+  - **Flujo de Checkout y Cliente:** Limpieza de la vista de seguimiento de pedidos (`OrderTracking.jsx`) omitiendo pasos de preparación redundantes.
+  - **Centro de Notificaciones:** Eliminación de los disparadores y tipos de alertas obsoletos.
+  - **Panel Administrativo y de Desarrollador:** Ocultamiento y remoción de opciones no utilizadas en la configuración del desarrollador (`DeveloperSettings.jsx`) y panel de administración (`AdminSettings.jsx`), así como la depuración correspondiente en base de datos.
+  - Estilos: Limpieza del archivo general `src/index.css` removiendo todas las clases CSS exclusivas de los portales de mesero y de cocina.
+* **Archivos Modificados:**
+  - `src/App.jsx`
+  - `src/constants/index.js`
+  - `src/routes/AppRoutes.jsx`
+  - `src/store/appConfigStore.js`
+  - `src/services/appConfigService.js`
+  - `src/layouts/ClientLayout.jsx`
+  - `src/components/client/checkout/CheckoutModal.jsx`
+  - `src/pages/client/OrderTracking.jsx`
+  - `src/services/notificationCenterService.js`
+  - `src/pages/admin/settings/sections/DeveloperSettings.jsx`
+  - `src/pages/admin/settings/sections/AdminSettings.jsx`
+  - `src/index.css`
+* **Desplegado:** Local build verificado ✅ (0 errores, 0 warnings)
+
+### [2026-06-13] - Visibilidad Condicional de Auditoría de Ajustes de Stock
+* **Tipo:** UI/UX / Lógica de Negocio
+* **Severidad:** Baja
+* **Síntoma:** La opción de "Auditoría de Ajustes de Stock" aparecía visible para el administrador incluso si el módulo de "Múltiples Empleados" estaba inactivo, resultando confuso o redundante.
+* **Descripción de Cambios:**
+  - **Filtro de Menú:** Se condicionó el renderizado de la tarjeta de auditoría de stock en el panel de personalización para que solo se muestre cuando `hasMultipleEmployees` es `true`.
+  - **Efecto de Redirección:** Se implementó una salvaguarda mediante `useEffect` en `AdminSettings.jsx` que expulsa al usuario al menú principal de personalización si el módulo de empleados se desactiva estando dentro de la auditoría de stock.
+* **Archivos Modificados:**
+  - `src/pages/admin/AdminSettings.jsx`
+* **Desplegado:** Local build verificado ✅
+
 ### [2026-06-13] - Migración de Módulos Activos a Zona de Desarrollador
 * **Tipo:** Reubicación de Módulos / Seguridad / UI/UX / AdminSettings
 * **Severidad:** Media (Control de Acceso del Comercio)

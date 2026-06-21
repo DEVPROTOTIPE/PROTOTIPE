@@ -5,8 +5,8 @@ export const checkoutSchema = z.object({
   nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
   celular: z.string().min(7, 'Ingresa un número de celular válido'),
 
-  // Tipo de entrega: domicilio o retiro en tienda
-  tipoEntrega: z.enum(['domicilio', 'retiro', 'digital', 'mesa'], {
+  // Tipo de entrega: domicilio, retiro en tienda o entrega digital
+  tipoEntrega: z.enum(['domicilio', 'retiro', 'digital'], {
     required_error: 'Selecciona un método de entrega',
   }),
 

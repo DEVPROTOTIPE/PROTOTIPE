@@ -21,9 +21,11 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
   const isFav = favoriteIds.includes(product.id)
 
   // Verificar si el producto está completamente agotado (todas las variantes en 0)
-  const isOutOfStock = (product.variantes || []).length > 0
-    ? (product.variantes || []).every(v => (v.stock || 0) <= 0)
-    : (product.stock !== undefined ? product.stock <= 0 : true)
+  const isOutOfStock = product.stockInfinito
+    ? false
+    : ((product.variantes || []).length > 0
+      ? (product.variantes || []).every(v => (v.stock || 0) <= 0)
+      : (product.stock !== undefined ? product.stock <= 0 : true))
 
   // Optimización Comercial
   const optEnabled = commercialOptimization?.enabled === true
@@ -31,9 +33,11 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
   const smartTags = commercialOptimization?.tools?.smartTags || {}
   
   // Calcular stock consolidado
-  const stockConsolidado = (product.variantes || []).length > 0
-    ? (product.variantes || []).reduce((sum, v) => sum + (v.stock || 0), 0)
-    : (product.stock || 0)
+  const stockConsolidado = product.stockInfinito
+    ? 9999
+    : ((product.variantes || []).length > 0
+      ? (product.variantes || []).reduce((sum, v) => sum + (v.stock || 0), 0)
+      : (product.stock || 0))
   
   // Obtener el precio activo (promocional o base)
   const actualPrice = product.tienePromocion && product.precioPromo < product.precioBase
@@ -136,14 +140,14 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -6, scale: 1.01 }}
       transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-      className={`bg-surface overflow-hidden shadow-sm hover:shadow-[0_15px_35px_rgba(0,0,0,0.08)] transition-all duration-300 cursor-pointer border border-black/5 dark:border-white/5 group ${
+      className={`bg-surface overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] transition-all duration-500 cursor-pointer border border-neutral-100 dark:border-neutral-800/80 group ${
         layout === 'list' ? 'flex flex-row h-32' : 'flex flex-col h-full'
       } ${isOutOfStock ? 'opacity-70' : ''}`}
       style={{
         ...glowStyle,
-        borderRadius: 'var(--radius-base)'
+        borderRadius: '20px'
       }}
       onClick={() => {
         if (product.isTemporal) {
@@ -155,36 +159,34 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
     >
       {/* Contenedor de Imagen */}
       <div className={`relative bg-surface-2 overflow-hidden shrink-0 ${
-        layout === 'list' ? 'w-32 h-32' : 'aspect-square w-full'
+        layout === 'list' ? 'w-32 h-32 rounded-l-[20px]' : 'aspect-square w-full rounded-t-[20px]'
       }`}>
         {product.imageUrl ? (
           <LazyImage
             src={product.imageUrl}
             alt={product.nombre}
-            className="group-hover:scale-105 transition-transform duration-700 ease-out"
+            className="group-hover:scale-103 transition-transform duration-700 ease-out"
             style={{ viewTransitionName: 'product-image' }}
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-muted">
-            <ImageIcon size={28} className="opacity-40 mb-1.5" />
-            <span className="text-[10px] font-bold tracking-wider">SIN IMAGEN</span>
+            <ImageIcon size={26} className="opacity-40 mb-1.5" />
+            <span className="text-[9px] font-bold tracking-wider">SIN IMAGEN</span>
           </div>
         )}
 
-        {/* Badges de Estado Premium (Glassmorphism) en la esquina inferior izquierda de la imagen */}
+        {/* Badges de Estado Premium (Glassmorphism) */}
         {isOutOfStock ? (
           <span
-            className="absolute bottom-3 left-3 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-slate-900/80 backdrop-blur-md text-white shadow-md z-10 border border-white/10"
-            style={{ borderRadius: 'var(--radius-base)' }}
+            className="absolute bottom-3 left-3 px-3 py-1 text-[9px] font-black uppercase tracking-wider bg-slate-900/80 backdrop-blur-md text-white shadow-md z-10 border border-white/10 rounded-full"
           >
             Agotado
           </span>
         ) : activeSmartTag ? (
           <span 
-            className="absolute bottom-3 left-3 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider shadow-md z-10 border border-white/20 text-center flex items-center justify-center shrink-0 backdrop-blur-md"
+            className="absolute bottom-3 left-3 px-3 py-1 text-[9px] font-black uppercase tracking-wider shadow-md z-10 border border-white/20 text-center flex items-center justify-center shrink-0 backdrop-blur-md rounded-full"
             style={{ 
-              borderRadius: 'var(--radius-base)',
-              backgroundColor: `${activeSmartTag.bg}dc`, // Opacidad del 86% para efecto glassmorphic
+              backgroundColor: `${activeSmartTag.bg}c0`, // Opacidad del 75% para efecto glassmorphic
               color: activeSmartTag.textCol
             }}
           >
@@ -192,8 +194,7 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
           </span>
         ) : product.tienePromocion && product.isTemporal ? (
           <span 
-            className="absolute bottom-3 left-3 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-primary/90 backdrop-blur-md text-white shadow-md z-10 border border-white/20"
-            style={{ borderRadius: 'var(--radius-base)' }}
+            className="absolute bottom-3 left-3 px-3 py-1 text-[9px] font-black uppercase tracking-wider bg-primary/90 backdrop-blur-md text-white shadow-md z-10 border border-white/20 rounded-full"
           >
             Combo
           </span>
@@ -203,10 +204,11 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
         <motion.button
           onClick={handleFavoriteClick}
           whileTap={{ scale: 0.8 }}
-          className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 border ${
+          whileHover={{ scale: 1.1 }}
+          className={`absolute top-3 right-3 w-8.5 h-8.5 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 border ${
             isFav
               ? 'bg-white/95 text-red-500 border-white shadow-md'
-              : 'bg-black/25 text-white border-white/15 hover:bg-white hover:text-gray-900 hover:border-white shadow-sm'
+              : 'bg-black/20 text-white border-white/10 hover:bg-white hover:text-red-500 hover:border-white shadow-sm'
           }`}
           aria-label={isFav ? `Quitar ${product.nombre} de favoritos` : `Agregar ${product.nombre} a favoritos`}
         >
@@ -215,7 +217,7 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
             animate={{ scale: isFav ? [1, 1.25, 1] : 1 }}
             transition={{ duration: 0.3 }}
           >
-            <Heart size={16} fill={isFav ? 'currentColor' : 'none'} className="stroke-[2.5]" />
+            <Heart size={15} fill={isFav ? 'currentColor' : 'none'} className="stroke-[2.5]" />
           </motion.div>
         </motion.button>
       </div>
@@ -295,10 +297,10 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
                   navigate('/tienda/producto/' + product.id)
                 }
               }}
-              className="w-8 h-8 rounded-full bg-primary hover:bg-primary-soft text-white flex items-center justify-center shadow-md shadow-primary/25 hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 shrink-0 cursor-pointer"
+              className="w-8.5 h-8.5 rounded-full bg-primary hover:bg-primary-soft text-white flex items-center justify-center shadow-md shadow-primary/20 hover:shadow-lg hover:rotate-90 active:scale-95 transition-all duration-300 shrink-0 cursor-pointer"
               aria-label={`Ver opciones de ${product.nombre}`}
             >
-              <Plus size={14} strokeWidth={3} />
+              <Plus size={15} strokeWidth={3} />
             </button>
           )}
         </div>

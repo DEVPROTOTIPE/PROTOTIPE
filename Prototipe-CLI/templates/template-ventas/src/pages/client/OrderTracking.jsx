@@ -24,12 +24,11 @@ import {
   ExternalLink,
   MapPin,
   Truck,
-  ChefHat,
+  PackageOpen,
   Sparkles,
   Download,
 } from 'lucide-react'
 import usePWAInstall from '../../hooks/usePWAInstall'
-import SoftPushPrompt from '../../components/client/SoftPushPrompt'
 
 
 // ─── Mapa de íconos de Lucide por nombre (string → componente) ────────────────
@@ -41,7 +40,7 @@ const ICON_MAP = {
   AlertTriangle,
   Package,
   Truck,
-  ChefHat,
+  PackageOpen,
   ShoppingBag,
   MapPin,
 }
@@ -68,7 +67,6 @@ export default function OrderTracking() {
   const [loading, setLoading] = useState(true)
   const [order, setOrder] = useState(null)
   const [error, setError] = useState(null)
-  const [hasCocinero, setHasCocinero] = useState(false)
   const [hasMensajero, setHasMensajero] = useState(false)
 
   useEffect(() => {
@@ -114,19 +112,15 @@ export default function OrderTracking() {
       }
     )
 
-    // Consultar de forma dinámica si hay cocineros o mensajeros configurados en la tienda a través de la configuración global
+    // Consultar de forma dinámica si hay mensajeros configurados en la tienda a través de la configuración global
     const storeEmployees = useAppConfigStore.getState().employees || []
     const isMultipleEnabled = useAppConfigStore.getState().hasMultipleEmployees ?? false
 
-    // Solo se asumen cocineros/mensajeros si el módulo de múltiples empleados está activo
+    // Solo se asumen mensajeros si el módulo de múltiples empleados está activo
     if (isMultipleEnabled) {
-      const activeCocineros = storeEmployees.filter(emp => emp.rol === ROLES.COCINERO || emp.role === ROLES.COCINERO)
       const activeMensajeros = storeEmployees.filter(emp => emp.rol === ROLES.MENSAJERO || emp.role === ROLES.MENSAJERO)
-      setHasCocinero(activeCocineros.length > 0)
       setHasMensajero(activeMensajeros.length > 0)
     } else {
-      // Si no hay múltiples empleados, no hay roles operativos
-      setHasCocinero(false)
       setHasMensajero(false)
     }
 
@@ -182,7 +176,7 @@ export default function OrderTracking() {
    * Construye la secuencia exacta de pasos del stepper en función de:
    * - Tipo de entrega (domicilio vs retiro)
    * - Método de pago (solo agregar credito_aprobado si pagó con crédito)
-   * - Roles activos en el negocio (cocinero, mensajero)
+   * - Roles activos en el negocio (mensajero)
    */
   const buildStepKeys = () => {
     const steps = ['pendiente']
@@ -190,19 +184,12 @@ export default function OrderTracking() {
     // Paso de crédito: SOLO si el pedido fue pagado con crédito/fiado
     if (esCreditoPago) steps.push('credito_aprobado')
 
-    // Paso de preparación: SOLO si el negocio tiene cocinero activo
-    if (hasCocinero) steps.push('alistamiento')
-
     if (isDomicilio) {
       // Listo para despacho + En camino: SOLO si hay mensajero activo (empleado O externo propio activo)
       if (hasMensajero || deliverySettings?.customDelivery?.enabled) {
         steps.push('listo')
         steps.push('en_camino')
       }
-    } else {
-      // Retiro en tienda: "listo" significa "listo para recoger", sin mensajero
-      // Solo se incluye si tiene cocinero (ya está en preparación) o como estado final previo
-      if (hasCocinero) steps.push('listo')
     }
 
     steps.push('completado')
@@ -346,10 +333,7 @@ export default function OrderTracking() {
             </div>
           )}
 
-          {/* Solicitud Inteligente y No Intrusiva de Permisos Push del Cliente */}
-          {order.cliente?.celular && (
-            <SoftPushPrompt userId={order.cliente.celular} role="client" />
-          )}
+
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
             <div className="bg-surface-2/40 border border-app p-4 rounded-2xl space-y-1.5">
@@ -360,7 +344,7 @@ export default function OrderTracking() {
               <p className="text-xs text-muted">
                 Entrega:{' '}
                 <span className="font-semibold text-app">
-                  {isDomicilio ? '🛵 Domicilio' : order.tipoEntrega === 'digital' ? '📱 Digital' : order.tipoEntrega === 'mesa' ? `🛎️ En Mesa (${order.tableName})` : '🏪 Retiro en tienda'}
+                  {isDomicilio ? '🛵 Domicilio' : order.tipoEntrega === 'digital' ? '📱 Digital' : '🏪 Retiro en tienda'}
                 </span>
               </p>
             </div>
@@ -401,7 +385,7 @@ export default function OrderTracking() {
             </div>
           </div>
 
-          {/* Detalle de domicilio / mesa */}
+          {/* Detalle de domicilio */}
           {isDomicilio ? (
             <div className="bg-surface-2/40 border border-app p-4 rounded-2xl mb-5 space-y-1.5">
               <h4 className="text-[10px] font-black uppercase tracking-wider text-muted flex items-center gap-1.5 mb-2">
@@ -423,14 +407,6 @@ export default function OrderTracking() {
                 ? <p className="text-xs font-bold text-primary pt-0.5">Costo de envío: {formatCurrency(order.costoEnvio)}</p>
                 : <p className="text-xs text-muted italic">El costo de envío será acordado con el negocio.</p>
               }
-            </div>
-          ) : order.tipoEntrega === 'mesa' ? (
-            <div className="bg-surface-2/40 border border-app p-4 rounded-2xl mb-5 space-y-1.5">
-              <h4 className="text-[10px] font-black uppercase tracking-wider text-muted flex items-center gap-1.5 mb-2">
-                <Package className="w-3.5 h-3.5 text-primary" /> Entrega en Salón
-              </h4>
-              <p className="text-sm font-medium text-app">Consumo en Mesa: <span className="text-primary font-bold">{order.tableName || 'N/A'}</span></p>
-              <p className="text-xs text-muted">Tu pedido está siendo preparado y se servirá directamente a tu mesa.</p>
             </div>
           ) : null}
 

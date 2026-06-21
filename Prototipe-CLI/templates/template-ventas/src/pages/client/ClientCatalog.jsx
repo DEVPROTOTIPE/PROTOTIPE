@@ -352,38 +352,37 @@ export default function ClientCatalog() {
   return (
     <div className="pb-6">
 
-      {/* ─── HEADER / BUSCADOR ─────────────────────────────── */}
-      <div className="bg-app pt-4 pb-2 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto space-y-4">
+      {/* ─── HEADER / BUSCADOR (Sticky Glassmorphic) ─────────────────── */}
+      <div className="sticky top-0 z-40 bg-app/85 backdrop-blur-xl border-none py-3 px-4 md:px-8 transition-all duration-300">
+        <div className="max-w-7xl mx-auto">
           
           {/* Barra de búsqueda */}
           <div className="relative flex items-center w-full">
             <div className="absolute left-4 flex items-center justify-center pointer-events-none text-muted">
-              <Search size={20} />
+              <Search size={18} className="opacity-75" />
             </div>
             <input
               id="search-input"
               name="search"
               type="text"
-              placeholder="Escribe el nombre del producto que buscas"
+              placeholder="¿Qué estás buscando hoy?"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-14 pl-12 pr-14 rounded-2xl bg-surface border border-app shadow-sm text-app focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all text-base"
+              className="w-full h-12 pl-11 pr-14 rounded-2xl bg-surface/90 border border-app shadow-inner text-app placeholder-muted/60 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 focus:shadow-[0_0_20px_rgba(var(--color-primary-rgb),0.05)] transition-all duration-300 text-sm font-medium"
             />
             {/* Botón de filtros avanzado */}
-            <div className="absolute right-3 flex items-center justify-center">
+            <div className="absolute right-2.5 flex items-center justify-center">
               <button 
                 onClick={() => setIsFilterModalOpen(true)}
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-muted hover:bg-surface-2 transition-colors relative"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-muted hover:bg-surface-2 transition-colors relative hover:scale-105 active:scale-95"
               >
-                <SlidersHorizontal size={18} className={hasActiveFilters ? "text-primary" : ""} />
+                <SlidersHorizontal size={16} className={hasActiveFilters ? "text-primary" : ""} />
                 {hasActiveFilters && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-primary border-2 border-surface" />
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary border-2 border-surface" />
                 )}
               </button>
             </div>
           </div>
-
 
         </div>
       </div>
@@ -421,29 +420,34 @@ export default function ClientCatalog() {
             </div>
 
             {/* Grid de tarjetas cuadradas de categorías en mobile / chips horizontales en desktop */}
-            <div className="flex overflow-x-auto pb-2 scrollbar-none w-full gap-2 sm:gap-3 sm:flex-wrap">
+            <div className="flex overflow-x-auto pb-3 pt-1 scrollbar-none w-full gap-2 sm:gap-2.5 sm:flex-wrap items-center">
               {/* Tarjeta "Todos" */}
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedCategoryId('all')}
-                className={`min-h-[80px] sm:min-h-0 sm:aspect-auto w-24 shrink-0 sm:w-auto sm:h-11 sm:px-5 flex flex-col sm:flex-row items-center justify-center p-2 rounded-2xl border transition-all duration-300 ${
+                className={`relative h-10 px-5 shrink-0 flex items-center justify-center gap-2 rounded-full border text-xs font-extrabold transition-colors duration-300 select-none z-10 cursor-pointer ${
                   selectedCategoryId === 'all'
-                    ? 'bg-primary text-white border-primary shadow-md shadow-primary/20'
-                    : 'bg-surface text-app border-primary-soft hover:border-primary hover:bg-surface-2'
+                    ? 'text-white border-transparent'
+                    : 'bg-surface text-muted hover:text-app border-app hover:bg-surface-2'
                 }`}
               >
+                {selectedCategoryId === 'all' && (
+                  <motion.div
+                    layoutId="activeCategoryBg"
+                    className="absolute inset-0 bg-primary rounded-full -z-10 shadow-xs shadow-primary/20"
+                    transition={{ type: 'spring', stiffness: 350, damping: 26 }}
+                  />
+                )}
                 <Tag 
-                  className={`w-6 h-6 sm:w-4 sm:h-4 shrink-0 mb-1 sm:mb-0 transition-colors ${
+                  className={`w-3.5 h-3.5 transition-colors duration-300 ${
                     selectedCategoryId === 'all' ? 'text-white' : 'text-primary'
                   }`} 
                 />
-                <span className="font-extrabold sm:font-bold text-[11px] sm:text-xs sm:normal-case tracking-wider sm:tracking-normal text-center leading-tight line-clamp-1 select-none">
-                  Todos
-                </span>
+                <span>Todos</span>
               </motion.button>
 
               {/* Tarjetas por categoría */}
-              {activeCategories.map((cat, idx) => {
+              {activeCategories.map((cat) => {
                 const IconComponent = getCategoryIconComponent(cat.iconName)
                 const isSelected = selectedCategoryId === cat.id
                 return (
@@ -451,20 +455,25 @@ export default function ClientCatalog() {
                     key={cat.id}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedCategoryId(cat.id)}
-                    className={`min-h-[80px] sm:min-h-0 sm:aspect-auto w-24 shrink-0 sm:w-auto sm:h-11 sm:px-5 flex flex-col sm:flex-row items-center justify-center p-2 rounded-2xl border transition-all duration-300 ${
+                    className={`relative h-10 px-5 shrink-0 flex items-center justify-center gap-2 rounded-full border text-xs font-extrabold transition-colors duration-300 select-none z-10 cursor-pointer ${
                       isSelected
-                        ? 'bg-primary text-white border-primary shadow-md shadow-primary/20'
-                        : 'bg-surface text-app border-primary-soft hover:border-primary hover:bg-surface-2'
+                        ? 'text-white border-transparent'
+                        : 'bg-surface text-muted hover:text-app border-app hover:bg-surface-2'
                     }`}
                   >
+                    {isSelected && (
+                      <motion.div
+                        layoutId="activeCategoryBg"
+                        className="absolute inset-0 bg-primary rounded-full -z-10 shadow-xs shadow-primary/20"
+                        transition={{ type: 'spring', stiffness: 350, damping: 26 }}
+                      />
+                    )}
                     <IconComponent 
-                      className={`w-6 h-6 sm:w-4 sm:h-4 shrink-0 mb-1 sm:mb-0 transition-colors ${
+                      className={`w-3.5 h-3.5 transition-colors duration-300 ${
                         isSelected ? 'text-white' : 'text-primary'
                       }`} 
                     />
-                    <span className="font-extrabold sm:font-bold text-[11px] sm:text-xs sm:normal-case tracking-wider sm:tracking-normal text-center leading-tight line-clamp-2 break-words select-none px-0.5 sm:px-0">
-                      {cat.nombre}
-                    </span>
+                    <span>{cat.nombre}</span>
                   </motion.button>
                 )
               })}
@@ -480,8 +489,39 @@ export default function ClientCatalog() {
                 ? "grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-4" 
                 : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"
           }>
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className={`bg-surface rounded-3xl animate-pulse border border-app ${catalogLayout === 'list' ? 'h-32' : 'aspect-[3/4]'}`} />
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
+              <div
+                key={i}
+                className={`bg-surface overflow-hidden border border-black/5 dark:border-white/5 animate-pulse flex ${
+                  catalogLayout === 'list' ? 'flex-row h-32' : 'flex-col h-full'
+                }`}
+                style={{ borderRadius: '20px' }}
+              >
+                {/* Contenedor de Imagen */}
+                <div className={`bg-surface-2 shrink-0 ${
+                  catalogLayout === 'list' ? 'w-32 h-32' : 'aspect-square w-full'
+                }`} />
+
+                {/* Bloque de Información */}
+                <div className="p-4 flex-1 flex flex-col gap-2 min-w-0">
+                  <div>
+                    {/* Categoría */}
+                    <div className="h-2.5 w-1/3 bg-surface-2 rounded mb-2" />
+                    
+                    {/* Título */}
+                    <div className="space-y-1.5 mb-2">
+                      <div className="h-3.5 w-5/6 bg-surface-2 rounded" />
+                      <div className="h-3.5 w-2/3 bg-surface-2 rounded" />
+                    </div>
+                  </div>
+
+                  {/* Pie de tarjeta (Precio y Botón) */}
+                  <div className="mt-auto pt-2 flex items-center justify-between">
+                    <div className="h-4.5 w-16 bg-surface-2 rounded" />
+                    <div className="h-8 w-8 rounded-full bg-surface-2 shrink-0" />
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (

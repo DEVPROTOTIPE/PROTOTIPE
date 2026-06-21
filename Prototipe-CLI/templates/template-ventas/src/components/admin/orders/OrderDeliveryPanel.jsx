@@ -163,6 +163,8 @@ export default function OrderDeliveryPanel({ order }) {
           mensajeroExtId: type === 'external' ? id : null,
           items: (order.items || []).map(i => ({ nombre: i.nombre, cantidad: i.cantidad })),
           notas: order.notas || '',
+          paymentMethod: order.metodoPago || '',
+          total: order.total || 0,
         })
       } else {
         await assignDelivery(order.id, {
@@ -209,6 +211,8 @@ export default function OrderDeliveryPanel({ order }) {
           phone:       order.cliente?.celular   || '',
           items: (order.items || []).map(i => ({ nombre: i.nombre, cantidad: i.cantidad })),
           notas: order.notas || '',
+          paymentMethod: order.metodoPago || '',
+          total: order.total || 0,
         })
       }
       await updateDeliveryStatus(order.id, estado, { actorName: 'admin', nota })

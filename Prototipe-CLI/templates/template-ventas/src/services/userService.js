@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, getDoc, getDocFromCache, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, getDocs, doc, getDoc, getDocFromCache, setDoc, updateDoc, serverTimestamp, query, where, orderBy, limit } from 'firebase/firestore'
 import { db } from '../config/firebaseConfig'
 import { COLLECTIONS } from '../constants'
 
@@ -80,4 +80,28 @@ export async function updateClientProfile(celular, data) {
   const userRef = doc(db, COLLECTIONS.USERS, celular)
   await updateDoc(userRef, { ...data, updatedAt: serverTimestamp() })
 }
+
+/**
+ * Obtiene los clientes actualizados desde una fecha específica (sincronización delta).
+ * @param {Date} sinceDate - Fecha límite inferior
+ * @param {number} limitVal - Límite de documentos a retornar
+ * @returns {Promise<Array>} Lista de clientes actualizados
+ */
+export async function getClientsUpdatedSince(sinceDate, limitVal = 100) {
+  try {
+    const clientsRef = collection(db, COLLECTIONS.USERS)
+    const q = query(
+      clientsRef,
+      where('updatedAt', '>', sinceDate),
+      orderBy('updatedAt', 'asc'),
+      limit(limitVal)
+    )
+    const querySnapshot = await getDocs(q)
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  } catch (error) {
+    console.error('[getClientsUpdatedSince] Error al obtener clientes delta:', error)
+    return []
+  }
+}
+
 

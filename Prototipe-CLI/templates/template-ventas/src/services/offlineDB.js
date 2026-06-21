@@ -44,7 +44,7 @@ function openDB() {
         resolve(request.result)
       }
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = () => {
         const db = request.result
         
         // Store de productos
@@ -97,14 +97,15 @@ export async function saveOfflineClient(client) {
   })
 }
 
-export async function saveOfflineClients(clients) {
+export async function saveOfflineClients(clients, clearFirst = true) {
   const db = await openDB()
   return new Promise((resolve, reject) => {
     const transaction = db.transaction('clients', 'readwrite')
     const store = transaction.objectStore('clients')
     
-    // Limpiar previo (opcional, o solo actualizar/insertar)
-    store.clear()
+    if (clearFirst) {
+      store.clear()
+    }
     
     clients.forEach(client => {
       // IndexedDB requiere keyPath 'id'

@@ -14,6 +14,14 @@
 export async function passWelcomePage(page, config) {
   await page.goto('/');
 
+  // Si aparece el modal de telemetría central, se descarta haciendo clic en "Entendido / Aceptar"
+  try {
+    await page.click('button:has-text("Entendido / Aceptar")', { timeout: 3000 });
+    await page.waitForTimeout(500); // Esperar a que se cierre la animación
+  } catch (e) {
+    // Ignorar si el modal no se presenta
+  }
+
   if (config.hasWelcomePage) {
     const welcomeButton = page.locator(`text=${config.welcomeButtonText}`);
     await welcomeButton.waitFor({ state: 'visible', timeout: 10000 });

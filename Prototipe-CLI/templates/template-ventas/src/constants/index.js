@@ -8,9 +8,7 @@ export const ROLES = {
   ADMIN: 'admin',
   CLIENT: 'client',
   VENDEDOR: 'vendedor',
-  COCINERO: 'cocinero',
   BODEGUERO: 'bodeguero',
-  MESERO: 'mesero',
   MENSAJERO: 'mensajero',
 }
 
@@ -172,17 +170,6 @@ export const PORTAL_CONFIG = {
     authRoute: '/portal/auth?rol=vendedor',
     emoji: '🛒',
   },
-  [ROLES.COCINERO]: {
-    label: 'Portal Cocina',
-    labelCorto: 'Cocina',
-    icon: 'ChefHat',
-    color: '#fb923c',
-    colorBg: 'rgba(251,146,60,0.15)',
-    colorBorder: 'rgba(251,146,60,0.3)',
-    route: '/portal/cocina',
-    authRoute: '/portal/auth?rol=cocinero',
-    emoji: '🍳',
-  },
   [ROLES.BODEGUERO]: {
     label: 'Portal Bodega',
     labelCorto: 'Bodega',
@@ -193,17 +180,6 @@ export const PORTAL_CONFIG = {
     route: '/portal/bodega',
     authRoute: '/portal/auth?rol=bodeguero',
     emoji: '📦',
-  },
-  [ROLES.MESERO]: {
-    label: 'Portal Mesero',
-    labelCorto: 'Salón',
-    icon: 'Utensils',
-    color: '#34d399',
-    colorBg: 'rgba(52,211,153,0.15)',
-    colorBorder: 'rgba(52,211,153,0.3)',
-    route: '/portal/mesero',
-    authRoute: '/portal/auth?rol=mesero',
-    emoji: '🍽️',
   },
   [ROLES.MENSAJERO]: {
     label: 'Portal Mensajero',
@@ -288,8 +264,8 @@ export const ORDER_STATE_META = {
   },
   alistamiento: {
     label: 'En Preparación',
-    desc: 'Tu pedido está siendo preparado en cocina',
-    icon: 'ChefHat',
+    desc: 'Tu pedido está en proceso de preparación',
+    icon: 'PackageOpen',
     color: 'orange',
     terminal: false,
     isError: false,
@@ -329,7 +305,7 @@ export const ORDER_STATE_META = {
 }
 
 // ─── Secuencia del stepper para pedidos de DOMICILIO ─────────────────────────
-// Añade estados intermedios aquí cuando implementes cocina, en_camino, etc.
+// Añade estados intermedios aquí cuando sea necesario (ej. en_camino, etc.).
 export const ORDER_TRACKING_STEPS_DOMICILIO = [
   'pendiente',
   'credito_aprobado',

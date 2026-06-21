@@ -5,6 +5,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../config/firebaseConfig'
 import { COLLECTIONS, DELIVERY_STATES } from '../constants'
+import { createCentralNotification, NC_TYPES } from './notificationCenterService'
 
 const COL      = COLLECTIONS.DELIVERIES
 const COL_ORD  = COLLECTIONS.ORDERS
@@ -84,6 +85,8 @@ export async function queueDelivery({
   deliveryCost   = null,
   items          = [],
   notas          = '',
+  paymentMethod  = '',
+  total          = 0,
 }) {
   const ref = doc(db, COL, orderId)
   const estado = mensajeroId || mensajeroExtId ? DELIVERY_STATES.ASSIGNED : DELIVERY_STATES.PENDING
@@ -99,6 +102,8 @@ export async function queueDelivery({
     deliveryCost,
     items,
     notas,
+    paymentMethod,
+    total,
     estado,
     history: [{
       estado,
@@ -150,6 +155,32 @@ export async function assignDelivery(orderId, { mensajeroId = null, mensajeroExt
   })
 
   await _syncOrderDeliveryInfo(orderId, { estado: nuevoEstado, mensajeroId, mensajeroExtId })
+
+  if (mensajeroId) {
+    try {
+      let orderNumber = null
+      try {
+        const orderSnap = await getDoc(doc(db, COL_ORD, orderId))
+        if (orderSnap.exists()) {
+          orderNumber = orderSnap.data().orderNumber
+        }
+      } catch (errSnap) {
+        console.warn('[deliveryService] No se pudo obtener el orderNumber para notificar asignación:', errSnap)
+      }
+
+      await createCentralNotification({
+        recipientId: mensajeroId,
+        recipientRole: 'mensajero',
+        title: 'Nueva Entrega Asignada',
+        body: `Se te ha asignado el domicilio del pedido #${orderNumber || orderId.slice(-4)}.`,
+        type: NC_TYPES.ENTREGA_ASIGNADA,
+        orderId,
+        orderNumber
+      })
+    } catch (err) {
+      console.error('[deliveryService] Error al notificar asignación al mensajero:', err)
+    }
+  }
 }
 
 /** Retira la asignación dejando el pedido como pendiente */

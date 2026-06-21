@@ -11,7 +11,7 @@
  * Modelo de datos (colección 'notifications'):
  * {
  *   recipientId: string,       // celular, employeeId, o 'admin'
- *   recipientRole: string,     // 'admin' | 'client' | 'cocinero' | 'bodeguero' | 'mesero' | 'mensajero' | 'vendedor'
+ *   recipientRole: string,     // 'admin' | 'client' | 'bodeguero' | 'mensajero' | 'vendedor'
  *   title: string,
  *   body: string,
  *   type: string,              // 'pedido_recibido' | 'pedido_preparando' | 'pedido_listo' | 'abono' | 'stock_bajo' | 'reclamo' | 'encargo' | etc.
@@ -64,11 +64,8 @@ export const NC_TYPES = {
   ENTREGA_ASIGNADA: 'entrega_asignada',
   ENTREGA_COMPLETADA: 'entrega_completada',
   ENTREGA_FALLIDA: 'entrega_fallida',
-  // Empleados (cocina/bodega/mesero)
-  PEDIDO_COCINA: 'pedido_cocina',
+  // Empleados (bodega)
   PEDIDO_MODIFICADO: 'pedido_modificado',
-  PEDIDO_LISTO_SERVIR: 'pedido_listo_servir',
-  SOLICITUD_ATENCION: 'solicitud_atencion',
   // Inventario
   STOCK_BAJO: 'stock_bajo',
   PRODUCTO_AGOTADO: 'producto_agotado',
@@ -93,7 +90,7 @@ export const NC_SOUND = {
 export const NC_TYPE_META = {
   [NC_TYPES.PEDIDO_RECIBIDO]:    { label: 'Nuevo Pedido',       icon: 'ShoppingBag', color: 'primary',  sound: NC_SOUND.PEDIDO,      adminRoute: '/admin/pedidos',     clientRoute: '/tienda/pedidos' },
   [NC_TYPES.PEDIDO_ACEPTADO]:    { label: 'Pedido Aceptado',    icon: 'CheckCircle2',color: 'emerald',  sound: NC_SOUND.PEDIDO,      adminRoute: '/admin/pedidos',     clientRoute: '/tienda/pedidos' },
-  [NC_TYPES.PEDIDO_PREPARANDO]:  { label: 'En Preparación',     icon: 'ChefHat',     color: 'orange',   sound: NC_SOUND.PEDIDO,      adminRoute: '/admin/pedidos',     clientRoute: '/tienda/pedidos' },
+  [NC_TYPES.PEDIDO_PREPARANDO]:  { label: 'En Preparación',     icon: 'PackageOpen', color: 'orange',   sound: NC_SOUND.PEDIDO,      adminRoute: '/admin/pedidos',     clientRoute: '/tienda/pedidos' },
   [NC_TYPES.PEDIDO_LISTO]:       { label: 'Pedido Listo',       icon: 'ShoppingBag', color: 'blue',     sound: NC_SOUND.PEDIDO,      adminRoute: '/admin/pedidos',     clientRoute: '/tienda/pedidos' },
   [NC_TYPES.PEDIDO_LISTO_RECOGER]:{ label: 'Listo para Recoger',icon: 'Store',       color: 'blue',     sound: NC_SOUND.PEDIDO,      adminRoute: '/admin/pedidos',     clientRoute: '/tienda/pedidos' },
   [NC_TYPES.PEDIDO_EN_CAMINO]:   { label: 'En Camino',          icon: 'Truck',       color: 'indigo',   sound: NC_SOUND.ENTREGA,     adminRoute: '/admin/pedidos',     clientRoute: '/tienda/pedidos' },
@@ -105,10 +102,7 @@ export const NC_TYPE_META = {
   [NC_TYPES.ENTREGA_ASIGNADA]:   { label: 'Entrega Asignada',   icon: 'Truck',       color: 'primary',  sound: NC_SOUND.ENTREGA,     adminRoute: '/admin/pedidos',     clientRoute: '/tienda/pedidos' },
   [NC_TYPES.ENTREGA_COMPLETADA]: { label: 'Entrega Completada', icon: 'CheckCircle2',color: 'emerald',  sound: NC_SOUND.ENTREGA,     adminRoute: '/admin/pedidos',     clientRoute: '/tienda/pedidos' },
   [NC_TYPES.ENTREGA_FALLIDA]:    { label: 'Entrega Fallida',    icon: 'AlertTriangle',color: 'red',     sound: NC_SOUND.ALERTA,      adminRoute: '/admin/pedidos',     clientRoute: '/tienda/pedidos' },
-  [NC_TYPES.PEDIDO_COCINA]:      { label: 'Nuevo Pedido Cocina',icon: 'ChefHat',     color: 'orange',   sound: NC_SOUND.PEDIDO,      adminRoute: '/admin/pedidos',     clientRoute: null },
   [NC_TYPES.PEDIDO_MODIFICADO]:  { label: 'Pedido Modificado',  icon: 'Edit',        color: 'amber',    sound: NC_SOUND.ALERTA,      adminRoute: '/admin/pedidos',     clientRoute: null },
-  [NC_TYPES.PEDIDO_LISTO_SERVIR]:{ label: 'Listo para Servir',  icon: 'Utensils',    color: 'blue',     sound: NC_SOUND.PEDIDO,      adminRoute: '/admin/pedidos',     clientRoute: null },
-  [NC_TYPES.SOLICITUD_ATENCION]: { label: 'Solicitud de Mesa',  icon: 'Bell',        color: 'amber',    sound: NC_SOUND.ALERTA,      adminRoute: '/admin/pedidos',     clientRoute: null },
   [NC_TYPES.STOCK_BAJO]:         { label: 'Stock Bajo',         icon: 'AlertTriangle',color: 'amber',   sound: NC_SOUND.INVENTARIO,  adminRoute: '/admin/inicio/alertas-stock', clientRoute: null },
   [NC_TYPES.PRODUCTO_AGOTADO]:   { label: 'Producto Agotado',   icon: 'Package',     color: 'red',      sound: NC_SOUND.INVENTARIO,  adminRoute: '/admin/inicio/alertas-stock', clientRoute: null },
   [NC_TYPES.RECLAMO_NUEVO]:      { label: 'Nuevo Reclamo',      icon: 'ShieldAlert', color: 'red',      sound: NC_SOUND.ALERTA,      adminRoute: '/admin/reclamos',    clientRoute: null },
@@ -122,7 +116,7 @@ export const NC_TYPE_META = {
  *
  * @param {Object} params
  * @param {string} params.recipientId   - Celular del cliente o ID del empleado (usar 'admin' para rol admin)
- * @param {string} params.recipientRole - Rol del destinatario (ej: 'admin', 'client', 'cocinero')
+ * @param {string} params.recipientRole - Rol del destinatario (ej: 'admin', 'client', 'vendedor')
  * @param {string} params.title         - Título de la notificación
  * @param {string} params.body          - Cuerpo / mensaje
  * @param {string} params.type          - Clave de tipo (usar NC_TYPES)
@@ -183,7 +177,7 @@ export async function createCentralNotification({
  * todo el historial. Para el historial paginado usar fetchNotificationsPage.
  *
  * @param {string} recipientId   - Celular, ID de empleado, o 'admin'
- * @param {string} recipientRole - Rol ('admin' | 'client' | 'cocinero' | etc.)
+ * @param {string} recipientRole - Rol ('admin' | 'client' | 'vendedor' | etc.)
  * @param {Function} onUpdate    - Callback que recibe el array de notificaciones (raw docs incluidos)
  * @param {number} [pageSize=15] - Número de notificaciones del lote en tiempo real
  * @returns {Function} - Función de unsuscribirse
@@ -278,6 +272,49 @@ export async function fetchNotificationsPage(recipientId, recipientRole, pageSiz
     console.error('[NC] Error en fetchNotificationsPage:', error)
     return { items: [], lastDoc: null, hasMore: false }
   }
+}
+
+/**
+ * Se suscribe en tiempo real al conteo de notificaciones no leídas.
+ *
+ * @param {string} recipientId   - Celular, ID de empleado o 'admin'
+ * @param {string} recipientRole - Rol ('admin' | 'client' | 'vendedor' | etc.)
+ * @param {Function} onCountUpdate - Callback que recibe el número total de no leídas
+ * @returns {Function} - Función de desuscripción
+ */
+export function subscribeToUnreadCount(recipientId, recipientRole, onCountUpdate) {
+  if (!recipientId && !recipientRole) {
+    onCountUpdate(0)
+    return () => {}
+  }
+
+  const isClient = recipientRole === 'client'
+
+  let q
+  if (isClient && recipientId) {
+    q = query(
+      collection(db, COL),
+      where('recipientId', '==', recipientId),
+      where('recipientRole', '==', 'client'),
+      where('status', '==', 'unread')
+    )
+  } else if (recipientRole) {
+    q = query(
+      collection(db, COL),
+      where('recipientRole', '==', recipientRole),
+      where('status', '==', 'unread')
+    )
+  } else {
+    onCountUpdate(0)
+    return () => {}
+  }
+
+  return onSnapshot(q, (snap) => {
+    onCountUpdate(snap.size)
+  }, (error) => {
+    console.error('[NC] Error en suscripción de conteo:', error)
+    onCountUpdate(0)
+  })
 }
 
 /**

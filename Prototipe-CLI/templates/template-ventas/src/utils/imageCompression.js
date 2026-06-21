@@ -56,10 +56,11 @@ export function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0
         canvas.toBlob(
           (blob) => {
             if (blob) {
-              // Mantener el nombre original pero con extensión .webp
               const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name
-              blob.name = `${nameWithoutExt}.webp`
-              resolve(blob)
+              // Devolver un File real (no un Blob con .name hack) para garantizar
+              // que .name, .type y .size sean propiedades nativas accesibles en uploadService
+              const webpFile = new File([blob], `${nameWithoutExt}.webp`, { type: 'image/webp' })
+              resolve(webpFile)
             } else {
               resolve(file) // Fallback al original si toBlob falla
             }

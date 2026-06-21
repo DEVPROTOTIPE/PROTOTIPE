@@ -80,11 +80,27 @@ async function main() {
     process.exit(1);
   }
 
-  // 1. Escanear clientes
-  const clientDirs = fs.readdirSync(workspaceRoot).filter(file => {
-    const fullPath = path.join(workspaceRoot, file);
-    return fs.statSync(fullPath).isDirectory() && fs.existsSync(path.join(fullPath, 'package.json'));
-  });
+  // 1. Escanear clientes en subcarpetas por core
+  const clientDirs = [];
+  try {
+    const coreDirs = fs.readdirSync(workspaceRoot).filter(file => {
+      const fullPath = path.join(workspaceRoot, file);
+      return fs.statSync(fullPath).isDirectory() && file !== 'Documentacion PROTOTIPE';
+    });
+
+    for (const coreDir of coreDirs) {
+      const corePath = path.join(workspaceRoot, coreDir);
+      const subDirs = fs.readdirSync(corePath).filter(file => {
+        const fullPath = path.join(corePath, file);
+        return fs.statSync(fullPath).isDirectory() && fs.existsSync(path.join(fullPath, 'package.json'));
+      });
+      for (const subDir of subDirs) {
+        clientDirs.push(path.join(coreDir, subDir).replace(/\\/g, '/'));
+      }
+    }
+  } catch (err) {
+    logger.error(`Error al escanear directorios de clientes: ${err.message}`);
+  }
 
   if (clientDirs.length === 0) {
     logger.warn('⚠️ No se encontraron instancias de clientes en el directorio de trabajo.');
@@ -128,10 +144,12 @@ async function main() {
         inferredTemplate = answers.template;
       }
 
+      const baseName = path.basename(dirName);
       meta = {
-        clientId: dirName.replace(/^app-/, ''),
-        projectName: dirName,
+        clientId: baseName.replace(/^app-/, ''),
+        projectName: baseName,
         template: inferredTemplate,
+        coreType: dirName.split('/')[0] || 'seed',
         niche: 'general_custom',
         version: '1.0.0',
         createdAt: new Date().toISOString()

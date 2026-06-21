@@ -452,9 +452,7 @@ export default function AdminSales() {
       ? 'Transferencia' 
       : 'Efectivo'
 
-    const deliveryLabel = order.tipoEntrega === 'mesa'
-      ? `Consumo en Salón (Mesa: ${order.tableName || 'N/A'})`
-      : order.tipoEntrega === 'retiro'
+    const deliveryLabel = order.tipoEntrega === 'retiro'
       ? 'Física (En Tienda)'
       : order.tipoEntrega === 'domicilio'
       ? 'Domicilio a domicilio'

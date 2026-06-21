@@ -96,7 +96,7 @@ export function subscribeToEmployees(callback) {
  * @param {string} pin
  * @returns {Promise<object|null>}
  */
-export async function authenticateEmployeeByPin(pin) {
+export async function authenticateEmployeeByPin() {
   console.warn("authenticateEmployeeByPin está obsoleta por razones de seguridad. Usa authenticateEmployeeByIdAndPin.")
   return null
 }

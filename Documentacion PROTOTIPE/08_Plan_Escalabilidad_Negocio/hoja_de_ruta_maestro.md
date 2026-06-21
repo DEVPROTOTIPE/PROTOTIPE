@@ -40,11 +40,9 @@ La **App Ventas** es la plantilla de mayor madurez y será el motor de todos los
 | `couponsEnabled` | Cupones | Sistema de descuentos por código |
 | `claimsEnabled` | Garantías y Reclamos | Flujo de posventa y devoluciones |
 | `wholesaleEnabled` | Mayoreo | Precios diferenciados por cantidad |
-| `tablesEnabled` | Mesas / Salón | Gestión de mesas para restaurantes o bares |
 | `deliveryEnabled` | Domicilios | Seguimiento de pedidos a domicilio |
 | `commissionsEnabled` | Comisiones | Reportes de comisiones por vendedor |
 | `enableDianBilling` | Facturación DIAN | Emisión de documentos electrónicos DIAN con cobro por volumen |
-| `kdsEnabled` | Pantalla Cocina KDS | Pantalla interactiva en vivo para control de comandas en cocina ordenadas por prioridad |
 | `reservasEnabled` | Reservas y Citas | Agenda interactiva semanal y cuadrícula de horarios asignables para servicios |
 | `posExpressScanner` | POS Exprés Scanner | Checkout rápido interpretando eventos de lectores de códigos de barra físicos |
 | `ordenesTrabajo` | Órdenes de Trabajo | Ficha de recepción de maquinaria y diagnóstico con cálculo de repuestos y firma digital |
@@ -60,7 +58,6 @@ Cada nicho tiene una **App Base Especializada** derivada del core, con su propia
 | # | Nicho | App Base | Estado | Prioridad |
 |---|---|---|---|---|
 | 1 | 🛍️ Tiendas de Ropa y Calzado | App Ventas (Core) | ✅ **Producción** | Alta |
-| 2 | 🍔 Restaurantes y Comidas Rápidas | App Restaurante | 📋 **Planificado** | Alta |
 | 3 | 💈 Barberías y Salones de Belleza | App Servicios | 📋 **Planificado** | Media |
 | 4 | 🛒 Tiendas de Barrio y Abarrotes | App Tendero | 📋 **Planificado** | Alta |
 | 5 | 🔧 Talleres y Servicios Técnicos | App Taller | 📋 **Planificado** | Media |
@@ -71,23 +68,6 @@ Cada nicho tiene una **App Base Especializada** derivada del core, con su propia
 ---
 
 ## 📱 Apps Base Planificadas
-
-### 2. App Restaurante 🍔
-
-**Descripción:** Plataforma de pedidos y gestión de mesa para restaurantes, cocinas rápidas y food trucks.
-
-**Diferenciadores del Core:**
-- Módulo de mesas con estado en tiempo real (disponible / ocupada / limpiando).
-- Carta digital por categorías con fotos de alta resolución.
-- Pantalla de cocina (Kitchen Display System - KDS) para ver pedidos en cola.
-- Comandas digitales enviadas directamente a cocina al confirmar el pedido.
-- Cierre de cuenta y división de pago entre comensales.
-
-**Feature Flags activadas por defecto:**
-`tablesEnabled`, `commissionsEnabled`
-
-**Feature Flags opcionales:**
-`deliveryEnabled` (para comidas a domicilio), `couponsEnabled` (para promos)
 
 ---
 
@@ -153,11 +133,10 @@ Cada nicho tiene una **App Base Especializada** derivada del core, con su propia
   - [ ] Documentar el primer caso de uso exitoso como material de ventas.
 
 ### Fase 2 — Primer Vertical Nuevo (3-6 meses)
-- **Objetivo:** Lanzar la App Restaurante como el segundo vertical, con al menos 2 clientes pagos.
+- **Objetivo:** Lanzar la App Servicios (Barberías / Salones) como el segundo vertical, con al menos 2 clientes pagos.
 - **Acciones clave:**
-  - [ ] Construir módulo de Mesas y KDS sobre el core existente.
-  - [ ] Adaptar el onboarding para el nicho de restaurantes.
-  - [ ] Conseguir un restaurante piloto para validar el flujo en producción.
+  - [ ] Adaptar el onboarding para el nicho de servicios y turnos.
+  - [ ] Conseguir un salón/barbería piloto para validar el flujo en producción.
 
 ### Fase 3 — Escala Multitenant (6-18 meses)
 - **Objetivo:** Superar los 10 clientes activos en al menos 3 verticales distintos.

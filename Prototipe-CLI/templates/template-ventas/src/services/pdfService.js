@@ -118,9 +118,9 @@ export async function exportSalesReportPDF({ dateFrom, dateTo, orders, products 
       transferTotal += totalPedido
     } else if (o.metodoPago === PAYMENT_METHODS.CREDIT) {
       const credit = creditsMap.get(o.id)
-      let saldo = 0
+      let saldo;
       if (credit) {
-        saldo = Number(credit.saldoPendiente) ?? 0
+        saldo = Number(credit.saldoPendiente) || 0
       } else {
         saldo = o.estado === ORDER_STATES.COMPLETED ? 0 : totalPedido
       }
@@ -370,15 +370,15 @@ export async function exportSalesReportPDF({ dateFrom, dateTo, orders, products 
 /**
  * Genera y descarga el PDF de Reporte de Cuentas por Cobrar y Deudas.
  */
-export async function exportCreditsReportPDF({ orders }) {
+export async function exportCreditsReportPDF() {
   const { jsPDF } = await import('jspdf')
   const { autoTable } = await import('jspdf-autotable')
-  const { collection, getDocs } = await import('firebase/firestore')
+  const { collection, getDocs, query, where } = await import('firebase/firestore')
   const { db } = await import('../config/firebaseConfig')
 
   let credits = []
   try {
-    const snap = await getDocs(collection(db, COLLECTIONS.CREDITS))
+    const snap = await getDocs(query(collection(db, COLLECTIONS.CREDITS), where('estado', '==', 'activo')))
     credits = snap.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
   } catch (err) {
     console.error('[pdfService] Error al obtener créditos para reporte:', err)
@@ -392,7 +392,7 @@ export async function exportCreditsReportPDF({ orders }) {
   })
 
   // Activos y deudores únicos
-  const activeCredits = credits.filter(c => c.estado === 'activo')
+  const activeCredits = credits
   const totalCartera = activeCredits.reduce((sum, c) => sum + (Number(c.saldoPendiente) || 0), 0)
   
   const deudoresSet = new Set(activeCredits.map(c => c.cliente?.celular).filter(Boolean))

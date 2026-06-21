@@ -16,6 +16,8 @@ export default function useAuthInit() {
   const { role, setAdmin, setLoading, logout } = useAuthStore()
 
   useEffect(() => {
+    let isMounted = true
+
     // 1. Si el LocalStorage ya hidrató un Cliente, apagamos el spinner de inmediato
     // salvo que estemos intentando entrar al panel de administración (esperamos a Firebase Auth).
     if (role === ROLES.CLIENT && !window.location.pathname.startsWith('/admin')) {
@@ -24,6 +26,8 @@ export default function useAuthInit() {
 
     // 2. Escuchamos cambios en Firebase Auth (para el Administrador)
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (!isMounted) return
+
       if (firebaseUser) {
         // Hay un administrador autenticado en Firebase
         setAdmin(firebaseUser) // setAdmin pone isLoading en false automáticamente
@@ -32,6 +36,7 @@ export default function useAuthInit() {
         const userRef = doc(db, COLLECTIONS.USERS, firebaseUser.uid)
         getDoc(userRef)
           .then((userSnap) => {
+            if (!isMounted) return
             if (!userSnap.exists()) {
               const configState = useAppConfigStore.getState()
               const finalName = configState.sellerName || 'Administrador'
@@ -46,15 +51,15 @@ export default function useAuthInit() {
               }
               setDoc(userRef, adminData, { merge: true })
                 .then(() => {
-                  console.log('[useAuthInit] Admin profile recreated successfully in Firestore.')
+                  if (isMounted) console.log('[useAuthInit] Admin profile recreated successfully in Firestore.')
                 })
                 .catch((err) => {
-                  console.error('[useAuthInit] Error auto-recreating admin profile in Firestore:', err)
+                  if (isMounted) console.error('[useAuthInit] Error auto-recreating admin profile in Firestore:', err)
                 })
             }
           })
           .catch((err) => {
-            console.error('[useAuthInit] Error checking admin profile in Firestore:', err)
+            if (isMounted) console.error('[useAuthInit] Error checking admin profile in Firestore:', err)
           })
       } else {
         // Firebase dice que no hay nadie autenticado.
@@ -65,11 +70,14 @@ export default function useAuthInit() {
         }
         // En cualquier caso, si no hay firebaseUser, apagamos el spinner
         // para que la app fluya (redirija al login o deje pasar al cliente).
-        useAuthStore.getState().setLoading(false)
+        if (isMounted) {
+          useAuthStore.getState().setLoading(false)
+        }
       }
     })
 
     return () => {
+      isMounted = false
       unsubscribe()
     }
   }, []) // Solo se ejecuta una vez al montar la App

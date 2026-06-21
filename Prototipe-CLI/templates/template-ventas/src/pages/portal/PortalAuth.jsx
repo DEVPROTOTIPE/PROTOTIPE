@@ -24,7 +24,7 @@ const ROLE_ROUTES = Object.fromEntries(
 
 export default function PortalAuth() {
   const [searchParams] = useSearchParams()
-  const rolParam = searchParams.get('rol') // viene del QR: ?rol=cocinero
+  const rolParam = searchParams.get('rol') // viene del QR: ?rol=vendedor
   const nav = useNavigate()
 
   // Step: 'role-select' | 'employee-select' | 'pin'
@@ -38,6 +38,23 @@ export default function PortalAuth() {
   const [pin, setPin]     = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [failedAttempts, setFailedAttempts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('portal-failed-attempts')
+      return saved ? JSON.parse(saved) : {}
+    } catch {
+      return {}
+    }
+  })
+  const [lockouts, setLockouts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('portal-lockouts')
+      return saved ? JSON.parse(saved) : {}
+    } catch {
+      return {}
+    }
+  })
+  const [secondsLeft, setSecondsLeft] = useState(0)
 
   const { setPortalEmployee } = usePortalStore()
   const { appName, appIcon, hasMultipleEmployees } = useAppConfigStore()
@@ -61,6 +78,19 @@ export default function PortalAuth() {
     })
     return () => unsub()
   }, [selectedRol])
+
+  // Efecto para verificar bloqueo activo del empleado seleccionado
+  useEffect(() => {
+    if (step !== 'pin' || !selectedEmployee) return
+    const checkLockout = () => {
+      const lockUntil = lockouts[selectedEmployee.id] || 0
+      const diff = Math.max(0, Math.ceil((lockUntil - Date.now()) / 1000))
+      setSecondsLeft(diff)
+    }
+    checkLockout()
+    const timer = setInterval(checkLockout, 1000)
+    return () => clearInterval(timer)
+  }, [step, selectedEmployee, lockouts])
 
   const handleSelectRole = (rol) => {
     setSelectedRol(rol)
@@ -90,24 +120,48 @@ export default function PortalAuth() {
   }
 
   const handleKey = useCallback((digit) => {
+    if (secondsLeft > 0) return
     setError('')
     if (pin.length < 6) setPin(p => p + digit)
-  }, [pin])
+  }, [pin, secondsLeft])
 
   const handleDelete = () => {
+    if (secondsLeft > 0) return
     setError('')
     setPin(p => p.slice(0, -1))
   }
 
   const handleSubmit = async () => {
+    if (secondsLeft > 0) return
     if (pin.length !== 6) { setError('El PIN debe tener exactamente 6 dígitos'); return }
     setLoading(true)
     try {
       const employee = await authenticateEmployeeByIdAndPin(selectedEmployee.id, pin)
       if (!employee) {
-        setError('PIN incorrecto. Intenta de nuevo.')
+        const currentFailed = (failedAttempts[selectedEmployee.id] || 0) + 1
+        const newFailedAttempts = { ...failedAttempts, [selectedEmployee.id]: currentFailed }
+        
+        setFailedAttempts(newFailedAttempts)
+        localStorage.setItem('portal-failed-attempts', JSON.stringify(newFailedAttempts))
+        
+        if (currentFailed >= 3) {
+          const lockoutUntil = Date.now() + 30000 // 30 segundos
+          const newLockouts = { ...lockouts, [selectedEmployee.id]: lockoutUntil }
+          setLockouts(newLockouts)
+          localStorage.setItem('portal-lockouts', JSON.stringify(newLockouts))
+          setError('Demasiados intentos fallidos. Bloqueado por 30 segundos.')
+          
+          const resetFailedAttempts = { ...newFailedAttempts, [selectedEmployee.id]: 0 }
+          setFailedAttempts(resetFailedAttempts)
+          localStorage.setItem('portal-failed-attempts', JSON.stringify(resetFailedAttempts))
+        } else {
+          setError(`PIN incorrecto. Intentos restantes: ${3 - currentFailed}`)
+        }
         setPin('')
       } else {
+        const newFailedAttempts = { ...failedAttempts, [selectedEmployee.id]: 0 }
+        setFailedAttempts(newFailedAttempts)
+        localStorage.setItem('portal-failed-attempts', JSON.stringify(newFailedAttempts))
         const logId = await logLogin(employee)
         setPortalEmployee(employee, logId)
         nav(ROLE_ROUTES[employee.rol] || '/portal/vendedor', { replace: true })
@@ -239,26 +293,48 @@ export default function PortalAuth() {
               )}
 
               {/* Teclado numérico */}
-              <div className="portal-auth-keypad">
-                {KEYS.map((key) => {
-                  if (key === '⌫') return (
-                    <button key={key} onClick={handleDelete} className="portal-key portal-key--action" aria-label="Borrar">
-                      <Delete size={20} />
-                    </button>
-                  )
-                  if (key === '✓') return (
-                    <button key={key} onClick={handleSubmit} disabled={loading || pin.length !== 6}
-                      className="portal-key portal-key--confirm" aria-label="Confirmar">
-                      {loading ? <Loader2 size={20} className="animate-spin" /> : '✓'}
-                    </button>
-                  )
-                  return (
-                    <button key={key} onClick={() => handleKey(key)} className="portal-key" aria-label={`Dígito ${key}`}>
-                      {key}
-                    </button>
-                  )
-                })}
-              </div>
+              {secondsLeft > 0 ? (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '1.5rem',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  borderRadius: '1.25rem',
+                  width: '100%',
+                  textAlign: 'center',
+                  gap: '0.5rem',
+                  marginTop: '1rem',
+                  color: '#ef4444'
+                }}>
+                  <AlertCircle size={28} className="animate-bounce" />
+                  <p style={{ fontSize: '0.875rem', fontWeight: 'bold' }}>Teclado Temporalmente Bloqueado</p>
+                  <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)' }}>Intenta de nuevo en <span style={{ fontWeight: 'bold', color: '#ef4444' }}>{secondsLeft}s</span></p>
+                </div>
+              ) : (
+                <div className="portal-auth-keypad">
+                  {KEYS.map((key) => {
+                    if (key === '⌫') return (
+                      <button key={key} onClick={handleDelete} className="portal-key portal-key--action" aria-label="Borrar">
+                        <Delete size={20} />
+                      </button>
+                    )
+                    if (key === '✓') return (
+                      <button key={key} onClick={handleSubmit} disabled={loading || pin.length !== 6}
+                        className="portal-key portal-key--confirm" aria-label="Confirmar">
+                        {loading ? <Loader2 size={20} className="animate-spin" /> : '✓'}
+                      </button>
+                    )
+                    return (
+                      <button key={key} onClick={() => handleKey(key)} className="portal-key" aria-label={`Dígito ${key}`}>
+                        {key}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </motion.div>
           )}
 

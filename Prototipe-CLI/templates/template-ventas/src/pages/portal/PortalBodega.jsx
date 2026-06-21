@@ -10,18 +10,21 @@ import { Warehouse, Plus, Minus, Package, Search, CheckCircle2, AlertCircle, Loa
 import { useQueryClient } from '@tanstack/react-query'
 import { useProducts } from '../../hooks/useInventory'
 import { registerStockMovement, subscribeToEmployeeMovements } from '../../services/stockMovementService'
-import { updateDoc, doc } from 'firebase/firestore'
+import { updateDoc, doc, runTransaction } from 'firebase/firestore'
 import { db } from '../../config/firebaseConfig'
 import { COLLECTIONS } from '../../constants'
 import usePortalStore from '../../store/portalStore'
 import { formatCurrency } from '../../utils/formatters'
 
 const TYPES = [
-  { value: 'entrada',  label: 'Entrada',  Icon: ArrowUpCircle,   color: '#34d399' },
-  { value: 'salida',   label: 'Salida',   Icon: ArrowDownCircle, color: '#fb923c' },
-  { value: 'ajuste',   label: 'Ajuste',   Icon: SlidersHorizontal, color: '#38bdf8' },
-  { value: 'merma',    label: 'Merma',    Icon: Trash2,          color: '#f87171' },
+  { value: 'entrada',  label: 'Entrada',  Icon: ArrowUpCircle,   color: '#34d399', unlimited: true  },
+  { value: 'salida',   label: 'Salida',   Icon: ArrowDownCircle, color: '#fb923c', unlimited: false },
+  { value: 'ajuste',   label: 'Ajuste',   Icon: SlidersHorizontal, color: '#38bdf8', unlimited: false },
+  { value: 'merma',    label: 'Merma',    Icon: Trash2,          color: '#f87171', unlimited: false },
 ]
+
+const UNLIMITED_STOCK = 9999
+const isUnlimited = (stock) => (stock || 0) >= UNLIMITED_STOCK
 
 export default function PortalBodega() {
   const queryClient = useQueryClient()
@@ -71,9 +74,41 @@ export default function PortalBodega() {
     const qty = parseInt(quantity)
     if (isNaN(qty) || qty <= 0) { setFeedback({ type: 'error', msg: 'Ingresa una cantidad válida.' }); return }
 
+    // Bloquear salida/merma en variantes con stock ilimitado
+    const varIsUnlimited = isUnlimited(selectedVariant.stock)
+    if (varIsUnlimited && (moveType === 'salida' || moveType === 'merma')) {
+      setFeedback({ type: 'error', msg: 'No se pueden registrar salidas o mermas en productos con stock ilimitado.' })
+      return
+    }
+
     setLoading(true)
     try {
-      // 1. Registrar el movimiento en el log
+      // 1. Actualizar stock mediante transacción atómica para evitar race conditions
+      const productRef = doc(db, COLLECTIONS.PRODUCTS, selectedProduct.id)
+      let finalVariantes = null
+      let finalNewStock = null
+
+      await runTransaction(db, async (tx) => {
+        const snap = await tx.get(productRef)
+        if (!snap.exists()) throw new Error('Producto no encontrado')
+        const freshVariantes = snap.data().variantes || []
+        const freshVariant = freshVariantes.find(v => v.id === selectedVariant.id)
+        if (!freshVariant) throw new Error('Variante no encontrada')
+
+        const currentStock = freshVariant.stock || 0
+        let newStock = currentStock
+        if (moveType === 'entrada')                     newStock = currentStock + qty
+        else if (moveType === 'salida' || moveType === 'merma') newStock = Math.max(0, currentStock - qty)
+        else if (moveType === 'ajuste')                  newStock = qty
+
+        finalNewStock = newStock
+        finalVariantes = freshVariantes.map(v =>
+          v.id === selectedVariant.id ? { ...v, stock: newStock } : v
+        )
+        tx.update(productRef, { variantes: finalVariantes })
+      })
+
+      // 2. Registrar el movimiento en el log (solo si la transacción anterior fue exitosa)
       await registerStockMovement({
         productId: selectedProduct.id,
         productName: selectedProduct.nombre,
@@ -84,30 +119,16 @@ export default function PortalBodega() {
         employeeName: portalEmployee?.nombre || '',
       })
 
-      // 2. Actualizar el stock de la variante en Firestore
-      const currentStock = selectedVariant.stock || 0
-      let newStock = currentStock
-      if (moveType === 'entrada') newStock = currentStock + qty
-      else if (moveType === 'salida' || moveType === 'merma') newStock = Math.max(0, currentStock - qty)
-      else if (moveType === 'ajuste') newStock = qty
-
-      const updatedVariantes = selectedProduct.variantes.map(v =>
-        v.id === selectedVariant.id ? { ...v, stock: newStock } : v
-      )
-      await updateDoc(doc(db, COLLECTIONS.PRODUCTS, selectedProduct.id), { variantes: updatedVariantes })
-
-      // Invalidar caché de productos en react-query para actualizar el listado izquierdo y otros componentes
+      // Invalidar caché
       queryClient.invalidateQueries({ queryKey: ['products'] })
 
-      // Sincronizar el estado local para reflejar la actualización inmediatamente en el portal de bodega
-      const updatedProduct = { ...selectedProduct, variantes: updatedVariantes }
+      // Sincronizar estado local
+      const updatedProduct = { ...selectedProduct, variantes: finalVariantes }
       setSelectedProduct(updatedProduct)
-      const newVar = updatedVariantes.find(v => v.id === selectedVariant.id)
-      if (newVar) {
-        setSelectedVariant(newVar)
-      }
+      const newVar = finalVariantes.find(v => v.id === selectedVariant.id)
+      if (newVar) setSelectedVariant(newVar)
 
-      setFeedback({ type: 'ok', msg: `${moveType === 'ajuste' ? 'Stock ajustado a' : 'Movimiento registrado.'} ${moveType === 'ajuste' ? newStock + ' und.' : ''}` })
+      setFeedback({ type: 'ok', msg: `${moveType === 'ajuste' ? 'Stock ajustado a' : 'Movimiento registrado.'} ${moveType === 'ajuste' ? finalNewStock + ' und.' : ''}` })
       setQuantity('')
       setReason('')
     } catch (e) {
@@ -166,8 +187,9 @@ export default function PortalBodega() {
                 <div className="portal-loading flex-1 flex items-center justify-center"><Loader2 className="animate-spin" size={24} /></div>
               ) : (
                 <div className="portal-bodega-list flex-1 overflow-y-auto">
-                  {filtered.map(p => {
+                   {filtered.map(p => {
                     const totalStock = p.variantes?.reduce((s, v) => s + (v.stock || 0), 0) || 0
+                    const unlimited = isUnlimited(totalStock)
                     return (
                       <button key={p.id} className={`portal-bodega-product-btn ${selectedProduct?.id === p.id ? 'portal-bodega-product-btn--active' : ''}`}
                         onClick={() => selectProduct(p)}>
@@ -175,8 +197,8 @@ export default function PortalBodega() {
                           <p className="portal-bodega-product-name">{p.nombre}</p>
                           <p className="portal-bodega-product-price">{formatCurrency(p.precioBase)}</p>
                         </div>
-                        <span className={`portal-stock-badge ${totalStock <= 0 ? 'portal-stock-badge--agotado' : totalStock <= 5 ? 'portal-stock-badge--low' : ''}`}>
-                          {totalStock} und.
+                        <span className={`portal-stock-badge ${!unlimited && totalStock <= 0 ? 'portal-stock-badge--agotado' : !unlimited && totalStock <= 5 ? 'portal-stock-badge--low' : ''}`}>
+                          {unlimited ? 'Disponible' : `${totalStock} und.`}
                         </span>
                       </button>
                     )
@@ -261,7 +283,12 @@ export default function PortalBodega() {
 
               {selectedVariant && (
                 <div className="portal-bodega-current-stock">
-                  Stock actual: <strong>{selectedVariant.stock || 0} unidades</strong>
+                  Stock actual: <strong>
+                    {isUnlimited(selectedVariant.stock) ? 'Ilimitado / Disponible' : `${selectedVariant.stock || 0} unidades`}
+                  </strong>
+                  {isUnlimited(selectedVariant.stock) && (
+                    <span className="text-xs text-amber-400 ml-2">(salidas y mermas no aplican)</span>
+                  )}
                 </div>
               )}
 
@@ -269,7 +296,7 @@ export default function PortalBodega() {
               <div className="portal-section">
                 <p className="portal-section-title">Tipo de movimiento</p>
                 <div className="portal-bodega-types">
-                  {TYPES.map(({ value, label, Icon, color }) => (
+                  {TYPES.filter(t => !isUnlimited(selectedVariant?.stock) || t.unlimited !== false).map(({ value, label, Icon, color }) => (
                     <button key={value} className={`portal-type-btn ${moveType === value ? 'portal-type-btn--active' : ''}`}
                       style={moveType === value ? { background: color + '22', borderColor: color, color } : {}}
                       onClick={() => setMoveType(value)}>

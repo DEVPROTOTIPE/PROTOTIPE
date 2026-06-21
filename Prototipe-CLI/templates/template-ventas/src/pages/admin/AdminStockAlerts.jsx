@@ -29,6 +29,7 @@ export default function AdminStockAlerts() {
     const alerts = []
     
     products.forEach(p => {
+      if (p.stockInfinito === true) return
       (p.variantes || []).forEach(v => {
         if (v.stock <= p.umbralAlerta) {
           const variantName = [v.color, v.talla].filter(Boolean).join(' / ') || 'Estándar'

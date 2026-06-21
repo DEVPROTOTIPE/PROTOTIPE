@@ -41,9 +41,7 @@ const ProductDetailPage = lazy(() => import('../pages/client/ProductDetailPage')
 // Páginas Portal Operativo
 const PortalAuth = lazy(() => import('../pages/portal/PortalAuth'))
 const PortalVendedor = lazy(() => import('../pages/portal/PortalVendedor'))
-const PortalCocina = lazy(() => import('../pages/portal/PortalCocina'))
 const PortalBodega = lazy(() => import('../pages/portal/PortalBodega'))
-const PortalMesero = lazy(() => import('../pages/portal/PortalMesero'))
 const PortalMensajero = lazy(() => import('../pages/portal/PortalMensajero'))
 
 // ─── Guard de rutas por rol ───────────────────────────────────────────────────
@@ -129,19 +127,9 @@ export default function AppRoutes() {
               <PortalVendedor />
             </RequirePortalAuth>
           } />
-          <Route path="cocina" element={
-            <RequirePortalAuth allowedRole={ROLES.COCINERO}>
-              <PortalCocina />
-            </RequirePortalAuth>
-          } />
           <Route path="bodega" element={
             <RequirePortalAuth allowedRole={ROLES.BODEGUERO}>
               <PortalBodega />
-            </RequirePortalAuth>
-          } />
-          <Route path="mesero" element={
-            <RequirePortalAuth allowedRole={ROLES.MESERO}>
-              <PortalMesero />
             </RequirePortalAuth>
           } />
           <Route path="mensajero" element={

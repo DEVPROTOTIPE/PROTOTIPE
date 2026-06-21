@@ -23,7 +23,6 @@ export const DEFAULT_SETTINGS = {
   sellerName: 'Vendedor',
   appIcon: '',
   theme: 'zafiro-moderno',
-  tablesEnabled: false,
   whatsappAdmin: '',
   bankInfo: {
     numeroCuenta: '',

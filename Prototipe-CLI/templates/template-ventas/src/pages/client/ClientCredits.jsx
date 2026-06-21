@@ -8,6 +8,7 @@ import { formatCurrency } from '../../utils/formatters'
 import { SUPPORT_WHATSAPP } from '../../constants'
 
 import { createCreditNotification } from '../../services/creditService'
+import ModalTemplate from '../../components/common/ModalTemplate'
 
 export default function ClientCredits() {
   const { user } = useAuthStore()
@@ -84,7 +85,7 @@ export default function ClientCredits() {
   }
 
   const handleSendAbonoWhatsApp = async (e) => {
-    e.preventDefault()
+    if (e && e.preventDefault) e.preventDefault()
     const monto = Number(abonoMonto)
     
     if (!abonoMonto || isNaN(monto) || monto <= 0) {
@@ -225,77 +226,58 @@ export default function ClientCredits() {
       </div>
 
       {/* MODAL PARA AGREGAR ABONO CLIENTE */}
-      <AnimatePresence>
-        {selectedCredit && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }}
+      <ModalTemplate
+        isOpen={!!selectedCredit}
+        onClose={() => setSelectedCredit(null)}
+        title="Registrar Abono"
+        subtitle={selectedCredit ? `Ingresa el monto que deseas abonar para el pedido #${selectedCredit.orderNumber}.` : ''}
+        icon={DollarSign}
+        footerActions={
+          <div className="flex gap-3 w-full">
+            <button
+              type="button"
               onClick={() => setSelectedCredit(null)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
-
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative w-full max-w-sm bg-surface rounded-3xl shadow-2xl p-6 border border-app z-10"
+              className="flex-1 h-12 bg-surface-2 text-app border border-app rounded-xl font-bold transition-all active:scale-95 cursor-pointer hover:bg-app/10"
             >
-              <div className="w-12 h-12 rounded-2xl bg-primary-soft flex items-center justify-center mb-4 border border-primary-soft">
-                <DollarSign size={24} className="text-primary" />
-              </div>
-              
-              <h2 className="text-xl font-black text-app mb-1">Registrar Abono</h2>
-              <p className="text-sm text-muted mb-6">
-                Ingresa el monto que deseas abonar para el pedido <span className="font-mono font-bold text-app">#{selectedCredit.orderNumber}</span>.
-              </p>
- 
-              <form onSubmit={handleSendAbonoWhatsApp} className="space-y-4">
-                <div className="bg-warning-soft border border-warning-soft rounded-2xl p-4 flex justify-between items-center">
-                  <span className="text-xs font-bold text-warning uppercase tracking-wider">Saldo Pendiente:</span>
-                  <span className="text-xl font-black text-warning">
-                    {formatCurrency(selectedCredit.saldoPendiente)}
-                  </span>
-                </div>
- 
-                <div>
-                  <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Monto a abonar *</label>
-                  <input
-                    type="number"
-                    value={abonoMonto}
-                    onChange={(e) => {
-                      setAbonoMonto(e.target.value)
-                      setAbonoError('')
-                    }}
-                    className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-lg font-bold"
-                    placeholder="Ingresa el valor numérico"
-                    autoFocus
-                  />
-                  {abonoError && <p className="text-xs text-red-500 font-semibold mt-1">{abonoError}</p>}
-                </div>
+              Cancelar
+            </button>
+            <button
+              onClick={handleSendAbonoWhatsApp}
+              disabled={!abonoMonto}
+              className="flex-1 h-12 bg-primary text-white rounded-xl font-bold shadow-md hover:opacity-90 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              Abonar
+            </button>
+          </div>
+        }
+      >
+        {selectedCredit && (
+          <div className="space-y-4 pt-2">
+            <div className="bg-warning-soft border border-warning-soft rounded-2xl p-4 flex justify-between items-center">
+              <span className="text-xs font-bold text-warning uppercase tracking-wider">Saldo Pendiente:</span>
+              <span className="text-xl font-black text-warning">
+                {formatCurrency(selectedCredit.saldoPendiente)}
+              </span>
+            </div>
 
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCredit(null)}
-                    className="flex-1 h-12 bg-surface-2 text-app border border-app rounded-xl font-bold transition-all active:scale-95 cursor-pointer"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={!abonoMonto}
-                    className="flex-1 h-12 bg-primary text-white rounded-xl font-bold shadow-md hover:opacity-90 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
-                  >
-                    Abonar
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+            <div>
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Monto a abonar *</label>
+              <input
+                type="number"
+                value={abonoMonto}
+                onChange={(e) => {
+                  setAbonoMonto(e.target.value)
+                  setAbonoError('')
+                }}
+                className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-lg font-bold"
+                placeholder="Ingresa el valor numérico"
+                autoFocus
+              />
+              {abonoError && <p className="text-xs text-red-500 font-semibold mt-1">{abonoError}</p>}
+            </div>
           </div>
         )}
-      </AnimatePresence>
+      </ModalTemplate>
     </div>
   )
 }

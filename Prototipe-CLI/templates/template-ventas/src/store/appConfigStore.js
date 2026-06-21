@@ -38,8 +38,6 @@ const useAppConfigStore = create(
       whatsappAdmin: '',
       claimsEnabled: false,
       orderTrackingEnabled: false,
-      tablesEnabled: getPersistedValue('tablesEnabled', false), // Módulo de mesas y autoservicio QR habilitado
-      activeTable: null,          // Mesa actual vinculada en la sesión del cliente (no persistida)
       trackingWaTemplate: '',
       appPromo: {
         enabled: false,
@@ -155,6 +153,7 @@ const useAppConfigStore = create(
           }
         }
       },
+      sistemaAlerta: null,
       isLoaded: false,
 
       // ─── Acciones ─────────────────────────────────────────────────────────
@@ -186,8 +185,6 @@ const useAppConfigStore = create(
 
       setTheme: (theme) => set({ theme }),
       setAppName: (name) => set({ appName: name }),
-      setTablesEnabled: (tablesEnabled) => set({ tablesEnabled }),
-      setActiveTable: (activeTable) => set({ activeTable }),
     }),
     {
       name: 'app-config-storage',
@@ -221,7 +218,6 @@ const useAppConfigStore = create(
         creditsEnabled: state.creditsEnabled,
         couponsEnabled: state.couponsEnabled,
         rolesOperativosEnabled: state.rolesOperativosEnabled,
-        tablesEnabled: state.tablesEnabled,
         adminRegistered: state.adminRegistered,
         commercialOptimization: state.commercialOptimization,
       }),

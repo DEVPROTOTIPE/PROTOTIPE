@@ -8,13 +8,13 @@ import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, ShoppingCart, User, Plus, Minus, Trash2,
-  Loader2, CheckCircle2, Printer, X, Package,
+  Loader2, CheckCircle2, X, Package,
   FileText, Store, RefreshCw, CreditCard, Wallet, Coins,
-  ChefHat, AlertCircle, History, ChevronRight
+  AlertCircle, History, ChevronRight
 } from 'lucide-react'
 import { useProducts, useCategories } from '../../hooks/useInventory'
 import { useCreatePhysicalOrder } from '../../hooks/useOrders'
-import { getClientByPhone, saveClientProfile, getAllClients } from '../../services/userService'
+import { getClientByPhone, saveClientProfile } from '../../services/userService'
 import usePortalStore from '../../store/portalStore'
 import useAppConfigStore from '../../store/appConfigStore'
 import { formatCurrency } from '../../utils/formatters'
@@ -22,12 +22,12 @@ import LazyImage from '../../components/ui/LazyImage'
 import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS } from '../../constants'
 import { getCssColor } from '../../utils/colors'
 import { useConnectivityStore } from '../../store/connectivityStore'
-import { getOfflineClient, saveOfflineClient, saveOfflineClients } from '../../services/offlineDB'
+import { getOfflineClient, saveOfflineClient, saveOfflineClients, addOfflineSale, getOfflineSales, removeOfflineSale } from '../../services/offlineDB'
 
 export default function PortalVendedor() {
   const isOnline = useConnectivityStore((state) => state.isOnline)
   const { portalEmployee } = usePortalStore()
-  const { appName, appIcon, whatsappAdmin, creditsEnabled, bankInfo, bankInfo2 } = useAppConfigStore()
+  const { creditsEnabled, bankInfo, bankInfo2 } = useAppConfigStore()
   const { data: products = [], isLoading: loadingProducts } = useProducts(true)
   const { data: categories = [] } = useCategories()
   const { mutateAsync: createPhysicalOrder, isPending: isSubmitting } = useCreatePhysicalOrder()
@@ -52,6 +52,7 @@ export default function PortalVendedor() {
 
   const [vendedorOrders, setVendedorOrders] = useState([])
   const [loadingOrders, setLoadingOrders] = useState(true)
+  const [offlineQueueCount, setOfflineQueueCount] = useState(0)
 
   // Escuchar pedidos del vendedor
   useEffect(() => {
@@ -73,20 +74,109 @@ export default function PortalVendedor() {
     }
   }, [stockAlert])
 
-  // Sincronizar clientes a IndexedDB para búsqueda offline instantánea
+  const refreshQueueCount = async () => {
+    try {
+      const queue = await getOfflineSales()
+      setOfflineQueueCount(queue?.length || 0)
+    } catch (err) {
+      console.warn('[refreshQueueCount] Error al contar ventas offline:', err)
+    }
+  }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refreshQueueCount()
+  }, [])
+
+  // Sincronizar clientes a IndexedDB para búsqueda offline instantánea (Delta Sync)
   useEffect(() => {
     if (isOnline) {
-      getAllClients().then(clients => {
-        if (clients.length > 0) {
-          saveOfflineClients(clients).catch(console.error)
+      const syncClients = async () => {
+        try {
+          const { getClientsUpdatedSince } = await import('../../services/userService')
+          const lastSyncStr = localStorage.getItem('portal-last-client-sync')
+          let sinceDate = new Date(0)
+          let clearFirst = true
+          if (lastSyncStr) {
+            const parsed = Date.parse(lastSyncStr)
+            if (!isNaN(parsed)) {
+              sinceDate = new Date(parsed)
+              clearFirst = false
+            }
+          }
+          
+          const updatedClients = await getClientsUpdatedSince(sinceDate, 100)
+          if (updatedClients && updatedClients.length > 0) {
+            await saveOfflineClients(updatedClients, clearFirst)
+            
+            // Encontrar el timestamp más reciente
+            let maxUpdatedAt = sinceDate.getTime()
+            updatedClients.forEach(c => {
+              if (c.updatedAt) {
+                let t = 0
+                if (typeof c.updatedAt.toMillis === 'function') {
+                  t = c.updatedAt.toMillis()
+                } else if (c.updatedAt instanceof Date) {
+                  t = c.updatedAt.getTime()
+                } else if (typeof c.updatedAt === 'number') {
+                  t = c.updatedAt
+                } else if (c.updatedAt.seconds) {
+                  t = c.updatedAt.seconds * 1000
+                }
+                if (t > maxUpdatedAt) {
+                  maxUpdatedAt = t
+                }
+              }
+            })
+            localStorage.setItem('portal-last-client-sync', new Date(maxUpdatedAt).toISOString())
+          }
+        } catch (err) {
+          console.error('[syncClients] Error en sincronización delta:', err)
         }
-      }).catch(console.error)
+      }
+      syncClients()
     }
   }, [isOnline])
+
+  // Procesar cola de ventas offline al recuperar conexión
+  useEffect(() => {
+    if (isOnline) {
+      let activeSync = true
+      const processOfflineQueue = async () => {
+        try {
+          const queue = await getOfflineSales()
+          if (!queue || queue.length === 0) return
+
+          console.log(`[Offline POS] Detectadas ${queue.length} ventas locales en cola. Iniciando sincronización...`)
+          
+          for (const sale of queue) {
+            if (!activeSync) break
+            try {
+              // Preparar payload sin la id interna de IndexedDB
+              const { id, ...orderPayload } = sale
+              await createPhysicalOrder(orderPayload)
+              await removeOfflineSale(id)
+              await refreshQueueCount()
+              console.log(`[Offline POS] Venta local ${id} sincronizada y removida de la cola con éxito.`)
+            } catch (syncErr) {
+              console.error(`[Offline POS] Error al sincronizar venta ${sale.id}:`, syncErr)
+              break // Detener procesamiento en caso de error transaccional de red
+            }
+          }
+        } catch (queueErr) {
+          console.error('[Offline POS] Error al leer la cola de ventas offline:', queueErr)
+        }
+      }
+
+      processOfflineQueue()
+      return () => { activeSync = false }
+    }
+  }, [isOnline, createPhysicalOrder])
 
   // Búsqueda de cliente en tiempo real
   useEffect(() => {
     const clean = celular.replace(/\D/g, '')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (clean.length < 10) { setFoundClient(null); setClientSearchStatus(''); return }
     const timer = setTimeout(async () => {
       setClientSearchStatus('searching')
@@ -148,39 +238,57 @@ export default function PortalVendedor() {
   }
 
   const filteredProducts = useMemo(() => products.filter(p => {
-    const matchSearch = p.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchCat = selectedCategory === 'Todos' || p.categoriaId === selectedCategory
-    return matchSearch && matchCat
-  }), [products, searchTerm, selectedCategory])
+    const matchesCat = selectedCategory === 'Todos' || p.categoriaId === selectedCategory
+    const matchesSearch = p.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+    return matchesCat && matchesSearch
+  }), [products, selectedCategory, searchTerm])
 
-  const getTotalStock = p => p.variantes?.reduce((s, v) => s + (v.stock || 0), 0) ?? 0
+  const handleProductClick = (product) => {
+    if (product.variantes && product.variantes.length > 0) {
+      setSelectedProductForVariant(product)
+    } else {
+      addToCart(product, null, 1)
+    }
+  }
 
   const addToCart = (product, variant, qty) => {
     setCart(prev => {
-      const idx = prev.findIndex(i => i.productId === product.id && i.variantId === variant.id)
-      if (idx !== -1) {
-        const newQ = prev[idx].cantidad + qty
-        if (newQ > variant.stock) { setTimeout(() => setStockAlert(`Stock máximo: ${variant.stock} und.`), 0); return prev }
-        const c = [...prev]; c[idx].cantidad = newQ; return c
+      const idx = prev.findIndex(item => item.productId === product.id && item.variantId === (variant?.id || null))
+      if (idx > -1) {
+        const newQty = prev[idx].cantidad + qty
+        const maxStock = variant ? variant.stock : product.stock
+        const unlimited = isUnlimited(maxStock)
+        if (newQty > maxStock && !unlimited) { setStockAlert('Stock máximo alcanzado.'); return prev }
+        const c = [...prev]; c[idx].cantidad = newQty; return c
+      } else {
+        return [...prev, {
+          productId: product.id,
+          variantId: variant?.id || null,
+          nombre: product.nombre,
+          precio: product.precioBase,
+          cantidad: qty,
+          maxStock: variant ? variant.stock : product.stock,
+          talla: variant?.talla || null,
+          color: variant?.color || null,
+          imageUrl: product.imageUrl || null
+        }]
       }
-      if (qty > variant.stock) { setTimeout(() => setStockAlert(`Stock disponible: ${variant.stock} und.`), 0); return prev }
-      return [...prev, { productId: product.id, variantId: variant.id, nombre: product.nombre, precio: product.precioBase, talla: variant.talla || null, color: variant.color || null, cantidad: qty, maxStock: variant.stock, imageUrl: product.imageUrl || null }]
     })
   }
 
-  const handleProductClick = (product) => {
-    const hasVariants = product.variantes?.length > 1 || (product.variantes?.length === 1 && (product.variantes[0].talla || product.variantes[0].color))
-    if (hasVariants) { setSelectedProductForVariant(product); return }
-    const v = product.variantes?.[0] || { id: 'default', stock: 9999 }
-    if (v.stock <= 0) { setStockAlert('Sin stock disponible.'); return }
-    addToCart(product, v, 1)
+  const isUnlimited = (stock) => stock === 'unlimited' || stock === null || stock === undefined || stock === 99999
+
+  const getTotalStock = (product) => {
+    if (!product.variantes || product.variantes.length === 0) return product.stock
+    return product.variantes.reduce((sum, v) => sum + (v.stock || 0), 0)
   }
 
   const updateQty = (idx, delta) => {
     setCart(prev => {
-      const item = prev[idx]; const nq = item.cantidad + delta
+      const nq = prev[idx].cantidad + delta
       if (nq <= 0) return prev.filter((_, i) => i !== idx)
-      if (nq > item.maxStock) { setTimeout(() => setStockAlert(`Máximo: ${item.maxStock} und.`), 0); return prev }
+      const maxStock = prev[idx].maxStock
+      if (nq > maxStock && !isUnlimited(maxStock)) { setStockAlert('Stock máximo alcanzado.'); return prev }
       const c = [...prev]; c[idx].cantidad = nq; return c
     })
   }
@@ -210,20 +318,49 @@ export default function PortalVendedor() {
       setStockAlert(!foundClient ? 'Selecciona o registra un cliente primero.' : 'El carrito está vacío.')
       return
     }
-    try {
-      const result = await createPhysicalOrder({
-        orderData: {
-          cliente: { nombre: foundClient.nombre, celular: foundClient.celular },
-          metodoPago: paymentMethod,
-          notas: notes,
-          vendedorId: portalEmployee?.id || '',
-          vendedorNombre: portalEmployee?.nombre || '',
-          items: cart.map(i => ({ productId: i.productId, variantId: i.variantId, nombre: i.nombre, descripcion: i.descripcion || '', precio: i.precio, talla: i.talla, color: i.color, cantidad: i.cantidad, imageUrl: i.imageUrl })),
+
+    const orderPayload = {
+      orderData: {
+        cliente: { nombre: foundClient.nombre, celular: foundClient.celular },
+        metodoPago: paymentMethod,
+        notas: notes,
+        vendedorId: portalEmployee?.id || '',
+        vendedorNombre: portalEmployee?.nombre || '',
+        items: cart.map(i => ({ productId: i.productId, variantId: i.variantId, nombre: i.nombre, descripcion: i.descripcion || '', precio: i.precio, talla: i.talla, color: i.color, cantidad: i.cantidad, imageUrl: i.imageUrl })),
+        total: getTotal(),
+        dispositivo: 'Portal',
+      },
+      adminId: portalEmployee?.id || 'portal',
+    }
+
+    if (!isOnline) {
+      try {
+        const offlineId = `offline_${Date.now()}`
+        await addOfflineSale({
+          id: offlineId,
+          ...orderPayload
+        })
+        await refreshQueueCount()
+        
+        setLastOrder({
+          ...foundClient,
+          orderNumber: `OFF-IDB-${Date.now().toString().slice(-4)}`,
           total: getTotal(),
-          dispositivo: 'Portal',
-        },
-        adminId: portalEmployee?.id || 'portal',
-      })
+          items: [...cart],
+          metodoPago: paymentMethod,
+          createdAt: new Date(),
+          isOffline: true
+        })
+        setCart([]); setCelular(''); setClientName(''); setFoundClient(null); setClientSearchStatus(''); setNotes('')
+        setStockAlert('Venta guardada localmente (Offline). Se sincronizará al recuperar conexión.')
+      } catch (offlineErr) {
+        setStockAlert(`Error al guardar venta localmente: ${offlineErr.message}`)
+      }
+      return
+    }
+
+    try {
+      const result = await createPhysicalOrder(orderPayload)
       setLastOrder({ ...foundClient, orderNumber: result.orderNumber, total: getTotal(), items: [...cart], metodoPago: paymentMethod, createdAt: new Date() })
       setCart([]); setCelular(''); setClientName(''); setFoundClient(null); setClientSearchStatus(''); setNotes('')
     } catch (e) { setStockAlert(`Error al procesar la venta: ${e.message}`) }
@@ -231,6 +368,31 @@ export default function PortalVendedor() {
 
   return (
     <div className="portal-vendedor">
+      {/* ─── BANNER DE CONECTIVIDAD OFFLINE ───────────────────────────── */}
+      {!isOnline ? (
+        <div className="w-full bg-red-500 text-white px-4 py-2.5 flex items-center justify-between text-xs font-bold shadow-md">
+          <div className="flex items-center gap-2">
+            <AlertCircle size={16} />
+            <span>Modo Offline Activo • Las ventas se guardarán localmente</span>
+          </div>
+          {offlineQueueCount > 0 && (
+            <span className="bg-white text-red-600 px-2 py-0.5 rounded-full font-black">
+              {offlineQueueCount} pendientes
+            </span>
+          )}
+        </div>
+      ) : offlineQueueCount > 0 ? (
+        <div className="w-full bg-amber-500 text-white px-4 py-2.5 flex items-center justify-between text-xs font-bold shadow-md">
+          <div className="flex items-center gap-2">
+            <Loader2 className="animate-spin" size={16} />
+            <span>Sincronizando ventas locales pendientes...</span>
+          </div>
+          <span className="bg-white text-amber-600 px-2 py-0.5 rounded-full font-black">
+            {offlineQueueCount} restantes
+          </span>
+        </div>
+      ) : null}
+
       {/* ─── ALERTA DE STOCK ──────────────────────────────────────────── */}
       <AnimatePresence>
         {stockAlert && (
@@ -283,50 +445,54 @@ export default function PortalVendedor() {
                 </button>
               </div>
               <div className="portal-variants-list max-h-[300px] overflow-y-auto pr-1 space-y-2">
-                {selectedProductForVariant.variantes?.map(v => (
-                  <div
-                    key={v.id}
-                    onClick={() => {
-                      if (v.stock > 0) {
-                        addToCart(selectedProductForVariant, v, 1)
-                        setSelectedProductForVariant(null)
-                      }
-                    }}
-                    className={`p-3 rounded-2xl border flex items-center justify-between transition-all cursor-pointer ${
-                      v.stock <= 0
-                        ? 'opacity-40 border-app bg-surface-2 cursor-not-allowed'
-                        : 'border-app hover:border-primary/50 hover:bg-primary-soft bg-surface'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      {v.color && (
-                        <div
-                          className="w-5 h-5 rounded-full border border-black/10 shadow-sm flex-shrink-0"
-                          style={{ backgroundColor: getCssColor(v.color) }}
-                          title={v.color}
-                        />
-                      )}
-                      <div>
-                        <p className="text-xs font-bold text-app">
-                          {[v.talla ? `Talla: ${v.talla}` : '', v.color ? `Color: ${v.color}` : ''].filter(Boolean).join(' • ') || 'Estándar'}
-                        </p>
-                        <p className="text-[10px] text-muted">
-                          Stock: {v.stock} unidades
-                        </p>
+                {selectedProductForVariant.variantes?.map(v => {
+                  const varUnlimited = isUnlimited(v.stock)
+                  const varAgotado = v.stock <= 0 && !varUnlimited
+                  return (
+                    <div
+                      key={v.id}
+                      onClick={() => {
+                        if (!varAgotado) {
+                          addToCart(selectedProductForVariant, v, 1)
+                          setSelectedProductForVariant(null)
+                        }
+                      }}
+                      className={`p-3 rounded-2xl border flex items-center justify-between transition-all cursor-pointer ${
+                        varAgotado
+                          ? 'opacity-40 border-app bg-surface-2 cursor-not-allowed'
+                          : 'border-app hover:border-primary/50 hover:bg-primary-soft bg-surface'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {v.color && (
+                          <div
+                            className="w-5 h-5 rounded-full border border-black/10 shadow-sm flex-shrink-0"
+                            style={{ backgroundColor: getCssColor(v.color) }}
+                            title={v.color}
+                          />
+                        )}
+                        <div>
+                          <p className="text-xs font-bold text-app">
+                            {[v.talla ? `Talla: ${v.talla}` : '', v.color ? `Color: ${v.color}` : ''].filter(Boolean).join(' • ') || 'Estándar'}
+                          </p>
+                          <p className="text-[10px] text-muted">
+                            Stock: {varUnlimited ? 'Disponible' : `${v.stock} unidades`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-primary">
+                          {formatCurrency(selectedProductForVariant.precioBase)}
+                        </span>
+                        {varAgotado ? (
+                          <span className="text-[10px] font-bold text-red-500 uppercase">Agotado</span>
+                        ) : (
+                          <ChevronRight size={14} className="text-muted" />
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-black text-primary">
-                        {formatCurrency(selectedProductForVariant.precioBase)}
-                      </span>
-                      {v.stock > 0 ? (
-                        <ChevronRight size={14} className="text-muted" />
-                      ) : (
-                        <span className="text-[10px] font-bold text-red-500 uppercase">Agotado</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </motion.div>
           </div>
@@ -457,14 +623,16 @@ export default function PortalVendedor() {
                 <div className="portal-products-grid">
                   {filteredProducts.map(product => {
                     const stock = getTotalStock(product)
+                    const unlimited = isUnlimited(stock)
+                    const agotado = stock <= 0 && !unlimited
                     return (
                       <motion.div key={product.id} whileTap={{ scale: 0.96 }}
-                        className={`portal-product-card ${stock <= 0 ? 'portal-product-card--agotado' : ''}`}
-                        onClick={() => stock > 0 && handleProductClick(product)}>
+                        className={`portal-product-card ${agotado ? 'portal-product-card--agotado' : ''}`}
+                        onClick={() => !agotado && handleProductClick(product)}>
                         <div className="portal-product-img">
                           {product.imageUrl ? <LazyImage src={product.imageUrl} alt={product.nombre} /> : <Package size={28} />}
-                          <span className={`portal-stock-badge ${stock <= 0 ? 'portal-stock-badge--agotado' : stock <= 5 ? 'portal-stock-badge--low' : ''}`}>
-                            {stock <= 0 ? 'Agotado' : `${stock} und.`}
+                          <span className={`portal-stock-badge ${agotado ? 'portal-stock-badge--agotado' : !unlimited && stock <= 5 ? 'portal-stock-badge--low' : ''}`}>
+                            {agotado ? 'Agotado' : unlimited ? 'Disponible' : `${stock} und.`}
                           </span>
                         </div>
                         <div className="portal-product-info">

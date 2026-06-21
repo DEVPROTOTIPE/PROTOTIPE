@@ -157,7 +157,7 @@ La verticalización de PROTOTIPE para industrias fuera del retail textil (como t
 
 * **`niche.json`**: Contiene la definición de la vertical de negocio (ej: `servicio_tecnico`). Modifica el comportamiento de la UI de forma declarativa.
 * **Atributos dinámicos**: Esquemas de propiedades de productos o servicios (ej: para taller automotriz: placa, modelo, kilometraje; para veterinaria: nombre mascota, especie). Se inyectan dinámicamente en formularios y listados, evitando campos fijos en base de datos.
-* **Feature flags**: Variables de configuración reactiva (ej: `tablesEnabled`, `creditsEnabled`, `sizesAndColorsEnabled`). Si una bandera está desactivada, la UI y la lógica de negocio purgan físicamente los inputs, reportes, botones y métodos de pago correspondientes del flujo operacional.
+* **Feature flags**: Variables de configuración reactiva (ej: `couponsEnabled`, `creditsEnabled`, `sizesAndColorsEnabled`). Si una bandera está desactivada, la UI y la lógica de negocio purgan físicamente los inputs, reportes, botones y métodos de pago correspondientes del flujo operacional.
 
 ---
 

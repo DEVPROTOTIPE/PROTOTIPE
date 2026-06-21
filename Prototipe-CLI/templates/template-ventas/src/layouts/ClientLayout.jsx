@@ -12,10 +12,9 @@ import ClientCouponsModal from '../components/client/coupons/ClientCouponsModal'
 import { useCoupons } from '../hooks/useCoupons'
 
 import useNotificationCenter from '../hooks/useNotificationCenter'
-import useFCMPermission from '../hooks/useFCMPermission'
 import NotificationHistoryTray from '../components/common/NotificationHistoryTray'
 import NCToastContainer from '../components/common/NCToastContainer'
-import TableMenuBar from '../components/client/table/TableMenuBar'
+
 
 const NAV_ITEMS_LEFT = [
   { path: '/tienda/catalogo', icon: ShoppingCart, label: 'Catálogo' },
@@ -38,7 +37,7 @@ const ALL_NAV_ITEMS = [
 export default function ClientLayout() {
   const location = useLocation()
   const isProductDetail = location.pathname.includes('/producto/')
-  const { appName, appIcon, creditsEnabled, couponsEnabled, tablesEnabled } = useAppConfigStore()
+  const { appName, appIcon, creditsEnabled, couponsEnabled } = useAppConfigStore()
   const { getCount, openCart, isOpen: isCartOpen } = useCartStore()
   const { user } = useAuthStore()
   const { subscribe, unsubscribe } = useFavoritesStore()
@@ -62,14 +61,7 @@ export default function ClientLayout() {
   const cartCount = getCount()
   const userId = user?.celular || user?.uid
 
-  // Sincronizar el permiso y tokens de FCM para Cliente
-  const { requestPermission } = useFCMPermission(user?.celular || 'client', 'client')
 
-  useEffect(() => {
-    if (user?.celular) {
-      requestPermission()
-    }
-  }, [user?.celular, requestPermission])
 
   // Hook central del Notification Center para Clientes
   const [soundEnabled, setSoundEnabled] = useState(true)
@@ -99,26 +91,31 @@ export default function ClientLayout() {
       return
     }
 
-    // Post-carga: solo la notificación más reciente no leída genera un toast
     const unread = notifications.filter(n => n.status === 'unread')
     if (unread.length > 0) {
-      const mostRecent = unread[0]
-      // Ignorar notificaciones con más de 20 segundos de antigüedad (acumuladas antes de entrar)
-      const createdTime = mostRecent.createdAt?.toDate ? mostRecent.createdAt.toDate().getTime() : (mostRecent.createdAt ? new Date(mostRecent.createdAt).getTime() : Date.now())
-      if (Date.now() - createdTime > 20000) return
-
       setToasts(prev => {
-        if (prev.some(t => t.id === mostRecent.id)) return prev
-        const newToast = {
-          id: mostRecent.id,
-          title: mostRecent.title,
-          body: mostRecent.body,
-          clickAction: mostRecent.clickAction
-        }
-        setTimeout(() => {
-          setToasts(current => current.filter(t => t.id !== mostRecent.id))
-        }, 5000)
-        return [...prev, newToast]
+        let updated = [...prev]
+        unread.forEach(item => {
+          if (updated.some(t => t.id === item.id)) return
+
+          const createdTime = item.createdAt?.toDate 
+            ? item.createdAt.toDate().getTime() 
+            : (item.createdAt ? new Date(item.createdAt).getTime() : Date.now())
+
+          if (Date.now() - createdTime > 20000) return
+
+          updated.push({
+            id: item.id,
+            title: item.title,
+            body: item.body,
+            clickAction: item.clickAction
+          })
+
+          setTimeout(() => {
+            setToasts(current => current.filter(t => t.id !== item.id))
+          }, 5000)
+        })
+        return updated
       })
     }
   }, [notifications])
@@ -605,8 +602,7 @@ export default function ClientLayout() {
         />
       )}
 
-      {/* Barra de menú para atención a la mesa y autoservicio QR */}
-      {tablesEnabled && <TableMenuBar />}
+
     </div>
   )
 }

@@ -19,6 +19,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   subscribeToCentralNotifications,
+  subscribeToUnreadCount,
   fetchNotificationsPage,
   markAsRead,
   markAllAsRead,
@@ -32,7 +33,7 @@ const PAGE_SIZE = 15
 /**
  * @param {Object} params
  * @param {string} params.recipientId    - Celular, employeeId o 'admin'
- * @param {string} params.recipientRole  - 'admin' | 'client' | 'cocinero' | etc.
+ * @param {string} params.recipientRole  - 'admin' | 'client' | 'vendedor' | 'bodeguero' | 'mensajero'
  * @param {boolean} [params.soundEnabled] - Si se reproducen sonidos (default: true)
  */
 export default function useNotificationCenter({
@@ -42,9 +43,28 @@ export default function useNotificationCenter({
 } = {}) {
   // Lista acumulada visible en el tray (lote live + páginas cargadas)
   const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
   const [isRinging, setIsRinging] = useState(false)
   const [hasMore, setHasMore] = useState(false)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+
+  // Suscripción al conteo real de no leídos
+  useEffect(() => {
+    if (!recipientId || !recipientRole) {
+      setUnreadCount(0)
+      return
+    }
+    if (recipientRole === 'client' && (recipientId === 'client' || recipientId === 'anonimo')) {
+      setUnreadCount(0)
+      return
+    }
+
+    const unsub = subscribeToUnreadCount(recipientId, recipientRole, (count) => {
+      setUnreadCount(count)
+    })
+
+    return () => unsub()
+  }, [recipientId, recipientRole])
 
   // Cursor para paginación: el último DocumentSnapshot del lote histórico
   const lastDocRef = useRef(null)
@@ -172,7 +192,6 @@ export default function useNotificationCenter({
   }, [recipientId, recipientRole, isLoadingMore, hasMore])
 
   // ─── Contadores ────────────────────────────────────────────────────────────
-  const unreadCount = notifications.filter(n => n.status === 'unread').length
 
   // ─── Acciones ──────────────────────────────────────────────────────────────
   const markRead = useCallback((notificationId) => {

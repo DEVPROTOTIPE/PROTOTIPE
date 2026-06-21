@@ -77,7 +77,7 @@ function calcMetrics(orders, billingConfig) {
   const totalMes = ordenesMes.reduce((sum, o) => sum + (o.total || 0), 0)
   const pedidosMes = ordenesMes.length
 
-  let comisionMes = 0
+  let comisionMes;
   if (billingMode === 'flat_monthly') {
     comisionMes = pagoMensualFijo
   } else {
@@ -131,7 +131,7 @@ function calcMetrics(orders, billingConfig) {
 
   // ─── Totales históricos ───────────────────────────────────────────
   const totalHistorico = orders.reduce((sum, o) => sum + (o.total || 0), 0)
-  let comisionHistorica = 0
+  let comisionHistorica;
   if (billingMode === 'flat_monthly') {
     const activeMonths = new Set()
     orders.forEach((o) => {

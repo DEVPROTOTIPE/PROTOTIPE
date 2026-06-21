@@ -14,12 +14,14 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Truck, MapPin, Phone, CheckCircle2, Clock, Loader2, Navigation,
-  AlertCircle, Package, MessageCircle, AlertTriangle, X, RefreshCw,
-  ChevronRight, ChevronDown, Bike, User,
+  AlertCircle, Package, MessageCircle, ChevronDown, Bike, User, Wallet, Coins, CreditCard, Banknote,
 } from 'lucide-react'
 import { subscribeToDeliveries, updateDeliveryStatus } from '../../services/deliveryService'
 import usePortalStore from '../../store/portalStore'
-import { DELIVERY_STATES, DELIVERY_STATE_LABELS } from '../../constants'
+import { DELIVERY_STATES, DELIVERY_STATE_LABELS, PAYMENT_METHODS } from '../../constants'
+import { formatCurrency } from '../../utils/formatters'
+import ModalTemplate from '../../components/common/ModalTemplate'
+import { useConnectivityStore } from '../../store/connectivityStore'
 
 // ─── Configuración de estados ─────────────────────────────────────────────────
 const ESTADO_CFG = {
@@ -111,58 +113,51 @@ function DeliverySteps({ estado }) {
 }
 
 // ─── Modal de nota obligatoria ────────────────────────────────────────────────
-function NoteModal({ targetState, onConfirm, onClose }) {
+function NoteModal({ isOpen, targetState, onConfirm, onClose }) {
   const [nota, setNota] = useState('')
   const isFailed = targetState === DELIVERY_STATES.FAILED
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/60 backdrop-blur-sm"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="bg-surface w-full max-w-lg rounded-t-3xl border-t border-x border-app shadow-2xl p-5 space-y-4"
-        onClick={(e) => e.stopPropagation()}
+
+  useEffect(() => {
+    if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setNota('')
+    }
+  }, [isOpen])
+
+  const footerActions = (
+    <div className="flex gap-3 w-full">
+      <button onClick={onClose} className="flex-1 h-12 rounded-2xl border border-app text-sm text-muted hover:bg-app/10 transition-colors font-semibold">
+        Cancelar
+      </button>
+      <button
+        onClick={() => nota.trim() && onConfirm(nota.trim())}
+        disabled={!nota.trim()}
+        className={`flex-1 h-12 rounded-2xl text-white text-sm font-bold disabled:opacity-40 transition-opacity hover:opacity-90 ${isFailed ? 'bg-rose-500' : 'bg-amber-500'}`}
       >
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-app text-base">
-            {isFailed ? '🚫 Entrega Fallida' : '📅 Reprogramar Entrega'}
-          </h3>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-app/10 text-muted transition-colors">
-            <X size={18} />
-          </button>
-        </div>
-        <p className="text-sm text-muted">Explica el motivo. Esto quedará registrado en el historial del pedido.</p>
-        <textarea
-          value={nota}
-          onChange={(e) => setNota(e.target.value)}
-          placeholder={isFailed
-            ? 'Ej. No había nadie en la dirección, número de celular errado...'
-            : 'Ej. Cliente solicitó nuevo horario, dirección incorrecta...'}
-          rows={3}
-          autoFocus
-          className="w-full px-4 py-3 rounded-2xl bg-surface-2 border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors resize-none"
-        />
-        <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 h-12 rounded-2xl border border-app text-sm text-muted hover:bg-app/10 transition-colors font-semibold">
-            Cancelar
-          </button>
-          <button
-            onClick={() => nota.trim() && onConfirm(nota.trim())}
-            disabled={!nota.trim()}
-            className={`flex-1 h-12 rounded-2xl text-white text-sm font-bold disabled:opacity-40 transition-opacity hover:opacity-90 ${isFailed ? 'bg-rose-500' : 'bg-amber-500'}`}
-          >
-            {isFailed ? 'Confirmar Falla' : 'Reprogramar'}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
+        {isFailed ? 'Confirmar Falla' : 'Reprogramar'}
+      </button>
+    </div>
+  )
+
+  return (
+    <ModalTemplate
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isFailed ? '🚫 Entrega Fallida' : '📅 Reprogramar Entrega'}
+      subtitle="Explica el motivo. Esto quedará registrado en el historial del pedido."
+      footerActions={footerActions}
+    >
+      <textarea
+        value={nota}
+        onChange={(e) => setNota(e.target.value)}
+        placeholder={isFailed
+          ? 'Ej. No había nadie en la dirección, número de celular errado...'
+          : 'Ej. Cliente solicitó nuevo horario, dirección incorrecta...'}
+        rows={3}
+        autoFocus
+        className="w-full px-4 py-3 rounded-2xl bg-surface-2 border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors resize-none"
+      />
+    </ModalTemplate>
   )
 }
 
@@ -266,6 +261,29 @@ function DeliveryCard({ delivery, onAdvance, onFail, onReschedule, updating }) {
                 )}
               </div>
 
+              {/* Método de pago — info crítica para el mensajero */}
+              {(() => {
+                const pm = delivery.paymentMethod
+                const total = delivery.total
+                if (!pm && !total) return null
+                const pmCfg = {
+                  [PAYMENT_METHODS.CASH]:     { label: 'Cobrar en Efectivo', Icon: Coins,     bg: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' },
+                  [PAYMENT_METHODS.TRANSFER]: { label: 'Ya Pagó (Transferencia)', Icon: Wallet, bg: 'bg-blue-500/10 border-blue-500/20 text-blue-400' },
+                  [PAYMENT_METHODS.CREDIT]:   { label: 'Fiado — No Cobrar', Icon: CreditCard, bg: 'bg-amber-500/10 border-amber-500/20 text-amber-400' },
+                }[pm] || { label: pm || 'Sin info de pago', Icon: Banknote, bg: 'bg-surface-2 border-app text-muted' }
+                const { label, Icon: PayIcon, bg } = pmCfg
+                return (
+                  <div className={`flex items-center justify-between gap-2 px-3 py-2 rounded-xl border ${bg} text-xs font-bold`}>
+                    <span className="flex items-center gap-1.5">
+                      <PayIcon size={13} /> {label}
+                    </span>
+                    {total > 0 && (
+                      <span className="font-black tabular-nums">{formatCurrency(total)}</span>
+                    )}
+                  </div>
+                )
+              })()}
+
               {/* Items del pedido */}
               {delivery.items?.length > 0 && (
                 <div className="space-y-1">
@@ -349,13 +367,42 @@ function DeliveryCard({ delivery, onAdvance, onFail, onReschedule, updating }) {
 
 // ─── Página principal ─────────────────────────────────────────────────────────
 export default function PortalMensajero() {
+  const isOnline = useConnectivityStore((state) => state.isOnline)
   const { portalEmployee } = usePortalStore()
   const [deliveries, setDeliveries] = useState([])
   const [loading, setLoading]       = useState(true)
   const [updating, setUpdating]     = useState(null)
   const [noteTarget, setNoteTarget] = useState(null) // { orderId, targetState }
   const [activeTab, setActiveTab]   = useState('my-deliveries') // 'my-deliveries' | 'available'
+  const [offlineQueue, setOfflineQueue] = useState([])
+  const [stockAlert, setStockAlert] = useState('')
 
+  useEffect(() => {
+    if (stockAlert) {
+      const t = setTimeout(() => setStockAlert(''), 3000)
+      return () => clearTimeout(t)
+    }
+  }, [stockAlert])
+
+  // Cargar cola offline inicial
+  useEffect(() => {
+    const stored = localStorage.getItem('portal-delivery-queue')
+    if (stored) {
+      try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setOfflineQueue(JSON.parse(stored))
+      } catch (e) {
+        console.error('[PortalMensajero] Error al parsear cola offline:', e)
+      }
+    }
+  }, [])
+
+  const saveOfflineQueue = (newQueue) => {
+    setOfflineQueue(newQueue)
+    localStorage.setItem('portal-delivery-queue', JSON.stringify(newQueue))
+  }
+
+  // Escuchar entregas en tiempo real
   useEffect(() => {
     const unsub = subscribeToDeliveries(
       data => { setDeliveries(data); setLoading(false) },
@@ -364,23 +411,140 @@ export default function PortalMensajero() {
     return () => unsub()
   }, [portalEmployee?.id])
 
+  // Procesar cola de entregas offline al recuperar conexión
+  useEffect(() => {
+    if (isOnline && offlineQueue.length > 0) {
+      let activeSync = true
+      const processQueue = async () => {
+        const queueCopy = [...offlineQueue]
+        console.log(`[Offline Delivery] Sincronizando ${queueCopy.length} actualizaciones de reparto en cola...`)
+        
+        for (const item of queueCopy) {
+          if (!activeSync) break
+          try {
+            if (item.type === 'assign') {
+              const { assignDelivery } = await import('../../services/deliveryService')
+              await assignDelivery(item.orderId, {
+                mensajeroId: item.mensajeroId,
+                actorName: item.actorName
+              })
+            } else {
+              await updateDeliveryStatus(item.orderId, item.estado, item.opts)
+            }
+            // Eliminar elemento procesado de la cola
+            const updated = queueCopy.filter(q => q.timestamp !== item.timestamp)
+            saveOfflineQueue(updated)
+          } catch (err) {
+            console.error('[Offline Delivery] Error al procesar elemento de cola:', err)
+            break // Detener en caso de fallo de red
+          }
+        }
+      }
+      processQueue()
+      return () => { activeSync = false }
+    }
+  }, [isOnline, offlineQueue])
+
+  // Helper para procesar transiciones de reparto de forma offline tolerante a fallos
+  const executeDeliveryTransition = async (orderId, estado, opts = {}) => {
+    if (!isOnline) {
+      const queueItem = {
+        type: 'status',
+        orderId,
+        estado,
+        opts,
+        timestamp: Date.now()
+      }
+      
+      // Actualizar estado visual local de inmediato
+      setDeliveries(prev => prev.map(d => {
+        if (d.id === orderId) {
+          return {
+            ...d,
+            estado,
+            history: [
+              ...(d.history || []),
+              {
+                estado,
+                timestamp: new Date().toISOString(),
+                actor: opts.actorName || 'mensajero',
+                nota: opts.nota || 'Guardado local (Offline)'
+              }
+            ]
+          }
+        }
+        return d
+      }))
+
+      const newQueue = [...offlineQueue, queueItem]
+      saveOfflineQueue(newQueue)
+      setStockAlert('Estado guardado localmente (Offline). Se sincronizará al recuperar señal.')
+      return
+    }
+
+    try {
+      await updateDeliveryStatus(orderId, estado, opts)
+    } catch (err) {
+      console.error('[executeDeliveryTransition] Error, guardando offline:', err)
+      const queueItem = {
+        type: 'status',
+        orderId,
+        estado,
+        opts,
+        timestamp: Date.now()
+      }
+      const newQueue = [...offlineQueue, queueItem]
+      saveOfflineQueue(newQueue)
+      setStockAlert('Red inestable. Guardado localmente (Offline).')
+    }
+  }
+
   // ─── Acciones ───────────────────────────────────────────────────────────────
   const handleAdvance = async (orderId, nextState) => {
     if (!nextState) return
     setUpdating(orderId)
     try {
       const delivery = deliveries.find(d => d.id === orderId)
+      const actorName = portalEmployee?.nombre || 'mensajero'
       if (delivery && delivery.estado === DELIVERY_STATES.PENDING) {
+        if (!isOnline) {
+          const queueItem = {
+            type: 'assign',
+            orderId,
+            mensajeroId: portalEmployee?.id || null,
+            actorName,
+            timestamp: Date.now()
+          }
+          
+          setDeliveries(prev => prev.map(d => {
+            if (d.id === orderId) {
+              return {
+                ...d,
+                mensajeroId: portalEmployee?.id || null,
+                estado: DELIVERY_STATES.ASSIGNED,
+                history: [
+                  ...(d.history || []),
+                  { estado: DELIVERY_STATES.ASSIGNED, timestamp: new Date().toISOString(), actor: actorName, nota: 'Asignado local (Offline)' }
+                ]
+              }
+            }
+            return d
+          }))
+          
+          const newQueue = [...offlineQueue, queueItem]
+          saveOfflineQueue(newQueue)
+          setStockAlert('Auto-asignación guardada localmente (Offline).')
+          return
+        }
+        
         // Si el pedido está en Pendiente (Disponible), el mensajero lo acepta/auto-asigna
         const { assignDelivery } = await import('../../services/deliveryService')
         await assignDelivery(orderId, {
           mensajeroId: portalEmployee?.id || null,
-          actorName: portalEmployee?.nombre || 'mensajero',
+          actorName,
         })
       } else {
-        await updateDeliveryStatus(orderId, nextState, {
-          actorName: portalEmployee?.nombre || 'mensajero',
-        })
+        await executeDeliveryTransition(orderId, nextState, { actorName })
       }
     } catch (e) { console.error(e) }
     finally { setUpdating(null) }
@@ -400,10 +564,49 @@ export default function PortalMensajero() {
     setUpdating(orderId)
     setNoteTarget(null)
     try {
-      await updateDeliveryStatus(orderId, targetState, {
-        actorName: portalEmployee?.nombre || 'mensajero',
+      const actorName = portalEmployee?.nombre || 'mensajero'
+      await executeDeliveryTransition(orderId, targetState, {
+        actorName,
         nota,
       })
+
+      // Enviar notificaciones de alerta de entrega (fallida o reprogramada) si hay conexión
+      if (isOnline) {
+        try {
+          const { createCentralNotification, NC_TYPES } = await import('../../services/notificationCenterService')
+          const delivery = deliveries.find(d => d.id === orderId)
+          const orderNumber = delivery?.orderNumber || orderId.slice(-4)
+          const isFailed = targetState === DELIVERY_STATES.FAILED
+          
+          const title = isFailed ? 'Entrega Fallida' : 'Entrega Reprogramada'
+          const body = `El mensajero ${portalEmployee?.nombre || ''} reportó: "${nota}" para el pedido #${orderNumber}.`
+          const type = isFailed ? NC_TYPES.ENTREGA_FALLIDA : NC_TYPES.PEDIDO_ESTADO
+
+          // Notificar al Administrador
+          await createCentralNotification({
+            recipientId: 'admin',
+            recipientRole: 'admin',
+            title,
+            body,
+            type,
+            orderId,
+            orderNumber
+          })
+
+          // Notificar al Vendedor POS
+          await createCentralNotification({
+            recipientId: 'vendedor',
+            recipientRole: 'vendedor',
+            title,
+            body,
+            type,
+            orderId,
+            orderNumber
+          })
+        } catch (errNotif) {
+          console.error('[PortalMensajero] Error al enviar notificación de evento negativo:', errNotif)
+        }
+      }
     } catch (e) { console.error(e) }
     finally { setUpdating(null) }
   }
@@ -432,6 +635,41 @@ export default function PortalMensajero() {
 
   return (
     <div className="portal-mensajero">
+      {/* ─── BANNER DE CONECTIVIDAD OFFLINE ───────────────────────────── */}
+      {!isOnline ? (
+        <div className="w-full bg-red-500 text-white px-4 py-2.5 flex items-center justify-between text-xs font-bold shadow-md shrink-0">
+          <div className="flex items-center gap-2">
+            <AlertCircle size={16} />
+            <span>Modo Offline Activo • Cambios de entrega se encolarán localmente</span>
+          </div>
+          {offlineQueue.length > 0 && (
+            <span className="bg-white text-red-600 px-2 py-0.5 rounded-full font-black">
+              {offlineQueue.length} pendientes
+            </span>
+          )}
+        </div>
+      ) : offlineQueue.length > 0 ? (
+        <div className="w-full bg-amber-500 text-white px-4 py-2.5 flex items-center justify-between text-xs font-bold shadow-md shrink-0">
+          <div className="flex items-center gap-2">
+            <Loader2 className="animate-spin" size={16} />
+            <span>Sincronizando entregas locales pendientes...</span>
+          </div>
+          <span className="bg-white text-amber-600 px-2 py-0.5 rounded-full font-black">
+            {offlineQueue.length} restantes
+          </span>
+        </div>
+      ) : null}
+
+      {/* ─── ALERTA FLOTANTE DE ACCIONES ────────────────────────────────── */}
+      <AnimatePresence>
+        {stockAlert && (
+          <motion.div initial={{ opacity: 0, y: -20, x: '-50%' }} animate={{ opacity: 1, y: 0, x: '-50%' }} exit={{ opacity: 0, y: -20, x: '-50%' }}
+            className="portal-stock-alert font-bold" onClick={() => setStockAlert('')}>
+            <AlertCircle size={16} /><span>{stockAlert}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ─── HEADER ─ */}
       <div className="portal-mensajero-header">
         <div className="portal-mensajero-icon"><Bike size={22} /></div>
@@ -538,15 +776,12 @@ export default function PortalMensajero() {
       )}
 
       {/* ─── Modal de nota obligatoria ─ */}
-      <AnimatePresence>
-        {noteTarget && (
-          <NoteModal
-            targetState={noteTarget.targetState}
-            onClose={() => setNoteTarget(null)}
-            onConfirm={handleNoteConfirm}
-          />
-        )}
-      </AnimatePresence>
+      <NoteModal
+        isOpen={!!noteTarget}
+        targetState={noteTarget?.targetState}
+        onClose={() => setNoteTarget(null)}
+        onConfirm={handleNoteConfirm}
+      />
     </div>
   )
 }

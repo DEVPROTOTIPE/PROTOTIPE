@@ -76,7 +76,7 @@ const STEP_TITLES = {
 export default function CheckoutModal({ isOpen, onClose }) {
   const { items, getTotal, clearCart } = useCartStore()
   const { user } = useAuthStore()
-  const { bankInfo, bankInfo2, whatsappAdmin, appName, deliverySettings, orderTrackingEnabled, creditsEnabled, couponsEnabled, tablesEnabled, activeTable } = useAppConfigStore()
+  const { bankInfo, bankInfo2, whatsappAdmin, appName, deliverySettings, orderTrackingEnabled, creditsEnabled, couponsEnabled } = useAppConfigStore()
   const { mutateAsync: createOrder, isPending } = useCreateOrder()
   const { completedSteps, markStepCompleted } = useGuidedStore()
   const { data: coupons = [] } = useCoupons()
@@ -92,62 +92,49 @@ export default function CheckoutModal({ isOpen, onClose }) {
   // Construcción dinámica de métodos de entrega
   const activeDeliveryOptions = []
   
-  if (activeTable && tablesEnabled) {
+  if (currentSettings.pickup?.enabled !== false) {
     activeDeliveryOptions.push({
-      id: 'mesa',
+      id: 'retiro',
       icon: Store,
-      title: 'Entrega en la Mesa',
-      description: `Llevamos tu pedido directamente a la ${activeTable.nombre}. Sin costo de envío.`,
+      title: 'Retiro en Tienda',
+      description: currentSettings.pickup?.instructions || 'Recoge tu pedido directamente en nuestro local.',
       badge: 'Gratis',
-      badgeColor: 'bg-emerald-500/10 text-emerald-500',
+      badgeColor: 'bg-success/10 text-success',
     })
-  } else {
+  }
 
-
-    if (currentSettings.pickup?.enabled !== false) {
-      activeDeliveryOptions.push({
-        id: 'retiro',
-        icon: Store,
-        title: 'Retiro en Tienda',
-        description: currentSettings.pickup?.instructions || 'Recoge tu pedido directamente en nuestro local.',
-        badge: 'Gratis',
-        badgeColor: 'bg-success/10 text-success',
-      })
-    }
-
-    if (currentSettings.shipping?.enabled !== false) {
-      let shippingBadge = 'Por acordar'
-      if (currentSettings.customDelivery?.enabled) {
-        if (currentSettings.customDelivery.costType === 'fijo') {
-          const fixed = Number(currentSettings.customDelivery.fixedCost) || 0
-          shippingBadge = fixed > 0 ? `+ ${formatCurrency(fixed)}` : 'Gratis'
-        } else {
-          shippingBadge = 'Por acordar'
-        }
-      } else if (currentSettings.shipping?.cost > 0) {
-        shippingBadge = `+ ${formatCurrency(currentSettings.shipping.cost)}`
+  if (currentSettings.shipping?.enabled !== false) {
+    let shippingBadge = 'Por acordar'
+    if (currentSettings.customDelivery?.enabled) {
+      if (currentSettings.customDelivery.costType === 'fijo') {
+        const fixed = Number(currentSettings.customDelivery.fixedCost) || 0
+        shippingBadge = fixed > 0 ? `+ ${formatCurrency(fixed)}` : 'Gratis'
+      } else {
+        shippingBadge = 'Por acordar'
       }
-
-      activeDeliveryOptions.push({
-        id: 'domicilio',
-        icon: Truck,
-        title: 'Domicilio',
-        description: currentSettings.shipping?.instructions || 'Recibe tu pedido en la comodidad de tu casa. Te contactaremos para coordinar.',
-        badge: shippingBadge,
-        badgeColor: 'bg-primary/10 text-primary',
-      })
+    } else if (currentSettings.shipping?.cost > 0) {
+      shippingBadge = `+ ${formatCurrency(currentSettings.shipping.cost)}`
     }
 
-    if (currentSettings.digital?.enabled === true) {
-      activeDeliveryOptions.push({
-        id: 'digital',
-        icon: CheckCircle2,
-        title: 'Entrega Digital / Servicio',
-        description: currentSettings.digital?.instructions || 'Servicios presenciales o productos virtuales.',
-        badge: 'Sin envío',
-        badgeColor: 'bg-info/10 text-info',
-      })
-    }
+    activeDeliveryOptions.push({
+      id: 'domicilio',
+      icon: Truck,
+      title: 'Domicilio',
+      description: currentSettings.shipping?.instructions || 'Recibe tu pedido en la comodidad de tu casa. Te contactaremos para coordinar.',
+      badge: shippingBadge,
+      badgeColor: 'bg-primary/10 text-primary',
+    })
+  }
+
+  if (currentSettings.digital?.enabled === true) {
+    activeDeliveryOptions.push({
+      id: 'digital',
+      icon: CheckCircle2,
+      title: 'Entrega Digital / Servicio',
+      description: currentSettings.digital?.instructions || 'Servicios presenciales o productos virtuales.',
+      badge: 'Sin envío',
+      badgeColor: 'bg-info/10 text-info',
+    })
   }
 
   // step: 1=Entrega, 2=Datos, 3=Pago, 4=Éxito
@@ -185,6 +172,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
     direccion: '',
     barrio: '',
     ciudad: '',
+    coords: null,
     metodoPago: '',
     notas: '',
   })
@@ -204,20 +192,26 @@ export default function CheckoutModal({ isOpen, onClose }) {
         setCouponError(`El cupón aplicado no es válido para el método de pago ${PAYMENT_METHOD_LABELS[formData.metodoPago]}.`)
       }
     }
-  }, [formData.metodoPago])
+  }, [formData.metodoPago, appliedCoupon])
+
+  // Re-validar cupón si cambian los items o el subtotal del carrito
+  useEffect(() => {
+    if (appliedCoupon) {
+      const subtotal = getTotal()
+      if (appliedCoupon.minimoCompra && subtotal < appliedCoupon.minimoCompra) {
+        setAppliedCoupon(null)
+        setCouponError(`El cupón se ha removido porque el subtotal actual (${formatCurrency(subtotal)}) no alcanza el mínimo requerido (${formatCurrency(appliedCoupon.minimoCompra)}).`)
+      }
+    }
+  }, [items, appliedCoupon])
 
   useEffect(() => {
     if (isOpen) {
       // Recalcular dinámicamente activeDeliveryOptions al abrir para evitar closure estático
       const options = []
-      if (activeTable && tablesEnabled) {
-        options.push('mesa')
-      } else {
-
-        if (currentSettings.pickup?.enabled !== false) options.push('retiro')
-        if (currentSettings.shipping?.enabled !== false) options.push('domicilio')
-        if (currentSettings.digital?.enabled === true) options.push('digital')
-      }
+      if (currentSettings.pickup?.enabled !== false) options.push('retiro')
+      if (currentSettings.shipping?.enabled !== false) options.push('domicilio')
+      if (currentSettings.digital?.enabled === true) options.push('digital')
 
       const hasOnlyOneOption = options.length === 1
       const initialDeliveryType = hasOnlyOneOption ? options[0] : ''
@@ -237,6 +231,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
         direccion: '',
         barrio: '',
         ciudad: '',
+        coords: null,
         metodoPago: '',
         notas: '',
       })
@@ -255,7 +250,11 @@ export default function CheckoutModal({ isOpen, onClose }) {
 
   // ── Paso 1 → 2: selección de entrega ─────────────────────────────────────
   const handleSelectDelivery = (tipo) => {
-    setFormData(prev => ({ ...prev, tipoEntrega: tipo }))
+    setFormData(prev => ({
+      ...prev,
+      tipoEntrega: tipo,
+      ...(tipo !== 'domicilio' && { coords: null })
+    }))
     setErrors({})
     setStep(2)
   }
@@ -263,15 +262,13 @@ export default function CheckoutModal({ isOpen, onClose }) {
   // ── Lookup de cliente por celular en tiempo real (debounced) ──────────────
   useEffect(() => {
     const phone = formData.celular?.replace(/\D/g, '')
-    // No buscar si el usuario ya está logueado o el número es muy corto
     if (user?.nombre || !phone || phone.length < 7) return
-
-    // Resetear estado mientras se escribe
     setPhoneLookup('loading')
-
+    let cancelled = false
     const timer = setTimeout(async () => {
       try {
         const client = await getClientByPhone(phone)
+        if (cancelled) return
         if (client?.nombre) {
           setFormData(prev => ({ ...prev, nombre: client.nombre }))
           setPhoneLookup('found')
@@ -279,11 +276,10 @@ export default function CheckoutModal({ isOpen, onClose }) {
           setPhoneLookup('new')
         }
       } catch {
-        setPhoneLookup('new')
+        if (!cancelled) setPhoneLookup('new')
       }
     }, 600)
-
-    return () => clearTimeout(timer)
+    return () => { cancelled = true; clearTimeout(timer) }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.celular])
 
@@ -393,11 +389,10 @@ export default function CheckoutModal({ isOpen, onClose }) {
   const calculateDiscount = () => {
     if (!couponsEnabled || !appliedCoupon) return 0
     const subtotal = getTotal()
-    if (appliedCoupon.tipoDescuento === 'porcentaje') {
-      return (subtotal * appliedCoupon.valorDescuento) / 100
-    } else {
-      return appliedCoupon.valorDescuento
-    }
+    const raw = appliedCoupon.tipoDescuento === 'porcentaje'
+      ? (subtotal * appliedCoupon.valorDescuento) / 100
+      : appliedCoupon.valorDescuento
+    return Math.min(raw, subtotal) // Descuento no puede superar el subtotal
   }
 
   const getShippingCost = () => {
@@ -424,6 +419,13 @@ export default function CheckoutModal({ isOpen, onClose }) {
   const handleCheckout = async () => {
     if (isSubmittingRef.current) return
     isSubmittingRef.current = true
+
+    // Guard: carrito no puede estar vacío al confirmar
+    if (!items.length) {
+      setErrors({ global: 'Tu carrito está vacío. Agrega productos antes de continuar.' })
+      isSubmittingRef.current = false
+      return
+    }
 
     const result = checkoutSchema.safeParse(formData)
 
@@ -457,10 +459,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
           }),
         },
         tipoEntrega: formData.tipoEntrega,
-        ...(formData.tipoEntrega === 'mesa' && activeTable && {
-          tableId: activeTable.id,
-          tableName: activeTable.nombre,
-        }),
+
         costoEnvio: currentShippingCost,
         metodoPago: formData.metodoPago,
         ...(formData.metodoPago === 'transferencia' && {
@@ -506,6 +505,7 @@ export default function CheckoutModal({ isOpen, onClose }) {
 
       setOrderNumber(shortId)
       clearCart()
+      isSubmittingRef.current = false // ← reset también en éxito
       setStep(5)
     } catch (error) {
       console.error('Error al crear pedido:', error)
@@ -538,9 +538,10 @@ export default function CheckoutModal({ isOpen, onClose }) {
     }
 
     const metodosLabel = { efectivo: 'Efectivo', transferencia: 'Transferencia', credito: 'Crédito (Fiado)' }
-    // Banco elegido para transferencia
-    const bancoInfo = snap?.metodoPago === 'transferencia'
-      ? (selectedBank === 2 && bankInfo2?.activa ? bankInfo2 : bankInfo)
+    // Banco: usar el que quedó registrado en el snapshot (no el estado mutable selectedBank)
+    const bancoName = snap?.bancoElegido
+    const bancoInfo = bancoName
+      ? (bankInfo2?.activa && bankInfo2?.banco === bancoName ? bankInfo2 : bankInfo)
       : null
     const itemsText = (snap?.items || []).map(item => {
       const variant = item.talla || item.color ? ` (${[item.talla, item.color].filter(Boolean).join(', ')})` : ''
@@ -552,8 +553,6 @@ export default function CheckoutModal({ isOpen, onClose }) {
       entregaLine = `${e.camion} *Entrega:* Domicilio\n${e.ubicacion} *Dirección:* ${snap?.cliente?.direccion || ''}, ${snap?.cliente?.barrio || ''}, ${snap?.cliente?.ciudad || ''}`
     } else if (isDigital) {
       entregaLine = `${e.digital} *Entrega:* Digital / Servicios`
-    } else if (snap?.tipoEntrega === 'mesa') {
-      entregaLine = `\uD83D\uDECE\uFE0F *Entrega:* En Mesa (${snap?.tableName || 'Sin Mesa'})`
     } else {
       const addressText = currentSettings.pickup?.address ? ` (${currentSettings.pickup.address})` : ''
       entregaLine = `${e.tienda} *Entrega:* Retiro en Tienda${addressText}`
@@ -620,10 +619,18 @@ ${e.dinero} *Total:* ${formatCurrency(snap?.total || 0)}${notasLine}`
     </div>
   )
 
+  const handleCloseVerify = () => {
+    if (step > 1 && step < 5) {
+      const confirmClose = window.confirm("¿Seguro que deseas salir del proceso de compra? Los datos ingresados se perderán.")
+      if (!confirmClose) return
+    }
+    onClose()
+  }
+
   return (
     <ModalTemplate
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleCloseVerify}
       title={step === 5 ? null : STEP_TITLES[step]}
       subtitle={stepperSubtitle}
       onBack={step > 1 && step < 5 ? () => setStep(step - 1) : null}
@@ -688,9 +695,8 @@ ${e.dinero} *Total:* ${formatCurrency(snap?.total || 0)}${notasLine}`
                   {formData.tipoEntrega === 'domicilio' && <Truck size={16} className="text-primary shrink-0" />}
                   {formData.tipoEntrega === 'retiro' && <Store size={16} className="text-primary shrink-0" />}
                   {formData.tipoEntrega === 'digital' && <CheckCircle2 size={16} className="text-primary shrink-0" />}
-                  {formData.tipoEntrega === 'mesa' && <Store size={16} className="text-primary shrink-0" />}
                   <span className="text-xs font-bold text-primary capitalize">
-                    {formData.tipoEntrega === 'domicilio' ? 'Entrega a domicilio' : formData.tipoEntrega === 'retiro' ? 'Retiro en tienda' : formData.tipoEntrega === 'mesa' ? `Entrega en Mesa: ${activeTable?.nombre}` : 'Entrega digital / servicio'}
+                    {formData.tipoEntrega === 'domicilio' ? 'Entrega a domicilio' : formData.tipoEntrega === 'retiro' ? 'Retiro en tienda' : 'Entrega digital / servicio'}
                   </span>
                   {activeDeliveryOptions.length > 1 && (
                     <button onClick={() => setStep(1)} className="ml-auto text-xs text-muted hover:text-primary underline underline-offset-2">
@@ -1334,9 +1340,7 @@ ${e.dinero} *Total:* ${formatCurrency(snap?.total || 0)}${notasLine}`
                           ? 'Domicilio a tu puerta' 
                           : formData.tipoEntrega === 'retiro' 
                             ? 'Retiro en tienda' 
-                            : formData.tipoEntrega === 'mesa' 
-                              ? `En Mesa: ${activeTable?.nombre}` 
-                              : 'Entrega digital / servicio'}
+                            : 'Entrega digital / servicio'}
                       </strong>
                     </div>
                     {formData.tipoEntrega === 'domicilio' && (
@@ -1347,7 +1351,7 @@ ${e.dinero} *Total:* ${formatCurrency(snap?.total || 0)}${notasLine}`
                     )}
                     {formData.notas && (
                       <div className="sm:col-span-2 italic text-muted mt-1 bg-surface p-2 rounded-lg border-l-2 border-primary">
-                        " {formData.notas} "
+                          {formData.notas}
                       </div>
                     )}
                   </div>

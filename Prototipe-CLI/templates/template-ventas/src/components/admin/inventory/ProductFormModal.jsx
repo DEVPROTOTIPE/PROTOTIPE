@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import NumberInput from '../../ui/NumberInput'
 import CurrencyInput from '../../ui/CurrencyInput'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Plus, Trash2, Image as ImageIcon, ChevronDown, Check, Sparkles, Camera, UploadCloud } from 'lucide-react'
+import { X, Plus, Trash2, Image as ImageIcon, ChevronDown, Check, Sparkles, Camera, UploadCloud, AlertCircle } from 'lucide-react'
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage'
-import { doc, onSnapshot, deleteDoc } from 'firebase/firestore'
+import { doc, onSnapshot, deleteDoc, setDoc } from 'firebase/firestore'
 import { storage, db } from '../../../config/firebaseConfig'
 import { productSchema } from '../../../schemas/inventorySchemas'
 import { PRODUCT_GENDERS } from '../../../constants'
@@ -16,6 +16,13 @@ import { getCssColor } from '../../../utils/colors'
 import { uploadImage, deleteImage } from '../../../services/uploadService'
 import { Loader2 } from 'lucide-react'
 import ProductCard from '../../client/catalog/ProductCard'
+
+const generateUUID = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+}
 
 const initialVariant = { id: '', talla: '', color: '', genero: '', stock: 0, nombre: '', sku: '', imageUrl: '', precio: '', precioCosto: '' }
 const initialForm = {
@@ -43,7 +50,8 @@ const initialForm = {
   productosComplementarios: [],
   seoTitle: '',
   seoDescription: '',
-  estado: null
+  estado: null,
+  stockInfinito: false
 }
 
 const PRESET_COLORS = [
@@ -188,6 +196,37 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
   const [loadingGalleryIndex, setLoadingGalleryIndex] = useState(null)
   const [galleryProgress, setGalleryProgress] = useState(0)
   const [tempGalleryUrl, setTempGalleryUrl] = useState('')
+  const [uploadError, setUploadError] = useState(null)
+  const sessionUploadedImages = useRef([])
+  const sessionDeletedImages = useRef([])
+  const isUploadingMain = useRef(false) // Fix 4: guard anti doble-clic imagen principal
+
+  // Fix 2: límite de tamaño de archivo (15 MB)
+  const MAX_FILE_MB = 15
+  const validateFileSize = (file) => {
+    if (file.size > MAX_FILE_MB * 1024 * 1024) {
+      showUploadError(`El archivo es demasiado grande (${(file.size / 1024 / 1024).toFixed(1)} MB). El límite es ${MAX_FILE_MB} MB.`)
+      return false
+    }
+    return true
+  }
+
+  const showUploadError = (msg) => {
+    setUploadError(msg)
+    setTimeout(() => setUploadError(null), 4000)
+  }
+
+  const handleRemoveImage = (url) => {
+    if (!url) return
+    if (sessionUploadedImages.current.includes(url)) {
+      deleteImage(url).catch(err => console.warn('Error deleting temp image:', err))
+      sessionUploadedImages.current = sessionUploadedImages.current.filter(u => u !== url)
+    } else {
+      if (!sessionDeletedImages.current.includes(url)) {
+        sessionDeletedImages.current.push(url)
+      }
+    }
+  }
 
   const getVariantFilter = (variantId) => {
     return variantFilters[variantId] || { category: 'ropa', group: 'hombre' }
@@ -203,20 +242,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
     }))
   }
 
-  const [loadingIA, setLoadingIA] = useState(false)
-  const [currentDraftId, setCurrentDraftId] = useState(null)
-  const [currentDraftFilePath, setCurrentDraftFilePath] = useState(null)
   const [uploadProgress, setUploadProgress] = useState(0)
-
-  const unsubscribeIARef = useRef(null)
-
-  useEffect(() => {
-    return () => {
-      if (unsubscribeIARef.current) {
-        unsubscribeIARef.current()
-      }
-    }
-  }, [])
 
   // Estados del Wizard (Solo creación)
   const [currentStep, setCurrentStep] = useState(1)
@@ -244,22 +270,48 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
     { number: 5, title: 'Inventario' },
   ]
 
-  const handleCleanupTemp = async (id, filePath) => {
-    if (!id) return
+  const cleanLeftovers = async (isSaving) => {
     try {
-      await deleteDoc(doc(db, "draft_products", id))
-      if (filePath) {
-        await deleteImage(filePath)
+      if (isSaving) {
+        // Al guardar, borrar las imágenes que estaban marcadas para borrar (pre-existentes eliminadas)
+        for (const url of sessionDeletedImages.current) {
+          await deleteImage(url).catch(err => console.warn('Error cleanup saved delete:', err))
+        }
+        
+        // También borrar cualquier imagen que hayamos subido en esta sesión pero que no quedó en el formulario final (ej. variantes eliminadas)
+        const finalUrls = []
+        if (formData.imageUrl) finalUrls.push(formData.imageUrl)
+        if (formData.variantes) {
+          formData.variantes.forEach(v => {
+            if (v.imageUrl) finalUrls.push(v.imageUrl)
+          })
+        }
+        if (formData.galeria) {
+          formData.galeria.forEach(url => {
+            if (url) finalUrls.push(url)
+          })
+        }
+        
+        const unusedSessionUploads = sessionUploadedImages.current.filter(url => !finalUrls.includes(url))
+        for (const url of unusedSessionUploads) {
+          await deleteImage(url).catch(err => console.warn('Error cleanup unused session upload:', err))
+        }
+      } else {
+        // Al cancelar, borrar TODAS las imágenes subidas en esta sesión
+        for (const url of sessionUploadedImages.current) {
+          await deleteImage(url).catch(err => console.warn('Error cleanup cancel upload:', err))
+        }
       }
-    } catch (e) {
-      console.error("Error al limpiar borrador temporal:", e)
+    } catch (err) {
+      console.warn('Error in cleanLeftovers:', err)
+    } finally {
+      sessionUploadedImages.current = []
+      sessionDeletedImages.current = []
     }
   }
 
   const handleClose = async () => {
-    if (currentDraftId) {
-      await handleCleanupTemp(currentDraftId, currentDraftFilePath)
-    }
+    await cleanLeftovers(false)
     onClose()
   }
 
@@ -267,56 +319,49 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
     const file = e.target.files[0]
     if (!file) return
 
-    setLoadingIA(true)
+    // Fix 4: bloquear si ya hay un upload de imagen principal en curso
+    if (isUploadingMain.current) return
+
+    // Fix 2: validar tamaño antes de procesar
+    if (!validateFileSize(file)) {
+      e.target.value = ''
+      return
+    }
+
+    isUploadingMain.current = true
     setUploadProgress(0)
+    const originalValue = e.target.value
+    e.target.value = '' // Reset to allow subsequent uploads of same file
 
     try {
-      if (currentDraftId) {
-        await handleCleanupTemp(currentDraftId, currentDraftFilePath)
-      }
-
-      const draftId = `draft_${crypto.randomUUID()}`
-      
-      const downloadURL = await uploadImage(file, 'products_drafts', draftId, (progress) => {
+      const imageId = `img_${generateUUID()}`
+      const downloadURL = await uploadImage(file, 'products', imageId, (progress) => {
         setUploadProgress(progress)
       })
 
-      setFormData(prev => ({ ...prev, imageUrl: downloadURL }))
-      setCurrentDraftId(draftId)
-      setCurrentDraftFilePath(downloadURL)
-      
-      await setDoc(doc(db, "draft_products", draftId), {
-        imageUrl: downloadURL,
-        filePath: downloadURL,
-        createdAt: new Date()
-      })
+      // Si había una imagen previa subida en esta misma sesión, la borramos inmediatamente
+      if (formData.imageUrl && sessionUploadedImages.current.includes(formData.imageUrl)) {
+        await deleteImage(formData.imageUrl).catch(err => console.warn('Error al borrar anterior de la sesión:', err))
+        sessionUploadedImages.current = sessionUploadedImages.current.filter(url => url !== formData.imageUrl)
+      } else if (formData.imageUrl) {
+        // Si era una imagen pre-existente, la agendamos para borrar si se guarda
+        sessionDeletedImages.current.push(formData.imageUrl)
+      }
 
-      const docRef = doc(db, "draft_products", draftId)
-      unsubscribeIARef.current = onSnapshot(docRef, (docSnap) => {
-        if (docSnap.exists() && docSnap.data().suggestions) {
-          const suggestions = docSnap.data().suggestions
-          setFormData(prev => ({
-            ...prev,
-            nombre: suggestions.nombre || prev.nombre,
-            descripcion: suggestions.descripcion || prev.descripcion,
-            precioBase: suggestions.precioBase?.toString() || prev.precioBase,
-            categoriaId: suggestions.categoriaId || prev.categoriaId,
-            seoTitle: suggestions.seoTitle || prev.seoTitle,
-            seoDescription: suggestions.seoDescription || prev.seoDescription,
-          }))
-          setLoadingIA(false)
-          if (unsubscribeIARef.current) {
-            unsubscribeIARef.current()
-            unsubscribeIARef.current = null
-          }
-        }
-      }, (error) => {
-        console.error("Error al escuchar sugerencias IA:", error)
-        setLoadingIA(false)
-      })
+      sessionUploadedImages.current.push(downloadURL)
+      setFormData(prev => ({ ...prev, imageUrl: downloadURL }))
     } catch (err) {
-      console.error(err)
-      setLoadingIA(false)
+      console.error('[Image Upload] Error:', err)
+      e.target.value = originalValue
+      if (err?.code === 'storage/unauthorized') {
+        showUploadError('Sin permisos para subir imágenes. Verifica las reglas de Firebase Storage.')
+      } else if (err?.code === 'storage/canceled') {
+        showUploadError('La subida fue cancelada.')
+      } else {
+        showUploadError('Error al subir la imagen. Verifica tu conexión e intenta de nuevo.')
+      }
+    } finally {
+      isUploadingMain.current = false
     }
   }
 
@@ -324,23 +369,42 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
     const file = e.target.files[0]
     if (!file) return
 
+    // Fix 2: validar tamaño
+    if (!validateFileSize(file)) {
+      e.target.value = ''
+      return
+    }
+
     setLoadingVariantImages(prev => ({ ...prev, [variantId]: true }))
     setVariantUploadProgress(prev => ({ ...prev, [variantId]: 0 }))
+    const originalValue = e.target.value
+    e.target.value = ''
 
     try {
       const variant = formData.variantes.find(v => v.id === variantId)
       if (variant && variant.imageUrl) {
-        await deleteImage(variant.imageUrl).catch(err => console.warn('Error al borrar anterior:', err))
+        if (sessionUploadedImages.current.includes(variant.imageUrl)) {
+          await deleteImage(variant.imageUrl).catch(err => console.warn('Error al borrar anterior de la sesión:', err))
+          sessionUploadedImages.current = sessionUploadedImages.current.filter(url => url !== variant.imageUrl)
+        } else {
+          sessionDeletedImages.current.push(variant.imageUrl)
+        }
       }
 
       const downloadURL = await uploadImage(file, 'products_variants', variantId, (progress) => {
         setVariantUploadProgress(prev => ({ ...prev, [variantId]: progress }))
       })
 
+      sessionUploadedImages.current.push(downloadURL)
       handleVariantChange(variantId, 'imageUrl', downloadURL)
     } catch (err) {
       console.error('[Variant Image Upload] Error:', err)
-      setErrors(prev => ({ ...prev, [`variant_img_${variantId}`]: 'Error al subir imagen de variante.' }))
+      e.target.value = originalValue
+      if (err?.code === 'storage/unauthorized') {
+        showUploadError('Sin permisos para subir imágenes de variante. Verifica las reglas de Firebase Storage.')
+      } else {
+        showUploadError('Error al subir imagen de variante. Verifica tu conexión e intenta de nuevo.')
+      }
     } finally {
       setLoadingVariantImages(prev => ({ ...prev, [variantId]: false }))
     }
@@ -350,25 +414,44 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
     const file = e.target.files[0]
     if (!file) return
 
+    // Fix 2: validar tamaño
+    if (!validateFileSize(file)) {
+      e.target.value = ''
+      return
+    }
+
     setLoadingGalleryIndex(index)
     setGalleryProgress(0)
+    const originalValue = e.target.value
+    e.target.value = ''
 
     try {
       const currentUrl = formData.galeria[index]
       if (currentUrl) {
-        await deleteImage(currentUrl).catch(err => console.warn('Error al borrar anterior:', err))
+        if (sessionUploadedImages.current.includes(currentUrl)) {
+          await deleteImage(currentUrl).catch(err => console.warn('Error al borrar anterior de la sesión:', err))
+          sessionUploadedImages.current = sessionUploadedImages.current.filter(url => url !== currentUrl)
+        } else {
+          sessionDeletedImages.current.push(currentUrl)
+        }
       }
 
       const downloadURL = await uploadImage(file, 'products_gallery', `gallery_${index}`, (progress) => {
         setGalleryProgress(progress)
       })
 
+      sessionUploadedImages.current.push(downloadURL)
       const newGal = [...formData.galeria]
       newGal[index] = downloadURL
       setFormData(prev => ({ ...prev, galeria: newGal }))
     } catch (err) {
       console.error('[Gallery Image Upload] Error:', err)
-      setErrors(prev => ({ ...prev, [`gallery_img_${index}`]: 'Error al subir imagen de galería.' }))
+      e.target.value = originalValue
+      if (err?.code === 'storage/unauthorized') {
+        showUploadError('Sin permisos para subir imágenes de galería. Verifica las reglas de Firebase Storage.')
+      } else {
+        showUploadError('Error al subir imagen de galería. Verifica tu conexión e intenta de nuevo.')
+      }
     } finally {
       setLoadingGalleryIndex(null)
     }
@@ -399,13 +482,14 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
         seoTitle: initialData.seoTitle || '',
         seoDescription: initialData.seoDescription || '',
         estado: initialData.estado || null,
+        stockInfinito: initialData.stockInfinito || false,
         variantes: (initialData.variantes && initialData.variantes.length > 0)
           ? initialData.variantes
           : [{ ...initialVariant, id: 'default', stock: initialData.stock || 0 }]
       })
       setCurrentStep(1)
     } else if (isOpen) {
-      setFormData({ ...initialForm, variantes: [{ ...initialVariant, id: crypto.randomUUID() }] })
+      setFormData({ ...initialForm, variantes: [{ ...initialVariant, id: generateUUID() }] })
       setErrors({})
       setCurrentStep(1) // Empezar siempre en el paso 1 al crear
     }
@@ -414,11 +498,15 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
   const handleAddVariant = () => {
     setFormData(prev => ({
       ...prev,
-      variantes: [...prev.variantes, { ...initialVariant, id: crypto.randomUUID() }]
+      variantes: [...prev.variantes, { ...initialVariant, id: generateUUID() }]
     }))
   }
 
   const handleRemoveVariant = (id) => {
+    const variant = formData.variantes.find(v => v.id === id)
+    if (variant && variant.imageUrl) {
+      handleRemoveImage(variant.imageUrl)
+    }
     setFormData(prev => ({
       ...prev,
       variantes: prev.variantes.filter(v => v.id !== id)
@@ -449,6 +537,21 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
     const hasSizeFilter = catalogFilters?.sizes !== false
     const hasVariantsEnabled = hasColorFilter || hasSizeFilter
 
+    const toggleStockInfinitoElement = (
+      <div className="flex items-center justify-between p-4 rounded-2xl bg-surface-2 border border-app mb-4 max-w-md mx-auto md:max-w-none">
+        <div>
+          <p className="text-sm font-bold text-app">Stock Infinito / Ilimitado</p>
+          <p className="text-xs text-muted">Para productos preparados al instante que no requieren control de inventario físico</p>
+        </div>
+        <input
+          type="checkbox"
+          checked={formData.stockInfinito || false}
+          onChange={(e) => setFormData({ ...formData, stockInfinito: e.target.checked })}
+          className="w-5 h-5 rounded text-primary focus:ring-primary border-app cursor-pointer shrink-0"
+        />
+      </div>
+    )
+
     if (!hasVariantsEnabled) {
       const handleStockChange = (val) => {
         const cleanVal = val === '' ? 0 : Number(val)
@@ -467,19 +570,29 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
       const stockVal = formData.variantes?.[0]?.stock ?? 0
 
       return (
-        <div className="bg-surface-2 p-5 rounded-3xl border border-app shadow-sm max-w-md mx-auto">
-          <div>
-            <label className="text-xs font-bold text-app mb-2 block">Cantidad Disponible en Stock *</label>
-            <input
-              type="number"
-              min={0}
-              placeholder="Ej. 10"
-              value={stockVal === 0 && formData.variantes?.[0]?.stock === undefined ? '' : stockVal}
-              onChange={(e) => handleStockChange(e.target.value === '' ? '' : Number(e.target.value))}
-              className="w-full h-12 px-4 rounded-xl border border-app bg-surface text-app focus:border-primary outline-none font-bold text-base"
-            />
-            {errors[`variantes.0.stock`] && (
-              <p className="text-error text-xs mt-1.5">{errors[`variantes.0.stock`]}</p>
+        <div className="space-y-4">
+          {toggleStockInfinitoElement}
+          <div className="bg-surface-2 p-5 rounded-3xl border border-app shadow-sm max-w-md mx-auto">
+            {formData.stockInfinito ? (
+              <div className="text-center py-4 bg-primary/10 rounded-2xl border border-dashed border-primary/30">
+                <span className="text-xl font-bold text-primary block">∞ Stock Ilimitado</span>
+                <p className="text-xs text-muted mt-1 px-4">Este producto se prepara al instante y no tiene límite de stock.</p>
+              </div>
+            ) : (
+              <div>
+                <label className="text-xs font-bold text-app mb-2 block">Cantidad Disponible en Stock *</label>
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="Ingresa la cantidad"
+                  value={stockVal === 0 && formData.variantes?.[0]?.stock === undefined ? '' : stockVal}
+                  onChange={(e) => handleStockChange(e.target.value === '' ? '' : Number(e.target.value))}
+                  className="w-full h-12 px-4 rounded-xl border border-app bg-surface text-app focus:border-primary outline-none font-bold text-base"
+                />
+                {errors[`variantes.0.stock`] && (
+                  <p className="text-error text-xs mt-1.5">{errors[`variantes.0.stock`]}</p>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -488,6 +601,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
 
     return (
       <div className="space-y-4">
+        {toggleStockInfinitoElement}
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-app uppercase tracking-wider">Variantes Disponibles</span>
           <button
@@ -701,75 +815,82 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                 )}
 
                 <div className="col-span-2">
-                  <label className="text-[10px] font-bold text-app mb-1 block uppercase">Stock Disponible *</label>
-                  <input
-                    type="number"
-                    min={0}
-                    placeholder="Ej. 10"
-                    value={variant.stock === '' ? '' : variant.stock}
-                    onChange={(e) => handleVariantChange(variant.id, 'stock', e.target.value)}
-                    className="w-full h-10 px-3 rounded-lg border border-app bg-surface text-xs focus:border-primary outline-none font-medium text-app"
-                  />
-                  {errors[`variantes.${index}.stock`] && (
-                    <p className="text-error text-[10px] mt-0.5">{errors[`variantes.${index}.stock`]}</p>
+                  <label className="text-[10px] font-bold text-app mb-1 block uppercase tracking-wider">Stock Disponible *</label>
+                  {formData.stockInfinito ? (
+                    <input
+                      type="text"
+                      disabled
+                      value="∞ Ilimitado"
+                      className="w-full h-11 px-4 rounded-xl border border-app bg-surface-2 text-sm outline-none font-bold text-primary/70 cursor-not-allowed text-center transition-all"
+                    />
+                  ) : (
+                    <>
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder="Ingresa la cantidad en inventario"
+                        value={variant.stock === '' ? '' : variant.stock}
+                        onChange={(e) => handleVariantChange(variant.id, 'stock', e.target.value)}
+                        className="w-full h-11 px-4 rounded-xl border border-app bg-surface text-sm focus:border-primary outline-none font-bold text-app transition-all"
+                      />
+                      {errors[`variantes.${index}.stock`] && (
+                        <p className="text-error text-[10px] mt-0.5">{errors[`variantes.${index}.stock`]}</p>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-app/40 border-dashed">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-app/40 border-dashed">
                 <div>
-                  <label className="text-[10px] font-semibold text-muted mb-1 block uppercase">SKU (Opcional)</label>
+                  <label className="text-[10px] font-bold text-app mb-1 block uppercase tracking-wider">SKU (Opcional)</label>
                   <input
                     type="text"
-                    placeholder="Ej. SKU-ROJO-M"
+                    placeholder="Referencia de almacén (SKU)"
                     value={variant.sku || ''}
                     onChange={(e) => handleVariantChange(variant.id, 'sku', e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg border border-app bg-surface text-[11px] focus:border-primary outline-none"
+                    className="w-full h-11 px-4 rounded-xl border border-app bg-surface text-sm focus:border-primary outline-none text-app transition-all"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-semibold text-muted block uppercase">Foto de Variante (Opcional)</label>
+                  <label className="text-[10px] font-bold text-app mb-1 block uppercase tracking-wider">Foto de Variante (Opcional)</label>
                   <div className="flex items-center gap-2">
                     {loadingVariantImages[variant.id] ? (
-                      <div className="flex items-center gap-2 h-9 px-3 rounded-lg border border-app bg-surface-2 w-full">
+                      <div className="flex items-center gap-2 h-11 px-3 rounded-xl border border-app bg-surface-2 w-full">
                         <Loader2 size={14} className="animate-spin text-primary shrink-0" />
-                        <span className="text-[10px] font-bold text-primary animate-pulse">
+                        <span className="text-[11px] font-bold text-primary animate-pulse">
                           Subiendo... {variantUploadProgress[variant.id] || 0}%
                         </span>
                       </div>
                     ) : variant.imageUrl ? (
-                      <div className="flex items-center gap-2 bg-surface p-1 pr-2.5 rounded-lg border border-app w-full justify-between">
+                      <div className="flex items-center gap-2 bg-surface p-1 pr-2.5 rounded-xl border border-app w-full justify-between h-11">
                         <div className="flex items-center gap-2 overflow-hidden">
                           <img 
                             src={variant.imageUrl} 
                             alt="Variante" 
-                            className="w-7 h-7 rounded object-cover border border-app shrink-0"
+                            className="w-8 h-8 rounded-lg object-cover border border-app shrink-0"
                           />
-                          <span className="text-[9px] font-mono text-muted truncate max-w-[120px]">
+                          <span className="text-[10px] font-mono text-muted truncate max-w-[120px]">
                             {variant.imageUrl}
                           </span>
                         </div>
                         <button
                           type="button"
-                          onClick={async () => {
-                            try {
-                              await deleteImage(variant.imageUrl)
-                            } catch (err) {
-                              console.warn('Error al borrar imagen de Storage:', err)
-                            }
+                          onClick={() => {
+                            handleRemoveImage(variant.imageUrl)
                             handleVariantChange(variant.id, 'imageUrl', '')
                           }}
-                          className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded transition-colors"
+                          className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer border-none flex items-center justify-center"
                           title="Eliminar foto"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     ) : (
-                      <div className="flex flex-col gap-1.5 w-full">
-                        <div className="flex gap-1.5 w-full">
-                          <label className="flex-1 h-9 bg-surface-2 hover:bg-surface border border-app rounded-lg flex items-center justify-center gap-1.5 text-[11px] font-bold text-app cursor-pointer transition-colors active:scale-95 group">
-                            <UploadCloud size={13} className="text-muted group-hover:text-primary transition-colors" />
+                      <div className="flex flex-col gap-2 w-full">
+                        <div className="flex gap-2 w-full">
+                          <label className="flex-1 h-11 bg-surface-2 hover:bg-surface border border-app rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold text-app cursor-pointer transition-colors active:scale-95 group">
+                            <UploadCloud size={14} className="text-muted group-hover:text-primary transition-colors" />
                             <span>Galería</span>
                             <input 
                               type="file" 
@@ -778,8 +899,8 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                               className="hidden" 
                             />
                           </label>
-                          <label className="flex-1 h-9 bg-surface-2 hover:bg-surface border border-app rounded-lg flex items-center justify-center gap-1.5 text-[11px] font-bold text-app cursor-pointer transition-colors active:scale-95 group">
-                            <Camera size={13} className="text-muted group-hover:text-primary transition-colors" />
+                          <label className="flex-1 h-11 bg-surface-2 hover:bg-surface border border-app rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold text-app cursor-pointer transition-colors active:scale-95 group">
+                            <Camera size={14} className="text-muted group-hover:text-primary transition-colors" />
                             <span>Cámara</span>
                             <input 
                               type="file" 
@@ -792,16 +913,16 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                         </div>
                         <input
                           type="url"
-                          placeholder="O enlace directo (URL)..."
+                          placeholder="O ingresa enlace web (http/https)"
                           value={variant.imageUrl || ''}
                           onChange={(e) => handleVariantChange(variant.id, 'imageUrl', e.target.value)}
-                          className="w-full h-8 px-2.5 rounded-lg border border-app bg-surface text-[10px] text-app focus:border-primary outline-none"
+                          className="w-full h-10 px-3 rounded-xl border border-app bg-surface text-xs text-app focus:border-primary outline-none transition-all placeholder:text-muted/60"
                         />
                       </div>
                     )}
                   </div>
                   {errors[`variant_img_${variant.id}`] && (
-                    <p className="text-error text-[9px] font-bold mt-0.5">{errors[`variant_img_${variant.id}`]}</p>
+                    <p className="text-error text-[10px] font-bold mt-0.5">{errors[`variant_img_${variant.id}`]}</p>
                   )}
                 </div>
               </div>
@@ -815,12 +936,6 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
   // Validaciones parciales por pasos para el Wizard
   const validateStep = (step) => {
     const stepErrors = {}
-    
-    if (step === 1) {
-      if (loadingIA) {
-        stepErrors.imageUrl = "Espera a que termine de procesar la imagen."
-      }
-    }
     
     if (step === 2) {
       if (!formData.nombre || formData.nombre.trim().length < 3) {
@@ -865,7 +980,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
       // Color, talla y demás campos de variante son opcionales (decisión del admin).
       if (!formData.variantes || formData.variantes.length === 0) {
         stepErrors.variantes = 'Debes añadir al menos una variante.'
-      } else {
+      } else if (!formData.stockInfinito) {
         formData.variantes.forEach((v, index) => {
           const stockNum = v.stock === '' ? NaN : Number(v.stock)
           if (isNaN(stockNum) || stockNum < 0) {
@@ -891,7 +1006,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
     setCurrentStep(prev => Math.max(prev - 1, 1))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     if (e) e.preventDefault()
     
     // Si estamos creando, realizar validación final de todos los pasos
@@ -914,11 +1029,11 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
     let finalVariantes = []
     if (hasVariantsEnabled) {
       finalVariantes = formData.variantes.map(v => ({
-        id: v.id || crypto.randomUUID(),
+        id: v.id || generateUUID(),
         talla: hasSizeFilter ? (v.talla || '') : '',
         color: hasColorFilter ? (v.color || '') : '',
         genero: v.genero || '',
-        stock: v.stock === '' ? 0 : Number(v.stock),
+        stock: formData.stockInfinito ? 9999 : (v.stock === '' ? 0 : Number(v.stock)),
         sku: v.sku || '',
         nombre: v.nombre || '',
         imageUrl: v.imageUrl || '',
@@ -931,7 +1046,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
         id: 'default',
         talla: '',
         color: '',
-        stock: mainStock === '' ? 0 : Number(mainStock),
+        stock: formData.stockInfinito ? 9999 : (mainStock === '' ? 0 : Number(mainStock)),
         precio: ''
       }]
     }
@@ -952,7 +1067,8 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
       variantes: finalVariantes,
       discountActive: formData.discountActive,
       discountType: formData.discountType,
-      discountValue: Number(formData.discountValue || 0)
+      discountValue: Number(formData.discountValue || 0),
+      stockInfinito: formData.stockInfinito || false
     }
 
     const result = productSchema.safeParse(dataToValidate)
@@ -968,8 +1084,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
     }
 
     setErrors({})
-    setCurrentDraftId(null)
-    setCurrentDraftFilePath(null)
+    await cleanLeftovers(true)
     onSave(result.data)
   }
 
@@ -1062,7 +1177,6 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                         accept="image/*" 
                         onChange={handleImageUpload} 
                         className="hidden" 
-                        disabled={loadingIA}
                       />
                     </label>
                     
@@ -1076,7 +1190,6 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                         capture="environment" 
                         onChange={handleImageUpload} 
                         className="hidden" 
-                        disabled={loadingIA}
                       />
                     </label>
                   </div>
@@ -1089,9 +1202,8 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                         type="url"
                         value={formData.imageUrl}
                         onChange={e => setFormData({...formData, imageUrl: e.target.value})}
-                        placeholder="https://..."
+                        placeholder="Ingresa el enlace web (http/https)"
                         className="w-full h-10 pl-9 pr-4 rounded-xl bg-surface-2 border border-app text-xs text-app focus:border-primary focus:outline-none"
-                        disabled={loadingIA}
                       />
                     </div>
                   </div>
@@ -1101,31 +1213,12 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                 <div className="flex flex-col items-center justify-center border border-app rounded-2xl bg-surface-2 p-3 relative min-h-[200px]">
                   <span className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2 block text-center">Previsualización de Tarjeta (Cliente)</span>
                   <div className="relative w-[185px] rounded-xl border border-app shadow-md overflow-hidden bg-surface shrink-0">
-                    {loadingIA ? (
-                      <div className="absolute inset-0 bg-surface/85 backdrop-blur-xs z-30 flex flex-col items-center justify-center p-3 text-center space-y-2">
-                        <div className="relative flex items-center justify-center">
-                          <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-                          <Sparkles size={14} className="text-primary absolute animate-pulse" />
-                        </div>
-                        <p className="text-[10px] font-black text-primary animate-pulse">
-                          IA Analizando...
-                        </p>
-                        <p className="text-[9px] text-muted">
-                          {uploadProgress < 100 ? `Subiendo: ${uploadProgress}%` : 'Sugerencias...'}
-                        </p>
-                      </div>
-                    ) : null}
 
                     {/* Botón de eliminar imagen flotante */}
-                    {formData.imageUrl && !loadingIA && (
+                    {formData.imageUrl && (
                       <button
                         type="button"
-                        onClick={async () => {
-                          if (currentDraftId) {
-                            await handleCleanupTemp(currentDraftId, currentDraftFilePath)
-                            setCurrentDraftId(null)
-                            setCurrentDraftFilePath(null)
-                          }
+                        onClick={() => {
                           setFormData({ ...formData, imageUrl: '' })
                         }}
                         className="absolute top-2 right-2 bg-black/60 text-white hover:bg-red-500 rounded-lg p-1.5 transition-colors z-20"
@@ -1208,7 +1301,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                             type="url"
                             value={tempGalleryUrl}
                             onChange={(e) => setTempGalleryUrl(e.target.value)}
-                            placeholder="https://... (URL de imagen secundaria)"
+                            placeholder="Ingresa el enlace de la imagen secundaria"
                             className="w-full h-10 pl-9 pr-4 rounded-xl bg-surface border border-app text-xs text-app focus:border-primary focus:outline-none"
                           />
                         </div>
@@ -1272,16 +1365,12 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                             {/* Eliminar Foto */}
                             <button
                               type="button"
-                              onClick={async () => {
-                                try {
-                                  await deleteImage(url)
-                                } catch (err) {
-                                  console.warn('Error al borrar de Storage:', err)
-                                }
+                              onClick={() => {
+                                handleRemoveImage(url)
                                 const newGal = formData.galeria.filter((_, i) => i !== idx)
                                 setFormData({ ...formData, galeria: newGal })
                               }}
-                              className="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors"
+                              className="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-50 hover:text-white flex items-center justify-center transition-colors"
                               title="Eliminar foto"
                             >
                               <Trash2 size={14} />
@@ -1318,43 +1407,25 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
 
             <div className="space-y-4">
               <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="block text-xs font-bold text-app">Nombre del Producto *</label>
-                  {loadingIA && (
-                    <span className="text-[10px] font-bold text-primary animate-pulse flex items-center gap-1">
-                      <Sparkles size={10} /> IA Escribiendo...
-                    </span>
-                  )}
-                </div>
+                <label className="block text-xs font-bold text-app mb-1">Nombre del Producto *</label>
                 <input
                   type="text"
                   value={formData.nombre}
                   onChange={e => setFormData({...formData, nombre: e.target.value})}
-                  placeholder={loadingIA ? "Escribiendo por IA..." : "Ej. Camisa Lino Italiana"}
-                  className={`w-full h-11 px-4 rounded-xl bg-surface-2 border text-app focus:border-primary focus:outline-none transition-all ${
-                    loadingIA ? 'border-primary/40 animate-pulse' : 'border-app'
-                  }`}
+                  placeholder="Ingresa el nombre del producto"
+                  className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none transition-all"
                 />
                 {errors.nombre && <p className="text-error text-xs mt-1">{errors.nombre}</p>}
               </div>
 
               <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="block text-xs font-bold text-app">Descripción Comercial</label>
-                  {loadingIA && (
-                    <span className="text-[10px] font-bold text-primary animate-pulse flex items-center gap-1">
-                      <Sparkles size={10} /> IA Redactando...
-                    </span>
-                  )}
-                </div>
+                <label className="block text-xs font-bold text-app mb-1">Descripción Comercial</label>
                 <textarea
                   value={formData.descripcion || ''}
                   onChange={e => setFormData({...formData, descripcion: e.target.value})}
                   rows={3}
-                  placeholder={loadingIA ? "Escribiendo descripción por IA..." : "Destaca los atractivos del producto..."}
-                  className={`w-full p-3 rounded-xl bg-surface-2 border text-app focus:border-primary focus:outline-none resize-none transition-all ${
-                    loadingIA ? 'border-primary/40 animate-pulse' : 'border-app'
-                  }`}
+                  placeholder="Escribe la descripción corta del producto"
+                  className="w-full p-3 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none resize-none transition-all"
                 />
               </div>
 
@@ -1364,7 +1435,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                   value={formData.categoriaId}
                   onChange={(val) => setFormData({...formData, categoriaId: val})}
                   options={categories.map(c => ({ value: c.id, label: c.nombre }))}
-                  placeholder="Selecciona una categoría..."
+                  placeholder="Elige una categoría de la lista"
                   emptyOption="Sin categoría"
                   dropUp={true}
                 />
@@ -1383,7 +1454,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                         atributos: { ...formData.atributos, [attr.id]: val }
                       })}
                       options={attr.options?.map(opt => ({ value: opt, label: opt }))}
-                      placeholder="Seleccione..."
+                      placeholder="Elige una opción de la lista"
                       dropUp={true}
                     />
                   ) : (
@@ -1425,7 +1496,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                 <CurrencyInput
                   value={formData.precioBase}
                   onChange={(val) => setFormData({...formData, precioBase: val})}
-                  placeholder="Ej. 85000"
+                  placeholder="Ingresa el precio de venta al público (PVP)"
                   className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none font-bold"
                 />
                 {errors.precioBase && <p className="text-error text-xs mt-1">{errors.precioBase}</p>}
@@ -1436,7 +1507,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                 <CurrencyInput
                   value={formData.precioMayorista}
                   onChange={(val) => setFormData({...formData, precioMayorista: val})}
-                  placeholder="Ej. 70000"
+                  placeholder="Ingresa el precio especial para venta al por mayor"
                   className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none font-bold"
                 />
               </div>
@@ -1446,7 +1517,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                 <CurrencyInput
                   value={formData.precioCosto}
                   onChange={(val) => setFormData({...formData, precioCosto: val})}
-                  placeholder="Ej. 45000"
+                  placeholder="Ingresa el costo de adquisición o fabricación"
                   className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none font-bold"
                 />
                 {errors.precioCosto && <p className="text-error text-xs mt-1">{errors.precioCosto}</p>}
@@ -1458,7 +1529,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                   min={0}
                   value={formData.umbralAlerta}
                   onChange={(val) => setFormData({...formData, umbralAlerta: val})}
-                  placeholder="Ej. 3"
+                  placeholder="Ingresa el stock mínimo para alertas"
                   className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none"
                 />
                 {errors.umbralAlerta && <p className="text-error text-xs mt-1">{errors.umbralAlerta}</p>}
@@ -1507,7 +1578,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                         { value: 'percentage', label: 'Porcentaje (%)' },
                         { value: 'amount', label: 'Monto Fijo (COP $)' },
                       ]}
-                      placeholder="Seleccione..."
+                      placeholder="Elige una opción de la lista"
                       dropUp={true}
                     />
                   </div>
@@ -1515,7 +1586,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                     <label className="block text-xs font-bold text-app mb-1.5">Valor del Descuento</label>
                     <input
                       type="number"
-                      placeholder="0"
+                      placeholder="Ingresa la cantidad"
                       value={formData.discountValue === 0 ? '' : formData.discountValue}
                       onChange={(e) => setFormData({ ...formData, discountValue: e.target.value === '' ? 0 : Number(e.target.value) })}
                       className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-app focus:border-primary focus:outline-none"
@@ -1673,7 +1744,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                     }
                     setCustomColorHex(val)
                   }}
-                  placeholder="#FFFFFF"
+                  placeholder="Ingresa el color hexadecimal (ej: #000000)"
                   className="w-full h-11 px-4 rounded-xl border border-app bg-surface-2 text-xs font-mono uppercase tracking-widest text-app focus:border-primary outline-none"
                 />
               </div>
@@ -1791,20 +1862,13 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
           <div className="md:col-span-2">
             <div className="flex justify-between items-center mb-1">
               <label className="block text-sm font-medium text-app">Nombre *</label>
-              {loadingIA && (
-                <span className="text-[10px] font-bold text-primary animate-pulse flex items-center gap-1">
-                  <Sparkles size={10} /> Autogenerando...
-                </span>
-              )}
             </div>
             <input
               type="text"
               value={formData.nombre}
               onChange={e => setFormData({...formData, nombre: e.target.value})}
-              placeholder={loadingIA ? "Escribiendo por IA..." : "Nombre del producto"}
-              className={`w-full h-11 px-4 rounded-xl bg-surface-2 border text-app focus:border-primary focus:outline-none transition-all ${
-                loadingIA ? 'border-primary/40 animate-pulse' : 'border-app'
-              }`}
+              placeholder="Ingresa el nombre del producto"
+              className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none transition-all"
             />
             {errors.nombre && <p className="text-error text-xs mt-1">{errors.nombre}</p>}
           </div>
@@ -1812,20 +1876,13 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
           <div className="md:col-span-2">
             <div className="flex justify-between items-center mb-1">
               <label className="block text-sm font-medium text-app">Descripción Comercial</label>
-              {loadingIA && (
-                <span className="text-[10px] font-bold text-primary animate-pulse flex items-center gap-1">
-                  <Sparkles size={10} /> Autogenerando...
-                </span>
-              )}
             </div>
             <textarea
               value={formData.descripcion || ''}
               onChange={e => setFormData({...formData, descripcion: e.target.value})}
               rows={3}
-              placeholder={loadingIA ? "Escribiendo descripción por IA..." : "Describe el producto..."}
-              className={`w-full p-3 rounded-xl bg-surface-2 border text-app focus:border-primary focus:outline-none resize-none transition-all ${
-                loadingIA ? 'border-primary/40 animate-pulse' : 'border-app'
-              }`}
+              placeholder="Escribe la descripción del producto"
+              className="w-full p-3 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none resize-none transition-all"
             />
           </div>
 
@@ -1835,7 +1892,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
               value={formData.categoriaId}
               onChange={(val) => setFormData({...formData, categoriaId: val})}
               options={categories.map(c => ({ value: c.id, label: c.nombre }))}
-              placeholder="Seleccione una categoría..."
+              placeholder="Elige una categoría de la lista"
               emptyOption="Sin categoría"
             />
             {errors.categoriaId && <p className="text-error text-xs mt-1">{errors.categoriaId}</p>}
@@ -1852,7 +1909,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                     atributos: { ...formData.atributos, [attr.id]: val }
                   })}
                   options={attr.options?.map(opt => ({ value: opt, label: opt }))}
-                  placeholder="Seleccione una opción..."
+                  placeholder="Elige una opción de la lista"
                 />
               ) : (
                 <input
@@ -1873,22 +1930,21 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
             <label className="block text-sm font-bold text-app">Imagen del Producto *</label>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3.5">
                 <div className="flex gap-2">
-                  <label className="flex-1 h-12 bg-surface-2 hover:bg-surface border-2 border-dashed border-app rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-app cursor-pointer transition-all active:scale-95 group">
-                    <UploadCloud size={18} className="text-muted group-hover:text-primary transition-colors" />
+                  <label className="flex-1 h-12 bg-surface-2 hover:bg-surface border border-app rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-app cursor-pointer transition-all active:scale-95 group">
+                    <UploadCloud size={16} className="text-muted group-hover:text-primary transition-colors" />
                     <span>Subir de Galería</span>
                     <input 
                       type="file" 
                       accept="image/*" 
                       onChange={handleImageUpload} 
                       className="hidden" 
-                      disabled={loadingIA}
                     />
                   </label>
                   
-                  <label className="flex-1 h-12 bg-surface-2 hover:bg-surface border-2 border-dashed border-app rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-app cursor-pointer transition-all active:scale-95 group">
-                    <Camera size={18} className="text-muted group-hover:text-primary transition-colors" />
+                  <label className="flex-1 h-12 bg-surface-2 hover:bg-surface border border-app rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-app cursor-pointer transition-all active:scale-95 group">
+                    <Camera size={16} className="text-muted group-hover:text-primary transition-colors" />
                     <span>Tomar Foto</span>
                     <input 
                       type="file" 
@@ -1896,27 +1952,50 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                       capture="environment" 
                       onChange={handleImageUpload} 
                       className="hidden" 
-                      disabled={loadingIA}
                     />
                   </label>
                 </div>
 
                 <div>
-                  <span className="text-[10px] text-muted font-bold block mb-1">O INGRESA UNA URL DE RESPALDO:</span>
+                  <span className="text-[10px] text-muted font-bold block mb-1.5 tracking-wider">O INGRESA UNA URL DE RESPALDO:</span>
                   <div className="relative">
-                    <ImageIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                    <ImageIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                     <input
                       type="url"
                       value={formData.imageUrl}
                       onChange={e => setFormData({...formData, imageUrl: e.target.value})}
-                      placeholder="https://..."
+                      placeholder="Enlace web de la imagen (http/https)"
                       className="w-full h-10 pl-9 pr-4 rounded-xl bg-surface-2 border border-app text-xs text-app focus:border-primary focus:outline-none"
-                      disabled={loadingIA}
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Vista Previa de la Imagen */}
+              <div className="flex items-center justify-center border border-app rounded-2xl bg-surface-2 p-3 min-h-[120px] relative">
+                {formData.imageUrl ? (
+                  <div className="relative w-28 h-28 rounded-xl overflow-hidden border border-app bg-surface shadow-sm group">
+                    <img 
+                      src={formData.imageUrl} 
+                      alt="Vista previa" 
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                      className="absolute top-1 right-1 bg-black/60 hover:bg-red-500 hover:text-white text-white rounded-lg p-1.5 transition-colors z-20 cursor-pointer border-none flex items-center justify-center"
+                      title="Eliminar imagen"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-1 text-muted">
+                    <ImageIcon size={24} className="stroke-[1.5]" />
+                    <span className="text-[9px] font-bold uppercase tracking-widest">Sin Imagen</span>
+                  </div>
+                )}
+              </div>
             </div>
             {errors.imageUrl && <p className="text-error text-xs mt-1">{errors.imageUrl}</p>}
             
@@ -1996,12 +2075,8 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                           {/* Eliminar Foto */}
                           <button
                             type="button"
-                            onClick={async () => {
-                              try {
-                                await deleteImage(url)
-                              } catch (err) {
-                                console.warn('Error al borrar de Storage:', err)
-                              }
+                            onClick={() => {
+                              handleRemoveImage(url)
                               const newGal = formData.galeria.filter((_, i) => i !== idx)
                               setFormData({ ...formData, galeria: newGal })
                             }}
@@ -2092,14 +2167,14 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                       { value: 'percentage', label: 'Porcentaje (%)' },
                       { value: 'amount', label: 'Monto Fijo (COP $)' },
                     ]}
-                    placeholder="Seleccione..."
+                    placeholder="Elige una opción de la lista"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-app mb-1.5">Valor del Descuento</label>
                   <input
                     type="number"
-                    placeholder="0"
+                    placeholder="Ingresa la cantidad"
                     value={formData.discountValue === 0 ? '' : formData.discountValue}
                     onChange={(e) => setFormData({ ...formData, discountValue: e.target.value === '' ? 0 : Number(e.target.value) })}
                     className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-app focus:border-primary focus:outline-none"
@@ -2169,7 +2244,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                       { value: 'descontinuado', label: '⛔ Descontinuado — Muestra mensaje de no disponible' },
                       { value: 'eliminado', label: '🗑️ Eliminado — Conserva URL con mensaje especial' },
                     ]}
-                    placeholder="— Automático (gestionado por stock) —"
+                    placeholder="Estado automático (se gestiona por stock)"
                   />
                 </div>
 
@@ -2184,7 +2259,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                         ...formData,
                         galeria: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                       })}
-                      placeholder="https://ejemplo.com/img1.jpg, https://ejemplo.com/img2.jpg"
+                      placeholder="Ingresa las URLs de imágenes secundarias separadas por comas"
                       className="w-full p-3 rounded-xl bg-surface border border-app text-xs text-app focus:border-primary focus:outline-none resize-none"
                     />
                   </div>
@@ -2201,7 +2276,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                         ...formData,
                         beneficios: e.target.value.split('\n').map(s => s.trim()).filter(Boolean)
                       })}
-                      placeholder="✓ Envío gratis hoy&#10;✓ Garantía de 12 meses&#10;✓ Devolución fácil"
+                      placeholder="Ingresa cada beneficio en una línea"
                       className="w-full p-3 rounded-xl bg-surface border border-app text-xs text-app focus:border-primary focus:outline-none resize-none"
                     />
                   </div>
@@ -2215,39 +2290,35 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                       type="text"
                       value={formData.garantiaInfo || ''}
                       onChange={e => setFormData({ ...formData, garantiaInfo: e.target.value })}
-                      placeholder="Ej: 6 meses de garantía por defectos de fábrica"
+                      placeholder="Ingresa las condiciones y tiempo de garantía"
                       className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-xs text-app focus:border-primary focus:outline-none"
                     />
                   </div>
                 )}
 
-                {/* SEO — auto-generado por Gemini, solo visible para referencia/edición manual si SEO activo */}
+                {/* SEO — visible para referencia/edición manual si SEO activo */}
                 {seoEnabled && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-app mb-1 uppercase tracking-wider">SEO Título
-                        <span className="ml-1 text-primary font-normal normal-case">✦ Gemini</span>
-                      </label>
-                      <p className="text-[10px] text-muted mb-1.5">Auto-generado al subir imagen. Edita si quieres.</p>
+                      <label className="block text-xs font-bold text-app mb-1 uppercase tracking-wider">SEO Título</label>
+                      <p className="text-[10px] text-muted mb-1.5 leading-normal">Título para buscadores y enlaces compartidos.</p>
                       <input
                         type="text"
                         value={formData.seoTitle || ''}
                         onChange={e => setFormData({ ...formData, seoTitle: e.target.value })}
-                        placeholder="Auto-generado por IA al subir la foto..."
-                        className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-xs text-app focus:border-primary focus:outline-none"
+                        placeholder="Título SEO (Ej: Cámara de Panel Solar Smart)"
+                        className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:border-primary focus:outline-none transition-all placeholder:text-muted/60"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-app mb-1 uppercase tracking-wider">SEO Descripción
-                        <span className="ml-1 text-primary font-normal normal-case">✦ Gemini</span>
-                      </label>
-                      <p className="text-[10px] text-muted mb-1.5">Auto-generado al subir imagen. Edita si quieres.</p>
+                      <label className="block text-xs font-bold text-app mb-1 uppercase tracking-wider">SEO Descripción</label>
+                      <p className="text-[10px] text-muted mb-1.5 leading-normal">Descripción corta para indexación en motores de búsqueda.</p>
                       <input
                         type="text"
                         value={formData.seoDescription || ''}
                         onChange={e => setFormData({ ...formData, seoDescription: e.target.value })}
-                        placeholder="Auto-generado por IA al subir la foto..."
-                        className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-xs text-app focus:border-primary focus:outline-none"
+                        placeholder="Descripción SEO breve y concisa"
+                        className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:border-primary focus:outline-none transition-all placeholder:text-muted/60"
                       />
                     </div>
                   </div>
@@ -2265,8 +2336,8 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                           ...formData,
                           productosRelacionados: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                         })}
-                        placeholder="ID1, ID2, ID3"
-                        className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-xs text-app focus:border-primary focus:outline-none"
+                        placeholder="Ej: prod1, prod2, prod3"
+                        className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:border-primary focus:outline-none transition-all placeholder:text-muted/60"
                       />
                     </div>
                     <div>
@@ -2278,8 +2349,8 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                           ...formData,
                           productosComplementarios: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                         })}
-                        placeholder="ID4, ID5"
-                        className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-xs text-app focus:border-primary focus:outline-none"
+                        placeholder="Ej: prod4, prod5, prod6"
+                        className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-sm text-app focus:border-primary focus:outline-none transition-all placeholder:text-muted/60"
                       />
                     </div>
                   </div>
@@ -2371,6 +2442,22 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
 
       <AnimatePresence>
         {renderCustomColorModal()}
+      </AnimatePresence>
+
+      {/* Toast de error de upload — visible sobre el modal */}
+      <AnimatePresence>
+        {uploadError && (
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-sm font-medium"
+            style={{ background: 'rgba(239,68,68,0.95)', color: '#fff', backdropFilter: 'blur(8px)', maxWidth: '90vw' }}
+          >
+            <AlertCircle size={18} className="shrink-0" />
+            <span>{uploadError}</span>
+          </motion.div>
+        )}
       </AnimatePresence>
     </>
   )

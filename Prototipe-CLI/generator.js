@@ -3,7 +3,6 @@ import path from 'path';
 import pc from 'picocolors';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import webpush from 'web-push';
 import ora from 'ora';
 import { Jimp } from 'jimp';
 import { getWorkspaceRoot } from './config.js';
@@ -113,7 +112,22 @@ export async function createProject(answers) {
   // Validaciones de preflight
   checkEnvironment(answers);
 
-  const targetDir = path.resolve(answers.targetPath);
+  // 0. Resolver coreType de la plantilla e inyectarlo en answers
+  let coreType = 'seed';
+  try {
+    const { getRegistroPath } = await import('./config.js');
+    const registro = await fs.readJson(getRegistroPath());
+    const templateConfig = Object.values(registro.plantillas).find(p => path.basename(p.destino) === answers.template);
+    if (templateConfig && templateConfig.coreType) {
+      coreType = templateConfig.coreType;
+    }
+  } catch (e) {}
+  answers.coreType = coreType;
+
+  // Resolver targetDir automáticamente usando getInstancePath
+  const { getInstancePath } = await import('./config.js');
+  const folderName = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const targetDir = getInstancePath(coreType, `App-${folderName}`);
   const srcTemplateDir = path.join(TEMPLATES_DIR, answers.template);
 
   // Resolver colores HSL y Tema de la paleta seleccionada (Auditoría)
@@ -293,18 +307,7 @@ export async function createProject(answers) {
     stepCSS.warn(`Aviso al configurar variables en src/index.css: ${cssErr.message}`);
   }
 
-  // 3. Generar llaves FCM VAPID criptográficas automáticamente
-  const step3 = ora('Generar claves FCM VAPID criptográficas').start();
-  let vapidPublicKey = '';
-  try {
-    const vapidKeys = webpush.generateVAPIDKeys();
-    vapidPublicKey = vapidKeys.publicKey;
-    step3.succeed('Claves VAPID autogeneradas con éxito.');
-  } catch (err) {
-    step3.warn(`No se pudieron autogenerar las llaves VAPID: ${err.message}`);
-  }
-
-  // 4. Crear el archivo .env.local
+  // 3. (Paso omitido: FCM desactivado)
   const step4 = ora('Generar variables de entorno (.env.local)').start();
   const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   const initials = (answers.projectName || 'P')
@@ -321,18 +324,15 @@ export async function createProject(answers) {
   const fbAuthDomain = String(answers.firebaseAuthDomain || '').trim();
   const fbProjectId = String(answers.firebaseProjectId || '').trim();
   const fbStorageBucket = String(answers.firebaseStorageBucket || '').trim();
-  const fbSenderId = String(answers.firebaseMessagingSenderId || '').trim();
   const fbAppId = String(answers.firebaseAppId || '').trim();
 
   const centralApiKey = String(answers.centralApiKey || '').trim();
-  const centralSenderId = String(answers.centralMessagingSenderId || '').trim();
   const centralAppId = String(answers.centralAppId || '').trim();
 
   const envContent = `VITE_FIREBASE_API_KEY=${fbApiKey}
 VITE_FIREBASE_AUTH_DOMAIN=${fbAuthDomain}
 VITE_FIREBASE_PROJECT_ID=${fbProjectId}
 VITE_FIREBASE_STORAGE_BUCKET=${fbStorageBucket}
-VITE_FIREBASE_MESSAGING_SENDER_ID=${fbSenderId}
 VITE_FIREBASE_APP_ID=${fbAppId}
 VITE_INITIAL_THEME=${themeName}
 VITE_DEVELOPER_EMAIL=${answers.developerEmail || ''}
@@ -353,9 +353,6 @@ VITE_DEVELOPER_FIXED_SERVICE_FEE=${answers.montoFijoServicio ?? 0}
 VITE_DEVELOPER_FLAT_MONTHLY_FEE=${answers.pagoMensualFijo ?? 0}
 VITE_DEVELOPER_ENABLE_DIAN_BILLING=${answers.enableDianBilling ?? false}
 VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN=${answers.costoPorFacturaDian ?? 0}
-
-# FCM Push
-VITE_FIREBASE_VAPID_KEY=${vapidPublicKey}
 
 # Nicho / Vertical de Negocio (usado por telemetría para contextualizar reportes de error)
 VITE_NICHE=${answers.niche || 'general'}
@@ -448,8 +445,13 @@ service firebase.storage {
   }
 }
 `;
-  await fs.writeFile(path.join(targetDir, 'storage.rules'), storageRulesContent, 'utf-8');
-  step5_2.succeed('Reglas de almacenamiento (storage.rules) generadas correctamente.');
+  const storageRulesPath = path.join(targetDir, 'storage.rules');
+  if (!(await fs.pathExists(storageRulesPath))) {
+    await fs.writeFile(storageRulesPath, storageRulesContent, 'utf-8');
+    step5_2.succeed('Reglas de almacenamiento (storage.rules) generadas correctamente.');
+  } else {
+    step5_2.succeed('Reglas de almacenamiento (storage.rules) heredadas de la plantilla.');
+  }
 
   // 5.3 Crear reglas de Firestore firestore.rules por defecto
   const step5_3 = ora('Generar reglas de Firestore firestore.rules').start();
@@ -463,8 +465,13 @@ service cloud.firestore {
   }
 }
 `;
-  await fs.writeFile(path.join(targetDir, 'firestore.rules'), firestoreRulesContent, 'utf-8');
-  step5_3.succeed('Reglas de base de datos (firestore.rules) generadas correctamente.');
+  const firestoreRulesPath = path.join(targetDir, 'firestore.rules');
+  if (!(await fs.pathExists(firestoreRulesPath))) {
+    await fs.writeFile(firestoreRulesPath, firestoreRulesContent, 'utf-8');
+    step5_3.succeed('Reglas de base de datos (firestore.rules) generadas correctamente.');
+  } else {
+    step5_3.succeed('Reglas de base de datos (firestore.rules) heredadas de la plantilla.');
+  }
 
   // 5.5 Crear archivo src/config/niche.json con especificaciones del nicho
   const stepNiche = ora('Generar metadatos de nicho (niche.json)').start();
@@ -545,6 +552,7 @@ service cloud.firestore {
     clientId,
     projectName: answers.projectName,
     template: answers.template,
+    coreType: answers.coreType || 'seed',
     niche: answers.niche || 'general_custom',
     version: '1.0.0',
     createdAt: new Date().toISOString()
@@ -552,36 +560,7 @@ service cloud.firestore {
   await fs.writeJson(path.join(targetDir, '.prototipe.json'), prototipeMeta, { spaces: 2 });
   stepMeta.succeed('Metadatos de sincronización (.prototipe.json) generados en la raíz.');
 
-  // 6. Configurar en caliente public/firebase-messaging-sw.js
-  const stepSW = ora('Configurar Service Worker de notificaciones').start();
-  const swPath = path.join(targetDir, 'public', 'firebase-messaging-sw.js');
-  if (await fs.pathExists(swPath)) {
-    let swContent = await fs.readFile(swPath, 'utf-8');
-    const replaceFirebaseField = (content, fieldName, value) => {
-      const regex = new RegExp(`${fieldName}:\\s*['"\`][^'"\`]*['"\`]`, 'g');
-      return content.replace(regex, `${fieldName}: "${value}"`);
-    };
-
-    swContent = replaceFirebaseField(swContent, 'apiKey', answers.firebaseApiKey);
-    swContent = replaceFirebaseField(swContent, 'authDomain', answers.firebaseAuthDomain);
-    swContent = replaceFirebaseField(swContent, 'projectId', answers.firebaseProjectId);
-    swContent = replaceFirebaseField(swContent, 'storageBucket', answers.firebaseStorageBucket);
-    swContent = replaceFirebaseField(swContent, 'messagingSenderId', answers.firebaseMessagingSenderId);
-    swContent = replaceFirebaseField(swContent, 'appId', answers.firebaseAppId);
-    
-    // Inyectar la llave VAPID auto-generada
-    if (vapidPublicKey) {
-      if (swContent.includes('// VAPID_KEY:')) {
-        swContent = swContent.replace(/\/\/ VAPID_KEY:\s*.*/, `// VAPID_KEY: ${vapidPublicKey}`);
-      } else {
-        swContent = `// VAPID_KEY: ${vapidPublicKey}\n` + swContent;
-      }
-    }
-    
-    stepSW.succeed('Service Worker de notificaciones (firebase-messaging-sw.js) updated.');
-  } else {
-    stepSW.info('No se encontró firebase-messaging-sw.js en el template.');
-  }
+  // 6. (Paso omitido: firebase-messaging-sw.js ya no se usa)
 
   // 6.1. Configurar manifest.json / site.webmanifest dinámicamente con los colores HSL convertidos a Hex
   const stepManifest = ora('Configurando manifest PWA con colores e identidad de marca').start();
@@ -934,6 +913,7 @@ Por favor, lee e indiza obligatoriamente los siguientes archivos y carpetas de n
 ### 📋 Contexto del Cliente (Briefing)
 - **Nombre**: ${answers.projectName}
 - **Client ID**: ${clientId}
+- **Core al que pertenece**: ${answers.coreType || 'seed'}
 - **Modo de Facturación de la Instancia**: ${answers.billingMode || 'percentage'}
 - **Tasa de Comisión / Costo**: 
   - Porcentaje: ${answers.comisionPorcentaje ?? 1.5}%
@@ -1104,21 +1084,25 @@ async function setupGitHub(answers, targetDir, clientId) {
 async function deployFirebase(answers, targetDir) {
   if (!answers.enableFirebaseDeploy) return;
 
-  console.log(pc.cyan('🔥 Desplegando reglas e índices en Firebase del cliente...'));
+  console.log(pc.cyan('🔥 Compilando el proyecto (npm run build)...'));
   try {
+    execSync('npm run build', { cwd: targetDir, stdio: 'ignore' });
+    console.log(pc.green('✅ Compilación de producción generada con éxito.'));
+
+    console.log(pc.cyan('🔥 Desplegando en Firebase (reglas, índices, storage y hosting)...'));
     execSync(
-      `firebase deploy --only firestore:rules,firestore:indexes,storage -P ${answers.firebaseProjectId}`,
+      `firebase deploy --only firestore:rules,firestore:indexes,storage,hosting -P ${answers.firebaseProjectId}`,
       { cwd: targetDir, stdio: 'ignore' }
     );
-    console.log(pc.green('✅ Reglas e índices de Firestore y Storage desplegados correctamente.'));
+    console.log(pc.green('✅ Proyecto de Firebase (Reglas, Índices, Storage y Hosting) desplegado por completo de forma exitosa.'));
 
     const seedScriptPath = path.join(targetDir, 'scratch', 'seed_brand.js');
-    if (await fs.pathExists(seedScriptPath)) {
+    if (answers.enableSeeding && await fs.pathExists(seedScriptPath)) {
       console.log(pc.cyan('🌱 Sembrando datos de marca iniciales y usuario Administrador en Firestore/Auth...'));
       execSync('node scratch/seed_brand.js', { cwd: targetDir, stdio: 'inherit', shell: true });
       console.log(pc.green('✅ Datos iniciales y usuario Administrador sembrados con éxito.'));
     } else {
-      console.warn(pc.yellow('⚠️  No se encontró el script scratch/seed_brand.js para sembrado automático.'));
+      console.log(pc.yellow('ℹ️  Se omitió la siembra de datos de prueba en la base de datos (se mantendrá vacía).'));
     }
   } catch (err) {
     console.warn(pc.yellow(`⚠️  Fallo al desplegar o sembrar en Firebase: ${err.message}. Asegúrate de tener firebase-cli logueado.`));
@@ -1154,6 +1138,7 @@ async function registerInCentralConsole(answers, clientId, uniqueToken) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formatREST({
         nombre: answers.projectName,
+        coreType: answers.coreType || 'seed',
         billingMode: answers.billingMode || 'percentage',
         comisionPorcentaje: Number(answers.comisionPorcentaje ?? 1.5),
         pagoMensualFijo: Number(answers.pagoMensualFijo ?? 0),

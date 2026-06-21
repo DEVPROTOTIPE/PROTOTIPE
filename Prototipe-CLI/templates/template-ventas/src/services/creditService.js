@@ -2,8 +2,6 @@ import {
   collection,
   doc,
   getDocs,
-  getDoc,
-  updateDoc,
   query,
   where,
   serverTimestamp,
@@ -11,8 +9,7 @@ import {
   runTransaction,
   onSnapshot,
   limit,
-  startAfter,
-  addDoc
+  startAfter
 } from 'firebase/firestore'
 import { db } from '../config/firebaseConfig'
 import { COLLECTIONS } from '../constants'
@@ -70,7 +67,8 @@ export async function addPaymentToCredit(creditId, paymentData) {
     }
 
     const nuevosAbonos = [...(data.abonos || []), nuevoAbono]
-    const nuevoSaldo = Math.max(0, data.saldoPending || data.saldoPendiente - paymentData.monto)
+    const currentSaldo = data.saldoPendiente !== undefined ? data.saldoPendiente : (data.saldoPending !== undefined ? data.saldoPending : data.montoTotal)
+    const nuevoSaldo = Math.max(0, currentSaldo - paymentData.monto)
     const nuevoEstado = nuevoSaldo === 0 ? 'pagado' : 'activo'
 
     transaction.update(creditRef, {
@@ -182,7 +180,7 @@ export async function getCreditsPaged(estado = 'activo', limitSize = 10, startAf
 /**
  * Registra una notificación de abono/pago de crédito en el Notification Center
  */
-export async function reportCreditPayment({ creditId, monto, clienteNombre, clienteCelular, orderNumber, orderId }) {
+export async function reportCreditPayment({ monto, clienteNombre, clienteCelular, orderNumber, orderId }) {
   await createCentralNotification({
     recipientId: 'admin',
     recipientRole: 'admin',
