@@ -16,6 +16,40 @@ param (
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
+$rootDir = if ($env:PROTOTIPE_WORKSPACE_ROOT) { $env:PROTOTIPE_WORKSPACE_ROOT } else { "D:\PROTOTIPE" }
+if (-not (Test-Path $rootDir)) {
+    # Suponer que el directorio raiz es el padre del script
+    $rootDir = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
+}
+
+function Write-BackupLog {
+    param (
+        [string]$Status,
+        [string]$Target,
+        [string]$Message
+    )
+    $logFile = "$rootDir\backup.log"
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logLine = "[$timestamp] [$Status] [$Target] $Message"
+    try {
+        Add-Content -Path $logFile -Value $logLine -Encoding UTF8
+    } catch {}
+}
+
+function Format-CommitMessageList {
+    param (
+        [string[]]$files
+    )
+    if ($files.Count -eq 0) { return "" }
+    if ($files.Count -le 5) {
+        return $files -join ", "
+    } else {
+        $firstThree = $files[0..2]
+        $remaining = $files.Count - 3
+        return "$($firstThree -join ', ') (y $remaining mas)"
+    }
+}
+
 if ([string]::IsNullOrWhiteSpace($SubprojectPath) -or -not (Test-Path $SubprojectPath)) {
     Write-Host " [ERROR] Ruta de subproyecto invalida o no especificada." -ForegroundColor Red
     exit 1
@@ -68,6 +102,46 @@ if (Test-Path $gitTempPath) {
     }
 }
 
+# Auto-vinculacion y resolucion de ramas para Instancias de Clientes
+$isInstance = $false
+if ($SubprojectPath -match 'Instancias Clientes') {
+    $isInstance = $true
+    $parentPath = Split-Path -Path $SubprojectPath -Parent
+    $niche = Split-Path -Path $parentPath -Leaf # ej: "ventas"
+    
+    Write-Host "  [Instancia Detectada] Sincronizando con repositorio remoto del Core..." -ForegroundColor Cyan
+    
+    # Encontrar la carpeta de plantilla core que coincida con el nicho
+    $coreFolder = Get-ChildItem -Path "$rootDir\Plantillas Core" -Directory | Where-Object { $_.Name -match $niche } | Select-Object -First 1
+    if ($null -ne $coreFolder) {
+        # Obtener el remoto origin de la plantilla core
+        $coreGitDir = Join-Path $coreFolder.FullName ".git"
+        if (-not (Test-Path $coreGitDir) -and (Test-Path (Join-Path $coreFolder.FullName ".git-backup-temp"))) {
+            $coreGitDir = Join-Path $coreFolder.FullName ".git-backup-temp"
+        }
+        
+        $coreRemote = git --git-dir="$coreGitDir" remote get-url origin 2>$null
+        if (-not [string]::IsNullOrWhiteSpace($coreRemote)) {
+            Write-Host "    -> Configurando repositorio remoto del Core: $coreRemote" -ForegroundColor Gray
+            # Reconfigurar el origin de la instancia
+            git remote remove origin 2>$null | Out-Null
+            git remote add origin $coreRemote.Trim()
+        } else {
+            Write-Host "    [!] ADVERTENCIA: No se pudo obtener el remoto origin de la plantilla core $($coreFolder.Name)." -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "    [!] ADVERTENCIA: No se encontro ninguna plantilla core para el nicho '$niche'." -ForegroundColor Yellow
+    }
+    
+    # Asegurar que la rama local coincida con el formato cliente/$projectName (estándar de instancias)
+    $expectedBranch = "cliente/$projectName"
+    $currentBranchLocal = (git rev-parse --abbrev-ref HEAD 2>$null)
+    if ($currentBranchLocal -and $currentBranchLocal -ne $expectedBranch) {
+        Write-Host "    -> Configurando rama local como '$expectedBranch' (convención cliente/* del core)..." -ForegroundColor Yellow
+        git branch -M $expectedBranch 2>&1 | Out-Null
+    }
+}
+
 # Auto-detectar la rama actual
 $branchName = (git rev-parse --abbrev-ref HEAD 2>$null)
 if (-not $branchName) {
@@ -98,10 +172,15 @@ try {
     }
     
     # Validar fugas de seguridad de variables de entorno (.env) antes de continuar
+    # Solo alertamos si un .env está siendo AGREGADO o MODIFICADO (M, A, ??)
+    # Si está siendo ELIMINADO del índice (D), es el resultado de un git rm --cached correcto — es SEGURO.
     $leakDetected = $false
     foreach ($line in ($statusShort -split "`r?`n")) {
         if ([string]::IsNullOrWhiteSpace($line)) { continue }
-        $filePath = $line.Substring(3).Trim() -replace '"', ''
+        $statusCode = $line.Substring(0, 2).Trim()
+        $filePath   = $line.Substring(3).Trim() -replace '"', ''
+        # D  = staged delete (desindexado correctamente), ignorar en el check de seguridad
+        if ($statusCode -eq 'D') { continue }
         if ($filePath -match '\.env' -and $filePath -notmatch '\.env\.example') {
             Write-Host "    -> [ALERTA SECURITY] Archivo sensible detectado: $filePath" -ForegroundColor Red
             $leakDetected = $true
@@ -129,6 +208,9 @@ try {
             if ([string]::IsNullOrWhiteSpace($line)) { continue }
             $statusType = $line.Substring(0, 2).Trim()
             $filePath = $line.Substring(3).Trim() -replace '"', ''
+            
+            # Ignorar archivos en directorios de compilacion/cache para el mensaje de commit
+            if ($filePath -match 'node_modules|dist/|\.firebase/|\.git/') { continue }
             $fileName = Split-Path -Path $filePath -Leaf
             
             if ($statusType -eq "M") { $modified += $fileName }
@@ -137,9 +219,9 @@ try {
         }
         
         $summaryParts = @()
-        if ($modified.Count -gt 0) { $summaryParts += "Mod: $($modified -join ', ')" }
-        if ($added.Count -gt 0)    { $summaryParts += "Add: $($added -join ', ')" }
-        if ($deleted.Count -gt 0)  { $summaryParts += "Del: $($deleted -join ', ')" }
+        if ($modified.Count -gt 0) { $summaryParts += "Mod: $(Format-CommitMessageList -files $modified)" }
+        if ($added.Count -gt 0)    { $summaryParts += "Add: $(Format-CommitMessageList -files $added)" }
+        if ($deleted.Count -gt 0)  { $summaryParts += "Del: $(Format-CommitMessageList -files $deleted)" }
         
         if ($summaryParts.Count -gt 0) {
             $contextText = $summaryParts -join " | "
@@ -153,7 +235,13 @@ try {
     
     Write-Host ""
     Write-Host "  [1/3] Indexando cambios locales..." -ForegroundColor Cyan
-    git add . 2>&1 | Out-Null
+    $addErr = git add . 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  [ERROR] Fallo al indexar archivos (git add .)." -ForegroundColor Red
+        if ($addErr) { Write-Host "    -> Detalle: $addErr" -ForegroundColor DarkGray }
+        Write-BackupLog -Status "FAILED" -Target $projectName -Message "Fallo git add en subproyecto: $addErr"
+        exit 1
+    }
     
     Write-Host "  [2/3] Creando commit local..." -ForegroundColor Cyan
     git commit -m $CommitMessage 2>&1 | Out-Null
@@ -163,18 +251,22 @@ try {
     if (-not $Push) {
         Write-Host "  [3/3] Modo Solo-Local: commit guardado localmente. Push omitido por configuracion." -ForegroundColor Yellow
         Write-Host "======================================================================" -ForegroundColor Green
+        Write-BackupLog -Status "SUCCESS" -Target $projectName -Message "Snapshot de subproyecto exitoso: $CommitMessage (Push omitido)"
         exit 0
     }
     
-    # Verificar conexion con el servidor remoto via SSH
-    Write-Host "  [3/3] Verificando conexion con GitHub (SSH)..." -ForegroundColor Cyan
+    # Verificar conexion con el servidor remoto
+    Write-Host "  [3/3] Verificando conexion con el repositorio remoto..." -ForegroundColor Cyan
     $isOnline = $false
-    git ls-remote origin HEAD 2>$null | Out-Null
+    $remoteErr = git ls-remote origin HEAD 2>&1
     if ($LASTEXITCODE -eq 0) { $isOnline = $true }
     
     if (-not $isOnline) {
         Write-Host ""
-        Write-Host "  [WARN] Sin conexion SSH con GitHub. El commit quedo guardado localmente." -ForegroundColor Yellow
+        Write-Host "  [WARN] No se pudo acceder al repositorio remoto 'origin' configurado." -ForegroundColor Yellow
+        if ($remoteErr) {
+            Write-Host "    -> Detalle de Git: $($remoteErr -join ' ')" -ForegroundColor DarkGray
+        }
         
         if ($Interactive) {
             Write-Host "  Desea realizar un respaldo local (Commit local en tu disco) unicamente? (S/N): " -NoNewline -ForegroundColor Cyan
@@ -182,17 +274,20 @@ try {
             if ($confirmLocal -like "s" -or $confirmLocal -like "S") {
                 Write-Host "  [OK] Respaldo local guardado con exito. Los cambios se subiran a GitHub la proxima vez que tenga conexion." -ForegroundColor Green
                 Write-Host "======================================================================" -ForegroundColor Green
+                Write-BackupLog -Status "SUCCESS" -Target $projectName -Message "Snapshot de subproyecto guardado localmente: $CommitMessage (Sin red)"
                 exit 0
             } else {
                 Write-Host "  Deshaciendo commit local para mantener el estado original..." -ForegroundColor Yellow
                 git reset --soft HEAD~1 2>&1 | Out-Null
                 Write-Host "  [CANCELADO] Proceso abortado por el usuario." -ForegroundColor Red
                 Write-Host "======================================================================" -ForegroundColor Red
+                Write-BackupLog -Status "FAILED" -Target $projectName -Message "Respaldo cancelado por falta de red."
                 exit 1
             }
         } else {
             Write-Host "  [INFO] Ejecuta 'git push' cuando tengas conexion disponible." -ForegroundColor Gray
             Write-Host "======================================================================" -ForegroundColor Yellow
+            Write-BackupLog -Status "SUCCESS" -Target $projectName -Message "Snapshot de subproyecto guardado localmente: $CommitMessage (Sin red)"
             exit 0
         }
     }
@@ -218,19 +313,30 @@ try {
             git reset --soft HEAD~1 2>&1 | Out-Null
             Write-Host "  [INFO] Proceso cancelado. Por favor, resuelve los conflictos manualmente." -ForegroundColor Yellow
             Write-Host "======================================================================" -ForegroundColor Red
+            Write-BackupLog -Status "FAILED" -Target $projectName -Message "Conflicto al sincronizar con GitHub en subproyecto en rama $branchName"
             exit 1
         }
     } else {
         Write-Host "    -> La rama no existe en el servidor remoto. Omitiendo pull preventivo." -ForegroundColor Gray
     }
     
-    Write-Host "    -> Subiendo tus cambios locales a GitHub (git push origin $branchName)..." -ForegroundColor DarkGray
+    Write-Host "    -> Subiendo tus cambios locales a GitHub (git push origin $branchName --no-verify)..." -ForegroundColor DarkGray
     Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
-    git push origin $branchName
+    git push origin $branchName --no-verify
+    $pushExitCode = $LASTEXITCODE
     Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
     
-    # ── Git Strategies: Auto-Merge a produccion ──────────────────────────
-    if ($branchName -ne "main" -and $branchName -ne "master") {
+    if ($pushExitCode -ne 0) {
+        Write-Host "  [ERROR] Fallo al subir los cambios a GitHub (git push origin $branchName)." -ForegroundColor Red
+        Write-Host "  Por favor, verifica tus permisos, credenciales SSH o estado de la red o ejecuta 'git push' manualmente." -ForegroundColor Yellow
+        Write-BackupLog -Status "FAILED" -Target $projectName -Message "Fallo git push a origin $branchName (Exit Code: $pushExitCode)"
+        exit 1
+    }
+    
+    Write-BackupLog -Status "SUCCESS" -Target $projectName -Message "Snapshot y push exitosos en subproyecto. Rama: $branchName, Commit: $CommitMessage"
+
+    # ── Git Strategies: Auto-Merge a main (solo para ramas de trabajo del core, NO para instancias cliente/*)
+    if ($branchName -ne "main" -and $branchName -ne "master" -and -not $branchName.StartsWith("cliente/")) {
         if ($Interactive) {
             Write-Host ""
             Write-Host "  [Git Strategies] Has subido cambios a la rama de desarrollo: [$branchName]" -ForegroundColor Yellow
@@ -267,13 +373,22 @@ try {
                 git checkout $branchName 2>&1 | Out-Null
                 Write-Host "  [INFO] Resuelve los conflictos manualmente y vuelve a intentarlo." -ForegroundColor Yellow
                 Write-Host "======================================================================" -ForegroundColor Red
+                Write-BackupLog -Status "FAILED" -Target $projectName -Message "Conflicto de auto-merge hacia $mainBranch"
                 exit 1
             }
             
-            Write-Host "  [Merge] Subiendo consolidacion a GitHub (git push origin $mainBranch)..." -ForegroundColor Cyan
+            Write-Host "  [Merge] Subiendo consolidacion a GitHub (git push origin $mainBranch --no-verify)..." -ForegroundColor Cyan
             Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
-            git push origin $mainBranch
+            git push origin $mainBranch --no-verify
+            $mergePushExitCode = $LASTEXITCODE
             Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
+            
+            if ($mergePushExitCode -ne 0) {
+                Write-Host "  [ERROR] Fallo al subir la consolidacion a GitHub (git push origin $mainBranch)." -ForegroundColor Red
+                Write-BackupLog -Status "WARN" -Target $projectName -Message "Snapshot de desarrollo OK, pero fallo el push de fusion a $mainBranch (Exit Code: $mergePushExitCode)"
+            } else {
+                Write-BackupLog -Status "SUCCESS" -Target $projectName -Message "Sincronizado y fusionado en $mainBranch con exito."
+            }
             
             git checkout $branchName 2>&1 | Out-Null
             Write-Host "  [OK] Proceso completado. Cambios sincronizados en [$branchName] y [$mainBranch]." -ForegroundColor Green
@@ -290,6 +405,7 @@ catch {
     Write-Host "  [ERROR] Ocurrio un fallo en el proceso de respaldo de subproyecto:" -ForegroundColor Red
     Write-Host "    -> $_" -ForegroundColor Red
     Write-Host ""
+    Write-BackupLog -Status "FAILED" -Target $projectName -Message "Excepcion en subproyecto: $_"
     exit 1
 }
 finally {

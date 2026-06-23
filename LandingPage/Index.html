@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <!-- SEO Básico y Avanzado -->
+  <title>PROTOTIPE - Sistemas a la Medida para Negocios Reales</title>
+  <meta name="description" content="Digitaliza, organiza y automatiza tu negocio físico con sistemas a la medida. Sin complicaciones técnicas. Recupera el control, optimiza procesos y potencia tu crecimiento real con PROTOTIPE." />
+  <meta name="robots" content="index, follow" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="PROTOTIPE - Sistemas a la Medida para Negocios Reales" />
+  <meta property="og:description" content="Digitaliza, organiza y automatiza tu negocio físico sin complicaciones técnicas. Recupera el control, optimiza procesos y potencia tu crecimiento real." />
+  <meta property="og:url" content="https://prototipe.com/" />
+  <meta property="og:image" content="https://prototipe.com/assets/og-image.png" />
+  <meta property="og:locale" content="es_ES" />
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="PROTOTIPE - Sistemas a la Medida para Negocios Reales" />
+  <meta name="twitter:description" content="Digitaliza, organiza y automatiza tu negocio físico sin complicaciones técnicas. Recupera el control, optimiza procesos y potencia tu crecimiento real." />
+  <meta name="twitter:image" content="https://prototipe.com/assets/og-image.png" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>" />
+  
+  <!-- Google Fonts - Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* VARIABLES DE DISEÑO PREMIUM (ESTILO 2026) */
+    :root {
+      --color-bg: #05070c;
+      --color-surface: rgba(10, 15, 30, 0.45);
+      --color-surface-hover: rgba(20, 28, 55, 0.6);
+      --color-primary: #38bdf8;
+      --color-primary-dark: #0284c7;
+      --color-secondary: #818cf8;
+      --color-secondary-dark: #4f46e5;
+      --color-accent: #22d3ee;
+      --color-text-main: #f3f4f6;
+      --color-text-muted: #9ca3af;
+      --color-border: rgba(255, 255, 255, 0.07);
+      --color-border-hover: rgba(56, 189, 248, 0.3);
+      --font-titles: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --container-width: 1200px;
+    }
+
+    /* RESET & BASE */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* FONDO DE GRADIENTES EN MOVIMIENTO LENTO Y GLOWS */
+    .bg-glow-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -2;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .glow-1 {
+      position: absolute;
+      top: -20%;
+      left: 30%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, rgba(129, 140, 248, 0.05) 50%, transparent 100%);
+      filter: blur(100px);
+      animation: rotateGlow 30s linear infinite;
+    }
+
+    .glow-2 {
+      position: absolute;
+      bottom: -10%;
+      right: 10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(34, 211, 238, 0.08) 0%, rgba(56, 189, 248, 0.03) 60%, transparent 100%);
+      filter: blur(120px);
+      animation: floatGlow 25s ease-in-out infinite alternate;
+    }
+
+    @keyframes rotateGlow {
+      0% { transform: rotate(0deg) translate(0, 0); }
+      50% { transform: rotate(180deg) translate(5%, 5%); }
+      100% { transform: rotate(360deg) translate(0, 0); }
+    }
+
+    @keyframes floatGlow {
+      0% { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(-50px) scale(1.1); }
+    }
+
+    /* GRID & LAYOUT GENERAL */
+    .container {
+      width: 100%;
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    section {
+      padding: 7.5rem 0;
+      position: relative;
+    }
+
+    /* HEADER & NAVBAR FLOTANTE CON BACKDROP-BLUR */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      transition: background-color 0.3s ease;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 0;
+      background: rgba(5, 7, 12, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-border);
+      transition: background-color 0.3s ease;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      color: var(--color-text-main);
+    }
+
+    .logo-svg {
+      width: 2.2rem;
+      height: 2.2rem;
+      fill: none;
+      stroke: url(#logoGrad);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
+    }
+
+    .logo-text {
+      font-family: var(--font-titles);
+      font-weight: 900;
+      font-size: 1.5rem;
+      letter-spacing: -0.05em;
+      background: linear-gradient(135deg, var(--color-text-main) 30%, var(--color-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--color-text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--color-primary);
+    }
+
+    /* BOTÓN NAVBAR REDISEÑADO CON CONTRASTE OPTIMIZADO (TEXTO BLANCO SOBRE GRADIENTE OSCURO) */
+    .nav-links a.nav-cta-btn {
+      padding: 0.6rem 1.2rem;
+      background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-secondary-dark) 100%);
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border-radius: 9px;
+      text-decoration: none;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+      box-shadow: 0 2px 10px rgba(2, 132, 199, 0.2);
+    }
+
+    .nav-links a.nav-cta-btn:hover {
+      color: #ffffff !important;
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+    }
+
+
+
+    /* MENÚ MÓVIL */
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      z-index: 101;
+    }
+
+    .menu-toggle span {
+      width: 28px;
+      height: 2px;
+      background-color: var(--color-text-main);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* BOTONES PREMIUM CON MICRO-INTERACCIONES Y CONTRASTE MEJORADO (WCAG COMPLIANT) */
+    .btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      padding: 1.1rem 2.2rem;
+      border-radius: 12px;
+      font-family: var(--font-titles);
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      border: none;
+      outline: none;
+    }
+
+    .btn:active {
+      transform: scale(0.95) !important;
+    }
+
+    /* BOTÓN PRIMARIO: Gradiente de alto contraste con texto blanco para legibilidad perfecta */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-secondary-dark) 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 20px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 8px 30px rgba(2, 132, 199, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--color-text-main);
+      border: 1px solid var(--color-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--color-primary);
+      transform: translateY(-2px);
+    }
+
+    .btn-svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-primary:hover .btn-svg {
+      transform: translateX(3px);
+    }
+
+    /* BADGE ELÍPTICO */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 999px;
+      color: var(--color-primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--color-accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--color-accent);
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    /* ANIMACIONES SCROLL REVEAL ELASTIC CON RETRASO */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.9s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-100 { transition-delay: 100ms; }
+    .delay-200 { transition-delay: 200ms; }
+    .delay-300 { transition-delay: 300ms; }
+    .delay-400 { transition-delay: 400ms; }
+
+    /* TITULARES Y TEXTOS DE SECCIÓN */
+    .section-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 4.5rem auto;
+    }
+
+    .section-header h2 {
+      font-family: var(--font-titles);
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, var(--color-text-main) 40%, var(--color-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .section-header p {
+      font-size: 1.1rem;
+      color: var(--color-text-muted);
+      font-weight: 400;
+    }
+
+    /* SECCIÓN 1: HERO */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 8.5rem;
+      padding-bottom: 5rem;
+      text-align: center;
+      position: relative;
+    }
+
+    /* EFECTO GRADIENT MOVIMIENTO EN HERO */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70%;
+      height: 70%;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, rgba(129, 140, 248, 0.02) 50%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+      filter: blur(80px);
+    }
+
+    .hero-content {
+      max-width: 950px;
+      margin: 0 auto;
+    }
+
+    .hero-content h1 {
+      font-family: var(--font-titles);
+      font-size: 3.8rem;
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.05em;
+      margin-bottom: 1.8rem;
+      background: linear-gradient(135deg, var(--color-text-main) 40%, var(--color-primary) 70%, var(--color-secondary) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: textGradientEffect 8s ease infinite alternate;
+    }
+
+    @keyframes textGradientEffect {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    .hero-content p {
+      font-size: 1.25rem;
+      color: var(--color-text-muted);
+      max-width: 760px;
+      margin: 0 auto 3rem auto;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* FLOATING UI CARD ESTRUCTURA (GLASSMORPHISM PERFECTO) */
+    .glass-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 18px;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100%; /* Garantizar que ocupen el 100% de la fila del grid */
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ANIMACIÓN DESLUMBRANTE EN HOVER CON DESTELLO DE BORDE Y SOMBRA DE NEÓN */
+    .glass-card:hover {
+      transform: translateY(-8px) scale(1.01);
+      border-color: var(--color-primary);
+      box-shadow: 0 15px 35px rgba(56, 189, 248, 0.12), 0 0 15px rgba(56, 189, 248, 0.05);
+    }
+
+    /* FLOATING UNIFORME SUTIL */
+    .floating-ui-1 {
+      animation: floatElement 6s ease-in-out infinite alternate;
+    }
+    .floating-ui-2 {
+      animation: floatElement 8s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes floatElement {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-8px); }
+    }
+
+    /* GRID SISTEMA CON ALINEACIÓN PERFECTA */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      align-items: stretch; /* Asegura que todos los elementos hijos estiren al mismo tamaño */
+    }
+
+    /* SECCIÓN 2: PROBLEMA & DOLOR */
+    /* Altura mínima uniforme para dolor_box */
+    .pain-box {
+      padding: 2.5rem 2.2rem;
+      min-height: 280px; /* Asegura el mismo tamaño de tarjeta */
+      justify-content: flex-start;
+    }
+
+    .pain-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .pain-icon-wrapper {
+      width: 3rem;
+      height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+
+    .glass-card:hover .pain-icon-wrapper {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .pain-header h3 {
+      font-family: var(--font-titles);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text-main);
+    }
+
+    .pain-box p {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+
+    /* SECCIÓN 3: SOLUCIÓN */
+    #solucion {
+      background: linear-gradient(180deg, transparent 0%, rgba(56, 189, 248, 0.02) 50%, transparent 100%);
+    }
+
+    .solution-card {
+      padding: 3.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .sol-icon-main {
+      width: 4.5rem;
+      height: 4.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      color: var(--color-primary);
+      margin-bottom: 2rem;
+      filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.15));
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .glass-card:hover .sol-icon-main {
+      transform: scale(1.1) rotate(10deg);
+    }
+
+    .solution-card h3 {
+      font-family: var(--font-titles);
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .solution-card p {
+      font-size: 1.15rem;
+      color: var(--color-text-muted);
+      line-height: 1.7;
+    }
+
+    /* SECCIÓN 4: CÓMO FUNCIONA (PASOS) */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.5rem;
+      position: relative;
+    }
+
+    .step-card {
+      padding: 3rem 2.2rem 2.2rem 2.2rem;
+      min-height: 250px; /* Tamaño uniforme */
+    }
+
+    .step-number {
+      position: absolute;
+      top: -1.5rem;
+      left: 2rem;
+      width: 3rem;
+      height: 3rem;
+      background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-secondary-dark) 100%);
+      color: #ffffff;
+      font-family: var(--font-titles);
+      font-weight: 800;
+      font-size: 1.25rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .glass-card:hover .step-number {
+      transform: scale(1.1) translateY(-2px);
+    }
+
+    .step-card h3 {
+      font-family: var(--font-titles);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .step-card p {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+    }
+
+    /* SECCIÓN 5: CASOS DE USO (TAMAÑO UNIFORME PERFECTO) */
+    .case-card {
+      padding: 2.2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1.2rem;
+      min-height: 160px; /* Tamaño uniforme de tarjeta */
+    }
+
+    .case-icon-wrapper {
+      width: 2.8rem;
+      height: 2.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--color-primary);
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover .case-icon-wrapper {
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--color-accent);
+      transform: scale(1.05);
+    }
+
+    .case-info h3 {
+      font-family: var(--font-titles);
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .case-info p {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+    }
+
+    /* SECCIÓN 6: BENEFICIOS (TAMAÑO UNIFORME PERFECTO) */
+    .benefit-card {
+      padding: 2.5rem 2.2rem;
+      min-height: 280px; /* Altura idéntica */
+    }
+
+    .benefit-icon-wrapper {
+      width: 3rem;
+      height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: rgba(34, 211, 238, 0.06);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      color: var(--color-accent);
+      margin-bottom: 1.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .glass-card:hover .benefit-icon-wrapper {
+      transform: scale(1.1) rotate(-5deg);
+    }
+
+    .benefit-card h3 {
+      font-family: var(--font-titles);
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+
+    .benefit-card p {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+
+    /* SECCIÓN 7: MODELO DE TRABAJO */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      padding: 3rem 2.5rem;
+      min-height: 480px; /* Tamaño idéntico */
+    }
+
+    .pricing-card.featured {
+      border: 2px solid rgba(56, 189, 248, 0.4);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.04) 0%, rgba(10, 15, 30, 0.55) 100%);
+      box-shadow: 0 10px 40px rgba(56, 189, 248, 0.08);
+    }
+
+    .pricing-card.featured::after {
+      content: 'RECOMENDADO';
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      padding: 0.3rem 0.8rem;
+      background: var(--color-primary);
+      color: #05070c;
+      font-size: 0.7rem;
+      font-weight: 800;
+      border-radius: 99px;
+      letter-spacing: 0.05em;
+    }
+
+    .pricing-name {
+      font-family: var(--font-titles);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .featured .pricing-name {
+      color: var(--color-primary);
+    }
+
+    .pricing-desc {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      margin-bottom: 2rem;
+      min-height: 2.8rem;
+    }
+
+    .pricing-features {
+      list-style: none;
+      margin-bottom: 2.5rem;
+      flex-grow: 1;
+    }
+
+    .pricing-features li {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 0.95rem;
+      color: var(--color-text-main);
+      margin-bottom: 1rem;
+    }
+
+    .feature-check-icon {
+      width: 1.15rem;
+      height: 1.15rem;
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+
+    /* SECCIÓN 8: PREGUNTAS FRECUENTES (FAQ) CON ANIMACIÓN DE TRANSICIÓN */
+    .faq-container {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .faq-item {
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      background: var(--color-surface);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .faq-item[open] {
+      border-color: var(--color-border-hover);
+    }
+
+    .faq-item summary {
+      padding: 1.5rem;
+      font-family: var(--font-titles);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-text-main);
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      outline: none;
+    }
+
+    .faq-item summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .faq-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: var(--color-primary);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .faq-item[open] .faq-icon {
+      transform: rotate(135deg);
+    }
+
+    /* ANIMACIÓN DESLUMBRANTE EN EL DESPLIEGUE DEL ACORDEÓN */
+    .faq-content {
+      padding: 0 1.5rem 1.5rem 1.5rem;
+      color: var(--color-text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      border-top: 1px solid rgba(255, 255, 255, 0.02);
+      padding-top: 1rem;
+      animation: slideDownFaq 0.3s ease-out;
+    }
+
+    @keyframes slideDownFaq {
+      0% { opacity: 0; transform: translateY(-8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* SECCIÓN 9: CTA FINAL (REDISENADO) */
+    #cta {
+      padding: 8.5rem 0;
+      background: radial-gradient(circle at center, rgba(56, 189, 248, 0.06) 0%, transparent 60%);
+    }
+
+    .cta-card {
+      padding: 4.5rem 3rem;
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto;
+      border: 1px solid rgba(56, 189, 248, 0.15);
+      background: linear-gradient(135deg, rgba(10, 15, 30, 0.7) 0%, rgba(5, 7, 12, 0.9) 100%);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .cta-card h2 {
+      font-family: var(--font-titles);
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, var(--color-text-main) 40%, var(--color-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cta-card p {
+      font-size: 1.2rem;
+      color: var(--color-text-muted);
+      max-width: 600px;
+      margin: 0 auto 2.5rem auto;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--color-border);
+      padding: 4rem 0 7rem 0; /* Espacio extra abajo para que no lo tape el mobile sticky CTA */
+      background: rgba(5, 7, 12, 0.8);
+      position: relative;
+      z-index: 10;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .footer-brand p {
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      max-width: 320px;
+    }
+
+    .footer-column h4 {
+      font-family: var(--font-titles);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--color-text-main);
+      margin-bottom: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+
+    .footer-column ul {
+      list-style: none;
+    }
+
+    .footer-column ul li {
+      margin-bottom: 0.8rem;
+    }
+
+    .footer-column ul a {
+      color: var(--color-text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s ease;
+    }
+
+    .footer-column ul a:hover {
+      color: var(--color-primary);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.03);
+      color: rgba(156, 163, 175, 0.6);
+      font-size: 0.8rem;
+    }
+
+    .footer-links-row {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .footer-links-row a {
+      color: rgba(156, 163, 175, 0.6);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links-row a:hover {
+      color: var(--color-primary);
+    }
+
+    /* BARRA CTA FIXED MOBILE REDISEÑADA CON GRADIENTE DE ALTO CONTRASTE */
+    .mobile-sticky-cta {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(5, 7, 12, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--color-border);
+      padding: 0.85rem 1.25rem;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 99;
+      box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .mobile-sticky-cta .btn {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      font-size: 0.95rem;
+      border-radius: 10px;
+    }
+
+    /* RESPONSIVIDAD (MOBILE FIRST & BREAKPOINTS) */
+    @media (max-width: 968px) {
+      .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 3.5rem;
+      }
+      .step-card {
+        padding: 3rem 1.5rem 1.5rem 1.5rem;
+        min-height: auto;
+      }
+      .step-number {
+        left: 1.5rem;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+      .hero-content h1 {
+        font-size: 2.8rem;
+      }
+      .hero-content p {
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      section {
+        padding: 5rem 0;
+      }
+      .section-header h2 {
+        font-size: 2rem;
+      }
+      .navbar {
+        padding: 1rem 0;
+      }
+      .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 75%;
+        max-width: 320px;
+        height: 100vh;
+        background: rgba(5, 7, 12, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        flex-direction: column;
+        justify-content: center;
+        gap: 2.5rem;
+        transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        border-left: 1px solid var(--color-border);
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+      }
+      .nav-links.active {
+        right: 0;
+      }
+      .menu-toggle {
+        display: flex;
+      }
+      /* MOBILE STICKY CTA SHOW */
+      .mobile-sticky-cta {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-content h1 {
+        font-size: 2.2rem;
+      }
+      .hero-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+      .hero-actions .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- GLOWS DE FONDO -->
+  <div class="bg-glow-container">
+    <div class="glow-1"></div>
+    <div class="glow-2"></div>
+  </div>
+
+  <!-- HEADER / NAVBAR -->
+  <header id="header-nav">
+    <div class="container">
+      <nav class="navbar">
+        <a href="#" class="logo-container">
+          <svg class="logo-svg" viewBox="0 0 24 24">
+            <defs>
+              <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8" />
+                <stop offset="100%" stop-color="#818cf8" />
+              </linearGradient>
+            </defs>
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          <span class="logo-text">PROTOTIPE</span>
+        </a>
+
+        <ul class="nav-links">
+          <li><a href="#problema">El Problema</a></li>
+          <li><a href="#solucion">La Solución</a></li>
+          <li><a href="#como-funciona">Cómo Funciona</a></li>
+          <li><a href="#beneficios">Beneficios</a></li>
+          <li><a href="#modelo">Modelo</a></li>
+          <li><a href="#faq">Preguntas</a></li>
+          <li>
+            <a href="https://wa.me/573167527660?text=Hola,%20quiero%20solicitar%20un%20diagnóstico%20gratuito%20de%20mi%20negocio." 
+               class="nav-cta-btn" 
+               target="_blank" 
+               rel="noopener noreferrer">
+              Diagnóstico Gratis
+            </a>
+          </li>
+        </ul>
+
+        <div class="menu-toggle" id="mobile-menu-btn">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO (PRIMER PANTALLAZO) -->
+    <section id="hero" class="hero">
+      <div class="container">
+        <div class="hero-content reveal">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            Sistemas para Negocios Reales
+          </div>
+          <h1>Tu negocio no necesita más herramientas.<br>Necesita un sistema que pense como tu negocio.</h1>
+          <p>
+            En PROTOTIPE creamos aplicaciones personalizadas que digitalizan, organizan y automatizan negocios reales, sin complicaciones técnicas.
+          </p>
+          <div class="hero-actions">
+            <a href="https://wa.me/573167527660?text=Hola,%20quiero%20solicitar%20un%20diagnóstico%20gratuito%20de%20mi%20negocio." 
+               class="btn btn-primary" 
+               target="_blank" 
+               rel="noopener noreferrer">
+              <span>📲 Solicitar diagnóstico gratuito</span>
+              <svg class="btn-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+              </svg>
+            </a>
+            <a href="#como-funciona" class="btn btn-secondary">
+              Ver cómo funciona
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EL PROBLEMA -->
+    <section id="problema">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="badge">Diagnóstico crítico</div>
+          <h2>La mayoría de negocios no falla por falta de clientes.<br>Falla por desorden interno.</h2>
+          <p>Muchos negocios siguen operando con papel, WhatsApp o Excel sin control real. Esto genera errores, pérdida de dinero y falta de crecimiento.</p>
+        </div>
+
+        <div class="grid">
+          <!-- TARJETAS DE DOLOR CON ICONOGRAFÍA SVG (IMPACTO REAL) -->
+          <div class="glass-card pain-box floating-ui-1 reveal delay-100">
+            <div class="pain-header">
+              <div class="pain-icon-wrapper">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3>Fuga de Tiempo</h3>
+            </div>
+            <p>Horas perdidas todos los días realizando tareas operativas repetitivas y resolviendo incendios administrativos que el sistema podría resolver solo.</p>
+          </div>
+
+          <div class="glass-card pain-box floating-ui-2 reveal delay-200">
+            <div class="pain-header">
+              <div class="pain-icon-wrapper">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3>Pérdida de Dinero</h3>
+            </div>
+            <p>Flujo de caja invisible, falta de control estricto sobre ventas diarias, deudas de clientes (fiados) y cuentas que no puedes rastrear a fin de mes.</p>
+          </div>
+
+          <div class="glass-card pain-box floating-ui-1 reveal delay-300">
+            <div class="pain-header">
+              <div class="pain-icon-wrapper">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3>Clientes Perdidos</h3>
+            </div>
+            <p>Clientes mal gestionados, cotizaciones olvidadas en chats de WhatsApp y falta de seguimiento que debilita la confianza en tu servicio.</p>
+          </div>
+
+          <div class="glass-card pain-box floating-ui-2 reveal delay-400">
+            <div class="pain-header">
+              <div class="pain-icon-wrapper">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                </svg>
+              </div>
+              <h3>Puntos Ciegos</h3>
+            </div>
+            <p>Decisiones empíricas tomadas a ciegas, sin información real ni reportes de stock, rotación de productos o rentabilidad neta del negocio.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LA SOLUCIÓN PROTOTIPE -->
+    <section id="solucion">
+      <div class="container">
+        <div class="glass-card solution-card reveal">
+          <div class="sol-icon-main">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="36" height="36">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l8.904-4.474M18 10.5c0 2.22-1.206 4.16-3 5.2v2.3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-2.3c-1.794-1.04-3-2.98-3-5.2a6 6 0 1112 0z" />
+            </svg>
+          </div>
+          <div class="badge">La solución PROTOTIPE</div>
+          <h3>Un sistema hecho exclusivamente para tu negocio</h3>
+          <p>
+            No vendemos herramientas genéricas o plantillas rígidas a las que tengas que adaptarte. Diseñamos e implementamos una aplicación digital a la medida, moldeada exactamente según la estructura operativa y comercial que maneja tu negocio en el mundo físico.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CÓMO FUNCIONA -->
+    <section id="como-funciona">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="badge">Sencillez operativa</div>
+          <h2>En 3 pasos simples</h2>
+          <p>El camino para estructurar la automatización y el control de tu empresa es sumamente sencillo.</p>
+        </div>
+
+        <div class="steps-grid">
+          <div class="glass-card step-card reveal delay-100">
+            <div class="step-number">1</div>
+            <h3>Diagnóstico del negocio</h3>
+            <p>Reunión gratuita para analizar tus procesos reales actuales, identificar los cuellos de botella críticos y trazar la lógica de tu aplicación.</p>
+          </div>
+
+          <div class="glass-card step-card reveal delay-200">
+            <div class="step-number">2</div>
+            <h3>Diseño del sistema</h3>
+            <p>Construimos y parametrizamos el sistema a la medida con las funciones, flujos de inventario, cajas, facturación y deudas exactas que necesitas.</p>
+          </div>
+
+          <div class="glass-card step-card reveal delay-300">
+            <div class="step-number">3</div>
+            <h3>Implementación activa</h3>
+            <p>Puesta en marcha del sistema, carga inicial de tus productos, capacitación del equipo y acompañamiento constante en vivo.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CASOS DE USO -->
+    <section id="casos">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="badge">Casos de éxito</div>
+          <h2>Diseñado para negocios reales como el tuyo</h2>
+          <p>Nuestros sistemas se adaptan de forma flexible a las necesidades del comercio y los servicios locales.</p>
+        </div>
+
+        <div class="grid">
+          <div class="glass-card case-card reveal delay-100">
+            <div class="case-icon-wrapper">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.67 2.67 0 1021 17.25l-5.83-5.83m-3.75 3.75L3 7.5M11.42 15.17l-3.75-3.75M11.42 15.17l2.92-2.92M13.5 3.91V5m0 7.82V17m-5.45-8.25h10.9m-10.9 4.33h5.45m-3-11v2.18m-.91 10.37l-2.18-2.18m11.64-6l-2.18 2.18" />
+              </svg>
+            </div>
+            <div class="case-info">
+              <h3>Ferreterías</h3>
+              <p>Control exacto de inventario por bultos o unidades, listas de precios cambiantes y cuentas por cobrar a contratistas.</p>
+            </div>
+          </div>
+
+          <div class="glass-card case-card reveal delay-200">
+            <div class="case-icon-wrapper">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+              </svg>
+            </div>
+            <div class="case-info">
+              <h3>Restaurantes</h3>
+              <p>Comandas digitales rápidas para mesas, órdenes directas de cocina, control de compras e insumos diarios de caja.</p>
+            </div>
+          </div>
+
+          <div class="glass-card case-card reveal delay-300">
+            <div class="case-icon-wrapper">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.68-.34-1.34-.78-1.95-1.31m11.11 3.51a10.025 10.025 0 01-13.43-1.63M16.92 5.12c.34.68.78 1.34 1.31 1.95m-3.51-11.11a10.025 10.025 0 011.63 13.43m-11.22-3.6c.34-.68.78-1.34 1.31-1.95m3.51 11.11a10.025 10.025 0 01-1.63-13.43m11.22 3.6c-.68.34-1.34.78-1.95 1.31m-11.11-3.51a10.025 10.025 0 0113.43 1.63M12 9v3m0 3h.01" />
+              </svg>
+            </div>
+            <div class="case-info">
+              <h3>Talleres mecánicos</h3>
+              <p>Fichas de ingreso del vehículo, historial mecánico por placas, órdenes de servicio y control de mano de obra.</p>
+            </div>
+          </div>
+
+          <div class="glass-card case-card reveal delay-100">
+            <div class="case-icon-wrapper">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72M6.75 18h3.5a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75h-3.5a.75.75 0 00-.75.75v3.75c0 .414.336.75.75.75z" />
+              </svg>
+            </div>
+            <div class="case-info">
+              <h3>Tiendas de barrio</h3>
+              <p>Terminal POS de venta rápida con lector de barra, balances limpios de caja al instante y control de compras.</p>
+            </div>
+          </div>
+
+          <div class="glass-card case-card reveal delay-200">
+            <div class="case-icon-wrapper">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
+            </div>
+            <div class="case-info">
+              <h3>Peluquerías y Estéticas</h3>
+              <p>Agenda ágil de citas y reservas, control de turnos, y liquidaciones de comisiones automatizadas para estilistas.</p>
+            </div>
+          </div>
+
+          <div class="glass-card case-card reveal delay-300">
+            <div class="case-icon-wrapper">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l8.904-4.474M18 10.5c0 2.22-1.206 4.16-3 5.2v2.3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-2.3c-1.794-1.04-3-2.98-3-5.2a6 6 0 1112 0z" />
+              </svg>
+            </div>
+            <div class="case-info">
+              <h3>Emprendimientos</h3>
+              <p>Monitoreo unificado de canales de venta digital, bases de datos integradas de prospectos y balances operativos.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BENEFICIOS -->
+    <section id="beneficios">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="badge">Efecto multiplicador</div>
+          <h2>Lo que vas a lograr con PROTOTIPE</h2>
+          <p>Tu negocio ganará solidez, velocidad y tranquilidad desde la primera semana de uso.</p>
+        </div>
+
+        <div class="grid">
+          <div class="glass-card benefit-card reveal delay-100">
+            <div class="benefit-icon-wrapper">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.746 3.746 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.746 3.746 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+              </svg>
+            </div>
+            <h3>Control total del negocio</h3>
+            <p>Monitoreo preciso de tus ventas, cierres diarios de caja y deudas activas de clientes desde cualquier dispositivo en tiempo real.</p>
+          </div>
+
+          <div class="glass-card benefit-card reveal delay-200">
+            <div class="benefit-icon-wrapper">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3>Menos errores operativos</h3>
+            <p>Procesos estandarizados y cálculos matemáticos exactos en segundos. Cero desvíos de caja o fallas por olvidos o confusión en el equipo.</p>
+          </div>
+
+          <div class="glass-card benefit-card reveal delay-300">
+            <div class="benefit-icon-wrapper">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3>Más tiempo libre</h3>
+            <p>Las tareas administrativas repetitivas se completan con un par de clics, eliminando las horas extras al final del día de trabajo.</p>
+          </div>
+
+          <div class="glass-card benefit-card reveal delay-400">
+            <div class="benefit-icon-wrapper">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+              </svg>
+            </div>
+            <h3>Crecimiento organizado</h3>
+            <p>Estructura sólida que te permite delegar operaciones rutinarias en tu equipo de forma segura y abrir nuevas sucursales sin desorden.</p>
+          </div>
+
+          <div class="glass-card benefit-card reveal delay-200">
+            <div class="benefit-icon-wrapper">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+              </svg>
+            </div>
+            <h3>Decisiones basadas en datos</h3>
+            <p>Conoce con absoluta precisión qué productos son los más rentables, qué días vendes más y el balance neto real de tu caja.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODELO DE TRABAJO -->
+    <section id="modelo">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="badge">Modelos adaptados</div>
+          <h2>Flexible según tu negocio</h2>
+          <p>Esquemas de trabajo y financiamiento transparentes ajustados a la escala de tu empresa local.</p>
+        </div>
+
+        <div class="pricing-grid">
+          <div class="glass-card pricing-card reveal delay-100">
+            <h3 class="pricing-name">Suscripción SaaS</h3>
+            <p class="pricing-desc">Para comercios que buscan una cuota mensual predecible de bajo impacto.</p>
+            <ul class="pricing-features">
+              <li>
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span>Diagnóstico inicial 100% gratuito</span>
+              </li>
+              <li>
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span>Acceso completo al sistema en la nube</span>
+              </li>
+              <li>
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span>Actualizaciones y mejoras periódicas</span>
+              </li>
+              <li>
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span>Soporte continuo vía WhatsApp</span>
+              </li>
+            </ul>
+            <a href="https://wa.me/573167527660?text=Hola,%20me%20interesa%20el%20modelo%20de%20Suscripción%20SaaS." 
+               class="btn btn-secondary" 
+               target="_blank" 
+               rel="noopener noreferrer">
+              Preguntar por Suscripción
+            </a>
+          </div>
+
+          <div class="glass-card pricing-card featured reveal delay-200">
+            <h3 class="pricing-name">Adquisición a Medida</h3>
+            <p class="pricing-desc">Para empresas que requieren desarrollos altamente específicos o integración física local.</p>
+            <ul class="pricing-features">
+              <li>
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span>Personalización estructural profunda</span>
+              </li>
+              <li>
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span>Pago inicial y mensualidades mínimas</span>
+              </li>
+              <li>
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span>Integración con hardware local</span>
+              </li>
+              <li>
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                <span>Soporte prioritario 24/7 en línea</span>
+              </li>
+            </ul>
+            <a href="https://wa.me/573167527660?text=Hola,%20me%20interesa%20el%20modelo%20de%20Adquisición%20a%20Medida." 
+               class="btn btn-primary" 
+               target="_blank" 
+               rel="noopener noreferrer">
+              Solicitar Cotización Especial
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PREGUNTAS FRECUENTES (FAQ) -->
+    <section id="faq">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="badge">Resolución de dudas</div>
+          <h2>Preguntas Frecuentes</h2>
+          <p>Respuestas claras a las dudas más comunes sobre la implementación de tu sistema.</p>
+        </div>
+
+        <div class="faq-container">
+          <details class="faq-item reveal">
+            <summary>
+              ¿Cómo sé si mi negocio está listo para un sistema?
+              <svg class="faq-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </summary>
+            <div class="faq-content">
+              Si pierdes tiempo diario revisando cuentas, anotas pedidos en papel que a veces se extravían, o sientes que las ventas no cuadran exactamente con la mercancía física, estás 100% listo. El desorden operativo limita tu crecimiento hoy mismo.
+            </div>
+          </details>
+
+          <details class="faq-item reveal">
+            <summary>
+              ¿Cuánto tiempo toma tener el sistema listo para funcionar?
+              <svg class="faq-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </summary>
+            <div class="faq-content">
+              Una vez completado el diagnóstico inicial gratuito y aprobados los flujos operativos, el tiempo de construcción y parametrización oscila entre 15 y 30 días calendario, dependiendo de la complejidad específica de tu operation física.
+            </div>
+          </details>
+
+          <details class="faq-item reveal">
+            <summary>
+              ¿Debo pagar costos por licencias o software de terceros?
+              <svg class="faq-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </summary>
+            <div class="faq-content">
+              No. Nuestros sistemas se estructuran sobre infraestructura cloud elástica. Esto significa que los costos de bases de datos y alojamiento son mínimos o nulos en escalas estándar de comercios locales, evitándote gastos ocultos de licenciamiento.
+            </div>
+          </details>
+
+          <details class="faq-item reveal">
+            <summary>
+              ¿Es difícil de usar para mi equipo de trabajo?
+              <svg class="faq-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            </summary>
+            <div class="faq-content">
+              Para nada. A diferencia de las herramientas genéricas que saturan la interfaz con docenas de campos inútiles, tu sistema tendrá solo los botones y flujos exactos que utiliza tu personal. Esto reduce el proceso de capacitación y adopción a menos de 48 horas.
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA FINAL (REDISENADO) -->
+    <section id="cta">
+      <div class="container">
+        <div class="glass-card cta-card reveal">
+          <h2>¿Listo para transformar tu negocio?</h2>
+          <p>Agenda una asesoría gratuita y descubre cómo funcionaría tu sistema personalizado en la vida real.</p>
+          <a href="https://wa.me/573167527660?text=Hola,%20quiero%20solicitar%20un%20diagnóstico%20gratuito%20de%20mi%20negocio." 
+             class="btn btn-primary" 
+             target="_blank" 
+             rel="noopener noreferrer">
+            <span>Hablar por WhatsApp</span>
+            <svg class="btn-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="logo-container">
+            <svg class="logo-svg" viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            <span class="logo-text">PROTOTIPE</span>
+          </a>
+          <p>Construyendo sistemas digitales de control, organización y automatización para negocios físicos reales.</p>
+        </div>
+        <div class="footer-column">
+          <h4>Navegación</h4>
+          <ul>
+            <li><a href="#problema">El Problema</a></li>
+            <li><a href="#solucion">La Solución</a></li>
+            <li><a href="#como-funciona">Cómo Funciona</a></li>
+            <li><a href="#beneficios">Beneficios</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Contacto</h4>
+          <ul>
+            <li><a href="https://wa.me/573167527660" target="_blank" rel="noopener noreferrer">Soporte WhatsApp</a></li>
+            <li><a href="mailto:contacto@prototipe.com">contacto@prototipe.com</a></li>
+            <li><a href="#">Bogotá, Colombia</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>PROTOTIPE © 2026 — Sistemas para negocios reales. Todos los derechos reservados.</p>
+        <div class="footer-links-row">
+          <a href="#">Términos</a>
+          <a href="#">Privacidad</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- BARRA CTA FIXED MOBILE (SIEMPRE VISIBLE EN INFERIOR DE PANTALLAS MÓVILES) -->
+  <div class="mobile-sticky-cta">
+    <a href="https://wa.me/573167527660?text=Hola,%20quiero%20solicitar%20un%20diagnóstico%20gratuito%20de%20mi%20negocio." 
+       class="btn btn-primary" 
+       target="_blank" 
+       rel="noopener noreferrer">
+      <span>📲 Diagnóstico Gratuito</span>
+      <svg class="btn-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+      </svg>
+    </a>
+  </div>
+
+  <!-- JAVASCRIPT: MENÚ RESPONSIVO & SCROLL REVEAL -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Menú móvil
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+      const navLinks = document.querySelector('.nav-links');
+
+      mobileMenuBtn.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+        // Animación de los spans del botón
+        const spans = mobileMenuBtn.querySelectorAll('span');
+        spans[0].style.transform = navLinks.classList.contains('active') ? 'rotate(45deg) translate(6px, 6px)' : 'none';
+        spans[1].style.opacity = navLinks.classList.contains('active') ? '0' : '1';
+        spans[2].style.transform = navLinks.classList.contains('active') ? 'rotate(-45deg) translate(5px, -5px)' : 'none';
+      });
+
+      // Cerrar menú móvil al dar clic a un enlace
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          navLinks.classList.remove('active');
+          const spans = mobileMenuBtn.querySelectorAll('span');
+          spans[0].style.transform = 'none';
+          spans[1].style.opacity = '1';
+          spans[2].style.transform = 'none';
+        });
+      });
+
+      // 2. Scroll Reveal con IntersectionObserver (animaciones fluidas de entrada)
+      const revealElements = document.querySelectorAll('.reveal');
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px -10% -10% 0px', // Ajustado para un trigger más suave
+        threshold: 0.1
+      };
+
+      const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target); // Solo se anima una vez
+          }
+        });
+      }, observerOptions);
+
+      revealElements.forEach(el => revealObserver.observe(el));
+
+      // 3. Navbar scroll effect background opacity
+      const headerNav = document.getElementById('header-nav');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+          headerNav.querySelector('.navbar').style.background = 'rgba(5, 7, 12, 0.95)';
+        } else {
+          headerNav.querySelector('.navbar').style.background = 'rgba(5, 7, 12, 0.7)';
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

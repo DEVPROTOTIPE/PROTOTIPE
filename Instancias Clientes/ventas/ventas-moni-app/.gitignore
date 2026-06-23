@@ -7,10 +7,25 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Dependencias
+node_modules/
+
+# Build output - NUNCA subir al repositorio
+dist/
+dist-ssr/
+
+# Variables de entorno - SECRETOS: NUNCA subir
+.env
+.env.*
+!.env.example
+
+# Firebase CLI cache y builds locales - NUNCA subir
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Vite cache
+.vite/
 
 # Editor directories and files
 .vscode/*
@@ -25,9 +40,6 @@ dist-ssr
 
 # Scratch folder
 scratch/
-
-# Vite cache
-.vite/
 
 # Testing reports and results
 playwright-report/

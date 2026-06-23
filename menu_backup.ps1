@@ -8,7 +8,10 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
-$rootDir = "D:\PROTOTIPE"
+$rootDir = if ($env:PROTOTIPE_WORKSPACE_ROOT) { $env:PROTOTIPE_WORKSPACE_ROOT } else { "D:\PROTOTIPE" }
+if (-not (Test-Path $rootDir)) {
+    $rootDir = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
+}
 $coresDir = "$rootDir\Plantillas Core"
 $instancesDir = "$rootDir\Instancias Clientes"
 $dashboardDir = "$rootDir\Central PROTOTIPE\dev-dashboard"
@@ -65,6 +68,25 @@ function Test-IsGitRepository {
         Set-Location -Path $prevPath -ErrorAction SilentlyContinue
     }
     return $insideGit
+}
+
+function Get-GitChangesCount {
+    param (
+        [string]$Path
+    )
+    if (-not (Test-IsGitRepository -Path $Path)) { return -1 }
+    
+    $gitDir = "$Path\.git"
+    if (-not (Test-Path $gitDir) -and (Test-Path "$Path\.git-backup-temp")) {
+        $gitDir = "$Path\.git-backup-temp"
+    }
+    
+    $changes = git --git-dir="$gitDir" --work-tree="$Path" status --porcelain 2>$null
+    $changesCount = 0
+    foreach ($line in ($changes -split "`r?`n")) {
+        if (-not [string]::IsNullOrWhiteSpace($line)) { $changesCount++ }
+    }
+    return $changesCount
 }
 
 function Show-Header {
@@ -185,11 +207,18 @@ function Manage-Cores {
         return
     }
     
-    # Preparar opciones del menu
+    # Preparar opciones del menu (Punto 10)
     $options = @()
     for ($i = 0; $i -lt $cores.Count; $i++) {
-        $hasGit = Test-IsGitRepository -Path $cores[$i].FullName
-        $gitStatus = if ($hasGit) { " (Git Activo)" } else { " (Sin Git)" }
+        $changesCount = Get-GitChangesCount -Path $cores[$i].FullName
+        $gitStatus = ""
+        if ($changesCount -eq -1) {
+            $gitStatus = " (Sin Git)"
+        } elseif ($changesCount -eq 0) {
+            $gitStatus = " (Git Activo | Sin cambios)"
+        } else {
+            $gitStatus = " (Git Activo | $changesCount cambios)"
+        }
         $options += "$($cores[$i].Name)$gitStatus"
     }
     $options += "[ Volver al menu principal ]"
@@ -209,7 +238,22 @@ function Manage-Cores {
             Set-Location -Path $selectedPath
             git init | Out-Null
             Write-Host " Repositorio Git inicializado con exito." -ForegroundColor Green
-            Start-Sleep -Seconds 1
+            
+            Write-Host " ¿Desea asociar un repositorio remoto de GitHub (origin) ahora? (S/N): " -NoNewline -ForegroundColor Cyan
+            $asociarRemote = Read-Host
+            if ($asociarRemote -like "s" -or $asociarRemote -like "S") {
+                Write-Host " Ingrese la URL del repositorio remoto (ej. git@github.com:usuario/repo.git o https://...): " -NoNewline -ForegroundColor Cyan
+                $remoteUrl = Read-Host
+                if (-not [string]::IsNullOrWhiteSpace($remoteUrl)) {
+                    git remote add origin $remoteUrl.Trim()
+                    Write-Host " Remoto 'origin' configurado con: $remoteUrl" -ForegroundColor Green
+                } else {
+                    Write-Host " [INFO] No se ingreso ninguna URL. El repositorio solo tendra respaldo local temporalmente." -ForegroundColor Yellow
+                }
+            } else {
+                Write-Host " [INFO] Repositorio configurado solo de forma local." -ForegroundColor Yellow
+            }
+            Start-Sleep -Seconds 1.5
         } else {
             return
         }
@@ -225,9 +269,12 @@ function Manage-Instances {
         return
     }
     
-    $instances = Get-ChildItem -Path $instancesDir -Directory -Recurse -Depth 2 | Where-Object {
-        $_.Parent.FullName -ne $instancesDir -and $_.Parent.Parent.FullName -eq $instancesDir
+    $instances = Get-ChildItem -Path $instancesDir -Directory -Recurse -Depth 3 -ErrorAction SilentlyContinue | Where-Object {
+        $path = $_.FullName
+        $path -notmatch 'node_modules|dist|\\\.git|\\\.firebase' -and 
+        ((Test-Path "$path\package.json") -or (Test-Path "$path\.git") -or (Test-Path "$path\.git-backup-temp"))
     }
+    
     if ($null -eq $instances -or $instances.Count -eq 0) {
         Show-Header
         Write-Host " [INFO] No hay instancias de clientes registradas fisicamente en el disco." -ForegroundColor Yellow
@@ -235,11 +282,18 @@ function Manage-Instances {
         return
     }
     
-    # Preparar opciones del menu
+    # Preparar opciones del menu (Punto 10)
     $options = @()
     for ($i = 0; $i -lt $instances.Count; $i++) {
-        $hasGit = Test-IsGitRepository -Path $instances[$i].FullName
-        $gitStatus = if ($hasGit) { " (Git Activo)" } else { " (Sin Git)" }
+        $changesCount = Get-GitChangesCount -Path $instances[$i].FullName
+        $gitStatus = ""
+        if ($changesCount -eq -1) {
+            $gitStatus = " (Sin Git)"
+        } elseif ($changesCount -eq 0) {
+            $gitStatus = " (Git Activo | Sin cambios)"
+        } else {
+            $gitStatus = " (Git Activo | $changesCount cambios)"
+        }
         $options += "$($instances[$i].Name)$gitStatus"
     }
     $options += "[ Volver al menu principal ]"
@@ -259,7 +313,9 @@ function Manage-Instances {
             Set-Location -Path $selectedPath
             git init | Out-Null
             Write-Host " Repositorio Git inicializado con exito." -ForegroundColor Green
-            Start-Sleep -Seconds 1
+            
+            Write-Host " [INFO] Esta instancia se vinculara de forma automatica al repositorio remoto del Core correspondiente." -ForegroundColor Cyan
+            Start-Sleep -Seconds 1.5
         } else {
             return
         }
@@ -277,6 +333,7 @@ $mainOptions = @(
 )
 
 # Bucle principal del menu
+$keepRunning = $true
 do {
     $choice = Get-MenuSelection -Title "SELECCIONE LA ACCION QUE DESEA REALIZAR:" -Options $mainOptions
     
@@ -285,10 +342,10 @@ do {
         1 { Run-Subproject-Backup -Path $dashboardDir; Write-Host " Presione cualquier tecla para volver al menu..."; Read-Host | Out-Null }
         2 { Manage-Cores }
         3 { Manage-Instances }
-        4 { break }
-        -1 { break }
+        4 { $keepRunning = $false }
+        -1 { $keepRunning = $false }
     }
-} while ($true)
+} while ($keepRunning)
 
 Write-Host ""
 Write-Host " Hasta luego! Entorno de desarrollo seguro." -ForegroundColor Green

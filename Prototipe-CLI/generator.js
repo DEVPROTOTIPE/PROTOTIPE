@@ -374,25 +374,38 @@ lerna-debug.log*
 
 # Directorios de dependencias
 node_modules/
+
+# Build output - NUNCA subir al repositorio
 dist/
 dist-ssr/
-*.local
 
-# Firebase y Secretos
-.firebase/
-.firebaserc
+# Variables de entorno - SECRETOS: NUNCA subir
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+
+# Firebase CLI cache y builds locales - NUNCA subir
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Vite cache
+.vite/
 
 # IDEs y Editores
-.vscode/
+.vscode/*
+!.vscode/extensions.json
 .idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Carpeta de pruebas y scratch local
+scratch/
+playwright-report/
+test-results/
 `;
   await fs.writeFile(gitignorePath, gitignoreContent, 'utf-8');
 

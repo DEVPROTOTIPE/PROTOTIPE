@@ -1,0 +1,70 @@
+# 🎨 Manual de Marca PROTOTIPE
+
+## 1. Personalidad de marca
+
+PROTOTIPE es una marca:
+*   Profesional
+*   Cercana
+*   Tecnológica
+*   Innovadora
+*   Accesible
+*   Premium
+*   Minimalista
+*   Seria
+
+---
+
+## 2. Posicionamiento
+
+PROTOTIPE se posiciona como una empresa que:
+
+Transforma negocios tradicionales en operaciones digitales organizadas mediante soluciones tecnológicas adaptadas a su realidad.
+
+---
+
+## 3. Tono de comunicación
+*   Claro
+*   Directo
+*   Técnico cuando sea necesario
+*   Amigable sin perder profesionalismo
+*   Educativo
+*   Explicativo
+
+---
+
+## 4. Valores de marca
+*   Confianza
+*   Transparencia
+*   Innovación
+*   Accesibilidad
+*   Compromiso con el cliente
+*   Responsabilidad
+
+---
+
+## 5. Estilo visual (guía general)
+*   Minimalista
+*   Limpio
+*   Uso moderado de colores
+*   Enfoque en claridad
+*   Interfaces simples
+*   Diseño funcional
+
+---
+
+## 6. Tipos de contenido
+
+PROTOTIPE comunicará mediante:
+*   Educación tecnológica
+*   Casos de éxito
+*   Demostración de productos
+*   Proceso de construcción
+*   Contenido personal del fundador
+
+---
+
+## 7. Identidad central
+
+PROTOTIPE no es solo software.
+
+Es una herramienta de transformación operativa para negocios reales.

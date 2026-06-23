@@ -1,5 +1,5 @@
 /**
- * HELPERS REUTILIZABLES PARA TESTS E2E - PROTOTIPE Framework
+ * HELPERS REUTILIZABLES PARA TESTS E2E - PROTOTIPE Framework (Trigger backup test)
  * -----------------------------------------------------------
  * Cada función recibe el objeto `page` de Playwright y el `APP_CONFIG`
  * del cliente activo. Esto garantiza que el mismo helper funcione en

@@ -19,8 +19,103 @@ const execAsync = promisify(exec);
 // Helper de sanitización extrema para evitar inyecciones de comandos en cadenas pasadas a consolas
 function sanitizeShellArgument(arg) {
   if (typeof arg !== 'string') return '';
-  // Remover caracteres de redirección, operadores lógicos y secuencias de control shell, manteniendo solo lo básico
-  return arg.replace(/["'`$\\;&|<>!*?()\[\]{}]/g, '').trim();
+  // Remover solo comillas dobles, comillas simples, variables shell, redirecciones y operadores lógicos,
+  // permitiendo caracteres válidos de nombres de rutas dinámicas (como [], (), {})
+  return arg.replace(/["'<>|;&$]/g, '').trim();
+}
+
+// Validar contención de rutas físicas para evitar Directory Traversal de forma agnóstica a la plataforma
+function isPathContained(parentPath, childPath) {
+  if (!parentPath || !childPath) return false;
+  const parentResolved = path.resolve(parentPath).toLowerCase();
+  const childResolved = path.resolve(childPath).toLowerCase();
+  return childResolved === parentResolved || childResolved.startsWith(parentResolved + path.sep);
+}
+
+// Redirigir consola de forma global a logger.js para auditoría persistente con guardián contra recursión
+let inConsoleLogger = false;
+
+function setupConsoleLogger() {
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+  const originalError = console.error;
+
+  console.log = (...args) => {
+    originalLog(...args);
+    if (!inConsoleLogger) {
+      inConsoleLogger = true;
+      try {
+        logger.info(args.join(' '));
+      } finally {
+        inConsoleLogger = false;
+      }
+    }
+  };
+
+  console.warn = (...args) => {
+    originalWarn(...args);
+    if (!inConsoleLogger) {
+      inConsoleLogger = true;
+      try {
+        logger.warn(args.join(' '));
+      } finally {
+        inConsoleLogger = false;
+      }
+    }
+  };
+
+  console.error = (...args) => {
+    originalError(...args);
+    if (!inConsoleLogger) {
+      inConsoleLogger = true;
+      try {
+        logger.error(args.join(' '));
+      } finally {
+        inConsoleLogger = false;
+      }
+    }
+  };
+}
+
+// Inicializar el logger global inmediatamente
+setupConsoleLogger();
+
+// Validar y sanear el archivo de metadatos .prototipe.json de los clientes
+function validatePrototipeMetadata(meta, folderName) {
+  const safeMeta = { ...meta };
+  if (!safeMeta.template) {
+    safeMeta.template = 'ventas';
+  }
+  if (!safeMeta.version) {
+    safeMeta.version = '0.0.0';
+  }
+  if (!safeMeta.clientId) {
+    safeMeta.clientId = folderName;
+  }
+  if (!safeMeta.projectName) {
+    safeMeta.projectName = folderName;
+  }
+  return safeMeta;
+}
+
+// Ejecutar diagnósticos rápidos del PATH
+async function runPreflightChecks() {
+  console.log('\n🔍 [Preflight] Comprobando dependencias del ecosistema...');
+  
+  try {
+    await execAsync('git --version');
+    console.log('   ✅ Git: Detectado en PATH.');
+  } catch (_) {
+    console.warn('   ⚠️  Git: No detectado en PATH. Las funciones de control de versiones y drift estarán limitadas.');
+  }
+
+  try {
+    await execAsync('firebase --version');
+    console.log('   ✅ Firebase CLI: Detectado en PATH.');
+  } catch (_) {
+    console.warn('   ⚠️  Firebase CLI: No detectado en PATH. Las operaciones y despliegues en la nube de Firebase no estarán operativos.');
+  }
+  console.log('──────────────────────────────────────────────────\n');
 }
 
 function killProcessTree(pid) {
@@ -673,10 +768,8 @@ app.get('/api/library/file', async (req, res) => {
     const filePath = path.resolve(rawPath);
 
     // Validación estricta canónica para evitar directory traversal
-    if (!filePath.toLowerCase().startsWith(baseDocDir.toLowerCase() + path.sep)) {
-      if (filePath.toLowerCase() !== baseDocDir.toLowerCase()) {
-        return res.status(403).json({ error: 'Acceso denegado. La ruta está fuera del directorio de documentación del proyecto.' });
-      }
+    if (!isPathContained(baseDocDir, filePath)) {
+      return res.status(403).json({ error: 'Acceso denegado. La ruta está fuera del directorio de documentación del proyecto.' });
     }
 
     if (!await fs.pathExists(filePath)) {
@@ -711,10 +804,7 @@ app.post('/api/library/extract', async (req, res) => {
   }
 
   // Prevención de Path Traversal: validar contención en el workspace root
-  const workspaceRoot = path.resolve(getWorkspaceRoot());
-  const relative = path.relative(workspaceRoot, sourceFile);
-  const isContained = !relative.startsWith('..') && !path.isAbsolute(relative);
-  if (!isContained) {
+  if (!isPathContained(getWorkspaceRoot(), sourceFile)) {
     return res.status(403).json({ error: 'Acceso denegado: El archivo de origen debe estar dentro del espacio de trabajo del proyecto.' });
   }
 
@@ -870,10 +960,8 @@ app.get('/api/project/file', async (req, res) => {
     let filePath = path.resolve(targetProjectDir, cleanRelativePath);
 
     // 4. Validación de seguridad contra directory traversal
-    if (!filePath.toLowerCase().startsWith(targetProjectDir.toLowerCase() + path.sep)) {
-      if (filePath.toLowerCase() !== targetProjectDir.toLowerCase()) {
-        return res.status(403).json({ error: 'Acceso denegado. La ruta está fuera del proyecto.' });
-      }
+    if (!isPathContained(targetProjectDir, filePath)) {
+      return res.status(403).json({ error: 'Acceso denegado. La ruta está fuera del proyecto.' });
     }
 
     if (!await fs.pathExists(filePath)) {
@@ -1678,90 +1766,121 @@ async function resolveFirebaseProjectId(projectDir, clientId) {
     } catch (_) {}
   }
 
-  // Si ya tenemos un proyecto válido, lo retornamos
-  if (projectId) return projectId;
-
   // AUTO-DETECCIÓN Y AUTO-CREACIÓN DE PROYECTO (CERO PASOS MANUALES)
-  try {
-    console.log(`[Firebase Auto] Buscando proyectos activos para asociar con "${clientId}"...`);
-    const { stdout } = await execAsync('firebase projects:list --json', { timeout: 30000 });
-    const listResult = JSON.parse(stdout);
-    const activeProjects = listResult.result || [];
-    
-    // 1. Intentar buscar un proyecto existente que coincida o contenga el clientId
-    const match = activeProjects.find(p => 
-      p.projectId.toLowerCase() === clientId.toLowerCase() ||
-      p.projectId.toLowerCase().startsWith(clientId.toLowerCase() + '-') ||
-      p.projectId.toLowerCase().includes(clientId.toLowerCase())
-    );
+  if (!projectId) {
+    try {
+      console.log(`[Firebase Auto] Buscando proyectos activos para asociar con "${clientId}"...`);
+      const { stdout } = await execAsync('firebase projects:list --json', { timeout: 30000 });
+      const listResult = JSON.parse(stdout);
+      const activeProjects = listResult.result || [];
+      
+      // 1. Intentar buscar un proyecto existente que coincida o contenga el clientId
+      const match = activeProjects.find(p => 
+        p.projectId.toLowerCase() === clientId.toLowerCase() ||
+        p.projectId.toLowerCase().startsWith(clientId.toLowerCase() + '-') ||
+        p.projectId.toLowerCase().includes(clientId.toLowerCase())
+      );
 
-    if (match) {
-      console.log(`[Firebase Auto] Auto-asociando con proyecto existente encontrado: ${match.projectId}`);
-      // Escribir el .firebaserc de forma automática para persistir la selección
-      await fs.writeJson(rcPath, { projects: { default: match.projectId } }, { spaces: 2 });
-      return match.projectId;
-    }
-
-    // 2. Si no hay coincidencia, auto-creamos un nuevo proyecto Firebase con ID único para este cliente/core
-    const uniqueId = `${clientId}-app-${Math.floor(1000 + Math.random() * 9000)}`;
-    const displayName = `App ${clientId.charAt(0).toUpperCase() + clientId.slice(1)}`;
-    console.log(`[Firebase Auto] No se encontró proyecto para "${clientId}". Auto-creando: ${uniqueId}...`);
-    
-    await execAsync(`firebase projects:create ${uniqueId} --display-name "${displayName}"`, { timeout: 180000 });
-    console.log(`[Firebase Auto] Proyecto Firebase "${uniqueId}" creado automáticamente.`);
-    
-    // Escribir el .firebaserc de forma automática
-    await fs.writeJson(rcPath, { projects: { default: uniqueId } }, { spaces: 2 });
-    
-    // Generar un firebase.json básico si no existe para que el deploy de hosting funcione
-    const fbJsonPath = path.join(projectDir, 'firebase.json');
-    if (!await fs.pathExists(fbJsonPath)) {
-      await fs.writeJson(fbJsonPath, {
-        hosting: {
-          public: "dist",
-          ignore: ["firebase.json", "**/.*", "**/node_modules/**"],
-          rewrites: [{ source: "**", destination: "/index.html" }]
+      if (match) {
+        console.log(`[Firebase Auto] Auto-asociando con proyecto existente encontrado: ${match.projectId}`);
+        // Escribir el .firebaserc de forma automática para persistir la selección
+        await fs.writeJson(rcPath, { projects: { default: match.projectId } }, { spaces: 2 });
+        projectId = match.projectId;
+      } else {
+        // 2. Si no hay coincidencia, auto-creamos un nuevo proyecto Firebase con ID único para este cliente/core
+        const uniqueId = `${clientId}-app-${Math.floor(1000 + Math.random() * 9000)}`;
+        const displayName = `App ${clientId.charAt(0).toUpperCase() + clientId.slice(1)}`;
+        console.log(`[Firebase Auto] No se encontró proyecto para "${clientId}". Auto-creando: ${uniqueId}...`);
+        
+        await execAsync(`firebase projects:create ${uniqueId} --display-name "${displayName}"`, { timeout: 180000 });
+        console.log(`[Firebase Auto] Proyecto Firebase "${uniqueId}" creado automáticamente.`);
+        
+        // Escribir el .firebaserc de forma automática
+        await fs.writeJson(rcPath, { projects: { default: uniqueId } }, { spaces: 2 });
+        
+        // Generar un firebase.json básico si no existe para que el deploy de hosting funcione
+        const fbJsonPath = path.join(projectDir, 'firebase.json');
+        if (!await fs.pathExists(fbJsonPath)) {
+          await fs.writeJson(fbJsonPath, {
+            hosting: {
+              public: "dist",
+              ignore: ["firebase.json", "**/.*", "**/node_modules/**"],
+              rewrites: [{ source: "**", destination: "/index.html" }]
+            }
+          }, { spaces: 2 });
         }
-      }, { spaces: 2 });
+        projectId = uniqueId;
+      }
+    } catch (err) {
+      console.warn(`[Firebase Auto Warning] Falló la auto-resolución/creación: ${err.message}. Usando fallback.`);
+      projectId = clientId;
     }
-
-    return uniqueId;
-  } catch (err) {
-    console.warn(`[Firebase Auto Warning] Falló la auto-resolución/creación: ${err.message}. Usando fallback.`);
   }
 
-  return clientId;
+  // Sanitización estricta para evitar inyección de comandos o caracteres no válidos
+  const safeId = (projectId || clientId).trim().toLowerCase().replace(/[^a-z0-9\-]/g, '');
+  if (!safeId) {
+    throw new Error(`El Firebase Project ID resolved "${projectId || clientId}" no es válido.`);
+  }
+  return safeId;
 }
 
-// Helper para buscar el directorio del proyecto del cliente
+// Helper para buscar el directorio del proyecto del cliente.
+// Fuente de verdad: .prototipe.json (clientId / projectName).
+// Soporta 3 niveles: directo, nicho/instancia, fallback por nombre de carpeta y package.json.
 async function findProjectDir(clientId) {
-  const baseAppsDir = getWorkspaceRoot();
+  const baseAppsDir = getWorkspaceRoot(); // D:\PROTOTIPE\Instancias Clientes
+  const lowerClientId = clientId.toLowerCase();
+
+  // Helper interno: decide si un directorio corresponde al clientId buscado
+  const matchesClientId = async (dirPath, folderName) => {
+    // 1. .prototipe.json — fuente de verdad (clientId y projectName)
+    const metaPath = path.join(dirPath, '.prototipe.json');
+    if (await fs.pathExists(metaPath)) {
+      const meta = await fs.readJson(metaPath).catch(() => ({}));
+      if (
+        (meta.clientId   && meta.clientId.toLowerCase()   === lowerClientId) ||
+        (meta.projectName && meta.projectName.toLowerCase() === lowerClientId)
+      ) return true;
+    }
+    // 2. package.json — nombre de paquete npm
+    const pkgPath = path.join(dirPath, 'package.json');
+    if (await fs.pathExists(pkgPath)) {
+      const pkg = await fs.readJson(pkgPath).catch(() => ({}));
+      if ((pkg.name || '').toLowerCase() === lowerClientId) return true;
+    }
+    // 3. Nombre de carpeta normalizado (kebab-case)
+    if (folderName.toLowerCase() === lowerClientId ||
+        folderName.toLowerCase().replace(/[^a-z0-9]+/g, '-') === lowerClientId) return true;
+    return false;
+  };
 
   if (await fs.pathExists(baseAppsDir)) {
     try {
       const items = await fs.readdir(baseAppsDir);
       for (const item of items) {
         const fullPath = path.join(baseAppsDir, item);
-        try {
-          const stat = await fs.stat(fullPath);
-          if (!stat.isDirectory()) continue;
+        const stat = await fs.stat(fullPath).catch(() => null);
+        if (!stat || !stat.isDirectory()) continue;
 
-          const pkgPath = path.join(fullPath, 'package.json');
-          if (await fs.pathExists(pkgPath)) {
-            const pkg = await fs.readJson(pkgPath);
-            const pkgName = pkg.name || '';
-            if (
-              pkgName.toLowerCase() === clientId.toLowerCase() || 
-              item.toLowerCase().replace(/[^a-z0-9]+/g, '-') === clientId.toLowerCase()
-            ) {
-              return fullPath;
-            }
-          }
-        } catch (_) {}
+        // Nivel 1: directorio inmediato (ej: Instancias Clientes/ventas-moni-app)
+        if (await matchesClientId(fullPath, item)) return fullPath;
+
+        // Nivel 2: un nivel dentro del nicho (ej: Instancias Clientes/ventas/ventas-moni-app)
+        const subItems = await fs.readdir(fullPath).catch(() => []);
+        for (const subItem of subItems) {
+          const subPath = path.join(fullPath, subItem);
+          const subStat = await fs.stat(subPath).catch(() => null);
+          if (!subStat || !subStat.isDirectory()) continue;
+          if (await matchesClientId(subPath, subItem)) return subPath;
+        }
       }
-    } catch (_) {}
+    } catch (err) {
+      console.error('[findProjectDir] Error recorriendo carpetas:', err);
+    }
   }
 
+  // Fallback: mappings conocidos de cores (para comandos que buscan el core directamente)
   const knownMappings = [
     { keys: ['ventas', 'smartfix'],              folder: 'App Ventas' },
     { keys: ['dev-dashboard', 'control'],         folder: 'dev-dashboard' },
@@ -1770,7 +1889,7 @@ async function findProjectDir(clientId) {
     { keys: ['gastronomia', 'restaurante'],       folder: 'App Gastronomia' }
   ];
   for (const mapping of knownMappings) {
-    if (mapping.keys.some(k => clientId.includes(k))) {
+    if (mapping.keys.some(k => lowerClientId.includes(k))) {
       let candidate = path.join(baseAppsDir, mapping.folder);
       if (fs.existsSync(candidate)) return candidate;
       candidate = path.join(path.dirname(baseAppsDir), 'Plantillas Core', mapping.folder);
@@ -2440,6 +2559,15 @@ async function getFilesRecursively(dir, ignorePaths = [], baseDir = dir) {
   return results;
 }
 
+const BINARY_EXTENSIONS = new Set([
+  '.png', '.jpg', '.jpeg', '.gif', '.ico', '.webp', '.pdf', '.zip',
+  '.woff', '.woff2', '.ttf', '.eot', '.mp3', '.wav', '.mp4', '.mov', '.svg'
+]);
+
+function isBinaryFile(filename) {
+  return BINARY_EXTENSIONS.has(path.extname(filename).toLowerCase());
+}
+
 // Endpoint para calcular desviaciones físicas (Drift Detector) respecto al Core
 app.get('/api/project/drift', async (req, res) => {
   const { clientId } = req.query;
@@ -2450,8 +2578,9 @@ app.get('/api/project/drift', async (req, res) => {
 
   try {
     const metaPath = path.join(projectDir, '.prototipe.json');
-    const meta = await fs.pathExists(metaPath) ? await fs.readJson(metaPath) : {};
-    let coreId = meta.templateId || meta.coreClave || meta.coreId;
+    let meta = await fs.pathExists(metaPath) ? await fs.readJson(metaPath) : {};
+    meta = validatePrototipeMetadata(meta, path.basename(projectDir));
+    let coreId = meta.templateId || meta.coreClave || meta.coreId || meta.template;
 
     if (!coreId) {
       if (clientId.toLowerCase().includes('venta')) coreId = 'ventas';
@@ -2487,23 +2616,49 @@ app.get('/api/project/drift', async (req, res) => {
           message: 'El archivo existe en el Core pero no en la instancia del Cliente.'
         });
       } else {
-        const coreContent = await fs.readFile(coreFile.absolutePath, 'utf-8');
-        const clientContent = await fs.readFile(clientFile.absolutePath, 'utf-8');
-        
-        if (coreContent !== clientContent) {
-          const diffResult = Diff.diffLines(clientContent, coreContent);
-          differences.push({
-            file: coreFile.relativePath,
-            status: 'modified',
-            message: 'El archivo local difiere de la plantilla del Core.',
-            diff: diffResult.map(part => ({
-              value: part.value,
-              added: part.added,
-              removed: part.removed
-            }))
-          });
+        const isBin = isBinaryFile(coreFile.relativePath);
+
+        if (isBin) {
+          try {
+            const coreBuf = await fs.readFile(coreFile.absolutePath);
+            const clientBuf = await fs.readFile(clientFile.absolutePath);
+            if (!coreBuf.equals(clientBuf)) {
+              differences.push({
+                file: coreFile.relativePath,
+                status: 'modified',
+                isBinary: true,
+                message: 'Archivo binario modificado.'
+              });
+            } else {
+              matchingCount++;
+            }
+          } catch (err) {
+            differences.push({
+              file: coreFile.relativePath,
+              status: 'modified',
+              isBinary: true,
+              message: `Error al leer archivo binario: ${err.message}`
+            });
+          }
         } else {
-          matchingCount++;
+          const coreContent = await fs.readFile(coreFile.absolutePath, 'utf-8');
+          const clientContent = await fs.readFile(clientFile.absolutePath, 'utf-8');
+          
+          if (coreContent !== clientContent) {
+            const diffResult = Diff.diffLines(clientContent, coreContent);
+            differences.push({
+              file: coreFile.relativePath,
+              status: 'modified',
+              message: 'El archivo local difiere de la plantilla del Core.',
+              diff: diffResult.map(part => ({
+                value: part.value,
+                added: part.added,
+                removed: part.removed
+              }))
+            });
+          } else {
+            matchingCount++;
+          }
         }
       }
     }
@@ -2820,18 +2975,37 @@ app.get('/api/project/drift/global', async (req, res) => {
   }
 
   try {
-    const dirs = await fs.readdir(GIT_INSTANCES_DIR);
-    const results = [];
-
-    await Promise.all(dirs.map(async (dir) => {
+    const candidates = [];
+    const topDirs = await fs.readdir(GIT_INSTANCES_DIR);
+    for (const dir of topDirs) {
       const fullPath = path.join(GIT_INSTANCES_DIR, dir);
       const stat = await fs.stat(fullPath).catch(() => null);
-      if (!stat || !stat.isDirectory()) return;
+      if (!stat || !stat.isDirectory()) continue;
 
-      const clientId = dir.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      if (await fs.pathExists(path.join(fullPath, '.prototipe.json'))) {
+        candidates.push({ folderName: dir, fullPath });
+      } else {
+        const subDirs = await fs.readdir(fullPath).catch(() => []);
+        for (const subDir of subDirs) {
+          const subFullPath = path.join(fullPath, subDir);
+          const subStat = await fs.stat(subFullPath).catch(() => null);
+          if (!subStat || !subStat.isDirectory()) continue;
+          if (await fs.pathExists(path.join(subFullPath, '.prototipe.json'))) {
+            candidates.push({ folderName: subDir, fullPath: subFullPath });
+          }
+        }
+      }
+    }
+
+    const results = [];
+
+    await Promise.all(candidates.map(async (candidate) => {
+      const { folderName, fullPath } = candidate;
+      const clientId = folderName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       const metaPath = path.join(fullPath, '.prototipe.json');
-      const meta = await fs.pathExists(metaPath) ? await fs.readJson(metaPath) : {};
-      let coreId = meta.templateId || meta.coreClave || meta.coreId;
+      let meta = await fs.pathExists(metaPath) ? await fs.readJson(metaPath) : {};
+      meta = validatePrototipeMetadata(meta, folderName);
+      let coreId = meta.templateId || meta.coreClave || meta.coreId || meta.template;
 
       if (!coreId) {
         if (clientId.toLowerCase().includes('venta')) coreId = 'ventas';
@@ -3037,8 +3211,11 @@ async function hasGitFolder(dir) {
 }
 
 async function execGitCommand(cmd, dir) {
+  if (typeof cmd !== 'string' || /[|;&$`<>]/g.test(cmd)) {
+    throw new Error('Comando de Git contiene caracteres prohibidos o inseguros.');
+  }
   const gitFolder = await getGitDirName(dir);
-  const env = { ...process.env };
+  const env = { ...process.env, PAGER: 'cat' };
   if (gitFolder) {
     env.GIT_DIR = path.join(dir, gitFolder);
     env.GIT_WORK_TREE = dir;
@@ -3118,11 +3295,31 @@ app.get('/api/git/targets', async (req, res) => {
         const fullPath = path.join(GIT_INSTANCES_DIR, dir);
         const stat = await fs.stat(fullPath).catch(() => null);
         if (!stat || !stat.isDirectory()) continue;
-        const hasGit = await isInsideGitRepo(fullPath);
-        const branch = hasGit ? await getGitBranch(fullPath) : null;
-        const hasChanges = hasGit ? await hasGitChanges(fullPath) : false;
-        if (hasChanges) instancesChanges = true;
-        targets.instances.push({ name: dir, path: fullPath, hasGit, branch, hasChanges });
+
+        // Si contiene .prototipe.json, es un candidato directo (nivel 1)
+        if (await fs.pathExists(path.join(fullPath, '.prototipe.json'))) {
+          const hasGit = await isInsideGitRepo(fullPath);
+          const branch = hasGit ? await getGitBranch(fullPath) : null;
+          const hasChanges = hasGit ? await hasGitChanges(fullPath) : false;
+          if (hasChanges) instancesChanges = true;
+          targets.instances.push({ name: dir, path: fullPath, hasGit, branch, hasChanges });
+        } else {
+          // Si no, buscar en sus subcarpetas (nivel 2)
+          const subDirs = await fs.readdir(fullPath).catch(() => []);
+          for (const subDir of subDirs) {
+            const subFullPath = path.join(fullPath, subDir);
+            const subStat = await fs.stat(subFullPath).catch(() => null);
+            if (!subStat || !subStat.isDirectory()) continue;
+            
+            if (await fs.pathExists(path.join(subFullPath, '.prototipe.json'))) {
+              const hasGit = await isInsideGitRepo(subFullPath);
+              const branch = hasGit ? await getGitBranch(subFullPath) : null;
+              const hasChanges = hasGit ? await hasGitChanges(subFullPath) : false;
+              if (hasChanges) instancesChanges = true;
+              targets.instances.push({ name: `${dir}/${subDir}`, path: subFullPath, hasGit, branch, hasChanges });
+            }
+          }
+        }
       }
     }
 
@@ -3151,10 +3348,10 @@ app.get('/api/git/status', async (req, res) => {
   if (!targetPath) return res.status(400).json({ error: 'El parámetro "path" es obligatorio.' });
 
   // Seguridad: evitar path traversal fuera del ecosistema
-  const resolvedPath = path.resolve(targetPath);
-  if (resolvedPath !== GIT_ROOT && !resolvedPath.startsWith(GIT_ROOT + path.sep)) {
+  if (!isPathContained(GIT_ROOT, targetPath)) {
     return res.status(403).json({ error: 'Ruta fuera del ecosistema PROTOTIPE. Acceso denegado.' });
   }
+  const resolvedPath = path.resolve(targetPath);
   if (!await fs.pathExists(resolvedPath)) {
     return res.status(404).json({ error: 'La ruta especificada no existe.' });
   }
@@ -3270,10 +3467,10 @@ app.get('/api/git/backup-stream', async (req, res) => {
   }
 
   // Seguridad: evitar path traversal
-  const resolvedPath = path.resolve(targetPath);
-  if (resolvedPath !== GIT_ROOT && !resolvedPath.startsWith(GIT_ROOT + path.sep)) {
+  if (!isPathContained(GIT_ROOT, targetPath)) {
     return res.status(403).json({ error: 'Ruta fuera del ecosistema PROTOTIPE. Acceso denegado.' });
   }
+  const resolvedPath = path.resolve(targetPath);
   if (!await fs.pathExists(resolvedPath)) {
     return res.status(404).json({ error: 'La ruta especificada no existe.' });
   }
@@ -3404,7 +3601,9 @@ app.get('/api/git/backup-stream', async (req, res) => {
   // Limpiar proceso si el cliente cierra la conexión
   req.on('close', () => {
     cleanUp();
-    if (!ps.killed) ps.kill();
+    if (!ps.killed && ps.pid) {
+      killProcessTree(ps.pid);
+    }
   });
 });
 
@@ -3456,10 +3655,10 @@ app.get('/api/git/cores-and-clients', async (req, res) => {
             }
           }
 
-          // Determinar la mejor rama base para cálculo de desfase
-          const defaultBase = baseBranches.includes('produccion')
-            ? 'produccion'
-            : (baseBranches.includes('main') ? 'main' : (baseBranches.includes('master') ? 'master' : currentBranch));
+          // Determinar la mejor rama base para cálculo de desfase (main es la rama de producción canónica)
+          const defaultBase = baseBranches.includes('main')
+            ? 'main'
+            : (baseBranches.includes('master') ? 'master' : (baseBranches.includes('develop') ? 'develop' : currentBranch));
 
           // Segundo paso: calcular commits behind/ahead para cada cliente de forma dinámica
           const clientsWithParity = [];
@@ -3533,9 +3732,9 @@ app.get('/api/git/sync-core-to-clients-stream', async (req, res) => {
   send('log', { text: `👥 Ramas cliente a actualizar: ${branchesToSync.join(', ')}`, type: 'info' });
   send('log', { text: '──────────────────────────────────────────────────', type: 'info' });
 
-  let originalBranch = 'produccion';
+  let originalBranch = 'main';
   try {
-    originalBranch = await getGitBranch(corePath) || 'produccion';
+    originalBranch = await getGitBranch(corePath) || 'main';
   } catch (_) {}
 
   const runCommandStream = (cmdStr, args, cwd) => {
@@ -3599,29 +3798,45 @@ app.get('/api/git/sync-core-to-clients-stream', async (req, res) => {
         send('log', { text: '   Subiendo rama actualizada a GitHub...', type: 'info' });
         await execGitCommand(`git push origin ${clientBranch} --no-verify`, corePath);
 
-        const envPath = path.join(corePath, '.env.local');
+        // Leer .env.local de la instancia física del cliente para obtener su Firebase Project ID
+        const clientPhysicalPath = await findProjectDir(clientName);
+        const clientEnvPath = clientPhysicalPath ? path.join(clientPhysicalPath, '.env.local') : '';
         let firebaseProjectId = '';
 
-        if (await fs.pathExists(envPath)) {
-          const envContent = await fs.readFile(envPath, 'utf8');
+        if (clientEnvPath && await fs.pathExists(clientEnvPath)) {
+          const envContent = await fs.readFile(clientEnvPath, 'utf8');
           const match = envContent.match(/VITE_FIREBASE_PROJECT_ID\s*=\s*(.+)/);
           if (match && match[1]) {
             firebaseProjectId = match[1].trim().replace(/['"]/g, '');
           }
         }
 
+        if (!firebaseProjectId) {
+          // Fallback: leer del .env.local del core si el cliente no tiene su propio project ID configurado
+          const coreEnvPath = path.join(corePath, '.env.local');
+          if (await fs.pathExists(coreEnvPath)) {
+            const envContent = await fs.readFile(coreEnvPath, 'utf8');
+            const match = envContent.match(/VITE_FIREBASE_PROJECT_ID\s*=\s*(.+)/);
+            if (match && match[1]) {
+              firebaseProjectId = match[1].trim().replace(/['"]/g, '');
+              send('log', { text: `⚠ Usando Firebase Project ID del Core como fallback: ${firebaseProjectId}`, type: 'warn' });
+            }
+          }
+        }
+
         if (firebaseProjectId) {
-          send('log', { text: `🚀 Configuración Firebase detectada: ${firebaseProjectId}`, type: 'info' });
+          firebaseProjectId = firebaseProjectId.trim().toLowerCase().replace(/[^a-z0-9\-]/g, '');
+          send('log', { text: `🚀 Firebase Project detectado para ${clientName}: ${firebaseProjectId}`, type: 'info' });
           
           send('log', { text: '   Compilando assets de producción...', type: 'info' });
-          await runCommandStream('npm', ['run', 'build'], corePath);
+          await runCommandStream('npm', ['run', 'build'], clientPhysicalPath || corePath);
 
           send('log', { text: `   Desplegando a Firebase Hosting para proyecto: ${firebaseProjectId}...`, type: 'info' });
-          await runCommandStream('firebase', ['deploy', '--only', 'hosting', '-P', firebaseProjectId], corePath);
+          await runCommandStream('firebase', ['deploy', '--only', 'hosting', '-P', firebaseProjectId], clientPhysicalPath || corePath);
           
           send('log', { text: `✅ Cliente ${clientName} actualizado y desplegado correctamente en producción.`, type: 'success' });
         } else {
-          send('log', { text: `⚠ No se detectó VITE_FIREBASE_PROJECT_ID en .env.local. Sincronización Git realizada, pero se omite el deploy.`, type: 'warn' });
+          send('log', { text: `⚠ No se encontró VITE_FIREBASE_PROJECT_ID para ${clientName}. Sincronización Git realizada, deploy omitido.`, type: 'warn' });
         }
 
         send('client-status', { client: clientName, status: 'success' });
@@ -3663,34 +3878,48 @@ const SYNC_EXCLUDED_PATHS = [
   'mapa_arquitectura_ia.md', 'mapa_arquitectura.md'
 ];
 
-// Helper: escanea recursivamente un directorio respetando SYNC_EXCLUDED_PATHS
-function getSyncFilesRecursive(dir, baseDir = dir) {
+// Helper: escanea recursivamente un directorio respetando SYNC_EXCLUDED_PATHS de forma asíncrona no bloqueante
+async function getSyncFilesRecursiveAsync(dir, baseDir = dir) {
   let results = [];
   let list;
-  try { list = fs.readdirSync(dir); } catch (_) { return results; }
-  for (const file of list) {
-    const fullPath = path.join(dir, file);
-    const rel = path.relative(baseDir, fullPath).replace(/\\/g, '/');
-    const isExcluded = SYNC_EXCLUDED_PATHS.some(ex => rel === ex || rel.startsWith(ex + '/'))
-      || rel.startsWith('Documentacion ') || rel.split('/').some(p => p.startsWith('Documentacion '));
-    if (isExcluded) continue;
-    let stat;
-    try { stat = fs.statSync(fullPath); } catch (_) { continue; }
-    if (stat.isDirectory()) {
-      results = results.concat(getSyncFilesRecursive(fullPath, baseDir));
-    } else {
-      results.push(rel);
-    }
+  try {
+    list = await fs.readdir(dir);
+  } catch (_) {
+    return results;
   }
+  await Promise.all(
+    list.map(async (file) => {
+      const fullPath = path.join(dir, file);
+      const rel = path.relative(baseDir, fullPath).replace(/\\/g, '/');
+      const isExcluded = SYNC_EXCLUDED_PATHS.some(ex => rel === ex || rel.startsWith(ex + '/'))
+        || rel.startsWith('Documentacion ') || rel.split('/').some(p => p.startsWith('Documentacion '));
+      if (isExcluded) return;
+      
+      let stat;
+      try {
+        stat = await fs.stat(fullPath);
+      } catch (_) {
+        return;
+      }
+      if (stat.isDirectory()) {
+        const subResults = await getSyncFilesRecursiveAsync(fullPath, baseDir);
+        results = results.concat(subResults);
+      } else {
+        results.push(rel);
+      }
+    })
+  );
   return results;
 }
 
-// Helper: hash MD5 síncrono de un archivo para comparación rápida
-function getSyncFileHash(filePath) {
+// Helper: hash MD5 asíncrono de un archivo para comparación rápida no bloqueante
+async function getSyncFileHashAsync(filePath) {
   try {
-    const buf = fs.readFileSync(filePath);
+    const buf = await fs.readFile(filePath);
     return crypto.createHash('md5').update(buf).digest('hex');
-  } catch (_) { return null; }
+  } catch (_) {
+    return null;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3720,45 +3949,88 @@ app.get('/api/instancias/list', async (req, res) => {
       };
     }
 
-    // Escanear Instancias Clientes
+    // Escanear Instancias Clientes (admite nivel 1 o nivel 2 como /ventas/ventas-moni-app)
     const templatesMap = {};
     if (await fs.pathExists(GIT_INSTANCES_DIR)) {
-      const dirs = await fs.readdir(GIT_INSTANCES_DIR);
-      for (const dir of dirs) {
+      const candidates = [];
+      const topDirs = await fs.readdir(GIT_INSTANCES_DIR);
+      
+      for (const dir of topDirs) {
         const fullPath = path.join(GIT_INSTANCES_DIR, dir);
         const stat = await fs.stat(fullPath).catch(() => null);
         if (!stat || !stat.isDirectory()) continue;
 
-        const metaPath = path.join(fullPath, '.prototipe.json');
-        if (!await fs.pathExists(metaPath)) continue;
+        // Si contiene .prototipe.json, es un candidato directo (nivel 1)
+        if (await fs.pathExists(path.join(fullPath, '.prototipe.json'))) {
+          candidates.push({ folderName: dir, fullPath });
+        } else {
+          // Si no, buscar en sus subcarpetas (nivel 2)
+          const subDirs = await fs.readdir(fullPath).catch(() => []);
+          for (const subDir of subDirs) {
+            const subFullPath = path.join(fullPath, subDir);
+            const subStat = await fs.stat(subFullPath).catch(() => null);
+            if (!subStat || !subStat.isDirectory()) continue;
+            
+            if (await fs.pathExists(path.join(subFullPath, '.prototipe.json'))) {
+              candidates.push({ folderName: subDir, fullPath: subFullPath });
+            }
+          }
+        }
+      }
 
+      const clientDataList = await Promise.all(candidates.map(async (candidate) => {
+        const { folderName, fullPath } = candidate;
+        const metaPath = path.join(fullPath, '.prototipe.json');
         let meta = {};
-        try { meta = await fs.readJson(metaPath); } catch (_) { continue; }
+        try { 
+          meta = await fs.readJson(metaPath); 
+          meta = validatePrototipeMetadata(meta, folderName);
+        } catch (_) { 
+          return null; 
+        }
 
         const templateKey = meta.template;
-        if (!templateKey || !coreInfo[templateKey]) continue;
+        if (!templateKey || !coreInfo[templateKey]) return null;
 
         const core = coreInfo[templateKey];
         const clientVersion = meta.version || '0.0.0';
 
         // ── Detección REAL por hash MD5 ─────────────────────────────────
-        // Comparar cada archivo del core contra el cliente.
-        // isOutdated = true si hay al menos un archivo con hash diferente o ausente.
         let driftCount = 0;
         try {
-          const coreFiles = getSyncFilesRecursive(core.path);
+          const coreFiles = await getSyncFilesRecursiveAsync(core.path);
           for (const relFile of coreFiles) {
-            const coreHash   = getSyncFileHash(path.join(core.path, relFile));
-            const clientHash = getSyncFileHash(path.join(fullPath, relFile));
+            const coreHash   = await getSyncFileHashAsync(path.join(core.path, relFile));
+            const clientHash = await getSyncFileHashAsync(path.join(fullPath, relFile));
             if (coreHash !== clientHash) driftCount++;
           }
         } catch (_) {
-          // Si el scan falla, fallback a comparación de versiones
           driftCount = clientVersion !== core.version ? 1 : 0;
         }
         const isOutdated = driftCount > 0;
         // ────────────────────────────────────────────────────────────────
 
+        return {
+          templateKey,
+          core,
+          clientData: {
+            clientId: meta.clientId || folderName,
+            projectName: meta.projectName || folderName,
+            folderName,
+            path: fullPath,
+            clientVersion,
+            coreVersion: core.version,
+            isOutdated,
+            driftCount,
+            niche: meta.niche || 'general'
+          }
+        };
+      }));
+
+      // Población síncrona segura
+      for (const item of clientDataList) {
+        if (!item) continue;
+        const { templateKey, core, clientData } = item;
         if (!templatesMap[templateKey]) {
           templatesMap[templateKey] = {
             key: templateKey,
@@ -3769,18 +4041,7 @@ app.get('/api/instancias/list', async (req, res) => {
             clients: []
           };
         }
-
-        templatesMap[templateKey].clients.push({
-          clientId: meta.clientId || dir,
-          projectName: meta.projectName || dir,
-          folderName: dir,
-          path: fullPath,
-          clientVersion,
-          coreVersion: core.version,
-          isOutdated,
-          driftCount,
-          niche: meta.niche || 'general'
-        });
+        templatesMap[templateKey].clients.push(clientData);
       }
     }
 
@@ -3870,13 +4131,13 @@ app.get('/api/instancias/sync-and-deploy-stream', async (req, res) => {
     let allSuccess = true;
 
     for (const folderName of folderNames) {
-      const clientPath = path.join(GIT_INSTANCES_DIR, folderName);
+      const clientPath = await findProjectDir(folderName);
 
       log(`\n🔄 [${folderName}] Iniciando sincronización...`, 'header');
       clientStatus(folderName, 'syncing');
 
-      if (!await fs.pathExists(clientPath)) {
-        log(`❌ Directorio de cliente no encontrado: ${clientPath}`, 'error');
+      if (!clientPath || !await fs.pathExists(clientPath)) {
+        log(`❌ Directorio de cliente no encontrado para: ${folderName}`, 'error');
         clientStatus(folderName, 'error', 'Directorio no encontrado');
         allSuccess = false;
         continue;
@@ -3887,7 +4148,7 @@ app.get('/api/instancias/sync-and-deploy-stream', async (req, res) => {
       try {
         // ── Fase 1: Detectar diferencias (copia diferencial por hash) ──────
         log(`   📊 Comparando archivos core vs cliente...`, 'info');
-        const coreFiles = getSyncFilesRecursive(corePath);
+        const coreFiles = await getSyncFilesRecursiveAsync(corePath);
         const changes = [];
 
         for (const file of coreFiles) {
@@ -3896,8 +4157,8 @@ app.get('/api/instancias/sync-and-deploy-stream', async (req, res) => {
           if (!await fs.pathExists(clientFile)) {
             changes.push({ file, type: 'NUEVO' });
           } else {
-            const hashCore = getSyncFileHash(coreFile);
-            const hashClient = getSyncFileHash(clientFile);
+            const hashCore = await getSyncFileHashAsync(coreFile);
+            const hashClient = await getSyncFileHashAsync(clientFile);
             if (hashCore !== hashClient) changes.push({ file, type: 'MODIFICADO' });
           }
         }
@@ -3965,7 +4226,8 @@ app.get('/api/instancias/sync-and-deploy-stream', async (req, res) => {
 
         const metaPath = path.join(clientPath, '.prototipe.json');
         if (await fs.pathExists(metaPath)) {
-          const meta = await fs.readJson(metaPath);
+          let meta = await fs.readJson(metaPath);
+          meta = validatePrototipeMetadata(meta, folderName);
           meta.version = coreVersion;
           await fs.writeJson(metaPath, meta, { spaces: 2 });
           log(`   🏷️  Metadata actualizada: v${meta.version} → v${coreVersion} en .prototipe.json`, 'success');
@@ -4007,7 +4269,7 @@ app.get('/api/instancias/sync-and-deploy-stream', async (req, res) => {
         if (await fs.pathExists(backupDir)) {
           log(`   🔄 Ejecutando rollback de seguridad...`, 'warn');
           try {
-            const backupFiles = getSyncFilesRecursive(backupDir, backupDir);
+            const backupFiles = await getSyncFilesRecursiveAsync(backupDir, backupDir);
             for (const file of backupFiles) {
               await fs.copy(path.join(backupDir, file), path.join(clientPath, file), { overwrite: true });
             }
@@ -4041,34 +4303,49 @@ app.get('/api/instancias/sync-and-deploy-stream', async (req, res) => {
   }
 });
 
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`\n🚀 [Prototipe CLI Bridge] Servidor local escuchando en: http://127.0.0.1:${PORT}`);
-  console.log(`Endpoints activos:`);
-  console.log(` - GET  http://localhost:${PORT}/api/templates`);
-  console.log(` - GET  http://localhost:${PORT}/api/firebase-config?projectId=[id]&projectName=[name]`);
-  console.log(` - POST http://localhost:${PORT}/api/create-project                 → Aprovisionamiento (SSE Logs)`);
-  console.log(` - GET  http://localhost:${PORT}/api/library`);
-  console.log(` - POST http://localhost:${PORT}/api/library/extract                 → Extracción de componentes`);
-  console.log(` - GET  http://localhost:${PORT}/api/project/file`);
-  console.log(` - POST http://localhost:${PORT}/api/project/deploy                  → Compilar y desplegar (SSE Logs)`);
-  console.log(` - GET  http://localhost:${PORT}/api/project/env                     → Leer variables .env.local`);
-  console.log(` - POST http://localhost:${PORT}/api/project/env                     → Escribir variables .env.local`);
-  console.log(` - GET  http://localhost:${PORT}/api/project/audit                   → Auditoría física y PWA`);
-  console.log(` - POST http://localhost:${PORT}/api/e2e/run                         → Ejecutar tests (SSE Logs)`);
-  console.log(` - GET  http://localhost:${PORT}/api/e2e/last-result?projectId=[id]`);
-  console.log(` `);
-  console.log(` 🔒 Control de Versiones Git:`);
-  console.log(` - GET  http://localhost:${PORT}/api/git/targets                     → Auto-detectar repositorios`);
-  console.log(` - GET  http://localhost:${PORT}/api/git/status?path=[ruta]          → Estado de cambios`);
-  console.log(` - GET  http://localhost:${PORT}/api/git/backup-stream?path=[ruta]   → Backup SSE en vivo`);
-  console.log(` `);
-  console.log(` 🏗️  Gestión de Plantillas Core:`);
-  console.log(` - POST http://localhost:${PORT}/api/register-core              → Registrar nueva plantilla`);
-  console.log(` - GET  http://localhost:${PORT}/api/cores                      → Listar todas las plantillas`);
-  console.log(` - POST http://localhost:${PORT}/api/cores/:clave/scaffold      → Copiar código base de otro core`);
-  console.log(` - POST http://localhost:${PORT}/api/cores/:clave/activate      → Sincronizar y activar en wizard`);
-  console.log(` - POST http://localhost:${PORT}/api/cores/:clave/deactivate    → Retirar del wizard\n`);
-});
+async function startServer(port) {
+  const server = app.listen(port, '127.0.0.1', () => {
+    console.log(`\n🚀 [Prototipe CLI Bridge] Servidor local escuchando en: http://127.0.0.1:${port}`);
+    console.log(`Endpoints activos:`);
+    console.log(` - GET  http://localhost:${port}/api/templates`);
+    console.log(` - GET  http://localhost:${port}/api/firebase-config?projectId=[id]&projectName=[name]`);
+    console.log(` - POST http://localhost:${port}/api/create-project                 → Aprovisionamiento (SSE Logs)`);
+    console.log(` - GET  http://localhost:${port}/api/library`);
+    console.log(` - POST http://localhost:${port}/api/library/extract                 → Extracción de componentes`);
+    console.log(` - GET  http://localhost:${port}/api/project/file`);
+    console.log(` - POST http://localhost:${port}/api/project/deploy                  → Compilar y desplegar (SSE Logs)`);
+    console.log(` - GET  http://localhost:${port}/api/project/env                     → Leer variables .env.local`);
+    console.log(` - POST http://localhost:${port}/api/project/env                     → Escribir variables .env.local`);
+    console.log(` - GET  http://localhost:${port}/api/project/audit                   → Auditoría física y PWA`);
+    console.log(` - POST http://localhost:${port}/api/e2e/run                         → Ejecutar tests (SSE Logs)`);
+    console.log(` - GET  http://localhost:${port}/api/e2e/last-result?projectId=[id]`);
+    console.log(` `);
+    console.log(` 🔒 Control de Versiones Git:`);
+    console.log(` - GET  http://localhost:${port}/api/git/targets                     → Auto-detectar repositorios`);
+    console.log(` - GET  http://localhost:${port}/api/git/status?path=[ruta]          → Estado de cambios`);
+    console.log(` - GET  http://localhost:${port}/api/git/backup-stream?path=[ruta]   → Backup SSE en vivo`);
+    console.log(` `);
+    console.log(` 🏗️  Gestión de Plantillas Core:`);
+    console.log(` - POST http://localhost:${port}/api/register-core              → Registrar nueva plantilla`);
+    console.log(` - GET  http://localhost:${port}/api/cores                      → Listar todas las plantillas`);
+    console.log(` - POST http://localhost:${port}/api/cores/:clave/scaffold      → Copiar código base de otro core`);
+    console.log(` - POST http://localhost:${port}/api/cores/:clave/activate      → Sincronizar y activar en wizard`);
+    console.log(` - POST http://localhost:${port}/api/cores/:clave/deactivate    → Retirar del wizard\n`);
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.warn(`⚠️  Puerto ${port} ocupado, intentando con el puerto ${port + 1}...`);
+      startServer(port + 1);
+    } else {
+      console.error('❌ Error crítico en servidor:', err.message);
+    }
+  });
+}
+
+// Ejecutar diagnósticos de dependencias del PATH una sola vez al arranque
+await runPreflightChecks();
+startServer(PORT);
 
 
 

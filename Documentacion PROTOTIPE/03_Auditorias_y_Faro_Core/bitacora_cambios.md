@@ -1,5 +1,324 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-23] - CORE-048: Análisis y Rediseño Premium Profesional de Landing Page
+
+* **Tipo:** UI/UX / Diseño / SEO / Código / Documentación
+* **Descripción de Cambios:**
+  - **Análisis de Landing Page:** Elaboración del reporte de auditoría técnica y visual `auditoria_landing_page_2026.md` bajo `03_Auditorias_y_Faro_Core/`, diagnosticando vulnerabilidades de seguridad, SEO y diseño.
+  - **Rediseño Completo de Index.html:** Implementación de variables HSL de tema, tipografías premium Outfit/Inter, glows radiales en movimiento lento, navbar interactivo con blur, tarjetas de dolor y casos con iconos SVG inline personalizados, acordeón de FAQ dinámico con detalles nativos de HTML5, footer corporativo expandido, barra CTA fija móvil en inferior y animaciones sutiles (scroll reveal, hover scale, active scale).
+  - **Optimización de Contraste y Consistencia (Revisión v1.1 - v1.2):** 
+    * Corrección de especificidad CSS en el botón CTA del navbar (`.nav-links a.nav-cta-btn`) inyectando color blanco brillante `#ffffff !important` para sobrescribir la regla de herencia gris y solucionar por completo el bug de legibilidad.
+    * Refactorización de contrastes en botones principales (`.btn-primary` y `.nav-cta-btn`) cambiando a un fondo de gradiente azul oscuro/violeta con texto blanco para legibilidad perfecta y cumplimiento estricto de WCAG AA.
+    * Alturas mínimas estandarizadas y alineaciones flexbox en todas las tarjetas de grids (`.pain-box`, `.step-card`, `.case-card`, `.benefit-card` y `.pricing-card`) logrando un tamaño geométrico uniforme e idéntico.
+    * Refinamiento en micro-interacciones hover de tarjetas y botones (rotación suave y escala en iconos SVG y números de paso).
+    * Transición de despliegue animada mediante CSS keyframes en acordeón de FAQ.
+  - **Seguridad y SEO:** Configuración de etiquetas Open Graph, Twitter Cards, description y rel="noopener noreferrer" en enlaces de WhatsApp externos.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_landing_page_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_landing_page_2026.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-23] - CORE-047: Sincronización y Normalización de la Matriz de Precios Oficial
+
+* **Tipo:** Documentación / Comercial / Negocio / Procesos
+* **Descripción de Cambios:**
+  - **Matriz de Precios Oficial:** Normalización completa del formato del archivo `matriz_precios_oficial.md` a su versión oficial definitiva con viñetas de guiones, estructura de cobros unificada por niveles (1 a 4), modelos de comisiones/transacciones, y reglas de crecimiento del ecosistema.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/matriz_precios_oficial.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/matriz_precios_oficial.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-23] - CORE-046: Integración Documental de Procesos Comerciales y de Escalabilidad
+
+* **Tipo:** Documentación / Comercial / Negocio / Organizacional
+* **Descripción de Cambios:**
+  - **Manual de Contratación de Clientes:** Creación de `manual_contratacion_clientes.md` en `/05_Estrategia_Comercial_Ecosistema/` detallando el embudo y proceso comercial paso a paso de PROTOTIPE.
+  - **Manual de Marca:** Creación de `manual_marca.md` en `/05_Estrategia_Comercial_Ecosistema/` consolidando la personalidad, tono de comunicación, valores y pautas visuales minimalistas de la marca.
+  - **Organigrama Futuro:** Creación de `organigrama_futuro.md` en `/08_Plan_Escalabilidad_Negocio/` planificando las necesidades de contratación y equipo por fases de crecimiento de clientes activos.
+  - **Sincronización del Mapa de la Aplicación:** Actualización de `mapa_aplicacion.md` registrando las tres nuevas piezas documentales.
+  - **Sincronización del Mapa de Documentación:** Actualización de `mapa_documentacion_ia.md` indexando las nuevas piezas para su consumo optimizado por la IA.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/manual_contratacion_clientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/manual_contratacion_clientes.md) [NEW]
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/manual_marca.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/manual_marca.md) [NEW]
+  - [`Documentacion PROTOTIPE/08_Plan_Escalabilidad_Negocio/organigrama_futuro.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/08_Plan_Escalabilidad_Negocio/organigrama_futuro.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-23] - CORE-045: Integración Documental del Roadmap de Negocio 2026-2029
+
+* **Tipo:** Documentación / Escalabilidad / Negocio / Procesos
+* **Descripción de Cambios:**
+  - **Roadmap Empresarial 2026-2029:** Creación de `roadmap_empresarial_2026_2029.md` en `/08_Plan_Escalabilidad_Negocio/` detallando los objetivos estratégicos y hitos por etapas (Consolidación, Validación Comercial, Escalamiento, Expansión) y metas de clientes activos.
+  - **Sincronización del Mapa de la Aplicación:** Actualización de `mapa_aplicacion.md` registrando la nueva pieza documental.
+  - **Sincronización del Mapa de Documentación:** Actualización de `mapa_documentacion_ia.md` indexando la nueva pieza para su consumo optimizado por la IA.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/08_Plan_Escalabilidad_Negocio/roadmap_empresarial_2026_2029.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/08_Plan_Escalabilidad_Negocio/roadmap_empresarial_2026_2029.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-23] - CORE-044: Integración Documental de la Oferta Comercial Oficial
+
+* **Tipo:** Documentación / Comercial / Negocio
+* **Descripción de Cambios:**
+  - **Oferta Comercial Oficial:** Creación de `oferta_comercial_oficial.md` en `/05_Estrategia_Comercial_Ecosistema/` conteniendo la propuesta de valor del ecosistema, problemas comerciales resueltos, entregables estándar y principios.
+  - **Sincronización del Mapa de la Aplicación:** Actualización de `mapa_aplicacion.md` registrando la nueva pieza documental.
+  - **Sincronización del Mapa de Documentación:** Actualización de `mapa_documentacion_ia.md` indexando la nueva pieza para su consumo optimizado por la IA.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/oferta_comercial_oficial.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/oferta_comercial_oficial.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-23] - CORE-043: Documentación del Modelo Operativo y de Negocio Comercial
+
+* **Tipo:** Documentación / Negocio / Procesos
+* **Descripción de Cambios:**
+  - **Modelo Operativo y de Negocio:** Generación de `modelo_operativo_y_negocio.md` en la subcarpeta temática `/05_Estrategia_Comercial_Ecosistema/` detallando el modelo comercial (setup, SaaS, comisiones por telemetría), onboarding, flujos de venta en PWA, desarrollo core, soporte de logs de excepciones, scripts de mantenimiento y sincronizaciones downstream seguras.
+  - **Sincronización del Mapa de la Aplicación:** Actualización de `mapa_aplicacion.md` registrando la nueva pieza documental.
+  - **Sincronización del Mapa de Documentación:** Actualización de `mapa_documentacion_ia.md` indexando la nueva pieza para su consumo optimizado por la IA.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/modelo_operativo_y_negocio.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/modelo_operativo_y_negocio.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-23] - CORE-042: Construcción del Mapa de Dependencias y Matriz de Impacto
+
+* **Tipo:** Documentación / Calidad / Auditoría / Riesgos
+* **Descripción de Cambios:**
+  - **Mapa de Dependencias y Riesgos:** Generación de `mapa_dependencias_y_riesgos.md` incluyendo diagramas de acoplamiento Mermaid para los componentes CLI, workers y servicios externos, matriz de impacto operativo, y análisis detallado de riesgos en producción y puntos únicos de falla (SPOF).
+  - **Sincronización del Mapa de la Aplicación:** Actualización de `mapa_aplicacion.md` registrando la nueva pieza documental.
+  - **Sincronización del Mapa de Documentación:** Actualización de `mapa_documentacion_ia.md` indexando la nueva pieza para su consumo optimizado por la IA.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/mapa_dependencias_y_riesgos.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/mapa_dependencias_y_riesgos.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-23] - CORE-041: Construcción de Registro de Decisiones Arquitectónicas (ADR)
+
+* **Tipo:** Documentación / Estándar / Arquitectura / Calidad
+* **Descripción de Cambios:**
+  - **Registro de Decisiones Arquitectónicas (ADR):** Generación de `registro_decisiones_arquitectura.md` detallando 5 ADRs claves sobre sharding físico, branding HSL, sincronizador downstream por MD5, workers asíncronos y telemetría desacoplada.
+  - **Sincronización del Mapa de la Aplicación:** Actualización de `mapa_aplicacion.md` registrando la nueva pieza estándar.
+  - **Sincronización del Mapa de Documentación:** Actualización de `mapa_documentacion_ia.md` indexando la nueva pieza para su consumo optimizado por la IA.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/registro_decisiones_arquitectura.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/registro_decisiones_arquitectura.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-23] - CORE-040: Construcción del Documento Maestro de Reglas Arquitectónicas
+
+* **Tipo:** Documentación / Estándar / Arquitectura / Calidad
+* **Descripción de Cambios:**
+  - **Documento Maestro de Arquitectura:** Generación de `estandar_arquitectonico_ecosistema.md` que unifica principios de arquitectura, componentes críticos, carpetas núcleo, dependencias obligatorias, tecnologías autorizadas/prohibidas, convenciones de código, patrones de diseño, reglas de sincronización, reglas de seguridad, reglas de escalabilidad, directivas obligatorias para IA, lista de acciones prohibidas y checklist de auditoría del ecosistema.
+  - **Sincronización del Mapa de la Aplicación:** Actualización de `mapa_aplicacion.md` registrando la nueva pieza estándar.
+  - **Sincronización del Mapa de Documentación:** Actualización de `mapa_documentacion_ia.md` indexando la nueva pieza para su consumo optimizado por la IA.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_arquitectonico_ecosistema.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/estandar_arquitectonico_ecosistema.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-23] - CORE-039: Distribución Estratégica de Informes de Auditoría Técnica y Diagrama del Ecosistema
+
+* **Tipo:** Documentación / Calidad / Auditoría / Sincronización
+* **Descripción de Cambios:**
+  - **Reubicación de Auditoría:** Mapeo y corrección del error tipográfico en la carpeta de auditorías (`03_Audiorias_y_Faro_Core` → `03_Auditorias_y_Faro_Core`), reubicando físicamente el archivo `auditoria_final_prototipe.md`.
+  - **Limpieza de Archivos Basura:** Eliminación física de archivos huérfanos obsoletos como `Sin título.canvas` en el directorio de documentación.
+  - **Mapeo Físico y Semántico:** Sincronización de los nuevos archivos `auditoria_final_prototipe.md` y `diagrama_flujo_ecosistema.md` en el mapa de archivos de la aplicación (`mapa_aplicacion.md`) y en el mapa semántico indexador para la IA (`mapa_documentacion_ia.md`).
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_final_prototipe.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_final_prototipe.md) [NEW]
+  - [`Documentacion PROTOTIPE/07_Manuales_Desarrollo/diagrama_flujo_ecosistema.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/diagrama_flujo_ecosistema.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-23] - CORE-038: Mapeo Completo del Ecosistema y Diccionario Técnico Detallado
+
+* **Tipo:** Documentación / Calidad / Mapeo Técnico / Arquitectura
+* **Descripción de Cambios:**
+  - **Diccionario Técnico Completo:** Documentación de granularidad estricta para el 100% de la lógica de los archivos raíz (scripts de backup), motor CLI (config, logger, cli, worker, generator, sync_templates, sync_clients, test_templates, server) y Consola Central (ComponentLibraryView, ComponentSandbox, CoreCard, CoreManagerPanel, CoreSyncPanel, E2EPanel, GitBackupPanel, useCopyToClipboard, useToast, pdfService, App) en `diccionario_tecnico_completo.md`.
+  - **Sincronización del Mapa de la Aplicación:** Actualización de `mapa_aplicacion.md` para reflejar el nombre físico exacto `/Documentacion PROTOTIPE/07_Manuales_Desarrollo/` y el archivo `diccionario_tecnico_completo.md`.
+  - **Sincronización del Mapa de Documentación:** Registro del diccionario y su respectivo criterio de decisión en `mapa_documentacion_ia.md`.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/07_Manuales_Desarrollo/diccionario_tecnico_completo.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/diccionario_tecnico_completo.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-23] - CORE-037: Auditoría Técnica Completa, Mapeo General y Plan de Limpieza
+
+* **Tipo:** Documentación / Auditoría / Calidad
+* **Descripción de Cambios:**
+  - **Auditoría Técnica Completa:** Redacción del informe maestro [`auditoria_tecnica_completa_maestra_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_completa_maestra_2026.md) detallando arquitectura, flujos operativos (esquematizados en Mermaid), stack de versiones del core, análisis exhaustivo de cada archivo y función del CLI, API, scripts de respaldo PowerShell y dev-dashboard.
+  - **Bugs y Soluciones:** Diagnóstico preciso de inyecciones de shell, laxitud en reglas Firestore, CORS abierto, scripts bloqueantes y colisiones, con sus respectivas soluciones técnicas.
+  - **Sincronización del GPS Semántico:** Actualización de [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) registrando la nueva pieza documental con su criterio de decisión.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_completa_maestra_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_completa_maestra_2026.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-22] - CORE-036: Auditoría, Robustecimiento y Blindaje de Seguridad del Servidor CLI Bridge
+
+* **Tipo:** Seguridad / Rendimiento / Estabilidad / Backend API
+* **Descripción de Cambios:**
+  - **Directory Traversal Blindado:** Se implementó y aplicó la función `isPathContained(parentPath, childPath)` de forma case-insensitive y multiplataforma en todos los endpoints que consultan archivos locales (`/api/library/file`, `/api/library/extract`, `/api/project/file`, `/api/git/status`, `/api/git/backup-stream`).
+  - **Mitigación de Zombies:** Se sustituyó `ps.kill()` por la llamada a la utilidad recursiva `killProcessTree(ps.pid)` (que ejecuta `taskkill /PID {pid} /T /F`) en el cleanup de `/api/git/backup-stream` para forzar la eliminación de subprocesos PowerShell/Git huérfanos en Windows.
+  - **I/O Asíncrono no Bloqueante:** Se refactorizó la lógica síncrona de lectura recursiva de archivos y hashing MD5 a métodos asíncronas basados en promesas (`getSyncFilesRecursiveAsync` y `getSyncFileHashAsync`).
+  - **Desbloqueo de Event Loop:** Refactorizado el endpoint `/api/instancias/list` para procesar desviaciones de forma paralela asíncrona mediante `Promise.all()` de forma segura libre de condiciones de carrera (Race Conditions), evitando escrituras concurrentes a variables compartidas.
+  - **Sanitización de Firebase Project ID:** Integrada validación estricta regex `^[a-z0-9\-]+$` en el resolutor de IDs de proyecto Firebase y en `/api/git/sync-core-to-clients-stream` para prevenir inyecciones indirectas.
+  - **Preflight Checks unificados:** Movida la llamada `runPreflightChecks()` al entry point del servidor para que no se imprima repetidamente en caso de fallar la asignación de puertos y reintentos de arranque.
+  - **Auditoría de Logs:** Interceptados `console.log`, `console.warn` y `console.error` para escribir de forma persistente y estructurada en `cli_bridge.log` a través de un logger interno (`logger.js`).
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+---
+
+### [2026-06-22] - CORE-035: Refactorización Arquitectura Git — Unificación de Ramas, Nomenclatura Cliente/*, --no-verify y Deploy por Instancia
+
+* **Tipo:** DevOps / Git / Arquitectura / Backend API
+* **Descripción de Cambios:**
+  - **Eliminación de rama `produccion` (Git):** Se fusionó `produccion` en `main` en `Plantillas Core/App Ventas` y se eliminó la rama local y remota. `main` es ahora la única rama de producción del Core. Commit de merge: `b312099`.
+  - **Limpieza de ramas obsoletas (`cliente/moni`):** Se eliminó la rama local y remota obsoleta `cliente/moni` del Core para consolidar la nomenclatura estándar de coincidencia 1:1 con la carpeta física (`cliente/ventas-moni-app`).
+  - **Remote de instancias apuntando al Core:** La instancia `ventas-moni-app` tenía su propio remote. Se reconfiguró para apuntar a `https://github.com/DEVPROTOTIPE/prototipe-core-ventas.git`.
+  - **Nomenclatura estándar `cliente/*`:** Se renombró la rama local de `ventas-moni-app` de `master` → `cliente/ventas-moni-app` y se publicó en el Core con ese formato. Se purgaron refs huérfanas (`origin/master`).
+  - **`--no-verify` en todos los push de backup:** Se añadió `--no-verify` a todos los comandos `git push` de `git_backup.ps1` and `subproject_backup.ps1`, desacoplando los tests E2E de Playwright del proceso de respaldo. Los tests siguen disponibles en el módulo E2E del Dashboard.
+  - **Prompt interactivo de bypass eliminado:** Se eliminó el bloque `if ($Interactive)` que preguntaba si forzar el push al fallar, ya que ahora el push nunca es bloqueado por hooks.
+  - **Guard `cliente/*` en auto-merge:** El auto-merge de ramas de trabajo hacia `main` ahora excluye explícitamente ramas con prefijo `cliente/`, evitando que snapshots de instancias contaminen el Core.
+  - **`findProjectDir` robustecido (server.js):** Nueva lógica de 3 niveles: (1) `.prototipe.json` como fuente de verdad, (2) `package.json` como fallback, (3) nombre de carpeta normalizado. Soporta estructura `Instancias Clientes/{nicho}/{instancia}`.
+  - **`defaultBase` en `/api/git/cores-and-clients`:** Prioridad cambiada de `produccion` → `main` para el cálculo de commits ahead/behind de instancias cliente.
+  - **`originalBranch` fallback:** El fallback de la variable `originalBranch` en el stream SSE de sincronización cambió de `produccion` → `main`.
+  - **Deploy por instancia física en `/api/git/sync-core-to-clients-stream`:** El `VITE_FIREBASE_PROJECT_ID` ahora se lee del `.env.local` de la instancia física del cliente (usando `findProjectDir`). El build y deploy se ejecutan en el directorio de la instancia, no del Core. Mantiene fallback al Core si la instancia no tiene `.env.local` propio.
+* **Archivos Modificados:**
+  - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY] — `--no-verify` en ambos push
+  - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY] — `cliente/*` naming + `--no-verify` + guard auto-merge
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY] — `findProjectDir`, `defaultBase`, `originalBranch`, deploy por instancia
+* **Repositorios afectados:** `prototipe-core-ventas` (ramas: `main`, `develop`, `cliente/ventas-moni-app`)
+
+---
+
+### [2026-06-22] - CORE-034: Saneamiento y Robustecimiento Integral del Sistema de Backup (10 Puntos de Auditoría)
+
+* **Tipo:** Seguridad / Calidad / DevOps / PowerShell / Git / UX
+* **Descripción de Cambios:**
+  - **Pre-Add Leak Checking (Punto 1 y 4):** Se movió el check de seguridad de variables de entorno `.env` antes del `git add .` en `git_backup.ps1` para evitar staging de secretos. Se excluyeron los archivos en estado `D` (deleted/desindexado) del check para evitar falsos positivos en las tareas de saneamiento.
+  - **Inicialización Remota Interactiva (Punto 3):** Al ejecutar `git init` desde `menu_backup.ps1` para un subproyecto o instancia sin Git, el script solicita de manera interactiva si desea asociar un repositorio origin y la URL, evitando fallos crípticos durante la ejecución de los backups.
+  - **Estados Dinámicos y Conteo de Cambios (Punto 2 y 10):** Se sustituyó el filtro rígido de profundidad fija en `menu_backup.ps1` por una búsqueda recursiva dinámica basada en firmas de proyectos (`package.json`, `.git`, `.git-backup-temp`) para detectar instancias mal anidadas. Además, se integró el conteo en tiempo real de cambios pendientes de Git (`Get-GitChangesCount`) para todos los subproyectos del menú interactivo mediante parámetros `--git-dir` y `--work-tree` que permiten la consulta rápida en repositorios inactivos.
+  - **Saneamiento de Indexación y Push (Punto 5, 8 y 9):** Se agregaron validaciones de `$LASTEXITCODE` inmediatamente posteriores a la indexación (`git add .`) y subida (`git push`), deteniendo la ejecución y escribiendo el estado en `backup.log` en lugar de reportar éxito erróneamente si las operaciones de Git fallan.
+  - **Mensaje de Commit Optimizado (Punto 6):** Se optimizó la generación automática del mensaje de commit en `git_backup.ps1` y `subproject_backup.ps1` filtrando subcarpetas del sistema (`dist/`, `node_modules/`, etc.) y reduciendo listas largas a formato descriptivo con la función helper `Format-CommitMessageList` (e.g. `Mod: a.js, b.js, c.js (y 4 mas)`).
+  - **Historial de Backups (Punto 8):** Se creó el archivo unificado `backup.log` en el directorio raíz en donde la función compartida `Write-BackupLog` escribe con timestamp la marca de tiempo, estado de ejecución y rama de cada backup realizado.
+  - **Corrección de Codificación de Caracteres y Cierre (UI/UX):** Se reemplazó el punto central Unicode (`•`) por un carácter de barra vertical (`|`) en los textos de estado de Git del menú de plantillas e instancias para corregir la codificación incorrecta (como `â€¢`) en Windows Terminal y PowerShell. Además, se solucionó el fallo del botón `Salir` del menú principal: dado que el comando `break` en PowerShell solo rompe bloques `switch` y no bucles `do-while` exteriores, se implementó una variable de control `$keepRunning` para finalizar correctamente la ejecución del script. También se corrigió el filtro del escaneo flexible de instancias, aplicando el patrón de exclusión contra `node_modules` sobre la ruta completa (`$path`) en lugar de sobre el nombre del directorio (`$name`), previniendo la detección y renderizado indeseado de carpetas internas de dependencias locales en el listado del menú.
+* **Archivos Modificados:**
+  - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+  - [`menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+  - [`backup.log`](file:///d:/PROTOTIPE/backup.log) [NEW]
+
+---
+
+### [2026-06-22] - CORE-033: Corrección del Sistema de Backup para Instancias de Cliente
+
+* **Tipo:** Bug Fix / Seguridad / Git / DevOps
+* **Descripción de Cambios:**
+  - **Desindexación de archivos sensibles:** Se ejecutó `git rm --cached .env.local` y `git rm --cached -r dist/ .firebase/` en el repositorio de `ventas-moni-app` para eliminar del índice de Git los archivos que nunca debieron ser tracked. Esto resuelve el bloqueo permanente del guardián de seguridad del script `subproject_backup.ps1` que abortaba el proceso por detectar `.env.local` como modificado en el staging area.
+  - **Actualización de `.gitignore` (Instancia y Plantilla):** Se reforzaron los `.gitignore` de `ventas-moni-app` y `App Ventas` con entradas explícitas y comentadas para `.env`, `.env.*` (excluyendo `.env.example`), `dist/`, `.firebase/`, `firebase-debug.log` y `.vite/`. Esto previene cualquier re-indexación accidental futura.
+  - **Actualización del template `.gitignore` en `generator.js`:** Se actualizó el bloque de `gitignoreContent` generado al aprovisionar nuevas instancias para que todas las instancias futuras nazcan con las mismas reglas de blindaje desde el primer commit, sin excepción.
+  - **Refinamiento del Guardián de Seguridad en `subproject_backup.ps1`:** Se mejoró el loop de detección de fugas en la función de validación pre-commit. Ahora extrae el `$statusCode` (primeras 2 columnas de `git status --short`) y salta con `continue` cualquier archivo cuyo código sea `D` (deleted/desindexado). Esto evita falsos positivos: un `D .env.local` es el resultado correcto de un `git rm --cached` y nunca debe abortar el proceso.
+* **Archivos Modificados:**
+  - [`Instancias Clientes/ventas/ventas-moni-app/.gitignore`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/.gitignore) [MODIFY]
+  - [`Plantillas Core/App Ventas/.gitignore`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/.gitignore) [MODIFY]
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+  - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+
+---
+
+### [2026-06-22] - CORE-032: Adaptación de Pantalla de Login a Temas y Optimización del Contraste del Fondo Tecnológico
+
+* **Tipo:** UI / UX / Temas / Consistencia Visual / Modo Claro / Modo Oscuro
+* **Descripción de Cambios:**
+  - **Login Adaptativo (Modo Claro/Oscuro):** Se refactorizó la pantalla de login en `App.jsx` eliminando clases de fondos oscuros fijos (`bg-[#070b13]`), tarjetas rígidas (`bg-slate-900/60 border-slate-800/80`) y textos invertidos. Ahora se utilizan variables HSL de diseño (`bg-[var(--color-bg)]`, `bg-[var(--color-surface-glass)]`, `border-[var(--color-border)]`, etc.). Los campos de entrada (tanto email como password) y el botón de visibilidad de contraseña ahora heredan los estilos del tema activo, garantizando un alto contraste y legibilidad.
+  - **Fondo Tecnológico con Mayor Visibilidad:** Incrementada la opacidad y presencia de la cuadrícula de puntos y los orbs de gradiente en `index.css`. En modo oscuro, `--dot-color` subió a `0.09` y los orbs a `0.28`, `0.20` y `0.18`. En modo claro, `--dot-color` subió a `0.12` y los orbs a `0.22`, `0.16` y `0.16`.
+  - **Ajuste de Viñeta y Soporte de Inputs:** En modo claro, la viñeta perimetral `--vignette-color` se suavizó de `0.5` a `0.35` para destacar los orbs decorativos de marca en los extremos de la pantalla. Además, se añadió el tipo de input `email` al override global de contraste en modo claro en `index.css` para una unificación total de la interfaz.
+  - **Corrección de Borde en Botón de Tema:** Se modificó `DarkModeToggle.jsx` para reemplazar las clases de borde rígido `border-slate-200` y color hardcodeado por variables de tema adaptativas HSL (`border-[var(--color-border)]` y `text-[var(--color-primary)]`), eliminando el contorno gris oscuro en el modo claro.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/index.css`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/index.css) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/ui/DarkModeToggle.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/ui/DarkModeToggle.jsx) [MODIFY]
+
+---
+
+### [2026-06-21] - CORE-031: Robustecimiento, Preflight Checks y Detección Dinámica de Colisiones de Puerto en CLI Bridge
+
+* **Tipo:** Seguridad / Robustez / Diagnóstico / Arranque / Control de Errores
+* **Descripción de Cambios:**
+  - **Diagnóstico Temprano (Preflight Checks):** Añadida la función asíncrona `runPreflightChecks()` ejecutada al inicializar el servidor. Realiza consultas rápidas a `git --version` y `firebase --version` emitiendo advertencias descriptivas en la consola si las herramientas no están presentes en el PATH local del desarrollador.
+  - **Validación del Esquema `.prototipe.json`:** Implementada la función `validatePrototipeMetadata(meta, folderName)` que establece campos por defecto seguros (`template`, `version`, `clientId`, `projectName`). Se integró en `/api/project/drift`, `/api/project/drift/global`, `/api/instancias/list` y `/api/instancias/sync-and-deploy-stream` para prevenir de forma proactiva comportamientos indefinidos si el archivo de metadatos de un cliente está corrupto o carece de propiedades.
+  - **Mitigación de Inyecciones en Git Command Execution:** Se robusteció `execGitCommand(cmd, dir)` validando la cadena `cmd` contra caracteres de inyección de consola y redirección (`|`, `;`, `&`, `$`, `` ` ``, `<`, `>`). Si se detecta una inyección, se lanza una excepción controlada previniendo la ejecución física.
+  - **Resolución Dinámica de Puertos (Colisiones):** Modificado el arranque del servidor para encapsularse en `startServer(port)`. Si se captura un error de puerto ocupado (`EADDRINUSE`), se intenta enlazar de forma recursiva a puertos incrementales (`port + 1`), evitando fallos fatales de ejecución si el puerto `3001` está ocupado.
+  - **Alineación de Ancho de Tarjetas de Clientes Activos:** Se corrigió la discrepancia de ancho en las tarjetas de la lista de instancias bajo Configuración. Al aplicar la clase de margen negativo `-mx-2` en conjunto con el padding `px-2` en el contenedor scrollable (`App.jsx`), se expandieron las tarjetas hacia los bordes del grid, alineándolas de forma simétrica con la tarjeta cabecera de "Instancias Activas" y la terminal, mientras se conserva el margen interno necesario para la animación en hover (`scale-[1.01]`) y la visualización de sombras sin recortes.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+---
+
+### [2026-06-21] - CORE-030: Optimización y Blindaje de Dashboard de Desarrollador y CLI Bridge
+
+* **Tipo:** Refactorización / Optimización / Estabilidad / API / Escalabilidad
+* **Descripción de Cambios:**
+  - **Unificación de URLs de API y Codificación de Parámetros:** Se declaró la constante unificada `CLI_URL = 'http://localhost:3001'` en `App.jsx` y `ComponentLibraryView.jsx`, reemplazando todas las llamadas directas hardcodeadas a localhost/127.0.0.1. Se aplicó `encodeURIComponent` en todos los parámetros dinámicos concatenados a las URL (como `clientId` o rutas de archivos `file`), eliminando fallos potenciales con caracteres especiales y nombres de carpetas.
+  - **Soporte de Estructura de Directorios Anidados (2 niveles):** Se actualizó el endpoint de sincronización y despliegue `/api/instancias/sync-and-deploy-stream` y el escaneo de repositorios Git `/api/git/targets` en `server.js` para detectar y resolver directorios de clientes organizados bajo carpetas de Core (e.g. `Instancias Clientes/{coreType}/{projectName}`) mediante la función `findProjectDir`, alineándolos con la visualización del listado y el detector de drift.
+  - **Exclusión de Archivos Binarios del Detector de Drift:** Implementado un juego de extensiones `BINARY_EXTENSIONS` y un helper `isBinaryFile` en `server.js`. Si un archivo es detectado como binario, se lee como Buffer en lugar de UTF-8 y se compara de forma íntegra sin invocar a `Diff.diffLines()`, retornando `{ isBinary: true }` y previniendo fugas de memoria y sobrecarga crítica de CPU en el servidor.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+---
+
+### [2026-06-21] - CORE-029: Corrección de Contornos de Enfoque, Sombras Cortadas en Instancias y Curvatura de Tarjetas Global
+
+* **Tipo:** UI / UX / CSS / Consistencia de Interfaz / Modo Oscuro / Modo Claro
+* **Descripción de Cambios:**
+  - **Remoción de Contornos y Anillos de Enfoque:** Añadido un reset de CSS global en `index.css` para `button:focus` y `[role="button"]:focus` que remueve los valores de `outline` y `box-shadow` al hacer clic sobre cualquier botón o toggle de la aplicación, solucionando la aparición del contorno rígido/anillo antiestético.
+  - **Espacio para Renderizado de Sombras en Lista de Instancias:** Modificado el contenedor del listado de clientes en `App.jsx` (alrededor de la línea 7770) reemplazando `pr-1` por `px-2 pb-2 pr-1.5`. Esto le provee holgura de padding horizontal e inferior suficiente para que la sombra flotante (`shadow-md`) y la escala de zoom en hover (`scale-[1.01]`) no sufran cortes en los límites del contenedor.
+  - **Estandarización de Curvatura de Tarjetas (Border Radius):** Se configuró una directiva global en `index.css` dentro de los selectores de tarjeta principal y grande (`div[class*="rounded-2xl"][class*="border"]` y `div[class*="rounded-3xl"][class*="border"]`) para aplicar un `border-radius: 1.25rem !important;` (20px). Esto unifica perfectamente las curvaturas de todas las tarjetas y modales del ecosistema para asegurar una consistencia visual de primer nivel, superando el desfase existente entre el uso aleatorio de 16px y 24px en los elementos de interfaz.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/index.css`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/index.css) [MODIFY]
+
+---
+
 ### [2026-06-21] - E2E-Hotfix: Control de Modal de Telemetría en Tests de Checkout
 
 * **Tipo:** Hotfix / Tests / E2E / Playwright
