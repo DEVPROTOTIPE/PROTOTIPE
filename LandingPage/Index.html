@@ -24,7 +24,7 @@
   <meta name="twitter:image" content="https://prototipe.com/assets/og-image.png" />
   
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m12 2-10 5 10 5 10-5-10-5Z'/><path d='m2 17 10 5 10-5'/><path d='m2 12 10 5 10-5'/></svg>" />
   
   <!-- Google Fonts - Outfit & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -67,9 +67,25 @@
       background-color: var(--color-bg);
       color: var(--color-text-main);
       font-family: var(--font-body);
-      line-height: 1.6;
+      line-height: 1.7;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* SCROLLBAR PREMIUM MODO OSCURO */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--color-bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(56, 189, 248, 0.2);
+      border-radius: 99px;
+      border: 2px solid var(--color-bg);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(56, 189, 248, 0.4);
     }
 
     /* FONDO DE GRADIENTES EN MOVIMIENTO LENTO Y GLOWS */
@@ -137,7 +153,12 @@
       left: 0;
       width: 100%;
       z-index: 100;
+      background: rgba(5, 7, 12, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-border);
       transition: background-color 0.3s ease;
+      overflow: visible !important;
     }
 
     .navbar {
@@ -145,11 +166,12 @@
       justify-content: space-between;
       align-items: center;
       padding: 1.25rem 0;
-      background: rgba(5, 7, 12, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--color-border);
-      transition: background-color 0.3s ease;
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-bottom: none;
+      transition: none;
+      overflow: visible !important;
     }
 
     .logo-container {
@@ -202,6 +224,9 @@
 
     /* BOTÓN NAVBAR REDISEÑADO CON CONTRASTE OPTIMIZADO (TEXTO BLANCO SOBRE GRADIENTE OSCURO) */
     .nav-links a.nav-cta-btn {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
       padding: 0.6rem 1.2rem;
       background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-secondary-dark) 100%);
       color: #ffffff !important;
@@ -209,14 +234,20 @@
       font-size: 0.85rem;
       border-radius: 9px;
       text-decoration: none;
-      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+      /* Transición con Bezier de rebote elástico (Spring Physics) en transform */
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
       box-shadow: 0 2px 10px rgba(2, 132, 199, 0.2);
     }
 
     .nav-links a.nav-cta-btn:hover {
       color: #ffffff !important;
-      transform: translateY(-1px) scale(1.02);
-      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+      transform: scale(1.06); /* Micro-estiramiento elástico */
+      box-shadow: 0 5px 18px rgba(2, 132, 199, 0.45);
+    }
+
+    .nav-links a.nav-cta-btn:active {
+      transform: scale(0.94); /* Compresión elástica de respuesta táctil instantánea */
+      transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
 
@@ -255,6 +286,7 @@
       cursor: pointer;
       border: none;
       outline: none;
+      overflow: hidden;
     }
 
     .btn:active {
@@ -266,6 +298,34 @@
       background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-secondary-dark) 100%);
       color: #ffffff;
       box-shadow: 0 4px 20px rgba(2, 132, 199, 0.3);
+    }
+
+    /* EFECTO DE HAZ DE LUZ (SHINE EFFECT) */
+    .btn-primary::after, .nav-links a.nav-cta-btn::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 30%;
+      height: 200%;
+      background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      transform: rotate(25deg);
+      transition: none;
+      pointer-events: none;
+    }
+
+    .btn-primary:hover::after, .nav-links a.nav-cta-btn:hover::after {
+      animation: shiny-sweep 1.2s ease-out;
+    }
+
+    @keyframes shiny-sweep {
+      0% { left: -60%; }
+      100% { left: 140%; }
     }
 
     .btn-primary:hover {
@@ -290,6 +350,7 @@
     .btn-svg {
       width: 1.25rem;
       height: 1.25rem;
+      flex-shrink: 0;
       transition: transform 0.2s ease;
     }
 
@@ -334,8 +395,8 @@
     /* ANIMACIONES SCROLL REVEAL ELASTIC CON RETRASO */
     .reveal {
       opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.9s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform: translateY(30px);
+      transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .reveal.visible {
@@ -357,9 +418,9 @@
 
     .section-header h2 {
       font-family: var(--font-titles);
-      font-size: 2.5rem;
+      font-size: clamp(1.6rem, 4.5vw, 2.5rem);
       font-weight: 800;
-      letter-spacing: -0.04em;
+      letter-spacing: -0.03em;
       line-height: 1.15;
       margin-bottom: 1.25rem;
       background: linear-gradient(135deg, var(--color-text-main) 40%, var(--color-primary) 100%);
@@ -407,16 +468,29 @@
 
     .hero-content h1 {
       font-family: var(--font-titles);
-      font-size: 3.8rem;
-      font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: -0.05em;
-      margin-bottom: 1.8rem;
-      background: linear-gradient(135deg, var(--color-text-main) 40%, var(--color-primary) 70%, var(--color-secondary) 100%);
+      font-size: clamp(2.2rem, 6.2vw, 3.8rem);
+      font-weight: 800; /* Peso premium más elegante y legible que 900 */
+      line-height: 1.15;
+      letter-spacing: -0.05em; /* Estilo compacto y sofisticado estilo Stripe/Vercel */
+      margin-bottom: 2rem;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 100%;
+    }
+
+    .hero-title-muted {
+      color: #ffffff;
+      opacity: 0.95;
+    }
+
+    .hero-title-highlight {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 50%, var(--color-secondary) 100%);
       background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: textGradientEffect 8s ease infinite alternate;
+      animation: textGradientEffect 6s ease infinite alternate;
+      text-shadow: 0 0 40px rgba(56, 189, 248, 0.15);
+      display: inline-block;
     }
 
     @keyframes textGradientEffect {
@@ -466,13 +540,15 @@
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
       pointer-events: none;
       z-index: 1;
+      border-radius: inherit;
     }
 
     /* ANIMACIÓN DESLUMBRANTE EN HOVER CON DESTELLO DE BORDE Y SOMBRA DE NEÓN */
     .glass-card:hover {
       transform: translateY(-8px) scale(1.01);
       border-color: var(--color-primary);
-      box-shadow: 0 15px 35px rgba(56, 189, 248, 0.12), 0 0 15px rgba(56, 189, 248, 0.05);
+      background: var(--color-surface-hover);
+      box-shadow: 0 20px 40px rgba(56, 189, 248, 0.15), 0 0 20px rgba(56, 189, 248, 0.08);
     }
 
     /* FLOATING UNIFORME SUTIL */
@@ -601,6 +677,7 @@
     .step-card {
       padding: 3rem 2.2rem 2.2rem 2.2rem;
       min-height: 250px; /* Tamaño uniforme */
+      overflow: visible !important;
     }
 
     .step-number {
@@ -1014,21 +1091,10 @@
         grid-template-columns: 1fr;
         gap: 2.5rem;
       }
-      .hero-content h1 {
-        font-size: 2.8rem;
-      }
       .hero-content p {
         font-size: 1.1rem;
       }
-    }
-
-    @media (max-width: 768px) {
-      section {
-        padding: 5rem 0;
-      }
-      .section-header h2 {
-        font-size: 2rem;
-      }
+      /* ACTIVACIÓN DE MENÚ MÓVIL EN TABLETS/DESKTOP BAJO */
       .navbar {
         padding: 1rem 0;
       }
@@ -1055,22 +1121,167 @@
       .menu-toggle {
         display: flex;
       }
+    }
+
+    @media (max-width: 768px) {
+      section {
+        padding: 5rem 0;
+      }
       /* MOBILE STICKY CTA SHOW */
       .mobile-sticky-cta {
         display: flex;
       }
+      /* COLAPSO INCONDICIONAL DE GRIDS DE TARJETAS EN MÓVIL */
+      .grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem;
+      }
+      .pricing-grid {
+        grid-template-columns: 1fr !important;
+        gap: 2rem;
+      }
     }
 
-    @media (max-width: 480px) {
-      .hero-content h1 {
-        font-size: 2.2rem;
-      }
+    @media (max-width: 576px) {
       .hero-actions {
         flex-direction: column;
         width: 100%;
+        gap: 1rem;
       }
       .hero-actions .btn {
         width: 100%;
+      }
+    }
+
+    /* CALCULADORA DE FUGAS OPERATIVAS */
+    .calculator-section {
+      background: linear-gradient(180deg, transparent 0%, rgba(34, 211, 238, 0.02) 50%, transparent 100%);
+      padding: 6rem 0;
+    }
+
+    .calculator-container {
+      max-width: 950px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 3.5rem;
+      align-items: stretch;
+      padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem);
+    }
+
+    .calc-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      justify-content: center;
+    }
+
+    .calc-slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .calc-slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .calc-slider-val {
+      color: var(--color-primary);
+      font-family: var(--font-titles);
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .calc-input-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
+      transition: background 0.3s;
+    }
+
+    .calc-input-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--color-primary);
+      transition: transform 0.1s;
+    }
+
+    .calc-input-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .calc-results-card {
+      padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2.2rem);
+      border: 1px solid rgba(56, 189, 248, 0.15);
+      background: linear-gradient(135deg, rgba(10, 15, 30, 0.8) 0%, rgba(5, 7, 12, 0.95) 100%);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-radius: 18px;
+      width: 100%;
+    }
+
+    .calc-result-number {
+      font-family: var(--font-titles);
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffffff 40%, var(--color-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .calc-result-big {
+      font-size: clamp(1.3rem, 5.5vw, 2.8rem);
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+    }
+
+    .calc-result-small {
+      font-size: clamp(1.1rem, 4vw, 1.8rem);
+      letter-spacing: -0.02em;
+    }
+
+    .calc-result-label {
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1.5rem;
+    }
+
+    .calc-divider {
+      height: 1px;
+      width: 100%;
+      background: var(--color-border);
+      margin: 1.5rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .calculator-container {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+      .calc-results-card {
+        padding: 2rem 1.25rem;
       }
     }
   </style>
@@ -1096,7 +1307,9 @@
                 <stop offset="100%" stop-color="#818cf8" />
               </linearGradient>
             </defs>
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            <path d="m12 2-10 5 10 5 10-5-10-5Z"/>
+            <path d="m2 17 10 5 10-5"/>
+            <path d="m2 12 10 5 10-5"/>
           </svg>
           <span class="logo-text">PROTOTIPE</span>
         </a>
@@ -1136,7 +1349,11 @@
             <span class="badge-dot"></span>
             Sistemas para Negocios Reales
           </div>
-          <h1>Tu negocio no necesita más herramientas.<br>Necesita un sistema que pense como tu negocio.</h1>
+          <h1>
+            <span class="hero-title-muted">Tu negocio no necesita más herramientas.</span>
+            <br>
+            <span class="hero-title-highlight">Necesita un sistema que piense como tu negocio.</span>
+          </h1>
           <p>
             En PROTOTIPE creamos aplicaciones personalizadas que digitalizan, organizan y automatizan negocios reales, sin complicaciones técnicas.
           </p>
@@ -1145,9 +1362,12 @@
                class="btn btn-primary" 
                target="_blank" 
                rel="noopener noreferrer">
-              <span>📲 Solicitar diagnóstico gratuito</span>
+              <svg class="btn-svg" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+              </svg>
+              <span>Solicitar diagnóstico gratuito</span>
               <svg class="btn-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
               </svg>
             </a>
             <a href="#como-funciona" class="btn btn-secondary">
@@ -1172,8 +1392,9 @@
           <div class="glass-card pain-box floating-ui-1 reveal delay-100">
             <div class="pain-header">
               <div class="pain-icon-wrapper">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
                 </svg>
               </div>
               <h3>Fuga de Tiempo</h3>
@@ -1184,8 +1405,10 @@
           <div class="glass-card pain-box floating-ui-2 reveal delay-200">
             <div class="pain-header">
               <div class="pain-icon-wrapper">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                  <path d="M12 6v12" />
                 </svg>
               </div>
               <h3>Pérdida de Dinero</h3>
@@ -1196,8 +1419,11 @@
           <div class="glass-card pain-box floating-ui-1 reveal delay-300">
             <div class="pain-header">
               <div class="pain-icon-wrapper">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
               </div>
               <h3>Clientes Perdidos</h3>
@@ -1208,8 +1434,10 @@
           <div class="glass-card pain-box floating-ui-2 reveal delay-400">
             <div class="pain-header">
               <div class="pain-icon-wrapper">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
                 </svg>
               </div>
               <h3>Puntos Ciegos</h3>
@@ -1220,13 +1448,77 @@
       </div>
     </section>
 
+    <!-- CALCULADORA INTERACTIVA DE FUGAS -->
+    <section id="calculadora" class="calculator-section">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="badge">Análisis de impacto</div>
+          <h2>¿Cuánto le cuesta el desorden a tu negocio?</h2>
+          <p>Calcula en tiempo real las horas perdidas y el dinero que se está filtrando debido a procesos manuales e ineficientes.</p>
+        </div>
+
+        <div class="glass-card calculator-container reveal">
+          <div class="calc-controls">
+            <div class="calc-slider-group">
+              <div class="calc-slider-header">
+                <span>Número de Empleados</span>
+                <span id="val-empleados" class="calc-slider-val">3</span>
+              </div>
+              <input type="range" id="input-empleados" class="calc-input-slider" min="1" max="15" value="3">
+            </div>
+
+            <div class="calc-slider-group">
+              <div class="calc-slider-header">
+                <span>Horas Perdidas Diarias por Empleado <span style="font-weight:normal; font-size:0.8rem; color:var(--color-text-muted);">(en papeleo, cuentas y desorden)</span></span>
+                <span id="val-horas" class="calc-slider-val">2.5h</span>
+              </div>
+              <input type="range" id="input-horas" class="calc-input-slider" min="0.5" max="8" step="0.5" value="2.5">
+            </div>
+
+            <div class="calc-slider-group">
+              <div class="calc-slider-header">
+                <span>Costo Estimado de Hora de Trabajo <span style="font-weight:normal; font-size:0.8rem; color:var(--color-text-muted);">(valor promedio de tu tiempo)</span></span>
+                <span id="val-costo" class="calc-slider-val">$12,000 COP</span>
+              </div>
+              <input type="range" id="input-costo" class="calc-input-slider" min="5000" max="40000" step="1000" value="12000">
+            </div>
+          </div>
+
+          <div class="calc-results-card">
+            <div id="res-tiempo" class="calc-result-number calc-result-big">150 hrs</div>
+            <div class="calc-result-label">Tiempo Perdido al Mes</div>
+
+            <div class="calc-divider"></div>
+
+            <div id="res-dinero" class="calc-result-number calc-result-big" style="color: #f87171; background: linear-gradient(135deg, #f87171 40%, #ef4444 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">$21,600,000 COP</div>
+            <div class="calc-result-label" style="color: #f87171;">Fuga de Dinero al Año</div>
+
+            <div class="calc-divider"></div>
+
+            <a href="https://wa.me/573167527660?text=Hola,%20hice%20el%20cálculo%20en%20la%20calculadora%20de%20desorden%20y%20quiero%20solicitar%20un%20diagnóstico%20gratuito." 
+               class="btn btn-primary" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               style="width:100%; margin-top:1rem;">
+              <svg class="btn-svg" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+              </svg>
+              <span>Detener esta fuga ahora</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- LA SOLUCIÓN PROTOTIPE -->
     <section id="solucion">
       <div class="container">
         <div class="glass-card solution-card reveal">
           <div class="sol-icon-main">
-            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="36" height="36">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l8.904-4.474M18 10.5c0 2.22-1.206 4.16-3 5.2v2.3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-2.3c-1.794-1.04-3-2.98-3-5.2a6 6 0 1112 0z" />
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="36" height="36" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 14c0.2-1 0.7-1.7 1.5-2.5c1-0.9 1.5-2.2 1.5-3.5A5 5 0 0 0 8 8c0 1 0.4 2 1.2 2.8c0.8 0.8 1.3 1.5 1.5 2.5" />
+              <path d="M9 18h6" />
+              <path d="M10 22h4" />
             </svg>
           </div>
           <div class="badge">La solución PROTOTIPE</div>
@@ -1281,8 +1573,8 @@
         <div class="grid">
           <div class="glass-card case-card reveal delay-100">
             <div class="case-icon-wrapper">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.67 2.67 0 1021 17.25l-5.83-5.83m-3.75 3.75L3 7.5M11.42 15.17l-3.75-3.75M11.42 15.17l2.92-2.92M13.5 3.91V5m0 7.82V17m-5.45-8.25h10.9m-10.9 4.33h5.45m-3-11v2.18m-.91 10.37l-2.18-2.18m11.64-6l-2.18 2.18" />
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
               </svg>
             </div>
             <div class="case-info">
@@ -1293,8 +1585,12 @@
 
           <div class="glass-card case-card reveal delay-200">
             <div class="case-icon-wrapper">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+                <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z" />
+                <line x1="6" y1="2" x2="6" y2="4" />
+                <line x1="10" y1="2" x2="10" y2="4" />
+                <line x1="14" y1="2" x2="14" y2="4" />
               </svg>
             </div>
             <div class="case-info">
@@ -1305,8 +1601,11 @@
 
           <div class="glass-card case-card reveal delay-300">
             <div class="case-icon-wrapper">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.68-.34-1.34-.78-1.95-1.31m11.11 3.51a10.025 10.025 0 01-13.43-1.63M16.92 5.12c.34.68.78 1.34 1.31 1.95m-3.51-11.11a10.025 10.025 0 011.63 13.43m-11.22-3.6c.34-.68.78-1.34 1.31-1.95m3.51 11.11a10.025 10.025 0 01-1.63-13.43m11.22 3.6c-.68.34-1.34.78-1.95 1.31m-11.11-3.51a10.025 10.025 0 0113.43 1.63M12 9v3m0 3h.01" />
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 10L17 5H7L5 10v7a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h8v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-7z" />
+                <circle cx="8" cy="13" r="1.5" />
+                <circle cx="16" cy="13" r="1.5" />
+                <path d="M6 10h12" />
               </svg>
             </div>
             <div class="case-info">
@@ -1317,8 +1616,10 @@
 
           <div class="glass-card case-card reveal delay-100">
             <div class="case-icon-wrapper">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72M6.75 18h3.5a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75h-3.5a.75.75 0 00-.75.75v3.75c0 .414.336.75.75.75z" />
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
             </div>
             <div class="case-info">
@@ -1329,8 +1630,11 @@
 
           <div class="glass-card case-card reveal delay-200">
             <div class="case-icon-wrapper">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="18" r="3" />
+                <circle cx="15" cy="18" r="3" />
+                <line x1="10.5" y1="15.5" x2="16" y2="4" />
+                <line x1="13.5" y1="15.5" x2="8" y2="4" />
               </svg>
             </div>
             <div class="case-info">
@@ -1341,8 +1645,12 @@
 
           <div class="glass-card case-card reveal delay-300">
             <div class="case-icon-wrapper">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l8.904-4.474M18 10.5c0 2.22-1.206 4.16-3 5.2v2.3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-2.3c-1.794-1.04-3-2.98-3-5.2a6 6 0 1112 0z" />
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2C7.5 5 7.5 12 7.5 17h9C16.5 12 16.5 5 12 2z" />
+                <path d="M7.5 14H4v3c0 2 2.5 3 3.5 3v-6z" />
+                <path d="M16.5 14h3.5v3c0 2-2.5 3-3.5 3v-6z" />
+                <path d="M10 20c0 2 2 4 2 4s2-2 2-4" />
+                <circle cx="12" cy="9" r="2" />
               </svg>
             </div>
             <div class="case-info">
@@ -1366,8 +1674,9 @@
         <div class="grid">
           <div class="glass-card benefit-card reveal delay-100">
             <div class="benefit-icon-wrapper">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.746 3.746 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.746 3.746 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="m9 12 2 2 4-4" />
               </svg>
             </div>
             <h3>Control total del negocio</h3>
@@ -1376,8 +1685,9 @@
 
           <div class="glass-card benefit-card reveal delay-200">
             <div class="benefit-icon-wrapper">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="m9 12 2 2 4-4" />
               </svg>
             </div>
             <h3>Menos errores operativos</h3>
@@ -1386,8 +1696,9 @@
 
           <div class="glass-card benefit-card reveal delay-300">
             <div class="benefit-icon-wrapper">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
               </svg>
             </div>
             <h3>Más tiempo libre</h3>
@@ -1396,8 +1707,9 @@
 
           <div class="glass-card benefit-card reveal delay-400">
             <div class="benefit-icon-wrapper">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                <polyline points="16 7 22 7 22 13" />
               </svg>
             </div>
             <h3>Crecimiento organizado</h3>
@@ -1406,8 +1718,10 @@
 
           <div class="glass-card benefit-card reveal delay-200">
             <div class="benefit-icon-wrapper">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="22" height="22" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
               </svg>
             </div>
             <h3>Decisiones basadas en datos</h3>
@@ -1432,26 +1746,26 @@
             <p class="pricing-desc">Para comercios que buscan una cuota mensual predecible de bajo impacto.</p>
             <ul class="pricing-features">
               <li>
-                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <span>Diagnóstico inicial 100% gratuito</span>
               </li>
               <li>
-                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <span>Acceso completo al sistema en la nube</span>
               </li>
               <li>
-                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <span>Actualizaciones y mejoras periódicas</span>
               </li>
               <li>
-                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <span>Soporte continuo vía WhatsApp</span>
               </li>
@@ -1469,26 +1783,26 @@
             <p class="pricing-desc">Para empresas que requieren desarrollos altamente específicos o integración física local.</p>
             <ul class="pricing-features">
               <li>
-                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <span>Personalización estructural profunda</span>
               </li>
               <li>
-                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <span>Pago inicial y mensualidades mínimas</span>
               </li>
               <li>
-                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <span>Integración con hardware local</span>
               </li>
               <li>
-                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                <svg class="feature-check-icon" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <span>Soporte prioritario 24/7 en línea</span>
               </li>
@@ -1517,8 +1831,9 @@
           <details class="faq-item reveal">
             <summary>
               ¿Cómo sé si mi negocio está listo para un sistema?
-              <svg class="faq-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              <svg class="faq-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             </summary>
             <div class="faq-content">
@@ -1529,8 +1844,9 @@
           <details class="faq-item reveal">
             <summary>
               ¿Cuánto tiempo toma tener el sistema listo para funcionar?
-              <svg class="faq-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              <svg class="faq-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             </summary>
             <div class="faq-content">
@@ -1541,8 +1857,9 @@
           <details class="faq-item reveal">
             <summary>
               ¿Debo pagar costos por licencias o software de terceros?
-              <svg class="faq-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              <svg class="faq-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             </summary>
             <div class="faq-content">
@@ -1553,8 +1870,9 @@
           <details class="faq-item reveal">
             <summary>
               ¿Es difícil de usar para mi equipo de trabajo?
-              <svg class="faq-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              <svg class="faq-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             </summary>
             <div class="faq-content">
@@ -1577,7 +1895,7 @@
              rel="noopener noreferrer">
             <span>Hablar por WhatsApp</span>
             <svg class="btn-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
             </svg>
           </a>
         </div>
@@ -1592,7 +1910,15 @@
         <div class="footer-brand">
           <a href="#" class="logo-container">
             <svg class="logo-svg" viewBox="0 0 24 24">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              <defs>
+                <linearGradient id="logoGradFooter" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#38bdf8" />
+                  <stop offset="100%" stop-color="#818cf8" />
+                </linearGradient>
+              </defs>
+              <path stroke="url(#logoGradFooter)" stroke-linecap="round" stroke-linejoin="round" d="m12 2-10 5 10 5 10-5-10-5Z"/>
+              <path stroke="url(#logoGradFooter)" stroke-linecap="round" stroke-linejoin="round" d="m2 17 10 5 10-5"/>
+              <path stroke="url(#logoGradFooter)" stroke-linecap="round" stroke-linejoin="round" d="m2 12 10 5 10-5"/>
             </svg>
             <span class="logo-text">PROTOTIPE</span>
           </a>
@@ -1632,9 +1958,12 @@
        class="btn btn-primary" 
        target="_blank" 
        rel="noopener noreferrer">
-      <span>📲 Diagnóstico Gratuito</span>
+      <svg class="btn-svg" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+      </svg>
+      <span>Diagnóstico Gratuito</span>
       <svg class="btn-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
       </svg>
     </a>
   </div>
@@ -1694,6 +2023,102 @@
           headerNav.querySelector('.navbar').style.background = 'rgba(5, 7, 12, 0.7)';
         }
       });
+
+      // 4. Animación fluida de acordeón (FAQ)
+      document.querySelectorAll('.faq-item').forEach(details => {
+        const summary = details.querySelector('summary');
+        const content = details.querySelector('.faq-content');
+        let isAnimating = false;
+
+        summary.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (isAnimating) return;
+
+          if (details.hasAttribute('open')) {
+            // Cerrando
+            isAnimating = true;
+            const startHeight = details.offsetHeight;
+            content.style.opacity = '0';
+            content.style.transform = 'translateY(-8px)';
+            
+            setTimeout(() => {
+              details.style.height = `${startHeight}px`;
+              // Forzar reflow
+              details.offsetHeight;
+              details.style.height = `${summary.offsetHeight}px`;
+            }, 50);
+
+            setTimeout(() => {
+              details.removeAttribute('open');
+              details.style.height = '';
+              content.style.opacity = '';
+              content.style.transform = '';
+              isAnimating = false;
+            }, 350);
+          } else {
+            // Abriendo
+            isAnimating = true;
+            details.setAttribute('open', 'true');
+            const summaryHeight = summary.offsetHeight;
+            const contentHeight = content.offsetHeight;
+            const totalHeight = summaryHeight + contentHeight + 16;
+            
+            details.style.height = `${summaryHeight}px`;
+            content.style.opacity = '0';
+            content.style.transform = 'translateY(-8px)';
+            
+            // Forzar reflow
+            details.offsetHeight;
+            
+            details.style.height = `${totalHeight}px`;
+            
+            setTimeout(() => {
+              content.style.opacity = '1';
+              content.style.transform = 'translateY(0)';
+            }, 50);
+
+            setTimeout(() => {
+              details.style.height = '';
+              isAnimating = false;
+            }, 350);
+          }
+        });
+      });
+
+      // 5. Lógica de la calculadora de fugas y ROI
+      const inputEmpleados = document.getElementById('input-empleados');
+      const inputHoras = document.getElementById('input-horas');
+      const inputCosto = document.getElementById('input-costo');
+
+      const valEmpleados = document.getElementById('val-empleados');
+      const valHoras = document.getElementById('val-horas');
+      const valCosto = document.getElementById('val-costo');
+
+      const resTiempo = document.getElementById('res-tiempo');
+      const resDinero = document.getElementById('res-dinero');
+
+      function updateCalculator() {
+        const empleados = parseInt(inputEmpleados.value);
+        const horas = parseFloat(inputHoras.value);
+        const costo = parseInt(inputCosto.value);
+
+        valEmpleados.textContent = empleados;
+        valHoras.textContent = `${horas}h`;
+        valCosto.textContent = `$${costo.toLocaleString('es-CO')} COP`;
+
+        const horasMes = Math.round(empleados * horas * 20);
+        const dineroAnio = horasMes * 12 * costo;
+
+        resTiempo.textContent = `${horasMes} hrs`;
+        resDinero.textContent = `$${dineroAnio.toLocaleString('es-CO')} COP`;
+      }
+
+      if (inputEmpleados && inputHoras && inputCosto) {
+        inputEmpleados.addEventListener('input', updateCalculator);
+        inputHoras.addEventListener('input', updateCalculator);
+        inputCosto.addEventListener('input', updateCalculator);
+        updateCalculator();
+      }
     });
   </script>
 

@@ -1,17 +1,36 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-23] - CORE-049: Alineación y Sincronización Completa del Mapa Semántico de Documentación IA
+
+* **Tipo:** Documentación / Control de Calidad / IA GPS
+* **Descripción de Cambios:**
+  - **Sincronización del Mapa Semántico:** Indexación de las 12 referencias físicas y semánticas que faltaban en el archivo de control `mapa_documentacion_ia.md` (GEMINI.md, verify_ecosystem_integrity.js, boveda_obsidian_index.md, mapa_ecosistema.canvas, telemetria_ecosistema_global.md, catalogo_componentes_atomicos.md, formulario_producto_ia.md, imagen_lazy.md, diagrama_flujo_ecosistema.md, diccionario_tecnico_completo.md, etc.) definiendo sus roles técnicos precisos, criterios de decisión IA coherentes y enlaces absolutos de Windows con protocolo `file:///`.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
 ### [2026-06-23] - CORE-048: Análisis y Rediseño Premium Profesional de Landing Page
 
 * **Tipo:** UI/UX / Diseño / SEO / Código / Documentación
 * **Descripción de Cambios:**
   - **Análisis de Landing Page:** Elaboración del reporte de auditoría técnica y visual `auditoria_landing_page_2026.md` bajo `03_Auditorias_y_Faro_Core/`, diagnosticando vulnerabilidades de seguridad, SEO y diseño.
   - **Rediseño Completo de Index.html:** Implementación de variables HSL de tema, tipografías premium Outfit/Inter, glows radiales en movimiento lento, navbar interactivo con blur, tarjetas de dolor y casos con iconos SVG inline personalizados, acordeón de FAQ dinámico con detalles nativos de HTML5, footer corporativo expandido, barra CTA fija móvil en inferior y animaciones sutiles (scroll reveal, hover scale, active scale).
-  - **Optimización de Contraste y Consistencia (Revisión v1.1 - v1.2):** 
+  - **Optimización de Contraste y Consistencia (Revisión v1.1 - v1.7):** 
+    * Purga completa de emojis (🧠, 📲) y reemplazo por iconos vectoriales SVG de alta definición (favicon de engranaje y nodos, y botones con el isotipo oficial de WhatsApp integrado).
     * Corrección de especificidad CSS en el botón CTA del navbar (`.nav-links a.nav-cta-btn`) inyectando color blanco brillante `#ffffff !important` para sobrescribir la regla de herencia gris y solucionar por completo el bug de legibilidad.
     * Refactorización de contrastes en botones principales (`.btn-primary` y `.nav-cta-btn`) cambiando a un fondo de gradiente azul oscuro/violeta con texto blanco para legibilidad perfecta y cumplimiento estricto de WCAG AA.
     * Alturas mínimas estandarizadas y alineaciones flexbox en todas las tarjetas de grids (`.pain-box`, `.step-card`, `.case-card`, `.benefit-card` y `.pricing-card`) logrando un tamaño geométrico uniforme e idéntico.
     * Refinamiento en micro-interacciones hover de tarjetas y botones (rotación suave y escala en iconos SVG y números de paso).
     * Transición de despliegue animada mediante CSS keyframes en acordeón de FAQ.
+    * **Revisión v1.5 (Iconos de Casos de Éxito):** Estandarización y reemplazo de los SVG vectoriales de la cuadrícula de casos de uso (Ferreterías, Restaurantes, Talleres mecánicos, Tiendas de barrio, Peluquerías, Emprendimientos) escalándolos a un tamaño uniforme de 24x24 px e inyectando un grosor de trazo stroke-width="2" con sus paths oficiales respectivos (martillo, utensilios, coche, tienda física, tijeras, cohete). Esta corrección previene de forma absoluta el empastamiento y los artefactos visuales causados por trazos anchos (2.5px) y resoluciones comprimidas (20x20px) en pantallas estándar.
+    * **Revisión v1.6 (Corrección de Overflow y Trazo Fino):** Solución definitiva al recorte horizontal (mochado) de los círculos numerados 1, 2 y 3 (`.step-number`) en la sección de pasos inyectando `overflow: visible !important;` en la clase de estilos de `.step-card` para que no herede el recorte de `.glass-card`. Homologación de todos los grosores de trazo de flechas interactivas en botones y el icono de bombilla a `stroke-width="2"` (sustituyendo trazos toscos de `2.5`) para un look ultra-estilizado y premium. Robustecimiento del logotipo del footer inyectándole una definición de gradiente local para garantizar su correcto render cromático en cualquier navegador.
+    * **Revisión v1.7 (Curvatura de Esquinas Glass-Card):** Corrección visual del destello de esquinas en ángulo recto (bordes rectos grises) en tarjetas con overflow deshabilitado. Se inyectó `border-radius: inherit;` en el pseudo-elemento `.glass-card::before` para que herede automáticamente la curvatura de 18px del contenedor padre, logrando un redondeado perfecto en todas las esquinas sin desborde.
+    * **Revisión v1.8 (Responsividad de ROI):** Pulido responsivo final en la visualización del retorno monetario anual en la calculadora de ROI. Se removió la regla `word-break: break-all` que separaba toscamente la sigla "COP" en pantallas estrechas y se inyectó `white-space: nowrap` junto con un font-size clamp() dinámico para garantizar una visualización unificada y nítida en todos los viewports.
+    * **Revisión v1.9 (Rediseño Tipográfico del Hero):** Rediseño tipográfico de alta jerarquía del titular principal (H1). Se redujo el peso de Outfit a 800 (eliminando la apariencia tosca del peso 900 anterior) y se cerró el tracking (`letter-spacing`) a -0.05em para un estilo más compacto y tecnológico. Estructuralmente se separó el titular en una frase introductoria en color blanco puro (`#ffffff`) y una propuesta de valor en gradiente animado elástico de cian a violeta de alto contraste.
+    * **Revisión v2.0 (Efecto Elástico de Botón):** Inyección de animación y transición con física de resorte (Spring Physics) en el botón de Diagnóstico Gratis del navbar del encabezado. Se definieron transiciones elásticas con curvas Bezier cúbicas (`cubic-bezier(0.34, 1.56, 0.64, 1)`) al pasar el cursor (escala a 1.06 y resplandor de marca) y una respuesta de compresión táctil instantánea al hacer clic (escala a 0.94).
   - **Seguridad y SEO:** Configuración de etiquetas Open Graph, Twitter Cards, description y rel="noopener noreferrer" en enlaces de WhatsApp externos.
 * **Archivos Modificados:**
   - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
