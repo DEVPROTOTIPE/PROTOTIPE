@@ -4,6 +4,20 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-051: Alineación e Integración de la Biblioteca y el Sandbox del Dashboard~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-23
+  - Fecha de finalización: 2026-06-23
+  - Descripción: Saneamiento integral de 29 enlaces rotos en el README.md de la biblioteca, mapeo de playgrounds del Sandbox para componentes huérfanos, y creación del archivo de documentación de KDS para completar la paridad de componentes.
+  - Archivos: [Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY], [Documentacion PROTOTIPE/09_Modulos_Completos/Pantalla_Cocina_KDS/pantalla_cocina_kds.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Pantalla_Cocina_KDS/pantalla_cocina_kds.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-050: Normalización de Iconografía en la Landing Page~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-23
+  - Fecha de finalización: 2026-06-23
+  - Descripción: Normalización al 100% de todos los iconos SVG de la landing page (Index.html) a la biblioteca de Lucide. Se corrigió el path del favicon, logotipo principal (Navbar y Footer), los iconos de la sección El Problema (Reloj, Dólar, Clientes, Puntos Ciegos), el icono principal de bombilla en La Solución (añadiendo espaciado explícito para decimales y comandos Bézier para evitar que Chrome lo renderizara de forma asimétrica), los iconos de la grilla de Beneficios, los checks de características de la tabla de precios y los iconos de más/menos del FAQ.
+  - Archivos: [LandingPage/Index.html](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY], [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY], [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-049: Alineación y Sincronización Completa del Mapa Semántico de Documentación IA~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-23

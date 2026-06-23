@@ -1,5 +1,47 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-23] - CORE-051: Alineación e Integración de la Biblioteca y el Sandbox del Dashboard
+
+* **Tipo:** Documentación / Calidad / Sandbox
+* **Descripción de Cambios:**
+  - **Saneamiento de la Biblioteca:** Corrección al 100% de los 29 enlaces rotos y reestructuración del catálogo general (`06_Biblioteca_Componentes/README.md`) para apuntar a las carpetas y archivos en español claro e indexar los 21 archivos markdown huérfanos que no estaban registrados.
+  - **Indexación y Registro de Componentes:** Catalogación de los componentes huérfanos `variant_selector.md` y `admin_stock_alerts.md` en el índice de la biblioteca.
+  - **Mapeo del Sandbox en Dashboard:** Modificación del selector de playground interactivo (`ComponentSandbox.jsx`) mapeando en `COMPONENT_META` y `COMPONENT_SANDBOX_MAP` las excepciones de visualización (consola de diagnóstico inteligente, rejilla de catálogo inteligente, hook de carrito de compras y hook de control del asistente guiado) para evitar el estado de "Playground No Configurado".
+  - **Creación de Ficha Técnica KDS:** Documentación completa y detallada del Kitchen Display System (KDS) en `pantalla_cocina_kds.md` para resolver el enlace roto en el catálogo, incluyendo flujo Mermaid y código React 100% funcional.
+  - **Sincronización Semántica de Mapas:** Registro e indexación de `pantalla_cocina_kds.md` en el mapa semántico global de documentación (`mapa_documentacion_ia.md`) y el mapa de aplicación (`mapa_aplicacion.md`).
+  - **Verificación Automatizada:** Ejecución de scripts de control y diagnóstico certificando 0 enlaces rotos, 0 archivos huérfanos en biblioteca y consistencia total en los mapas.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/09_Modulos_Completos/Pantalla_Cocina_KDS/pantalla_cocina_kds.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Pantalla_Cocina_KDS/pantalla_cocina_kds.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-23] - CORE-050: Normalización de Iconografía en la Landing Page (Revisión v2.1 y v2.2)
+
+* **Tipo:** UI/UX / Calidad / SVG / Documentación
+* **Descripción de Cambios:**
+  - **Revisión v2.1 (Completado anteriormente):** Reemplazo del path de la bombilla deforme en "La Solución PROTOTIPE" por el SVG simétrico limpio de `lightbulb` de Lucide.
+  - **Revisión v2.2 (Ejecutado):** Normalización de todos los iconos de la landing page a la biblioteca Lucide SVG para garantizar consistencia y paridad:
+    * Se actualizó el favicon URL-encoded para utilizar los paths estándar de Lucide `layers`.
+    * Se reemplazó el path tosco del logotipo principal (en Navbar, Footer y defs) por los paths oficiales de `layers`.
+    * Sección *El Problema*: Reemplazo de paths mixtos de Heroicons por Lucide oficial (`clock` para tiempo, `circle-dollar-sign` para dinero, `users` para clientes perdidos y `bar-chart-2` para puntos ciegos).
+    * Sección *Beneficios*: Reemplazo sistemático por Lucide oficial (`badge-check` para control total, `check-circle-2` para menos errores, `clock` para más tiempo libre, `trending-up` para crecimiento y `bar-chart-2` para decisiones basadas en datos).
+    * Sección *Modelo de Precios*: Normalización del check de viñetas al path de Lucide `check`.
+    * Sección *FAQ*: Reemplazo del icono de despliegue por Lucide `plus` oficial.
+    * Todas las modificaciones se realizaron inyectando `stroke-width="2"` y separando de forma explícita coordenadas y números decimales para prevenir anomalías de renderizado en Chrome.
+  - **Control de Roadmap y Logs:** Registro del progreso en la bitácora física del proyecto y finalización en task.md.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
 ### [2026-06-23] - CORE-049: Alineación y Sincronización Completa del Mapa Semántico de Documentación IA
 
 * **Tipo:** Documentación / Control de Calidad / IA GPS

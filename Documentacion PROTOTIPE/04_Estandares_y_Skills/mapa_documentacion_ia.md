@@ -297,6 +297,7 @@
 | **pos_express_scanner.md** | Módulo de checkout veloz en caja que interpreta eventos de lectores de códigos de barra físicos. | Web Audio API | [Ver POS Express Scanner](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/POS_Express_Scanner/pos_express_scanner.md) |
 | **ordenes_trabajo_equipos.md** | Ficha de control de recepción de maquinaria y equipos para diagnóstico, repuestos y firma digital. | Canvas HTML5 | [Ver Órdenes de Trabajo](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Ordenes_Trabajo_Equipos/ordenes_trabajo_equipos.md) |
 | **propuesta_commits_despliegues.md** | Propuesta técnica para implementar el módulo visual de control de versiones y copias de seguridad de cores/instancias de clientes desde la consola central. | PowerShell / Node.js SSE | [Ver Propuesta Commits](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Modulo_Commits_Despliegues/propuesta_commits_despliegues.md) |
+| **pantalla_cocina_kds.md** | Monitor interactivo de cocina en tiempo real (KDS) con semáforo cronológico de tiempos de preparación y alertas auditivas sintéticas (Web Audio API). | React, Firebase Firestore | [Ver Pantalla Cocina KDS](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Pantalla_Cocina_KDS/pantalla_cocina_kds.md) |
 
 ---
 

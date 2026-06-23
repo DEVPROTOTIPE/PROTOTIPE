@@ -438,6 +438,10 @@ const COMPONENT_META = {
   'creador de filtros de catálogo': { type: 'complex', label: 'Módulo Completo', color: 'teal', note: 'Extrae atributos dinámicamente de una colección de Firestore.' },
   'panel de filtros de catálogo': { type: 'complex', label: 'Módulo Completo', color: 'teal', note: 'Bottom sheet con filtros extraídos de productos reales. Requiere datos de catálogo.' },
   'banner de instalación pwa': { type: 'complex', label: 'API del Navegador', color: 'teal', note: 'Usa el evento beforeinstallprompt del navegador. Solo se activa en contexto real de PWA.' },
+  'consola de errores y diagnóstico inteligente': { type: 'complex', label: 'Módulo Completo', color: 'teal', note: 'Monitoreo de fallas y asistente de diagnóstico de código. Integrado de manera nativa en el dashboard central.' },
+  'rejilla de catálogo inteligente': { type: 'complex', label: 'Componente UI', color: 'teal', note: 'Rejilla responsiva con layouts e imágenes. Requiere inicialización de appConfigStore y productos en base de datos.' },
+  'hook de carrito de compras': { type: 'hook', label: 'Zustand Store', color: 'violet', note: 'Store Zustand persistente para controlar existencias, adiciones y límites de stock.' },
+  'hook de control del asistente guiado': { type: 'hook', label: 'Zustand Store', color: 'violet', note: 'Store Zustand para el flujo guiado de usuario. Sin interfaz visual directa.' },
 };
 
 // Mapa: nombre en minúsculas → clave de playground
