@@ -1,8 +1,19 @@
 import { Minus, Plus } from 'lucide-react'
 
 /**
+ * @typedef {Object} QuantitySelectorProps
+ * @property {number} value - Cantidad numérica actual seleccionada.
+ * @property {(value: number) => void} onChange - Callback que recibe el nuevo valor numérico al cambiar.
+ * @property {number} [min] - Límite mínimo de cantidad seleccionable. Por defecto 1.
+ * @property {number} [max] - Límite máximo de cantidad seleccionable. Por defecto 10.
+ * @property {'sm' | 'md'} [size] - Escala de tamaño visual del componente. Por defecto 'md'.
+ * @property {string} [className] - Clases de Tailwind adicionales.
+ */
+
+/**
  * Componente atómico para la selección y ajuste de cantidades.
  * Garantiza consistencia en comportamiento, bordes, estados deshabilitados y transiciones.
+ * @param {QuantitySelectorProps} props
  */
 export default function QuantitySelector({ 
   value, 
@@ -12,6 +23,18 @@ export default function QuantitySelector({
   size = 'md',
   className = '' 
 }) {
+  // Validación de tipos y sanidad en tiempo de desarrollo para evitar datos corruptos
+  if (process.env.NODE_ENV !== 'production') {
+    if (typeof value !== 'number') {
+      console.error(`[QuantitySelector Error] 'value' debe ser un número. Recibido: ${typeof value}`);
+    }
+    if (typeof onChange !== 'function') {
+      console.error(`[QuantitySelector Error] 'onChange' debe ser una función. Recibido: ${typeof onChange}`);
+    }
+    if (value < min || value > max) {
+      console.warn(`[QuantitySelector Warn] 'value' (${value}) se encuentra fuera del rango establecido [${min}, ${max}].`);
+    }
+  }
   const handleDecrement = () => {
     if (value > min) {
       onChange(value - 1)

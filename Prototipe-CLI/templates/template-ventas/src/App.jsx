@@ -474,20 +474,27 @@ export default function App() {
                         </p>
                       </div>
 
-                      {/* Botón de Cierre */}
+                      {/* Botón de Cierre — siempre con contraste garantizado */}
                       {sistemaAlerta.dismissible ? (
                         <button
                           onClick={handleDismissAlert}
-                          className={`w-full h-11 rounded-2xl font-bold text-sm text-white active:scale-95 transition-all shadow-sm border-none cursor-pointer ${
-                            sistemaAlerta.type === 'error' ? 'bg-red-600 hover:bg-red-500' :
-                            sistemaAlerta.type === 'warning' ? 'bg-amber-600 hover:bg-amber-500 text-slate-900' :
-                            'bg-indigo-650 hover:bg-indigo-550'
-                          }`}
+                          className="w-full h-11 rounded-2xl font-bold text-sm active:scale-95 transition-all shadow-sm border-none cursor-pointer"
+                          style={{
+                            background:
+                              sistemaAlerta.type === 'error' ? '#dc2626' :
+                              sistemaAlerta.type === 'warning' ? '#d97706' :
+                              'var(--color-primary)',
+                            color: '#ffffff',
+                            boxShadow:
+                              sistemaAlerta.type === 'error' ? '0 4px 15px rgba(220,38,38,0.35)' :
+                              sistemaAlerta.type === 'warning' ? '0 4px 15px rgba(217,119,6,0.35)' :
+                              '0 4px 15px rgba(99,102,241,0.35)'
+                          }}
                         >
                           Entendido / Aceptar
                         </button>
                       ) : (
-                        <div className="text-[10px] text-slate-500 font-semibold select-none flex items-center gap-1.5 animate-pulse">
+                        <div className="text-[10px] font-semibold select-none flex items-center gap-1.5 animate-pulse" style={{ color: 'var(--color-text-muted)' }}>
                           <span>🔒 Bloqueo Administrativo Activo</span>
                         </div>
                       )}

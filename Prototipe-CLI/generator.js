@@ -62,11 +62,39 @@ export const PALETTES = {
 };
 
 /**
+ * Valida de forma remota las credenciales de Firebase enviadas por el usuario.
+ * @param {string} apiKey API Key de Firebase
+ * @param {string} projectId Project ID de Firebase
+ */
+async function validateFirebaseCredentials(apiKey, projectId) {
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents?key=${apiKey}`;
+  try {
+    const res = await fetch(url, { method: 'GET' });
+    const data = await res.json();
+    
+    // Si la API key es inválida
+    if (res.status === 400 && data.error && (data.error.message.includes('API key') || data.error.message.includes('INVALID'))) {
+      throw new Error(`API Key de Firebase inválida: ${data.error.message}`);
+    }
+    // Si el proyecto no existe
+    if (res.status === 404 && data.error && data.error.message.includes('not found')) {
+      throw new Error(`El Project ID de Firebase "${projectId}" no existe o no tiene Firestore activo.`);
+    }
+    return true;
+  } catch (err) {
+    if (err.message.includes('fetch failed') || err.message.includes('network') || err.message.includes('FetchError')) {
+      throw new Error(`Error de red al conectar con Firebase: ${err.message}`);
+    }
+    throw err;
+  }
+}
+
+/**
  * Valida el entorno local asegurando que las dependencias CLI (firebase, gh si se requiere) estén
  * instaladas y con sesión iniciada.
  * @param {Object} answers Datos de configuración
  */
-function checkEnvironment(answers) {
+async function checkEnvironment(answers) {
   const spinner = ora('🔍 Ejecutando preflight check del entorno...').start();
   
   // 1. Validar Firebase CLI
@@ -82,6 +110,17 @@ function checkEnvironment(answers) {
   } catch (err) {
     spinner.fail();
     throw new Error('Firebase CLI no tiene sesión iniciada. Ejecuta: firebase login');
+  }
+
+  // 1.1 Validar credenciales de Firebase en la nube si no es aprovisionamiento automático
+  if (!answers.autoProvisionFirebase && answers.firebaseApiKey && answers.firebaseProjectId) {
+    spinner.text = '🔍 Validando credenciales de Firebase en la nube...';
+    try {
+      await validateFirebaseCredentials(answers.firebaseApiKey, answers.firebaseProjectId);
+    } catch (err) {
+      spinner.fail();
+      throw new Error(`Fallo en preflight check de Firebase: ${err.message}`);
+    }
   }
 
   // 2. Validar GitHub CLI si se requiere subir a GitHub
@@ -101,7 +140,7 @@ function checkEnvironment(answers) {
     }
   }
 
-  spinner.succeed('Preflight check completado con éxito. Entorno verificado.');
+  spinner.succeed('Preflight check completado con éxito. Entorno verificado y credenciales validadas.');
 }
 
 /**
@@ -110,7 +149,7 @@ function checkEnvironment(answers) {
  */
 export async function createProject(answers) {
   // Validaciones de preflight
-  checkEnvironment(answers);
+  await checkEnvironment(answers);
 
   // 0. Resolver coreType de la plantilla e inyectarlo en answers
   let coreType = 'seed';
@@ -421,31 +460,36 @@ test-results/
 
   // 5.1 Crear archivo firebase.json de forma nativa para configurar Firestore y Storage
   const step5_1 = ora('Generar configuración firebase.json').start();
-  const firebaseJsonContent = JSON.stringify({
-    firestore: {
-      rules: "firestore.rules",
-      indexes: "firestore.indexes.json"
-    },
-    storage: {
-      rules: "storage.rules"
-    },
-    hosting: {
-      public: "dist",
-      ignore: [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      rewrites: [
-        {
-          source: "**",
-          destination: "/index.html"
-        }
-      ]
-    }
-  }, null, 2);
-  await fs.writeFile(path.join(targetDir, 'firebase.json'), firebaseJsonContent, 'utf-8');
-  step5_1.succeed('Configuración firebase.json generada correctamente.');
+  const firebaseJsonPath = path.join(targetDir, 'firebase.json');
+  if (!(await fs.pathExists(firebaseJsonPath))) {
+    const firebaseJsonContent = JSON.stringify({
+      firestore: {
+        rules: "firestore.rules",
+        indexes: "firestore.indexes.json"
+      },
+      storage: {
+        rules: "storage.rules"
+      },
+      hosting: {
+        public: "dist",
+        ignore: [
+          "firebase.json",
+          "**/.*",
+          "**/node_modules/**"
+        ],
+        rewrites: [
+          {
+            source: "**",
+            destination: "/index.html"
+          }
+        ]
+      }
+    }, null, 2);
+    await fs.writeFile(firebaseJsonPath, firebaseJsonContent, 'utf-8');
+    step5_1.succeed('Configuración firebase.json generada correctamente (fallback).');
+  } else {
+    step5_1.succeed('Configuración firebase.json heredada de la plantilla.');
+  }
 
   const step5_2 = ora('Generar reglas de almacenamiento storage.rules').start();
   const storageRulesContent = `rules_version = '2';
@@ -811,6 +855,22 @@ console.log('✅ Mapa de arquitectura para la IA generado.');
     console.warn(`[Auto-Map] No se pudo autogenerar el mapa de IA inicial: ${mapErr.message}`);
   }
 
+  // 7.1. Configurar package.json con el nombre del proyecto de marca blanca
+  const stepPkg = ora('Configurando package.json con la marca del cliente').start();
+  try {
+    const targetPkgPath = path.join(targetDir, 'package.json');
+    if (await fs.pathExists(targetPkgPath)) {
+      const pkg = await fs.readJson(targetPkgPath);
+      pkg.name = `app-${clientId}`;
+      await fs.writeJson(targetPkgPath, pkg, { spaces: 2 });
+      stepPkg.succeed(`package.json actualizado con la marca blanca: app-${clientId}`);
+    } else {
+      stepPkg.info('No se encontró package.json en la plantilla para personalizar el nombre.');
+    }
+  } catch (err) {
+    stepPkg.warn(`Aviso al configurar package.json: ${err.message}`);
+  }
+
   // 7.2. Configurar dinámicamente Playwright E2E si existe en la plantilla
   const stepE2E = ora('Configurando suite de pruebas Playwright E2E').start();
   try {
@@ -1109,16 +1169,8 @@ async function deployFirebase(answers, targetDir) {
     );
     console.log(pc.green('✅ Proyecto de Firebase (Reglas, Índices, Storage y Hosting) desplegado por completo de forma exitosa.'));
 
-    const seedScriptPath = path.join(targetDir, 'scratch', 'seed_brand.js');
-    if (answers.enableSeeding && await fs.pathExists(seedScriptPath)) {
-      console.log(pc.cyan('🌱 Sembrando datos de marca iniciales y usuario Administrador en Firestore/Auth...'));
-      execSync('node scratch/seed_brand.js', { cwd: targetDir, stdio: 'inherit', shell: true });
-      console.log(pc.green('✅ Datos iniciales y usuario Administrador sembrados con éxito.'));
-    } else {
-      console.log(pc.yellow('ℹ️  Se omitió la siembra de datos de prueba en la base de datos (se mantendrá vacía).'));
-    }
   } catch (err) {
-    console.warn(pc.yellow(`⚠️  Fallo al desplegar o sembrar en Firebase: ${err.message}. Asegúrate de tener firebase-cli logueado.`));
+    console.warn(pc.yellow(`⚠️  Fallo al desplegar en Firebase: ${err.message}. Asegúrate de tener firebase-cli logueado.`));
   }
 }
 

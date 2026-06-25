@@ -202,6 +202,7 @@ async function main() {
     'public',
     'firestore.indexes.json',
     'firestore.rules',
+    'storage.rules',
     'vite.config.js',
     'eslint.config.js',
     'GEMINI.md',
@@ -209,13 +210,13 @@ async function main() {
     'mapa_arquitectura.md',
     'mapa_arquitectura_ia.md',
     'package.json',
-    'scripts'
+    'scripts',
+    'scratch'
   ];
 
   const EXCLUDE_PATTERNS = [
     '.env.local',
     '.firebaserc',
-    'firebase.json',
     'package-lock.json',
     'node_modules'
   ];

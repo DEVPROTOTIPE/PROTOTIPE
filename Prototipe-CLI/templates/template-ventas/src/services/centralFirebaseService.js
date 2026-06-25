@@ -15,7 +15,7 @@ import { getFirestore } from 'firebase/firestore'
  * configuradas (modo standalone, sin conexión central).
  */
 
-const CENTRAL_API_KEY            = import.meta.env.VITE_DEVELOPER_CENTRAL_API_KEY || 'AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE'
+const CENTRAL_API_KEY            = import.meta.env.VITE_DEVELOPER_CENTRAL_API_KEY || 'AIzaSy[API_KEY_DE_CLIENTE_AUTOGENERADA]'
 const CENTRAL_AUTH_DOMAIN        = import.meta.env.VITE_DEVELOPER_CENTRAL_AUTH_DOMAIN || 'prototipe-ecosistema-control.firebaseapp.com'
 const CENTRAL_PROJECT_ID         = import.meta.env.VITE_DEVELOPER_CENTRAL_PROJECT_ID || 'prototipe-ecosistema-control'
 const CENTRAL_STORAGE_BUCKET     = import.meta.env.VITE_DEVELOPER_CENTRAL_STORAGE_BUCKET || 'prototipe-ecosistema-control.firebasestorage.app'

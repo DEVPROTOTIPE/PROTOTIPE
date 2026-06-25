@@ -12,7 +12,6 @@ import * as Diff from 'diff';
 const EXCLUDED_PATHS = [
   '.env.local',
   '.firebaserc',
-  'firebase.json',
   'src/config/firebaseConfig.js',
   'src/config/niche.json',
   'index.html',

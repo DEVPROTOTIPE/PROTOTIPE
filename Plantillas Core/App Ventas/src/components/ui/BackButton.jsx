@@ -2,10 +2,28 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 
 /**
+ * @typedef {Object} BackButtonProps
+ * @property {string} [to] - Ruta de redirección específica (ej: '/catalogo') si no se desea el historial por defecto.
+ * @property {() => void} [onClick] - Callback personalizado al presionar el botón (prevalece sobre 'to').
+ * @property {string} [className] - Clases adicionales de Tailwind CSS para posicionamiento o overrides.
+ */
+
+/**
  * Componente atómico de navegación para ir atrás.
  * Garantiza consistencia visual y de comportamiento en toda la aplicación.
+ * @param {BackButtonProps} props
  */
 export default function BackButton({ to, onClick, className = '' }) {
+  // Validación de props en modo de desarrollo para blindar ante fallas de integración
+  if (process.env.NODE_ENV !== 'production') {
+    if (to && typeof to !== 'string') {
+      console.warn(`[BackButton Warn] La propiedad 'to' debe ser una cadena de texto (string). Recibido: ${typeof to}`);
+    }
+    if (onClick && typeof onClick !== 'function') {
+      console.error(`[BackButton Error] La propiedad 'onClick' debe ser una función. Recibido: ${typeof onClick}`);
+    }
+  }
+
   const navigate = useNavigate()
 
   const handleBack = () => {

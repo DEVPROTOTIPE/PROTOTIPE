@@ -290,60 +290,7 @@ async function getLibraryReadmeText() {
   return '';
 }
 
-// Función para expandir los requerimientos usando la API REST de Gemini de forma nativa
-async function expandRequirementsWithAI(customRequirements, projectName, libraryReadme) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || !apiKey.trim()) {
-    console.log('[Gemini] GEMINI_API_KEY no configurada en el CLI (.env). Omitiendo expansión cognitiva.');
-    return customRequirements;
-  }
-
-  console.log('[Gemini] Iniciando expansión de requerimientos usando Gemini 2.5 Flash...');
-  const systemInstruction = `Eres el Arquitecto de Soluciones Senior del ecosistema PROTOTIPE. Tu trabajo es tomar los requerimientos sencillos en bruto de un cliente y expandirlos en una especificación técnica de desarrollo sumamente detallada en formato Markdown.
-Esta especificación se le pasará a otra Inteligencia Artificial (Antigravity) que se encargará de construir la aplicación cliente a la medida sobre un lienzo limpio o plantilla.
-Debes diseñar:
-1. El flujo de estados (Workflow) adecuado para el nicho de mercado del cliente (ej. para tornerías, aires acondicionados, etc. no utilices flujos de venta de ropa).
-2. Un esquema de datos preciso para el objeto 'atributos' en Firestore (ej. material, tolerancia, PSI) evitando campos rígidos de ropa (tallas/colores).
-3. Recomendaciones exactas de qué componentes de la Biblioteca Core portar mediante su ruta absoluta 'file:///${getDocumentationRoot().replace(/\\/g, '/')}/06_Biblioteca_Componentes/...'.
-4. Identificación de nuevos componentes, hooks o stores a crear de manera estrictamente modular (component-first), prohibiendo código inline duplicado.
-5. Pautas de UI, interacciones táctiles (active:scale-95) y animaciones de resorte de Framer Motion con clases variables HSL de marca blanca.
-
-Tienes a tu disposición el siguiente catálogo de componentes listos en la Biblioteca Core de PROTOTIPE:
-${libraryReadme}`;
-
-  const prompt = `Expande detalladamente las especificaciones para el nuevo proyecto a la medida: "${projectName}"
-Requerimiento en bruto del cliente:
-"${customRequirements}"
-
-Genera el blueprint técnico estructurado en Markdown para la IA desarrolladora.`;
-
-  try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        systemInstruction: { parts: [{ text: systemInstruction }] },
-        generationConfig: { temperature: 0.2 }
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!resultText) throw new Error('Respuesta de API vacía o no estructurada.');
-
-    console.log('[Gemini] Expansión cognitiva completada.');
-    return resultText;
-  } catch (error) {
-    console.error('[Gemini] Error en llamada REST:', error.message);
-    return `${customRequirements}\n\n*(Fallo de expansión por IA: ${error.message}. Por favor procesa el requerimiento básico)*`;
-  }
-}
+// Expansión cognitiva de requerimientos con IA removida por solicitud.
 
 // Endpoint para validar credenciales de Firebase en caliente (Mejora 1)
 app.post('/api/firebase/validate', async (req, res) => {
@@ -560,20 +507,6 @@ app.post('/api/create-project', async (req, res) => {
     }
   }
   
-  // ─── Expansión cognitiva con Gemini (async, no bloquea) ──────────────────────
-  try {
-    if (answers.customRequirements && answers.customRequirements.trim().length > 0) {
-      const readme = await getLibraryReadmeText();
-      answers.customRequirements = await expandRequirementsWithAI(
-        answers.customRequirements,
-        answers.projectName,
-        readme
-      );
-    }
-  } catch (aiErr) {
-    // No fatal: si falla la expansión, se continúa con el requerimiento en bruto
-    console.warn(`[API Bridge] Fallo en expansión cognitiva (no crítico): ${aiErr.message}`);
-  }
 
   // ─── Aprovisionamiento en proceso hijo (con Respuesta JSON) ───────────────────
   console.log(`[API Bridge] Iniciando creación de proyecto: ${answers.projectName}`);
@@ -3870,7 +3803,7 @@ app.get('/api/git/sync-core-to-clients-stream', async (req, res) => {
 // Preserva la identidad del cliente (Firebase, marca, configuración).
 // ─────────────────────────────────────────────────────────────────────────────
 const SYNC_EXCLUDED_PATHS = [
-  '.env.local', '.firebaserc', 'firebase.json',
+  '.env.local', '.firebaserc',
   'src/config/firebaseConfig.js', 'src/config/niche.json',
   'index.html', 'public', 'package-lock.json',
   'node_modules', '.git', '.git-backup-temp', '.vite', 'dist',
@@ -4300,6 +4233,318 @@ app.get('/api/instancias/sync-and-deploy-stream', async (req, res) => {
   } finally {
     clearInterval(keepAlive);
     try { if (!res.writableEnded && !res.finished) res.end(); } catch (_) {}
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS Y ENDPOINTS PARA FIREBASE RULES DRIFT SCAN & DEPLOY (Propuesta 2)
+// ─────────────────────────────────────────────────────────────────────────────
+import os from 'os';
+
+// Helper para obtener el Access Token activo de Firebase CLI
+async function getFirebaseAccessToken() {
+  const configPath = path.join(os.homedir(), '.config', 'configstore', 'firebase-tools.json');
+  if (!await fs.pathExists(configPath)) {
+    throw new Error('No se encontró la sesión activa de Firebase CLI. Ejecuta "firebase login".');
+  }
+  const config = await fs.readJson(configPath);
+  const tokens = config.tokens;
+  if (!tokens) {
+    throw new Error('No hay tokens guardados en Firebase CLI. Ejecuta "firebase login".');
+  }
+
+  // Si el access_token no ha expirado, usarlo directamente
+  if (tokens.access_token && tokens.expires_at && tokens.expires_at > Date.now()) {
+    return tokens.access_token;
+  }
+
+  // Refrescar el token usando OAuth2
+  const clientId = '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com';
+  try {
+    const res = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        client_id: clientId,
+        refresh_token: tokens.refresh_token
+      })
+    });
+    const data = await res.json();
+    if (data.access_token) {
+      tokens.access_token = data.access_token;
+      tokens.expires_at = Date.now() + (data.expires_in * 1000) - 60000;
+      await fs.writeJson(configPath, config, { spaces: 2 });
+      return data.access_token;
+    }
+  } catch (err) {
+    console.error('[Firebase Token Refresh Error]:', err.message);
+  }
+
+  if (tokens.access_token) {
+    return tokens.access_token;
+  }
+  throw new Error('No se pudo refrescar el token de Firebase.');
+}
+
+// Helper para descargar las reglas vigentes en la nube
+async function getCloudFirebaseRules(projectId, type, accessToken, storageBucket = '') {
+  const releasesUrl = `https://firebaserules.googleapis.com/v1/projects/${projectId}/releases`;
+  try {
+    const resReleases = await fetch(releasesUrl, {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    if (!resReleases.ok) {
+      const errData = await resReleases.json().catch(() => ({}));
+      throw new Error(errData?.error?.message || `HTTP ${resReleases.status}`);
+    }
+    const dataReleases = await resReleases.json();
+    const releases = dataReleases.releases || [];
+
+    const targetRelease = releases.find(r => {
+      const name = r.name || '';
+      if (type === 'firestore') {
+        return name.endsWith('/cloud.firestore');
+      } else {
+        if (storageBucket) {
+          return name.endsWith(`/firebase.storage/${storageBucket}`);
+        }
+        return name.includes('/firebase.storage');
+      }
+    });
+
+    if (!targetRelease || !targetRelease.rulesetName) {
+      return null; // Sin reglas
+    }
+
+    const rulesetUrl = `https://firebaserules.googleapis.com/v1/${targetRelease.rulesetName}`;
+    const resRuleset = await fetch(rulesetUrl, {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    if (!resRuleset.ok) {
+      const errData = await resRuleset.json().catch(() => ({}));
+      throw new Error(errData?.error?.message || `HTTP ${resRuleset.status}`);
+    }
+    const dataRuleset = await resRuleset.json();
+    const files = dataRuleset.source?.files || [];
+    if (files.length > 0) {
+      return files[0].content || '';
+    }
+    return '';
+  } catch (err) {
+    console.warn(`[CloudRules] Error rules get (${type}) para ${projectId}:`, err.message);
+    throw err;
+  }
+}
+
+// Endpoint para el escaneo de drift global de reglas Firebase
+app.get('/api/project/firebase-rules/drift-global', async (req, res) => {
+  if (!await fs.pathExists(GIT_INSTANCES_DIR)) {
+    return res.json({ success: true, driftMatrix: [] });
+  }
+
+  try {
+    const accessToken = await getFirebaseAccessToken();
+    const topDirs = await fs.readdir(GIT_INSTANCES_DIR);
+    const candidates = [];
+    for (const dir of topDirs) {
+      const fullPath = path.join(GIT_INSTANCES_DIR, dir);
+      const stat = await fs.stat(fullPath).catch(() => null);
+      if (!stat || !stat.isDirectory()) continue;
+
+      if (await fs.pathExists(path.join(fullPath, '.prototipe.json'))) {
+        candidates.push({ folderName: dir, fullPath });
+      } else {
+        const subDirs = await fs.readdir(fullPath).catch(() => []);
+        for (const subDir of subDirs) {
+          const subFullPath = path.join(fullPath, subDir);
+          const subStat = await fs.stat(subFullPath).catch(() => null);
+          if (!subStat || !subStat.isDirectory()) continue;
+          if (await fs.pathExists(path.join(subFullPath, '.prototipe.json'))) {
+            candidates.push({ folderName: subDir, fullPath: subFullPath });
+          }
+        }
+      }
+    }
+
+    const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+    const registro = await fs.readJson(registroPath);
+    const plantillas = registro.plantillas || {};
+
+    const results = [];
+
+    await Promise.all(candidates.map(async (candidate) => {
+      const { folderName, fullPath } = candidate;
+      const metaPath = path.join(fullPath, '.prototipe.json');
+      let meta = await fs.pathExists(metaPath) ? await fs.readJson(metaPath) : {};
+      meta = validatePrototipeMetadata(meta, folderName);
+
+      const clientId = meta.clientId || folderName;
+      const projectName = meta.projectName || folderName;
+      const templateKey = meta.template;
+      if (!templateKey || !plantillas[templateKey]) return;
+
+      const corePath = plantillas[templateKey].fuente;
+
+      let firebaseProjectId = meta.firebaseProjectId || '';
+      let storageBucket = '';
+
+      const envPath = path.join(fullPath, '.env.local');
+      if (await fs.pathExists(envPath)) {
+        const envContent = await fs.readFile(envPath, 'utf8');
+        const idMatch = envContent.match(/VITE_FIREBASE_PROJECT_ID\s*=\s*(.+)/);
+        if (idMatch && idMatch[1]) {
+          firebaseProjectId = idMatch[1].trim().replace(/['"]/g, '');
+        }
+        const bucketMatch = envContent.match(/VITE_FIREBASE_STORAGE_BUCKET\s*=\s*(.+)/);
+        if (bucketMatch && bucketMatch[1]) {
+          storageBucket = bucketMatch[1].trim().replace(/['"]/g, '');
+        }
+      }
+
+      if (!firebaseProjectId) {
+        const rcPath = path.join(fullPath, '.firebaserc');
+        if (await fs.pathExists(rcPath)) {
+          const rc = await fs.readJson(rcPath).catch(() => ({}));
+          firebaseProjectId = rc.projects?.default || '';
+        }
+      }
+
+      if (!firebaseProjectId) return;
+
+      // Reglas locales de la plantilla Core
+      const localFirestoreRulesPath = path.join(corePath, 'firestore.rules');
+      const localStorageRulesPath = path.join(corePath, 'storage.rules');
+
+      let localFirestoreRules = '';
+      if (await fs.pathExists(localFirestoreRulesPath)) {
+        localFirestoreRules = await fs.readFile(localFirestoreRulesPath, 'utf8');
+      }
+
+      let localStorageRules = '';
+      if (await fs.pathExists(localStorageRulesPath)) {
+        localStorageRules = await fs.readFile(localStorageRulesPath, 'utf8');
+      }
+
+      // Reglas de la nube
+      let cloudFirestoreRules = null;
+      let cloudStorageRules = null;
+      let firestoreError = null;
+      let storageError = null;
+
+      try {
+        cloudFirestoreRules = await getCloudFirebaseRules(firebaseProjectId, 'firestore', accessToken);
+      } catch (err) {
+        firestoreError = err.message;
+      }
+
+      try {
+        cloudStorageRules = await getCloudFirebaseRules(firebaseProjectId, 'storage', accessToken, storageBucket);
+      } catch (err) {
+        storageError = err.message;
+      }
+
+      const cleanRules = (rules) => (rules || '').replace(/\r\n/g, '\n').trim();
+
+      const firestoreDrift = cleanRules(localFirestoreRules) !== cleanRules(cloudFirestoreRules);
+      const storageDrift = cleanRules(localStorageRules) !== cleanRules(cloudStorageRules);
+
+      results.push({
+        clientId,
+        projectName,
+        firebaseProjectId,
+        templateKey,
+        firestore: {
+          hasLocal: !!localFirestoreRules,
+          hasCloud: cloudFirestoreRules !== null,
+          drift: firestoreDrift,
+          error: firestoreError,
+          local: localFirestoreRules,
+          cloud: cloudFirestoreRules || ''
+        },
+        storage: {
+          hasLocal: !!localStorageRules,
+          hasCloud: cloudStorageRules !== null,
+          drift: storageDrift,
+          error: storageError,
+          local: localStorageRules,
+          cloud: cloudStorageRules || ''
+        }
+      });
+    }));
+
+    res.json({ success: true, driftMatrix: results });
+  } catch (err) {
+    res.status(500).json({ error: `Error en drift global de Firebase: ${err.message}` });
+  }
+});
+
+// Endpoint para desplegar reglas selectivamente a Firebase
+app.post('/api/project/firebase-rules/deploy', async (req, res) => {
+  const { clientId, type } = req.body;
+  if (!clientId) return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+
+  const projectDir = await findProjectDir(clientId);
+  if (!projectDir) return res.status(404).json({ error: `No se encontró el proyecto para: ${clientId}` });
+
+  let firebaseProjectId = '';
+  const envPath = path.join(projectDir, '.env.local');
+  if (await fs.pathExists(envPath)) {
+    const envContent = await fs.readFile(envPath, 'utf8');
+    const idMatch = envContent.match(/VITE_FIREBASE_PROJECT_ID\s*=\s*(.+)/);
+    if (idMatch && idMatch[1]) {
+      firebaseProjectId = idMatch[1].trim().replace(/['"]/g, '');
+    }
+  }
+
+  if (!firebaseProjectId) {
+    const rcPath = path.join(projectDir, '.firebaserc');
+    if (await fs.pathExists(rcPath)) {
+      const rc = await fs.readJson(rcPath).catch(() => ({}));
+      firebaseProjectId = rc.projects?.default || '';
+    }
+  }
+
+  if (!firebaseProjectId) {
+    return res.status(400).json({ error: `No se configuró un Firebase Project ID para la instancia "${clientId}".` });
+  }
+
+  let deployOnly = '';
+  if (type === 'firestore') {
+    deployOnly = 'firestore:rules';
+  } else if (type === 'storage') {
+    deployOnly = 'storage';
+  } else {
+    deployOnly = 'firestore:rules,storage';
+  }
+
+  try {
+    const fbJsonPath = path.join(projectDir, 'firebase.json');
+    if (!await fs.pathExists(fbJsonPath)) {
+      const metaPath = path.join(projectDir, '.prototipe.json');
+      if (await fs.pathExists(metaPath)) {
+        const meta = await fs.readJson(metaPath);
+        const templateKey = meta.template;
+        const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+        if (await fs.pathExists(registroPath)) {
+          const registro = await fs.readJson(registroPath);
+          const corePath = registro.plantillas?.[templateKey]?.fuente;
+          if (corePath) {
+            const coreFbJson = path.join(corePath, 'firebase.json');
+            if (await fs.pathExists(coreFbJson)) {
+              await fs.copy(coreFbJson, fbJsonPath);
+            }
+          }
+        }
+      }
+    }
+
+    const cmd = `firebase deploy --only ${deployOnly} -P ${firebaseProjectId}`;
+    const stdout = execSync(cmd, { cwd: projectDir, encoding: 'utf8' });
+    res.json({ success: true, message: `Reglas de Firebase desplegadas con éxito.`, output: stdout });
+  } catch (err) {
+    console.error(`[Firebase Rules Deploy Error]:`, err.message);
+    res.status(500).json({ error: `Error al desplegar reglas Firebase: ${err.message}`, details: err.stderr || err.message });
   }
 });
 

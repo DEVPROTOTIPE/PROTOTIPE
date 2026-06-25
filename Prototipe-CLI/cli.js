@@ -187,13 +187,6 @@ async function main() {
       name: 'enableFirebaseDeploy',
       message: '¿Deseas desplegar reglas e índices en Firebase en este paso?',
       default: true
-    },
-    {
-      type: 'confirm',
-      name: 'enableSeeding',
-      message: '¿Deseas sembrar datos de prueba iniciales (productos y admin demo) en Firestore?',
-      default: false,
-      when: (ans) => ans.enableFirebaseDeploy === true
     }
   ]);
 

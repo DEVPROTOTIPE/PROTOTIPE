@@ -1,6 +1,549 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
-### [2026-06-23] - CORE-051: Alineación e Integración de la Biblioteca y el Sandbox del Dashboard
+
+### [2026-06-25] - AUDITORIA: Informe de Blindaje de Replicación de Cores y Conectividad Central
+
+* **Tipo:** Auditoría / Seguridad / Calidad / Escalabilidad / Documentación
+* **Descripción de Cambios:**
+  - **Elaboración de Auditoría de Replicación:** Se redactó y publicó el informe [`auditoria_replicacion_cores_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_replicacion_cores_2026.md) analizando de forma crítica el aislamiento de variables de entorno de marca, fallos potenciales de desalineación en tokens de telemetría, el acoplamiento del Smoke Test de Playwright en cores futuros, limitaciones en la inyección de estilos HSL, y la falta de validación de Firebase Storage en los Preflight Checks.
+  - **Sincronización del Mapa de la Aplicación:** Se registró la entrada en [`mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md).
+  - **Sincronización del Mapa Semántico:** Se indexó la auditoría y su Criterio de Decisión en [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md).
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_replicacion_cores_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_replicacion_cores_2026.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-25] - DOCUMENTACION: Creación del Sistema de Ventas Oficial de PROTOTIPE
+
+* **Tipo:** Documentación / Estrategia Comercial / Ventas
+* **Descripción de Cambios:**
+  - **Creación del Manual de Ventas:** Se diseñó e implementó el archivo [`sistema_ventas_prototipe.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/sistema_ventas_prototipe.md) bajo la carpeta temática de Estrategia Comercial. Este documento estructura el funnel comercial (atracción, WhatsApp, clasificación caliente/tibio/frío, reunión de diagnóstico, armado de propuesta comercial, manejo de objeciones y post-pago de implementación).
+  - **Sincronización del Mapa de la Aplicación:** Se registró el nuevo archivo en [`mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md).
+  - **Sincronización del Mapa Semántico:** Se indexó la nueva entrada y su respectivo Criterio de Decisión en [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md).
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/sistema_ventas_prototipe.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/sistema_ventas_prototipe.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-25] - CORE-079: Optimización de Rendimiento de Scroll y Consistencia de Interlineado de Títulos
+
+* **Tipo:** Rendimiento / UI/UX / CSS / JS / Tipografía / Documentación
+* **Descripción de Cambios:**
+  - **Eliminación de Transición Universal para Rendimiento de Scroll**: Se erradicó la regla de transición CSS en el selector universal `*, *::before, *::after` (que aplicaba `transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease`). Esta regla forzaba al navegador a calcular y monitorizar transiciones en cada elemento del DOM durante las operaciones de scroll y transformaciones 3D/hover, induciendo lag y caída de FPS. En su lugar, se implementó una regla acoplada a una clase temporal `.theme-transition`.
+  - **Transición de Tema Dinámica en JavaScript**: Se actualizó el manejador del botón de alternancia de tema (`#theme-toggle`) en JS para inyectar la clase `.theme-transition` al elemento raíz `html` antes de realizar el cambio, eliminándola mediante un `setTimeout` de 300ms. Esto garantiza que la transición fluida ocurra exclusivamente al cambiar de tema, liberando al navegador de procesamientos inútiles en operaciones normales de scroll.
+  - **Transiciones Selectivas en Hover**: Se agregaron transiciones optimizadas para elementos interactivos individuales en sus estados normales/hover (tales como `.nav-links a { transition: color 0.3s ease; }`), manteniendo la respuesta visual suave sin penalizar el rendimiento.
+  - **Unificación de Interlineado Global de Encabezados**: Se implementó una regla global para encabezados `h1, h2, h3, h4, h5, h6` fijando un `line-height: 1.25` por defecto y unificando la tipografía `Outfit`. Se eliminaron las declaraciones de tipografía e interlineado duplicadas en clases específicas (como `.section-header h2`, `.pain-card h3`, `.solution-box h3`, `.benefit-card h3`, `.step-card h3`, `.support-text h3`, `.support-box-info h4`, `.footer-column h4`), eliminando el interlineado heredado excesivo (`1.7` del body) y logrando una separación compacta, estética y profesional.
+  - **Reducción de Separación entre Título y Copy en Solución**: Se solucionó el excesivo espacio vertical en la tarjeta de la sección Solución (`.solution-box`) en dispositivos móviles: (1) Se redujeron los paddings laterales del contenedor `.solution-box` de `3rem` a `1.5rem` (en tablets) y a `1.2rem` (en celulares angostos), expandiendo el ancho horizontal útil para el texto. (2) Esto permitió estabilizar la frase de morphing a un máximo de 2 líneas estables sin riesgo de layout shift, habilitando disminuir el `min-height` del `h3` de `3.2em`/`4.2em` a `2.5em` (tablets) y `2.6em` (móviles). (3) Finalmente, se estrechó el `margin-bottom` de `1.5rem` a `1.2rem` y `1rem` respectivamente, eliminando por completo la separación vacía del copy.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-078: Corrección de Interceptación de WhatsApp Leads y Layout Shifts
+
+* **Tipo:** Bugs / CSS / JS / UI/UX / Estabilidad Visual / Documentación
+* **Descripción de Cambios:**
+  - **Resolución de Error de Inicialización y Anidación de IIFEs**: Se detectó y corrigió un fallo de sintaxis y anidación crítica en los scripts del final de la página (re-establecido con éxito tras una restauración manual de copia de archivo por parte del usuario). La IIFE de la funcionalidad de *Botones Magnéticos* estaba anidada erróneamente dentro de la IIFE del *Formulario de Captura de Leads Express*. Asimismo, esta última terminaba con `});` en lugar de `})();`, convirtiéndose en una expresión de función anónima no ejecutada (no-op síncrono). Se reestructuraron y separaron correctamente ambas IIFEs, y se restableció el listener global de click en `document` para interceptar enlaces `wa.me` y `api.whatsapp.com`. Esto recuperó con éxito la visualización del Modal de Leads Express de conversión. Además, se removió la exclusión `.btn-navbar` en el script del magnético, permitiendo aplicar el efecto interactivo al botón "Asesoría Gratis" del encabezado en desktop.
+  - **Mitigación de Advertencias de Origen Único (file://) y Scroll Suave con Offset**: Al hacer clic en los enlaces de anclaje de la barra de navegación (#solucion, #problema, etc.) abriendo el archivo localmente (`file://`), Chrome disparaba en la consola una advertencia de origen de seguridad única bloqueando la transición. Se implementó un interceptor de clics en JavaScript para todos los enlaces que comienzan con `#` en su `href`: el script calcula y realiza un scroll suave restando la altura física exacta del header de navegación fijo (offset), evitando que los títulos queden ocultos debajo de la navbar y previniendo la navegación nativa por defecto en entornos de desarrollo local (silenciando la advertencia al 100%). En producción (`http:`/`https:`), la URL se actualiza limpiamente con `history.pushState`.
+  - **Ajuste de Altura Mínima para Tarjeta de Solución en Móviles**: Se configuró `min-height: 7.3em;` en `.solution-box h3` bajo la media query `@media (max-width: 768px)`. Esto reserva el espacio vertical suficiente para albergar frases de hasta 3 líneas (como ocurre con la palabra dinámica "tu emprendimiento") sin deformar la tarjeta ni empujar el texto descriptivo inferior, eliminando el layout shift (brinco visual) del CRO.
+  - **Animación Typewriter de Beneficios con Cero Layout Shift**: Se refactorizó la inicialización del typewriter de `#beneficios .section-header h2`. En lugar de vaciar e inyectar caracteres síncronamente (lo que expandía la caja dinámicamente y movía todo el layout hacia abajo línea por línea), ahora se pre-renderizan todos los caracteres en spans de opacidad `0` al inicio para reservar el alto físico final exacto de inmediato. Al entrar al viewport, un temporizador revela secuencialmente la opacidad de los spans a `1`, logrando una visualización sumamente fluida y premium con un Cumulative Layout Shift de exactamente 0px.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-077: Optimización y Rediseño de Menú Hamburguesa Móvil
+
+* **Tipo:** UI/UX / CSS / Rendimiento / Responsividad / Animación / Documentación
+* **Descripción de Cambios:**
+  - **Menú Móvil a Pantalla Completa**: Se cambió el ancho de `.nav-links` de `width: 80%; max-width: 320px;` a `width: 100%; max-width: 100%;` en pantallas móviles. Esto elimina la franja lateral y brinda el ancho de pantalla completo, evitando el amontonamiento y quiebre de líneas en los enlaces extensos.
+  - **Fondo Completamente Sólido sin Transparencia**: Se removió `backdrop-filter: blur(...)` y se inhabilitó la transparencia (`rgba`), configurando un color de fondo 100% sólido del tema (`var(--color-surface)` en claro/blanco y `var(--color-bg)` en oscuro/azul profundo). Esto previene el lag de scroll y optimiza drásticamente el rendimiento de renderizado en GPU móvil.
+  - **Animación Acelerada y Fluida**: Se redujo el tiempo de la transición CSS a `0.28s` (antes `0.4s`) y se afinó la curva de movimiento a `cubic-bezier(0.25, 1, 0.5, 1)`, haciendo que la salida y el repliegue del menú se sientan instantáneos, fluidos y responsivos.
+  - **Z-Index de Control**: Se asignó un `z-index: 999;` a `.nav-links` móvil para asegurar que cubra toda la página de fondo pero manteniéndose por debajo de `.menu-toggle` (`z-index: 1000`), el cual queda por encima para permitir un cierre directo por el usuario.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-076: Mitigación de Layout Shift en Texto Cambiante de Solución
+
+* **Tipo:** UI/UX / CSS / Rendimiento / Estabilidad Visual / Documentación
+* **Descripción de Cambios:**
+  - **Mitigación de Layout Shift (Brinco de Tarjeta)**: Se inyectó la propiedad `min-height: 2.8em;` en `.solution-box h3` en la vista de escritorio para reservar el espacio vertical correspondiente a dos líneas de texto. Para resolver el brinco en dispositivos móviles tras cambios de texto de diferente longitud (como "tu emprendimiento"), se configuraron alturas mínimas y tamaños de letra responsivos: (1) En la media query `@media (max-width: 768px)`, se redujo la tipografía a `clamp(1.3rem, 4.5vw, 1.8rem)` y se inyectó `min-height: 3.2em` (suficiente para 3 líneas). (2) En la media query `@media (max-width: 480px)`, se redujo a `clamp(1.15rem, 5vw, 1.4rem)` y se estableció `min-height: 4.2em` (suficiente para 4 líneas). Esto garantiza que la tarjeta `.solution-box` y el `h3` conserven su altura física fija al 100% en todo momento sin provocar saltos de página al alternar las palabras del morphing.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-075: Centrado de Tarjetas de Dolor, Descompactación de CRO y Corrección de Recortes 3D/Errores de Consola
+
+* **Tipo:** UI/UX / CSS / JS / HTML / Responsividad / Bugs / Documentación
+* **Descripción de Cambios:**
+  - **Centrado de Tarjetas de Dolor (.pain-card)**: Reestructurado el layout de las tarjetas de la sección El Problema a un flujo de columna centrado (`flex-direction: column; align-items: center; text-align: center`). Esto distribuye simétricamente los elementos y optimiza el ancho disponible para el texto en teléfonos móviles.
+  - **Descompactación de Tarjeta de Comparación**: Incrementado el `gap` en `.visual-card` (a `1.8rem`) y en `.time-comparison-wrapper` (a `2rem`). Además, se aumentó el espacio entre elementos de fila (`.time-comparison-row` con `gap: 0.75rem`) y el margen superior del pie (`.time-comparison-footer` con `margin-top: 1.5rem`), logrando un diseño mucho más descompactado y legible.
+  - **Corrección de Espaciado tras Dos Puntos**: Se redefinió `.time-label` a `display: block` y se inyectó `margin-right: 0.45rem` en `.time-label strong`. Esto corrige el bug visual por el cual el texto del `strong` y del `span` se traslapaban y se renderizaban juntos sin espacio en dispositivos móviles (`Antes:Procesos` y `PROTOTIPE:registrado`).
+  - **Resolución de Recortes 3D en Testimonios**: Añadido padding vertical extra (`padding-top: 1.5rem; padding-bottom: 2.5rem; margin-top: -1.5rem;`) y forzado `overflow-y: visible !important;` en `.testimonials-grid` para carrusel móvil. Esto proporciona el espacio de proyección Z necesario para la rotación 3D de las tarjetas sin que el navegador mutile sus esquinas superior e inferior.
+  - **Remoción de Buscador de FAQ**: Eliminado por completo el HTML del buscador de Preguntas Frecuentes (`.faq-search-container`), el estilo CSS (`#faq-search-input:focus`) y el script JS encargado de realizar los filtros de búsqueda según la instrucción directa del usuario.
+  - **Resolución de Error del Service Worker en Consola**: Se inyectó la validación `window.location.protocol !== 'file:'` y se acopló un bloque `try/catch` de contingencia. Esto evita que el navegador intente registrar el Service Worker y arroje un `TypeError` cuando el usuario abre la Landing Page de manera puramente local desde su explorador de archivos.
+  - **Corrección de Sintaxis DOMContentLoaded**: Se corrigió el cierre del listener principal DOMContentLoaded (cambiando `})();` por `});`) solucionando el SyntaxError de fin de input inesperado.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-074: Escalado de Ilustración Hero, Remoción de Focus Rings y Bloqueo Global de Selección
+
+* **Tipo:** UI/UX / CSS / Responsividad / Estética / Usabilidad / Documentación
+* **Descripción de Cambios:**
+  - **Ilustración del Hero más grande**: Se incrementó el `max-width` global de `.hero-illustration` de `480px` a `560px` para dotar de mayor presencia a la ilustración en escritorio y pantallas medianas.
+  - **Optimización de espacio en móvil**: Se redujo el padding horizontal de `.container` en pantallas móviles (`@media (max-width: 576px)`) a `1.25rem`, permitiendo que el SVG interactivo y el contenido de texto se estiren horizontalmente y ganen mayor tamaño.
+  - **Remoción definitiva de contornos de enfoque y sombras azules**: Se inyectó la propiedad `outline: none !important;` y `-webkit-tap-highlight-color: transparent !important;` de forma universal (`*`). Adicionalmente, se anularon los halos de enfoque en `:focus` y `:focus-visible` de botones, enlaces y menús, impidiendo que el navegador aplique su caja de sombreado o halo azul nativo en cualquier elemento.
+  - **Bloqueo global de copia y selección de texto**: Se deshabilitó la selección accidental de texto con `user-select: none !important` (y sus respectivos prefijos) de manera global mediante un selector exceptuando explícitamente a los campos `<input>` y `<textarea>` para no interferir con la captura de Leads en el formulario.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-073: Reducción de Tamaño de Texto del Hero en Versión Móvil
+
+* **Tipo:** UI/UX / CSS / Responsividad / Documentación
+* **Descripción de Cambios:**
+  - **Reducción de tamaño del párrafo del Hero**: Se aplicó una regla responsiva `.hero-content p { font-size: 1rem; }` dentro de la media query `@media (max-width: 576px)`. Esto disminuye el tamaño del párrafo descriptivo en pantallas móviles desde `1.2rem` a `1rem`, restaurando la jerarquía tipográfica con respecto al título H1 (que baja a `2.1rem` en móviles) para evitar que parezcan de dimensiones similares.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-072: Optimización de Botones Magnéticos, Remoción de Líneas de Flujo y Rediseño de Theme Toggle
+
+* **Tipo:** UI/UX / Interactividad / Estética / CSS / JS / HTML / Documentación
+* **Descripción de Cambios:**
+  - **Efecto de Botón Magnético Mejorado**: Se incrementó la zona de interacción reactiva del cursor (padding virtual de 16px y margen negativo compensatorio de -16px) en la clase `.btn-magnetic-wrapper` de todos los botones magnéticos. Esto soluciona por completo el jittering (temblor) visual producido cuando el transform del botón desplazaba el cursor fuera de sus límites físicos.
+  - **Botón Magnético en WhatsApp y Encabezado**: Se adaptó el wrapper del WhatsApp FAB para posicionarse de forma fija mediante `width: 98px; height: 98px; bottom: calc(2rem - 20px); right: calc(2rem - 20px);` de manera que el FAB de 58x58px quede perfectamente centrado y con un área activa fluida en desktop (retornado a la normalidad en móviles sin el wrapper). El botón "Asesoría Gratis" del encabezado (`.btn-primary.btn-navbar`) ahora cuenta de igual forma con el efecto magnético en su totalidad y sin desalineación.
+  - **Hotfix de Sombra (Glow) Persistente**: Se corrigió una anomalía por la cual la sombra difuminada radial de los botones magnéticos se quedaba permanentemente activa tras retirar el cursor. Se inyectó una reconfiguración explícita de `glow.style.opacity = '0'` en el event listener `mouseleave` en JS, lo que garantiza el apagado inmediato del glow al perder interacción.
+  - **Rediseño Premium de Modo Claro/Oscuro**: Se reconstruyó el botón de alternancia de tema (`theme-toggle-btn`) reemplazando los emojis planos (`☀️`/`🌙`) por dos iconos SVG premium en línea del Sol y de la Luna. Se añadieron transformaciones CSS avanzadas de rotación cruzada y escalado dinámico (`transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)`) acoplados directamente al estado del root element (`html.dark`), eliminando la manipulación de texto en JS.
+  - **Remoción de Líneas de Flujo SVG**: Se removieron de forma limpia las dos líneas de flujo SVG verticales discontinuas animadas que conectaban la sección Hero con Rubros y Rubros con Problema, logrando un espaciado visual más limpio y unificado.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-071: Enriquecimiento Estético de Fondo, Glow Blobs y Visibilidad de Partículas
+
+* **Tipo:** UI/UX / Estética / Animaciones / CSS / HTML / Documentación
+* **Descripción de Cambios:**
+  - **Ajuste de Visibilidad de Partículas (Hero Canvas)**: Se triplicó la opacidad de los nodos de partículas (de `0.12` a `0.28`) y de sus líneas de interconexión (de `0.06` a `0.18`) en el canvas del Hero. Esto incrementa de forma elegante su visibilidad sin generar ruido ni sobrecargar la jerarquía visual de la sección.
+  - **Glow Blobs de Fondo (Efecto Aurora/Respiración)**: Se inyectaron dos elementos dinámicos de fondo (`.glow-blob glow-blob-primary` y `.glow-blob glow-blob-secondary`) en la sección Hero. Utilizan degradados radiales difuminados de los colores de la marca (azul primario y violeta secundario).
+  - **Efecto de Respiración Adaptativo**: Se implementó una animación CSS de transformación de escala y traslación (`blob-pulse`) de 12 segundos con ciclos alternos. Se definieron variables CSS específicas para la opacidad mínima, media y máxima adaptables de forma nativa a los temas claro (`--blob-opacity-min: 0.12`, etc.) y oscuro (`--blob-opacity-min: 0.08`, etc.), logrando un efecto orgánico e integrado sin negros absolutos.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-070: Robustecimiento de WhatsApp FAB/Botones e Integración de Formulario Lead Express
+
+* **Tipo:** Conversión (CRO) / Leads / HTML / CSS / JS / Documentación
+* **Descripción de Cambios:**
+  - **Modal de Captura de Leads Express**: Se maquetó e integró un modal (`#lead-modal`) con diseño premium, bordes redondeados y fondos glassmorphic adaptables al modo claro y oscuro, ubicado estratégicamente antes del cierre de body.
+  - **Refactorización de Contenedor (Bugfix)**: Se reestructuró la maquetación HTML de manera que la etiqueta `<form>` actúa directamente como el contenedor del modal (`modal-container lead-modal-container`), asegurando que todos los elementos (header, body, footer) sean hijos directos del flex container, solucionando la anomalía de desbordamiento exterior de los botones de acción.
+  - **Remoción Completa de Scrollbar**: Se configuró la altura máxima a `90vh !important` y se compactaron los paddings de cabecera/cuerpo/pie y los márgenes verticales de los inputs. Esto redujo la altura total a 420px, logrando que el modal quepa en su totalidad de forma limpia y sin scrollbars verticales tanto en teléfonos móviles (probado en viewport 375x667) como en computadoras.
+  - **Estructura de Datos Básicos y Flexibilidad**: El formulario recopila Nombre completo (obligatorio), Celular/WhatsApp (obligatorio) y Correo electrónico (opcional, aclarando de forma amigable que el campo se puede dejar vacío si el cliente no posee o no maneja correo).
+  - **Adaptabilidad y UX Móvil**: Se diseñaron estilos responsivos específicos para el modal en teléfonos móviles (pantallas ≤ 480px) apilando verticalmente los botones del formulario y ajustando los márgenes, impidiendo desbordamientos y facilitando la interacción táctil.
+  - **Intercepción Global Inteligente de WhatsApp (`wa.me`)**: Se implementó un script autoejecutable que intercepta mediante delegación de eventos clics en cualquier enlace que contenga `wa.me`. Cancela la redirección por defecto, abre el modal, y resguarda la URL de destino para procesar su número de teléfono y parámetros de mensaje de forma dinámica.
+  - **Enriquecimiento contextual de Mensajes**: Tras enviar los datos del formulario, se extrae el mensaje original del botón seleccionado y se compila un nuevo mensaje estructurado amigablemente con la cabecera `📢 [Prototype Web]` (identificador de origen) y los datos de contacto del lead. La redirección a WhatsApp se ejecuta en una pestaña nueva con el enlace final parametrizado.
+  - **Corrección de Codificación de Emojis (Bugfix Emojis)**: Se convirtieron todos los emojis del script JS (`📢`, `👤`, `✉️`, `📞`) a secuencias de escape Unicode de ES6 (`\u{1F4E2}`, `\u{1F464}`, `\u{2709}\u{FE0F}` y `\u{1F4DE}`). Esto erradica de raíz el error de visualización de diamantes con signos de interrogación (caracteres de reemplazo de decodificación) causado cuando el navegador de origen interpreta la página bajo codificaciones locales como ANSI / Windows-1252.
+  - **Bypass de Enlaces wa.me a API de WhatsApp**: Se reemplazaron todas las referencias y redirecciones del subdominio corto `wa.me` por llamadas directas al endpoint `api.whatsapp.com/send`. Esto soluciona un bug crítico de decodificación del propio servidor de redirecciones de WhatsApp, el cual corrompía los bytes percent-encodados de UTF-8 de los emojis transformándolos en rombos con signo de interrogación () al inyectarlos en la interfaz del chat.
+  - **Accesibilidad por Teclado en la Calculadora (A11y)**: Se implementó soporte completo de navegación por teclado (Space, Enter, Escape, ArrowUp y ArrowDown) para los selectores customizados de la calculadora, inyectando los atributos de accesibilidad correspondientes (`role="listbox"`, `role="option"`, `aria-selected` y `tabindex="0"`).
+  - **Persistencia de Leads (LocalStorage)**: Se configuró el almacenamiento automático en LocalStorage de los datos del lead tras su primer envío, permitiendo auto-completar los campos de Nombre, Celular y Correo en futuras aperturas del modal para evitar redundancias y potenciar la tasa de conversión (CRO).
+  - **Micro-animación y Estado de Carga ("Redirigiendo...")**: Se añadió una micro-animación de carga (spinner giratorio SVG) y desactivación del formulario durante 800ms tras presionar enviar, previniendo dobles envíos y optimizando la fluidez de redirección.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-069: Corrección de Icono Calculadora, Estabilización de Beneficios y Alineación Simétrica de KPIs
+
+* **Tipo:** UI/UX / Correctivo / Responsivo / Animaciones / CSS / JS / Documentación
+* **Descripción de Cambios:**
+  - **Sustitución de Icono Calculadora (Trigger):** Se reemplazó el SVG de la calculadora colapsada por el SVG oficial de Lucide, eliminando la línea base (patas de soporte) que simulaba visualmente una papelera de reciclaje.
+  - **Responsividad de Trigger en Móvil:** Se inyectaron reglas CSS responsivas (`@media (max-width: 576px)`) para reducir paddings a `1rem 1.25rem` y configurar gap de `1rem`, disminuyendo tamaños de fuentes en `h4` y `p` para que el texto de la tarjeta trigger no se comprima ni desborde en viewports angostos.
+  - **Estabilización de Scroll (Remoción de Animación en Beneficios):** Se eliminó por completo el colapso dinámico de copy en `.benefit-card` (IntersectionObserver y transiciones de max-height/opacity en el párrafo descriptivo). El contenido se muestra de manera estática y estable por defecto, erradicando el Layout Shift y los saltos/oscilaciones de scroll.
+  - **Alineación Sincrónica de KPIs ("Negocio Organizado"):** Se definieron alturas mínimas en desktop y móvil para títulos (`h3`) y valores (`.organizado-value`), y se aplicó `margin-top: auto` en `.organizado-status-badge` en las tres tarjetas. Esto garantiza que todos los elementos (títulos, números, porcentajes y badges verdes) estén milimétricamente alineados horizontalmente en todas las resoluciones.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-068: Optimización de UX de Beneficios, Dashboard de KPIs Móvil y Ajuste de Testimonios
+
+* **Tipo:** UI/UX / Responsivo / Móvil / Animaciones / CSS / JS / Documentación
+* **Descripción de Cambios:**
+  - **Despliegue Dinámico de Beneficios (Scroll Accordion):** Se inyectaron estilos colapsables CSS (`max-height: 0`, `opacity: 0`, `overflow: hidden`) en `.benefit-card p`. Se configuró un `IntersectionObserver` en JS con `rootMargin: '-15% 0px -15% 0px'` y `threshold: 0.15` para añadir/remover la clase `.active`, de forma que el texto de cada beneficio se expanda suavemente al llegar al centro de la pantalla y se contraiga al salir, optimizando el espacio vertical del scroll.
+  - **Mini-Dashboard de KPIs ("Negocio Organizado"):** Reestructuración responsiva en viewports móviles (≤ 768px) para agrupar las tres tarjetas del dashboard (Ventas, Inventario, Clientes) en una sola fila horizontal compacta de 3 columnas (`grid-template-columns: repeat(3, 1fr)`) reduciendo paddings, dimensiones de iconos y fuentes tipográficas, resolviendo la saturación de pantalla vertical.
+  - **Alineación de Testimonios sin Scroll Interno:** Ajuste de altura a `350px` en móviles para `.flip-inner` de los testimonios responsivos, reduciendo el padding a `1.4rem 1.1rem` y el gap a `0.7rem`. Esto garantiza que los textos y botones en el frente y dorso caben a la perfección sin desbordamientos ni scroll vertical innecesario.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-067: Corrección de Scroll Dropdown, Responsividad en Botón WhatsApp y Autocalibración de Giroscopio Móvil
+
+* **Tipo:** UI/UX / Responsivo / Móvil / Giroscopio / CSS / JS / Documentación
+* **Descripción de Cambios:**
+  - **Scroll Contenido en Dropdowns (`.custom-options`):** Se inyectaron las propiedades CSS `overscroll-behavior: contain` y `-webkit-overflow-scrolling: touch` para mitigar el arrastre de la página de fondo al navegar por la lista de opciones desplegables de la calculadora.
+  - **Optimización Responsiva de Botón WhatsApp (`#config-cta-btn`):** Se crearon estilos específicos de móvil para reducir el padding de la tarjeta de resultado a `1.25rem 1rem` y escalar tipografía/padding del botón de WhatsApp en la calculadora (`font-size: 0.88rem`, `padding: 0.8rem 1.2rem`), garantizando visualización fluida sin textos fracturados.
+  - **Autocalibración Dinámica de Giroscopio Móvil:** Se reemplazó la calibración fija de 45° por un algoritmo de línea base adaptable (Dynamic Baseline Calibration) con filtro de paso bajo (lerp de `0.04`) en el listener del sensor. El punto neutro de inclinación se adapta automáticamente a la postura de sujeción del móvil del usuario (acostado horizontalmente, inclinado, etc.), eliminando la desalineación permanente y auto-centrando las tarjetas de forma progresiva e ininterrumpida.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-066: Optimización de Rendimiento General de Animaciones y Aceleración por GPU
+
+* **Tipo:** Rendimiento / GPU / CSS / JS / Animaciones / Documentación
+* **Descripción de Cambios:**
+  - **Aceleración por GPU en CSS (Tarjetas):** Se inyectaron las propiedades CSS `will-change: transform`, `backface-visibility: hidden` y `transform-style: preserve-3d` en las reglas `.rubro-card` y `.flip-inner` de testimonios 3D para indicarle al navegador que renderice estas transformaciones tridimensionales en capas de composición independientes en la GPU, previniendo repintados repetidos (DOM repaints) y eliminando el lag.
+  - **Optimización de Renderizado en Canvas del Hero:** Se optimizó el loop JavaScript del canvas de partículas animadas (`#hero-canvas`) mediante `IntersectionObserver`. Cuando el usuario hace scroll hacia abajo y la sección `#hero` sale de vista, el observer desactiva la bandera de animación y ejecuta `cancelAnimationFrame` deteniendo por completo el dibujo en canvas a 60 FPS. Al reingresar al viewport, se reactiva e inicia automáticamente con `requestAnimationFrame(draw)`, eliminando el consumo ocioso de recursos en móviles y desktop.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-065: Rediseño de la Calculadora CRO, Retos Dinámicos por Nicho y Colapso por Trigger
+
+* **Tipo:** Conversión (CRO) / UI/UX / HTML / CSS / JS / Documentación
+* **Descripción de Cambios:**
+  - **Remoción de Emojis:** Se eliminó el emoji de cohete del título principal de la calculadora.
+  - **Custom Selects Premium:** Se implementaron selectores visuales personalizados con estructura HTML (`.custom-select-container`, `.custom-select-trigger`, `.custom-options`, `.custom-option`) estilizados con diseño glassmorphic adaptable al modo claro/oscuro, bordes redondeados de 8-10px, efectos hover con HSL y rotación de flecha indicadora. Estos Custom Selects se sincronizan automáticamente con los selectores nativos ocultos.
+  - **Base de Datos Dinámica e Investigada (32 Combinaciones):** Se estructuraron 4 retos/dolores operacionales reales e investigados para cada uno de los 8 rubros de negocio del ecosistema. Al cambiar de rubro, la lista desplegable de retos se repobla automáticamente con opciones específicas y personalizadas.
+  - **Calculadora Colapsada por Defecto:** Se ocultó el contenedor de la calculadora (`.configurador-container`) por defecto. Se diseñó una tarjeta trigger atractiva (`.configurador-trigger-card`) con un icono de calculadora animado con pulso y una flecha indicadora deslizante en hover. Al hacer clic en ella, la calculadora se despliega in-place mediante transiciones de escala y opacidad. Se añadió un botón de cierre en la calculadora para volver a colapsarla y liberar espacio vertical de navegación.
+  - **Hotfix de Sintaxis JS:** Se corrigió un truncamiento accidental de código en la función autoejecutable de la animación de partículas del botón de WhatsApp (`n = window.innerWidth > 768 ? 16 : 8`) que arrojaba un `SyntaxError` global en el motor JS de la landing page, restaurando al 100% el funcionamiento interactivo de la tarjeta trigger y el colapso de la calculadora.
+  - **Optimización de Latencia en Tilt 3D (60 FPS):** Se solucionó la pesadez y retraso (lag) de renderizado en el efecto de Inclinación 3D general. Se inyectó lógica en JS para desactivar dinámicamente la propiedad `transition` de CSS en el evento `mouseenter` (`card.style.transition = 'none'`), logrando un seguimiento inmediato del cursor del ratón a 60 FPS. La transición se reactiva al salir (`mouseleave`) para garantizar que la tarjeta regrese suavemente a su posición inicial sin saltos bruscos.
+  - **Inclinación 3D Giroscópica en Móviles:** Implementación de la Device Orientation API en viewports móviles (≤ 768px). Las tarjetas se inclinan tridimensionalmente en base al movimiento físico real del teléfono en las manos del usuario. Se optimizó el consumo de energía filtrando con un `IntersectionObserver` para activar el cálculo únicamente en las tarjetas en pantalla, limitando la tasa de eventos a ~30Hz, y suavizando la animación con `requestAnimationFrame`.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-064: Refinamiento de Animaciones y Efecto Tilt 3D Selectivo
+
+* **Tipo:** Animaciones / UI/UX / HTML / JS / Refactorización / Documentación
+* **Descripción de Cambios:**
+  - **Efecto Tilt 3D en Rubros:** Se integraron las tarjetas de rubro (`.rubro-card`) en el script de inclinación 3D para la vista desktop. Se inyectó lógica JS para leer dinámicamente la clase y asignar un factor de escala adaptativo de `1.03` (igual a su hover CSS), logrando una transición fluida libre de saltos de tamaño.
+  - **Exclusión de FAQ del Tilt 3D:** Se modificó el selector en el IntersectionObserver y listeners de eventos en JavaScript para excluir explícitamente las tarjetas colapsables de preguntas frecuentes (`.faq-item`), previniendo inclinaciones tridimensionales que pudieran interferir con la legibilidad del contenido de respuestas expandidas.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-063: Optimización SEO y Tasa de Conversión (CRO) en Landing Page
+
+* **Tipo:** SEO / CRO / HTML / CSS / JS / Conversión / Documentación
+* **Descripción de Cambios:**
+  - **Esquema JSON-LD (SEO):** Inyección de datos estructurados en formato JSON-LD en el head para registrar a PROTOTIPE bajo el esquema `ProfessionalService` con su teléfono, URL, área de cobertura (Colombia/LATAM) y descripción comercial.
+  - **Tag URL Canónica:** Agregado `<link rel="canonical" href="https://prototipe.com/" />` para evitar penalizaciones por contenido duplicado.
+  - **Accesibilidad en SVG Hero:** Integrados atributos `role="img"`, `aria-labelledby` y etiquetas internas `<title>` y `<desc>` en la ilustración interactiva del Hero para mejorar el rastreo semántico.
+  - **Calculadora de Diagnóstico Express (CRO):** Desarrollo de un widget dinámico interactivo en la sección de rubros que asocia 32 combinaciones de nicho de negocio y dolor operacional para arrojar una propuesta recomendada inmediata y auto-formatear un enlace personalizado directo a WhatsApp.
+  - **Acordeón FAQ (CRO/SEO):** Maquetación de la sección `#faq` con acordeones premium expansivos basados en `<details>` y `<summary>`. Se programó lógica JS de auto-cierre exclusivo de ítems abiertos para optimizar la experiencia visual de lectura.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-062: Interactividad Máxima y 10 Animaciones Profesionales en Landing Page
+
+* **Tipo:** UI/UX / HTML / CSS / JS / Animaciones / Interactividad / Documentación
+* **Descripción de Cambios:**
+  - **Hero Canvas Particles:** Inyección de `<canvas id="hero-canvas">` y JS de partículas fluidas e interconexión de nodos reactivos a la posición del cursor (solo si `prefers-reduced-motion` no está activo).
+  - **Rubros Stagger + Ripple:** Animación stagger de entrada secuencial de tarjetas mediante `animation-delay` en CSS y propagación de ondas ripple personalizadas al hacer clic con puntero sobre cualquier `.rubro-card`.
+  - **Dolor Counter:** Un acumulador digital animado en `#problema` que simula en tiempo real el tiempo administrativo perdido acumulado del día de hoy en un negocio no organizado.
+  - **Morphing de Texto Solución:** Dinamismo de palabra clave en el `h3` de `#solucion` alternando suavemente entre giros comerciales comunes ("tu ferretería", "tu restaurante", "tu taller", etc.) para generar empatía y personalización.
+  - **Typewriter Beneficios:** Animación progresiva de máquina de escribir sobre el título principal de `#beneficios` acompañada de cursor parparante que se auto-elimina al completarse.
+  - **Confetti en Organizado:** Explosión de partículas de confeti en las tarjetas de `#negocio-organizado` al entrar al viewport mediante `IntersectionObserver`. **Ajuste:** Se removieron los círculos de carga SVG (gauges) en las esquinas por considerarse sobrecargados e innecesarios, purificando la visual del dashboard.
+  - **Corrección de Testimonios (Evitar Desbordes):** Se aumentó la altura mínima de las tarjetas flip-inner de testimonios (`min-height: 350px` en desktop y `380px` en móviles) para evitar que la información del autor (nombre, rol y emojis) desborde los límites de las tarjetas con textos largos.
+  - **Rediseño de Pasos (Cómo Funciona):** Se eliminó por completo la línea divisoria vertical del timeline por ser innecesaria en el layout horizontal. Se rediseñó la numeración de los pasos (`.step-num`) purgando el fondo rectangular azul translúcido tosco por un número grande minimalista que cambia de color (gris a azul primario) e incrementa su tamaño sutilmente al encenderse con la clase `.step-lit`.
+  - **Soporte Ping Badge:** Lógica inteligente que evalúa la hora local del visitante para adaptar el texto e ícono de estado del soporte (En línea / Respuesta rápida vía WhatsApp).
+  - **CTA Particle Burst:** Explosión de partículas vectoriales de color al presionar el botón de contacto de WhatsApp final en `#cta`.
+  - **Alineación 3D Tilt:** Exclusión de las tarjetas de testimonios en el script de inclinación 3D del cursor para evitar conflictos de animaciones con el efecto flip-card.
+  - **Mobile Tap Hints (Revisión v3):** Inyección de la clase y estilos CSS responsivos para `.mobile-tap-hint` y `.rubro-tap-hint` ("Toca para ver 👆") con animación de pulso infinito para incitar y guiar el toque en móviles, además de perfeccionar la visibilidad ocultando al 100% (opacity 0) el contenido frontal de la tarjeta cuando el overlay está activo.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-061: Escala Premium Landing Page — 13 Mejoras de Conversión, Navegación, UX y Mobile
+
+* **Tipo:** UI/UX / HTML / CSS / JS / Animaciones / Responsividad / Documentación
+* **Descripción de Cambios:**
+  - **WhatsApp FAB:** Botón flotante verde fijo en esquina inferior derecha con SVG oficial de WhatsApp, anillo de pulso verde (`@keyframes waPulse`), aparición con transición suave tras 1.5s y hover con elevación. No interfiere con el contenido.
+  - **Micro-copy de Confianza Hero:** Tres sellos de garantía con puntos verdes bajo los CTAs del hero: "Sin costos ocultos", "Soporte directo por WhatsApp", "Adaptado a tu negocio".
+  - **Sección `#testimonios`:** Nueva sección entre `#negocio-organizado` y `#como-funciona` con grid de 3 tarjetas de testimonio (ferretería Bogotá, restaurante Medellín, taller Cali), cita decorativa, estrellas doradas y avatar emoji.
+  - **Sección `#rubros`:** Nueva sección entre `#hero` y `#problema` con grid de 8 tarjetas de rubros (ferretería, restaurante, taller, peluquería, tienda, farmacia, emprendimiento, negocio familiar) con hover elevation y link a WhatsApp para rubros no listados.
+  - **Scroll Progress Bar:** Barra de 3px en el top del viewport con gradiente azul animado que muestra el progreso de scroll. Listener pasivo de alto rendimiento.
+  - **Navbar Active Section:** `IntersectionObserver` sobre las 6 secciones principales. Al entrar en viewport, el enlace del navbar correspondiente recibe clase `.nav-active` con subrayado animado `scaleX` desde 0 a 1.
+  - **Hero H1 Word-by-Word:** El título H1 del hero se divide en `<span>` por palabra con `animation-delay` incremental de `0.07s`, creando una entrada escalonada desde abajo. Se ejecuta antes del DOMContentLoaded para máxima velocidad.
+  - **Tilt 3D en Cards:** `mousemove`/`mouseleave` en todas las `.glass-card` aplicando `perspective(900px) rotateX/Y` máximo ±4°. Solo activo en `window.innerWidth > 768` para no afectar móvil.
+  - **Tipografía Responsive `clamp()`:** `.section-header h2` y `.solution-box h3` usan `clamp()` para escala fluida. Media query `768px` ajusta padding de secciones a `3.5rem` y margin del header a `2.5rem`.
+  - **Botones Full-Width Móvil:** En `@media (max-width: 480px)` los botones del hero son `width: 100%`. FAB reducido a 52px.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-060: Humanización de Landing Page y Tarjetas Visuales de Confianza
+
+* **Tipo:** UI/UX / HTML / CSS / JS / Animaciones / Documentación
+* **Descripción de Cambios:**
+  - **Tarjeta "Antes y Después":** Inyección de la tarjeta de comparación `.before-after-card` en la sección `#problema`, mostrando el contraste entre la fricción diaria del trabajo manual y la tranquilidad del orden digital de PROTOTIPE.
+  - **Tarjetas de Beneficios Dinámicos:** Adición de dos tarjetas al final de `#beneficios`: una lista de control elástica progresiva ("Tu negocio hoy, bajo control") y una gráfica comparativa de horas administrativas de trabajo diario ("Menos tiempo organizando, más tiempo atendiendo") con barras animadas y etiquetas de tiempo externas para prevenir problemas de legibilidad.
+  - **Sección Intermedia Interactiva:** Creación de la sección `#negocio-organizado` ("Así se siente un negocio organizado") con un grid de 3 tarjetas (Ventas del día, Inventario disponible y Clientes atendidos). Se implementó un algoritmo de Javascript Count-Up a 60 FPS con suavizado cuadrático para animar el conteo de los números desde cero hasta sus valores finales (formateando las cifras con formato regional de pesos colombianos es-CO).
+  - **Tarjeta de Estado del Día en Soporte:** Inyección de una tarjeta operativa en la columna derecha de `#soporte` que detalla los logros operativos del día de un negocio digitalizado (caja cuadrada, inventario al día, pedidos a tiempo, clientes conformes) con checks dinámicos elásticos.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-059: Enriquecimiento Dinámico y Animaciones del Ecosistema de Landing Page
+
+* **Tipo:** UI/UX / CSS / HTML / Vectorial (SVG) / Interactividad / Documentación
+* **Descripción de Cambios:**
+  - **Efecto de Flotación Global:** Inyección de animación keyframe `.floatIllustration` en la ilustración vectorial del Hero para que oscile verticalmente de manera fluida en loops infinitos.
+  - **Interactividad del SVG (Widgets en Hover):** Envoltura de las secciones de "Ventas del Mes", "Lista de Control" y "Últimos Pedidos" en etiquetas de grupo interactivo (`.svg-card-interactive`). Se programaron transiciones de escala elástica (`scale(1.06)`) y sombras de resplandor HSL dinámicas (`drop-shadow` de color de marca primario) para invitar a ser pulsados.
+  - **Animación del Gráfico y Nodos:** Se añadió la animación de dibujado automático (`.svg-chart-line` mediante `stroke-dashoffset` keyframes) y se inyectaron clases pulsantes continuas (`.svg-chart-dot` y `.svg-chart-dot-delayed` con animaciones infinitas de escala) en los círculos de datos.
+  - **Botones Dinámicos (Efecto Shimmer y Springs):** Integración de un efecto de brillo metálico animado (`shimmer`) en los botones primarios `.btn-primary` mediante gradientes en pseudo-elementos ::after, configurando también transiciones Bezier de elevación y escala elástica al pasar el cursor y contracción al presionar (`btn:active`).
+  - **Elevación Elástica en Tarjetas:** Modificación de las propiedades de transición de `.glass-card` con Bezier cúbicos elásticos (`cubic-bezier(0.34, 1.56, 0.64, 1)`) que elevan las tarjetas `6px`, aumentan su tamaño a `1.025` y colorean su borde con el color primario de marca al hacer hover.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-058: Implementación de Secciones Legales e Integridad de Contacto en Footer
+
+* **Tipo:** UI/UX / HTML / CSS / JS / Legal / Documentación
+* **Descripción de Cambios:**
+  - **Saneamiento del Footer (Contacto):** Remoción de la ubicación física "Bogotá, Colombia" e indicación explícita de "Soporte Correo" para `contacto@prototipe.com` a fin de depurar los canales de contacto directo de la empresa.
+  - **Términos de Servicio Interactivos:** Creación e inyección del modal `#modal-terminos` que regula el objeto del desarrollo a medida, las licencias no exclusivas del core de software, el soporte y la propiedad de los datos.
+  - **Política de Privacidad Interactiva:** Creación e inyección del modal `#modal-privacidad` regulando la confidencialidad, la seguridad de las bases de datos aisladas, los accesos restringidos para mantenimiento y la portabilidad de los datos comerciales.
+  - **Controlador JavaScript y Accesibilidad:** Implementación de funciones para abrir/cerrar modales, enfocar botones de cierre por defecto, desactivar el scroll de la página principal (`overflow: hidden`), cerrar haciendo clic fuera del modal (backdrop blur) o presionando la tecla `Esc`.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-051: Rediseño Radical Corporativo y Humano de la Landing Page
+
+* **Tipo:** UI/UX / Diseño / CSS / HTML / Documentación
+* **Descripción de Cambios:**
+  - **Alineación con el Brief de Marca:** Reemplazo de la maquetación oscura/neón/tecnológica de `Index.html` por un enfoque claro, humano, profesional y centrado en la consultoría de negocios.
+  - **Paleta Cromática y Tema Claro Predeterminado:** Configuración de fondo `#F8FAFC`, tarjetas `#FFFFFF`, textos en Slate (`#1E293B` y `#64748B`), azul corporativo `#2563EB` y color éxito `#10B981`.
+  - **Modo Oscuro con Persistencia:** Integración de un toggle en la barra superior con los iconos ☀️ y 🌙 que aplica transiciones CSS suaves de 300ms, evita negros absolutos utilizando `#0F172A` de fondo, y persiste la selección del usuario en `localStorage` (con script anti-flash que inyecta la clase `.dark` síncronamente al cargar la página).
+  - **Simplificación y Purgado de Efectos:** Se eliminaron las partículas, glows radiales en movimiento, destellos en bordes de tarjetas y la calculadora interactiva de ROI de fugas de dinero para maximizar la simplicidad y cercanía del sitio.
+  - **Contenido Reestructurado de Brief:**
+    * *Hero Principal*: Título de confianza, subtítulo humano y botones limpios sin animación elástica de resorte, incorporando una ilustración interactiva SVG inline que representa el control operativo de un negocio.
+    * *Problema*: *"Muchos negocios trabajan más de lo necesario."* Tarjetas detallando uso de papel, información dispersa, procesos repetitivos, falta de control y pérdida de tiempo.
+    * *Solución*: *"Una herramienta adaptada a tu negocio."* Enfoque en el acompañamiento a la medida de las necesidades reales de cada empresa.
+    * *Beneficios*: Tarjetas organizadas con iconos Lucide vectoriales (Más organización, control, menos errores, más tiempo, mejor atención y crecimiento ordenado).
+    * *Cómo funciona*: Pasos numerados del 01 al 04 (Reunión, Análisis, Diseño e Implementación).
+    * *Soporte*: *"No estarás solo."* Capacitación, WhatsApp, soporte rápido, actualizaciones y tiempos de respuesta comprometidos (24h generales / urgentes inmediato).
+    * *Confianza & CTA*: Píldora de confianza *"Cada negocio es diferente..."* y enlace directo a WhatsApp.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-056: Preflight Check de Firebase, Gestión de Drift de Reglas y Purgado de Seeding/IA
+
+* **Tipo:** Refactorización / Firebase / Seguridad / Calidad / UI / Purga
+* **Descripción de Cambios:**
+  - **Preflight Check de Firebase:** Se creó la función `validateFirebaseCredentials` en `generator.js` haciendo uso de la API REST nativa de Google/Firebase para validar el ID del proyecto y la API Key de Firebase al vuelo. Se adaptó la función `checkEnvironment` para abortar proactivamente el flujo de aprovisionamiento si el check de credenciales falla.
+  - **Dashboard Firebase Drift & Rules Deploy:** Se implementaron endpoints (`GET /api/project/firebase-rules/drift-global` y `POST /api/project/firebase-rules/deploy`) en `server.js` que se comunican con Firebase CLI local de forma no interactiva (leyendo el configstore `firebase-tools.json`). Se actualizó `dev-dashboard` con la pestaña de "Reglas Firebase (Drift & Deploy)", permitiendo auditar visualmente el estado de desalineación local vs nube y realizar despliegues en un solo clic con diff interactivo.
+  - **Purgado Absoluto de Seeding y Código/Doc de IA:** Se eliminaron todos los scripts de seeding (`seed_brand.js` y `seed_ropa_interior.js`) y las preguntas interactivas del CLI correspondientes. Se removieron de todo el ecosistema los blueprints, carpetas de componentes de biblioteca (`Formulario_Producto_IA`, `ProductFormModal_IA`), scripts (`generate_ia_map.js`), planos (`mapa_arquitectura_ia.md`, `plan_implementacion_ia.md`) y el manual técnico de mapas de IA (`manual_ia_maps.md`), purgando también las alusiones a "Asistente Premium" de la UI del dashboard y desenganchando la tarea `map` del ciclo de compilación.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/cli.js`](file:///d:/PROTOTIPE/Prototipe-CLI/cli.js) [MODIFY]
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+  - Varios `package.json` [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-055: Auditoría, Robustecimiento y Marca Blanca en Motor de Aprovisionamiento
+
+* **Tipo:** Refactorización / Scaffolding / Firebase / Calidad / Marca Blanca
+* **Descripción de Cambios:**
+  - **Heredar `firebase.json` de la Plantilla Core:** Se modificó [`generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) para que si el archivo `firebase.json` ya existe en la plantilla copiada, lo conserve de forma nativa en lugar de sobrescribirlo con el JSON estático hardcodeado. Esto garantiza que todos los servicios y configuraciones vigentes del Core se hereden en las nuevas marcas sin desfases.
+  - **Sincronización de Reglas de Storage y Sembrador:** Se añadieron `'storage.rules'` y la carpeta `'scratch'` (que aloja a [`seed_brand.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/scratch/seed_brand.js)) a la lista `SYNC_PATHS` de [`sync_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js). Esto soluciona el bug de aprovisionamiento en el cual la carpeta `scratch/` no existía y la base de datos se creaba vacía sin la siembra inicial obligatoria de `appConfigStore`.
+  - **Marca Blanca en `package.json`:** Se inyectó lógica en [`generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) para personalizar dinámicamente el campo `"name"` de `package.json` del cliente con su `clientId` correspondiente (ej: `app-ventas-moni-app` en lugar de `app-ventas`).
+  - **Auditoría Técnica Maestra:** Se elaboró el informe de análisis de fugas y robustez [`auditoria_motor_aprovisionamiento_marca_blanca.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_motor_aprovisionamiento_marca_blanca.md) detallando las brechas resueltas.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/sync_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY]
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_motor_aprovisionamiento_marca_blanca.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_motor_aprovisionamiento_marca_blanca.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-054: Depuración de Redundancias y Enriquecimiento del Sandbox de Componentes
+
+* **Tipo:** Refactorización / Calidad / Documentación / Sandbox / Build
+* **Descripción de Cambios:**
+  - **Depuración Física de Biblioteca:** Se eliminaron del disco los archivos de componentes y fichas redundantes obsoletas (`cart_drawer.md`, `selector_fecha.md`) y archivos temporales de desecho (`Nuevo Documento de texto.txt`, `temp_rules.rules`) para consolidar la biblioteca.
+  - **Limpieza del Índice (README.md):** Se actualizó el README.md de `/06_Biblioteca_Componentes` eliminando los enlaces y referencias a los componentes eliminados.
+  - **Creación de Playgrounds (Mocked Sandboxes):** Se diseñaron e implementaron 5 nuevos playgrounds interactivos locales en `dev-dashboard/src/components/admin/sandboxes/` con simulación mock de flujos complejos sin requerir APIs o servicios externos de red:
+    * `LoginPageSandbox.jsx`: Simula flujos de login híbrido OTP/Email, PIN para empleados y administración.
+    * `FormularioProductoIASandbox.jsx`: Simula el procesamiento y autogeneración de títulos/descripciones mediante Gemini IA.
+    * `OrderTrackingSandbox.jsx`: Simula un stepper visual del progreso de envíos en tiempo real.
+    * `CatalogFiltersSandbox.jsx`: Simula la barra y bottom sheet interactivo de filtros de catálogo.
+    * `PWAInstallBannerSandbox.jsx`: Simula la lógica de banner interactivo y trigger de instalación de PWA.
+  - **Integración de Playgrounds:** Se modificó `ComponentSandbox.jsx` para realizar la carga perezosa (`React.lazy`) de los 5 sandboxes, registrándolos en `SANDBOXES` y `COMPONENT_SANDBOX_MAP` y liberando su entrada en `COMPONENT_META` (marcando la remoción de su aviso de "Playground no configurado").
+  - **Doble Exportación en SandboxLayout:** Se adaptó `SandboxLayout.jsx` para exportar el componente de forma tanto nombrada como por defecto (`export default SandboxLayout`), solucionando colisiones de importación y garantizando paridad total en los 50 sandboxes del dashboard.
+  - **Actualización de Mapas y Roadmap:** Se alineó el mapa de la aplicación (`mapa_aplicacion.md`) registrando el directorio `sandboxes/`, se removieron las referencias obsoletas del mapa semántico de IA (`mapa_documentacion_ia.md`) y se actualizó `tareas_pendientes.md` como completado.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/FormularioProductoIASandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/FormularioProductoIASandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LoginPageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LoginPageSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/OrderTrackingSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/OrderTrackingSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CatalogFiltersSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CatalogFiltersSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PWAInstallBannerSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PWAInstallBannerSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/SandboxLayout.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/SandboxLayout.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-052: Robustecimiento y Blindaje de la Biblioteca de Componentes y Sandbox
+
+* **Tipo:** Calidad / Robustecimiento / Linter / Control de Tipos / UI
+* **Descripción de Cambios:**
+  - **Script de Validación Pre-build Linter (`verify_library_integrity.cjs`):** Se creó e integró un validador en tiempo de compilación que audita automáticamente la correspondencia física y lógica de la biblioteca (README.md, enlaces, mapeos en `ComponentSandbox.jsx`). Si existe alguna inconsistencia (componentes huérfanos o playgrounds sin registrar), el build de producción aborta intencionalmente.
+  - **Tolerancia a Fallas en Playgrounds (`SandboxErrorBoundary`):** Se implementó una clase `ErrorBoundary` granular con interfaz de diagnóstico estilizada dentro de `ComponentSandbox.jsx` para envolver los playgrounds. Evita que un fallo en runtime en un componente experimental tumbe todo el dashboard de desarrollo.
+  - **Mapeo de Nombres Físicos de Biblioteca:** Se enriqueció `COMPONENT_SANDBOX_MAP` y `COMPONENT_META` en `ComponentSandbox.jsx` para admitir las 46 variantes exactas de nombres de carpetas físicas en minúsculas y sin acentos.
+  - **Tipado Estricto JSDoc y Aserciones en Desarrollo:** Se incorporaron tipos JSDoc estructurados y aserciones de desarrollo en runtime en los componentes de UI reutilizables `BackButton.jsx` y `QuantitySelector.jsx` para robustecer y blindar sus contratos de API.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/package.json`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/package.json) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+  - [`Plantillas Core/App Ventas/src/components/ui/BackButton.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/ui/BackButton.jsx) [MODIFY]
+  - [`Plantillas Core/App Ventas/src/components/ui/QuantitySelector.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/ui/QuantitySelector.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
+---
+
+### [2026-06-24] - CORE-053: Sincronización Estructural Automática de Firebase en el Ecosistema
+
+* **Tipo:** Refactorización / Infraestructura / Sincronización / Firebase
+* **Descripción de Cambios:**
+  - **Sincronización Estructural de firebase.json:** Se retiró el archivo `firebase.json` de la lista de exclusiones de sincronización (`EXCLUDED_PATHS` en `sync_clients.js` y `SYNC_EXCLUDED_PATHS` en `server.js`). Dado que este archivo no contiene credenciales de base de datos ni IDs de proyecto y es 100% estructural, este ajuste permite que cualquier adición o cambio en los servicios de Firebase (como Storage, Functions o Hosting) del Core se propague automáticamente downstream a todas las instancias de clientes al sincronizar.
+  - **Preservación de Identidad y Secretos:** Se mantuvieron estrictamente excluidos `.env.local` y `.firebaserc` para asegurar el aislamiento de las credenciales de base de datos únicas de cada cliente.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/sync_clients.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_clients.js) [MODIFY]
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-24] - HOTFIX-TELEMETRIA-002: Desactivación de Alerta Residual de Enlace y Panel de Gestión en Dashboard
+
+* **Tipo:** Hotfix / Base de Datos / UI / Telemetría
+* **Descripción de Cambios:**
+  - **Desactivación de Alerta Residual de Telemetría:** Se detectó la persistencia de un objeto `sistemaAlerta` con estado `active: true` y título "Prueba de Enlace de Telemetría" en Firestore Central para los clientes `moni-app` y `ventas-smartfix`. Esto causaba el despliegue automático del modal en cada recarga de la app. Se actualizaron los documentos correspondientes en `/clientes_control` para deshabilitar (`null`) dicho aviso residual en Firestore.
+  - **Panel de Alertas Remotas en dev-dashboard:** Para evitar que esto vuelva a ocurrir y permitir el control de estas notificaciones directamente por el desarrollador, se integraron controles de Alerta Remota en el modal de CRM (Gestión de Clientes) de [`dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx). Ahora se expone un checkbox para "Habilitar Alerta Remota" y campos para personalizar el tipo de alerta (info, warning, error), título, mensaje y si es descartable (dismissible), mapeándolos bidireccionalmente a Firestore Central.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - Firestore Central: documentos `moni-app` y `ventas-smartfix` en `/clientes_control` [DATABASE]
+
+---
+
+### [2026-06-24] - CLIENTE-MONI-001: Corrección de Carga de Imágenes y Firebase Storage en Ventas MoNI
+
+* **Tipo:** Configuración / Infraestructura / Firebase / Bugfix
+* **Descripción de Cambios:**
+  - **Corrección de Configuración de Firebase:** Se detectó la omisión de la sección `"storage"` en el archivo [`firebase.json`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/firebase.json) de la instancia cliente `ventas-moni-app`, lo cual impedía que Firebase CLI reconociera y gestionara el servicio.
+  - **Actualización de Archivo `firebase.json`:** Se inyectó el bloque `"storage": { "rules": "storage.rules" }` para vincular de forma oficial el archivo local de reglas al servicio de almacenamiento.
+  - **Auditoría de Reglas de Seguridad de Storage:** Se comprobó que el proyecto `ventas-moni-app` en la nube tenía reglas por defecto restrictivas (`allow read, write: if false;`), bloqueando cualquier subida de imágenes desde cámara/galería.
+  - **Despliegue de Reglas Correctivas:** Se ejecutó con éxito el despliegue de las reglas de seguridad de Storage (`storage.rules`) al proyecto `ventas-moni-app` de Firebase, permitiendo lecturas públicas y restringiendo escrituras únicamente a administradores autenticados.
+  - **Verificación de Seguridad:** Se validó mediante la API de Firebase que las reglas activas de Storage son ahora consistentes con el estándar de seguridad establecido.
+* **Archivos Modificados:**
+  - [`Instancias Clientes/ventas/ventas-moni-app/firebase.json`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/firebase.json) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
 
 * **Tipo:** Documentación / Calidad / Sandbox
 * **Descripción de Cambios:**
