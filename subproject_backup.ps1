@@ -50,9 +50,21 @@ function Format-CommitMessageList {
     }
 }
 
+function Exit-WithPause {
+    param (
+        [int]$code = 0
+    )
+    if ($Interactive) {
+        Write-Host ""
+        Write-Host "Presione cualquier tecla para salir..." -ForegroundColor Yellow
+        $null = [Console]::ReadKey()
+    }
+    exit $code
+}
+
 if ([string]::IsNullOrWhiteSpace($SubprojectPath) -or -not (Test-Path $SubprojectPath)) {
     Write-Host " [ERROR] Ruta de subproyecto invalida o no especificada." -ForegroundColor Red
-    exit 1
+    Exit-WithPause 1
 }
 
 Set-Location -Path $SubprojectPath
@@ -359,7 +371,22 @@ try {
             Write-Host "  [Git Strategies] Auto-Merge activado. Fusionando [$branchName] -> [$mainBranch]..." -ForegroundColor Yellow
             
             Write-Host "  [Merge] Cambiando a la rama de produccion [$mainBranch]..." -ForegroundColor Cyan
-            git checkout $mainBranch 2>&1 | Out-Null
+            $checkoutResult = git checkout $mainBranch 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                # Intentar crearla desde origin si no existe localmente
+                Write-Host "  [Merge] La rama local '$mainBranch' no existe. Intentando crearla desde el servidor remoto..." -ForegroundColor Yellow
+                $checkoutResult = git checkout -b $mainBranch origin/$mainBranch 2>&1
+                if ($LASTEXITCODE -ne 0) {
+                    # Si no existe ni local ni remotamente, crearla a partir de la rama actual
+                    Write-Host "  [Merge] La rama '$mainBranch' no existe en el origen remoto. Creandola a partir de la rama actual..." -ForegroundColor Yellow
+                    $checkoutResult = git checkout -b $mainBranch 2>&1
+                    if ($LASTEXITCODE -ne 0) {
+                        Write-Host "  [ERROR] No se pudo cambiar ni crear la rama de produccion [$mainBranch]." -ForegroundColor Red
+                        Write-Host "  Detalle de Git: $checkoutResult" -ForegroundColor DarkGray
+                        Exit-WithPause 1
+                    }
+                }
+            }
             
             Write-Host "  [Merge] Trayendo ultimos cambios del servidor remoto..." -ForegroundColor Cyan
             git pull origin $mainBranch --no-edit 2>&1 | Out-Null
@@ -376,7 +403,7 @@ try {
                 Write-Host "  [INFO] Resuelve los conflictos manualmente y vuelve a intentarlo." -ForegroundColor Yellow
                 Write-Host "======================================================================" -ForegroundColor Red
                 Write-BackupLog -Status "FAILED" -Target $projectName -Message "Conflicto de auto-merge hacia $mainBranch"
-                exit 1
+                Exit-WithPause 1
             }
             
             Write-Host "  [Merge] Subiendo consolidacion a GitHub (git push origin $mainBranch --no-verify)..." -ForegroundColor Cyan
@@ -408,7 +435,7 @@ catch {
     Write-Host "    -> $_" -ForegroundColor Red
     Write-Host ""
     Write-BackupLog -Status "FAILED" -Target $projectName -Message "Excepcion en subproyecto: $_"
-    exit 1
+    Exit-WithPause 1
 }
 finally {
     # Asegurar que los componentes base (Core, Dashboard, etc.) queden en develop. Instancias de clientes regresan a su rama de cliente.
