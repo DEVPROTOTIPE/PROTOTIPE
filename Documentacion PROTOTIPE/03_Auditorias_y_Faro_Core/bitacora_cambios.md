@@ -1,6 +1,35 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
 
+### [2026-06-26] - CORE-082: Alineación, Icono de WhatsApp, Ajuste de Desbordamiento y Corrección de Vibración de Botones Magnéticos en Calculadora CRO
+
+* **Tipo:** Conversión (CRO) / UI/UX / HTML / CSS / JS / Documentación
+* **Descripción de Cambios:**
+  - **Alineación Simétrica de Entradas de la Calculadora:** Se extrajo el radio toggle de tipo de reto del interior de la segunda columna y se reubicó arriba en un contenedor centrado `.reto-toggle-container` con una estética de selector premium tipo "pill switcher" sin los radio buttons nativos (manejando estados activos vía selector `:has` en CSS). Esto permite alinear los selectores del tipo de negocio y la entrada de reto al mismo nivel horizontal exacto de forma simétrica.
+  - **Favicon Oficial Completo de WhatsApp:** Se reemplazó el icono SVG de la burbuja vacía en el botón CTA de la calculadora por el SVG oficial completo (que incluye el auricular de teléfono de color blanco en su interior), logrando consistencia visual con el resto de la página.
+  - **Evitación de Desbordamientos de Texto de Recomendación:** Se añadieron estilos CSS (`overflow-wrap: break-word`, `word-wrap: break-word`, `word-break: break-word`) en `#config-recommendation` para evitar que textos muy largos y continuos (sin espacios) desborden y rompan la tarjeta de diagnóstico recomendada.
+  - **Corrección de Vibración y Jitter en Botones Magnéticos:** Se configuró `pointer-events: none` para las etiquetas `<a>` y `<button>` directas de `.btn-magnetic-wrapper` en el archivo de estilos y se inyectó `cursor: pointer`. Al mover el hover styling a nivel del wrapper (`.btn-magnetic-wrapper:hover .btn-primary`, etc.) y añadir un click handler delegado en JS para disparar programáticamente `btn.click()` de forma segura (con validación de target para evitar loops infinitos), se erradicó por completo el temblor o vibración síncrona al pasar el ratón por encima de los botones magnéticos en escritorio.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+---
+
+### [2026-06-25] - CORE-081: Flexibilidad de Entrada de Dolor y Prevención de Desplazamiento en Calculadora CRO
+
+* **Tipo:** Conversión (CRO) / UI/UX / HTML / CSS / JS / Documentación
+* **Descripción de Cambios:**
+  - **Flexibilidad de Entrada de Reto Personalizado**: Se implementó una interfaz de tipo radio botón dentro de la Calculadora de Diagnóstico Express (CRO) que permite alternar entre seleccionar un dolor común de la lista pre-poblada dinámicamente y escribir un dolor/reto personalizado en un área de texto responsiva. Al redactar el reto personalizado, el texto se formatea de manera fluida y se inserta directamente en la propuesta recomendada en pantalla y en la URL final de WhatsApp que se envía al presionar el botón de acción CTA.
+* **Archivos Modificados:**
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+---
+
 ### [2026-06-25] - CORE-080: Forzado de la Rama de Desarrollo (develop) en Herramienta de Respaldos
 
 * **Tipo:** Herramientas / Automatización / Git / Scripting

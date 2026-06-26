@@ -4,6 +4,20 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-082: Alineación, Icono de WhatsApp, Ajuste de Desbordamiento y Corrección de Vibración de Botones Magnéticos en Calculadora CRO~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se corrigen 4 fallos de UI/UX en la Calculadora de Diagnóstico Express y los Botones Magnéticos: (1) Desbordamiento: Se inyecta `overflow-wrap: break-word` y afines en el contenedor de recomendaciones para evitar que textos continuos sin espacios rompan el layout. (2) Alineación: Se extrae el toggle de tipo de reto para colocarlo como un switcher superior de tipo "pill", alineando horizontalmente los inputs de ambas columnas a la misma altura. (3) Icono de WhatsApp: Se cambia el SVG del botón de resultados por el oficial completo (burbuja + teléfono). (4) Vibración de Botones: Se desactivan los pointer-events en los botones interactivos dentro del wrapper magnético para estabilizar la atracción, gestionando el click y hover desde el propio wrapper.
+  - Archivos: [LandingPage/Index.html](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY], [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY], [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-081: Flexibilidad de Entrada de Dolor y Prevención de Desplazamiento en Calculadora CRO~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-25
+  - Fecha de finalización: 2026-06-25
+  - Descripción: Se aplicaron dos mejoras críticas a la Calculadora de Diagnóstico Express (CRO) en la landing page: (1) Flexibilidad de Entrada: Se implementó un control de tipo radio toggle en el segundo paso ("¿Cuál es tu mayor reto hoy?") que permite al usuario alternar entre seleccionar un reto preconfigurado de la lista dinámica ("Seleccionar de la lista") o redactar su propia necesidad a través de un campo de área de texto de tamaño responsivo ("Prefiero escribirlo"). Al escribir en la entrada personalizada, la propuesta recomendada y el mensaje/URL de WhatsApp se actualizan automáticamente en tiempo real para reflejar el texto exacto redactado por el usuario. (2) Prevención de Desplazamiento (Scroll Chaining): Se implementaron controladores de eventos JavaScript para capturar eventos de scroll (\`wheel\` y \`touchmove\`) en las listas de opciones del Custom Select (\`#custom-options-nicho\` y \`#custom-options-dolor\`). Esto evita que el scroll continúe y mueva toda la landing page al llegar a los límites (superior o inferior) de las listas desplegables, confinando la navegación dentro del dropdown.
+  - Archivos: [LandingPage/Index.html](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY], [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY], [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-080: Forzado de la Rama de Desarrollo (develop) en Herramienta de Respaldos~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-25
