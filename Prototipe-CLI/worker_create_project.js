@@ -102,7 +102,7 @@ async function runSmokeTest(targetDir) {
     // 3. Importar Playwright local
     const require = createRequire(import.meta.url);
     const playwrightPath = require.resolve('playwright', { paths: [targetDir] });
-    const { chromium } = await import(playwrightPath);
+    const { chromium } = require(playwrightPath);
 
     // 4. Lanzar navegador headless
     const browser = await chromium.launch({ headless: true });
@@ -114,7 +114,7 @@ async function runSmokeTest(targetDir) {
     });
 
     await page.goto('http://localhost:5190');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     const title = await page.title();
     console.log(`[Smoke Test] Renderización exitosa. Título del sitio: "${title}"`);

@@ -1,11 +1,12 @@
 {
-  "name": "app-ventas",
+  "name": "proyecto-cliente-saas",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "map": "node scripts/generate_ia_map.js",
+    "build": "npm run map && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test:ui": "playwright test",

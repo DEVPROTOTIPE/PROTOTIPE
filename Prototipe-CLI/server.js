@@ -1260,6 +1260,65 @@ app.post('/api/register-core', async (req, res) => {
     await fs.ensureDir(templatePath);
     await fs.writeFile(path.join(templatePath, '.gitkeep'), '', 'utf-8');
 
+    // 4.1 Proporcionar archivos Firebase base en el Core
+    const firestoreRulesDefault = `rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n`;
+    const storageRulesDefault = `rules_version = '2';\nservice firebase.storage {\n  match /b/{bucket}/o {\n    match /{allPaths=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n`;
+    const firestoreIndexesDefault = JSON.stringify({ indexes: [], fieldOverrides: [] }, null, 2) + '\n';
+    const firebaseJsonDefault = JSON.stringify({
+      firestore: {
+        rules: "firestore.rules",
+        indexes: "firestore.indexes.json"
+      },
+      storage: {
+        rules: "storage.rules"
+      },
+      hosting: {
+        public: "dist",
+        ignore: [
+          "firebase.json",
+          "**/.*",
+          "**/node_modules/**"
+        ],
+        headers: [
+          {
+            source: "/index.html",
+            headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }]
+          },
+          {
+            source: "/sw.js",
+            headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }]
+          },
+          {
+            source: "/firebase-messaging-sw.js",
+            headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }]
+          },
+          {
+            source: "/manifest.webmanifest",
+            headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }]
+          },
+          {
+            source: "/manifest.json",
+            headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }]
+          },
+          {
+            source: "/assets/**",
+            headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }]
+          }
+        ],
+        rewrites: [
+          {
+            source: "**",
+            destination: "/index.html"
+          }
+        ]
+      }
+    }, null, 2) + '\n';
+
+    await fs.writeFile(path.join(corePath, 'firestore.rules'), firestoreRulesDefault, 'utf-8');
+    await fs.writeFile(path.join(corePath, 'storage.rules'), storageRulesDefault, 'utf-8');
+    await fs.writeFile(path.join(corePath, 'firestore.indexes.json'), firestoreIndexesDefault, 'utf-8');
+    await fs.writeFile(path.join(corePath, 'firebase.json'), firebaseJsonDefault, 'utf-8');
+
     // 5. Registrar en plantillas_registro.json
     registro.plantillas[safeClave] = {
       fuente: corePath.replace(/\\/g, '/'),
@@ -1281,7 +1340,7 @@ app.post('/api/register-core', async (req, res) => {
         corePath,
         docPath,
         templatePath,
-        archivosCreados: docStandard.map(d => d.name)
+        archivosCreados: [...docStandard.map(d => d.name), 'firestore.rules', 'storage.rules', 'firestore.indexes.json', 'firebase.json']
       }
     });
 
@@ -1550,13 +1609,16 @@ async function performCoreSync(clave, CLI_ROOT) {
     const stat = await fs.stat(filePath);
     if (stat.isDirectory()) {
       const dirFiles = await fs.readdir(filePath);
-      for (const file of dirFiles) {
-        if (file === 'node_modules' || file === '.git' || file === 'dist' || file === '.vite') continue;
+      await Promise.all(dirFiles.map(async (file) => {
+        if ([
+          'node_modules', '.git', 'dist', '.vite', '.firebase', 
+          'playwright-report', 'test-results', 'scratch', 'scripts'
+        ].includes(file)) return;
         await sanitizeFile(path.join(filePath, file));
-      }
+      }));
     } else {
       const ext = path.extname(filePath);
-      if (['.js', '.jsx', '.json', '.md', '.html'].includes(ext)) {
+      if (['.js', '.jsx', '.json', '.md', '.html', '.rules'].includes(ext)) {
         let content = await fs.readFile(filePath, 'utf8');
         let changed = false;
 
@@ -1566,8 +1628,8 @@ async function performCoreSync(clave, CLI_ROOT) {
           changed = true;
         }
 
-        // Replace Package Name
-        if (tokens.packageName && content.includes(tokens.packageName)) {
+        // Replace Package Name EXCLUSIVAMENTE en package.json
+        if (path.basename(filePath) === 'package.json' && tokens.packageName && content.includes(tokens.packageName)) {
           content = content.replace(new RegExp(tokens.packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'proyecto-cliente-saas');
           changed = true;
         }
@@ -1676,10 +1738,291 @@ app.post('/api/cores/:clave/sync', async (req, res) => {
   }
 });
 
+
+// Helper para sanitizar el contenido del core en memoria antes de la comparación física para evitar falsos drifts
+function sanitizeCoreContentForDrift(filePath, content, tokens, srcProjectId) {
+  let changedContent = content;
+  const ext = path.extname(filePath);
+  const base = path.basename(filePath);
+
+  if (['.js', '.jsx', '.json', '.md', '.html', '.rules'].includes(ext)) {
+    // Replace Project ID
+    if (srcProjectId && changedContent.includes(srcProjectId)) {
+      changedContent = changedContent.replace(new RegExp(srcProjectId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'proyecto-cliente-saas');
+    }
+
+    // Replace Package Name EXCLUSIVAMENTE en package.json
+    if (base === 'package.json' && tokens.packageName && changedContent.includes(tokens.packageName)) {
+      changedContent = changedContent.replace(new RegExp(tokens.packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'proyecto-cliente-saas');
+    }
+
+    // Replace API Key
+    if (tokens.apiKey && changedContent.includes(tokens.apiKey)) {
+      changedContent = changedContent.replace(new RegExp(tokens.apiKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'AIzaSy[API_KEY_DE_CLIENTE_AUTOGENERADA]');
+    }
+    if (/AIzaSy[A-Za-z0-9_-]{33}/g.test(changedContent)) {
+      changedContent = changedContent.replace(/AIzaSy[A-Za-z0-9_-]{33}/g, 'AIzaSy[API_KEY_DE_CLIENTE_AUTOGENERADA]');
+    }
+
+    // Replace App ID
+    if (tokens.appId && changedContent.includes(tokens.appId)) {
+      changedContent = changedContent.replace(new RegExp(tokens.appId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'APP_ID_MUTABLE');
+    }
+
+    // Replace Telemetry Token
+    if (tokens.telemetryToken && changedContent.includes(tokens.telemetryToken)) {
+      changedContent = changedContent.replace(new RegExp(tokens.telemetryToken.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 'TELEMETRIA_TOKEN_MUTABLE');
+    }
+
+    // Replace index.html title/metas
+    if (base === 'index.html') {
+      changedContent = changedContent.replace(/<title>[^<]*<\/title>/gi, '<title>Prototipe App Base</title>');
+      changedContent = changedContent.replace(/<meta\s+name="apple-mobile-web-app-title"\s+content="[^"]*"\s*\/?>/gi, '<meta name="apple-mobile-web-app-title" content="Prototipe App Base" />');
+    }
+
+    // Replace generic measurement ID
+    if (/G-[A-Za-z0-9]{10}/g.test(changedContent)) {
+      changedContent = changedContent.replace(/G-[A-Za-z0-9]{10}/g, 'G-[ID_MEDICION_TEMPORAL]');
+    }
+  }
+
+  // Si es package.json, remover también el script deploy para simular la sanitización del destino
+  if (base === 'package.json') {
+    try {
+      const pkgObj = JSON.parse(changedContent);
+      if (pkgObj.scripts && pkgObj.scripts.deploy) {
+        delete pkgObj.scripts.deploy;
+      }
+      changedContent = JSON.stringify(pkgObj, null, 2);
+    } catch (_) {}
+  }
+
+  return changedContent;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// POST /api/cores/:clave/deactivate
-// Marca activo: false sin borrar nada (para retirar temporalmente del wizard)
+// GET /api/cores/:clave/drift
+// Calcula las diferencias físicas (drift) entre el Core de desarrollo y la plantilla empaquetada
 // ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/cores/:clave/drift', async (req, res) => {
+  const { clave } = req.params;
+  const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+
+  try {
+    if (!await fs.pathExists(registroPath)) {
+      return res.status(404).json({ error: 'No se encontró el registro de plantillas.' });
+    }
+
+    const registro = await fs.readJson(registroPath);
+    const config = registro.plantillas[clave];
+    if (!config) {
+      return res.status(404).json({ error: `La clave "${clave}" no existe en el registro.` });
+    }
+
+    const corePath     = config.fuente.replace(/\//g, path.sep);
+    const templatePath = config.destino.replace(/\//g, path.sep);
+
+    if (!await fs.pathExists(corePath)) {
+      return res.status(404).json({ error: `El directorio del Core fuente no existe: ${corePath}` });
+    }
+
+    if (!await fs.pathExists(templatePath)) {
+      // Si la plantilla del CLI no se ha sincronizado ni una sola vez
+      return res.json({
+        success: true,
+        parityPercent: 0,
+        totalCount: 0,
+        syncedCount: 0,
+        differences: [
+          {
+            file: 'Todo el Core',
+            status: 'missing_in_template',
+            message: 'La plantilla CLI aún no ha sido sincronizada. Está en 0% de paridad.'
+          }
+        ]
+      });
+    }
+
+    // 1. Extraer tokens de configuración para sanitización semántica en memoria
+    const tokens = {
+      projectId: '',
+      apiKey: '',
+      measurementId: '',
+      packageName: '',
+      appId: '',
+      telemetryToken: ''
+    };
+
+    const srcPkg = path.join(corePath, 'package.json');
+    if (await fs.pathExists(srcPkg)) {
+      try {
+        const pkg = await fs.readJson(srcPkg);
+        tokens.packageName = pkg.name || '';
+      } catch (_) {}
+    }
+
+    const envPath = path.join(corePath, '.env.local');
+    if (await fs.pathExists(envPath)) {
+      try {
+        const envContent = await fs.readFile(envPath, 'utf8');
+        const parseEnvValue = (key) => {
+          const match = envContent.match(new RegExp(`^${key}\\s*=\\s*["']?([^"'\\n]+)["']?`, 'm'));
+          return match ? match[1].trim() : '';
+        };
+        tokens.projectId         = parseEnvValue('VITE_FIREBASE_PROJECT_ID');
+        tokens.apiKey            = parseEnvValue('VITE_FIREBASE_API_KEY');
+        tokens.measurementId     = parseEnvValue('VITE_FIREBASE_MEASUREMENT_ID');
+        tokens.appId             = parseEnvValue('VITE_FIREBASE_APP_ID');
+        tokens.telemetryToken    = parseEnvValue('VITE_DEVELOPER_TELEMETRY_TOKEN');
+      } catch (_) {}
+    }
+
+    const srcProjectId = tokens.projectId || 'ventas-smartfix';
+
+    // Definición de exclusiones y rutas a verificar (mismo estándar de performCoreSync)
+    const SYNC_PATHS = [
+      'src/components', 'src/hooks', 'src/services', 'src/store',
+      'src/layouts', 'src/pages', 'src/routes', 'src/utils',
+      'src/constants', 'src/schemas', 'src/types', 'src/providers',
+      'src/config', 'src/App.jsx', 'src/App.css', 'src/index.css', 'src/main.jsx',
+      'firestore.indexes.json', 'firestore.rules', 'storage.rules',
+      'vite.config.js', 'eslint.config.js', 'GEMINI.md',
+      'index.html', 'package.json'
+    ];
+
+    const EXCLUDE_FROM_TEMPLATE = new Set([
+      '.env.local', '.env', '.firebaserc', 'firebase.json',
+      'dist', 'node_modules', '.git', '.firebase',
+      'scratch', 'playwright-report', 'test-results', '.gitkeep'
+    ]);
+
+    // Recolectar archivos del Core asíncronamente
+    const collectFiles = async (baseDir, relPath, resultList = []) => {
+      const fullPath = path.join(baseDir, relPath);
+      if (!await fs.pathExists(fullPath)) return resultList;
+
+      const stat = await fs.stat(fullPath);
+      if (stat.isDirectory()) {
+        const files = await fs.readdir(fullPath);
+        await Promise.all(files.map(file => {
+          if (EXCLUDE_FROM_TEMPLATE.has(file)) return;
+          return collectFiles(baseDir, path.join(relPath, file), resultList);
+        }));
+      } else {
+        resultList.push({
+          relativePath: relPath.replace(/\\/g, '/'),
+          absolutePath: fullPath
+        });
+      }
+      return resultList;
+    };
+
+    const coreFilesList = [];
+    await Promise.all(SYNC_PATHS.map(p => collectFiles(corePath, p, coreFilesList)));
+
+    // Comparar cada archivo
+    const differences = [];
+    let matchingCount = 0;
+
+    await Promise.all(coreFilesList.map(async (coreFile) => {
+      const destFilePath = path.join(templatePath, coreFile.relativePath);
+      if (!await fs.pathExists(destFilePath)) {
+        differences.push({
+          file: coreFile.relativePath,
+          status: 'missing_in_template',
+          message: 'El archivo existe en el Core pero no en la plantilla CLI.'
+        });
+        return;
+      }
+
+      const isBin = isBinaryFile(coreFile.relativePath);
+      if (isBin) {
+        try {
+          const coreBuf = await fs.readFile(coreFile.absolutePath);
+          const destBuf = await fs.readFile(destFilePath);
+          if (!coreBuf.equals(destBuf)) {
+            differences.push({
+              file: coreFile.relativePath,
+              status: 'modified',
+              isBinary: true,
+              message: 'Archivo binario modificado.'
+            });
+          } else {
+            matchingCount++;
+          }
+        } catch (err) {
+          differences.push({
+            file: coreFile.relativePath,
+            status: 'modified',
+            isBinary: true,
+            message: `Error al comparar binario: ${err.message}`
+          });
+        }
+      } else {
+        try {
+          const rawCoreContent = await fs.readFile(coreFile.absolutePath, 'utf-8');
+          const destContent = await fs.readFile(destFilePath, 'utf-8');
+
+          // Sanitizar el contenido en memoria antes de compararlo
+          const sanitizedCoreContent = sanitizeCoreContentForDrift(
+            coreFile.relativePath,
+            rawCoreContent,
+            tokens,
+            srcProjectId
+          );
+
+          if (sanitizedCoreContent.trim() !== destContent.trim()) {
+            // Generar diff solo si el archivo es menor a 150KB
+            const stat = await fs.stat(coreFile.absolutePath);
+            let diffLines = null;
+            if (stat.size < 150 * 1024) {
+              const diffResult = Diff.diffLines(destContent.trim(), sanitizedCoreContent.trim());
+              diffLines = diffResult.map(part => ({
+                value: part.value,
+                added: part.added,
+                removed: part.removed
+              }));
+            }
+
+            differences.push({
+              file: coreFile.relativePath,
+              status: 'modified',
+              message: 'El archivo local difiere estructuralmente de la plantilla CLI.',
+              diff: diffLines
+            });
+          } else {
+            matchingCount++;
+          }
+        } catch (err) {
+          differences.push({
+            file: coreFile.relativePath,
+            status: 'modified',
+            message: `Error al leer o sanitizar archivo: ${err.message}`
+          });
+        }
+      }
+    }));
+
+    const totalFiles = coreFilesList.length;
+    const parityPercent = totalFiles > 0 ? Math.round((matchingCount / totalFiles) * 100) : 100;
+
+    // Ordenar las diferencias alfabéticamente por nombre de archivo
+    differences.sort((a, b) => a.file.localeCompare(b.file));
+
+    res.json({
+      success: true,
+      parityPercent,
+      totalCount: totalFiles,
+      syncedCount: matchingCount,
+      differences
+    });
+
+  } catch (err) {
+    console.error(`[API /cores/${clave}/drift] Error: ${err.message}`);
+    res.status(500).json({ error: `Error al calcular drift del core: ${err.message}` });
+  }
+});
+
 // Helper para resolver el ID de proyecto de Firebase de forma robusta y 100% automatizada
 async function resolveFirebaseProjectId(projectDir, clientId) {
   let projectId = null;
@@ -2474,26 +2817,92 @@ app.post('/api/project/fix/pwa', async (req, res) => {
 });
 
 app.post('/api/project/fix/rules', async (req, res) => {
-  const { clientId } = req.body;
+  const { clientId, type = 'all' } = req.body;
   if (!clientId) return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
 
   const projectDir = await findProjectDir(clientId);
   if (!projectDir) return res.status(404).json({ error: 'Proyecto no encontrado.' });
 
-  const rulesDest = path.join(projectDir, 'firestore.rules');
-  const rulesSrc = path.join(path.dirname(projectDir), 'App Ventas', 'firestore.rules');
-
   try {
-    let sourcePath = rulesSrc;
-    if (!await fs.pathExists(sourcePath)) {
-      sourcePath = path.join(getWorkspaceRoot(), 'Prototipe-CLI', 'templates', 'template-ventas', 'firestore.rules');
+    // 1. Detectar el Core asignado al cliente
+    const metaPath = path.join(projectDir, '.prototipe.json');
+    let meta = await fs.pathExists(metaPath) ? await fs.readJson(metaPath) : {};
+    meta = validatePrototipeMetadata(meta, path.basename(projectDir));
+    let coreId = meta.templateId || meta.coreClave || meta.coreId || meta.template;
+
+    if (!coreId) {
+      if (clientId.toLowerCase().includes('venta')) coreId = 'ventas';
+      else if (clientId.toLowerCase().includes('servicio')) coreId = 'servicios';
+      else if (clientId.toLowerCase().includes('agendamiento') || clientId.toLowerCase().includes('barber')) coreId = 'agendamiento';
+      else if (clientId.toLowerCase().includes('gastronomia') || clientId.toLowerCase().includes('restaurante')) coreId = 'gastronomia';
     }
 
-    if (await fs.pathExists(sourcePath)) {
-      await fs.copy(sourcePath, rulesDest);
-      return res.json({ success: true, message: 'Se ha restablecido firestore.rules con la plantilla segura del estándar.' });
+    if (!coreId) {
+      return res.status(400).json({ error: 'No se pudo detectar el Core de referencia para este cliente.' });
+    }
+
+    // 2. Resolver la ruta absoluta del Core origen
+    const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+    const registro = await fs.readJson(registroPath);
+    const coreConfig = registro.plantillas[coreId];
+    
+    let corePath = null;
+    if (coreConfig?.fuente) {
+      corePath = coreConfig.fuente.replace(/\//g, path.sep);
     } else {
-      return res.status(404).json({ error: 'No se encontró la plantilla de reglas origen para copiar.' });
+      corePath = await findProjectDir(coreId);
+    }
+
+    if (!corePath || !await fs.pathExists(corePath)) {
+      return res.status(404).json({ error: `No se encontró el directorio del Core de referencia: "${coreId}"` });
+    }
+
+    // 3. Determinar qué archivos restaurar
+    const filesToCopy = [];
+    if (type === 'firestore' || type === 'all') {
+      filesToCopy.push('firestore.rules');
+      filesToCopy.push('firestore.indexes.json');
+    }
+    if (type === 'storage' || type === 'all') {
+      filesToCopy.push('storage.rules');
+    }
+
+    const restored = [];
+    const errors = [];
+
+    for (const fileName of filesToCopy) {
+      const destPath = path.join(projectDir, fileName);
+      let srcPath = path.join(corePath, fileName);
+
+      // Fallback a templates de CLI si no existe en la carpeta fuente del Core
+      if (!await fs.pathExists(srcPath)) {
+        srcPath = path.join(CLI_ROOT, 'templates', `template-${coreId}`, fileName);
+      }
+
+      // Segundo fallback a plantilla seed por defecto
+      if (!await fs.pathExists(srcPath)) {
+        srcPath = path.join(CLI_ROOT, 'templates', 'template-core-seed', fileName);
+      }
+
+      if (await fs.pathExists(srcPath)) {
+        await fs.copy(srcPath, destPath);
+        restored.push(fileName);
+      } else {
+        errors.push(`${fileName} (no se encontró origen)`);
+      }
+    }
+
+    if (restored.length > 0) {
+      return res.json({
+        success: true,
+        message: `Se han restaurado los archivos: ${restored.join(', ')}.`,
+        errors: errors.length > 0 ? errors : undefined
+      });
+    } else {
+      return res.status(404).json({
+        error: 'No se encontraron las plantillas de reglas/configuración origen para copiar.',
+        details: errors
+      });
     }
   } catch (err) {
     res.status(500).json({ error: `Fallo al restaurar reglas de seguridad: ${err.message}` });
@@ -3309,7 +3718,7 @@ app.get('/api/project/drift/global', async (req, res) => {
 
         results.push({
           clientId,
-          projectName: dir,
+          projectName: folderName,
           coreId,
           parityPercent,
           modifiedCount: modifiedFiles.length,
@@ -4467,6 +4876,61 @@ async function auditAndPatchScripts(clientPath, corePath, log) {
   }
 }
 
+async function auditAndPatchFirebaseJson(clientPath, log) {
+  const fbJsonPath = path.join(clientPath, 'firebase.json');
+  if (!await fs.pathExists(fbJsonPath)) {
+    log(`   🔧 firebase.json faltante en ${clientPath}. Omitiendo inyección de cabeceras.`, 'warn');
+    return;
+  }
+  try {
+    const config = await fs.readJson(fbJsonPath);
+    if (!config.hosting) {
+      config.hosting = {};
+    }
+    
+    const hostings = Array.isArray(config.hosting) ? config.hosting : [config.hosting];
+    let patched = false;
+    
+    const requiredHeaders = [
+      { source: '/index.html', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
+      { source: '/sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
+      { source: '/firebase-messaging-sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
+      { source: '/manifest.webmanifest', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
+      { source: '/manifest.json', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
+      { source: '/assets/**', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] }
+    ];
+    
+    for (const h of hostings) {
+      if (!h.headers) {
+        h.headers = [];
+      }
+      for (const req of requiredHeaders) {
+        const existingIdx = h.headers.findIndex(item => item.source === req.source);
+        if (existingIdx === -1) {
+          h.headers.push(req);
+          patched = true;
+        } else {
+          const existing = h.headers[existingIdx];
+          const hasCacheCtrl = existing.headers && existing.headers.some(x => x.key === 'Cache-Control' && x.value === req.headers[0].value);
+          if (!hasCacheCtrl) {
+            h.headers[existingIdx] = req;
+            patched = true;
+          }
+        }
+      }
+    }
+    
+    if (patched) {
+      log(`   🔧 firebase.json no tiene configuradas las cabeceras estrictas de caché PWA. Auto-curando...`, 'warn');
+      config.hosting = Array.isArray(config.hosting) ? hostings : hostings[0];
+      await fs.writeJson(fbJsonPath, config, { spaces: 2 });
+      log(`   ✅ firebase.json curado con éxito con cabeceras estrictas de caché (no-cache y assets inmutables).`, 'success');
+    }
+  } catch (err) {
+    log(`   ❌ Error al auditar/parchear firebase.json: ${err.message}`, 'error');
+  }
+}
+
 async function validateClientIntegrityBeforeSync(corePath, clientPath, folderName, log) {
   log(`🔍 Iniciando Pre-flight Validation Pipeline (CORE-089)...`, 'info');
   const metaPath = path.join(clientPath, '.prototipe.json');
@@ -4598,6 +5062,7 @@ async function validateClientIntegrityBeforeSync(corePath, clientPath, folderNam
   }, log);
 
   await auditAndPatchScripts(clientPath, corePath, log);
+  await auditAndPatchFirebaseJson(clientPath, log);
   log(`✅ PRE-FLIGHT VALIDATION COMPLETADA SIN ERRORES CRÍTICOS.`, 'success');
 }
 
@@ -4914,6 +5379,54 @@ async function getFirebaseAccessToken() {
   throw new Error('No se pudo refrescar el token de Firebase.');
 }
 
+// Helper autocurativo para restaurar o inicializar reglas del Core si faltasen físicamente
+async function autoHealCoreRules(corePath, type, cloudRules) {
+  const fileName = type === 'firestore' ? 'firestore.rules' : 'storage.rules';
+  const filePath = path.join(corePath, fileName);
+  
+  if (await fs.pathExists(filePath)) {
+    return await fs.readFile(filePath, 'utf8');
+  }
+
+  console.log(`[Autocuración] El Core en "${corePath}" no tiene el archivo "${fileName}". Generándolo...`);
+  
+  let contentToSave = '';
+  if (cloudRules && cloudRules.trim() && !cloudRules.includes('Error') && !cloudRules.includes('Permission denied')) {
+    contentToSave = cloudRules;
+    console.log(`[Autocuración] Poblado "${fileName}" con las reglas activas de la nube.`);
+  } else {
+    if (type === 'firestore') {
+      contentToSave = `rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n`;
+    } else {
+      contentToSave = `rules_version = '2';\nservice firebase.storage {\n  match /b/{bucket}/o {\n    match /{allPaths=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n`;
+    }
+    console.log(`[Autocuración] Poblado "${fileName}" con plantilla restrictiva por defecto.`);
+  }
+
+  await fs.ensureDir(corePath);
+  await fs.writeFile(filePath, contentToSave, 'utf-8');
+
+  // Asegurar indexes.json
+  if (type === 'firestore') {
+    const indexesPath = path.join(corePath, 'firestore.indexes.json');
+    if (!await fs.pathExists(indexesPath)) {
+      await fs.writeFile(indexesPath, JSON.stringify({ indexes: [], fieldOverrides: [] }, null, 2) + '\n', 'utf-8');
+    }
+  }
+
+  // Asegurar firebase.json
+  const firebaseJsonPath = path.join(corePath, 'firebase.json');
+  if (!await fs.pathExists(firebaseJsonPath)) {
+    const firebaseJsonDefault = JSON.stringify({
+      firestore: { rules: "firestore.rules", indexes: "firestore.indexes.json" },
+      storage: { rules: "storage.rules" }
+    }, null, 2) + '\n';
+    await fs.writeFile(firebaseJsonPath, firebaseJsonDefault, 'utf-8');
+  }
+
+  return contentToSave;
+}
+
 // Helper para descargar las reglas vigentes en la nube
 async function getCloudFirebaseRules(projectId, type, accessToken, storageBucket = '') {
   const releasesUrl = `https://firebaserules.googleapis.com/v1/projects/${projectId}/releases`;
@@ -5039,21 +5552,7 @@ app.get('/api/project/firebase-rules/drift-global', async (req, res) => {
 
       if (!firebaseProjectId) return;
 
-      // Reglas locales de la plantilla Core
-      const localFirestoreRulesPath = path.join(corePath, 'firestore.rules');
-      const localStorageRulesPath = path.join(corePath, 'storage.rules');
-
-      let localFirestoreRules = '';
-      if (await fs.pathExists(localFirestoreRulesPath)) {
-        localFirestoreRules = await fs.readFile(localFirestoreRulesPath, 'utf8');
-      }
-
-      let localStorageRules = '';
-      if (await fs.pathExists(localStorageRulesPath)) {
-        localStorageRules = await fs.readFile(localStorageRulesPath, 'utf8');
-      }
-
-      // Reglas de la nube
+      // 1. Obtener reglas de la nube primero
       let cloudFirestoreRules = null;
       let cloudStorageRules = null;
       let firestoreError = null;
@@ -5069,6 +5568,21 @@ app.get('/api/project/firebase-rules/drift-global', async (req, res) => {
         cloudStorageRules = await getCloudFirebaseRules(firebaseProjectId, 'storage', accessToken, storageBucket);
       } catch (err) {
         storageError = err.message;
+      }
+
+      // 2. Reglas locales autocurativas
+      let localFirestoreRules = '';
+      try {
+        localFirestoreRules = await autoHealCoreRules(corePath, 'firestore', cloudFirestoreRules);
+      } catch (err) {
+        console.error(`[Autocuración Error] Fallo en firestore.rules para el core "${templateKey}": ${err.message}`);
+      }
+
+      let localStorageRules = '';
+      try {
+        localStorageRules = await autoHealCoreRules(corePath, 'storage', cloudStorageRules);
+      } catch (err) {
+        console.error(`[Autocuración Error] Fallo en storage.rules para el core "${templateKey}": ${err.message}`);
       }
 
       const cleanRules = (rules) => (rules || '').replace(/\r\n/g, '\n').trim();

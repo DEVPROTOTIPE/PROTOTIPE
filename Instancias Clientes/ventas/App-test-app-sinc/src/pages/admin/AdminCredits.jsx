@@ -1,0 +1,394 @@
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { CreditCard, Search, DollarSign, History, CheckCircle, ChevronDown, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useAddPayment } from '../../hooks/useCredits'
+import { paymentSchema } from '../../schemas/creditSchemas'
+import { formatCurrency } from '../../utils/formatters'
+import * as creditService from '../../services/creditService'
+import ModalTemplate from '../../components/common/ModalTemplate'
+
+export default function AdminCredits() {
+  const [activeTab, setActiveTab] = useState('activo') // activo | pagado
+  const [credits, setCredits] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const { mutate: addPayment, isPending } = useAddPayment()
+  const handleExportCreditsReportPDF = async () => {
+    const { exportCreditsReportPDF } = await import('../../services/pdfService')
+    exportCreditsReportPDF({})
+  }
+
+  const [searchTerm, setSearchTerm] = useState('')
+  const [expandedId, setExpandedId] = useState(null)
+
+  // Estados de paginación
+  const [pagesHistory, setPagesHistory] = useState([null]) // Array de startAfter docs para navegar
+  const [currentPageIdx, setCurrentPageIdx] = useState(0)
+  const [hasNextPage, setHasNextPage] = useState(false)
+  const [lastVisibleDoc, setLastVisibleDoc] = useState(null)
+  
+  // Modal de abono
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+  const [selectedCredit, setSelectedCredit] = useState(null)
+  const [paymentMonto, setPaymentMonto] = useState('')
+  const [paymentNota, setPaymentNota] = useState('')
+  const [paymentError, setPaymentError] = useState('')
+
+  // Cargar créditos al cambiar de pestaña o de página
+  useEffect(() => {
+    async function loadPagedCredits() {
+      setIsLoading(true)
+      try {
+        const startAfterDoc = pagesHistory[currentPageIdx] || null
+        
+        // Obtener la página actual y si existe una página siguiente de forma atómica
+        const result = await creditService.getCreditsPaged(activeTab, 10, startAfterDoc)
+        setCredits(result.credits)
+        setLastVisibleDoc(result.lastDoc)
+        setHasNextPage(result.hasNextPage)
+      } catch (err) {
+        console.error('Error al cargar créditos paginados:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadPagedCredits()
+  }, [activeTab, currentPageIdx, pagesHistory])
+
+  // Resetear paginación al cambiar de pestaña o realizar búsquedas
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab)
+    setPagesHistory([null])
+    setCurrentPageIdx(0)
+    setExpandedId(null)
+    setCredits([])
+  }
+
+  const handleNextPage = () => {
+    if (hasNextPage && lastVisibleDoc) {
+      setPagesHistory(prev => [...prev, lastVisibleDoc])
+      setCurrentPageIdx(prev => prev + 1)
+      setExpandedId(null)
+    }
+  }
+
+  const handlePrevPage = () => {
+    if (currentPageIdx > 0) {
+      setCurrentPageIdx(prev => prev - 1)
+      setExpandedId(null)
+      // Quitar la última página agregada del historial
+      setPagesHistory(prev => prev.slice(0, -1))
+    }
+  }
+
+  const filteredCredits = credits.filter(c => 
+    c.clienteNombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.clienteCelular?.includes(searchTerm)
+  )
+
+  const openPaymentModal = (credit, e) => {
+    e.stopPropagation()
+    setSelectedCredit(credit)
+    setPaymentMonto('')
+    setPaymentNota('')
+    setPaymentError('')
+    setIsPaymentModalOpen(true)
+  }
+
+  const handleAddPayment = (e) => {
+    if (e && e.preventDefault) e.preventDefault()
+    
+    const dataToValidate = {
+      monto: Number(paymentMonto),
+      nota: paymentNota.trim(),
+    }
+
+    const result = paymentSchema.safeParse(dataToValidate)
+    if (!result.success) {
+      setPaymentError(result.error.issues[0].message)
+      return
+    }
+
+    if (dataToValidate.monto > selectedCredit.saldoPendiente) {
+      setPaymentError('El abono no puede ser mayor al saldo pendiente')
+      return
+    }
+
+    addPayment({ id: selectedCredit.id, paymentData: dataToValidate }, {
+      onSuccess: () => {
+        setIsPaymentModalOpen(false)
+        setSelectedCredit(null)
+      }
+    })
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="p-4 md:p-8 max-w-7xl mx-auto"
+    >
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center">
+          <CreditCard size={20} className="text-white" />
+        </div>
+        <h1 className="text-2xl font-bold text-app">Créditos y Fiados</h1>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4 justify-between mb-6">
+        {/* Buscador y Botón de Reporte */}
+        <div className="flex flex-col sm:flex-row items-center gap-2.5 flex-1 max-w-2xl">
+          <div className="relative flex-1 w-full">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <input
+              type="text"
+              placeholder="Escribe el nombre del cliente o número de pedido para buscar"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary transition-colors text-sm"
+            />
+          </div>
+          <button
+            onClick={handleExportCreditsReportPDF}
+            className="w-full sm:w-auto h-11 px-4 bg-surface hover:bg-surface-2 text-app border border-app rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-sm cursor-pointer whitespace-nowrap text-sm"
+          >
+            <CreditCard size={18} className="text-primary" /> <span>Exportar Cartera</span>
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex p-1.5 gap-1 bg-surface-2 rounded-2xl sm:w-64">
+          <button
+            onClick={() => handleTabChange('activo')}
+            className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${
+              activeTab === 'activo' ? 'bg-surface text-primary shadow-sm' : 'text-muted hover:text-app'
+            }`}
+          >
+            Activos
+          </button>
+          <button
+            onClick={() => handleTabChange('pagado')}
+            className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${
+              activeTab === 'pagado' ? 'bg-surface text-primary shadow-sm' : 'text-muted hover:text-app'
+            }`}
+          >
+            Pagados
+          </button>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-10 text-muted">Cargando créditos...</div>
+      ) : filteredCredits.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center bg-surface rounded-3xl border border-app">
+          <CreditCard size={48} className="text-muted mb-4 opacity-30" />
+          <h3 className="text-lg font-bold text-app mb-1">No hay créditos {activeTab}s</h3>
+          <p className="text-muted text-sm">
+            {activeTab === 'activo' ? 'Todos tus clientes están al día.' : 'Aún no hay créditos pagados en su totalidad.'}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-4">
+            <AnimatePresence>
+              {filteredCredits.map(credit => {
+                const isExpanded = expandedId === credit.id
+                const isPaid = credit.estado === 'pagado'
+
+                return (
+                  <motion.div
+                    key={credit.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="bg-surface rounded-3xl border border-app shadow-sm overflow-hidden"
+                  >
+                    {/* Tarjeta Resumen */}
+                    <div
+                      onClick={() => setExpandedId(isExpanded ? null : credit.id)}
+                      className="p-4 sm:p-6 flex flex-col md:flex-row gap-4 md:items-center justify-between cursor-pointer hover:bg-surface-2/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${
+                          isPaid ? 'bg-success/10 border-success/30 text-success' : 'bg-warning/10 border-warning/30 text-warning'
+                        }`}>
+                          {isPaid ? <CheckCircle size={24} /> : <DollarSign size={24} />}
+                        </div>
+                        
+                        <div>
+                          <h3 className="font-bold text-app text-lg leading-tight">
+                            {credit.clienteNombre}
+                          </h3>
+                          <p className="text-sm text-muted font-medium">
+                            Cel: {credit.clienteCelular} • Ref: {credit.orderNumber}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between md:justify-end gap-6 border-t border-app md:border-0 pt-4 md:pt-0">
+                        <div className="text-left md:text-right">
+                          <p className="text-xs text-muted mb-0.5">Monto Original: {formatCurrency(credit.montoTotal)}</p>
+                          {isPaid ? (
+                            <p className="font-black text-success text-xl">PAGADO</p>
+                          ) : (
+                            <p className="font-black text-warning text-xl">
+                              Debe {formatCurrency(credit.saldoPendiente)}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          {!isPaid && (
+                            <button
+                              onClick={(e) => openPaymentModal(credit, e)}
+                              className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center hover:bg-primary/20 transition-colors"
+                              title="Añadir Abono"
+                            >
+                              <Plus size={20} />
+                            </button>
+                          )}
+                          <ChevronDown size={20} className={`text-muted transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Historial Expandido */}
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="border-t border-app bg-surface-2/30"
+                        >
+                          <div className="p-6">
+                            <h4 className="text-sm font-bold text-app mb-4 flex items-center gap-2">
+                              <History size={16} className="text-primary" /> Historial de Abonos
+                            </h4>
+                            
+                            {(!credit.abonos || credit.abonos.length === 0) ? (
+                              <p className="text-sm text-muted italic">Aún no se han registrado abonos a esta deuda.</p>
+                            ) : (
+                              <div className="space-y-3">
+                                {credit.abonos.map((abono, idx) => (
+                                  <div key={idx} className="flex justify-between items-center bg-surface p-3 rounded-xl border border-app">
+                                    <div>
+                                      <p className="text-sm font-bold text-success">+{formatCurrency(abono.monto)}</p>
+                                      {abono.nota && <p className="text-xs text-muted mt-0.5">Nota: {abono.nota}</p>}
+                                    </div>
+                                    <p className="text-xs text-muted">
+                                      {new Date(abono.fecha).toLocaleDateString()} {new Date(abono.fecha).toLocaleTimeString()}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                )
+              })}
+            </AnimatePresence>
+          </div>
+
+          {/* Botones de Paginación */}
+          <div className="flex items-center justify-between pt-4 border-t border-app bg-surface px-4 py-3 rounded-2xl border">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPageIdx === 0}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border border-app bg-surface text-app hover:border-primary/50 disabled:opacity-40 disabled:hover:border-app disabled:cursor-not-allowed"
+            >
+              <ChevronLeft size={16} /> Anterior
+            </button>
+            
+            <span className="text-xs font-bold text-muted uppercase tracking-wider">
+              Página {currentPageIdx + 1}
+            </span>
+
+            <button
+              onClick={handleNextPage}
+              disabled={!hasNextPage}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border border-app bg-surface text-app hover:border-primary/50 disabled:opacity-40 disabled:hover:border-app disabled:cursor-not-allowed"
+            >
+              Siguiente <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PARA AGREGAR ABONO */}
+      <ModalTemplate
+        isOpen={isPaymentModalOpen}
+        onClose={() => {
+          setIsPaymentModalOpen(false)
+          setSelectedCredit(null)
+        }}
+        title="Registrar Abono"
+        subtitle={selectedCredit ? `Cliente: ${selectedCredit.clienteNombre}` : ''}
+        footerActions={
+          <div className="flex gap-3 w-full">
+            <button
+              type="button"
+              onClick={() => {
+                setIsPaymentModalOpen(false)
+                setSelectedCredit(null)
+              }}
+              className="flex-1 h-12 bg-surface-2 text-app rounded-xl font-bold transition-all active:scale-95 border border-app hover:bg-app/10"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleAddPayment}
+              disabled={isPending || !paymentMonto}
+              className="flex-1 h-12 bg-primary text-white rounded-xl font-bold transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center"
+            >
+              {isPending ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                'Guardar Abono'
+              )}
+            </button>
+          </div>
+        }
+      >
+        {selectedCredit && (
+          <div className="space-y-4 pt-2">
+            <div className="bg-warning-soft border border-warning-soft rounded-2xl p-4 flex justify-between items-center">
+              <span className="text-sm font-semibold text-warning">Saldo Actual:</span>
+              <span className="text-xl font-black text-warning">
+                {formatCurrency(selectedCredit.saldoPendiente)}
+              </span>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-app mb-1">Monto a abonar *</label>
+              <input
+                type="number"
+                value={paymentMonto}
+                onChange={(e) => setPaymentMonto(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-lg font-bold"
+                placeholder="Ingresa el valor numérico"
+              />
+              {paymentError && <p className="text-xs text-error mt-1">{paymentError}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-app mb-1">Nota (Opcional)</label>
+              <input
+                type="text"
+                value={paymentNota}
+                onChange={(e) => setPaymentNota(e.target.value)}
+                className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+                placeholder="Ingresa una descripción del método o lugar de pago"
+              />
+            </div>
+          </div>
+        )}
+      </ModalTemplate>
+    </motion.div>
+  )
+}

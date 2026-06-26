@@ -67,19 +67,34 @@ export const PALETTES = {
  * @param {string} projectId Project ID de Firebase
  */
 async function validateFirebaseCredentials(apiKey, projectId) {
-  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents?key=${apiKey}`;
+  // Se añade la subruta '/config' para evitar que Google devuelva un HTML 404 genérico por consultar la raíz
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/config?key=${apiKey}`;
   try {
     const res = await fetch(url, { method: 'GET' });
-    const data = await res.json();
+    const text = await res.text();
     
-    // Si la API key es inválida
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (_) {
+      throw new Error(`Respuesta no válida de Google Cloud (404 HTML). Verifica el Project ID: "${projectId}".`);
+    }
+
     if (res.status === 400 && data.error && (data.error.message.includes('API key') || data.error.message.includes('INVALID'))) {
       throw new Error(`API Key de Firebase inválida: ${data.error.message}`);
     }
-    // Si el proyecto no existe
+    
+    if (res.status === 403 && data.error) {
+      const msg = data.error.message || '';
+      if (msg.includes('Permission denied on resource project') || data.error.status === 'PERMISSION_DENIED' && msg.includes(projectId)) {
+        throw new Error(`El Project ID de Firebase "${projectId}" no existe o no tiene Firestore activo.`);
+      }
+    }
+
     if (res.status === 404 && data.error && data.error.message.includes('not found')) {
       throw new Error(`El Project ID de Firebase "${projectId}" no existe o no tiene Firestore activo.`);
     }
+
     return true;
   } catch (err) {
     if (err.message.includes('fetch failed') || err.message.includes('network') || err.message.includes('FetchError')) {
@@ -491,17 +506,51 @@ test-results/
     step5_1.succeed('Configuración firebase.json heredada de la plantilla.');
   }
 
-  const step5_2 = ora('Generar reglas de almacenamiento storage.rules').start();
-  const storageRulesContent = `rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /{allPaths=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
+  // Asegurar cabeceras estrictas de caché PWA a futuro en firebase.json (CORE-090)
+  try {
+    if (await fs.pathExists(firebaseJsonPath)) {
+      const config = await fs.readJson(firebaseJsonPath);
+      if (!config.hosting) config.hosting = {};
+      const hostings = Array.isArray(config.hosting) ? config.hosting : [config.hosting];
+      
+      const requiredHeaders = [
+        { source: '/index.html', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
+        { source: '/sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
+        { source: '/firebase-messaging-sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
+        { source: '/manifest.webmanifest', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
+        { source: '/manifest.json', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
+        { source: '/assets/**', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] }
+      ];
+      
+      let changed = false;
+      for (const h of hostings) {
+        if (!h.headers) h.headers = [];
+        for (const req of requiredHeaders) {
+          const idx = h.headers.findIndex(item => item.source === req.source);
+          if (idx === -1) {
+            h.headers.push(req);
+            changed = true;
+          } else {
+            const existing = h.headers[idx];
+            const hasCacheCtrl = existing.headers && existing.headers.some(x => x.key === 'Cache-Control' && x.value === req.headers[0].value);
+            if (!hasCacheCtrl) {
+              h.headers[idx] = req;
+              changed = true;
+            }
+          }
+        }
+      }
+      if (changed) {
+        config.hosting = Array.isArray(config.hosting) ? hostings : hostings[0];
+        await fs.writeJson(firebaseJsonPath, config, { spaces: 2 });
+      }
     }
+  } catch (err) {
+    console.error('⚠️ Error al inyectar cabeceras estrictas de caché en firebase.json:', err.message);
   }
-}
-`;
+
+  const step5_2 = ora('Generar reglas de almacenamiento storage.rules').start();
+  const storageRulesContent = `rules_version = '2';\nservice firebase.storage {\n  match /b/{bucket}/o {\n    match /{allPaths=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n`;
   const storageRulesPath = path.join(targetDir, 'storage.rules');
   if (!(await fs.pathExists(storageRulesPath))) {
     await fs.writeFile(storageRulesPath, storageRulesContent, 'utf-8');
@@ -512,16 +561,7 @@ service firebase.storage {
 
   // 5.3 Crear reglas de Firestore firestore.rules por defecto
   const step5_3 = ora('Generar reglas de Firestore firestore.rules').start();
-  const firestoreRulesContent = `rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-  }
-}
-`;
+  const firestoreRulesContent = `rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n`;
   const firestoreRulesPath = path.join(targetDir, 'firestore.rules');
   if (!(await fs.pathExists(firestoreRulesPath))) {
     await fs.writeFile(firestoreRulesPath, firestoreRulesContent, 'utf-8');
@@ -1137,6 +1177,8 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
 
   // 12. Auto-registro en la Consola Central (Developer Cockpit)
   await registerInCentralConsole(answers, clientId, uniqueToken);
+
+  const vapidPublicKey = answers.firebaseVapidKey || answers.vapidPublicKey || '';
 
   return {
     clientId,

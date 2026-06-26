@@ -4,6 +4,34 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-093: Optimización, Sanitización y Visualización de Diferencias en Sincronización de Cores (CORE-093)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se optimizó y refactorizó el motor de sincronización de plantillas Core (`performCoreSync`) en la CLI para realizar E/S de forma concurrente con `Promise.all` al sanitizar archivos. Se restringió la sustitución del token `packageName` a `package.json`, protegiendo componentes de React y estilos CSS de sobreescrituras codiciosas. Se habilitó la sanitización nativa de archivos de reglas Firebase (`.rules`) y se inyectaron exclusiones recursivas. Adicionalmente, se corrigieron bugs críticos en `generator.js` (preflight check con error de análisis HTML 404 de Google) y `worker_create_project.js` (import dinámico ESM de Playwright en Windows y timeouts causados por telemetría). Finalmente, se implementó el endpoint `GET /api/cores/:clave/drift` para comparar semánticamente en memoria el Core con la plantilla y se integró en `CoreCard.jsx` del Dashboard un modal interactivo premium que muestra la tasa de paridad (0-100%), listado de archivos faltantes y acordeones dinámicos con el diff de líneas coloreadas.
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Prototipe-CLI/generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY], [Prototipe-CLI/worker_create_project.js](file:///d:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-092: Blindaje a Futuro de Cores e Instancias (Firebase Rules & Config Integrity)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se implementó un blindaje de paridad y autocuración para las reglas de Firebase y configuraciones críticas en el CLI Server y generador. Modificado `/api/register-core` para provisionar archivos Firebase base completos (`firebase.json`, `firestore.rules`, `storage.rules`, `firestore.indexes.json`) al crear nuevos Cores. Modificado `/api/project/firebase-rules/drift-global` para autocurar archivos faltantes en el Core local (descargando las reglas de la nube o usando plantillas restrictivas por defecto). Se dinamizó completamente `/api/project/fix/rules` leyendo `.prototipe.json` para resolver el Core dinámicamente en lugar del acoplamiento rígido con "App Ventas", extendiendo la restauración a reglas de almacenamiento y de índices. Finalmente, se actualizaron las reglas por defecto en `generator.js` con esquemas restrictivos seguros por defecto. Asimismo, se corrigió un error crítico `ReferenceError: dir is not defined` en el endpoint `/api/project/drift/global` que causaba que el cálculo de drift global fallara al intentar evaluar instancias.
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Prototipe-CLI/generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-091: Alineación e Integridad de Telemetría Central y Ping-Pong en Cores e Instancias~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se solucionó una desincronización física (drift) que degradaba la conexión en tiempo real entre las instancias cliente y el Dashboard Central. Se inyectó `centralFirebaseService.js` en el Core `App Ventas/` y se actualizó `useAppConfigSync.js` con el listener de instantáneas de 176 líneas en el Core y la instancia cliente `ventas-moni-app`, restaurando el canal de ping-pong y sistemaAlerta. Validado localmente con sincronización y build completo.
+  - Archivos: [Plantillas Core/App Ventas/src/services/centralFirebaseService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/centralFirebaseService.js) [NEW], [Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-090: Blindaje a Futuro contra Caché Persistente en Despliegues de Hosting PWA (CORE-090)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se implementó un blindaje integral a nivel de todo el ecosistema para solucionar la persistencia de caché en Firebase Hosting. Se inyectaron reglas de cabeceras HTTP (`Cache-Control`) para servir sin caché los archivos de control (`index.html`, `sw.js`, `firebase-messaging-sw.js`, manifiestos) y con caché inmutable de larga duración los assets estáticos con hash (`/assets/**`), tanto en `firebase.json` del Core de Ventas como en la instancia del cliente. Se estandarizó el registro del Service Worker en `main.jsx` de todas las plantillas (`App Ventas`, `template-ventas`, `template-core-seed`) y de la instancia cliente con un callback y un listener de `controllerchange` en el cliente para forzar una recarga suave automática, protegido contra recargas en primera carga. Finalmente, se inyectaron rutinas automáticas de auto-curación de estas cabeceras tanto en el aprovisionador del CLI (`generator.js`) como en el pipeline de pre-flight del servidor CLI (`server.js`).
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Prototipe-CLI/generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY], [Plantillas Core/App Ventas/firebase.json](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firebase.json) [MODIFY], [Plantillas Core/App Ventas/src/main.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/main.jsx) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/firebase.json](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/firebase.json) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/src/main.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/main.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-089: Pre-flight Validation Pipeline y Blindaje de Integridad de Sincronización en CLI Server (CORE-089)~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-26

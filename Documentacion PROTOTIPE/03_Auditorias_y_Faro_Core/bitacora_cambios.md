@@ -1,5 +1,71 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-26] - CORE-093: Optimización, Sanitización y Visualización de Diferencias en Sincronización de Cores
+
+* **Tipo:** Refactorización / Optimización / CLI / Aprovisionamiento / Robustez / UI/UX / Documentación
+* **Descripción de Cambios:**
+  - **Sincronización Concurrente de Cores:** Se optimizó `performCoreSync` en `server.js` reemplazando la recursión síncrona/secuencial por E/S paralela con `Promise.all` para la sanitización de plantillas, bajando el tiempo de sincronización local del Core a ~220ms.
+  - **Protección de packageName:** Se limitó el reemplazo del nombre de paquete estrictamente a `package.json`, eliminando falsas sobreescrituras en archivos del código fuente React o selectores CSS.
+  - **Soporte de Reglas Firebase:** Se añadió soporte para procesar y sanitizar la extensión `.rules` nativamente.
+  - **Exclusión de Directorios de Trabajo:** Se excluyeron carpetas temporales (`.firebase`, `playwright-report`, `test-results`, `scratch`, `scripts`) en la recursión de sanitización.
+  - **Corrección de Bug de Validación de Firebase:** Se solucionó una excepción `Unexpected token '<'` al validar credenciales en `generator.js` causante de fallos en el preflight check al consultar la raíz REST de Firestore. Ahora se realiza la consulta sobre la colección `/config` para recibir un JSON estructurado de error (403/400) o éxito (200) de Google.
+  - **Corrección de ESM Import en Windows:** Se reemplazó la llamada a `import()` dinámico de Playwright con ruta de disco absoluta de Windows por `require()` nativa de CommonJS en `worker_create_project.js`, evitando fallos del motor ESM.
+  - **Chequeo de Humo Optimizada:** Se cambió el estado de espera en Playwright de `networkidle` a `load` en `worker_create_project.js` para evitar timeouts debido a flujos SSE de fondo de la telemetría centralizada.
+  - **Backend de Drift y Diffs para Cores:** Se implementó el endpoint `GET /api/cores/:clave/drift` en `server.js` para evaluar de forma concurrente la paridad física, excluyendo temporales, aplicando sanitización semántica al vuelo antes de la comparación y limitando los diffs de texto a archivos menores a 150 KB.
+  - **Frontend del Visualizador de Paridad:** Se actualizó `CoreCard.jsx` en el Dashboard Central agregando el botón "Diferencias" y el modal interactivo que despliega el porcentaje SVG de paridad (0-100%), listado de archivos faltantes en la CLI, acordeón de archivos modificados con resaltado de diff de líneas verde/rojo y un botón para sincronizar en caliente con refresco reactivo.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+  - [`Prototipe-CLI/worker_create_project.js`](file:///d:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-26] - CORE-092: Blindaje a Futuro de Cores e Instancias (Firebase Rules & Config Integrity)
+
+* **Tipo:** Mejora de Seguridad / Robustez / Multi-core / CLI / Automatización / Documentación
+* **Descripción de Cambios:**
+  - **Aprovisionamiento Nativo de Cores:** Se modificó `/api/register-core` para escribir y provisionar físicamente `firebase.json` (con Firestore, Storage y cabeceras de caché PWA configuradas), `firestore.rules`, `storage.rules` y `firestore.indexes.json` con configuraciones restrictivas base seguras en nuevos Cores al crearse.
+  - **Autocuración de Drift en Caliente:** Se inyectó el helper `autoHealCoreRules` en `/api/project/firebase-rules/drift-global` de modo que si un Core plantilla local carece de sus reglas de seguridad, se generen y escriban proactivamente antes de calcular drifts, priorizando las reglas activas de la nube (si el cliente está conectado) o plantillas seguras locales si falla la conexión.
+  - **Dinamización y Generalización de Fix Rules:** Se desacopló la dependencia rígida ("hardcoded") de `App Ventas` en `/api/project/fix/rules`. Ahora se lee `.prototipe.json` de la instancia para resolver su Core de origen de manera dinámica, y se amplió el soporte para restaurar no solo `firestore.rules`, sino también `storage.rules` y `firestore.indexes.json` selectivamente o por lotes.
+  - **Estandarización en el Generador:** Se actualizaron las plantillas estáticas de reglas por defecto en `generator.js` con el formato restrictivo seguro estándar (acceso denegado a no autenticados en Firestore y Storage).
+  - **Corrección de Bug de Drift Global de Archivos:** Se corrigió un `ReferenceError: dir is not defined` en el endpoint `/api/project/drift/global` provocado por una variable no actualizada durante una refactorización previa. Esto impedía visualizar la matriz de paridad en el Dashboard al arrojar excepciones en el cálculo de drift de las instancias.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-26] - CORE-091: Tuning de Telemetría Central y Ping-Pong en Cores e Instancias
+
+* **Tipo:** Corrección de Bugs / Robustez / Sincronización / Telemetría / Documentación
+* **Descripción de Cambios:**
+  - **Saneamiento de Alineación (Drift):** Se solucionó la desincronización física en la que las instancias cliente veían sobrescrita su lógica de sincronización central (`useAppConfigSync.js`) con una versión básica del Core `App Ventas/` que carecía de conexión de base de datos secundaria.
+  - **Inyección de Conexión Central en Core:** Se copió `centralFirebaseService.js` a `Plantillas Core/App Ventas/src/services/` y se actualizó `useAppConfigSync.js` en `Plantillas Core/App Ventas/src/hooks/` con el hook de 176 líneas que integra listeners en tiempo real para `sistemaAlerta`, `triggerPing` y tarifas del CRM central.
+  - **Propagación y Alineación de Instancia:** Se actualizó `ventas-moni-app` con el hook alineado y se corrió una prueba de sincronización downstream desde el CLI Bridge. El sistema propagó los cambios con éxito y construyó la PWA v1.3.0 sin advertencias.
+* **Archivos Modificados:**
+  - [`Plantillas Core/App Ventas/src/services/centralFirebaseService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/centralFirebaseService.js) [NEW]
+  - [`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  - [`Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-26] - CORE-090: Blindaje a Futuro contra Caché Persistente en Despliegues de Hosting PWA
+
+* **Tipo:** Mejora de Seguridad / Robustez / Multi-core / CLI / Automatización / Documentación
+* **Descripción de Cambios:**
+  - **Planificación y Diseño de Blindaje contra Caché:** Se planificó un blindaje en caliente para resolver el problema de desactualización en Firebase Hosting sin dañar la identidad de las marcas ni configuraciones locales. La solución consiste en: (1) Inyectar cabeceras `Cache-Control` estrictas en `firebase.json` de cores e instancias, forzando la validación inmediata del `index.html` y service workers en cada recarga, mientras se permite caché inmutable para assets hasheados de Vite. (2) Registrar el Service Worker con una estrategia de recarga automática al cambiar el controlador (`controllerchange`) en `main.jsx` protegiendo la carga inicial. (3) Inyectar rutinas automáticas de auto-curación y auditoría de cabeceras en el generador de proyectos (`generator.js`) y en el pipeline de sincronización del servidor CLI (`server.js`).
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
 
 ### [2026-06-26] - CORE-089: Pre-flight Validation Pipeline y Blindaje de Integridad de Sincronización en CLI Server
 
