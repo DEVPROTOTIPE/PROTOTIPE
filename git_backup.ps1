@@ -150,7 +150,9 @@ if ($residualTemps) {
     Write-Host " [INFO] Restaurando directorios .git residuales de backups anteriores..." -ForegroundColor Yellow
     foreach ($temp in $residualTemps) {
         try {
+            attrib -h -r -s $temp.FullName 2>&1 | Out-Null
             Rename-Item -Path $temp.FullName -NewName ".git" -ErrorAction Stop -Force
+            attrib +h "$($temp.Parent.FullName)\.git" 2>&1 | Out-Null
             Write-Host "    -> Restaurado: $($temp.Parent.Name)/.git" -ForegroundColor DarkGray
         } catch {
             Write-Host "    [!] No se pudo restaurar: $($temp.FullName)" -ForegroundColor Red
@@ -178,7 +180,9 @@ try {
             $tempPath = "$parentPath\.git-backup-temp"
             
             Write-Host "    -> Ocultando: $parentName/.git" -ForegroundColor DarkGray
+            attrib -h -r -s $dir.FullName 2>&1 | Out-Null
             Rename-Item -Path $dir.FullName -NewName ".git-backup-temp" -Force
+            attrib +h $tempPath 2>&1 | Out-Null
             
             $renamedDirs += [PSCustomObject]@{
                 OriginalPath = $dir.FullName
@@ -410,7 +414,9 @@ finally {
                 $success = $false
                 while (-not $success -and $retries -gt 0) {
                     try {
+                        attrib -h -r -s $tempPath 2>&1 | Out-Null
                         Rename-Item -Path $tempPath -NewName ".git" -ErrorAction Stop -Force
+                        attrib +h "$($dir.TempPath.Replace('.git-backup-temp', '.git'))" 2>&1 | Out-Null
                         $success = $true
                     } catch {
                         $retries--

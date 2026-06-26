@@ -40,7 +40,9 @@ if ($tempGitDirs.Count -gt 0) {
             $restored = $false
             while (-not $restored -and $retries -gt 0) {
                 try {
+                    attrib -h -r -s $tempDir.FullName 2>&1 | Out-Null
                     Rename-Item -Path $tempDir.FullName -NewName ".git" -ErrorAction Stop -Force
+                    attrib +h "$($tempDir.Parent.FullName)\.git" 2>&1 | Out-Null
                     $restored = $true
                 } catch {
                     $retries--

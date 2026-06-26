@@ -13,11 +13,15 @@
   - **Chequeo de Humo Optimizada:** Se cambió el estado de espera en Playwright de `networkidle` a `load` en `worker_create_project.js` para evitar timeouts debido a flujos SSE de fondo de la telemetría centralizada.
   - **Backend de Drift y Diffs para Cores:** Se implementó el endpoint `GET /api/cores/:clave/drift` en `server.js` para evaluar de forma concurrente la paridad física, excluyendo temporales, aplicando sanitización semántica al vuelo antes de la comparación y limitando los diffs de texto a archivos menores a 150 KB.
   - **Frontend del Visualizador de Paridad:** Se actualizó `CoreCard.jsx` en el Dashboard Central agregando el botón "Diferencias" y el modal interactivo que despliega el porcentaje SVG de paridad (0-100%), listado de archivos faltantes en la CLI, acordeón de archivos modificados con resaltado de diff de líneas verde/rojo y un botón para sincronizar en caliente con refresco reactivo.
+  - **Solución a Bloqueo de Git Oculto en Windows (Subproyectos):** Se corrigió un error de "Acceso denegado" al restaurar las carpetas `.git-backup-temp` a `.git` en Windows. El comando `Rename-Item` fallaba debido a que las carpetas tenían el atributo `Hidden` activo. Se modificaron los scripts `git_backup.ps1`, `menu_backup.ps1` y `subproject_backup.ps1` para remover temporalmente los atributos de archivo (`attrib -h -r -s`) antes del renombrado y volver a ocultarlas una vez restauradas, garantizando ejecuciones limpias de control de versiones.
 * **Archivos Modificados:**
   - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
   - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
   - [`Prototipe-CLI/worker_create_project.js`](file:///d:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
   - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY]
+  - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+  - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
   - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
   - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
 

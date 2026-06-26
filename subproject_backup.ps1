@@ -87,10 +87,12 @@ if (Test-Path $gitTempPath) {
     $renameSuccess = $false
     while (-not $renameSuccess -and $retries -gt 0) {
         try {
+            attrib -h -r -s $gitTempPath 2>&1 | Out-Null
             Rename-Item -Path $gitTempPath -NewName ".git" -ErrorAction Stop -Force
+            attrib +h $gitNormalPath 2>&1 | Out-Null
             $renameSuccess = $true
             $tempRenamed = $true
-            Write-Host "    -> Habilitado: $projectName/.git" -ForegroundColor DarkGray
+            Write-Host "    -> Habilitando: $projectName/.git" -ForegroundColor DarkGray
         } catch {
             $retries--
             if ($retries -gt 0) { Start-Sleep -Milliseconds 400 }
@@ -436,7 +438,9 @@ finally {
         $restored = $false
         while (-not $restored -and $retries -gt 0) {
             try {
+                attrib -h -r -s $gitNormalPath 2>&1 | Out-Null
                 Rename-Item -Path $gitNormalPath -NewName ".git-backup-temp" -ErrorAction Stop -Force
+                attrib +h $gitTempPath 2>&1 | Out-Null
                 $restored = $true
                 Write-Host "    -> Resguardo inactivo configurado para $projectName." -ForegroundColor DarkGray
             } catch {
