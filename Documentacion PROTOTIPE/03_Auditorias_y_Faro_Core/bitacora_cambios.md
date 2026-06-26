@@ -1,5 +1,22 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-26] - CORE-094: Optimización de Drift y Paridad de Cores (Normalización LF, Huérfanos, Poda y Diffs Lazy)
+
+* **Tipo:** Refactorización / Optimización / CLI / UI/UX / Robustez / Control de Calidad / Documentación
+* **Descripción de Cambios:**
+  - **Normalización LF en Drift Detector:** Se inyectó el reemplazo de retornos de carro CRLF (`\r\n`) por LF (`\n`) y `.trim()` en la comparación física de archivos en memoria en el backend CLI, previniendo falsos desvíos (drifts invisibles) en entornos Windows.
+  - **Detección Bidireccional de Huérfanos:** Se expandió la lógica de `drift` en `server.js` agregando el escaneo inverso sobre el directorio de destino (`templatePath`) para identificar archivos obsoletos de la plantilla CLI que ya no existen en el Core de desarrollo (marcados con el estado `orphan_in_template`).
+  - **Sincronización con Poda (Pruning):** Se actualizó el helper de sincronización `performCoreSync` y los endpoints del servidor para leer la bandera `prune` del body y ejecutar la eliminación física segura de archivos huérfanos detectados en el template.
+  - **Diffs Asíncronos Bajo Demanda (Lazy):** Se rediseñó el endpoint `/api/cores/:clave/drift` para omitir el pesado cálculo y payload de diferencias inline, y se implementó un nuevo endpoint dedicado `/api/cores/:clave/diff` que calcula el diff de líneas con `jsdiff` en caliente únicamente para el archivo consultado.
+  - **Frontend con Lazy Loading y Sección de Obsoletos:** Se actualizó `CoreCard.jsx` en el Dashboard Central incorporando los estados locales `fileDiffs`/`loadingFileDiff` para cargar individualmente las diferencias al expandir el acordeón del archivo, agregando la nueva sección "🗑️ Archivos Obsoletos en Plantilla CLI" para listar huérfanos y enviando `{ prune: true }` al sincronizar para curar el desvío físico por completo.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
 ### [2026-06-26] - CORE-093: Optimización, Sanitización y Visualización de Diferencias en Sincronización de Cores
 
 * **Tipo:** Refactorización / Optimización / CLI / Aprovisionamiento / Robustez / UI/UX / Documentación

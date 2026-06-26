@@ -1498,11 +1498,9 @@ app.post('/api/cores/:clave/scaffold', async (req, res) => {
     res.status(500).json({ error: `Error en scaffold: ${err.message}` });
   }
 });
-
+// Helper para sincronizar archivos del core a la plantilla del CLI (sanitizado) con opción de poda (prune)
 // ─────────────────────────────────────────────────────────────────────────────
-// Helper para sincronizar archivos del core a la plantilla del CLI (sanitizado)
-// ─────────────────────────────────────────────────────────────────────────────
-async function performCoreSync(clave, CLI_ROOT) {
+async function performCoreSync(clave, CLI_ROOT, options = {}) {
   const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
   const registro = await fs.readJson(registroPath);
   const config = registro.plantillas[clave];
@@ -1510,11 +1508,12 @@ async function performCoreSync(clave, CLI_ROOT) {
 
   const corePath     = config.fuente.replace(/\//g, path.sep);
   const templatePath = config.destino.replace(/\//g, path.sep);
+  const prune = options.prune === true;
 
-  // 1. Validar que el core tiene código real (más que solo docs y .gitkeep)
+  // 1. Validar que el core tiene código real
   const hasCode = await fs.pathExists(path.join(corePath, 'src'));
   if (!hasCode) {
-    throw new Error(`El core "${clave}" no tiene código en /src/ todavía. Completa el scaffold o el desarrollo antes de sincronizar.`);
+    throw new Error(`El core "${clave}" no tiene código en /src/ todavía. Sincronización omitida.`);
   }
 
   // 2. Sincronizar código core → templates/
@@ -1537,17 +1536,54 @@ async function performCoreSync(clave, CLI_ROOT) {
   await fs.ensureDir(templatePath);
   const synced = [];
 
-  for (const relPath of SYNC_PATHS) {
+  // Copiar directorios controlados concurrentemente
+  await Promise.all(SYNC_PATHS.map(async (relPath) => {
     const src  = path.join(corePath, relPath);
     const dest = path.join(templatePath, relPath);
-    if (!await fs.pathExists(src)) continue;
+    if (!await fs.pathExists(src)) return;
     await fs.copy(src, dest, {
       overwrite: true,
       filter: (s) => !EXCLUDE_FROM_TEMPLATE.has(path.basename(s))
     });
     synced.push(relPath);
-  }
+  }));
 
+  // Purgar archivos obsoletos en el template (poda) si está activo
+  if (prune) {
+    const collectFilesLocal = async (baseDir, relPath, resultList = []) => {
+      const fullPath = path.join(baseDir, relPath);
+      if (!await fs.pathExists(fullPath)) return resultList;
+      const stat = await fs.stat(fullPath);
+      if (stat.isDirectory()) {
+        const files = await fs.readdir(fullPath);
+        await Promise.all(files.map(file => {
+          if (EXCLUDE_FROM_TEMPLATE.has(file)) return;
+          return collectFilesLocal(baseDir, path.join(relPath, file), resultList);
+        }));
+      } else {
+        resultList.push(relPath.replace(/\\/g, '/'));
+      }
+      return resultList;
+    };
+
+    const coreFiles = [];
+    const templateFiles = [];
+    await Promise.all(SYNC_PATHS.map(p => collectFilesLocal(corePath, p, coreFiles)));
+    await Promise.all(SYNC_PATHS.map(p => collectFilesLocal(templatePath, p, templateFiles)));
+
+    const coreFilesSet = new Set(coreFiles);
+    for (const tempFile of templateFiles) {
+      if (!coreFilesSet.has(tempFile)) {
+        const fileToDelete = path.join(templatePath, tempFile);
+        try {
+          await fs.remove(fileToDelete);
+          console.log(`[Sync Prune] Eliminado archivo huérfano del template: ${tempFile}`);
+        } catch (err) {
+          console.warn(`[Sync Prune] No se pudo eliminar ${tempFile}:`, err.message);
+        }
+      }
+    }
+  }
   // Copiar package.json sanitizado (sin credenciales de cliente)
   const srcPkg = path.join(corePath, 'package.json');
   if (await fs.pathExists(srcPkg)) {
@@ -1689,6 +1725,7 @@ async function performCoreSync(clave, CLI_ROOT) {
 app.post('/api/cores/:clave/activate', async (req, res) => {
   const { clave } = req.params;
   const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+  const prune = req.body.prune === true;
 
   try {
     const registro = await fs.readJson(registroPath);
@@ -1696,7 +1733,7 @@ app.post('/api/cores/:clave/activate', async (req, res) => {
     if (!config) return res.status(404).json({ error: `La clave "${clave}" no existe en el registro.` });
 
     // Sincronizar código usando el helper común
-    const { synced, templatePath } = await performCoreSync(clave, CLI_ROOT);
+    const { synced, templatePath } = await performCoreSync(clave, CLI_ROOT, { prune });
 
     // Incrementar versión (patch) y marcar activo: true
     const [major, minor, patch] = (config.version || '0.1.0').split('.').map(Number);
@@ -1725,8 +1762,9 @@ app.post('/api/cores/:clave/activate', async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 app.post('/api/cores/:clave/sync', async (req, res) => {
   const { clave } = req.params;
+  const prune = req.body.prune === true;
   try {
-    const { synced, templatePath } = await performCoreSync(clave, CLI_ROOT);
+    const { synced, templatePath } = await performCoreSync(clave, CLI_ROOT, { prune });
     res.json({
       success: true,
       message: `Plantilla "${clave}" sincronizada correctamente con el CLI sin alterar su estado en el wizard.`,
@@ -1807,43 +1845,87 @@ function sanitizeCoreContentForDrift(filePath, content, tokens, srcProjectId) {
 app.get('/api/cores/:clave/drift', async (req, res) => {
   const { clave } = req.params;
   const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
-
   try {
-    if (!await fs.pathExists(registroPath)) {
-      return res.status(404).json({ error: 'No se encontró el registro de plantillas.' });
-    }
-
     const registro = await fs.readJson(registroPath);
     const config = registro.plantillas[clave];
     if (!config) {
-      return res.status(404).json({ error: `La clave "${clave}" no existe en el registro.` });
+      return res.status(404).json({ error: `La plantilla core con clave "${clave}" no existe.` });
     }
 
     const corePath     = config.fuente.replace(/\//g, path.sep);
     const templatePath = config.destino.replace(/\//g, path.sep);
 
-    if (!await fs.pathExists(corePath)) {
-      return res.status(404).json({ error: `El directorio del Core fuente no existe: ${corePath}` });
-    }
-
-    if (!await fs.pathExists(templatePath)) {
-      // Si la plantilla del CLI no se ha sincronizado ni una sola vez
+    const hasCode = await fs.pathExists(path.join(corePath, 'src'));
+    if (!hasCode) {
       return res.json({
         success: true,
         parityPercent: 0,
-        totalCount: 0,
         syncedCount: 0,
-        differences: [
-          {
-            file: 'Todo el Core',
-            status: 'missing_in_template',
-            message: 'La plantilla CLI aún no ha sido sincronizada. Está en 0% de paridad.'
-          }
-        ]
+        totalCount: 0,
+        differences: [],
+        message: 'El Core no contiene código de desarrollo todavía.'
       });
     }
 
-    // 1. Extraer tokens de configuración para sanitización semántica en memoria
+    const SYNC_PATHS = [
+      'src/components', 'src/hooks', 'src/services', 'src/store',
+      'src/layouts', 'src/pages', 'src/routes', 'src/utils',
+      'src/constants', 'src/schemas', 'src/types', 'src/providers',
+      'src/config', 'src/App.jsx', 'src/App.css', 'src/index.css', 'src/main.jsx',
+      'firestore.indexes.json', 'firestore.rules', 'storage.rules',
+      'vite.config.js', 'eslint.config.js', 'GEMINI.md',
+      'index.html', 'public'
+    ];
+
+    const EXCLUDE_FROM_TEMPLATE = new Set([
+      '.env.local', '.env', '.firebaserc', 'firebase.json',
+      'dist', 'node_modules', '.git', '.firebase',
+      'scratch', 'playwright-report', 'test-results', '.gitkeep'
+    ]);
+
+    const collectFilesLocal = async (baseDir, relPath, resultList = []) => {
+      const fullPath = path.join(baseDir, relPath);
+      if (!await fs.pathExists(fullPath)) return resultList;
+      const stat = await fs.stat(fullPath);
+      if (stat.isDirectory()) {
+        const files = await fs.readdir(fullPath);
+        await Promise.all(files.map(file => {
+          if (EXCLUDE_FROM_TEMPLATE.has(file)) return;
+          return collectFilesLocal(baseDir, path.join(relPath, file), resultList);
+        }));
+      } else {
+        resultList.push(relPath.replace(/\\/g, '/'));
+      }
+      return resultList;
+    };
+
+    const coreFiles = [];
+    const templateFiles = [];
+    await Promise.all(SYNC_PATHS.map(p => collectFilesLocal(corePath, p, coreFiles)));
+    await Promise.all(SYNC_PATHS.map(p => collectFilesLocal(templatePath, p, templateFiles)));
+
+    if (await fs.pathExists(path.join(corePath, 'package.json'))) {
+      coreFiles.push('package.json');
+    }
+    if (await fs.pathExists(path.join(templatePath, 'package.json'))) {
+      templateFiles.push('package.json');
+    }
+
+    const filesInCore = await fs.readdir(corePath).catch(() => []);
+    const docDirInCore = filesInCore.find(f => f.startsWith('Documentacion'));
+    if (docDirInCore && await fs.pathExists(path.join(corePath, docDirInCore))) {
+      await collectFilesLocal(corePath, docDirInCore, coreFiles);
+    }
+    const filesInTemplate = await fs.readdir(templatePath).catch(() => []);
+    const docDirInTemplate = filesInTemplate.find(f => f.startsWith('Documentacion'));
+    if (docDirInTemplate && await fs.pathExists(path.join(templatePath, docDirInTemplate))) {
+      await collectFilesLocal(templatePath, docDirInTemplate, templateFiles);
+    }
+
+    const coreFilesSet = new Set(coreFiles);
+    const templateFilesSet = new Set(templateFiles);
+    const allFiles = new Set([...coreFiles, ...templateFiles]);
+
     const tokens = {
       projectId: '',
       apiKey: '',
@@ -1852,7 +1934,7 @@ app.get('/api/cores/:clave/drift', async (req, res) => {
       appId: '',
       telemetryToken: ''
     };
-
+    
     const srcPkg = path.join(corePath, 'package.json');
     if (await fs.pathExists(srcPkg)) {
       try {
@@ -1876,150 +1958,181 @@ app.get('/api/cores/:clave/drift', async (req, res) => {
         tokens.telemetryToken    = parseEnvValue('VITE_DEVELOPER_TELEMETRY_TOKEN');
       } catch (_) {}
     }
-
     const srcProjectId = tokens.projectId || 'ventas-smartfix';
 
-    // Definición de exclusiones y rutas a verificar (mismo estándar de performCoreSync)
-    const SYNC_PATHS = [
-      'src/components', 'src/hooks', 'src/services', 'src/store',
-      'src/layouts', 'src/pages', 'src/routes', 'src/utils',
-      'src/constants', 'src/schemas', 'src/types', 'src/providers',
-      'src/config', 'src/App.jsx', 'src/App.css', 'src/index.css', 'src/main.jsx',
-      'firestore.indexes.json', 'firestore.rules', 'storage.rules',
-      'vite.config.js', 'eslint.config.js', 'GEMINI.md',
-      'index.html', 'package.json'
-    ];
+    const differences = [];
+    let huerfanosCount = 0;
 
-    const EXCLUDE_FROM_TEMPLATE = new Set([
-      '.env.local', '.env', '.firebaserc', 'firebase.json',
-      'dist', 'node_modules', '.git', '.firebase',
-      'scratch', 'playwright-report', 'test-results', '.gitkeep'
-    ]);
-
-    // Recolectar archivos del Core asíncronamente
-    const collectFiles = async (baseDir, relPath, resultList = []) => {
-      const fullPath = path.join(baseDir, relPath);
-      if (!await fs.pathExists(fullPath)) return resultList;
-
-      const stat = await fs.stat(fullPath);
-      if (stat.isDirectory()) {
-        const files = await fs.readdir(fullPath);
-        await Promise.all(files.map(file => {
-          if (EXCLUDE_FROM_TEMPLATE.has(file)) return;
-          return collectFiles(baseDir, path.join(relPath, file), resultList);
-        }));
-      } else {
-        resultList.push({
-          relativePath: relPath.replace(/\\/g, '/'),
-          absolutePath: fullPath
-        });
-      }
-      return resultList;
+    const isBinaryExt = (file) => {
+      const ext = path.extname(file).toLowerCase();
+      return ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.webp', '.pdf', '.zip', '.woff', '.woff2', '.ttf', '.eot'].includes(ext);
     };
 
-    const coreFilesList = [];
-    await Promise.all(SYNC_PATHS.map(p => collectFiles(corePath, p, coreFilesList)));
+    for (const file of allFiles) {
+      const isCore = coreFilesSet.has(file);
+      const isTemplate = templateFilesSet.has(file);
 
-    // Comparar cada archivo
-    const differences = [];
-    let matchingCount = 0;
-
-    await Promise.all(coreFilesList.map(async (coreFile) => {
-      const destFilePath = path.join(templatePath, coreFile.relativePath);
-      if (!await fs.pathExists(destFilePath)) {
+      if (isCore && !isTemplate) {
         differences.push({
-          file: coreFile.relativePath,
+          file,
           status: 'missing_in_template',
-          message: 'El archivo existe en el Core pero no en la plantilla CLI.'
+          message: 'Pendiente de sincronizar (no existe en la plantilla CLI).',
+          isBinary: isBinaryExt(file)
         });
-        return;
-      }
-
-      const isBin = isBinaryFile(coreFile.relativePath);
-      if (isBin) {
-        try {
-          const coreBuf = await fs.readFile(coreFile.absolutePath);
-          const destBuf = await fs.readFile(destFilePath);
-          if (!coreBuf.equals(destBuf)) {
-            differences.push({
-              file: coreFile.relativePath,
-              status: 'modified',
-              isBinary: true,
-              message: 'Archivo binario modificado.'
-            });
-          } else {
-            matchingCount++;
-          }
-        } catch (err) {
-          differences.push({
-            file: coreFile.relativePath,
-            status: 'modified',
-            isBinary: true,
-            message: `Error al comparar binario: ${err.message}`
-          });
-        }
+      } else if (!isCore && isTemplate) {
+        huerfanosCount++;
+        differences.push({
+          file,
+          status: 'orphan_in_template',
+          message: 'Archivo obsoleto en la plantilla (no existe en el Core).',
+          isBinary: isBinaryExt(file)
+        });
       } else {
-        try {
-          const rawCoreContent = await fs.readFile(coreFile.absolutePath, 'utf-8');
-          const destContent = await fs.readFile(destFilePath, 'utf-8');
+        const srcPath = path.join(corePath, file);
+        const destPath = path.join(templatePath, file);
 
-          // Sanitizar el contenido en memoria antes de compararlo
-          const sanitizedCoreContent = sanitizeCoreContentForDrift(
-            coreFile.relativePath,
-            rawCoreContent,
-            tokens,
-            srcProjectId
-          );
-
-          if (sanitizedCoreContent.trim() !== destContent.trim()) {
-            // Generar diff solo si el archivo es menor a 150KB
-            const stat = await fs.stat(coreFile.absolutePath);
-            let diffLines = null;
-            if (stat.size < 150 * 1024) {
-              const diffResult = Diff.diffLines(destContent.trim(), sanitizedCoreContent.trim());
-              diffLines = diffResult.map(part => ({
-                value: part.value,
-                added: part.added,
-                removed: part.removed
-              }));
-            }
-
+        const isBin = isBinaryExt(file);
+        if (isBin) {
+          const statSrc = await fs.stat(srcPath).catch(() => null);
+          const statDest = await fs.stat(destPath).catch(() => null);
+          if (statSrc?.size !== statDest?.size) {
             differences.push({
-              file: coreFile.relativePath,
+              file,
               status: 'modified',
-              message: 'El archivo local difiere estructuralmente de la plantilla CLI.',
-              diff: diffLines
+              message: 'Archivo binario difiere en tamaño.',
+              isBinary: true
             });
-          } else {
-            matchingCount++;
           }
-        } catch (err) {
-          differences.push({
-            file: coreFile.relativePath,
-            status: 'modified',
-            message: `Error al leer o sanitizar archivo: ${err.message}`
-          });
+        } else {
+          const coreRaw = await fs.readFile(srcPath, 'utf8').catch(() => '');
+          const templateRaw = await fs.readFile(destPath, 'utf8').catch(() => '');
+
+          const coreSanitized = sanitizeCoreContentForDrift(file, coreRaw, tokens, srcProjectId);
+
+          const coreClean = coreSanitized.replace(/\r\n/g, '\n').trim();
+          const templateClean = templateRaw.replace(/\r\n/g, '\n').trim();
+
+          if (coreClean !== templateClean) {
+            differences.push({
+              file,
+              status: 'modified',
+              message: 'El contenido difiere de la plantilla del Core.',
+              isBinary: false
+            });
+          }
         }
       }
-    }));
+    }
 
-    const totalFiles = coreFilesList.length;
-    const parityPercent = totalFiles > 0 ? Math.round((matchingCount / totalFiles) * 100) : 100;
-
-    // Ordenar las diferencias alfabéticamente por nombre de archivo
-    differences.sort((a, b) => a.file.localeCompare(b.file));
+    const totalCount = coreFiles.length + huerfanosCount;
+    const syncedCount = totalCount - differences.length;
+    const parityPercent = totalCount > 0 ? Math.round((syncedCount / totalCount) * 100) : 100;
 
     res.json({
       success: true,
       parityPercent,
-      totalCount: totalFiles,
-      syncedCount: matchingCount,
+      syncedCount,
+      totalCount,
       differences
     });
 
   } catch (err) {
     console.error(`[API /cores/${clave}/drift] Error: ${err.message}`);
-    res.status(500).json({ error: `Error al calcular drift del core: ${err.message}` });
+    res.status(500).json({ error: `Error al calcular diferencias: ${err.message}` });
+  }
+});
+
+// GET /api/cores/:clave/diff
+// Devuelve las diferencias línea por línea para un archivo específico bajo demanda (lazy-loading)
+app.get('/api/cores/:clave/diff', async (req, res) => {
+  const { clave } = req.params;
+  const { file } = req.query;
+
+  if (!file) {
+    return res.status(400).json({ error: 'El parámetro "file" es obligatorio.' });
+  }
+
+  const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+  try {
+    const registro = await fs.readJson(registroPath);
+    const config = registro.plantillas[clave];
+    if (!config) {
+      return res.status(404).json({ error: `La plantilla core con clave "${clave}" no existe.` });
+    }
+
+    const corePath     = config.fuente.replace(/\//g, path.sep);
+    const templatePath = config.destino.replace(/\//g, path.sep);
+
+    const resolvedCoreFile = path.resolve(corePath, file);
+    const resolvedTemplateFile = path.resolve(templatePath, file);
+
+    if (!isPathContained(corePath, resolvedCoreFile) || !isPathContained(templatePath, resolvedTemplateFile)) {
+      return res.status(403).json({ error: 'Acceso denegado: ruta de archivo fuera de los límites del proyecto.' });
+    }
+
+    if (!await fs.pathExists(resolvedCoreFile) || !await fs.pathExists(resolvedTemplateFile)) {
+      return res.status(404).json({ error: `El archivo "${file}" no existe en ambas ubicaciones.` });
+    }
+
+    const ext = path.extname(file).toLowerCase();
+    const binaryExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.webp', '.pdf', '.zip', '.woff', '.woff2', '.ttf', '.eot'];
+    if (binaryExtensions.includes(ext)) {
+      return res.status(400).json({ error: 'No se pueden generar diffs de archivos binarios.' });
+    }
+
+    const tokens = {
+      projectId: '',
+      apiKey: '',
+      measurementId: '',
+      packageName: '',
+      appId: '',
+      telemetryToken: ''
+    };
+    
+    const srcPkg = path.join(corePath, 'package.json');
+    if (await fs.pathExists(srcPkg)) {
+      try {
+        const pkg = await fs.readJson(srcPkg);
+        tokens.packageName = pkg.name || '';
+      } catch (_) {}
+    }
+
+    const envPath = path.join(corePath, '.env.local');
+    if (await fs.pathExists(envPath)) {
+      try {
+        const envContent = await fs.readFile(envPath, 'utf8');
+        const parseEnvValue = (key) => {
+          const match = envContent.match(new RegExp(`^${key}\\s*=\\s*["']?([^"'\\n]+)["']?`, 'm'));
+          return match ? match[1].trim() : '';
+        };
+        tokens.projectId         = parseEnvValue('VITE_FIREBASE_PROJECT_ID');
+        tokens.apiKey            = parseEnvValue('VITE_FIREBASE_API_KEY');
+        tokens.measurementId     = parseEnvValue('VITE_FIREBASE_MEASUREMENT_ID');
+        tokens.appId             = parseEnvValue('VITE_FIREBASE_APP_ID');
+        tokens.telemetryToken    = parseEnvValue('VITE_DEVELOPER_TELEMETRY_TOKEN');
+      } catch (_) {}
+    }
+    const srcProjectId = tokens.projectId || 'ventas-smartfix';
+
+    const coreRaw = await fs.readFile(resolvedCoreFile, 'utf8');
+    const templateRaw = await fs.readFile(resolvedTemplateFile, 'utf8');
+
+    const coreSanitized = sanitizeCoreContentForDrift(file, coreRaw, tokens, srcProjectId);
+
+    const coreClean = coreSanitized.replace(/\r\n/g, '\n').trim();
+    const templateClean = templateRaw.replace(/\r\n/g, '\n').trim();
+
+    const diff = Diff.diffLines(templateClean, coreClean);
+
+    res.json({
+      success: true,
+      file,
+      diff
+    });
+
+  } catch (err) {
+    console.error(`[API /cores/${clave}/diff] Error: ${err.message}`);
+    res.status(500).json({ error: `Error al calcular diff de archivo: ${err.message}` });
   }
 });
 

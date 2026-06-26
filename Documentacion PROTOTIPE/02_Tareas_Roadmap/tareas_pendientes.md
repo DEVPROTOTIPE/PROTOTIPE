@@ -4,6 +4,13 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-094: Optimización de Drift y Paridad de Cores (Normalización LF, Huérfanos, Poda y Diffs Lazy)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se implementó un detector de desvíos (drift) optimizado y paridad inteligente. Se inyectó la normalización LF (`\n`) en la comparación en memoria para eliminar falsos desvíos invisibles (CRLF) en entornos Windows. Se incorporó detección bidireccional de archivos obsoletos (huérfanos en la plantilla CLI). Se actualizó el endpoint de sincronización física para soportar poda (`prune: true`), eliminando de forma segura archivos huérfanos. Se implementó la llamada diferida (lazy loading) bajo demanda para cálculo y renderizado de diffs por archivo en el acordeón del modal en `CoreCard.jsx` en lugar de cargarlos en el payload inicial.
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-093: Optimización, Sanitización y Visualización de Diferencias en Sincronización de Cores (CORE-093)~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-26

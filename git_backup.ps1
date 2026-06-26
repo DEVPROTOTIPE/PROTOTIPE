@@ -130,13 +130,42 @@ $stoppedVitePaths = @()
 # Obtener todos los procesos node.exe activos
 $nodeProcesses = Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue
 
+# Identificar e indexar los PIDs a proteger (Dashboard Central y CLI Bridge Server)
+$protectedPids = @()
 foreach ($proc in $nodeProcesses) {
+    if ($proc.CommandLine -match 'Central PROTOTIPE' -or $proc.CommandLine -match 'dev-dashboard' -or $proc.CommandLine -match 'server\.js') {
+        $protectedPids += $proc.ProcessId
+    }
+}
+# Propagar protección hacia arriba en el árbol (padres, abuelos, etc.) para cubrir la cadena npm -> cmd -> node/vite
+$allProcesses = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue
+for ($i = 0; $i -lt 4; $i++) {
+    foreach ($itemPid in $protectedPids.Clone()) {
+        $proc = $allProcesses | Where-Object { $_.ProcessId -eq $itemPid }
+        if ($proc -and $proc.ParentProcessId -and $protectedPids -notcontains $proc.ParentProcessId) {
+            $protectedPids += $proc.ParentProcessId
+        }
+    }
+}
+
+foreach ($proc in $nodeProcesses) {
+    # Ignorar si el proceso está protegido
+    if ($protectedPids -contains $proc.ProcessId) {
+        continue
+    }
+
     # Validar si es un proceso npm dev o ejecucion directa de vite dentro de D:\PROTOTIPE
     if ($proc.CommandLine -match 'vite' -or ($proc.CommandLine -match 'npm' -and $proc.CommandLine -match 'dev')) {
         # Extraer la ruta raíz del subproyecto de forma precisa
         $procPath = ""
         if ($proc.CommandLine -match '(?i)(D:\\PROTOTIPE\\(?:Plantillas Core|Central PROTOTIPE)\\[^\\]+|D:\\PROTOTIPE\\Instancias Clientes\\[^\\]+\\[^\\]+)') {
             $procPath = $Matches[1]
+        }
+        
+        if ($procPath -match 'Central PROTOTIPE' -or $procPath -match 'dev-dashboard') {
+            # Omitir detener el Dashboard de Control Central para mantener la interfaz y conexión SSE vivas
+            Write-Host " [INFO] Omitiendo detener el Dashboard de Control Central (PID: $($proc.ProcessId)) para no interrumpir el flujo de datos SSE." -ForegroundColor Gray
+            continue
         }
         
         Write-Host " [INFO] Detectado servidor de desarrollo Vite/npm activo (PID: $($proc.ProcessId)). Deteniendo para liberar bloqueos..." -ForegroundColor Yellow

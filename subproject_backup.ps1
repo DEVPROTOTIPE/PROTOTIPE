@@ -22,6 +22,9 @@ if (-not (Test-Path $rootDir)) {
     $rootDir = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
 }
 
+$viteWasStoppedSub = $false
+$stoppedVitePathsSub = @()
+
 function Write-BackupLog {
     param (
         [string]$Status,
@@ -85,11 +88,64 @@ if (Test-Path $gitTempPath) {
     
     # Detener procesos de Vite/Node que puedan bloquear el archivo
     $nodeProcesses = Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue
+    
+    # Identificar e indexar los PIDs a proteger (Dashboard Central y CLI Bridge Server)
+    $protectedPids = @()
+    foreach ($proc in $nodeProcesses) {
+        if ($proc.CommandLine -match 'Central PROTOTIPE' -or $proc.CommandLine -match 'dev-dashboard' -or $proc.CommandLine -match 'server\.js') {
+            $protectedPids += $proc.ProcessId
+        }
+    }
+    # Propagar protección hacia arriba en el árbol (padres, abuelos, etc.) para cubrir la cadena npm -> cmd -> node/vite
+    $allProcesses = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue
+    for ($i = 0; $i -lt 4; $i++) {
+        foreach ($itemPid in $protectedPids.Clone()) {
+            $proc = $allProcesses | Where-Object { $_.ProcessId -eq $itemPid }
+            if ($proc -and $proc.ParentProcessId -and $protectedPids -notcontains $proc.ParentProcessId) {
+                $protectedPids += $proc.ParentProcessId
+            }
+        }
+    }
+
     $stoppedAny = $false
     foreach ($proc in $nodeProcesses) {
+        # Ignorar si el proceso está protegido
+        if ($protectedPids -contains $proc.ProcessId) {
+            continue
+        }
+        
         if ($proc.CommandLine -match 'vite' -or ($proc.CommandLine -match 'npm' -and $proc.CommandLine -match 'dev')) {
-            Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
-            $stoppedAny = $true
+            # Extraer la ruta raíz del subproyecto de forma precisa
+            $procPath = ""
+            if ($proc.CommandLine -match '(?i)(D:\\PROTOTIPE\\(?:Plantillas Core|Central PROTOTIPE)\\[^\\]+|D:\\PROTOTIPE\\Instancias Clientes\\[^\\]+\\[^\\]+)') {
+                $procPath = $Matches[1]
+            }
+            
+            # Por seguridad extra, si la ruta del proceso pertenece al Dashboard Central, omitir
+            if ($procPath -match 'Central PROTOTIPE' -or $procPath -match 'dev-dashboard') {
+                continue
+            }
+            
+            # Solo detener si el proceso pertenece a este subproyecto ($SubprojectPath)
+            # Para evitar detener otros servidores dev que no están involucrados
+            $isMatch = $false
+            if ($procPath) {
+                $resolvedProc = Split-Path -Path $procPath -Resolve -ErrorAction SilentlyContinue
+                $resolvedSub  = Split-Path -Path $SubprojectPath -Resolve -ErrorAction SilentlyContinue
+                if ($resolvedProc -eq $resolvedSub) {
+                    $isMatch = $true
+                }
+            }
+            
+            if ($isMatch) {
+                Write-Host "  [INFO] Detectado servidor de desarrollo Vite/npm del subproyecto activo (PID: $($proc.ProcessId)). Deteniendo..." -ForegroundColor Yellow
+                Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
+                $stoppedAny = $true
+                $viteWasStoppedSub = $true
+                if ($stoppedVitePathsSub -notcontains $procPath) {
+                    $stoppedVitePathsSub += $procPath
+                }
+            }
         }
     }
     if ($stoppedAny) { Start-Sleep -Milliseconds 1000 }
@@ -478,5 +534,11 @@ finally {
         if (-not $restored) {
             Write-Host "  [WARNING] No se pudo renombrar .git a .git-backup-temp. Por favor, hágalo manualmente." -ForegroundColor Red
         }
+    }
+    
+    # Reiniciar el servidor Vite del subproyecto si fue detenido
+    if ($viteWasStoppedSub -and (Test-Path $SubprojectPath)) {
+        Write-Host "  [INFO] Reiniciando servidor de desarrollo Vite del subproyecto..." -ForegroundColor Cyan
+        Start-Process powershell -ArgumentList "-NoProfile -NoExit -Command `"Set-Location '$SubprojectPath'; npm run dev`"" -WindowStyle Normal
     }
 }
