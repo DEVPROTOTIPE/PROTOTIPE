@@ -3,15 +3,20 @@ import {
   X, Activity, Database, Network, Key, AlertTriangle, 
   CheckCircle, RefreshCw, Terminal, Cpu, Bell, Mail
 } from 'lucide-react';
-import { db, auth } from '../../../config/firebaseConfig';
+import { db, auth, messaging } from '../../../config/firebaseConfig';
 import { collection, addDoc, deleteDoc, doc, getDoc } from 'firebase/firestore';
+import { isSupported } from 'firebase/messaging';
 
 export default function DeveloperDiagnosticsModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState('general');
   const [logs, setLogs] = useState([]);
   const [loadingLocal, setLoadingLocal] = useState(false);
   const [loadingCentral, setLoadingCentral] = useState(false);
+  const [loadingVapid, setLoadingVapid] = useState(false);
   const [loadingErrorTest, setLoadingErrorTest] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState(
+    typeof window !== 'undefined' ? Notification.permission : 'unknown'
+  );
 
   const addLog = (message, type = 'info') => {
     const time = new Date().toLocaleTimeString();
@@ -122,6 +127,54 @@ export default function DeveloperDiagnosticsModal({ isOpen, onClose }) {
     }
   };
 
+  // 3. Diagnóstico de VAPID y Notificaciones Push
+  const testVapidMessaging = async () => {
+    setLoadingVapid(true);
+    clearLogs();
+    addLog('Validando soporte de mensajería push...', 'info');
+    try {
+      const messagingSupported = await isSupported();
+      addLog(`Mensajería PWA Push soportada en este navegador: ${messagingSupported ? 'SÍ' : 'NO'}`, messagingSupported ? 'success' : 'error');
+
+      const vapidKey = import.meta.env.VITE_VAPID_KEY;
+      addLog(`VITE_VAPID_KEY configurado en .env.local: ${vapidKey ? 'SÍ (Presente)' : 'NO (Faltante)'}`, vapidKey ? 'success' : 'error');
+
+      const permissionStatus = Notification.permission;
+      setNotificationPermission(permissionStatus);
+      addLog(`Permiso de notificaciones del sistema: "${permissionStatus}"`, 
+        permissionStatus === 'granted' ? 'success' : permissionStatus === 'default' ? 'info' : 'error'
+      );
+
+      if (permissionStatus !== 'granted') {
+        addLog('Solicitando permiso de notificaciones al navegador...', 'info');
+        const userPermission = await Notification.requestPermission();
+        setNotificationPermission(userPermission);
+        addLog(`Nuevo estado del permiso: "${userPermission}"`, userPermission === 'granted' ? 'success' : 'error');
+      }
+
+      if (messagingSupported && vapidKey && Notification.permission === 'granted') {
+        addLog('Intentando recuperar Token de Registro de Dispositivo (FCM)...', 'info');
+        const { getToken } = await import('firebase/messaging');
+        if (messaging) {
+          const currentToken = await getToken(messaging, { vapidKey });
+          if (currentToken) {
+            addLog(`Token FCM recuperado con éxito: ${currentToken.substring(0, 15)}...`, 'success');
+            console.log('FCM Token Completo:', currentToken);
+          } else {
+            addLog('No se pudo recuperar el token del dispositivo (Token nulo).', 'error');
+          }
+        } else {
+          addLog('El servicio de Mensajería no está inicializado.', 'error');
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      addLog(`Error en diagnóstico VAPID/Push: ${error.message || 'Error desconocido'}`, 'error');
+    } finally {
+      setLoadingVapid(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -164,6 +217,14 @@ export default function DeveloperDiagnosticsModal({ isOpen, onClose }) {
             }`}
           >
             Pings Firebase
+          </button>
+          <button
+            onClick={() => { setActiveTab('vapid'); clearLogs(); }}
+            className={`flex-1 py-3 text-center border-b-2 transition-all ${
+              activeTab === 'vapid' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-app'
+            }`}
+          >
+            Notificaciones (VAPID)
           </button>
         </div>
 
@@ -236,7 +297,31 @@ export default function DeveloperDiagnosticsModal({ isOpen, onClose }) {
             </div>
           )}
 
+          {activeTab === 'vapid' && (
+            <div className="space-y-4">
+              <div className="p-3.5 bg-surface-2 border border-app rounded-xl space-y-2.5 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-muted">Permiso de Notificaciones:</span>
+                  <span className={`font-bold capitalize ${notificationPermission === 'granted' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                    {notificationPermission}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center border-t border-app pt-2.5">
+                  <span className="font-semibold text-muted">VITE_VAPID_KEY Cargado:</span>
+                  <span className="font-bold">{import.meta.env.VITE_VAPID_KEY ? '✅ SÍ' : '❌ NO'}</span>
+                </div>
+              </div>
 
+              <button
+                onClick={testVapidMessaging}
+                disabled={loadingVapid}
+                className="w-full h-11 bg-primary text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+              >
+                <Bell size={16} className={loadingVapid ? 'animate-spin' : ''} />
+                Diagnosticar FCM & VAPID Push
+              </button>
+            </div>
+          )}
 
           {/* Consola de logs en tiempo real */}
           {logs.length > 0 && (

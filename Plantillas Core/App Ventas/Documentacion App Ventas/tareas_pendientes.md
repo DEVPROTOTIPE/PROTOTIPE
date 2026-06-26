@@ -21,5 +21,3 @@ Roadmap de desarrollo, mejoras y corrección de errores para la plantilla base d
 - [x] ~~Optimizar bundle de producción reduciendo importaciones no utilizadas y limpiando variables sin uso según reporte de ESLint~~
 - [ ] Mejorar cobertura de pruebas unitarias y E2E con Playwright
 - [x] ~~Refactorizar el almacenamiento offline usando IndexedDB (Cola de facturación local en PortalVendedor y sincronización delta de clientes)~~
-- [x] ~~Corrección del parpadeo (flicker) en la alerta remota bloqueante al recargar el navegador evaluando síncronamente el estado de cierre en localStorage durante la fase de maquetación (render)~~
-

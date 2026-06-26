@@ -1,115 +1,109 @@
 {
-  "hash": "596a163e",
-  "configHash": "223eea98",
-  "lockfileHash": "b0d36e08",
-  "browserHash": "dc4dd9fd",
+  "hash": "875dd3f7",
+  "configHash": "eb33613a",
+  "lockfileHash": "5ae623e5",
+  "browserHash": "66da2853",
   "optimized": {
     "@tanstack/react-query": {
       "src": "../../node_modules/@tanstack/react-query/build/modern/index.js",
       "file": "@tanstack_react-query.js",
-      "fileHash": "197a546f",
-      "needsInterop": false
-    },
-    "canvas-confetti": {
-      "src": "../../node_modules/canvas-confetti/dist/confetti.module.mjs",
-      "file": "canvas-confetti.js",
-      "fileHash": "492161a7",
+      "fileHash": "0b74dd57",
       "needsInterop": false
     },
     "firebase/app": {
       "src": "../../node_modules/firebase/app/dist/esm/index.esm.js",
       "file": "firebase_app.js",
-      "fileHash": "3efe7499",
+      "fileHash": "79642ad6",
       "needsInterop": false
     },
     "firebase/auth": {
       "src": "../../node_modules/firebase/auth/dist/esm/index.esm.js",
       "file": "firebase_auth.js",
-      "fileHash": "9507e7f4",
+      "fileHash": "31f62d0a",
       "needsInterop": false
     },
     "firebase/firestore": {
       "src": "../../node_modules/firebase/firestore/dist/esm/index.esm.js",
       "file": "firebase_firestore.js",
-      "fileHash": "4ce0cc48",
+      "fileHash": "dba5960e",
       "needsInterop": false
     },
     "firebase/messaging": {
       "src": "../../node_modules/firebase/messaging/dist/esm/index.esm.js",
       "file": "firebase_messaging.js",
-      "fileHash": "a45ded23",
+      "fileHash": "37b01276",
       "needsInterop": false
     },
     "firebase/storage": {
       "src": "../../node_modules/firebase/storage/dist/esm/index.esm.js",
       "file": "firebase_storage.js",
-      "fileHash": "769f9f6c",
+      "fileHash": "3d743bdb",
       "needsInterop": false
     },
     "framer-motion": {
       "src": "../../node_modules/framer-motion/dist/es/index.mjs",
       "file": "framer-motion.js",
-      "fileHash": "bee3c034",
+      "fileHash": "22547685",
       "needsInterop": false
     },
     "lucide-react": {
       "src": "../../node_modules/lucide-react/dist/esm/lucide-react.mjs",
       "file": "lucide-react.js",
-      "fileHash": "3d13ef2a",
+      "fileHash": "c6dfda41",
       "needsInterop": false
     },
     "react-dom": {
       "src": "../../node_modules/react-dom/index.js",
       "file": "react-dom.js",
-      "fileHash": "6ca6a366",
+      "fileHash": "3253a524",
       "needsInterop": true
     },
     "react-dom/client": {
       "src": "../../node_modules/react-dom/client.js",
       "file": "react-dom_client.js",
-      "fileHash": "a5ca8e56",
+      "fileHash": "4ad1ded8",
       "needsInterop": true
     },
     "react-error-boundary": {
       "src": "../../node_modules/react-error-boundary/dist/react-error-boundary.js",
       "file": "react-error-boundary.js",
-      "fileHash": "ff1ea0a3",
+      "fileHash": "24ad117e",
       "needsInterop": false
     },
     "react-router-dom": {
       "src": "../../node_modules/react-router-dom/dist/index.mjs",
       "file": "react-router-dom.js",
-      "fileHash": "b0158224",
+      "fileHash": "a4cf152c",
       "needsInterop": false
     },
     "react": {
       "src": "../../node_modules/react/index.js",
       "file": "react.js",
-      "fileHash": "ddbc7022",
+      "fileHash": "64539a79",
       "needsInterop": true
     },
     "react/jsx-dev-runtime": {
       "src": "../../node_modules/react/jsx-dev-runtime.js",
       "file": "react_jsx-dev-runtime.js",
-      "fileHash": "c0a5c914",
+      "fileHash": "27c44d59",
       "needsInterop": true
     },
     "zod": {
       "src": "../../node_modules/zod/index.js",
       "file": "zod.js",
-      "fileHash": "6a3db9c6",
+      "fileHash": "38bacc33",
       "needsInterop": false
     },
     "zustand": {
       "src": "../../node_modules/zustand/esm/index.mjs",
       "file": "zustand.js",
-      "fileHash": "04923111",
+      "fileHash": "69b92128",
       "needsInterop": false
     },
     "zustand/middleware": {
       "src": "../../node_modules/zustand/esm/middleware.mjs",
       "file": "zustand_middleware.js",
-      "fileHash": "1473a591",
+      "fileHash": "7113e383",
       "needsInterop": false
     }
   },

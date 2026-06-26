@@ -12,6 +12,7 @@ import ClientCouponsModal from '../components/client/coupons/ClientCouponsModal'
 import { useCoupons } from '../hooks/useCoupons'
 
 import useNotificationCenter from '../hooks/useNotificationCenter'
+import useFCMPermission from '../hooks/useFCMPermission'
 import NotificationHistoryTray from '../components/common/NotificationHistoryTray'
 import NCToastContainer from '../components/common/NCToastContainer'
 
@@ -61,7 +62,14 @@ export default function ClientLayout() {
   const cartCount = getCount()
   const userId = user?.celular || user?.uid
 
+  // Sincronizar el permiso y tokens de FCM para Cliente
+  const { requestPermission } = useFCMPermission(user?.celular || 'client', 'client')
 
+  useEffect(() => {
+    if (user?.celular) {
+      requestPermission()
+    }
+  }, [user?.celular, requestPermission])
 
   // Hook central del Notification Center para Clientes
   const [soundEnabled, setSoundEnabled] = useState(true)

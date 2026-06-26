@@ -8,9 +8,10 @@ import MobilePreview from '../components/MobilePreview'
 // Componente helper para bloquear el scroll en el body cuando un modal está abierto
 function ThemeModalLock({ children }) {
   useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow
     document.body.style.overflow = 'hidden'
     return () => {
-      document.body.style.overflow = ''
+      document.body.style.overflow = originalStyle
     }
   }, [])
   return <>{children}</>

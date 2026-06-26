@@ -2,45 +2,6 @@
 
 Historial de cambios, mejoras y correcciones técnicas aplicadas sobre la plantilla core de Ventas.
 
-### [2026-06-19] - Fix 2/3/4/5: Hardening completo del pipeline de imágenes
-
-* **Tipo:** Seguridad / Robustez / Infraestructura / UX
-* **Descripción de Cambios:**
-  - **Fix 2 [ALTO] — Validación de tamaño `ProductFormModal.jsx`:** Límite de 15 MB validado en los 3 handlers (imagen principal, variante, galería) ANTES de intentar comprimir o subir. Si el archivo supera el límite, se dispara el toast de error con el tamaño real del archivo y se aborta la operación sin tocar Storage.
-  - **Fix 3 [BAJO] — `imageCompression.js`:** Reemplazado el hack `blob.name = ...` (propiedad no estándar en Blob) por `new File([blob], nombre, { type: 'image/webp' })`. El objeto resultante ahora es un `File` real con `.name`, `.type` y `.size` como propiedades nativas, garantizando compatibilidad total con la API del browser y con `uploadService`.
-  - **Fix 4 [MEDIO] — Guard de concurrencia `ProductFormModal.jsx`:** Ref `isUploadingMain` agregado. Si el admin hace doble clic o activa el input mientras ya hay un upload en curso, el segundo intento se ignora. El flag se libera siempre en el bloque `finally` sin importar si el upload fue exitoso o falló.
-  - **Fix 5 [MEDIO] — Metadata Content-Type `uploadService.js`:** `uploadBytesResumable` ahora recibe `{ contentType: processedFile.type || 'image/webp' }` como tercer argumento. Firebase Storage servirá las imágenes con `Content-Type: image/webp` correcto en lugar de `application/octet-stream`.
-* **Archivos Modificados:**
-  - [imageCompression.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/utils/imageCompression.js) [MODIFY] — Fix 3
-  - [uploadService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/uploadService.js) [MODIFY] — Fix 5
-  - [ProductFormModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/inventory/ProductFormModal.jsx) [MODIFY] — Fix 2 + Fix 4
-* **Build:** ✅ `npm run build` — 952ms sin errores — 2026-06-19
-
-### [2026-06-19] - Fix 1: Limpieza automática de Storage al eliminar producto
-
-* **Tipo:** Infraestructura / Optimización de costos / Integridad de datos
-* **Severidad:** [MINOR] corrección de fuga de almacenamiento acumulativa
-* **Descripción de Cambios:**
-  - **[MODIFY] `inventoryService.js`:** `deleteProduct()` ahora hace `getDoc()` previo al borrado, recolecta todas las URLs de imágenes del producto (`imageUrl`, `galeria[]`, `variantes[].imageUrl`) y las elimina de Firebase Storage en paralelo con `Promise.allSettled()` (tolerante a errores individuales). Si la lectura/limpieza de Storage falla, el `deleteDoc()` procede igual para no dejar el catálogo inconsistente. Import de `deleteImage` agregado desde `uploadService`.
-* **Archivos Modificados:**
-  - [inventoryService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/inventoryService.js) [MODIFY]
-* **Build:** ✅ `npm run build` — 925ms sin errores — 2026-06-19
-
-### [2026-06-19] - Fix Crítico: Firebase Storage — Reglas, Registro y Feedback de Upload
-
-* **Tipo:** Seguridad / Infraestructura / UX
-* **Severidad:** Crítica (Storage sin reglas = posible deny-all en Blaze o allow-all sin autenticación)
-* **Descripción de Cambios:**
-  - **[NEW] `storage.rules`:** Creado archivo de reglas de Firebase Storage con lectura pública para rutas de catálogo (`products/`, `products_variants/`, `products_gallery/`, `branding/`) y escritura restringida a `request.auth != null`. Bloqueo explícito por defecto en rutas no listadas.
-  - **[MODIFY] `firebase.json`:** Agregada sección `"storage": { "rules": "storage.rules" }` para que las reglas sean desplegadas con `firebase deploy --only storage`.
-  - **[MODIFY] `ProductFormModal.jsx`:** Agregado estado `uploadError` + función `showUploadError()` con auto-dismissal a 4s. Los 3 handlers de imagen (principal, variante, galería) ahora distinguen `storage/unauthorized` de otros errores de red. Toast visual animado con Framer Motion inyectado en el fragment raíz del modal. Import `AlertCircle` agregado a lucide-react.
-* **Archivos Modificados:**
-  - [storage.rules](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/storage.rules) [NEW]
-  - [firebase.json](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firebase.json) [MODIFY]
-  - [ProductFormModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/inventory/ProductFormModal.jsx) [MODIFY]
-* **Pendiente:** ~~Desplegar reglas con `cmd /c firebase deploy --only storage` cuando el usuario lo confirme.~~
-* **Desplegado:** ✅ `firebase deploy --only storage` — `ventas-smartfix` — 2026-06-19
-
 ### [2026-06-19] - Optimización de Bundle y Depuración de Importaciones (ESLint Clean Up)
 * **Tipo:** Mantenimiento / Optimización / Calidad de Código
 * **Severidad:** Baja (Saneamiento de warnings y errores del linter en imports y variables obsoletas)

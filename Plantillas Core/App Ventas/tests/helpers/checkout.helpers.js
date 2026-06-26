@@ -1,5 +1,5 @@
 /**
- * HELPERS REUTILIZABLES PARA TESTS E2E - PROTOTIPE Framework (Trigger backup test)
+ * HELPERS REUTILIZABLES PARA TESTS E2E - PROTOTIPE Framework
  * -----------------------------------------------------------
  * Cada función recibe el objeto `page` de Playwright y el `APP_CONFIG`
  * del cliente activo. Esto garantiza que el mismo helper funcione en
@@ -13,14 +13,6 @@
  */
 export async function passWelcomePage(page, config) {
   await page.goto('/');
-
-  // Si aparece el modal de telemetría central, se descarta haciendo clic en "Entendido / Aceptar"
-  try {
-    await page.click('button:has-text("Entendido / Aceptar")', { timeout: 3000 });
-    await page.waitForTimeout(500); // Esperar a que se cierre la animación
-  } catch (e) {
-    // Ignorar si el modal no se presenta
-  }
 
   if (config.hasWelcomePage) {
     const welcomeButton = page.locator(`text=${config.welcomeButtonText}`);

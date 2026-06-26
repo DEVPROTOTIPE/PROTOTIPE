@@ -77,27 +77,20 @@ export default function LoginPage() {
     try {
       let userCredential
 
-      // Intentar iniciar sesión primero (caso común y evita errores 400 de registro redundantes)
+      // Intentar login o registro inicial según corresponda
       try {
-        userCredential = await signInWithEmailAndPassword(auth, adminEmail, adminPassword)
+        if (!adminRegistered) {
+          // Primera vez: registrar la cuenta del administrador primario
+          userCredential = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword)
+        } else {
+          // Ya hay administrador: solo inicio de sesión
+          userCredential = await signInWithEmailAndPassword(auth, adminEmail, adminPassword)
+        }
       } catch (signInErr) {
-        const isUserNotFound = 
-          signInErr.code === 'auth/user-not-found' || 
-          signInErr.code === 'auth/invalid-credential' ||
-          signInErr.code === 'auth/invalid-email';
-        
-        // Si el usuario no existe (o Firestore indica que no hay admin registrado) intentamos registrar
-        if (isUserNotFound || !adminRegistered) {
-          try {
-            userCredential = await createUserWithEmailAndPassword(auth, adminEmail, adminPassword)
-          } catch (createErr) {
-            // Si al intentar registrar dice que el email ya existe, significa que el error original
-            // de login era por contraseña incorrecta
-            if (createErr.code === 'auth/email-already-in-use') {
-              throw signInErr
-            }
-            throw createErr
-          }
+        console.error('[AdminAuth] Error en auth de Firebase:', signInErr)
+        if (signInErr.code === 'auth/email-already-in-use') {
+          // Si por alguna razón la cuenta ya existe en Auth, reintentar login directo
+          userCredential = await signInWithEmailAndPassword(auth, adminEmail, adminPassword)
         } else {
           throw signInErr
         }

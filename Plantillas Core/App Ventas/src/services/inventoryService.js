@@ -16,7 +16,6 @@ import {
 import { db } from '../config/firebaseConfig'
 import { COLLECTIONS } from '../constants'
 import { createCentralNotification, NC_TYPES } from './notificationCenterService'
-import { deleteImage } from './uploadService'
 
 const productsRef = collection(db, COLLECTIONS.PRODUCTS)
 const categoriesRef = collection(db, COLLECTIONS.CATEGORIES)
@@ -210,37 +209,5 @@ export async function toggleProductStatus(id, currentStatus) {
 }
 
 export async function deleteProduct(id) {
-  // 1. Leer el documento antes de borrarlo para recolectar todas las URLs de imágenes
-  try {
-    const snap = await getDoc(doc(db, COLLECTIONS.PRODUCTS, id))
-    if (snap.exists()) {
-      const data = snap.data()
-
-      // Recolectar todas las URLs de imágenes asociadas al producto
-      const imageUrls = []
-
-      if (data.imageUrl) imageUrls.push(data.imageUrl)
-
-      if (Array.isArray(data.galeria)) {
-        data.galeria.forEach(url => { if (url) imageUrls.push(url) })
-      }
-
-      if (Array.isArray(data.variantes)) {
-        data.variantes.forEach(v => { if (v?.imageUrl) imageUrls.push(v.imageUrl) })
-      }
-
-      // 2. Eliminar imágenes de Storage en paralelo (tolerante: si alguna ya no existe, no bloquea)
-      if (imageUrls.length > 0) {
-        await Promise.allSettled(imageUrls.map(url => deleteImage(url)))
-        console.log(`[inventoryService] ${imageUrls.length} imagen(es) eliminadas de Storage para producto ${id}`)
-      }
-    }
-  } catch (err) {
-    // Si falla la lectura o limpieza de Storage, igual procedemos a borrar Firestore
-    // para no dejar el catálogo en estado inconsistente
-    console.warn(`[inventoryService] Limpieza de Storage parcial para producto ${id}:`, err.message)
-  }
-
-  // 3. Borrar el documento de Firestore
   await deleteDoc(doc(db, COLLECTIONS.PRODUCTS, id))
 }
