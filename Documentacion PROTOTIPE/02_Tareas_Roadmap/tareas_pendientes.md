@@ -4,6 +4,13 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-095: Corrección de Cierre de Servidor Dev-Dashboard en Backups de Git~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se corrigió el cierre accidental del Dashboard Central (`dev-dashboard`) y la CLI Bridge (`server.js`) durante los backups de Git. Se implementó un algoritmo dinámico en PowerShell que obtiene y propaga de forma ascendente los PIDs a proteger (relación `ParentProcessId` cubriendo npm -> cmd/powershell -> node/vite), protegiendo la cadena completa de ejecución. Adicionalmente, en `subproject_backup.ps1` se aisló la detención de servidores dev de modo que solo afecte al subproyecto de interés y se inyectó la restauración automática en el bloque `finally` para reactivar el servidor tras el respaldo.
+  - Archivos: [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY], [menu_backup.ps1](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+
 * **[x] ~~Tarea CORE-094: Optimización de Drift y Paridad de Cores (Normalización LF, Huérfanos, Poda y Diffs Lazy)~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-26

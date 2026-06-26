@@ -1,5 +1,21 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-26] - CORE-095: Corrección de Cierre de Servidor Dev-Dashboard en Backups de Git
+
+* **Tipo:** Corrección de Bugs / Robustez / Scripts de Automatización / Control de Versiones
+* **Descripción de Cambios:**
+  - **Estrategia de Protección Dinámica en PowerShell:** Se refactorizó la lógica de detención de servidores dev (`node.exe` y `vite`) en los scripts `git_backup.ps1`, `subproject_backup.ps1` y `menu_backup.ps1`. Se implementó un algoritmo dinámico que identifica los PIDs del Dashboard Central (`dev-dashboard` y `Central PROTOTIPE`) y de la CLI (`server.js`), y propaga la protección hacia arriba por el árbol de procesos (`ParentProcessId` por 4 iteraciones) para cubrir la cadena completa (incluyendo ejecutores npm y consolas de comandos intermedias).
+  - **Aislamiento por Subproyecto en subproject_backup.ps1:** Se limitó la detención de procesos de desarrollo únicamente a aquellos que correspondan al subproyecto bajo respaldo (`$SubprojectPath`), comparando sus rutas absolutas resueltas y evitando interrumpir otros servidores dev del ecosistema.
+  - **Autocuración y Reinicio en block finally:** Se inyectó lógica en la sección `finally` de `subproject_backup.ps1` para reiniciar automáticamente el servidor de desarrollo del subproyecto mediante `Start-Process powershell -ArgumentList ... npm run dev` si este fue detenido al inicio del script.
+* **Archivos Modificados:**
+  - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+  - [`menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
 ### [2026-06-26] - CORE-094: Optimización de Drift y Paridad de Cores (Normalización LF, Huérfanos, Poda y Diffs Lazy)
 
 * **Tipo:** Refactorización / Optimización / CLI / UI/UX / Robustez / Control de Calidad / Documentación
