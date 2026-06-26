@@ -545,6 +545,103 @@
       outline: none;
     }
 
+    /* CONTENEDOR Y HINT INDICADOR DE INTERACTIVIDAD */
+    .hero-illustration-wrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .svg-interactive-hint {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: var(--color-primary);
+      color: #ffffff;
+      padding: 0.35rem 0.75rem;
+      border-radius: 99px;
+      font-family: var(--font-titles);
+      font-size: 0.75rem;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+      pointer-events: none;
+      z-index: 10;
+      animation: bounceHint 2s ease-in-out infinite;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .svg-interactive-hint.hidden {
+      opacity: 0;
+      transform: scale(0.8) translateY(-10px);
+    }
+
+    @keyframes bounceHint {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-6px);
+      }
+    }
+
+    /* ESTILOS INTERACTIVOS PARA CHECKLIST SVG */
+    .svg-todo-item {
+      cursor: pointer;
+    }
+    .svg-todo-item .todo-chk-rect,
+    .svg-todo-item .todo-chk-path,
+    .svg-todo-item .todo-text-line {
+      transition: fill 0.25s ease, stroke 0.25s ease, opacity 0.25s ease, stroke-dashoffset 0.25s ease;
+    }
+    .svg-todo-item[data-checked="true"] .todo-chk-rect {
+      fill: #10b981 !important;
+      stroke: #10b981 !important;
+      stroke-width: 1;
+    }
+    .svg-todo-item[data-checked="true"] .todo-chk-path {
+      opacity: 1 !important;
+      stroke-dasharray: 12;
+      stroke-dashoffset: 0;
+    }
+    .svg-todo-item[data-checked="false"] .todo-chk-rect {
+      fill: var(--color-surface) !important;
+      stroke: var(--color-border) !important;
+      stroke-width: 1.5;
+    }
+    .svg-todo-item[data-checked="false"] .todo-chk-path {
+      opacity: 0 !important;
+      stroke-dasharray: 12;
+      stroke-dashoffset: 12;
+    }
+    .svg-todo-item[data-checked="true"] .todo-text-line {
+      stroke: var(--color-text-muted) !important;
+      opacity: 0.5;
+    }
+    .svg-todo-item[data-checked="false"] .todo-text-line {
+      stroke: var(--color-text-main) !important;
+      opacity: 1;
+    }
+
+    /* HOVER DETALLADO EN NODOS DEL GRÁFICO */
+    .svg-chart-dot-hit {
+      outline: none;
+    }
+    .svg-chart-dot-hit:hover + .svg-chart-dot {
+      r: 6 !important;
+      fill: var(--color-primary-light) !important;
+      stroke: var(--color-primary) !important;
+      stroke-width: 2px !important;
+    }
+    
+    /* Filtro Glow para elemento destacado */
+    .svg-chart-dot-glow {
+      transition: r 0.25s ease;
+    }
+
     .svg-card-interactive:hover,
     .svg-card-interactive:focus-visible {
       transform: scale(1.06);
@@ -3356,6 +3453,7 @@
             </div>
           </div>
           <div class="hero-illustration-wrapper reveal">
+            <div class="svg-interactive-hint">Pruébame 👆</div>
             <!-- Ilustración SVG amigable de orden de negocio -->
             <svg class="hero-illustration" viewBox="0 0 500 450" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="svg-hero-title svg-hero-desc">
               <title id="svg-hero-title">Ilustración del Sistema Administrativo PROTOTIPE</title>
@@ -3381,11 +3479,29 @@
               <g class="svg-card-interactive" data-dashboard-module="ventas" tabindex="0" role="button" aria-label="Abrir módulo interactivo de Ventas del Mes">
                 <rect x="80" y="110" width="160" height="110" rx="10" fill="var(--color-bg)" stroke="var(--color-border)" stroke-width="1.5"/>
                 <path class="svg-chart-line" d="M100 190 C115 160, 130 150, 145 170 C160 190, 175 125, 190 125 C205 125, 215 130, 235 90" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round"/>
-                <circle class="svg-chart-dot" cx="145" cy="170" r="4" fill="var(--color-primary)"/>
-                <circle class="svg-chart-dot-delayed" cx="190" cy="125" r="4" fill="var(--color-primary)"/>
-                <circle class="svg-chart-dot-glow" cx="235" cy="90" r="10" fill="var(--color-primary)"/>
-                <circle class="svg-chart-dot-growing" cx="235" cy="90" r="4" fill="var(--color-primary)"/>
+                
+                <!-- Guías verticales para el hover -->
+                <line class="svg-chart-guide" x1="145" y1="110" x2="145" y2="210" stroke="var(--color-primary)" stroke-width="1" stroke-dasharray="2 2" opacity="0" style="transition: opacity 0.25s; pointer-events: none;"/>
+                <line class="svg-chart-guide" x1="190" y1="110" x2="190" y2="210" stroke="var(--color-primary)" stroke-width="1" stroke-dasharray="2 2" opacity="0" style="transition: opacity 0.25s; pointer-events: none;"/>
+                <line class="svg-chart-guide" x1="235" y1="110" x2="235" y2="210" stroke="var(--color-primary)" stroke-width="1" stroke-dasharray="2 2" opacity="0" style="transition: opacity 0.25s; pointer-events: none;"/>
+
+                <circle class="svg-chart-dot-hit" data-index="1" data-val="$350,000" cx="145" cy="170" r="10" fill="transparent" style="cursor: pointer;"/>
+                <circle class="svg-chart-dot" cx="145" cy="170" r="4" fill="var(--color-primary)" style="transition: r 0.25s, fill 0.25s; pointer-events: none;"/>
+
+                <circle class="svg-chart-dot-hit" data-index="2" data-val="$420,000" cx="190" cy="125" r="10" fill="transparent" style="cursor: pointer;"/>
+                <circle class="svg-chart-dot svg-chart-dot-delayed" cx="190" cy="125" r="4" fill="var(--color-primary)" style="transition: r 0.25s, fill 0.25s; pointer-events: none;"/>
+
+                <circle class="svg-chart-dot-glow" cx="235" cy="90" r="10" fill="var(--color-primary)" style="pointer-events: none;"/>
+                <circle class="svg-chart-dot-hit" data-index="3" data-val="$520,000" cx="235" cy="90" r="12" fill="transparent" style="cursor: pointer;"/>
+                <circle class="svg-chart-dot-growing" cx="235" cy="90" r="4" fill="var(--color-primary)" style="transition: r 0.25s; pointer-events: none;"/>
+
                 <text x="95" y="135" fill="var(--color-text-main)" font-family="sans-serif" font-weight="bold" font-size="12">Ventas del Mes</text>
+
+                <!-- Tooltip del gráfico dentro del SVG -->
+                <g id="svg-chart-tooltip" opacity="0" transform="translate(0, 0)" style="transition: opacity 0.25s, transform 0.25s; pointer-events: none;">
+                  <rect x="0" y="0" width="56" height="18" rx="4" fill="var(--color-primary)" opacity="0.95"/>
+                  <text x="28" y="12" fill="#ffffff" font-family="sans-serif" font-size="9" font-weight="bold" text-anchor="middle">value</text>
+                </g>
               </g>
               
               <!-- Lista de Tareas Ordenada (Checklist) -->
@@ -3393,16 +3509,23 @@
                 <rect x="260" y="110" width="160" height="110" rx="10" fill="var(--color-bg)" stroke="var(--color-border)" stroke-width="1.5"/>
                 <text x="275" y="135" fill="var(--color-text-main)" font-family="sans-serif" font-weight="bold" font-size="12">Lista de Control</text>
                 
-                <rect x="275" y="152" width="12" height="12" rx="3" fill="#10b981"/>
-                <path d="M278 158 l2 2 l4 -4" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="295" y1="158" x2="390" y2="158" stroke="var(--color-text-muted)" stroke-width="2"/>
+                <g class="svg-todo-item" data-checked="true" data-index="1">
+                  <rect class="todo-chk-rect" x="275" y="152" width="12" height="12" rx="3" fill="#10b981"/>
+                  <path class="todo-chk-path" d="M278 158 l2 2 l4 -4" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line class="todo-text-line" x1="295" y1="158" x2="390" y2="158" stroke="var(--color-text-muted)" stroke-width="2"/>
+                </g>
                 
-                <rect x="275" y="172" width="12" height="12" rx="3" fill="#10b981"/>
-                <path d="M278 178 l2 2 l4 -4" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="295" y1="178" x2="370" y2="178" stroke="var(--color-text-muted)" stroke-width="2"/>
+                <g class="svg-todo-item" data-checked="true" data-index="2">
+                  <rect class="todo-chk-rect" x="275" y="172" width="12" height="12" rx="3" fill="#10b981"/>
+                  <path class="todo-chk-path" d="M278 178 l2 2 l4 -4" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line class="todo-text-line" x1="295" y1="178" x2="370" y2="178" stroke="var(--color-text-muted)" stroke-width="2"/>
+                </g>
 
-                <rect x="275" y="192" width="12" height="12" rx="3" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="1.5"/>
-                <line x1="295" y1="198" x2="385" y2="198" stroke="var(--color-text-muted)" stroke-width="2"/>
+                <g class="svg-todo-item" data-checked="false" data-index="3">
+                  <rect class="todo-chk-rect" x="275" y="192" width="12" height="12" rx="3" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="1.5"/>
+                  <path class="todo-chk-path" d="M278 198 l2 2 l4 -4" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0;"/>
+                  <line class="todo-text-line" x1="295" y1="198" x2="385" y2="198" stroke="var(--color-text-main)" stroke-width="2"/>
+                </g>
               </g>
               
               <!-- Vista de Inventario / Base de Datos Simplificada -->
@@ -3415,8 +3538,10 @@
                 <rect x="130" y="290" width="80" height="10" rx="3" fill="var(--color-text-main)"/>
                 <rect x="130" y="305" width="50" height="8" rx="2" fill="var(--color-text-muted)"/>
                 
-                <rect x="320" y="290" width="80" height="20" rx="10" fill="var(--color-success-light)" stroke="var(--color-success)" stroke-width="1"/>
-                <text x="335" y="304" fill="var(--color-success)" font-family="sans-serif" font-weight="bold" font-size="10">Entregado</text>
+                <g class="svg-interactive-status" data-status="entregado">
+                  <rect class="status-rect" x="320" y="290" width="80" height="20" rx="10" fill="var(--color-success-light)" stroke="var(--color-success)" stroke-width="1" style="transition: fill 0.25s, stroke 0.25s;"/>
+                  <text class="status-text" x="360" y="304" text-anchor="middle" fill="var(--color-success)" font-family="sans-serif" font-weight="bold" font-size="10" style="transition: fill 0.25s;">Entregado</text>
+                </g>
               </g>
             </svg>
           </div>
@@ -5143,7 +5268,14 @@
       document.querySelectorAll('.svg-card-interactive[data-dashboard-module]').forEach(moduleBtn => {
         const modKey = moduleBtn.getAttribute('data-dashboard-module');
         
-        function handleOpen() {
+        function handleOpen(e) {
+          if (e && e.target && (
+            e.target.closest('.svg-todo-item') ||
+            e.target.closest('.svg-interactive-status') ||
+            e.target.closest('.svg-chart-dot-hit')
+          )) {
+            return; // No abrir el modal si se hizo clic en un control interactivo
+          }
           const tpl = dashboardTemplates[modKey];
           if (!tpl) return;
 
@@ -5203,10 +5335,218 @@
         moduleBtn.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            handleOpen();
+            handleOpen(e);
           }
         });
       });
+
+      // === INTERACTIVIDAD DEL MINI-DASHBOARD INLINE EN HERO ===
+      (function() {
+        const wrapper = document.querySelector('.hero-illustration-wrapper');
+        const hint = document.querySelector('.svg-interactive-hint');
+        if (!wrapper) return;
+
+        let userInteracted = false;
+
+        function hideHint() {
+          if (hint && !hint.classList.contains('hidden')) {
+            hint.classList.add('hidden');
+          }
+        }
+
+        function markInteraction(e) {
+          if (e && e.isTrusted === false) return; // Evitar que clics programáticos apaguen la interactividad
+          userInteracted = true;
+          hideHint();
+        }
+
+        // Registrar interacción global en el contenedor para apagar la guía
+        wrapper.addEventListener('click', markInteraction, { capture: true });
+        wrapper.addEventListener('touchstart', markInteraction, { passive: true });
+
+        // 1. Módulo Ventas: Hover en puntos del gráfico SVG
+        const guides = wrapper.querySelectorAll('.svg-chart-guide');
+        const dotHits = wrapper.querySelectorAll('.svg-chart-dot-hit');
+        const chartTooltip = wrapper.querySelector('#svg-chart-tooltip');
+        const chartTooltipText = chartTooltip ? chartTooltip.querySelector('text') : null;
+        const chartDots = wrapper.querySelectorAll('.svg-chart-dot, .svg-chart-dot-growing');
+
+        dotHits.forEach((hit, idx) => {
+          hit.addEventListener('mouseenter', (e) => {
+            markInteraction(e);
+            const val = hit.getAttribute('data-val');
+            const cx = parseFloat(hit.getAttribute('cx'));
+            const cy = parseFloat(hit.getAttribute('cy'));
+
+            if (chartTooltip && chartTooltipText) {
+              chartTooltipText.textContent = val;
+              // Centrar el tooltip arriba del punto (ancho del rect es 56, alto es 18)
+              chartTooltip.setAttribute('transform', `translate(${cx - 28}, ${cy - 26})`);
+              chartTooltip.style.opacity = '1';
+            }
+
+            if (guides[idx]) guides[idx].style.opacity = '0.35';
+            if (chartDots[idx]) {
+              chartDots[idx].setAttribute('r', '6');
+            }
+          });
+
+          hit.addEventListener('mouseleave', () => {
+            if (chartTooltip) chartTooltip.style.opacity = '0';
+            if (guides[idx]) guides[idx].style.opacity = '0';
+            if (chartDots[idx]) {
+              const origR = '4';
+              chartDots[idx].setAttribute('r', origR);
+            }
+          });
+        });
+
+        // 2. Módulo Lista de Control: Clic directo en checkboxes del SVG
+        const todoItems = wrapper.querySelectorAll('.svg-todo-item');
+        todoItems.forEach(item => {
+          item.addEventListener('mouseenter', markInteraction);
+          item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            markInteraction(e);
+
+            const isChecked = item.getAttribute('data-checked') === 'true';
+            item.setAttribute('data-checked', isChecked ? 'false' : 'true');
+          });
+        });
+
+        // Helper para lanzar micro-confeti
+        function createConfettiAt(x, y) {
+          const body = document.body;
+          for (let i = 0; i < 15; i++) {
+            const p = document.createElement('div');
+            p.className = 'cta-particle';
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+            p.style.background = `hsl(${Math.random() * 360}, 90%, 60%)`;
+            
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 30 + Math.random() * 50;
+            const tx = Math.cos(angle) * speed;
+            const ty = Math.sin(angle) * speed;
+            
+            p.style.setProperty('--bx', tx + 'px');
+            p.style.setProperty('--by', ty + 'px');
+            p.style.animation = 'ctaBurst 0.65s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards';
+            
+            body.appendChild(p);
+            setTimeout(() => p.remove(), 700);
+          }
+        }
+
+        // 3. Módulo Últimos Pedidos: Toggle del badge de estado
+        const statusConfig = {
+          pendiente: {
+            text: 'Pendiente',
+            fill: 'rgba(239, 68, 68, 0.08)',
+            stroke: '#ef4444',
+            color: '#dc2626',
+            next: 'proceso'
+          },
+          proceso: {
+            text: 'En Proceso',
+            fill: 'rgba(245, 158, 11, 0.08)',
+            stroke: '#f59e0b',
+            color: '#d97706',
+            next: 'entregado'
+          },
+          entregado: {
+            text: 'Entregado',
+            fill: 'var(--color-success-light)',
+            stroke: 'var(--color-success)',
+            color: 'var(--color-success)',
+            next: 'pendiente'
+          }
+        };
+
+        const statusGroup = wrapper.querySelector('.svg-interactive-status');
+        if (statusGroup) {
+          statusGroup.addEventListener('mouseenter', markInteraction);
+          statusGroup.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            markInteraction(e);
+
+            const current = statusGroup.getAttribute('data-status') || 'entregado';
+            const config = statusConfig[current];
+            const nextStatus = config.next;
+            const nextConfig = statusConfig[nextStatus];
+
+            statusGroup.setAttribute('data-status', nextStatus);
+
+            const rect = statusGroup.querySelector('.status-rect');
+            const text = statusGroup.querySelector('.status-text');
+
+            if (rect) {
+              rect.setAttribute('fill', nextConfig.fill);
+              rect.setAttribute('stroke', nextConfig.stroke);
+            }
+            if (text) {
+              text.setAttribute('fill', nextConfig.color);
+              text.textContent = nextConfig.text;
+            }
+
+            // Confeti si pasa a Entregado
+            if (nextStatus === 'entregado') {
+              const rectGeom = statusGroup.getBoundingClientRect();
+              createConfettiAt(rectGeom.left + rectGeom.width / 2, rectGeom.top + rectGeom.height / 2);
+            }
+          });
+        }
+
+        // 4. Attraction Loop (Animación autómata inicial al cargar la página)
+        setTimeout(() => {
+          if (userInteracted) return;
+
+          // Paso A: Marcar el tercer checkbox de control
+          const task3 = wrapper.querySelector('.svg-todo-item[data-index="3"]');
+          if (task3 && !userInteracted) {
+            task3.setAttribute('data-checked', 'true');
+            setTimeout(() => {
+              if (!userInteracted) {
+                task3.setAttribute('data-checked', 'false');
+              }
+            }, 1200);
+          }
+
+          // Paso B: Mostrar tooltip de la gráfica durante 1.2 segundos
+          const dot2 = wrapper.querySelector('.svg-chart-dot-hit[data-index="2"]');
+          if (dot2 && !userInteracted) {
+            const enterEvt = new Event('mouseenter');
+            const leaveEvt = new Event('mouseleave');
+            dot2.dispatchEvent(enterEvt);
+            setTimeout(() => {
+              if (!userInteracted) {
+                dot2.dispatchEvent(leaveEvt);
+              }
+            }, 1200);
+          }
+
+          // Paso C: Ciclar estados de Pedidos hasta volver a Entregado con confeti
+          if (statusGroup && !userInteracted) {
+            setTimeout(() => {
+              if (userInteracted) return;
+              statusGroup.dispatchEvent(new Event('click')); // Entregado -> Pendiente
+              
+              setTimeout(() => {
+                if (userInteracted) return;
+                statusGroup.dispatchEvent(new Event('click')); // Pendiente -> En Proceso
+                
+                setTimeout(() => {
+                  if (userInteracted) return;
+                  statusGroup.dispatchEvent(new Event('click')); // En Proceso -> Entregado (Confeti!)
+                }, 1000);
+              }, 1000);
+            }, 1500);
+          }
+
+        }, 2200);
+      })();
       
       // Close dynamic dashboard modal
       const closeDashboardModal = document.getElementById('close-dashboard-modal');

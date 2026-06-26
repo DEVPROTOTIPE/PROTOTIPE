@@ -1,6 +1,132 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
 
+### [2026-06-26] - CORE-089: Pre-flight Validation Pipeline y Blindaje de Integridad de Sincronización en CLI Server
+
+* **Tipo:** Mejora de Seguridad / Robustez / Multi-core / CLI / Automatización / Documentación
+* **Descripción de Cambios:**
+  - **Implementación de Pre-flight Integrity Pipeline:** Se desarrolló e integró en `server.js` la función `validateClientIntegrityBeforeSync` dentro del flujo de sincronización física del CLI (`/api/instancias/sync-and-deploy-stream`). Este pipeline realiza de forma automática y secuencial:
+    1. **Resolución Correcta de Variables e Identidad:** Lee `.prototipe.json` para extraer el `clientId` y usa el token del Firebase CLI local para resolver correctamente el `projectId` de Firebase en base a `.firebaserc`.
+    2. **Auto-curación Dinámica de `.env.local`:** Consulta la base de datos Firestore central para recuperar las comisiones/parámetros de facturación del cliente y su token de telemetría activo. Consulta el SDK config de Firebase del cliente (`firebase apps:sdkconfig web`) y reconstruye/auto-cura el archivo `.env.local` con todas las credenciales de Firebase correctas, previniendo errores de "invalid-api-key" y pantallas en blanco.
+    3. **Integridad del Service Worker FCM:** Si el Service Worker `public/firebase-messaging-sw.js` no existe en la carpeta del cliente, lo copia del Core e inyecta estáticamente al vuelo las credenciales de Firebase personalizadas de la marca (ya que el SW no lee variables en runtime).
+    4. **Inyección en Configuración Excluida (`firebaseConfig.js`):** Valida si exporta `messaging`. Si está ausente debido a paridad con el Core, realiza un patch seguro agregando el código necesario para inicializar e importar FCM de forma segura.
+    5. **Paridad de Scripts y Construcción:** Copia scripts faltantes de NPM (como `generate_ia_map.js`) referenciados en `package.json` desde el Core.
+  - **Verificación de Calidad y Pruebas:** Se ejecutaron pruebas SSE end-to-end simulando la eliminación manual de variables en `.env.local` y el borrado físico de `firebase-messaging-sw.js` en `ventas-moni-app`, comprobando su correcta regeneración y auto-curado. Finalmente, se ejecutó una compilación de producción local exitosa (`npm run build`) para certificar la integridad.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-26] - CORE-088: Corrección de Prioridad de Detección de Firebase Project ID en CLI Server
+
+* **Tipo:** Corrección de Bugs / Firebase / CLI / Despliegue
+* **Descripción de Cambios:**
+  - **Corregida Prioridad de Detección de Project ID en resolveFirebaseProjectId:** Se solucionó el fallo en el que el servidor CLI intentaba desplegar el Hosting utilizando el identificador genérico del cliente (`moni-app`) en lugar del ID real del proyecto de Firebase (`ventas-moni-app`), debido a que la lectura de `.prototipe.json` (que contenía `clientId: "moni-app"`) enmascaraba las lecturas posteriores de `.firebaserc` y `.env.local`. Se reestructuró la función para consultar con máxima prioridad el archivo `.firebaserc` (fuente de verdad oficial de Firebase CLI) y la variable `VITE_FIREBASE_PROJECT_ID` en `.env.local` antes de recurrir a metadatos de la instancia.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+
+---
+
+### [2026-06-26] - CORE-087: Inicialización de Firebase, Exportación de Messaging y Saneamiento de Compilación en ventas-moni-app
+
+* **Tipo:** Corrección de Bugs / Configuración / Firebase / Compilación
+* **Descripción de Cambios:**
+  - **Inyección de Credenciales de Firebase y Telemetría en la Marca:** Se recuperaron e inyectaron las credenciales reales de Firebase del cliente (`ventas-moni-app`) y sus parámetros de telemetría y comisiones del desarrollador en `.env.local`, solucionando el error fatal `auth/invalid-api-key` y la pantalla en blanco al iniciar.
+  - **Exportación de Firebase Messaging (`messaging`):** Se actualizó el archivo `src/config/firebaseConfig.js` para exportar de forma segura y perezosa la instancia de `messaging` (Firebase Cloud Messaging) de modo que sea totalmente compatible con los hooks del core sincronizados (`useFCMPermission.js`), eliminando errores de importación faltante.
+  - **Inyección de Generador de Mapa de IA:** Se creó la carpeta `/scripts` y se inyectó el script `generate_ia_map.js` para posibilitar el paso de pre-compilación `"npm run map"` y permitir que la compilación local para producción (`npm run build`) complete exitosamente.
+* **Archivos Modificados:**
+  - [`Instancias Clientes/ventas/ventas-moni-app/.env.local`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/.env.local) [MODIFY]
+  - [`Instancias Clientes/ventas/ventas-moni-app/src/config/firebaseConfig.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/config/firebaseConfig.js) [MODIFY]
+  - [`Instancias Clientes/ventas/ventas-moni-app/scripts/generate_ia_map.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/scripts/generate_ia_map.js) [NEW]
+
+---
+
+### [2026-06-26] - CORE-086: Propuesta Técnica y Visual para Mini-Dashboard Interactivo Inline en Hero
+
+* **Tipo:** Conversión (CRO) / UI/UX / Propuesta / Documentación
+* **Descripción de Cambios:**
+  - **Elaboración de Propuesta de Mini-Dashboard Interactivo:** Se redactó la especificación UX/técnica [`propuesta_dashboard_interactivo.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/propuesta_dashboard_interactivo.md) para permitir a los visitantes interactuar directamente con los tres módulos del mockup SVG (Ventas del Mes, Lista de Control y Últimos Pedidos) sin abrir el modal a la primera interacción. La propuesta abarca cues visuales de atracción (badge dinámico flotante, atracción onboarding animada al cargar y hover selectivo de cursor) y mecánicas técnicas basadas en JS puro para interactuar en caliente con el DOM SVG (tooltips, checkboxes con tachado e interruptor de estados con micro-confeti).
+  - **Actualización del Mapa de Documentación y Roadmap:** Sincronizado en el GPS semántico y registrado en el control de tareas del roadmap.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/09_Modulos_Completos/propuesta_dashboard_interactivo.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/propuesta_dashboard_interactivo.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
+---
+
+### [2026-06-26] - CORE-085: Expansión de Nichos Comerciales y Consistencia de Configuración Operativa [Revisión y Refinamiento]
+
+* **Tipo:** Expansión / Sincronización / Backend / Frontend / Consistencia
+* **Descripción de Cambios:**
+  - **Expansión de Verticas de Negocio (10 Paletas por Nicho - 130 Paletas Totales):** Se incorporaron 13 nuevos nichos comerciales de alta demanda en LatAm (Colombia). Se diseñaron e inyectaron 10 paletas HSL de contraste verificado (130 combinaciones completas light/dark en total) adaptadas estratégicamente a la identidad visual de cada vertical. Se inyectaron de forma consistente en `dev-dashboard` y en los archivos `palettes.js` de las plantillas (`template-ventas`, `template-core-seed`, `App Ventas`) y en la instancia del cliente activo (`ventas-moni-app`), asegurando su disponibilidad en las marcas. Se incluyeron catálogos de prueba en `App.jsx` y atributos dinámicos en `generator.js` de la CLI.
+  - **Fusión en CLI Server y Fallback Core:** Modificado el endpoint `POST /api/project/env` en `server.js` para realizar fusión aditiva con `.env.local` y se inyectaron fallbacks en `billingService.js` en App Ventas.
+  - **Resolución de Integridad Pre-build:** Se indexó y registró la propuesta técnica del Hero `propuesta_dashboard_interactivo.md` en el `README.md` de la biblioteca y en `ComponentSandbox.jsx` (`COMPONENT_META`), permitiendo que el validador de prebuild de Vite complete exitosamente la compilación.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Plantillas Core/App Ventas/src/services/billingService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/billingService.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/analisis_nichos_mercado_saas.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/analisis_nichos_mercado_saas.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Prototipe-CLI/templates/template-ventas/src/constants/palettes.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/constants/palettes.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-core-seed/src/constants/palettes.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/constants/palettes.js) [MODIFY]
+  - [`Plantillas Core/App Ventas/src/constants/palettes.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/constants/palettes.js) [MODIFY]
+  - [`Instancias Clientes/ventas/ventas-moni-app/src/constants/palettes.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/constants/palettes.js) [MODIFY]
+
+---
+
+### [2026-06-26] - AUDITORÍA: Auditoría de Seguridad y Viabilidad sobre 17 Archivos Sincronizables del Core Ventas
+
+* **Tipo:** Seguridad / Calidad / Auditoría / Documentación
+* **Descripción de Cambios:**
+  - **Auditoría Técnica Exhaustiva de Código Fuente:** Se auditó de forma proactiva y secuencial el listado de 17 archivos del directorio `src/` indicados por el Drift Detector (`App.jsx`, modales de inventario y apariencia, hooks de FCM y sincronización, layouts base, páginas y utilidades de compresión). Se comprobó que todos los archivos contienen lógica de aplicación pura y no contienen credenciales hardcodeadas (todas las referencias de Firebase se consumen de forma dinámica desde variables de entorno locales de la instancia cliente mediante el protector `firebaseConfig.js` y Zustand).
+  - **Registro en Mapa de Documentación y Publicación de Informe:** Se generó y publicó el informe físico de auditoría [`auditoria_archivos_sincronizables_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_archivos_sincronizables_2026.md) en el directorio de documentación del proyecto.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_archivos_sincronizables_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_archivos_sincronizables_2026.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-26] - CORE-084: Matriz de Paridad Inteligente, Blindaje de Sincronización y Fusión de index/package en CLI Server
+
+* **Tipo:** Refactorización / Seguridad / Calidad / Multi-core / Backend / CLI
+* **Descripción de Cambios:**
+  - **Validador Centralizado de Exclusiones (isPathExcludedFromSync):** Se implementó una función centralizada de validación que unifica las exclusiones para el Drift Detector y el Sincronizador físico, eliminando el desacoplamiento lógico previo. Para asegurar la portabilidad ante múltiples Cores futuros con diferentes estructuras, el helper utiliza patrones dinámicos insensibles a mayúsculas que detectan y excluyen de forma flexible cualquier inicialización de Firebase (`**/firebaseConfig.*`, `**/firebase.*`), logotipos de assets (`**/logo.*`, `logo-.*`), favicons, manifiestos PWA, carpetas temporales (`scratch/`, `scripts/`, `playwright-report/`, `test-results/`), variables de entorno locales (`.env.*`) y el service worker de notificaciones push del cliente.
+  - **Fusión e Inyección Inteligente de index.html:** `index.html` se re-incorporó de manera segura en el Drift y Sincronizador. Al sincronizar `index.html`, el backend respalda en memoria el `<title>`, los metatags SEO y los scripts de analíticas de terceros (dentro del nuevo bloque seguro delimitado por `<!-- CLIENT_SCRIPTS_START -->`) de la instancia del cliente. Luego copia el HTML del Core y re-inyecta las etiquetas del cliente para preservar su marca intacta. La comparación en el Drift Detector pre-procesa temporalmente ambos HTMLs (eliminando bloques de marcas/scripts de terceros) para evitar falsas alarmas de paridad.
+  - **Fusión Lógica de package.json:** Al sincronizar `package.json`, en lugar de un copiado de archivo plano que destruiría el `"name"` de la app cliente o su versión, el backend realiza una fusión lógica aditiva de los bloques `dependencies`, `devDependencies` y `scripts` de la plantilla del Core en la instancia cliente, inyectando comandos y dependencias nuevas de manera automática sin alterar la identidad de la marca.
+  - **Bloqueo Activo de Seguridad en APIs:** Se blindaron los endpoints `/api/project/sync-file` y `/api/project/sync-files` para rechazar de forma activa con código HTTP `403 Forbidden` cualquier intento manual o masivo de sobrescribir archivos protegidos (como credenciales de Firebase, variables de entorno locales o logotipos de marca).
+  - **Elaboración de Auditoría Técnica de Paridad:** Se publicó el informe técnico de paridad [`auditoria_paridad_y_exclusiones_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_paridad_y_exclusiones_2026.md) indexándolo en el mapa semántico.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_paridad_y_exclusiones_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_paridad_y_exclusiones_2026.md) [NEW]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
+### [2026-06-26] - CORE-083: Validación de package.json en Resolución de Proyectos de Clientes en CLI Server
+
+* **Tipo:** Corrección de Bugs / Robustez / Backend / CLI
+* **Descripción de Cambios:**
+  - **Validación Estricta de package.json en findProjectDir:** Se solucionó el error de despliegue en el Dashboard en el que al intentar desplegar un Core (ej. la plantilla `ventas`), la función `findProjectDir` resolvía erróneamente carpetas organizativas de nicho vacías (como `Instancias Clientes\ventas`) como si fuesen el proyecto de la marca, debido a que coincidían con el nombre del cliente y no se comprobaba la existencia de archivos del proyecto. Se inyectó una validación con `fs.pathExists` en la resolución de carpetas por coincidencia de nombre (kebab-case) para exigir que la ruta resultante contenga un archivo `package.json`. Esto evita que coincida con carpetas organizativas y permite que la función continúe y resuelva correctamente mediante el fallback de `knownMappings` (apuntando a `Plantillas Core\App Ventas`).
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+---
+
 ### [2026-06-26] - CORE-082: Alineación, Icono de WhatsApp, Ajuste de Desbordamiento y Corrección de Vibración de Botones Magnéticos en Calculadora CRO
 
 * **Tipo:** Conversión (CRO) / UI/UX / HTML / CSS / JS / Documentación

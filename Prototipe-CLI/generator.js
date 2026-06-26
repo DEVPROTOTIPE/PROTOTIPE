@@ -598,7 +598,67 @@ service cloud.firestore {
       { name: 'duracion', label: 'Duración Estimada', type: 'select', options: ['30 min', '45 min', '1 hora', '1.5 horas', '2 horas'] },
       { name: 'profesional', label: 'Profesional / Especialista', type: 'text', placeholder: 'Ej. Podólogo Principal / Esteticista' }
     ];
+  } else if (answers.niche === 'insumos-agricolas') {
+    nicheData.attributes = [
+      { name: 'marca', label: 'Marca / Fabricante', type: 'text', placeholder: 'Ej. Syngenta, Stihl, Bayer' },
+      { name: 'compatibilidad', label: 'Compatibilidad de Repuesto', type: 'text', placeholder: 'Ej. Motor Stihl FS 160 / Universal' }
+    ];
+  } else if (answers.niche === 'alimentos-artesanales') {
+    nicheData.attributes = [
+      { name: 'presentacion', label: 'Presentación / Porciones', type: 'select', options: ['Unidad Individual', 'Caja x6', 'Caja x12', 'Media Libra', 'Una Libra'] },
+      { name: 'requiere_anticipo', label: 'Anticipación Requerida', type: 'select', options: ['Entrega Inmediata', '24 Horas de Anticipación', '48 Horas de Anticipación'] }
+    ];
+  } else if (answers.niche === 'ferreteria-rural') {
+    nicheData.attributes = [
+      { name: 'unidad_medida', label: 'Unidad de Venta', type: 'select', options: ['Unidad', 'Bulto / S Saco', 'Kilo', 'Metro', 'Rollo'] }
+    ];
+  } else if (answers.niche === 'repuestos-motos') {
+    nicheData.attributes = [
+      { name: 'marca_moto', label: 'Marca de Moto Compatible', type: 'text', placeholder: 'Ej. Yamaha, Pulsar, Boxer, Suzuki' },
+      { name: 'modelo_anio', label: 'Modelo / Año', type: 'text', placeholder: 'Ej. 2018 - 2022' }
+    ];
+  } else if (answers.niche === 'distribuidoras-beauty') {
+    nicheData.attributes = [
+      { name: 'tipo_presentacion', label: 'Presentación Profesional', type: 'select', options: ['Unidad Detal', 'Caja/Pack Mayorista', 'Litro / Galón (Granel)'] }
+    ];
+  } else if (answers.niche === 'petshops-locales') {
+    nicheData.attributes = [
+      { name: 'peso_concentrado', label: 'Peso del Empaque', type: 'select', options: ['1 kg', '2 kg', '8 kg', '15 kg', '22 kg', 'Suelto / Libra'] },
+      { name: 'mascota', label: 'Tipo de Mascota', type: 'select', options: ['Perro Adulto', 'Cachorro', 'Gato Adulto', 'Gatito', 'Otras Mascotas'] }
+    ];
+  } else if (answers.niche === 'repuestos-lineablanca') {
+    nicheData.attributes = [
+      { name: 'marca_electrodomestico', label: 'Marca Compatible', type: 'text', placeholder: 'Ej. Whirlpool, Mabe, Haceb, LG' },
+      { name: 'modelo_exacto', label: 'Modelo o Número de Parte', type: 'text', placeholder: 'Ej. W1023456 / Lavadora Haceb 13kg' }
+    ];
+  } else if (answers.niche === 'moda-local-calzado') {
+    nicheData.attributes = [
+      { name: 'talla', label: 'Talla', type: 'select', options: ['34', '35', '36', '37', '38', '39', '40', '41', '42', 'S', 'M', 'L', 'XL'] },
+      { name: 'material', label: 'Material / Composición', type: 'text', placeholder: 'Ej. Cuero 100% natural, Sintético, Lona' }
+    ];
+  } else if (answers.niche === 'alimentacion-saludable') {
+    nicheData.attributes = [
+      { name: 'alergenos', label: 'Alérgenos / Restricción', type: 'select', options: ['Libre de Gluten (Gluten Free)', 'Sin Azúcar Añadida', 'Vegano / Plant-Based', 'Keto / Bajo en Carbohidratos', 'Sin Restricción / Natural'] },
+      { name: 'presentacion', label: 'Presentación', type: 'text', placeholder: 'Ej. Frasco 250g, Bolsa de 500g, Cápsulas' }
+    ];
+  } else if (answers.niche === 'home-office-ergonomia') {
+    nicheData.attributes = [
+      { name: 'ajustable', label: 'Nivel de Ajuste', type: 'select', options: ['Totalmente Ajustable (Ergonómico)', 'Ajuste de Altura Únicamente', 'Fijo / Estático'] }
+    ];
+  } else if (answers.niche === 'licores-cocteleria') {
+    nicheData.attributes = [
+      { name: 'volumen_alcohol', label: 'Contenido / Volumen', type: 'select', options: ['Lata 330ml', 'Botella 375ml (Media)', 'Botella 750ml (Estándar)', 'Botella 1000ml (Litro)'] }
+    ];
+  } else if (answers.niche === 'coleccionismo-geek') {
+    nicheData.attributes = [
+      { name: 'estado_articulo', label: 'Estado / Edición', type: 'select', options: ['Nuevo en Caja (Mint in Box)', 'Edición Limitada', 'Edición Regular', 'Segunda Mano (Excelente Estado)'] }
+    ];
+  } else if (answers.niche === 'distribucion-horeca') {
+    nicheData.attributes = [
+      { name: 'empaque_volumen', label: 'Empaque de Venta', type: 'select', options: ['Paquete x50 Unidades', 'Caja x500 Unidades', 'Galón / Garrafa', 'Bulto Mayorista'] }
+    ];
   }
+
 
   await fs.writeJson(path.join(configDir, 'niche.json'), nicheData, { spaces: 2 });
   stepNiche.succeed('Metadatos de nicho (niche.json) generados en src/config.');

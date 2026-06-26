@@ -29,6 +29,7 @@ import {
   Download,
 } from 'lucide-react'
 import usePWAInstall from '../../hooks/usePWAInstall'
+import SoftPushPrompt from '../../components/client/SoftPushPrompt'
 
 
 // ─── Mapa de íconos de Lucide por nombre (string → componente) ────────────────
@@ -333,7 +334,10 @@ export default function OrderTracking() {
             </div>
           )}
 
-
+          {/* Solicitud Inteligente y No Intrusiva de Permisos Push del Cliente */}
+          {order.cliente?.celular && (
+            <SoftPushPrompt userId={order.cliente.celular} role="client" />
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
             <div className="bg-surface-2/40 border border-app p-4 rounded-2xl space-y-1.5">

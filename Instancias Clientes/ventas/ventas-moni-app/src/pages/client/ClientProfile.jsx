@@ -73,7 +73,7 @@ export default function ClientProfile() {
   return (
     <div className="pb-6">
       {/* Header del Perfil con gradiente fluido y aura de color */}
-      <div className="relative z-40 bg-gradient-to-b from-primary/8 via-primary/3 to-transparent pt-10 pb-8 px-4 md:px-8 border-b border-primary/5">
+      <div className={`relative bg-gradient-to-b from-primary/8 via-primary/3 to-transparent pt-10 pb-8 px-4 md:px-8 border-b border-primary/5 ${showEmojiPicker ? 'z-40' : 'z-10'}`}>
         {/* Aura decorativa de fondo */}
         <div className="absolute top-0 right-1/4 w-72 h-72 rounded-full bg-primary/4 blur-3xl pointer-events-none overflow-hidden" />
         

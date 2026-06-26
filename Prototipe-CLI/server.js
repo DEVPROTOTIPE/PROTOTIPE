@@ -1682,22 +1682,41 @@ app.post('/api/cores/:clave/sync', async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper para resolver el ID de proyecto de Firebase de forma robusta y 100% automatizada
 async function resolveFirebaseProjectId(projectDir, clientId) {
-  const metaPath = path.join(projectDir, '.prototipe.json');
   let projectId = null;
-  if (await fs.pathExists(metaPath)) {
-    try {
-      const meta = await fs.readJson(metaPath);
-      projectId = meta.firebaseProjectId || meta.clientId;
-    } catch (_) {}
-  }
-  
+
+  // 1. Intentar leer desde .firebaserc (Fuente de verdad oficial de Firebase CLI)
   const rcPath = path.join(projectDir, '.firebaserc');
-  if (!projectId && await fs.pathExists(rcPath)) {
+  if (await fs.pathExists(rcPath)) {
     try {
       const rc = await fs.readJson(rcPath);
       projectId = rc.projects?.default;
     } catch (_) {}
   }
+
+  // 2. Intentar leer desde .env.local (Configuración de entorno del cliente)
+  if (!projectId) {
+    const envPath = path.join(projectDir, '.env.local');
+    if (await fs.pathExists(envPath)) {
+      try {
+        const envContent = await fs.readFile(envPath, 'utf8');
+        const match = envContent.match(/VITE_FIREBASE_PROJECT_ID\s*=\s*(.+)/);
+        if (match && match[1]) {
+          projectId = match[1].trim().replace(/['"]/g, '');
+        }
+      } catch (_) {}
+    }
+  }
+
+  // 3. Intentar leer desde .prototipe.json (Metadatos de la instancia)
+  const metaPath = path.join(projectDir, '.prototipe.json');
+  let meta = null;
+  if (!projectId && await fs.pathExists(metaPath)) {
+    try {
+      meta = await fs.readJson(metaPath);
+      projectId = meta.firebaseProjectId;
+    } catch (_) {}
+  }
+
 
   // AUTO-DETECCIÓN Y AUTO-CREACIÓN DE PROYECTO (CERO PASOS MANUALES)
   if (!projectId) {
@@ -1762,6 +1781,7 @@ async function resolveFirebaseProjectId(projectDir, clientId) {
 // Fuente de verdad: .prototipe.json (clientId / projectName).
 // Soporta 3 niveles: directo, nicho/instancia, fallback por nombre de carpeta y package.json.
 async function findProjectDir(clientId) {
+  if (!clientId) return null;
   const baseAppsDir = getWorkspaceRoot(); // D:\PROTOTIPE\Instancias Clientes
   const lowerClientId = clientId.toLowerCase();
 
@@ -1782,9 +1802,11 @@ async function findProjectDir(clientId) {
       const pkg = await fs.readJson(pkgPath).catch(() => ({}));
       if ((pkg.name || '').toLowerCase() === lowerClientId) return true;
     }
-    // 3. Nombre de carpeta normalizado (kebab-case)
-    if (folderName.toLowerCase() === lowerClientId ||
-        folderName.toLowerCase().replace(/[^a-z0-9]+/g, '-') === lowerClientId) return true;
+    // 3. Nombre de carpeta normalizado (kebab-case) - Solo si contiene package.json
+    if (await fs.pathExists(pkgPath)) {
+      if (folderName.toLowerCase() === lowerClientId ||
+          folderName.toLowerCase().replace(/[^a-z0-9]+/g, '-') === lowerClientId) return true;
+    }
     return false;
   };
 
@@ -2149,25 +2171,49 @@ app.post('/api/project/env', async (req, res) => {
 
   const envPath = path.join(projectDir, '.env.local');
   try {
-    let content = '';
+    let existingVariables = {};
+    if (await fs.pathExists(envPath)) {
+      const existingContent = await fs.readFile(envPath, 'utf-8');
+      existingContent.split('\n').forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+          const index = trimmed.indexOf('=');
+          const key = trimmed.slice(0, index).trim();
+          const val = trimmed.slice(index + 1).trim().replace(/^["']|["']$/g, '');
+          existingVariables[key] = val;
+        }
+      });
+    }
+
     const invalidKeys = [];
     const envKeyRegex = /^[A-Z_][A-Z0-9_]*$/;
+
+    // Fusionar variables del body con las existentes, validando que las nuevas claves sean sintácticamente correctas
     Object.entries(variables).forEach(([key, val]) => {
       const cleanKey = key.trim().toUpperCase();
       if (!envKeyRegex.test(cleanKey)) {
         invalidKeys.push(key);
       }
-      content += `${cleanKey}=${val}\n`;
+      existingVariables[cleanKey] = val;
     });
+
     if (invalidKeys.length > 0) {
       return res.status(400).json({ error: `Nombres de variable inválidos: ${invalidKeys.join(', ')}. Deben ser letras mayúsculas, números y guiones bajos solamente.` });
     }
+
+    // Reconstruir el contenido ordenado
+    let content = '';
+    Object.entries(existingVariables).forEach(([key, val]) => {
+      content += `${key}=${val}\n`;
+    });
+
     await fs.writeFile(envPath, content, 'utf-8');
-    res.json({ success: true, message: 'Variables de entorno actualizadas en .env.local con éxito.' });
+    res.json({ success: true, message: 'Variables de entorno actualizadas en .env.local con éxito (fusión realizada).' });
   } catch (err) {
     res.status(500).json({ error: `Error al escribir variables .env.local: ${err.message}` });
   }
 });
+
 
 // Función interna para realizar la auditoría física y PWA de un proyecto
 async function runAuditInternal(projectDir, clientId) {
@@ -2454,6 +2500,188 @@ app.post('/api/project/fix/rules', async (req, res) => {
   }
 });
 
+// Helper unificado para determinar si un archivo/ruta debe ser excluido de paridad y sincronización.
+// Protege credenciales de Firebase, tokens de entorno, marca blanca y carpetas temporales/desarrollo.
+function isPathExcludedFromSync(relativePath) {
+  const rel = relativePath.replace(/\\/g, '/').toLowerCase();
+  
+  // 1. Carpetas del entorno, dependencias y temporales
+  if (
+    rel === 'node_modules' || rel.startsWith('node_modules/') ||
+    rel === '.git' || rel.startsWith('.git/') ||
+    rel === 'dist' || rel.startsWith('dist/') ||
+    rel === '.vite' || rel.startsWith('.vite/') ||
+    rel === '.firebase' || rel.startsWith('.firebase/') ||
+    rel === 'playwright-report' || rel.startsWith('playwright-report/') ||
+    rel === 'test-results' || rel.startsWith('test-results/') ||
+    rel === 'scratch' || rel.startsWith('scratch/') ||
+    rel === 'scripts' || rel.startsWith('scripts/')
+  ) {
+    return true;
+  }
+
+  // 2. Variables de entorno locales y backups
+  if (
+    rel === '.env.local' ||
+    rel === '.env' ||
+    rel.startsWith('.env.') ||
+    rel === 'cli_bridge.log' ||
+    rel.endsWith('.bak')
+  ) {
+    return true;
+  }
+
+  // 3. Archivos de vinculación de Firebase, metadatos locales y bloqueo de control
+  if (
+    rel === '.firebaserc' ||
+    rel === 'firebase.json' ||
+    rel === '.prototipe.json' ||
+    rel === 'package-lock.json' ||
+    rel === '.gitignore'
+  ) {
+    return true;
+  }
+
+  // 4. Protección flexible de inicialización de Firebase en cualquier ruta de src/
+  // (Ej. src/firebase.js, src/config/firebaseConfig.ts, src/lib/firebase.js)
+  if (rel.startsWith('src/')) {
+    const parts = rel.split('/');
+    const fileName = parts[parts.length - 1];
+    if (
+      fileName.startsWith('firebase') ||
+      fileName.startsWith('firebaseconfig')
+    ) {
+      return true;
+    }
+  }
+
+  // 5. Service Worker de Firebase Messaging del cliente
+  if (rel === 'public/firebase-messaging-sw.js') {
+    return true;
+  }
+
+  // 6. Carpetas de documentación local
+  const segments = rel.split('/');
+  if (segments.some(segment => segment.startsWith('documentacion '))) {
+    return true;
+  }
+  if (rel === 'mapa_arquitectura_ia.md' || rel === 'mapa_arquitectura.md') {
+    return true;
+  }
+
+  // 7. Assets de marca y favicons del cliente
+  if (
+    rel === 'public/favicon.ico' ||
+    rel === 'public/manifest.json' ||
+    rel.startsWith('public/favicon-') ||
+    rel.startsWith('public/apple-touch-icon') ||
+    rel.startsWith('public/android-chrome-') ||
+    rel.startsWith('public/mstile-') ||
+    rel.startsWith('public/safari-pinned-tab') ||
+    rel.startsWith('public/browserconfig.xml')
+  ) {
+    return true;
+  }
+  // Excluir logotipos de assets en cualquier extensión (SVG, PNG, etc.)
+  if (rel.startsWith('src/assets/')) {
+    const parts = rel.split('/');
+    const fileName = parts[parts.length - 1];
+    if (fileName.startsWith('logo.') || fileName.startsWith('logo-')) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// Normaliza el contenido HTML limpiando tags de SEO y scripts de terceros del cliente para comparaciones limpias de paridad.
+function normalizeIndexHtmlForDiff(content) {
+  let normalized = content.replace(/<title>[\s\S]*?<\/title>/gi, '<title>__TITLE__</title>');
+  normalized = normalized.replace(/<meta\s+name="apple-mobile-web-app-title"\s+content="[^"]*"\s*\/?>/gi, '');
+  normalized = normalized.replace(/<!--\s*CLIENT_SCRIPTS_START\s*-->([\s\S]*?)<!--\s*CLIENT_SCRIPTS_END\s*-->/gi, '');
+  
+  const seoMetas = ['description', 'keywords', 'og:title', 'og:description', 'twitter:title', 'twitter:description'];
+  seoMetas.forEach(name => {
+    const isProp = name.startsWith('og:');
+    const regexAttr = isProp ? 'property' : 'name';
+    const cleanRegex = new RegExp(`<meta\\s+${regexAttr}="${name}"\\s+content="[^"]*"\\s*\/?>`, 'gi');
+    normalized = normalized.replace(cleanRegex, '');
+  });
+
+  return normalized.replace(/\s+/g, ' ').trim();
+}
+
+// Inyecta el SEO, título y bloque seguro de scripts de la instancia cliente en el index.html base del Core.
+function preserveClientSeoOnIndex(coreContent, clientContent, metadata = {}) {
+  let result = coreContent;
+
+  // 1. Extraer e inyectar <title> (con fallback a metadata)
+  const titleMatch = clientContent.match(/<title>([\s\S]*?)<\/title>/i);
+  const titleText = titleMatch ? titleMatch[1] : (metadata.projectName || 'Prototipe App');
+  if (result.match(/<title>[\s\S]*?<\/title>/i)) {
+    result = result.replace(/<title>[\s\S]*?<\/title>/i, `<title>${titleText}</title>`);
+  } else {
+    result = result.replace('</head>', `    <title>${titleText}</title>\n  </head>`);
+  }
+
+  // 2. Extraer apple-mobile-web-app-title
+  const appleTitleMatch = clientContent.match(/<meta\s+name="apple-mobile-web-app-title"\s+content="([^"]*)"\s*\/?>/i);
+  if (appleTitleMatch) {
+    if (result.match(/<meta\s+name="apple-mobile-web-app-title"\s+content="[^"]*"\s*\/?>/gi)) {
+      result = result.replace(/<meta\s+name="apple-mobile-web-app-title"\s+content="[^"]*"\s*\/?>/gi, 
+        `<meta name="apple-mobile-web-app-title" content="${appleTitleMatch[1]}" />`);
+    } else {
+      result = result.replace('</head>', `    <meta name="apple-mobile-web-app-title" content="${appleTitleMatch[1]}" />\n  </head>`);
+    }
+  }
+
+  // 3. Extraer y re-inyectar bloque seguro de scripts del cliente (Facebook Pixel, Analytics, etc.)
+  const clientScriptsMatch = clientContent.match(/<!--\s*CLIENT_SCRIPTS_START\s*-->([\s\S]*?)<!--\s*CLIENT_SCRIPTS_END\s*-->/i);
+  if (clientScriptsMatch && clientScriptsMatch[1].trim()) {
+    const scriptsBlock = clientScriptsMatch[0];
+    if (result.match(/<!--\s*CLIENT_SCRIPTS_START\s*-->([\s\S]*?)<!--\s*CLIENT_SCRIPTS_END\s*-->/i)) {
+      result = result.replace(/<!--\s*CLIENT_SCRIPTS_START\s*-->([\s\S]*?)<!--\s*CLIENT_SCRIPTS_END\s*-->/i, scriptsBlock);
+    } else {
+      result = result.replace('</head>', `    ${scriptsBlock}\n  </head>`);
+    }
+  }
+
+  // 4. Conservar metatags SEO comunes
+  const seoMetas = ['description', 'keywords', 'og:title', 'og:description', 'twitter:title', 'twitter:description'];
+  seoMetas.forEach(name => {
+    const isProp = name.startsWith('og:');
+    const regexAttr = isProp ? 'property' : 'name';
+    const regex = new RegExp(`<meta\\s+${regexAttr}="${name}"\\s+content="([^"]*)"\\s*\/?>`, 'i');
+    const match = clientContent.match(regex);
+    if (match) {
+      const cleanRegex = new RegExp(`<meta\\s+${regexAttr}="${name}"\\s+content="[^"]*"\\s*\/?>`, 'gi');
+      result = result.replace(cleanRegex, '');
+      result = result.replace('</head>', `    <meta ${regexAttr}="${name}" content="${match[1]}" />\n  </head>`);
+    }
+  });
+
+  return result;
+}
+
+// Fusiona lógicamente dependencias y scripts de npm del Core en el package.json de la instancia cliente.
+async function mergePackageJson(corePath, clientPath) {
+  const corePkg = await fs.readJson(corePath);
+  const clientPkg = await fs.readJson(clientPath);
+
+  const combinedDeps = { ...(clientPkg.dependencies || {}), ...(corePkg.dependencies || {}) };
+  const combinedDevDeps = { ...(clientPkg.devDependencies || {}), ...(corePkg.devDependencies || {}) };
+  const combinedScripts = { ...(clientPkg.scripts || {}), ...(corePkg.scripts || {}) };
+
+  const merged = {
+    ...clientPkg, // Preserva name, version, author, private, etc.
+    scripts: combinedScripts,
+    dependencies: combinedDeps,
+    devDependencies: combinedDevDeps
+  };
+
+  return merged;
+}
+
 // Helper para escanear directorios recursivamente para el Drift Detector
 async function getFilesRecursively(dir, ignorePaths = [], baseDir = dir) {
   let results = [];
@@ -2461,21 +2689,12 @@ async function getFilesRecursively(dir, ignorePaths = [], baseDir = dir) {
   const list = await fs.readdir(dir);
   for (const file of list) {
     const filePath = path.join(dir, file);
-    const stat = await fs.stat(filePath);
-    const relative = path.relative(baseDir, filePath);
+    const stat = await fs.stat(filePath).catch(() => null);
+    if (!stat) continue;
+    const relative = path.relative(baseDir, filePath).replace(/\\/g, '/');
     
-    // Omitir directorios y archivos excluidos
-    if (
-      file === 'node_modules' || 
-      file === '.git' || 
-      file === 'dist' || 
-      file === '.env.local' || 
-      file === '.vite' || 
-      file === '.firebase' || 
-      file === '.prototipe.json' ||
-      file === 'cli_bridge.log' ||
-      file.endsWith('.bak')
-    ) {
+    // Validar exclusiones con la función unificada
+    if (isPathExcludedFromSync(relative)) {
       continue;
     }
     
@@ -2484,7 +2703,7 @@ async function getFilesRecursively(dir, ignorePaths = [], baseDir = dir) {
     } else {
       results.push({
         absolutePath: filePath,
-        relativePath: relative.replace(/\\/g, '/'),
+        relativePath: relative,
         size: stat.size
       });
     }
@@ -2577,20 +2796,45 @@ app.get('/api/project/drift', async (req, res) => {
           const coreContent = await fs.readFile(coreFile.absolutePath, 'utf-8');
           const clientContent = await fs.readFile(clientFile.absolutePath, 'utf-8');
           
-          if (coreContent !== clientContent) {
-            const diffResult = Diff.diffLines(clientContent, coreContent);
-            differences.push({
-              file: coreFile.relativePath,
-              status: 'modified',
-              message: 'El archivo local difiere de la plantilla del Core.',
-              diff: diffResult.map(part => ({
-                value: part.value,
-                added: part.added,
-                removed: part.removed
-              }))
-            });
-          } else {
+          if (coreFile.relativePath === 'index.html') {
+            const normalizedCore = normalizeIndexHtmlForDiff(coreContent);
+            const normalizedClient = normalizeIndexHtmlForDiff(clientContent);
+            
+            if (normalizedCore !== normalizedClient) {
+              const diffResult = Diff.diffLines(clientContent, coreContent);
+              differences.push({
+                file: coreFile.relativePath,
+                status: 'modified',
+                message: 'El archivo HTML difiere estructuralmente de la plantilla del Core (excluyendo SEO/branding y scripts de cliente).',
+                diff: diffResult.map(part => ({
+                  value: part.value,
+                  added: part.added,
+                  removed: part.removed
+                }))
+              });
+            } else {
+              matchingCount++;
+            }
+          } else if (coreFile.relativePath === 'package.json') {
+            // Se ignora de la lista física de diferencias para evitar sobrescrituras de texto plano destructivas.
+            // Las discrepancias de dependencias se reportan lógicamente en dependencyDetails.
             matchingCount++;
+          } else {
+            if (coreContent !== clientContent) {
+              const diffResult = Diff.diffLines(clientContent, coreContent);
+              differences.push({
+                file: coreFile.relativePath,
+                status: 'modified',
+                message: 'El archivo local difiere de la plantilla del Core.',
+                diff: diffResult.map(part => ({
+                  value: part.value,
+                  added: part.added,
+                  removed: part.removed
+                }))
+              });
+            } else {
+              matchingCount++;
+            }
           }
         }
       }
@@ -2652,13 +2896,18 @@ app.post('/api/project/sync-file', async (req, res) => {
     return res.status(400).json({ error: 'Los parámetros "clientId" y "file" son obligatorios.' });
   }
 
+  // 1. Validar si el archivo es una ruta protegida e inmutable de la instancia
+  if (isPathExcludedFromSync(file)) {
+    return res.status(403).json({ error: `El archivo ${file} contiene configuraciones o credenciales específicas de la instancia del cliente y está protegido contra sobrescritura.` });
+  }
+
   const projectDir = await findProjectDir(clientId);
   if (!projectDir) return res.status(404).json({ error: `No se encontró el proyecto para: ${clientId}` });
 
   try {
     const metaPath = path.join(projectDir, '.prototipe.json');
     const meta = await fs.pathExists(metaPath) ? await fs.readJson(metaPath) : {};
-    let coreId = meta.templateId || meta.coreClave || meta.coreId;
+    let coreId = meta.templateId || meta.coreClave || meta.coreId || meta.template || meta.coreType;
 
     if (!coreId) {
       if (clientId.toLowerCase().includes('venta')) coreId = 'ventas';
@@ -2667,9 +2916,13 @@ app.post('/api/project/sync-file', async (req, res) => {
       else if (clientId.toLowerCase().includes('gastronomia') || clientId.toLowerCase().includes('restaurante')) coreId = 'gastronomia';
     }
 
+    if (!coreId) {
+      return res.status(400).json({ error: 'No se pudo determinar el Core de referencia para este cliente en su .prototipe.json.' });
+    }
+
     const coreDir = await findProjectDir(coreId);
     if (!coreDir) {
-      return res.status(404).json({ error: 'Core de referencia no encontrado.' });
+      return res.status(404).json({ error: `Core de referencia no encontrado: ${coreId}` });
     }
 
     const srcPath = path.join(coreDir, file);
@@ -2680,9 +2933,27 @@ app.post('/api/project/sync-file', async (req, res) => {
     }
 
     await fs.ensureDir(path.dirname(destPath));
-    await fs.copy(srcPath, destPath);
 
-    res.json({ success: true, message: `Archivo ${file} sincronizado exitosamente con el Core.` });
+    // 2. Procesar fusiones inteligentes según el archivo
+    if (file === 'index.html') {
+      const coreContent = await fs.readFile(srcPath, 'utf-8');
+      const clientContent = await fs.pathExists(destPath) ? await fs.readFile(destPath, 'utf-8') : '';
+      const mergedHTML = preserveClientSeoOnIndex(coreContent, clientContent, meta);
+      await fs.writeFile(destPath, mergedHTML, 'utf-8');
+      res.json({ success: true, message: `Archivo ${file} fusionado y sincronizado de forma inteligente, conservando branding y SEO.` });
+    } else if (file === 'package.json') {
+      if (await fs.pathExists(destPath)) {
+        const mergedPkg = await mergePackageJson(srcPath, destPath);
+        await fs.writeJson(destPath, mergedPkg, { spaces: 2 });
+        res.json({ success: true, message: `Dependencias y scripts de package.json fusionados de forma lógica sin alterar la identidad del cliente.` });
+      } else {
+        await fs.copy(srcPath, destPath);
+        res.json({ success: true, message: `Archivo package.json copiado de forma limpia.` });
+      }
+    } else {
+      await fs.copy(srcPath, destPath);
+      res.json({ success: true, message: `Archivo ${file} sincronizado exitosamente con el Core.` });
+    }
   } catch (err) {
     res.status(500).json({ error: `Error al sincronizar archivo: ${err.message}` });
   }
@@ -2701,7 +2972,7 @@ app.post('/api/project/sync-files', async (req, res) => {
   try {
     const metaPath = path.join(projectDir, '.prototipe.json');
     const meta = await fs.pathExists(metaPath) ? await fs.readJson(metaPath) : {};
-    let coreId = meta.templateId || meta.coreClave || meta.coreId;
+    let coreId = meta.templateId || meta.coreClave || meta.coreId || meta.template || meta.coreType;
 
     if (!coreId) {
       if (clientId.toLowerCase().includes('venta')) coreId = 'ventas';
@@ -2710,20 +2981,53 @@ app.post('/api/project/sync-files', async (req, res) => {
       else if (clientId.toLowerCase().includes('gastronomia') || clientId.toLowerCase().includes('restaurante')) coreId = 'gastronomia';
     }
 
+    if (!coreId) {
+      return res.status(400).json({ error: 'No se pudo determinar el Core de referencia para este cliente en su .prototipe.json.' });
+    }
+
     const coreDir = await findProjectDir(coreId);
     if (!coreDir) {
-      return res.status(404).json({ error: 'Core de referencia no encontrado.' });
+      return res.status(404).json({ error: `Core de referencia no encontrado: ${coreId}` });
     }
 
     const results = [];
     for (const file of files) {
+      // 1. Validar exclusiones
+      if (isPathExcludedFromSync(file)) {
+        results.push({ file, success: false, error: 'Protegido de sincronización (Contiene credenciales/branding de instancia)' });
+        continue;
+      }
+
       const srcPath = path.join(coreDir, file);
       const destPath = path.join(projectDir, file);
 
       if (await fs.pathExists(srcPath)) {
         await fs.ensureDir(path.dirname(destPath));
-        await fs.copy(srcPath, destPath);
-        results.push({ file, success: true });
+        
+        try {
+          // 2. Procesar fusiones inteligentes
+          if (file === 'index.html') {
+            const coreContent = await fs.readFile(srcPath, 'utf-8');
+            const clientContent = await fs.pathExists(destPath) ? await fs.readFile(destPath, 'utf-8') : '';
+            const mergedHTML = preserveClientSeoOnIndex(coreContent, clientContent, meta);
+            await fs.writeFile(destPath, mergedHTML, 'utf-8');
+            results.push({ file, success: true, note: 'Fusionado con SEO de cliente' });
+          } else if (file === 'package.json') {
+            if (await fs.pathExists(destPath)) {
+              const mergedPkg = await mergePackageJson(srcPath, destPath);
+              await fs.writeJson(destPath, mergedPkg, { spaces: 2 });
+              results.push({ file, success: true, note: 'Fusionado lógicamente con package de cliente' });
+            } else {
+              await fs.copy(srcPath, destPath);
+              results.push({ file, success: true });
+            }
+          } else {
+            await fs.copy(srcPath, destPath);
+            results.push({ file, success: true });
+          }
+        } catch (copyErr) {
+          results.push({ file, success: false, error: `Error al copiar/fusionar: ${copyErr.message}` });
+        }
       } else {
         results.push({ file, success: false, error: 'No existe en Core' });
       }
@@ -3802,16 +4106,7 @@ app.get('/api/git/sync-core-to-clients-stream', async (req, res) => {
 // Archivos/carpetas excluidos de la sincronización física Core → Cliente.
 // Preserva la identidad del cliente (Firebase, marca, configuración).
 // ─────────────────────────────────────────────────────────────────────────────
-const SYNC_EXCLUDED_PATHS = [
-  '.env.local', '.firebaserc',
-  'src/config/firebaseConfig.js', 'src/config/niche.json',
-  'index.html', 'public', 'package-lock.json',
-  'node_modules', '.git', '.git-backup-temp', '.vite', 'dist',
-  'playwright-report', 'test-results', '.prototipe.json', 'scratch',
-  'mapa_arquitectura_ia.md', 'mapa_arquitectura.md'
-];
-
-// Helper: escanea recursivamente un directorio respetando SYNC_EXCLUDED_PATHS de forma asíncrona no bloqueante
+// Helper: escanea recursivamente un directorio respetando isPathExcludedFromSync de forma asíncrona no bloqueante
 async function getSyncFilesRecursiveAsync(dir, baseDir = dir) {
   let results = [];
   let list;
@@ -3824,9 +4119,9 @@ async function getSyncFilesRecursiveAsync(dir, baseDir = dir) {
     list.map(async (file) => {
       const fullPath = path.join(dir, file);
       const rel = path.relative(baseDir, fullPath).replace(/\\/g, '/');
-      const isExcluded = SYNC_EXCLUDED_PATHS.some(ex => rel === ex || rel.startsWith(ex + '/'))
-        || rel.startsWith('Documentacion ') || rel.split('/').some(p => p.startsWith('Documentacion '));
-      if (isExcluded) return;
+      
+      // Delegar la validación al helper centralizado
+      if (isPathExcludedFromSync(rel)) return;
       
       let stat;
       try {
@@ -3985,6 +4280,328 @@ app.get('/api/instancias/list', async (req, res) => {
   }
 });
 
+// =============================================================================
+// PRE-FLIGHT VALIDATION AND AUTO-HEALING PIPELINE (CORE-089)
+// =============================================================================
+
+async function fetchCentralClientConfig(clientId) {
+  try {
+    const accessToken = await getFirebaseAccessToken();
+    const url = `https://firestore.googleapis.com/v1/projects/prototipe-ecosistema-control/databases/(default)/documents/clientes_control/${clientId}`;
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    if (!res.ok) {
+      if (res.status === 404) return null;
+      throw new Error(`Error HTTP ${res.status} al consultar clientes_control`);
+    }
+    const doc = await res.json();
+    const fields = doc.fields || {};
+    return {
+      billingMode: fields.billingMode?.stringValue || 'percentage',
+      comisionPorcentaje: fields.comisionPorcentaje?.doubleValue ?? fields.comisionPorcentaje?.integerValue ?? 1.5,
+      montoFijoServicio: fields.montoFijoServicio?.integerValue ?? fields.montoFijoServicio?.doubleValue ?? 500,
+      pagoMensualFijo: fields.pagoMensualFijo?.integerValue ?? fields.pagoMensualFijo?.doubleValue ?? 0,
+      enableDianBilling: fields.enableDianBilling?.booleanValue ?? false,
+      costoPorFacturaDian: fields.costoPorFacturaDian?.integerValue ?? fields.costoPorFacturaDian?.doubleValue ?? 150,
+      nombre: fields.nombre?.stringValue || clientId,
+      projectId: fields.projectId?.stringValue || doc.name.split('/').pop()
+    };
+  } catch (err) {
+    console.error(`[Preflight Central Config] Fallo al consultar Firestore central:`, err.message);
+    return null;
+  }
+}
+
+async function fetchCentralClientToken(clientId) {
+  try {
+    const accessToken = await getFirebaseAccessToken();
+    const url = `https://firestore.googleapis.com/v1/projects/prototipe-ecosistema-control/databases/(default)/documents:runQuery`;
+    const body = {
+      structuredQuery: {
+        from: [{ collectionId: 'tokens' }],
+        where: {
+          compositeFilter: {
+            op: 'AND',
+            filters: [
+              {
+                fieldFilter: {
+                  field: { fieldPath: 'clientId' },
+                  op: 'EQUAL',
+                  value: { stringValue: clientId }
+                }
+              },
+              {
+                fieldFilter: {
+                  field: { fieldPath: 'active' },
+                  op: 'EQUAL',
+                  value: { booleanValue: true }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(`Query failed: ${res.status}`);
+    const results = await res.json();
+    if (Array.isArray(results) && results.length > 0 && results[0].document) {
+      const doc = results[0].document;
+      return doc.name.split('/').pop();
+    }
+    return null;
+  } catch (err) {
+    console.error(`[Preflight Token Check] Fallo al buscar token central:`, err.message);
+    return null;
+  }
+}
+
+async function fetchFirebaseSDKConfig(projectId) {
+  try {
+    const { stdout } = await execAsync(`firebase apps:sdkconfig web --project ${projectId} --json`, { timeout: 30000 });
+    const parsed = JSON.parse(stdout);
+    if (parsed && parsed.result) {
+      return parsed.result.sdkConfig || parsed.result;
+    }
+    return parsed;
+  } catch (err) {
+    console.error(`[Preflight Firebase SDK] Error al obtener sdkconfig para ${projectId}:`, err.message);
+    return null;
+  }
+}
+
+async function auditAndPatchFirebaseConfig(filePath, log) {
+  if (!await fs.pathExists(filePath)) {
+    log(`   ⚠ No se encontró firebaseConfig.js en ${filePath}. Omitiendo patch.`, 'warn');
+    return;
+  }
+  let content = await fs.readFile(filePath, 'utf8');
+  if (content.includes('export { messaging }') || content.includes('export const messaging')) {
+    return;
+  }
+  log(`   🔧 firebaseConfig.js no exporta 'messaging'. Aplicando auto-curación de interfaz...`, 'warn');
+  if (!content.includes('firebase/messaging')) {
+    content = `import { getMessaging, isSupported } from 'firebase/messaging'\n` + content;
+  }
+  const patchCode = `
+// =============================================================================
+// AUTO-INYECCIÓN PARA COMPATIBILIDAD CON CORE MESSAGING (CORE-089)
+// =============================================================================
+let messaging = null;
+isSupported().then((supported) => {
+  if (supported) {
+    messaging = getMessaging(app);
+  }
+}).catch((err) => {
+  console.warn('[FCM Config] Messaging no soportado:', err);
+});
+export { messaging };
+`;
+  content = content.trim() + '\n' + patchCode;
+  await fs.writeFile(filePath, content, 'utf8');
+  log(`   ✅ firebaseConfig.js parcheado con éxito.`, 'success');
+}
+
+async function auditAndPatchServiceWorker(clientPath, corePath, firebaseConfig, log) {
+  const swDestPath = path.join(clientPath, 'public', 'firebase-messaging-sw.js');
+  const swSrcPath = path.join(corePath, 'public', 'firebase-messaging-sw.js');
+  if (!await fs.pathExists(swDestPath)) {
+    if (await fs.pathExists(swSrcPath)) {
+      log(`   🔧 Service Worker FCM faltante. Copiando desde el Core...`, 'warn');
+      await fs.ensureDir(path.dirname(swDestPath));
+      await fs.copy(swSrcPath, swDestPath);
+    } else {
+      log(`   ⚠ No se encontró public/firebase-messaging-sw.js en el Core. Omitiendo.`, 'warn');
+      return;
+    }
+  }
+  let swContent = await fs.readFile(swDestPath, 'utf8');
+  const initRegex = /firebase\.initializeApp\(\{[\s\S]*?\}\)/;
+  const clientInitBlock = `firebase.initializeApp({
+  apiKey: "${firebaseConfig.apiKey}",
+  authDomain: "${firebaseConfig.authDomain}",
+  projectId: "${firebaseConfig.projectId}",
+  storageBucket: "${firebaseConfig.storageBucket}",
+  messagingSenderId: "${firebaseConfig.messagingSenderId}",
+  appId: "${firebaseConfig.appId}"
+})`;
+  if (initRegex.test(swContent)) {
+    swContent = swContent.replace(initRegex, clientInitBlock);
+  } else {
+    swContent = swContent + '\n\n' + clientInitBlock + '\nconst messaging = firebase.messaging();\n';
+  }
+  await fs.writeFile(swDestPath, swContent, 'utf8');
+  log(`   ✅ public/firebase-messaging-sw.js actualizado con credenciales del cliente.`, 'success');
+}
+
+async function auditAndPatchScripts(clientPath, corePath, log) {
+  const pkgPath = path.join(clientPath, 'package.json');
+  if (!await fs.pathExists(pkgPath)) return;
+  const pkg = await fs.readJson(pkgPath);
+  const scripts = pkg.scripts || {};
+  for (const [key, cmd] of Object.entries(scripts)) {
+    const match = cmd.match(/node\s+scripts\/([a-zA-Z0-9_\-\.]+)/);
+    if (match && match[1]) {
+      const scriptFile = match[1];
+      const clientScriptPath = path.join(clientPath, 'scripts', scriptFile);
+      const coreScriptPath = path.join(corePath, 'scripts', scriptFile);
+      if (!await fs.pathExists(clientScriptPath)) {
+        if (await fs.pathExists(coreScriptPath)) {
+          log(`   🔧 Utilidad de compilación faltante detectada: scripts/${scriptFile}. Copiando...`, 'warn');
+          await fs.ensureDir(path.dirname(clientScriptPath));
+          await fs.copy(coreScriptPath, clientScriptPath);
+          log(`      + Copiado: scripts/${scriptFile}`, 'stdout');
+        } else {
+          log(`   ⚠ El script ${key} requiere scripts/${scriptFile} pero no existe en el Core.`, 'warn');
+        }
+      }
+    }
+  }
+}
+
+async function validateClientIntegrityBeforeSync(corePath, clientPath, folderName, log) {
+  log(`🔍 Iniciando Pre-flight Validation Pipeline (CORE-089)...`, 'info');
+  const metaPath = path.join(clientPath, '.prototipe.json');
+  if (!await fs.pathExists(metaPath)) {
+    throw new Error(`Falta el archivo de metadatos obligatorio .prototipe.json en ${clientPath}`);
+  }
+  const meta = await fs.readJson(metaPath);
+  const clientId = meta.clientId;
+  if (!clientId) {
+    throw new Error(`.prototipe.json no contiene un clientId válido.`);
+  }
+  log(`   ID de Cliente identificado: "${clientId}"`, 'info');
+
+  const firebaseProjectId = await resolveFirebaseProjectId(clientPath, clientId);
+  log(`   Proyecto Firebase asociado: "${firebaseProjectId}"`, 'info');
+
+  log(`   Firestore central: Consultando configuración y comisiones...`, 'info');
+  const centralConfig = await fetchCentralClientConfig(clientId);
+  const telemetryToken = await fetchCentralClientToken(clientId);
+
+  if (centralConfig) {
+    log(`      Facturación central: Modo ${centralConfig.billingMode}, Comisión: ${centralConfig.comisionPorcentaje}%`, 'info');
+  } else {
+    log(`   ⚠ No se encontró configuración central en clientes_control/${clientId}. Usando valores locales existentes.`, 'warn');
+  }
+
+  if (telemetryToken) {
+    log(`      Token de Telemetría central recuperado: ${telemetryToken}`, 'info');
+  } else {
+    log(`   ⚠ No se encontró token activo en la colección tokens para clientId ${clientId}.`, 'warn');
+  }
+
+  log(`   Firebase CLI: Consultando SDK config de ${firebaseProjectId}...`, 'info');
+  const sdkConfig = await fetchFirebaseSDKConfig(firebaseProjectId);
+  if (!sdkConfig) {
+    throw new Error(`No se pudo obtener la configuración del proyecto Firebase "${firebaseProjectId}". Verifica permisos.`);
+  }
+
+  const envPath = path.join(clientPath, '.env.local');
+  let currentEnv = {};
+  if (await fs.pathExists(envPath)) {
+    const content = await fs.readFile(envPath, 'utf8');
+    content.split(/\r?\n/).forEach(line => {
+      const parts = line.split('=');
+      if (parts.length >= 2 && !line.trim().startsWith('#')) {
+        currentEnv[parts[0].trim()] = parts.slice(1).join('=').trim();
+      }
+    });
+  }
+
+  const finalEnv = {
+    ...currentEnv,
+    VITE_FIREBASE_API_KEY: sdkConfig.apiKey || currentEnv.VITE_FIREBASE_API_KEY || '',
+    VITE_FIREBASE_AUTH_DOMAIN: sdkConfig.authDomain || currentEnv.VITE_FIREBASE_AUTH_DOMAIN || '',
+    VITE_FIREBASE_PROJECT_ID: firebaseProjectId,
+    VITE_FIREBASE_STORAGE_BUCKET: sdkConfig.storageBucket || currentEnv.VITE_FIREBASE_STORAGE_BUCKET || '',
+    VITE_FIREBASE_MESSAGING_SENDER_ID: sdkConfig.messagingSenderId || currentEnv.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+    VITE_FIREBASE_APP_ID: sdkConfig.appId || currentEnv.VITE_FIREBASE_APP_ID || '',
+
+    VITE_DEVELOPER_TELEMETRY_ENDPOINT: 'https://reporttelemetry-bkwhzlbhlq-uc.a.run.app',
+    VITE_DEVELOPER_TELEMETRY_TOKEN: telemetryToken || currentEnv.VITE_DEVELOPER_TELEMETRY_TOKEN || '',
+    VITE_DEVELOPER_CLIENT_ID: clientId,
+
+    VITE_DEVELOPER_CENTRAL_API_KEY: 'AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE',
+    VITE_DEVELOPER_CENTRAL_AUTH_DOMAIN: 'prototipe-ecosistema-control.firebaseapp.com',
+    VITE_DEVELOPER_CENTRAL_PROJECT_ID: 'prototipe-ecosistema-control',
+    VITE_DEVELOPER_CENTRAL_STORAGE_BUCKET: 'prototipe-ecosistema-control.firebasestorage.app',
+    VITE_DEVELOPER_CENTRAL_MESSAGING_SENDER_ID: '703542009613',
+    VITE_DEVELOPER_CENTRAL_APP_ID: '1:703542009613:web:00f9363de11a908c991a44',
+
+    VITE_FIREBASE_VAPID_KEY: 'BBDourdsNRV6kqRLm52FcPagPlDo99IJ3VdUP8NTERFXwXdJ8Pt7e7zbw82xE4O3f5ImVvebprW9_lVZ--fmnac',
+
+    VITE_DEVELOPER_BILLING_MODE: centralConfig?.billingMode || currentEnv.VITE_DEVELOPER_BILLING_MODE || 'percentage',
+    VITE_DEVELOPER_COMMISSION_PERCENT: centralConfig?.comisionPorcentaje || currentEnv.VITE_DEVELOPER_COMMISSION_PERCENT || '1.5',
+    VITE_DEVELOPER_FIXED_SERVICE_FEE: centralConfig?.montoFijoServicio || currentEnv.VITE_DEVELOPER_FIXED_SERVICE_FEE || '500',
+    VITE_DEVELOPER_FLAT_MONTHLY_FEE: centralConfig?.pagoMensualFijo || currentEnv.VITE_DEVELOPER_FLAT_MONTHLY_FEE || '0',
+    VITE_DEVELOPER_ENABLE_DIAN_BILLING: centralConfig?.enableDianBilling !== undefined ? String(centralConfig.enableDianBilling) : (currentEnv.VITE_DEVELOPER_ENABLE_DIAN_BILLING || 'false'),
+    VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN: centralConfig?.costoPorFacturaDian || currentEnv.VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN || '150'
+  };
+
+  let envContent = `# Variables de entorno Firebase — Proyecto: ${firebaseProjectId}\n`;
+  envContent += `# Generado automáticamente por el pre-flight validation pipeline (CORE-089)\n\n`;
+  
+  envContent += `# Firebase Config\n`;
+  envContent += `VITE_FIREBASE_API_KEY=${finalEnv.VITE_FIREBASE_API_KEY}\n`;
+  envContent += `VITE_FIREBASE_AUTH_DOMAIN=${finalEnv.VITE_FIREBASE_AUTH_DOMAIN}\n`;
+  envContent += `VITE_FIREBASE_PROJECT_ID=${finalEnv.VITE_FIREBASE_PROJECT_ID}\n`;
+  envContent += `VITE_FIREBASE_STORAGE_BUCKET=${finalEnv.VITE_FIREBASE_STORAGE_BUCKET}\n`;
+  envContent += `VITE_FIREBASE_MESSAGING_SENDER_ID=${finalEnv.VITE_FIREBASE_MESSAGING_SENDER_ID}\n`;
+  envContent += `VITE_FIREBASE_APP_ID=${finalEnv.VITE_FIREBASE_APP_ID}\n\n`;
+
+  envContent += `# Telemetría de Comisiones\n`;
+  envContent += `VITE_DEVELOPER_TELEMETRY_ENDPOINT=${finalEnv.VITE_DEVELOPER_TELEMETRY_ENDPOINT}\n`;
+  envContent += `VITE_DEVELOPER_TELEMETRY_TOKEN=${finalEnv.VITE_DEVELOPER_TELEMETRY_TOKEN}\n`;
+  envContent += `VITE_DEVELOPER_CLIENT_ID=${finalEnv.VITE_DEVELOPER_CLIENT_ID}\n\n`;
+
+  envContent += `# Conexión Central de Control\n`;
+  envContent += `VITE_DEVELOPER_CENTRAL_API_KEY=${finalEnv.VITE_DEVELOPER_CENTRAL_API_KEY}\n`;
+  envContent += `VITE_DEVELOPER_CENTRAL_AUTH_DOMAIN=${finalEnv.VITE_DEVELOPER_CENTRAL_AUTH_DOMAIN}\n`;
+  envContent += `VITE_DEVELOPER_CENTRAL_PROJECT_ID=${finalEnv.VITE_DEVELOPER_CENTRAL_PROJECT_ID}\n`;
+  envContent += `VITE_DEVELOPER_CENTRAL_STORAGE_BUCKET=${finalEnv.VITE_DEVELOPER_CENTRAL_STORAGE_BUCKET}\n`;
+  envContent += `VITE_DEVELOPER_CENTRAL_MESSAGING_SENDER_ID=${finalEnv.VITE_DEVELOPER_CENTRAL_MESSAGING_SENDER_ID}\n`;
+  envContent += `VITE_DEVELOPER_CENTRAL_APP_ID=${finalEnv.VITE_DEVELOPER_CENTRAL_APP_ID}\n\n`;
+
+  envContent += `# VAPID Key para Push Notifications\n`;
+  envContent += `VITE_FIREBASE_VAPID_KEY=${finalEnv.VITE_FIREBASE_VAPID_KEY}\n\n`;
+
+  envContent += `# Parámetros de Facturación Local\n`;
+  envContent += `VITE_DEVELOPER_BILLING_MODE=${finalEnv.VITE_DEVELOPER_BILLING_MODE}\n`;
+  envContent += `VITE_DEVELOPER_COMMISSION_PERCENT=${finalEnv.VITE_DEVELOPER_COMMISSION_PERCENT}\n`;
+  envContent += `VITE_DEVELOPER_FIXED_SERVICE_FEE=${finalEnv.VITE_DEVELOPER_FIXED_SERVICE_FEE}\n`;
+  envContent += `VITE_DEVELOPER_FLAT_MONTHLY_FEE=${finalEnv.VITE_DEVELOPER_FLAT_MONTHLY_FEE}\n`;
+  envContent += `VITE_DEVELOPER_ENABLE_DIAN_BILLING=${finalEnv.VITE_DEVELOPER_ENABLE_DIAN_BILLING}\n`;
+  envContent += `VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN=${finalEnv.VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN}\n`;
+
+  await fs.writeFile(envPath, envContent, 'utf8');
+  log(`   ✅ Archivo .env.local sincronizado y auto-curado.`, 'success');
+
+  const configPath = path.join(clientPath, 'src', 'config', 'firebaseConfig.js');
+  await auditAndPatchFirebaseConfig(configPath, log);
+
+  await auditAndPatchServiceWorker(clientPath, corePath, {
+    apiKey: finalEnv.VITE_FIREBASE_API_KEY,
+    authDomain: finalEnv.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: finalEnv.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: finalEnv.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: finalEnv.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: finalEnv.VITE_FIREBASE_APP_ID
+  }, log);
+
+  await auditAndPatchScripts(clientPath, corePath, log);
+  log(`✅ PRE-FLIGHT VALIDATION COMPLETADA SIN ERRORES CRÍTICOS.`, 'success');
+}
+
+
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/instancias/sync-and-deploy-stream (SSE)
 // Sincroniza físicamente archivos Core → Instancias Cliente + build + deploy.
@@ -4072,6 +4689,16 @@ app.get('/api/instancias/sync-and-deploy-stream', async (req, res) => {
       if (!clientPath || !await fs.pathExists(clientPath)) {
         log(`❌ Directorio de cliente no encontrado para: ${folderName}`, 'error');
         clientStatus(folderName, 'error', 'Directorio no encontrado');
+        allSuccess = false;
+        continue;
+      }
+
+      // Pre-flight Validation & Auto-Healing Pipeline (CORE-089)
+      try {
+        await validateClientIntegrityBeforeSync(corePath, clientPath, folderName, log);
+      } catch (validationErr) {
+        log(`❌ Fallo crítico en validación pre-flight: ${validationErr.message}`, 'error');
+        clientStatus(folderName, 'error', validationErr.message);
         allSuccess = false;
         continue;
       }

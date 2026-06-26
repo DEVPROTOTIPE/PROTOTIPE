@@ -153,7 +153,6 @@ const useAppConfigStore = create(
           }
         }
       },
-      sistemaAlerta: null,
       isLoaded: false,
 
       // ─── Acciones ─────────────────────────────────────────────────────────

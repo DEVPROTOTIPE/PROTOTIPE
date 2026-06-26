@@ -4,6 +4,56 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-089: Pre-flight Validation Pipeline y Blindaje de Integridad de Sincronización en CLI Server (CORE-089)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se implementó un robusto pipeline de validación e integridad pre-flight (`validateClientIntegrityBeforeSync`) en el motor de sincronización física del Bridge CLI. El sistema extrae el `clientId` de `.prototipe.json` y resuelve el `projectId` de Firebase; consulta en Firestore central la facturación y el token de telemetría; lee y auto-cura `.env.local` agregando credenciales reales vía Firebase CLI `apps:sdkconfig`; inyecta el service worker FCM (`firebase-messaging-sw.js`) ausente parcheándolo con credenciales estáticas de la marca al vuelo; audita la interfaz de `firebaseConfig.js` inyectando exports ausentes (`messaging`); y copia scripts NPM requeridos. Validado localmente con compilación completa y exitosa de Vite.
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-088: Corrección de Prioridad de Detección de Firebase Project ID en CLI Server (CORE-088)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se corrigió un error en el helper `resolveFirebaseProjectId` del servidor CLI en el que la variable `meta.clientId` (ej. `moni-app`) enmascaraba el project ID correcto de Firebase al leer `.prototipe.json`, saltándose la consulta a `.firebaserc` y `.env.local` e intentando desplegar en un proyecto inexistente. Ahora se consulta primero `.firebaserc` y `.env.local` (el ID real `ventas-moni-app`) antes de recurrir a metadatos.
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+
+* **[x] ~~Tarea CORE-087: Inicialización de Firebase, Exportación de Messaging y Saneamiento de Compilación en ventas-moni-app (CORE-087)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se solucionó el error fatal de pantalla en blanco provocado por credenciales vacías (`auth/invalid-api-key`) inyectando las claves de Firebase y de telemetría correctas de la marca en `.env.local`. Asimismo, se actualizó `firebaseConfig.js` del cliente para exportar la mensajería asíncrona (`messaging`) requerida por los hooks del core y se creó la carpeta `/scripts` con el generador de mapa semántico `generate_ia_map.js` para corregir y habilitar el proceso de compilación local (`npm run build`).
+  - Archivos: [Instancias Clientes/ventas/ventas-moni-app/.env.local](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/.env.local) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/src/config/firebaseConfig.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/config/firebaseConfig.js) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/scripts/generate_ia_map.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/scripts/generate_ia_map.js) [NEW]
+
+* **[x] ~~Tarea CORE-086: Propuesta Técnica y Visual para Mini-Dashboard Interactivo Inline en Hero (CORE-086)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se redactó y estructuró la propuesta de diseño UX y desarrollo técnico para dotar de interactividad directa a las tres sub-tarjetas (Ventas del Mes, Lista de Control, Últimos Pedidos) de la ilustración del Hero SVG. La propuesta define visual cues de descubrimiento (Floating badge "Pruébame 👆", micro-animación onboarding de atracción, cursores e iluminaciones selectivas) y mecánicas de interacción en el DOM del SVG (tooltips dinámicos con hover de puntos en el gráfico, toggle interactivo de checkboxes con tachado de texto en vivo y ciclos de estado con explosión de confeti en el badge de pedidos).
+  - Archivos: [Documentacion PROTOTIPE/09_Modulos_Completos/propuesta_dashboard_interactivo.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/propuesta_dashboard_interactivo.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-085: Expansión de Nichos Comerciales y Consistencia de Configuración Operativa (CORE-085) [Revisión y Refinamiento]~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se expandieron las verticales comerciales a 13 nuevos nichos específicos con 10 paletas HSL de contraste verificado (130 combinaciones completas light/dark en total) adaptadas estratégicamente a la identidad visual de cada vertical. Se inyectaron de forma consistente en `dev-dashboard` y en los archivos `palettes.js` de las plantillas (`template-ventas`, `template-core-seed`, `App Ventas`) y en la instancia del cliente activo (`ventas-moni-app`). Se incluyeron catálogos de prueba y la inyección de atributos dinámicos en `niche.json` desde la CLI. Adicionalmente, se implementó el endpoint de fusión en la CLI y el fallback en `billingService.js`. Finalmente, se resolvió la integridad del prebuild registrando e indexando la propuesta técnica `propuesta_dashboard_interactivo.md` del Hero en el `README.md` de la biblioteca y en `ComponentSandbox.jsx` (`COMPONENT_META`).
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Prototipe-CLI/generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY], [dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [App Ventas/src/services/billingService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/billingService.js) [MODIFY], [dev-dashboard/src/components/admin/ComponentSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY], [Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY], [Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/analisis_nichos_mercado_saas.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/analisis_nichos_mercado_saas.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY], [Prototipe-CLI/templates/template-ventas/src/constants/palettes.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/constants/palettes.js) [MODIFY], [Prototipe-CLI/templates/template-core-seed/src/constants/palettes.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/constants/palettes.js) [MODIFY], [Plantillas Core/App Ventas/src/constants/palettes.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/constants/palettes.js) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/src/constants/palettes.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/constants/palettes.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-084: Matriz de Paridad Inteligente, Blindaje de Sincronización y Fusión de index/package en CLI Server~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se unificó y blindó el motor de paridad y sincronización física del CLI. Se inyectó el helper unificado `isPathExcludedFromSync()` con soporte de expresiones regex para excluir archivos críticos de base de datos (`.firebaserc`, `firebase.json`), variables de entorno (`.env.*`), logotipos (`logo.*`), favicons, y carpetas temporales (`scratch/`, `scripts/`, `playwright-report/`, `test-results/`) en cualquier Core o cliente. Se implementó fusión inteligente de `index.html` (preservando el título, metatags SEO y scripts de analíticas de terceros del cliente en la zona segura de marcado) y mezcla lógica de dependencias y scripts en `package.json` sin alterar la identidad de la marca. Finalmente, se auditó exhaustivamente el listado de 17 archivos del directorio `src/` marcados por el Drift Detector, validando que corresponden a lógica pura de software sin parámetros fijos ni credenciales de marca.
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_paridad_y_exclusiones_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_paridad_y_exclusiones_2026.md) [NEW], [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_archivos_sincronizables_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_archivos_sincronizables_2026.md) [NEW], [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY], [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-083: Validación de package.json en Resolución de Proyectos de Clientes en CLI Server~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Se soluciona el error ENOENT al intentar compilar y desplegar cores (como 'ventas') desde el Dashboard. La función `findProjectDir` en `server.js` coincidía de forma codiciosa con carpetas vacías de nicho (ej. `Instancias Clientes\ventas`) basándose únicamente en el nombre de la carpeta, omitiendo el fallback a cores conocidos. Se inyectó una validación para exigir que la carpeta contenga obligatoriamente un archivo `package.json` antes de validar el nombre de la carpeta, garantizando que solo se resuelvan proyectos Node estructurados válidos.
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY], [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-082: Alineación, Icono de WhatsApp, Ajuste de Desbordamiento y Corrección de Vibración de Botones Magnéticos en Calculadora CRO~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-26

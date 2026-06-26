@@ -185,12 +185,12 @@ function calcMetrics(orders, billingConfig) {
 export function subscribeToBillingData(onUpdate) {
   let latestOrders = []
   let latestConfig = {
-    billingMode: 'percentage',
-    comisionPorcentaje: 1,
-    montoFijoServicio: 0,
-    pagoMensualFijo: 0,
-    enableDianBilling: false,
-    costoPorFacturaDian: 0,
+    billingMode: import.meta.env.VITE_DEVELOPER_BILLING_MODE || 'percentage',
+    comisionPorcentaje: import.meta.env.VITE_DEVELOPER_COMMISSION_PERCENT ? Number(import.meta.env.VITE_DEVELOPER_COMMISSION_PERCENT) : 1,
+    montoFijoServicio: import.meta.env.VITE_DEVELOPER_FIXED_SERVICE_FEE ? Number(import.meta.env.VITE_DEVELOPER_FIXED_SERVICE_FEE) : 0,
+    pagoMensualFijo: import.meta.env.VITE_DEVELOPER_FLAT_MONTHLY_FEE ? Number(import.meta.env.VITE_DEVELOPER_FLAT_MONTHLY_FEE) : 0,
+    enableDianBilling: import.meta.env.VITE_DEVELOPER_ENABLE_DIAN_BILLING === 'true' || import.meta.env.VITE_DEVELOPER_ENABLE_DIAN_BILLING === true,
+    costoPorFacturaDian: import.meta.env.VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN ? Number(import.meta.env.VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN) : 0,
     triggerTelemetryReport: null
   }
 
@@ -220,12 +220,12 @@ export function subscribeToBillingData(onUpdate) {
     if (snap.exists()) {
       const data = snap.data()
       latestConfig = {
-        billingMode: data.developerBillingMode || 'percentage',
-        comisionPorcentaje: data.developerCommissionPercent ?? 1,
-        montoFijoServicio: data.developerFixedServiceFee ?? 0,
-        pagoMensualFijo: data.developerFlatMonthlyFee ?? 0,
-        enableDianBilling: data.enableDianBilling === true,
-        costoPorFacturaDian: data.costoPorFacturaDian ?? 0,
+        billingMode: data.developerBillingMode || import.meta.env.VITE_DEVELOPER_BILLING_MODE || 'percentage',
+        comisionPorcentaje: data.developerCommissionPercent ?? (import.meta.env.VITE_DEVELOPER_COMMISSION_PERCENT ? Number(import.meta.env.VITE_DEVELOPER_COMMISSION_PERCENT) : 1),
+        montoFijoServicio: data.developerFixedServiceFee ?? (import.meta.env.VITE_DEVELOPER_FIXED_SERVICE_FEE ? Number(import.meta.env.VITE_DEVELOPER_FIXED_SERVICE_FEE) : 0),
+        pagoMensualFijo: data.developerFlatMonthlyFee ?? (import.meta.env.VITE_DEVELOPER_FLAT_MONTHLY_FEE ? Number(import.meta.env.VITE_DEVELOPER_FLAT_MONTHLY_FEE) : 0),
+        enableDianBilling: data.enableDianBilling === true || import.meta.env.VITE_DEVELOPER_ENABLE_DIAN_BILLING === 'true' || import.meta.env.VITE_DEVELOPER_ENABLE_DIAN_BILLING === true,
+        costoPorFacturaDian: data.costoPorFacturaDian ?? (import.meta.env.VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN ? Number(import.meta.env.VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN) : 0),
         triggerTelemetryReport: data.triggerTelemetryReport ?? null
       }
       onUpdate(calcMetrics(latestOrders, latestConfig))

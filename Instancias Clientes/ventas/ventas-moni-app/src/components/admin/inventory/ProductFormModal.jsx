@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import NumberInput from '../../ui/NumberInput'
 import CurrencyInput from '../../ui/CurrencyInput'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Plus, Trash2, Image as ImageIcon, ChevronDown, Check, Sparkles, Camera, UploadCloud, AlertCircle } from 'lucide-react'
+import { X, Plus, Trash2, Image as ImageIcon, ChevronDown, Check, Sparkles, Camera, UploadCloud } from 'lucide-react'
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage'
 import { doc, onSnapshot, deleteDoc, setDoc } from 'firebase/firestore'
 import { storage, db } from '../../../config/firebaseConfig'
@@ -196,25 +196,8 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
   const [loadingGalleryIndex, setLoadingGalleryIndex] = useState(null)
   const [galleryProgress, setGalleryProgress] = useState(0)
   const [tempGalleryUrl, setTempGalleryUrl] = useState('')
-  const [uploadError, setUploadError] = useState(null)
   const sessionUploadedImages = useRef([])
   const sessionDeletedImages = useRef([])
-  const isUploadingMain = useRef(false) // Fix 4: guard anti doble-clic imagen principal
-
-  // Fix 2: límite de tamaño de archivo (15 MB)
-  const MAX_FILE_MB = 15
-  const validateFileSize = (file) => {
-    if (file.size > MAX_FILE_MB * 1024 * 1024) {
-      showUploadError(`El archivo es demasiado grande (${(file.size / 1024 / 1024).toFixed(1)} MB). El límite es ${MAX_FILE_MB} MB.`)
-      return false
-    }
-    return true
-  }
-
-  const showUploadError = (msg) => {
-    setUploadError(msg)
-    setTimeout(() => setUploadError(null), 4000)
-  }
 
   const handleRemoveImage = (url) => {
     if (!url) return
@@ -319,16 +302,6 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
     const file = e.target.files[0]
     if (!file) return
 
-    // Fix 4: bloquear si ya hay un upload de imagen principal en curso
-    if (isUploadingMain.current) return
-
-    // Fix 2: validar tamaño antes de procesar
-    if (!validateFileSize(file)) {
-      e.target.value = ''
-      return
-    }
-
-    isUploadingMain.current = true
     setUploadProgress(0)
     const originalValue = e.target.value
     e.target.value = '' // Reset to allow subsequent uploads of same file
@@ -351,29 +324,14 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
       sessionUploadedImages.current.push(downloadURL)
       setFormData(prev => ({ ...prev, imageUrl: downloadURL }))
     } catch (err) {
-      console.error('[Image Upload] Error:', err)
+      console.error(err)
       e.target.value = originalValue
-      if (err?.code === 'storage/unauthorized') {
-        showUploadError('Sin permisos para subir imágenes. Verifica las reglas de Firebase Storage.')
-      } else if (err?.code === 'storage/canceled') {
-        showUploadError('La subida fue cancelada.')
-      } else {
-        showUploadError('Error al subir la imagen. Verifica tu conexión e intenta de nuevo.')
-      }
-    } finally {
-      isUploadingMain.current = false
     }
   }
 
   const handleVariantImageUpload = async (variantId, e) => {
     const file = e.target.files[0]
     if (!file) return
-
-    // Fix 2: validar tamaño
-    if (!validateFileSize(file)) {
-      e.target.value = ''
-      return
-    }
 
     setLoadingVariantImages(prev => ({ ...prev, [variantId]: true }))
     setVariantUploadProgress(prev => ({ ...prev, [variantId]: 0 }))
@@ -399,12 +357,8 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
       handleVariantChange(variantId, 'imageUrl', downloadURL)
     } catch (err) {
       console.error('[Variant Image Upload] Error:', err)
+      setErrors(prev => ({ ...prev, [`variant_img_${variantId}`]: 'Error al subir imagen de variante.' }))
       e.target.value = originalValue
-      if (err?.code === 'storage/unauthorized') {
-        showUploadError('Sin permisos para subir imágenes de variante. Verifica las reglas de Firebase Storage.')
-      } else {
-        showUploadError('Error al subir imagen de variante. Verifica tu conexión e intenta de nuevo.')
-      }
     } finally {
       setLoadingVariantImages(prev => ({ ...prev, [variantId]: false }))
     }
@@ -413,12 +367,6 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
   const handleGalleryImageUpload = async (index, e) => {
     const file = e.target.files[0]
     if (!file) return
-
-    // Fix 2: validar tamaño
-    if (!validateFileSize(file)) {
-      e.target.value = ''
-      return
-    }
 
     setLoadingGalleryIndex(index)
     setGalleryProgress(0)
@@ -446,12 +394,8 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
       setFormData(prev => ({ ...prev, galeria: newGal }))
     } catch (err) {
       console.error('[Gallery Image Upload] Error:', err)
+      setErrors(prev => ({ ...prev, [`gallery_img_${index}`]: 'Error al subir imagen de galería.' }))
       e.target.value = originalValue
-      if (err?.code === 'storage/unauthorized') {
-        showUploadError('Sin permisos para subir imágenes de galería. Verifica las reglas de Firebase Storage.')
-      } else {
-        showUploadError('Error al subir imagen de galería. Verifica tu conexión e intenta de nuevo.')
-      }
     } finally {
       setLoadingGalleryIndex(null)
     }
@@ -2442,22 +2386,6 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
 
       <AnimatePresence>
         {renderCustomColorModal()}
-      </AnimatePresence>
-
-      {/* Toast de error de upload — visible sobre el modal */}
-      <AnimatePresence>
-        {uploadError && (
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-sm font-medium"
-            style={{ background: 'rgba(239,68,68,0.95)', color: '#fff', backdropFilter: 'blur(8px)', maxWidth: '90vw' }}
-          >
-            <AlertCircle size={18} className="shrink-0" />
-            <span>{uploadError}</span>
-          </motion.div>
-        )}
       </AnimatePresence>
     </>
   )

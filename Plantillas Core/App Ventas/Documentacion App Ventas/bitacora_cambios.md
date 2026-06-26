@@ -2,6 +2,33 @@
 
 Historial de cambios, mejoras y correcciones técnicas aplicadas sobre la plantilla core de Ventas.
 
+### [2026-06-26] - Corrección de Superposición de Línea de Encabezado en Perfil del Cliente
+* **Tipo:** Corrección de Errores / UI/UX
+* **Severidad:** Baja (Problema de superposición visual)
+* **Descripción de Cambios:**
+  - **Ajuste Dinámico de z-index:** Se modificó la cabecera en `ClientProfile.jsx` para alternar dinámicamente su z-index entre `z-10` (cuando el selector de emojis está cerrado) y `z-40` (cuando está abierto). Esto permite que el contenedor principal de tarjetas (`z-20`) se renderice sobre la cabecera por defecto, cubriendo la línea de borde divisoria (`border-b border-primary/5`) donde se superpone por el margen negativo (`-mt-5`), mientras que garantiza que el menú selector de avatar/emoji se posicione correctamente al frente al interactuar con él.
+* **Archivos Modificados:**
+  - [ClientProfile.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientProfile.jsx) [MODIFY]
+* **Desplegado:** Local build verificado exitosamente ✅
+
+### [2026-06-26] - Corrección de Bloqueo de Scroll en Selector de Temas del Desarrollador
+* **Tipo:** Corrección de Errores / UI/UX / Estabilidad
+* **Severidad:** Media (Bloqueo persistente del scroll del body al interactuar con el selector de temas)
+* **Descripción de Cambios:**
+  - **Reemplazo de ThemeModalLock por useEffect:** Se eliminó el componente helper `ThemeModalLock` de `AppearanceSettings.jsx` y se reemplazó por un hook `useEffect` directo en `AppearanceSettings` suscrito al cambio de `isThemeModalOpen`. Esto evita que las múltiples actualizaciones de estado (al hacer clic y previsualizar paletas cromáticas) provoquen que se capture el estilo `overflow: hidden` ya aplicado al body como si fuera el estilo original, previniendo que la página se quede sin scroll al cerrar el modal.
+* **Archivos Modificados:**
+  - [AppearanceSettings.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/AppearanceSettings.jsx) [MODIFY]
+* **Desplegado:** Local build verificado exitosamente ✅
+
+### [2026-06-26] - Corrección de Descarga de Facturas en Apartado de Clientes
+* **Tipo:** Corrección de Errores / Estabilidad / UI/UX
+* **Severidad:** Alta (Error de referencia que impedía la descarga de facturas)
+* **Descripción de Cambios:**
+  - **Importación de Constante faltante:** Se importó la constante `PAYMENT_METHODS` en `ClientOrders.jsx` desde `../../constants`. Esto resuelve el `ReferenceError` que ocurría al hacer clic en "Descargar Factura" en las tarjetas de pedidos completados del cliente, permitiendo que el flujo de impresión/descarga se ejecute correctamente.
+* **Archivos Modificados:**
+  - [ClientOrders.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientOrders.jsx) [MODIFY]
+* **Desplegado:** Local build verificado exitosamente ✅
+
 ### [2026-06-19] - Optimización de Bundle y Depuración de Importaciones (ESLint Clean Up)
 * **Tipo:** Mantenimiento / Optimización / Calidad de Código
 * **Severidad:** Baja (Saneamiento de warnings y errores del linter en imports y variables obsoletas)

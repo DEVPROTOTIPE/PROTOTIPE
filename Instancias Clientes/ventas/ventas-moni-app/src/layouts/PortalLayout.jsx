@@ -6,6 +6,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useConnectivityStore } from '../store/connectivityStore'
 
 import useNotificationCenter from '../hooks/useNotificationCenter'
+import useFCMPermission from '../hooks/useFCMPermission'
 import NCToastContainer from '../components/common/NCToastContainer'
 import NotificationHistoryTray from '../components/common/NotificationHistoryTray'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -16,7 +17,14 @@ export default function PortalLayout() {
   const nav = useNavigate()
   const config = PORTAL_CONFIG[portalEmployee?.rol] || { color: 'var(--color-primary)', emoji: '👤', label: 'Portal', labelCorto: 'Portal' }
 
+  // Sincronizar el permiso y tokens de FCM para Empleados (usando su employeeId o celular)
+  const { requestPermission } = useFCMPermission(portalEmployee?.celular || portalEmployee?.id || 'employee', portalEmployee?.rol || 'employee')
 
+  useEffect(() => {
+    if (portalEmployee) {
+      requestPermission()
+    }
+  }, [portalEmployee, requestPermission])
 
   // Hook central del Notification Center para el rol específico
   const [soundEnabled, setSoundEnabled] = useState(true)
