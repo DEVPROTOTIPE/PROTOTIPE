@@ -409,12 +409,24 @@ catch {
     exit 1
 }
 finally {
-    # Asegurar regreso a la rama de trabajo original (develop o develop branch original)
-    if ($branchName) {
-        $currentBranch = (git rev-parse --abbrev-ref HEAD 2>$null)
-        if ($currentBranch -and $currentBranch -ne $branchName) {
-            Write-Host "  [Restauración] Regresando a la rama de trabajo original: [$branchName]..." -ForegroundColor Yellow
-            git checkout $branchName 2>&1 | Out-Null
+    # Asegurar que los componentes base (Core, Dashboard, etc.) queden en develop. Instancias de clientes regresan a su rama de cliente.
+    if (-not $isInstance -and -not $branchName.StartsWith("cliente/")) {
+        $currentBranchSub = (git rev-parse --abbrev-ref HEAD 2>$null)
+        if ($currentBranchSub -and $currentBranchSub -ne "develop") {
+            Write-Host "  [Restauración] Cambiando el subproyecto a la rama de desarrollo 'develop'..." -ForegroundColor Yellow
+            $hasDevelopSub = (git branch --list "develop" 2>$null)
+            if (-not $hasDevelopSub) {
+                git branch develop 2>&1 | Out-Null
+            }
+            git checkout develop 2>&1 | Out-Null
+        }
+    } else {
+        if ($branchName) {
+            $currentBranch = (git rev-parse --abbrev-ref HEAD 2>$null)
+            if ($currentBranch -and $currentBranch -ne $branchName) {
+                Write-Host "  [Restauración] Regresando a la rama original del cliente: [$branchName]..." -ForegroundColor Yellow
+                git checkout $branchName 2>&1 | Out-Null
+            }
         }
     }
     # Si renombramos de .git-backup-temp a .git al inicio, lo restauramos a .git-backup-temp

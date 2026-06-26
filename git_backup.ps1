@@ -437,6 +437,17 @@ finally {
         }
     }
 
+    # Asegurar que el repositorio maestro quede situado en la rama develop
+    $currentBranchMaster = (git rev-parse --abbrev-ref HEAD 2>$null)
+    if ($currentBranchMaster -and $currentBranchMaster -ne "develop") {
+        Write-Host " [Restauración] Cambiando el repositorio maestro a la rama de desarrollo 'develop'..." -ForegroundColor Yellow
+        $hasDevelop = (git branch --list "develop" 2>$null)
+        if (-not $hasDevelop) {
+            git branch develop 2>&1 | Out-Null
+        }
+        git checkout develop 2>&1 | Out-Null
+    }
+
     Write-Host ""
     Write-Host "======================================================================" -ForegroundColor Cyan
     Write-Host "  [OK] Snapshot completado | Entorno de desarrollo restaurado con exito" -ForegroundColor Green

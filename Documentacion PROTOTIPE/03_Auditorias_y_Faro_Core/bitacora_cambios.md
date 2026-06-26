@@ -1,6 +1,20 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
 
+### [2026-06-25] - CORE-080: Forzado de la Rama de Desarrollo (develop) en Herramienta de Respaldos
+
+* **Tipo:** Herramientas / Automatización / Git / Scripting
+* **Descripción de Cambios:**
+  - **Forzado de Rama develop en Respaldo Maestro:** Se actualizó `git_backup.ps1` en el bloque `finally` de restauración. Tras completar el proceso de guardado y push, se verifica si la rama activa no es `develop`, forzando el checkout a la rama `develop` localmente.
+  - **Forzado de Rama develop en Respaldo de Subproyectos:** Se modificó `subproject_backup.ps1` en su sección de limpieza final. Para todos los subproyectos del núcleo (Cores de Oro como `App Ventas`, Consola Central `dev-dashboard`), se cambia la rama activa a `develop` al finalizar el script. Las instancias de clientes (cuyas ramas siguen la nomenclatura `cliente/*`) quedan excluidas y regresan de manera segura a su rama original de cliente.
+* **Archivos Modificados:**
+  - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
 ### [2026-06-25] - AUDITORIA: Informe de Blindaje de Replicación de Cores y Conectividad Central
 
 * **Tipo:** Auditoría / Seguridad / Calidad / Escalabilidad / Documentación

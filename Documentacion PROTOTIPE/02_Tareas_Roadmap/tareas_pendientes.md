@@ -4,6 +4,13 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-080: Forzado de la Rama de Desarrollo (develop) en Herramienta de Respaldos~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-25
+  - Fecha de finalización: 2026-06-25
+  - Descripción: Se modificaron los scripts de respaldo de PowerShell (`git_backup.ps1` y `subproject_backup.ps1`) para garantizar que al finalizar el proceso de guardado/push, el desarrollador quede posicionado de forma automática en la rama de desarrollo `develop`. En `git_backup.ps1` (respaldo maestro) se añadió un bloque en `finally` que realiza el checkout a `develop`. En `subproject_backup.ps1` (respaldo de subproyectos) se adaptó la lógica final del bloque `finally` para cambiar la rama activa a `develop` de forma automática al guardar componentes base (Cores, Dashboard, etc.), mientras que las ramas de instancias cliente (`cliente/*`) se respetan y regresan a su rama correspondiente de forma segura.
+  - Archivos: [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY], [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY], [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-079: Optimización de Rendimiento de Scroll y Consistencia de Interlineado de Títulos~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-24
