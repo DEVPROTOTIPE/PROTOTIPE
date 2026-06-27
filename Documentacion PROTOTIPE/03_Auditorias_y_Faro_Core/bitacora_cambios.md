@@ -15,10 +15,12 @@
     - Generador de Proyectos de la CLI (`Prototipe-CLI/templates/template-ventas`)
     - Instancia de Cliente Activa (`Instancias Clientes/ventas/ventas-moni-app`)
   - **P5 — Compilación Exitosa**: Se corrió la compilación de producción de Vite (`npm run build`) en la carpeta del Core, validando la ausencia de enlaces o importaciones rotas con éxito total.
+  - **P6 — Desacoplamiento de Repositorios (Solución de regresiones al guardar)**: Se desindexaron por completo las carpetas `Plantillas Core/`, `Instancias Clientes/` y las plantillas de `Prototipe-CLI/templates/` del repositorio raíz de Git (`git rm -r --cached`), y se añadieron a `.gitignore` del raíz. Esto evita que el `checkout` temporal de la CLI en el raíz durante los respaldos pise o revierta los archivos locales de Cores e Instancias, manteniendo la paridad y cambios locales 100% seguros y estables.
 * **Archivos Modificados:**
-  - [`Plantillas Core/App Ventas/`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/) [MODIFY/DELETE]
-  - [`Prototipe-CLI/templates/template-ventas/`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/) [MODIFY/DELETE]
-  - [`Instancias Clientes/ventas/ventas-moni-app/`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/) [MODIFY/DELETE]
+  - [`.gitignore`](file:///d:/PROTOTIPE/.gitignore) [MODIFY]
+  - [`Plantillas Core/App Ventas/`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/) [MODIFY/DELETE/EXCLUDE_FROM_ROOT_GIT]
+  - [`Prototipe-CLI/templates/template-ventas/`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/) [MODIFY/DELETE/EXCLUDE_FROM_ROOT_GIT]
+  - [`Instancias Clientes/ventas/ventas-moni-app/`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/) [MODIFY/DELETE/EXCLUDE_FROM_ROOT_GIT]
 
 ### [2026-06-26] - CORE-097: Robustecimiento y Expansión del Módulo de Control Git
 
