@@ -4,6 +4,118 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-115: Respaldos No Disruptivos y Eliminación de Detenciones de Servidores~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Se eliminó la detención de procesos dev de Vite/Node (`Stop-Process`) de los scripts de PowerShell (`git_backup.ps1`, `subproject_backup.ps1`, `menu_backup.ps1`). Dado que el motor de renombrado temporal de repositorios Git cuenta con un bucle tolerante de reintentos y que Vite ignora la carpeta `.git`, la detención de procesos era redundante y provocaba el cierre del Dashboard y demás servidores locales de desarrollo.
+  - Archivos: [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY], [menu_backup.ps1](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+
+* **[x] ~~Tarea CORE-116: Auto-Merge a Producción Activado por Defecto~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Se configuró el estado `doAutoMerge` como `true` por defecto en el panel del control de versiones del Dashboard Central (`GitBackupPanel.jsx`). Esto garantiza que los respaldos no solo se guarden en la rama de desarrollo activa, sino que se fusionen y empujen de forma automatizada hacia la rama principal de producción (`master`/`main`) sin requerir clicks adicionales en la interfaz.
+  - Archivos: [Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-114: Robustecimiento de Inicialización de Firebase (Resguardo HMR)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Se robusteció la inicialización del SDK cliente de Firebase (`firebaseConfig.js`) tanto en las plantillas core como en las instancias cliente (`ventas-moni-app`) para soportar recargas en caliente de Vite (HMR) sin provocar caídas del sistema. Se implementó una inicialización condicional para la app de Firebase utilizando `getApps()` y un bloque `try/catch` de contingencia sobre `initializeFirestore` para recuperar la conexión activa con `getFirestore(app)` en re-evaluaciones de módulos locales.
+  - Archivos: [Plantillas Core/App Ventas/src/config/firebaseConfig.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/config/firebaseConfig.js) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/src/config/firebaseConfig.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/config/firebaseConfig.js) [MODIFY], [Prototipe-CLI/templates/template-ventas/src/config/firebaseConfig.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/config/firebaseConfig.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-113: Ajustes Visuales, Corrección de Enlaces y Optimización CRO en Landing~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Refactorización y afinación CRO de la Landing Page. Ajuste de los Lead Magnets de nicho para ofrecer soporte técnico y actualizaciones reales, corrección de interpolación de teléfono de WhatsApp, remoción del efecto magnético en CTA secundario, rediseño claro e integrado del card de pérdida financiera, cambio de border-radius en la píldora de regalo a 10px y scroll automático al tope en carga de página. Corrección de error de HMR en App Ventas Core.
+  - Archivos: [LandingPage/js/app.js](file:///d:/PROTOTIPE/LandingPage/js/app.js) [MODIFY], [LandingPage/css/styles.css](file:///d:/PROTOTIPE/LandingPage/css/styles.css) [MODIFY], [LandingPage/Index.html](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY], [LandingPage/sw.js](file:///d:/PROTOTIPE/LandingPage/sw.js) [MODIFY], [Plantillas Core/App Ventas/src/App.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-112: Formulación de Propuestas Avanzadas de Persuasión y Captación~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Formulación de propuestas avanzadas de persuasión psicológica y captación para la landing page de PROTOTIPE. Se detallaron estrategias conductuales como la reciprocidad a través de lead magnets personalizados por nicho, el efecto de anclaje de precios comparando costos de ineficiencia vs inversión, storytelling basado en el alivio del dolor y el sesgo de progreso dotado en la calculadora.
+  - Archivos: [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/propuestas_persuasion_captacion_avanzada_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/propuestas_persuasion_captacion_avanzada_2026.md) [NEW], [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-111: Elaboración de Propuesta de Conversión Psicológica y CRO para Landing Page~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Elaboración de una propuesta técnica y estratégica de conversión psicológica de alto nivel para la landing page de PROTOTIPE, inyectando disparadores conductuales como aversión a la pérdida en la propuesta de valor, humanización y credibilidad en prueba social, simulador interactivo de dolor financiero y personalización dinámica contextual de nichos para optimizar la captación de leads.
+  - Archivos: [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/propuesta_conversion_psicologica_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/propuesta_conversion_psicologica_2026.md) [MODIFY], [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-110: Auditoría Técnica, SEO, CRO y Accesibilidad de la Landing Page~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Realización de una auditoría profunda y rigurosa de la landing page (Index.html de 7000 líneas y sw.js), identificando cuellos de botella de rendimiento, accesibilidad crítica (bloqueo de selección de texto y anulación de foco de teclado), fricciones de conversión (modal interceptor de leads de WhatsApp) y discrepancias de caché en el Service Worker. Se generó un informe técnico detallado con un plan de acción ordenado por prioridad en el directorio de auditorías del proyecto.
+  - Archivos: [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_landing_page_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_landing_page_2026.md) [MODIFY], [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-109: Integración de la Landing Page en el Dev-Dashboard~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Se integró la landing page estática del ecosistema (`d:/PROTOTIPE/LandingPage/Index.html` y `sw.js`) en `public/landing/` del `dev-dashboard` y se solventó el enrutamiento y la persistencia de tema. Se enrutó el enlace de cabecera a `/landing/index.html` para evadir el fallback de la SPA. Además, se aisló el estado de tema del dashboard en localStorage bajo la clave `prototipe_dev_dashboard_theme` para evitar colisiones con la landing page (que usa `theme` sobre el mismo origen), y se inyectó una rutina que desregistra Service Workers obsoletos en la raíz `/` del origen.
+  - Archivos: [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [Central PROTOTIPE/dev-dashboard/public/landing/index.html](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/public/landing/index.html) [NEW], [Central PROTOTIPE/dev-dashboard/public/landing/sw.js](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/public/landing/sw.js) [NEW]
+
+* **[x] ~~Tarea CORE-108: Robustez Concurrente en Test de Humo y Filtro de Comentarios en Sanitización~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Se mejoró la robustez de concurrencia y seguridad en el CLI mediante dos acciones clave: (1) En `worker_create_project.js`, se reemplazó el puerto estático de pruebas de humo `5190` por un resolvedor de puertos dinámicos libres (`getFreePort` a través del módulo `net`), evitando colisiones y fallas si se inician múltiples creaciones de proyectos en paralelo. Además, se añadió un guardián de existencia para `node_modules` para omitir el test de humo si no están instaladas las dependencias, previniendo procesos zombie. (2) En `sync_templates.js`, se ajustó la expresión regular del extractor de variables para ignorar caracteres de comentarios (`#`) al leer `.env.local`, evitando que comentarios de línea contaminen los tokens dinámicos e impidan la sanitización correcta de las plantillas (mitigación de fugas de secretos).
+  - Archivos: [Prototipe-CLI/worker_create_project.js](file:///d:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY], [Prototipe-CLI/sync_templates.js](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-107: Robustez Híbrida de Triggers y Validación Preventiva en Aprovisionador~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Se robustecieron los triggers de comunicación en tiempo real (`triggerPing` y `triggerTelemetryReport`) en `useAppConfigSync.js` para parsear los datos de forma híbrida y tolerante a fallos, aceptando tanto objetos `Timestamp` de Firestore (mediante `.toMillis()`) como enteros primitivos de milisegundos (`Number`), evitando así fallas silenciosas de telemetría si cambia el tipo de serialización central. Adicionalmente, se inyectó una validación estricta de preflight en `generator.js` que verifica que la clave central de control (`VITE_DEVELOPER_CENTRAL_API_KEY`) y las variables de telemetría estén configuradas correctamente, deteniendo la creación de nuevas instancias si falta alguna para evitar deploys en estado inconsistente.
+  - Archivos: [Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY], [Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY], [Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js) [MODIFY], [Prototipe-CLI/generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY], [Prototipe-CLI/sync_templates.js](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY], [Prototipe-CLI/test_templates.js](file:///d:/PROTOTIPE/Prototipe-CLI/test_templates.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-106: Blindaje Automatizado y Guardianes Estáticos de Telemetría en el CLI~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Se diseñó e implementó un sistema de guardianes estáticos y validación de integridad para blindar el canal de telemetría del ecosistema contra regresiones de código (tales como el bug de cero ventas mensuales). Se añadió una función de análisis estático `auditarIntegridadHook` en `sync_templates.js` (bloqueando la sincronización downstream si el core origen tiene vulnerabilidades en el hook) y en `test_templates.js` (como un paso formal del runner de pruebas de integración de plantillas, haciendo fallar el build si el hook vulnera los estándares). Adicionalmente, se documentó este estándar de comprobación estricta de tipos de datos en la normativa arquitectónica global.
+  - Archivos: [Prototipe-CLI/sync_templates.js](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY], [Prototipe-CLI/test_templates.js](file:///d:/PROTOTIPE/Prototipe-CLI/test_templates.js) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_arquitectonico_ecosistema.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/estandar_arquitectonico_ecosistema.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-105: Auto-Respuesta Silenciosa de Telemetría y Restauración de Valores Reales en Test de Telemetría~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Se corrigió la desincronización en el canal de telemetría de facturación remota. Anteriormente, el dashboard emitía `triggerTelemetryReport: timestamp` al documento central `clientes_control/{clientId}` en de-facto telemetría global, pero el hook cliente `useAppConfigSync.js` no lo propagaba localmente. Adicionalmente, el botón individual "Test de Telemetría" creaba un registro con valores simulados/mock en `reportesBilling` pero no enviaba el trigger al cliente para que reportara sus valores reales. Se modificó `handleCreateTestReport` en el Dashboard para que actualice `triggerTelemetryReport` en `clientes_control/{clientId}`, y se actualizó `useAppConfigSync.js` para interceptar este trigger directamente en memoria desde el snapshot central, validando que no esté expirado (antigüedad < 60s) e invocando de inmediato a `reportMonthlyBillingToDeveloper` con las métricas reales del cliente en caché de Zustand. Se corrigió un bug crítico donde las tiendas con cero ventas mensuales (como `moni-app` con base de datos limpia) abortaban el envío por una validación estricta de verdad (`if (metrics.totalMes)`); ahora se evalúa por tipo de dato (`typeof metrics.totalMes === 'number'`), garantizando que se reporten facturaciones de $0 con éxito y se sobrescriban correctamente los reportes de prueba.
+  - Archivos: [Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY], [Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY], [Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-104: Potenciación y Siembra Automática del Generador~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Potenciación integral del aprovisionador para lograr generación 100% libre de errores. Se implementó la validación preventiva de integridad para `firestore.indexes.json` con reescritura de fallback mínimo, la asignación determinística y dinámica de puertos de desarrollo en `vite.config.js` basada en un hash de `clientId` para evadir colisiones en ejecuciones multi-instancia, y la generación nativa de `scripts/seed_admin.js` el cual ejecuta una siembra REST de Firestore con el token administrativo extraído dinámicamente de `firebase-tools.json` (Firebase CLI) del desarrollador, registrando el usuario administrador en Firebase Auth y creando los documentos obligatorios en la colección `/users` y `/config/settings` para prevenir bloqueos por reglas de seguridad y errores `PERMISSION_DENIED`.
+  - Archivos: [Prototipe-CLI/generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-103: Blindaje de Seguridad y Robustez en generator.js (Round 2)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Se robusteció la lógica del generador implementando la generación de `adminPassword` única e impredecible por instancia, timeouts de seguridad de 10-15 segundos en ejecuciones secundarias de mapeo, inyección y balanceo de llaves para variables de estilos en CSS global, y fallbacks reactivos seguros en el retorno de aprovisionamiento. Adicionalmente se migró el registro de la Consola Central a `Promise.allSettled` para blindaje contra cortes de red intermitentes, se asignaron puertos Playwright dinámicos derivados y se refinó la validación e inyección SEO en `index.html` con regex tolerantes a mayúsculas y atributos, previniendo también el aprovisionamiento de nombres de proyecto inválidos.
+  - Archivos: [Prototipe-CLI/generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY], [Prototipe-CLI/cli.js](file:///d:/PROTOTIPE/Prototipe-CLI/cli.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-102: Eliminación de Selector Interactivo de Ramas y Robustecimiento del Backup~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Se removió por completo el dropdown interactivo del selector de ramas locales/remotas del Dashboard y sus endpoints CLI correspondientes para evitar regresiones de Git. Asimismo, se corrigió la lógica de retorno del script de PowerShell (`git_backup.ps1` y `subproject_backup.ps1`) reemplazando las llamadas `exit` por retorno simple en el bloque de excepciones del control de flujo para garantizar el merge a producción y retorno final del HEAD a `develop`.
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-101: Auditoría, Saneamiento y Robustecimiento del Módulo de Facturación y Cobros~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Auditoría y saneamiento técnico del flujo financiero de cobranzas. Se corrigió el cálculo del preview de WhatsApp para cobros mensuales basándose estrictamente en el período consultado, se implementó control de concurrencia en la confirmación de pagos de la tabla (deshabilitación y spinner reactivo), y se desacopló el selector de clientes de WhatsApp para resolver desde la base unificada histórica en lugar de períodos activos. Se integró la autocuración de plantillas, persistencia del timestamp de envío y rediseño visual del PDF y la tabla del Dashboard. Asimismo, se solucionaron los emoji corruptos en Windows mediante codificación unicode nativa evasiva a Vite (`String.fromCodePoint`) y bypass de redirección wa.me, inyectando también semáforos de concurrencia y soporte TypeScript y de estilos dinámicos al CLI.
+  - Archivos: [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY], [Central PROTOTIPE/dev-dashboard/firestore.rules](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firestore.rules) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/services/pdfService.js](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/services/pdfService.js) [MODIFY], [Prototipe-CLI/server.js](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Prototipe-CLI/worker_create_project.js](file:///D:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY], [Prototipe-CLI/generator.js](file:///D:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
 * **[x] ~~Tarea CORE-100: Selector Interactivo y Cambio de Ramas Dinámico en Control Git~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-26

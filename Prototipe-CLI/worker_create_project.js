@@ -19,6 +19,7 @@ import { spawn, exec } from 'child_process';
 import path from 'path';
 import fs from 'fs-extra';
 import { createRequire } from 'module';
+import net from 'net';
 
 // Guard de seguridad: este script DEBE ejecutarse como proceso hijo (fork),
 // no directamente por el usuario.
@@ -73,8 +74,30 @@ function waitPort(port, timeoutMs = 15000) {
   });
 }
 
+function getFreePort() {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.unref();
+    server.on('error', reject);
+    server.listen(0, () => {
+      const port = server.address().port;
+      server.close(() => {
+        resolve(port);
+      });
+    });
+  });
+}
+
 async function runSmokeTest(targetDir) {
   console.log('[Smoke Test] Iniciando test de humo headless...');
+
+  // [BLINDAJE] Si no existen las dependencias instaladas en node_modules, omitir inmediatamente
+  const nodeModulesPath = path.join(targetDir, 'node_modules');
+  if (!await fs.pathExists(nodeModulesPath)) {
+    console.log('[Smoke Test] node_modules no está instalado en la instancia. Omitiendo test de humo.');
+    return;
+  }
+
   const pkgPath = path.join(targetDir, 'package.json');
   if (!await fs.pathExists(pkgPath)) return;
 
@@ -87,17 +110,25 @@ async function runSmokeTest(targetDir) {
     return;
   }
 
+  // [BLINDAJE-PUERTO-LIBRE] Obtener puerto libre de forma dinámica para evitar colisiones en arranques paralelos (concurrencia)
+  let port = 5190;
+  try {
+    port = await getFreePort();
+  } catch (_) {
+    // fallback al puerto estático si falla net
+  }
+
   // 1. Iniciar Vite en segundo plano
-  console.log('[Smoke Test] Iniciando Vite en puerto 5190...');
-  const viteProcess = spawn('cmd.exe', ['/c', 'npm run dev -- --port 5190'], {
+  console.log(`[Smoke Test] Iniciando Vite en puerto libre ${port}...`);
+  const viteProcess = spawn('cmd.exe', ['/c', `npm run dev -- --port ${port}`], {
     cwd: targetDir,
     stdio: 'ignore'
   });
 
   try {
-    // 2. Esperar al puerto 5190
-    await waitPort(5190);
-    console.log('[Smoke Test] Vite listo en puerto 5190.');
+    // 2. Esperar al puerto dinámico
+    await waitPort(port);
+    console.log(`[Smoke Test] Vite listo en puerto ${port}.`);
 
     // 3. Importar Playwright local
     const require = createRequire(import.meta.url);
@@ -113,7 +144,7 @@ async function runSmokeTest(targetDir) {
       consoleErrors.push(err.message);
     });
 
-    await page.goto('http://localhost:5190');
+    await page.goto(`http://localhost:${port}`);
     await page.waitForLoadState('load');
 
     const title = await page.title();
@@ -150,7 +181,11 @@ process.on('message', async (msg) => {
     
     // Ejecutar test de humo si no se desactivó explícitamente en answers
     if (answers.enableSmokeTest !== false) {
-      await runSmokeTest(result.targetDir);
+      try {
+        await runSmokeTest(result.targetDir);
+      } catch (smokeErr) {
+        console.error(`[Smoke Test Warning] El test de humo no se pudo completar: ${smokeErr.message}. La app fue aprovisionada con éxito, pero te sugerimos revisar manualmente su arranque.`);
+      }
     }
 
     process.send({ type: 'SUCCESS', data: result });

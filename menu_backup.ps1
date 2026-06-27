@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 #                 PROTOTIPE ECOSISTEMA - GESTOR MAESTRO DE RESPALDOS
 # ==============================================================================
 # Menu interactivo premium con navegacion por flechas y seleccion con Enter.
@@ -23,51 +23,9 @@ Set-Location -Path $rootDir
 # Depth 5 cubre todos los subrepos anidados sin recorrer node_modules ni carpetas profundas
 $tempGitDirs = Get-ChildItem -Path $rootDir -Directory -Hidden -Filter ".git-backup-temp" -Recurse -Depth 5 -ErrorAction SilentlyContinue
 if ($tempGitDirs.Count -gt 0) {
-    # Detectar y detener servidores Vite si hay carpetas por recuperar
-    $nodeProcesses = Get-CimInstance Win32_Process -Filter "Name='node.exe'" -ErrorAction SilentlyContinue
-    
-    # Identificar e indexar los PIDs a proteger (Dashboard Central y CLI Bridge Server)
-    $protectedPids = @()
-    foreach ($proc in $nodeProcesses) {
-        if ($proc.CommandLine -match 'Central PROTOTIPE' -or $proc.CommandLine -match 'dev-dashboard' -or $proc.CommandLine -match 'server\.js') {
-            $protectedPids += $proc.ProcessId
-        }
-    }
-    # Propagar protección hacia arriba en el árbol (padres, abuelos, etc.) para cubrir la cadena npm -> cmd -> node/vite
-    $allProcesses = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue
-    for ($i = 0; $i -lt 4; $i++) {
-        foreach ($itemPid in $protectedPids.Clone()) {
-            $proc = $allProcesses | Where-Object { $_.ProcessId -eq $itemPid }
-            if ($proc -and $proc.ParentProcessId -and $protectedPids -notcontains $proc.ParentProcessId) {
-                $protectedPids += $proc.ParentProcessId
-            }
-        }
-    }
-
+    # Omitimos detener los servidores locales de desarrollo Vite (dev-dashboard, App Ventas, etc.).
+    # El renombrado de las carpetas .git es tolerante a bloqueos y se realiza mediante un bucle con reintentos.
     $viteStopped = $false
-    foreach ($proc in $nodeProcesses) {
-        # Ignorar si el proceso está protegido
-        if ($protectedPids -contains $proc.ProcessId) {
-            continue
-        }
-        
-        if ($proc.CommandLine -match 'vite' -or ($proc.CommandLine -match 'npm' -and $proc.CommandLine -match 'dev')) {
-            # Extraer la ruta raíz del subproyecto de forma precisa
-            $procPath = ""
-            if ($proc.CommandLine -match '(?i)(D:\\PROTOTIPE\\(?:Plantillas Core|Central PROTOTIPE)\\[^\\]+|D:\\PROTOTIPE\\Instancias Clientes\\[^\\]+\\[^\\]+)') {
-                $procPath = $Matches[1]
-            }
-            
-            # Por seguridad extra, si la ruta del proceso pertenece al Dashboard Central, omitir
-            if ($procPath -match 'Central PROTOTIPE' -or $procPath -match 'dev-dashboard') {
-                continue
-            }
-            
-            Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
-            $viteStopped = $true
-        }
-    }
-    if ($viteStopped) { Start-Sleep -Milliseconds 1000 }
 
     foreach ($tempDir in $tempGitDirs) {
         if (Test-Path $tempDir.FullName) {
@@ -163,7 +121,7 @@ function Update-EcosystemStatusCache {
         $dBranch  = (git -C $dashboardDir rev-parse --abbrev-ref HEAD 2>$null)
         $Global:EcosystemStatusCache += [PSCustomObject]@{
             Icon    = "🖥"
-            Label   = "Dashboard (dev-dashboard)"
+            Label   = " Dashboard (dev-dashboard)"
             Branch  = $dBranch
             Changes = $dChanges
         }

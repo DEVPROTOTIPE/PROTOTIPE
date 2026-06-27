@@ -38,7 +38,7 @@ async function extractSanitizationTokens(fuente) {
     try {
       const envContent = await fs.readFile(envPath, 'utf8');
       const parseEnvValue = (key) => {
-        const match = envContent.match(new RegExp(`^${key}\\s*=\\s*["']?([^"'\\n]+)["']?`, 'm'));
+        const match = envContent.match(new RegExp(`^${key}\\s*=\\s*["']?([^"'#\\n]+)["']?`, 'm'));
         return match ? match[1].trim() : '';
       };
       tokens.projectId         = parseEnvValue('VITE_FIREBASE_PROJECT_ID');
@@ -111,6 +111,50 @@ function validarRegistro(registro) {
   return errors;
 }
 
+/**
+ * Audita de manera estática el hook useAppConfigSync.js para asegurar el blindaje de telemetría.
+ * @param {string} hookPath Ruta absoluta al hook
+ * @param {string} name Nombre descriptivo de la plantilla
+ * @returns {Promise<string[]>} Lista de errores de blindaje
+ */
+async function auditarIntegridadHook(hookPath, name) {
+  const errors = [];
+  try {
+    const content = await fs.readFile(hookPath, 'utf8');
+    
+    // 1. Validar que procesa triggerTelemetryReport
+    if (!content.includes('triggerTelemetryReport')) {
+      errors.push(`useAppConfigSync.js en "${name}" no contiene referencias a "triggerTelemetryReport". El canal de telemetría remota está ausente.`);
+    }
+    
+    // 2. Validar que NO usa el patrón vulnerable
+    if (content.includes('if (metrics && metrics.totalMes)')) {
+      errors.push(`useAppConfigSync.js en "${name}" contiene el patrón vulnerable "if (metrics && metrics.totalMes)". Bloquea el reporte si las ventas son $0.`);
+    }
+    
+    // 3. Validar que implementa la comprobación de tipo estricta
+    if (content.includes('triggerTelemetryReport') && !content.includes("typeof metrics.totalMes === 'number'")) {
+      errors.push(`useAppConfigSync.js en "${name}" procesa telemetría pero no tiene la comprobación de tipo estricta "typeof metrics.totalMes === 'number'". Riesgo de fallo con $0 en ventas.`);
+    }
+    
+    // 4. Validar control de re-gatillado/expiración (<60s)
+    if (!content.includes('60000') && !content.includes('isExpired')) {
+      errors.push(`useAppConfigSync.js en "${name}" no contiene un mecanismo de antigüedad/expiración (isExpired / 60000ms). Riesgo de reportes duplicados infinitos en page load.`);
+    }
+
+    // 5. Validar soporte híbrido (Timestamp y Number) para triggers
+    if (content.includes('triggerTelemetryReport') && !content.includes('toMillis')) {
+      errors.push(`useAppConfigSync.js en "${name}" procesa telemetría pero carece de soporte híbrido (toMillis / fallback de Number) para triggerTelemetryReport.`);
+    }
+    if (content.includes('triggerPing') && !content.includes('toMillis')) {
+      errors.push(`useAppConfigSync.js en "${name}" procesa ping pero carece de soporte híbrido (toMillis / fallback de Number) para triggerPing.`);
+    }
+  } catch (err) {
+    errors.push(`Error leyendo useAppConfigSync.js en "${name}": ${err.message}`);
+  }
+  return errors;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const dryRun      = args.includes('--dry-run')    || args.includes('-d');
@@ -172,6 +216,19 @@ async function main() {
   if (!await fs.pathExists(fuente)) {
     console.error(pc.red(`❌ La carpeta fuente de desarrollo no existe en el disco: ${fuente}`));
     process.exit(1);
+  }
+
+  // ── Paso 0.5: Auditar integridad del hook de telemetría en el origen ─────
+  const hookSourcePath = path.join(fuente, 'src', 'hooks', 'useAppConfigSync.js');
+  if (await fs.pathExists(hookSourcePath)) {
+    const hookErrors = await auditarIntegridadHook(hookSourcePath, targetTemplateName);
+    if (hookErrors.length > 0) {
+      console.error(pc.red('\n❌ ERROR DE SINCRONIZACIÓN (VULNERABILIDAD DE TELEMETRÍA DETECTADA):'));
+      hookErrors.forEach(err => console.error(pc.red(`   - ${err}`)));
+      console.log(pc.yellow('\n💡 La sincronización ha sido abortada para proteger el canal de telemetría downstream.'));
+      console.log(pc.yellow('   Por favor, corrige useAppConfigSync.js en el core antes de sincronizar.\n'));
+      process.exit(1);
+    }
   }
 
   // Detectar carpetas de documentación locales de la plantilla core

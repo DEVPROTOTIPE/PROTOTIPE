@@ -130,6 +130,9 @@ const CLI_ROOT = __dirname;
 const TEMPLATES_DIR = path.join(CLI_ROOT, 'templates');
 const WORKER_PATH  = path.join(CLI_ROOT, 'worker_create_project.js');
 
+// Locks globales de sincronización para prevenir condiciones de carrera (Race Conditions)
+const syncLocks = {};
+
 // Tiempo máximo de aprovisionamiento antes de considerar el proceso como colgado (10 min)
 const WORKER_TIMEOUT_MS = 10 * 60 * 1000;
 
@@ -1518,19 +1521,41 @@ async function performCoreSync(clave, CLI_ROOT, options = {}) {
 
   // 2. Sincronizar código core → templates/
   const SYNC_PATHS = [
+    // Directorios estándar de código y recursos React
     'src/components', 'src/hooks', 'src/services', 'src/store',
     'src/layouts', 'src/pages', 'src/routes', 'src/utils',
     'src/constants', 'src/schemas', 'src/types', 'src/providers',
-    'src/config', 'src/App.jsx', 'src/App.css', 'src/index.css', 'src/main.jsx',
+    'src/config', 'src/context', 'src/theme', 'src/styles',
+    'src/locales', 'src/features', 'src/state', 'src/assets',
+    
+    // Archivos de entrada y hojas de estilo base
+    'src/App.jsx', 'src/App.tsx', 'src/App.css', 'src/index.css',
+    'src/main.jsx', 'src/main.tsx',
+    
+    // Archivos de configuración de Firebase, PWA y Bundlers
     'firestore.indexes.json', 'firestore.rules', 'storage.rules',
-    'vite.config.js', 'eslint.config.js', 'GEMINI.md',
+    'vite.config.js', 'vite.config.ts', 'eslint.config.js',
+    'tailwind.config.js', 'tailwind.config.ts',
+    'postcss.config.js', 'postcss.config.cjs', 'postcss.config.ts',
+    'tsconfig.json', 'jsconfig.json',
+    
+    // Documentación central y punto de entrada HTML
+    'GEMINI.md', '.env.example', '.cursorrules',
     'index.html', 'public'
   ];
 
   const EXCLUDE_FROM_TEMPLATE = new Set([
+    // Archivos locales secretos o de configuración de hosting específicos
     '.env.local', '.env', '.firebaserc', 'firebase.json',
-    'dist', 'node_modules', '.git', '.firebase',
-    'scratch', 'playwright-report', 'test-results', '.gitkeep'
+    
+    // Entornos de compilación y dependencias
+    'dist', 'node_modules', '.git', '.firebase', '.vite', '.eslintcache', '.parcel-cache',
+    
+    // Carpetas de desarrollo y pruebas locales
+    'scratch', 'playwright-report', 'test-results', '.gitkeep',
+    
+    // Archivos temporales y metadatos de sistema operativo
+    '.DS_Store', 'Thumbs.db', 'npm-debug.log', 'yarn-error.log', 'pnpm-debug.log', 'firebase-debug.log'
   ]);
 
   await fs.ensureDir(templatePath);
@@ -1763,6 +1788,14 @@ app.post('/api/cores/:clave/activate', async (req, res) => {
 app.post('/api/cores/:clave/sync', async (req, res) => {
   const { clave } = req.params;
   const prune = req.body.prune === true;
+
+  if (syncLocks[clave]) {
+    return res.status(429).json({ 
+      error: `Ya existe un proceso de sincronización activo para el Core "${clave}". Por favor, espera a que termine.` 
+    });
+  }
+
+  syncLocks[clave] = true;
   try {
     const { synced, templatePath } = await performCoreSync(clave, CLI_ROOT, { prune });
     res.json({
@@ -1773,6 +1806,8 @@ app.post('/api/cores/:clave/sync', async (req, res) => {
   } catch (err) {
     console.error(`[API /cores/${clave}/sync] Error: ${err.message}`);
     res.status(500).json({ error: `Error al sincronizar la plantilla: ${err.message}` });
+  } finally {
+    delete syncLocks[clave];
   }
 });
 
@@ -1868,19 +1903,41 @@ app.get('/api/cores/:clave/drift', async (req, res) => {
     }
 
     const SYNC_PATHS = [
+      // Directorios estándar de código y recursos React
       'src/components', 'src/hooks', 'src/services', 'src/store',
       'src/layouts', 'src/pages', 'src/routes', 'src/utils',
       'src/constants', 'src/schemas', 'src/types', 'src/providers',
-      'src/config', 'src/App.jsx', 'src/App.css', 'src/index.css', 'src/main.jsx',
+      'src/config', 'src/context', 'src/theme', 'src/styles',
+      'src/locales', 'src/features', 'src/state', 'src/assets',
+      
+      // Archivos de entrada y hojas de estilo base
+      'src/App.jsx', 'src/App.tsx', 'src/App.css', 'src/index.css',
+      'src/main.jsx', 'src/main.tsx',
+      
+      // Archivos de configuración de Firebase, PWA y Bundlers
       'firestore.indexes.json', 'firestore.rules', 'storage.rules',
-      'vite.config.js', 'eslint.config.js', 'GEMINI.md',
+      'vite.config.js', 'vite.config.ts', 'eslint.config.js',
+      'tailwind.config.js', 'tailwind.config.ts',
+      'postcss.config.js', 'postcss.config.cjs', 'postcss.config.ts',
+      'tsconfig.json', 'jsconfig.json',
+      
+      // Documentación central y punto de entrada HTML
+      'GEMINI.md', '.env.example', '.cursorrules',
       'index.html', 'public'
     ];
 
     const EXCLUDE_FROM_TEMPLATE = new Set([
+      // Archivos locales secretos o de configuración de hosting específicos
       '.env.local', '.env', '.firebaserc', 'firebase.json',
-      'dist', 'node_modules', '.git', '.firebase',
-      'scratch', 'playwright-report', 'test-results', '.gitkeep'
+      
+      // Entornos de compilación y dependencias
+      'dist', 'node_modules', '.git', '.firebase', '.vite', '.eslintcache', '.parcel-cache',
+      
+      // Carpetas de desarrollo y pruebas locales
+      'scratch', 'playwright-report', 'test-results', '.gitkeep',
+      
+      // Archivos temporales y metadatos de sistema operativo
+      '.DS_Store', 'Thumbs.db', 'npm-debug.log', 'yarn-error.log', 'pnpm-debug.log', 'firebase-debug.log'
     ]);
 
     const collectFilesLocal = async (baseDir, relPath, resultList = []) => {

@@ -211,6 +211,15 @@ async function main() {
     console.log(pc.yellow(`2. Ejecuta: npm run dev`));
     console.log(pc.bold(pc.yellow('\n📋 CHECKLIST DE APROVISIONAMIENTO OBLIGATORIO:')));
     console.log(pc.white(`Token generado para este cliente: ${pc.cyan(result.uniqueToken)}`));
+    // [BLINDAJE-SEGURIDAD] Mostrar la contraseña admin única generada para este cliente.
+    // Guardarla en un lugar seguro — no se puede recuperar después.
+    if (result.adminPassword) {
+      console.log(pc.bold(pc.yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')));
+      console.log(pc.bold(pc.yellow('🔑 CREDENCIALES ADMIN (únicas, guárdalas ahora):')));
+      console.log(pc.white(`   Email:    ${pc.cyan(`admin@${answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.com`)}`));
+      console.log(pc.white(`   Password: ${pc.cyan(result.adminPassword)}`));
+      console.log(pc.bold(pc.yellow('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')));
+    }
     console.log(pc.green('✓ Instancia y token auto-registrados en Consola Central (Firestore).'));
     console.log(pc.green('✓ Service Worker de notificaciones y .firebaserc pre-vinculados.'));
     console.log(pc.bold(pc.green('====================================================\n')));

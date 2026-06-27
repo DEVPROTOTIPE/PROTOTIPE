@@ -1,6 +1,181 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
-### [2026-06-27] - CORE-101: Eliminación de Selector Interactivo de Ramas y Robustecimiento del Backup
+### [2026-06-27] - CORE-115/116: Respaldos No Disruptivos y Activación por Defecto del Auto-Merge
+
+* **Tipo:** Refactorización / Control de Versiones / UX/UI / Robustez / Git
+* **Firma de auditoría:** CORE-115-116-NON-DISRUPTIVE-BACKUP
+* **Descripción de Cambios:**
+  - **T1 — Remoción de Cierre Forzado de Procesos (CORE-115):** Se eliminó la rutina que invocaba `Stop-Process` contra servidores de desarrollo Vite/Node activos en los scripts de respaldo de PowerShell (`git_backup.ps1`, `subproject_backup.ps1`, `menu_backup.ps1`). Dado que el motor de renombrado temporal de repositorios Git (`.git` <-> `.git-backup-temp`) cuenta con un bucle tolerante de reintentos y que Vite ignora la carpeta `.git`, la detención de procesos resultaba redundante y causaba el cierre abrupto del Dashboard y aplicaciones cliente.
+  - **T2 — Auto-Merge a Producción Activado por Defecto (CORE-116):** Se modificó el valor inicial del estado `doAutoMerge` de `false` a `true` en el componente [`GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) del Dashboard. Esto asegura que, por defecto, los respaldos guarden y envíen los cambios a la rama de desarrollo (ej. `develop`) y ejecuten automáticamente el Auto-Merge y push hacia la rama principal (`master` o `main`), regresando el HEAD local de forma transparente a `develop`.
+* **Archivos Modificados:**
+  - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+  - [`menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
+### [2026-06-27] - CORE-114: Robustecimiento de Inicialización de Firebase (Resguardo HMR)
+
+* **Tipo:** Corrección de Errores / Robustez / Firebase / HMR
+* **Firma de auditoría:** CORE-114-FIREBASE-HMR-ROBUSTNESS
+* **Descripción de Cambios:**
+  - **T1 — Resguardo contra inicialización duplicada de Firebase App:** En `firebaseConfig.js` (en core-templates e instancias), se actualizó la inicialización del objeto `FirebaseApp` utilizando una comprobación del arreglo de aplicaciones activas: `const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()`. Esto previene el error `Firebase App named '[DEFAULT]' already exists` durante las recargas en caliente de Vite (HMR) al guardar cambios.
+  - **T2 — Resguardo contra inicialización duplicada de Firestore:** Para evitar el crash asociado al re-intento de inicialización de Firestore con caché local activa en recargas de HMR, se encapsuló `initializeFirestore` en un bloque `try/catch` que recurre a `getFirestore(app)` si el servicio ya ha sido inicializado.
+* **Archivos Modificados:**
+  - [`Plantillas Core/App Ventas/src/config/firebaseConfig.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/config/firebaseConfig.js) [MODIFY]
+  - [`Instancias Clientes/ventas/ventas-moni-app/src/config/firebaseConfig.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/config/firebaseConfig.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-ventas/src/config/firebaseConfig.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/config/firebaseConfig.js) [MODIFY]
+
+---
+
+### [2026-06-27] - CORE-113: Ajustes Visuales, Corrección de Enlaces y Optimización CRO en Landing
+
+* **Tipo:** Corrección de Errores / Visual / UX/UI / CRO / HMR
+* **Descripción de Cambios:**
+  - **V1 — Regalos Reales de Nicho:** Se adaptaron los 8 nichos de la landing page para ofrecer "Actualizaciones automáticas del sistema + soporte técnico gratuito" en lugar de plantillas ficticias no disponibles.
+  - **V2 — Enlace a WhatsApp:** Corrección de interpolación rota de la variable `${phone}` en el link de WhatsApp de la landing page removiendo el escape de barra invertida (`\`).
+  - **V3 — Exclusión de Botón Magnético:** Se removió el efecto de botón magnético interactivo al botón "Solicitar esta solución por WhatsApp" (`#config-cta-btn`) por inconsistencia visual con el panel estático de cotización.
+  - **V4 — Rediseño Clave de Simulador:** Se reemplazó la tarjeta gris y oscura de pérdidas financieras por un diseño limpio y claro coherente con los tokens y el lenguaje visual claro de la landing page.
+  - **V5 — Diseño de Píldora de Regalo:** Ajuste del border-radius de la píldora de regalo de un estilo pill circular (50px) a un cuadrado redondeado (10px) para mantener consistencia geométrica con las tarjetas.
+  - **V6 — Forzar Scroll al Inicio:** Integración de la rutina scrollRestoration yscrollTo para asegurar que al recargar la página inicie siempre desde el tope (0,0).
+  - **V7 — Corrección de HMR en App Ventas Core:** Reubicación de los imports de `updateDynamicManifest` y `useConnectivityStore` al inicio del archivo `App.jsx` para evitar el crash de `Cannot read properties of null (reading 'inst')` en Zustand v5 al re-evaluar en HMR de Vite.
+* **Archivos Modificados:**
+  - [`LandingPage/js/app.js`](file:///d:/PROTOTIPE/LandingPage/js/app.js) [MODIFY]
+  - [`LandingPage/css/styles.css`](file:///d:/PROTOTIPE/LandingPage/css/styles.css) [MODIFY]
+  - [`LandingPage/Index.html`](file:///d:/PROTOTIPE/LandingPage/Index.html) [MODIFY]
+  - [`LandingPage/sw.js`](file:///d:/PROTOTIPE/LandingPage/sw.js) [MODIFY]
+  - [`Plantillas Core/App Ventas/src/App.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
+
+---
+
+### [2026-06-27] - CORE-112: Formulación de Propuestas Avanzadas de Persuasión y Captación
+
+* **Tipo:** Conversión / Estrategia / Documentación / CRO
+* **Descripción de Cambios:**
+  - **P1 — Reciprocidad con Lead Magnets:** Diseño de estrategia de entrega de plantillas y recursos gratuitos (regalos de nicho) en la redirección de WhatsApp para aumentar CTR de captación.
+  - **P2 — Anclaje Financiero:** Propuesta de comparación visual entre pérdidas operativas vs costo de suscripción para transformar el software en una inversión de ahorro.
+  - **P3 — Storytelling de Dolor y Alivio:** Re-estructuración de testimonios como arcos narrativos breves enfocados en la salida al dolor de cabeza del mostrador.
+  - **P4 — Progreso Dotado:** Integración conceptual de un indicador de porcentaje de digitalización para motivar al cliente a cerrar la brecha con una llamada.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/propuestas_persuasion_captacion_avanzada_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/propuestas_persuasion_captacion_avanzada_2026.md) [NEW]
+
+---
+
+### [2026-06-27] - CORE-111: Elaboración de Propuesta de Conversión Psicológica y CRO para Landing Page
+
+* **Tipo:** Conversión / Estrategia / Documentación / CRO
+* **Descripción de Cambios:**
+  - **C1 — Diagnóstico del Dolor del Cliente:** Análisis de disparadores cognitivos aplicados a dueños de pymes tradicionales, formulando copy enfocado a la aversión a la pérdida.
+  - **C2 — Humanización de la Prueba Social:** Reemplazo de emojis de perfil por mini-casos de éxito con rostros reales y nombres comerciales.
+  - **C3 — Simulador del Dolor Financiero:** Propuesta de un calculador interactivo del impacto económico para inducir urgencia de compra.
+  - **C4 — Personalización Dinámica:** Estructura de renderizado dinámico contextual de la landing en base al nicho/rubro seleccionado.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/propuesta_conversion_psicologica_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/propuesta_conversion_psicologica_2026.md) [NEW]
+
+---
+
+### [2026-06-27] - CORE-110: Auditoría Técnica, SEO, CRO y Accesibilidad de la Landing Page
+
+* **Tipo:** Auditoría / UX/UI / SEO / CRO / Rendimiento / Accesibilidad
+* **Descripción de Cambios:**
+  - **T1 — Auditoría Técnica Integral:** Diagnóstico a fondo del archivo monolítico `Index.html` de 7017 líneas y 293 KB y del service worker `sw.js`. Se evaluó la arquitectura monolítica (falta de caché modular independiente para CSS/JS) y se analizó la velocidad y rendimiento en el renderizado inicial.
+  - **T2 — Análisis de Accesibilidad Crítica (a11y):** Detección de violaciones críticas de los estándares WCAG: (1) Secuestro global de selección de texto (`user-select: none !important`), que degrada severamente la usabilidad y rompe utilidades del navegador y extensiones de traducción. (2) Destrucción del foco visible (`outline: none !important`), que impide la navegación mediante teclado a usuarios con discapacidades motoras/visuales.
+  - **T3 — Análisis de Conversión (CRO):** Diagnóstico de la fricción del modal agresivo de captura de leads que intercepta los enlaces de WhatsApp, interrumpiendo el flujo del usuario y provocando fugas de prospectos. Se propuso una estrategia transparente y opcional de captura.
+  - **T4 — Saneamiento de Caching en Service Worker:** Detección de discrepancias en Google Fonts entre la URL precargada en `sw.js` (que busca `Plus Jakarta Sans`) y las familias tipográficas reales del HTML (`Inter` y `Outfit`), lo que genera desperdicio de ancho de banda y pérdida del beneficio offline.
+  - **T5 — Plan de Acción Ordenado por Prioridad:** Diseño de una refactorización modular completa para desacoplar estilos, lógica interactiva y marcado semántico, unificando los IntersectionObservers y limitando las animaciones del Canvas en móviles para optimizar la interacción al siguiente renderizado (INP).
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_landing_page_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_landing_page_2026.md) [MODIFY]
+
+---
+
+### [2026-06-27] - CORE-109: Integración de la Landing Page en el Dev-Dashboard
+
+* **Tipo:** Alojamiento / Routing / UX / Dashboard
+* **Descripción de Cambios:**
+  - **L1 — Despliegue de Landing Estática:** Integración de `Index.html` y `sw.js` en `public/landing/` del dev-dashboard.
+  - **L2 — Enrutamiento y Persistencia de Tema:** Enrutado directo a `/landing/index.html` para evitar caídas de SPA y aislamiento de estados de tema en localStorage para prevenir colisiones entre dashboard y landing.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/public/landing/index.html`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/public/landing/index.html) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/public/landing/sw.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/public/landing/sw.js) [NEW]
+
+---
+
+### [2026-06-27] - CORE-108: Robustez Concurrente en Test de Humo y Filtro de Comentarios en Sanitización
+
+* **Tipo:** Robustez / Concurrencia / Scripts / CLI
+* **Descripción de Cambios:**
+  - **C1 — Puerto Dinámico en Test de Humo:** Mapeo de puerto libre mediante el módulo `net` en lugar de puerto `5190` fijo, eliminando fallas por colisión de puertos concurrentes en creaciones simultáneas de proyectos.
+  - **C2 — Filtro de Comentarios en Env:** Exclusión de líneas comentadas (`#`) al leer `.env.local` en `sync_templates.js` para evitar contaminación e inyección de tokens incorrectos.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/worker_create_project.js`](file:///d:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+  - [`Prototipe-CLI/sync_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY]
+
+---
+
+### [2026-06-27] - CORE-107: Robustez Híbrida de Triggers y Validación Preventiva en Aprovisionador
+
+* **Tipo:** Robustez / Validación / Firebase / Aprovisionamiento
+* **Descripción de Cambios:**
+  - **T1 — Parseo Híbrido de Timestamps:** Soporte para leer timestamps de Firestore tanto como enteros primitivos como objetos `Timestamp` mediante `.toMillis()`, evitando caídas en telemetría.
+  - **T2 — Validación Preflight en CLI:** Comprobación estricta de variables del desarrollador (`VITE_DEVELOPER_CENTRAL_API_KEY`) previniendo aprovisionamientos rotos.
+* **Archivos Modificados:**
+  - [`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+---
+
+### [2026-06-26] - CORE-106: Blindaje Automatizado y Guardianes Estáticos de Telemetría en el CLI
+
+* **Tipo:** Blindaje / Test de Integración / Seguridad / Calidad
+* **Descripción de Cambios:**
+  - **T1 — Guardián Estático en Sync:** Implementación de comprobación sintáctica del hook cliente (`useAppConfigSync.js`) antes del sync.
+  - **T2 — Integración en Test Runner:** Añadido de test de telemetría como paso del runner de pruebas estáticas de plantillas del CLI.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/sync_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY]
+  - [`Prototipe-CLI/test_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/test_templates.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_arquitectonico_ecosistema.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/estandar_arquitectonico_ecosistema.md) [MODIFY]
+
+---
+
+### [2026-06-26] - CORE-105: Auto-Respuesta Silenciosa de Telemetría y Restauración de Valores Reales en Test de Telemetría
+
+* **Tipo:** Telemetría / Correlación / Sync / Zustand
+* **Descripción de Cambios:**
+  - **T1 — Emisión de Telemetría Real:** Intercepción del trigger `triggerTelemetryReport` en el cliente y propagación del reporte con métricas en tiempo real.
+  - **B1 — Corrección de Reportes de $0:** Modificación de la validación a `typeof totalMes === 'number'` para reportar adecuadamente el balance de tiendas vacías sin abortar el envío.
+* **Archivos Modificados:**
+  - [`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+---
+
+### [2026-06-26] - CORE-104: Potenciación y Siembra Automática del Generador
+
+* **Tipo:** Aprovisionador / Automatización / Seeding / Firestore
+* **Descripción de Cambios:**
+  - **A1 — Asignación de Puertos Dinámicos:** Mapeo de puertos Vite basado en hash de `clientId` para evitar colisiones en desarrollo multi-instancia.
+  - **A2 — Sembrado REST Firebase Auth/Firestore:** Generación de `seed_admin.js` para crear usuario admin administrativo de forma programática.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+---
+
+### [2026-06-26] - CORE-103: Blindaje de Seguridad y Robustez en generator.js (Round 2)
+
+* **Tipo:** Seguridad / Aprovisionamiento / Multi-instancia
+* **Descripción de Cambios:**
+  - **S1 — Contraseña Admin Impredecible:** Generación de clave única por instancia en lugar de credencial estática.
+  - **S2 — Timeout de Aprovisionamiento:** Mapeo preventivo con `Promise.allSettled` y límites de tiempo para mitigar cortes de red.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+---
+
+### [2026-06-26] - CORE-101: Eliminación de Selector Interactivo de Ramas y Robustecimiento del Backup
 
 * **Tipo:** Refactorización / Corrección de Bugs / Scripts de PowerShell
 * **Descripción de Cambios:**

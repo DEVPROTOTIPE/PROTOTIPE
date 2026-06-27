@@ -102,12 +102,63 @@ function auditarDependencias(pkg, name) {
         const goldenMajor = parseInt(goldenMatch[0], 10);
         
         if (currentMajor !== goldenMajor) {
-          warnings.push(`Diferencia de versión en "${depName}": plantilla usa ${currentVersion}, Core recomienda ${goldenVersion}`);
-        }
-      }
-    }
+           warnings.push(`Diferencia de versión en "${depName}": plantilla usa ${currentVersion}, Core recomienda ${goldenVersion}`);
+         }
+       }
+     }
+   }
+   return warnings;
+}
+
+/**
+ * Audita la estructura lógica del hook useAppConfigSync.js para garantizar el blindaje de la telemetría.
+ * @param {string} destino Dir del template
+ * @param {string} name Nombre del template
+ * @returns {string[]} Lista de errores de blindaje
+ */
+function auditarIntegridadHook(destino, name) {
+  const errors = [];
+  const hookPath = path.join(destino, 'src', 'hooks', 'useAppConfigSync.js');
+  
+  if (!fs.existsSync(hookPath)) {
+    return errors;
   }
-  return warnings;
+  
+  try {
+    const content = fs.readFileSync(hookPath, 'utf8');
+    
+    // 1. Validar que procesa triggerTelemetryReport
+    if (!content.includes('triggerTelemetryReport')) {
+      errors.push(`useAppConfigSync.js en "${name}" no contiene referencias a "triggerTelemetryReport". El canal de telemetría remota está ausente.`);
+    }
+    
+    // 2. Validar que NO usa el patrón vulnerable
+    if (content.includes('if (metrics && metrics.totalMes)')) {
+      errors.push(`useAppConfigSync.js en "${name}" contiene el patrón vulnerable "if (metrics && metrics.totalMes)". Bloquea el reporte si las ventas son $0.`);
+    }
+    
+    // 3. Validar que implementa la comprobación de tipo estricta
+    if (content.includes('triggerTelemetryReport') && !content.includes("typeof metrics.totalMes === 'number'")) {
+      errors.push(`useAppConfigSync.js en "${name}" procesa telemetría pero no tiene la comprobación de tipo estricta "typeof metrics.totalMes === 'number'". Riesgo de fallo con $0 en ventas.`);
+    }
+    
+    // 4. Validar control de re-gatillado/expiración (<60s)
+    if (!content.includes('60000') && !content.includes('isExpired')) {
+      errors.push(`useAppConfigSync.js en "${name}" no contiene un mecanismo de antigüedad/expiración (isExpired / 60000ms). Riesgo de reportes duplicados infinitos en page load.`);
+    }
+
+    // 5. Validar soporte híbrido (Timestamp y Number) para triggers
+    if (content.includes('triggerTelemetryReport') && !content.includes('toMillis')) {
+      errors.push(`useAppConfigSync.js en "${name}" procesa telemetría pero carece de soporte híbrido (toMillis / fallback de Number) para triggerTelemetryReport.`);
+    }
+    if (content.includes('triggerPing') && !content.includes('toMillis')) {
+      errors.push(`useAppConfigSync.js en "${name}" procesa ping pero carece de soporte híbrido (toMillis / fallback de Number) para triggerPing.`);
+    }
+  } catch (err) {
+    errors.push(`Error leyendo useAppConfigSync.js en "${name}": ${err.message}`);
+  }
+  
+  return errors;
 }
 
 /**
@@ -206,6 +257,20 @@ async function testPlantilla(name, config, opts) {
     warnings.forEach(w => console.log(pc.yellow(`    ⚠️ ADVERTENCIA: ${w}`)));
   } else {
     console.log(pc.green('    ✓ Todas las dependencias críticas coinciden con el Core de Oro.'));
+  }
+
+  // ── Paso 2.6: Auditar estándares de telemetría en el Hook ─────────────────
+  printSection('Auditando estándares de telemetría y blindaje del Hook...');
+  const hookErrors = auditarIntegridadHook(destino, name);
+  if (hookErrors.length > 0) {
+    hookErrors.forEach(err => console.log(pc.red(`    ✗ ERROR DE BLINDAJE: ${err}`)));
+    result.passed = false;
+    result.skipped = true;
+    result.skipReason = `Fallo en auditoría de estándares de telemetría en useAppConfigSync.js: ${hookErrors.join('; ')}`;
+    result.totalDuration = Date.now() - startTotal;
+    return result;
+  } else {
+    console.log(pc.green('    ✓ Hook useAppConfigSync.js cumple con los estándares de blindaje de telemetría.'));
   }
 
   if (!pkg.scripts || !pkg.scripts.build) {
@@ -457,6 +522,6 @@ async function main() {
 }
 
 main().catch(err => {
-  console.error(pc.red(`\n❌ Error inesperado: ${err.message}\n`));
+  console.error(pc.red(`\n❌ Error inesperado:\n`), err.stack);
   process.exit(1);
 });

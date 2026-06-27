@@ -1,8 +1,10 @@
-const CACHE_NAME = 'prototipe-cache-v1';
+const CACHE_NAME = 'prototipe-cache-v12';
 const ASSETS = [
   '/',
   '/Index.html',
-  'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap'
+  '/css/styles.css',
+  '/js/app.js',
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap'
 ];
 
 self.addEventListener('install', event => {

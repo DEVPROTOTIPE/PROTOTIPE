@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import pc from 'picocolors';
 import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import ora from 'ora';
 import { Jimp } from 'jimp';
 import { getWorkspaceRoot } from './config.js';
@@ -11,6 +11,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const CLI_ROOT = __dirname;
 const TEMPLATES_DIR = path.join(CLI_ROOT, 'templates');
+
+// [ROBUSTEZ] Leer versión del CLI desde su propio package.json para usarla en metadatos de instancias.
+// Evita el hardcode de '1.0.0' que hace imposible rastrear la compatibilidad real de las instancias.
+let CLI_VERSION = '1.0.0';
+try {
+  const cliPkg = await fs.readJson(path.join(CLI_ROOT, 'package.json'));
+  CLI_VERSION = cliPkg.version || '1.0.0';
+} catch (_) {}
 
 function parseHSL(hslStr) {
   if (!hslStr || typeof hslStr !== 'string') return null;
@@ -155,6 +163,16 @@ async function checkEnvironment(answers) {
     }
   }
 
+  // 3. Validar claves de la Consola Central
+  const activeCentralApiKey = answers.centralApiKey || process.env.VITE_DEVELOPER_CENTRAL_API_KEY;
+  if (!activeCentralApiKey) {
+    spinner.fail();
+    throw new Error(
+      'Falta la Clave de API de la Consola Central (VITE_DEVELOPER_CENTRAL_API_KEY). ' +
+      'Por favor, configúrala como variable de entorno en el servidor o provéela en el briefing para permitir el auto-registro del cliente.'
+    );
+  }
+
   spinner.succeed('Preflight check completado con éxito. Entorno verificado y credenciales validadas.');
 }
 
@@ -178,13 +196,26 @@ export async function createProject(answers) {
   } catch (e) {}
   answers.coreType = coreType;
 
-  // Resolver targetDir automáticamente usando getInstancePath
+  // [BLINDAJE-INPUTS] Validar projectName antes de derivar clientId y folderName.
+  // Un nombre con solo caracteres especiales produce clientId='-' o '' que corrompe
+  // .firebaserc, el repo de GitHub y todos los metadatos de la instancia.
+  const rawName = (answers.projectName || '').trim();
+  const clientId = rawName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const folderName = clientId; // Mismo slug normalizado
+
+  if (!clientId || clientId.length < 2) {
+    throw new Error(
+      `El nombre del proyecto "${rawName}" no genera un identificador válido. ` +
+      `Usa al menos 2 caracteres alfanuméricos (letras o números).`
+    );
+  }
+
+  // Declarar targetDir y srcTemplateDir después de validar clientId
   const { getInstancePath } = await import('./config.js');
-  const folderName = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   const targetDir = getInstancePath(coreType, `App-${folderName}`);
   const srcTemplateDir = path.join(TEMPLATES_DIR, answers.template);
 
-  // Resolver colores HSL y Tema de la paleta seleccionada (Auditoría)
+  // Resolver colores HSL y Tema de la paleta seleccionada
   let primaryColor, accentColor, themeName;
   if (answers.paletteChoice === 'custom') {
     primaryColor = answers.customPrimary;
@@ -201,17 +232,47 @@ export async function createProject(answers) {
 
   // 1. Crear directorio de destino y copiar plantilla
   const step1 = ora('Copiar estructura base de plantilla').start();
+  const EXCLUDE_FROM_GEN = new Set([
+    'node_modules', '.git', '.firebase', '.vite', '.eslintcache', '.parcel-cache',
+    '.env.local', 'firebase-debug.log', '.DS_Store', 'Thumbs.db',
+    'npm-debug.log', 'yarn-error.log', 'pnpm-debug.log'
+  ]);
   try {
     if (await fs.pathExists(targetDir)) {
       step1.info('La ruta de destino ya existe. Los archivos se sobrescribirán.');
       step1.start('Copiar estructura base de plantilla');
     }
     await fs.ensureDir(targetDir);
-    await fs.copy(srcTemplateDir, targetDir);
+    await fs.copy(srcTemplateDir, targetDir, {
+      overwrite: true,
+      filter: (src) => !EXCLUDE_FROM_GEN.has(path.basename(src))
+    });
     step1.succeed('Estructura base de plantilla copiada correctamente.');
   } catch (err) {
     step1.fail(`Fallo al copiar plantilla: ${err.message}`);
     throw err;
+  }
+
+  // [BRECHA-C] Validar integridad de firestore.indexes.json tras copiar el template.
+  // Un JSON corrupto, vacío o con estructura inválida hace fallar el firebase deploy de forma
+  // poco descriptiva (error genérico de CLI). Se valida y se reemplaza con la estructura mínima.
+  {
+    const indexesJsonPath = path.join(targetDir, 'firestore.indexes.json');
+    if (await fs.pathExists(indexesJsonPath)) {
+      try {
+        const indexesRaw = await fs.readFile(indexesJsonPath, 'utf-8');
+        const parsed = JSON.parse(indexesRaw);
+        if (!Array.isArray(parsed.indexes) || !Array.isArray(parsed.fieldOverrides)) {
+          throw new Error('Estructura inválida: faltan los arrays "indexes" o "fieldOverrides"');
+        }
+      } catch (indexErr) {
+        console.warn(pc.yellow(`⚠️  firestore.indexes.json inválido (${indexErr.message}). Reemplazando con estructura mínima válida.`));
+        await fs.writeJson(indexesJsonPath, { indexes: [], fieldOverrides: [] }, { spaces: 2 });
+      }
+    } else {
+      await fs.writeJson(indexesJsonPath, { indexes: [], fieldOverrides: [] }, { spaces: 2 });
+      console.log(pc.gray('   ℹ  firestore.indexes.json creado con estructura base (no existía en el template).'));
+    }
   }
 
   // 1.1 Configurar documentación local de la instancia/proyecto (Estándar v2 — 12 archivos)
@@ -284,6 +345,15 @@ export async function createProject(answers) {
       }
     ];
 
+    // Nombres genéricos conocidos usados en templates de core que deben reemplazarse
+    const GENERIC_PLACEHOLDERS = [
+      'Plantilla Core', 'App Ventas', 'App-Ventas', 'Core Seed',
+      'Instancia Base', 'Template Base', 'NombreProyecto', 'ProjectName'
+    ];
+    const genericRegex = new RegExp(GENERIC_PLACEHOLDERS.map(p =>
+      p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // Escapar caracteres especiales de regex
+    ).join('|'), 'g');
+
     // Generar cada archivo: respetar contenido existente (no sobreescribir)
     for (const doc of docStandard) {
       const filePath = path.join(targetDocDir, doc.name);
@@ -292,8 +362,8 @@ export async function createProject(answers) {
       } else {
         // Si existe pero viene del core con contenido genérico de placeholder, adaptar el nombre del proyecto
         let existing = await fs.readFile(filePath, 'utf-8');
-        if (existing.includes('Plantilla Core') || existing.includes('App Ventas')) {
-          existing = existing.replace(/Plantilla Core/g, answers.projectName).replace(/App Ventas/g, answers.projectName);
+        if (GENERIC_PLACEHOLDERS.some(p => existing.includes(p))) {
+          existing = existing.replace(genericRegex, answers.projectName);
           await fs.writeFile(filePath, existing, 'utf-8');
         }
       }
@@ -304,11 +374,25 @@ export async function createProject(answers) {
     stepDoc.warn(`No se pudo inicializar la documentación local: ${docErr.message}`);
   }
 
-  // 2.1 Inyectar colores HSL en caliente en src/index.css
-  const stepCSS = ora('Inyectando variables de tema HSL en src/index.css').start();
+  // 2.1 Inyectar colores HSL en caliente en el archivo de estilos global detectado
+  const stepCSS = ora('Inyectando variables de tema HSL en estilos globales').start();
   try {
-    const indexPathCSS = path.join(targetDir, 'src', 'index.css');
-    if (await fs.pathExists(indexPathCSS)) {
+    const cssCandidates = [
+      path.join(targetDir, 'src', 'index.css'),
+      path.join(targetDir, 'src', 'styles', 'index.css'),
+      path.join(targetDir, 'src', 'styles', 'global.css'),
+      path.join(targetDir, 'src', 'App.css'),
+      path.join(targetDir, 'src', 'index.scss')
+    ];
+    let indexPathCSS = null;
+    for (const cand of cssCandidates) {
+      if (await fs.pathExists(cand)) {
+        indexPathCSS = cand;
+        break;
+      }
+    }
+
+    if (indexPathCSS) {
       let cssContent = await fs.readFile(indexPathCSS, 'utf-8');
       
       const brand = answers.branding || {};
@@ -346,24 +430,41 @@ export async function createProject(answers) {
   --color-action: var(--color-primary);
 }`;
       
-      if (cssContent.includes(':root {')) {
-        cssContent = cssContent.replace(/:root\s*\{[^}]*\}/g, rootVarsBlock);
+      // [BLINDAJE-CSS] Usar un parser de balanceo de llaves en lugar de regex simple
+      // El regex [^}]* falla con propiedades que contienen llaves (ej: @layer, variables complejas)
+      const rootStart = cssContent.search(/:root\s*\{/);
+      if (rootStart !== -1) {
+        let depth = 0;
+        let rootEnd = -1;
+        for (let i = cssContent.indexOf('{', rootStart); i < cssContent.length; i++) {
+          if (cssContent[i] === '{') depth++;
+          else if (cssContent[i] === '}') {
+            depth--;
+            if (depth === 0) { rootEnd = i + 1; break; }
+          }
+        }
+        if (rootEnd !== -1) {
+          cssContent = cssContent.slice(0, rootStart) + rootVarsBlock + cssContent.slice(rootEnd);
+        } else {
+          // Bloque :root malformado — prepend como fallback seguro
+          cssContent = rootVarsBlock + '\n\n' + cssContent;
+        }
       } else {
         cssContent = rootVarsBlock + '\n\n' + cssContent;
       }
-      
+
       await fs.writeFile(indexPathCSS, cssContent, 'utf-8');
-      stepCSS.succeed('Variables de marca completas inyectadas en src/index.css.');
+      stepCSS.succeed(`Variables de marca completas inyectadas en estilos globales (${path.basename(indexPathCSS)}).`);
     } else {
-      stepCSS.info('No se encontró src/index.css para inyectar colores en caliente.');
+      stepCSS.info('No se encontró ningún archivo de estilos global compatible para inyectar colores en caliente.');
     }
   } catch (cssErr) {
-    stepCSS.warn(`Aviso al configurar variables en src/index.css: ${cssErr.message}`);
+    stepCSS.warn(`Aviso al configurar variables en estilos globales: ${cssErr.message}`);
   }
 
   // 3. (Paso omitido: FCM desactivado)
   const step4 = ora('Generar variables de entorno (.env.local)').start();
-  const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  // clientId ya fue declarado y validado al inicio de createProject (L193)
   const initials = (answers.projectName || 'P')
     .split(/[\s-_]+/)
     .filter(Boolean)
@@ -372,6 +473,15 @@ export async function createProject(answers) {
     .toUpperCase()
     .slice(0, 3) || 'P';
   const uniqueToken = (answers.telemetryToken || `${clientId}-token-${Date.now()}`).trim();
+
+  // [BLINDAJE-SEGURIDAD] Generar contraseña admin única e impredecible por instancia.
+  // NUNCA usar una contraseña estática compartida entre todas las instancias.
+  const adminPassword = [
+    Math.random().toString(36).slice(2, 6).toUpperCase(),
+    Math.random().toString(36).slice(2, 6),
+    Math.floor(Math.random() * 9000 + 1000),
+    '!'
+  ].join('');
 
   // Sanitizar todos los inputs eliminando espacios accidentales
   const fbApiKey = String(answers.firebaseApiKey || '').trim();
@@ -391,9 +501,9 @@ VITE_FIREBASE_APP_ID=${fbAppId}
 VITE_INITIAL_THEME=${themeName}
 VITE_DEVELOPER_EMAIL=${answers.developerEmail || ''}
 
-# Credenciales del Administrador de la Instancia (Autogeneradas)
+# Credenciales del Administrador de la Instancia (Autogeneradas — únicas por instancia)
 VITE_DEVELOPER_ADMIN_EMAIL=admin@${clientId}.com
-VITE_DEVELOPER_ADMIN_PASSWORD=Admin2026!
+VITE_DEVELOPER_ADMIN_PASSWORD=${adminPassword}
 
 # Telemetría de Comisiones del Desarrollador (Centralización Central - HTTPS Blaze)
 VITE_DEVELOPER_TELEMETRY_ENDPOINT=https://reporttelemetry-bkwhzlbhlq-uc.a.run.app
@@ -710,7 +820,9 @@ test-results/
     template: answers.template,
     coreType: answers.coreType || 'seed',
     niche: answers.niche || 'general_custom',
-    version: '1.0.0',
+    // [ROBUSTEZ] Versión real del CLI que creó esta instancia — no hardcodeada.
+    // Permite al sistema de sincronización detectar incompatibilidades futuras.
+    generatorVersion: CLI_VERSION,
     createdAt: new Date().toISOString()
   };
   await fs.writeJson(path.join(targetDir, '.prototipe.json'), prototipeMeta, { spaces: 2 });
@@ -776,11 +888,13 @@ test-results/
     const seoDescription = answers.seoDescription || `${seoTitle} - Plataforma a la medida para la gestión de ventas, inventario y servicios.`;
     const seoKeywords = answers.seoKeywords || `${seoTitle}, ventas, inventario, facturación, ecosistema, control`;
     
-    // Reemplazar <title>
-    if (indexContent.includes('<title>')) {
-      indexContent = indexContent.replace(/<title>[^<]*<\/title>/, `<title>${seoTitle}</title>`);
+    // [BLINDAJE-SEO] Regex insensible a mayúsculas/minúsculas y tolerante a atributos extra en la etiqueta <title>
+    // Ej: <TITLE lang="es">...</TITLE> o <title   > también se detectan y reemplazan correctamente
+    const titleRegex = /<title[^>]*>[^<]*<\/title>/i;
+    if (titleRegex.test(indexContent)) {
+      indexContent = indexContent.replace(titleRegex, `<title>${seoTitle}</title>`);
     } else {
-      indexContent = indexContent.replace('</head>', `    <title>${seoTitle}</title>\n  </head>`);
+      indexContent = indexContent.replace(/<\/head>/i, `    <title>${seoTitle}</title>\n  </head>`);
     }
 
     // Limpiar metatags SEO viejos si existen en el template (tolerancia HTML5)
@@ -947,27 +1061,255 @@ console.log('✅ Mapa de arquitectura para la IA generado.');
 
   await fs.writeFile(path.join(scratchDir, 'generate_ia_map.js'), mapScriptContent, 'utf-8');
 
-  // Ejecutar de forma síncrona el mapa de IA inicial
+  // [BLINDAJE-TIMEOUT] Ejecutar el mapa de IA con timeout para evitar bloqueos por symlinks o discos lentos
   try {
-    execSync('node scratch/generate_ia_map.js', { cwd: targetDir, stdio: 'ignore' });
+    execSync('node scratch/generate_ia_map.js', { cwd: targetDir, stdio: 'ignore', timeout: 10000 });
   } catch (mapErr) {
     console.warn(`[Auto-Map] No se pudo autogenerar el mapa de IA inicial: ${mapErr.message}`);
   }
 
-  // 7.1. Configurar package.json con el nombre del proyecto de marca blanca
-  const stepPkg = ora('Configurando package.json con la marca del cliente').start();
+  // 7.1. Configurar package.json con el nombre del proyecto de marca blanca y el script de seed
+  const stepPkg = ora('Configurando package.json y scripts de la marca').start();
   try {
     const targetPkgPath = path.join(targetDir, 'package.json');
     if (await fs.pathExists(targetPkgPath)) {
       const pkg = await fs.readJson(targetPkgPath);
       pkg.name = `app-${clientId}`;
+      
+      // Inyectar script de seed admin
+      pkg.scripts = pkg.scripts || {};
+      pkg.scripts['seed:admin'] = 'node scripts/seed_admin.js';
+      
       await fs.writeJson(targetPkgPath, pkg, { spaces: 2 });
-      stepPkg.succeed(`package.json actualizado con la marca blanca: app-${clientId}`);
+      stepPkg.succeed(`package.json actualizado con la marca blanca (app-${clientId}) y script seed:admin.`);
     } else {
       stepPkg.info('No se encontró package.json en la plantilla para personalizar el nombre.');
     }
+
+    // [BRECHA-A] Crear el script scripts/seed_admin.js
+    const scriptsDir = path.join(targetDir, 'scripts');
+    await fs.ensureDir(scriptsDir);
+    
+    const seedAdminContent = `import fs from 'fs';
+import path from 'path';
+import os from 'os';
+
+// 1. Leer .env.local
+const envPath = path.join(process.cwd(), '.env.local');
+if (!fs.existsSync(envPath)) {
+  console.error("❌ Error: No se encontró .env.local en la raíz.");
+  process.exit(1);
+}
+
+const envContent = fs.readFileSync(envPath, 'utf-8');
+const env = {};
+envContent.split('\\n').forEach(line => {
+  const match = line.match(/^\\s*([\\w.]+)\\s*=\\s*(.*)\\s*$/);
+  if (match) {
+    env[match[1]] = match[2].replace(/['"\\\\\\x60]/g, '').trim();
+  }
+});
+
+const apiKey = env.VITE_FIREBASE_API_KEY;
+const projectId = env.VITE_FIREBASE_PROJECT_ID;
+const adminEmail = env.VITE_DEVELOPER_ADMIN_EMAIL;
+const adminPassword = env.VITE_DEVELOPER_ADMIN_PASSWORD;
+const clientId = env.VITE_DEVELOPER_CLIENT_ID;
+const theme = env.VITE_INITIAL_THEME || 'emerald';
+
+if (!apiKey || !projectId || !adminEmail || !adminPassword) {
+  console.error("❌ Error: Faltan variables de Firebase en .env.local");
+  process.exit(1);
+}
+
+// 2. Obtener Token del Desarrollador (Firebase CLI)
+function getDeveloperAccessToken() {
+  const possiblePaths = [
+    path.join(os.homedir(), '.config', 'configstore', 'firebase-tools.json'),
+    path.join(process.env.APPDATA || '', 'configstore', 'firebase-tools.json')
+  ];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      try {
+        const data = JSON.parse(fs.readFileSync(p, 'utf-8'));
+        if (data.tokens && data.tokens.access_token) {
+          return data.tokens.access_token;
+        }
+      } catch (_) {}
+    }
+  }
+  return null;
+}
+
+const devToken = getDeveloperAccessToken();
+if (!devToken) {
+  console.error("❌ Error: No se pudo obtener la sesión de Firebase CLI. Ejecuta: firebase login");
+  process.exit(1);
+}
+
+async function run() {
+  console.log(\`🤖 Iniciando siembra para la instancia [\${clientId}]...\`);
+  
+  // A. Registrar el Admin en Firebase Auth (REST)
+  let uid = '';
+  try {
+    console.log(\`🔑 Creando cuenta de administrador en Firebase Auth (\${adminEmail})...\`);
+    const signupRes = await fetch(\`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=\${apiKey}\`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: adminEmail,
+        password: adminPassword,
+        returnSecureToken: true
+      })
+    });
+    
+    const signupData = await signupRes.json();
+    if (!signupRes.ok) {
+      if (signupData.error && signupData.error.message === 'EMAIL_EXISTS') {
+        console.log(\`ℹ️  El correo \${adminEmail} ya existe en Firebase Auth. Intentando obtener UID...\`);
+        const signinRes = await fetch(\`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=\${apiKey}\`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: adminEmail,
+            password: adminPassword,
+            returnSecureToken: true
+          })
+        });
+        const signinData = await signinRes.json();
+        if (!signinRes.ok) {
+          throw new Error(\`Fallo de autenticación: \${signinData.error?.message || 'Error desconocido'}\`);
+        }
+        uid = signinData.localId;
+      } else {
+        throw new Error(signupData.error?.message || 'Error desconocido al registrar usuario.');
+      }
+    } else {
+      uid = signupData.localId;
+      console.log(\`✅ Administrador creado en Firebase Auth con UID: \${uid}\`);
+    }
   } catch (err) {
-    stepPkg.warn(`Aviso al configurar package.json: ${err.message}`);
+    console.error(\`❌ Error en Firebase Auth: \${err.message}\`);
+    process.exit(1);
+  }
+
+  // B. Escribir perfil del Admin en Firestore (bypasseando reglas con token OAuth2 de firebase-tools)
+  try {
+    console.log(\`🗄️  Escribiendo rol administrativo en users/\${uid}...\`);
+    const userDocUrl = \`https://firestore.googleapis.com/v1/projects/\${projectId}/databases/(default)/documents/users/\${uid}?updateMask.fieldPaths=email&updateMask.fieldPaths=role&updateMask.fieldPaths=nombre&updateMask.fieldPaths=updatedAt\`;
+    const userPayload = {
+      name: \`projects/\${projectId}/databases/(default)/documents/users/\${uid}\`,
+      fields: {
+        email: { stringValue: adminEmail },
+        role: { stringValue: 'admin' },
+        nombre: { stringValue: 'Administrador' },
+        updatedAt: { stringValue: new Date().toISOString() }
+      }
+    };
+    
+    const userRes = await fetch(userDocUrl, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': \`Bearer \${devToken}\`
+      },
+      body: JSON.stringify(userPayload)
+    });
+    
+    if (!userRes.ok) {
+      const errText = await userRes.text();
+      throw new Error(\`HTTP \${userRes.status}: \${errText}\`);
+    }
+    console.log(\`✅ Perfil de administrador guardado en Firestore.\`);
+  } catch (err) {
+    console.error(\`❌ Error al escribir perfil en Firestore: \${err.message}\`);
+    process.exit(1);
+  }
+
+  // C. Escribir config/settings en Firestore
+  try {
+    console.log(\`⚙️  Creando configuración inicial del negocio (config/settings)...\`);
+    const settingsUrl = \`https://firestore.googleapis.com/v1/projects/\${projectId}/databases/(default)/documents/config/settings\`;
+    const settingsPayload = {
+      fields: {
+        appName: { stringValue: clientId.toUpperCase().replace(/-/g, ' ') },
+        sellerName: { stringValue: 'Administrador' },
+        appIcon: { stringValue: '' },
+        theme: { stringValue: theme },
+        whatsappAdmin: { stringValue: '' },
+        adminRegistered: { booleanValue: true },
+        appFont: { stringValue: 'inter' },
+        appRadius: { stringValue: 'rounded' },
+        animationsEnabled: { booleanValue: true },
+        updatedAt: { stringValue: new Date().toISOString() }
+      }
+    };
+    
+    const settingsRes = await fetch(settingsUrl, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': \`Bearer \${devToken}\`
+      },
+      body: JSON.stringify(settingsPayload)
+    });
+    
+    if (!settingsRes.ok) {
+      const errText = await settingsRes.text();
+      throw new Error(\`HTTP \${settingsRes.status}: \${errText}\`);
+    }
+    console.log(\`✅ Configuración config/settings inicializada.\`);
+  } catch (err) {
+    console.error(\`❌ Error al escribir config/settings: \${err.message}\`);
+    process.exit(1);
+  }
+
+  console.log(\`\\n🎉 ¡Siembra completada con éxito!\`);
+  console.log(\`   - Usuario: \${adminEmail}\`);
+  console.log(\`   - Contraseña: \${adminPassword}\`);
+  console.log(\`   - Configuración base del negocio inicializada.\`);
+}
+
+run();
+`;
+    await fs.writeFile(path.join(scriptsDir, 'seed_admin.js'), seedAdminContent, 'utf-8');
+  } catch (err) {
+    stepPkg.warn(`Aviso al configurar package.json/scripts: ${err.message}`);
+  }
+
+  // [BRECHA-B] Personalizar vite.config.js con puerto determinístico único por clientId.
+  // En un ecosistema multi-instancia, si todas usan el puerto 5173 hay colisiones.
+  // El puerto se deriva del hash simple del clientId: rango 5100-5199 (100 puertos únicos).
+  const stepVite = ora('Personalizar vite.config.js con puerto único por instancia').start();
+  try {
+    const viteConfigPath = path.join(targetDir, 'vite.config.js');
+    if (await fs.pathExists(viteConfigPath)) {
+      const devPort = 5100 + (clientId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 100);
+      let viteContent = await fs.readFile(viteConfigPath, 'utf-8');
+
+      if (/server\s*:\s*\{/.test(viteContent)) {
+        // Ya tiene bloque server — inyectar o reemplazar el port dentro de él
+        if (/port\s*:\s*\d+/.test(viteContent)) {
+          viteContent = viteContent.replace(/port\s*:\s*\d+/, `port: ${devPort}`);
+        } else {
+          viteContent = viteContent.replace(/(server\s*:\s*\{)/, `$1\n    port: ${devPort},`);
+        }
+      } else {
+        // No tiene bloque server — añadirlo dentro de defineConfig
+        viteContent = viteContent.replace(
+          /(defineConfig\s*\(\s*\{)/,
+          `$1\n  server: {\n    port: ${devPort},\n    host: true,\n  },`
+        );
+      }
+
+      await fs.writeFile(viteConfigPath, viteContent, 'utf-8');
+      stepVite.succeed(`vite.config.js: puerto ${devPort} asignado determinísticamente para ${clientId}.`);
+    } else {
+      stepVite.info('No se encontró vite.config.js en la plantilla — puerto por defecto de Vite.');
+    }
+  } catch (viteErr) {
+    stepVite.warn(`Aviso al personalizar vite.config.js: ${viteErr.message}`);
   }
 
   // 7.2. Configurar dinámicamente Playwright E2E si existe en la plantilla
@@ -996,9 +1338,14 @@ console.log('✅ Mapa de arquitectura para la IA generado.');
       if (await fs.pathExists(oldConfigPath)) {
         let configContent = await fs.readFile(oldConfigPath, 'utf-8');
         
-        // Reemplazar nombre, baseURL
+        // [BLINDAJE-PLAYWRIGHT] Puerto dinámico: usar PORT de entorno o el que la instancia definió en su playwright.config.js
+        // Fallback al estándar de Vite (5173) si ninguno está disponible
+        const vitePort = process.env.VITE_DEV_PORT || process.env.PORT || '5173';
         configContent = configContent.replace(/name:\s*['"`].*?['"`]/, `name: '${answers.projectName}'`);
-        configContent = configContent.replace(/baseURL:\s*['"`].*?['"`]/, `baseURL: 'http://localhost:5173'`); // O puerto de Vite
+        configContent = configContent.replace(
+          /baseURL:\s*['"`].*?['"`]/,
+          `baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:${vitePort}'`
+        );
         
         await fs.writeFile(newConfigPath, configContent, 'utf-8');
         await fs.remove(oldConfigPath);
@@ -1065,6 +1412,14 @@ Copia y pega todo el contenido de este bloque en tu primer mensaje del chat de A
 
 Hola. Vamos a trabajar sobre este nuevo proyecto: **${answers.projectName}** (${clientId}). 
 La carpeta física está creada en la ruta: \`${targetDir}\`
+
+> [!IMPORTANT]
+> **Paso 0 Obligatorio de Inicialización:**
+> Antes de proponer o ejecutar cualquier plan en el código de esta app, debes correr la tarea de sembrado del administrador y configuración en la terminal del proyecto:
+> \`\`\`bash
+> npm run seed:admin
+> \`\`\`
+> Esto registrará al usuario administrador en Firebase Auth y guardará su documento de perfil en la colección \`users\` y la configuración base en \`config/settings\` de Firestore. Este paso es necesario para evitar errores de \`PERMISSION_DENIED\` al probar la app, ya que las reglas de seguridad restringen las escrituras a administradores registrados.
 
 Por favor, lee e indiza obligatoriamente los siguientes archivos y carpetas de navegación e instrucciones antes de proponer tu plan de implementación. Son tu GPS de arquitectura y estándares:
 1. **Mapa de Código de este Proyecto** → [mapa_arquitectura_ia.md](file:///${targetDir.replace(/\\/g, '/')}/mapa_arquitectura_ia.md): contiene la estructura física de todos los archivos y carpetas locales.
@@ -1177,15 +1532,17 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
   // 12. Auto-registro en la Consola Central (Developer Cockpit)
   await registerInCentralConsole(answers, clientId, uniqueToken);
 
-  const vapidPublicKey = answers.firebaseVapidKey || answers.vapidPublicKey || '';
+  // [BLINDAJE-RETORNO] Asegurar que todos los valores retornados tengan fallback seguro
+  const vapidPublicKey = (answers.firebaseVapidKey || answers.vapidPublicKey || '').trim();
 
   return {
-    clientId,
-    uniqueToken,
-    targetDir,
-    themeName,
-    primaryColor,
+    clientId: clientId || '',
+    uniqueToken: uniqueToken || '',
+    targetDir: targetDir || '',
+    themeName: themeName || 'emerald',
+    primaryColor: primaryColor || 'hsl(142, 70%, 45%)',
     vapidPublicKey,
+    adminPassword, // Exponer para que el wizard lo muestre al usuario al finalizar
     prompt: promptContent
   };
 }
@@ -1201,11 +1558,14 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
 async function installDependencies(targetDir) {
   console.log('\n' + pc.cyan('📦 Instalando dependencias en el nuevo proyecto. Por favor espera...'));
   try {
-    execSync('npm install', { cwd: targetDir, stdio: 'inherit', shell: true });
+    // [BLINDAJE-TIMEOUT] npm install puede tardar varios minutos con paquetes pesados o
+    // red lenta. Sin timeout puede bloquear el worker (y por tanto el CLI) indefinidamente.
+    // 5 minutos es un límite generoso pero real para el peor caso en red corporativa con caché fría.
+    execSync('npm install', { cwd: targetDir, stdio: 'inherit', shell: true, timeout: 300000 });
     console.log(pc.green('✅ Dependencias de npm instaladas.'));
 
     console.log(pc.cyan('🔍 Generando mapa de arquitectura inicial...'));
-    execSync('npm run map', { cwd: targetDir, stdio: 'inherit', shell: true });
+    execSync('npm run map', { cwd: targetDir, stdio: 'inherit', shell: true, timeout: 15000 });
     console.log(pc.green('✅ Mapa de arquitectura del nuevo proyecto indexado con éxito.'));
   } catch (err) {
     console.warn(pc.yellow(`⚠️  Aviso en instalación/mapeo de dependencias: ${err.message}`));
@@ -1260,18 +1620,59 @@ async function deployFirebase(answers, targetDir) {
 
   console.log(pc.cyan('🔥 Compilando el proyecto (npm run build)...'));
   try {
-    execSync('npm run build', { cwd: targetDir, stdio: 'ignore' });
-    console.log(pc.green('✅ Compilación de producción generada con éxito.'));
+    // [BLINDAJE-STDERR] Capturar stderr para reportar el error real del build/deploy.
+    // Con stdio:'ignore' el único mensaje disponible era "Command failed" sin contexto.
+    // Ahora se captura stderr y se muestra en el warning para facilitar el debug.
+    let buildStderr = '';
+    try {
+      execSync('npm run build', {
+        cwd: targetDir,
+        stdio: ['ignore', 'ignore', 'pipe'],
+        timeout: 120000 // 2 min máximo para el build
+      });
+      console.log(pc.green('✅ Compilación de producción generada con éxito.'));
+    } catch (buildErr) {
+      buildStderr = buildErr.stderr ? buildErr.stderr.toString().slice(0, 500) : buildErr.message;
+      throw new Error(`npm run build falló:\n${buildStderr}`);
+    }
 
     console.log(pc.cyan('🔥 Desplegando en Firebase (reglas, índices, storage y hosting)...'));
-    execSync(
-      `firebase deploy --only firestore:rules,firestore:indexes,storage,hosting -P ${answers.firebaseProjectId}`,
-      { cwd: targetDir, stdio: 'ignore' }
-    );
-    console.log(pc.green('✅ Proyecto de Firebase (Reglas, Índices, Storage y Hosting) desplegado por completo de forma exitosa.'));
+    let deployStderr = '';
+    try {
+      execSync(
+        `firebase deploy --only firestore:rules,firestore:indexes,storage,hosting -P ${answers.firebaseProjectId}`,
+        {
+          cwd: targetDir,
+          stdio: ['ignore', 'ignore', 'pipe'],
+          timeout: 180000 // 3 min máximo para el deploy de Firebase
+        }
+      );
+      console.log(pc.green('✅ Proyecto de Firebase (Reglas, Índices, Storage y Hosting) desplegado por completo de forma exitosa.'));
+    } catch (deployErr) {
+      deployStderr = deployErr.stderr ? deployErr.stderr.toString().slice(0, 800) : deployErr.message;
+      throw new Error(`firebase deploy falló:\n${deployStderr}`);
+    }
 
   } catch (err) {
     console.warn(pc.yellow(`⚠️  Fallo al desplegar en Firebase: ${err.message}. Asegúrate de tener firebase-cli logueado.`));
+  }
+}
+
+/**
+ * Helper interno para peticiones fetch con reintento automático y backoff exponencial.
+ */
+async function fetchWithRetry(url, options, retries = 3, backoffMs = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.ok) return res;
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      console.warn(`📡 [Conectividad Central] Intento ${i + 1} fallido. Reintentando en ${backoffMs}ms...`);
+      await new Promise(resolve => setTimeout(resolve, backoffMs));
+      backoffMs *= 2;
+    }
   }
 }
 
@@ -1299,32 +1700,50 @@ async function registerInCentralConsole(answers, clientId, uniqueToken) {
       return { fields };
     };
 
-    await fetch(`${centralUrl}/clientes_control/${clientId}?key=${activeCentralApiKey}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formatREST({
-        nombre: answers.projectName,
-        coreType: answers.coreType || 'seed',
-        billingMode: answers.billingMode || 'percentage',
-        comisionPorcentaje: Number(answers.comisionPorcentaje ?? 1.5),
-        pagoMensualFijo: Number(answers.pagoMensualFijo ?? 0),
-        active: true,
-        createdAt: new Date().toISOString()
-      }))
+    const payloadCliente = formatREST({
+      nombre: answers.projectName,
+      coreType: answers.coreType || 'seed',
+      billingMode: answers.billingMode || 'percentage',
+      comisionPorcentaje: Number(answers.comisionPorcentaje ?? 1.5),
+      pagoMensualFijo: Number(answers.pagoMensualFijo ?? 0),
+      active: true,
+      createdAt: new Date().toISOString()
     });
 
-    await fetch(`${centralUrl}/tokens/${uniqueToken}?key=${activeCentralApiKey}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formatREST({
-        active: true,
-        clientId,
-        createdAt: new Date().toISOString()
-      }))
+    const payloadToken = formatREST({
+      active: true,
+      clientId,
+      createdAt: new Date().toISOString()
     });
 
-    console.log(pc.green('✅ Instancia y Token auto-registrados correctamente en la Consola Central.'));
+    // [BLINDAJE-REGISTRO] Promise.allSettled: cada registro falla de forma independiente.
+    // Con Promise.all, un fallo en 'clientes_control' cancelaba el registro del 'token' y viceversa,
+    // dejando la telemetría en estado inconsistente (cliente sin token o token sin cliente).
+    const [resultCliente, resultToken] = await Promise.allSettled([
+      fetchWithRetry(`${centralUrl}/clientes_control/${clientId}?key=${activeCentralApiKey}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadCliente)
+      }),
+      fetchWithRetry(`${centralUrl}/tokens/${uniqueToken}?key=${activeCentralApiKey}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadToken)
+      })
+    ]);
+
+    const clienteOk = resultCliente.status === 'fulfilled';
+    const tokenOk   = resultToken.status   === 'fulfilled';
+
+    if (clienteOk && tokenOk) {
+      console.log(pc.green('✅ Instancia y Token auto-registrados correctamente en la Consola Central.'));
+    } else {
+      if (!clienteOk) console.warn(pc.yellow(`⚠️  Registro de instancia en clientes_control falló: ${resultCliente.reason?.message}`));
+      if (!tokenOk)   console.warn(pc.yellow(`⚠️  Registro de token de telemetría falló: ${resultToken.reason?.message}`));
+      console.warn(pc.yellow('   → El proyecto fue creado, pero su registro en la Consola Central quedó incompleto. Registra manualmente o re-ejecuta el CLI.'));
+    }
   } catch (err) {
     console.warn(pc.yellow(`⚠️  No se pudo realizar el auto-registro en la Consola Central: ${err.message}`));
   }
 }
+
