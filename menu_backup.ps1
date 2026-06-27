@@ -142,6 +142,49 @@ function Show-Header {
     Write-Host ""
 }
 
+$Global:EcosystemStatusCache = @()
+
+function Update-EcosystemStatusCache {
+    $Global:EcosystemStatusCache = @()
+    
+    # Maestro (raiz del proyecto)
+    $mChanges = Get-GitChangesCount -Path $rootDir
+    $mBranch  = (git -C $rootDir rev-parse --abbrev-ref HEAD 2>$null)
+    $Global:EcosystemStatusCache += [PSCustomObject]@{
+        Icon    = "📦"
+        Label   = "Maestro (PROTOTIPE)"
+        Branch  = $mBranch
+        Changes = $mChanges
+    }
+
+    # Dashboard
+    if (Test-Path $dashboardDir) {
+        $dChanges = Get-GitChangesCount -Path $dashboardDir
+        $dBranch  = (git -C $dashboardDir rev-parse --abbrev-ref HEAD 2>$null)
+        $Global:EcosystemStatusCache += [PSCustomObject]@{
+            Icon    = "🖥"
+            Label   = "Dashboard (dev-dashboard)"
+            Branch  = $dBranch
+            Changes = $dChanges
+        }
+    }
+
+    # Cores
+    if (Test-Path $coresDir) {
+        foreach ($core in (Get-ChildItem -Path $coresDir -Directory -ErrorAction SilentlyContinue)) {
+            $cChanges = Get-GitChangesCount -Path $core.FullName
+            $gitDir   = if (Test-Path "$($core.FullName)\.git") { "$($core.FullName)\.git" } else { "$($core.FullName)\.git-backup-temp" }
+            $cBranch  = (git --git-dir="$gitDir" rev-parse --abbrev-ref HEAD 2>$null)
+            $Global:EcosystemStatusCache += [PSCustomObject]@{
+                Icon    = "🧩"
+                Label   = $core.Name
+                Branch  = $cBranch
+                Changes = $cChanges
+            }
+        }
+    }
+}
+
 function Show-StatusPanel {
     $sep = "  " + ("─" * 65)
     Write-Host "  ESTADO DEL ECOSISTEMA" -ForegroundColor Yellow
@@ -166,31 +209,18 @@ function Show-StatusPanel {
         Write-Host $statusText -ForegroundColor $statusColor
     }
 
-    # Maestro (raiz del proyecto)
-    $mChanges = Get-GitChangesCount -Path $rootDir
-    $mBranch  = (git -C $rootDir rev-parse --abbrev-ref HEAD 2>$null)
-    Write-RepoRow -Icon "📦" -Label "Maestro (PROTOTIPE)" -Branch $mBranch -Changes $mChanges
-
-    # Dashboard
-    if (Test-Path $dashboardDir) {
-        $dChanges = Get-GitChangesCount -Path $dashboardDir
-        $dBranch  = (git -C $dashboardDir rev-parse --abbrev-ref HEAD 2>$null)
-        Write-RepoRow -Icon "🖥" -Label "Dashboard (dev-dashboard)" -Branch $dBranch -Changes $dChanges
-    }
-
-    # Cores
-    if (Test-Path $coresDir) {
-        foreach ($core in (Get-ChildItem -Path $coresDir -Directory -ErrorAction SilentlyContinue)) {
-            $cChanges = Get-GitChangesCount -Path $core.FullName
-            $gitDir   = if (Test-Path "$($core.FullName)\.git") { "$($core.FullName)\.git" } else { "$($core.FullName)\.git-backup-temp" }
-            $cBranch  = (git --git-dir="$gitDir" rev-parse --abbrev-ref HEAD 2>$null)
-            Write-RepoRow -Icon "🧩" -Label $core.Name -Branch $cBranch -Changes $cChanges
+    if ($null -eq $Global:EcosystemStatusCache -or $Global:EcosystemStatusCache.Count -eq 0) {
+        Write-Host "  Cargando estados del ecosistema..." -ForegroundColor DarkGray
+    } else {
+        foreach ($repo in $Global:EcosystemStatusCache) {
+            Write-RepoRow -Icon $repo.Icon -Label $repo.Label -Branch $repo.Branch -Changes $repo.Changes
         }
     }
 
     Write-Host $sep -ForegroundColor DarkGray
     Write-Host ""
 }
+
 
 # Funcion generica para menu interactivo con flechas y Enter
 function Get-MenuSelection {
@@ -250,6 +280,10 @@ function Get-MenuSelection {
                 if ($selectedIndex -ge $Options.Count) { $selectedIndex = 0 }
             } elseif ($key -eq 13) {
                 return $selectedIndex
+            } elseif ($key -eq 82) {
+                # Tecla R - Forzar recarga de estado
+                Write-Host "`n  Re-escaneando estados de Git..." -ForegroundColor Yellow
+                Update-EcosystemStatusCache
             } elseif ($key -eq 81 -or $key -eq 27) {
                 return -1
             }
@@ -423,16 +457,20 @@ $mainOptions = @(
     "✖   Salir"
 )
 
+# Carga inicial de la caché
+Write-Host "  Inicializando y escaneando repositorios..." -ForegroundColor Yellow
+Update-EcosystemStatusCache
+
 # Bucle principal del menu
 $keepRunning = $true
 do {
     $choice = Get-MenuSelection -Title "SELECCIONE LA ACCION QUE DESEA REALIZAR:" -Options $mainOptions -ShowStatus
     
     switch ($choice) {
-        0 { Run-Master-Backup; Write-Host " Presione cualquier tecla para volver al menu..."; Read-Host | Out-Null }
-        1 { Run-Subproject-Backup -Path $dashboardDir; Write-Host " Presione cualquier tecla para volver al menu..."; Read-Host | Out-Null }
-        2 { Manage-Cores }
-        3 { Manage-Instances }
+        0 { Run-Master-Backup; Update-EcosystemStatusCache; Write-Host " Presione cualquier tecla para volver al menu..."; Read-Host | Out-Null }
+        1 { Run-Subproject-Backup -Path $dashboardDir; Update-EcosystemStatusCache; Write-Host " Presione cualquier tecla para volver al menu..."; Read-Host | Out-Null }
+        2 { Manage-Cores; Update-EcosystemStatusCache }
+        3 { Manage-Instances; Update-EcosystemStatusCache }
         4 { $keepRunning = $false }
         -1 { $keepRunning = $false }
     }
