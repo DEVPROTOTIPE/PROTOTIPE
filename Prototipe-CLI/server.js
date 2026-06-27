@@ -3948,6 +3948,13 @@ app.get('/api/git/branches', async (req, res) => {
       tempRenamed = true;
     }
 
+    // Fetch preventivo ligero (timeout 6s) para traer nuevas ramas desde GitHub
+    try {
+      await execGitCommand('git fetch', projectDir);
+    } catch (fetchErr) {
+      console.warn(`[API /api/git/branches] Warning al hacer fetch previo en ${projectDir}:`, fetchErr.message);
+    }
+
     const { stdout } = await execGitCommand('git branch -a --format="%(refname:short)"', projectDir);
     const branches = stdout
       .split('\n')
