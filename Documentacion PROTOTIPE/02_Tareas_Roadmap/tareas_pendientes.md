@@ -4,6 +4,13 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-099: Desacoplamiento de Repositorios Git y Corrección de Fugas de Archivos en Control Git~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Solución definitiva del conflicto de control de versiones raíz vs subproyectos. Se desindexaron las carpetas `Plantillas Core/`, `Instancias Clientes/` y las plantillas de `Prototipe-CLI/templates/` del repositorio raíz Git de `D:\PROTOTIPE` para que el `checkout` de la CLI no pise o revierta los archivos locales. Se actualizaron los archivos `.gitignore` del raíz y de cada subproyecto para excluir de forma hermética la carpeta de Git renombrada `.git-backup-temp/`. Se restauraron los archivos físicos perdidos durante los checkouts y merges de Git desde el commit `911f5b0` (como `.prototipe.json` y `.gitignore` en la instancia del cliente `ventas-moni-app`). Se saneó la lógica de detección en `isInsideGitRepo` de `server.js` para reconocer repositorios inactivos renombrados como `.git-backup-temp`. Adicionalmente, se corrigió un bloqueo de seguridad en `git log` de la CLI reemplazando el delimitador pipe (`|`) con `:::` para evitar el filtro de inyección de shell en `execGitCommand`.
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [.gitignore](file:///d:/PROTOTIPE/.gitignore) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/.gitignore](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/.gitignore) [MODIFY], [Plantillas Core/App Ventas/.gitignore](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/.gitignore) [MODIFY]
+
 * **[x] ~~Tarea CORE-098: Poda Limpia de Firebase Cloud Messaging (FCM) e Inactividad Push~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-26

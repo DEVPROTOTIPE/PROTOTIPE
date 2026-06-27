@@ -3031,6 +3031,7 @@ function isPathExcludedFromSync(relativePath) {
   if (
     rel === 'node_modules' || rel.startsWith('node_modules/') ||
     rel === '.git' || rel.startsWith('.git/') ||
+    rel === '.git-backup-temp' || rel.startsWith('.git-backup-temp/') ||
     rel === 'dist' || rel.startsWith('dist/') ||
     rel === '.vite' || rel.startsWith('.vite/') ||
     rel === '.firebase' || rel.startsWith('.firebase/') ||
