@@ -4,19 +4,26 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-117: Restricción de Estrategia Auto-Merge para Instancias Cliente~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Se inhabilitó y ocultó de forma dinámica el interruptor de "Auto-Merge a producción" en la UI del Dashboard (`GitBackupPanel.jsx`) al seleccionar repositorios de tipo cliente/instancia (`Instancias Clientes`), ya que estos operan bajo una única rama dedicada y carecen de rama principal de producción/main.
+  - Archivos: [Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-115: Respaldos No Disruptivos y Eliminación de Detenciones de Servidores~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-27
   - Fecha de finalización: 2026-06-27
-  - Descripción: Se eliminó la detención de procesos dev de Vite/Node (`Stop-Process`) de los scripts de PowerShell (`git_backup.ps1`, `subproject_backup.ps1`, `menu_backup.ps1`). Dado que el motor de renombrado temporal de repositorios Git cuenta con un bucle tolerante de reintentos y que Vite ignora la carpeta `.git`, la detención de procesos era redundante y provocaba el cierre del Dashboard y demás servidores locales de desarrollo.
-  - Archivos: [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY], [menu_backup.ps1](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+  - Descripción: Se eliminó la detención de procesos dev de Vite/Node (`Stop-Process`) de los scripts de PowerShell (`git_backup.ps1`, `subproject_backup.ps1`, `menu_backup.ps1`) y se configuró `watch.ignored: ['**/.git-backup-temp**']` en `vite.config.js` en todos los proyectos del ecosistema. Esto resuelve de raíz tanto las recargas/parpadeos indeseados en el navegador como los fallos de bloqueo ("Acceso denegado") al renombrar las carpetas de Git a su estado original.
+  - Archivos: [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY], [menu_backup.ps1](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY], [Central PROTOTIPE/dev-dashboard/vite.config.js](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/vite.config.js) [MODIFY], [Plantillas Core/App Ventas/vite.config.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/vite.config.js) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/vite.config.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/vite.config.js) [MODIFY]
 
 * **[x] ~~Tarea CORE-116: Auto-Merge a Producción Activado por Defecto~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-27
   - Fecha de finalización: 2026-06-27
-  - Descripción: Se configuró el estado `doAutoMerge` como `true` por defecto en el panel del control de versiones del Dashboard Central (`GitBackupPanel.jsx`). Esto garantiza que los respaldos no solo se guarden en la rama de desarrollo activa, sino que se fusionen y empujen de forma automatizada hacia la rama principal de producción (`master`/`main`) sin requerir clicks adicionales en la interfaz.
-  - Archivos: [Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+  - Descripción: Se configuró el estado `doAutoMerge` como `true` por defecto en el panel de control de versiones del Dashboard Central (`GitBackupPanel.jsx`) y se implementó una estrategia de fusión Zero-Checkout (`git branch -f`) en los scripts de respaldo de PowerShell (`git_backup.ps1` y `subproject_backup.ps1`). Esto garantiza que los cambios se fusionen y empujen a master/main de forma inmediata sin alterar los archivos del directorio de trabajo activo, erradicando por completo las recargas de Vite HMR en el navegador.
+  - Archivos: [Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY], [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
 
 * **[x] ~~Tarea CORE-114: Robustecimiento de Inicialización de Firebase (Resguardo HMR)~~**
   - Estatus: Completado.

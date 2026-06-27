@@ -365,45 +365,10 @@ try {
             if ($hasMaster) { $mainBranch = "master" }
             
             Write-Host ""
-            Write-Host "  [Git Strategies] Auto-Merge activado. Fusionando [$branchName] -> [$mainBranch]..." -ForegroundColor Yellow
+            Write-Host "  [Git Strategies] Auto-Merge activado (Zero-Checkout). Fusionando [$branchName] -> [$mainBranch]..." -ForegroundColor Yellow
             
-            Write-Host "  [Merge] Cambiando a la rama de produccion [$mainBranch]..." -ForegroundColor Cyan
-            $checkoutResult = git checkout $mainBranch 2>&1
-            if ($LASTEXITCODE -ne 0) {
-                # Intentar crearla desde origin si no existe localmente
-                Write-Host "  [Merge] La rama local '$mainBranch' no existe. Intentando crearla desde el servidor remoto..." -ForegroundColor Yellow
-                $checkoutResult = git checkout -b $mainBranch origin/$mainBranch 2>&1
-                if ($LASTEXITCODE -ne 0) {
-                    # Si no existe ni local ni remotamente, crearla a partir de la rama actual
-                    Write-Host "  [Merge] La rama '$mainBranch' no existe en el origen remoto. Creandola a partir de la rama actual..." -ForegroundColor Yellow
-                    $checkoutResult = git checkout -b $mainBranch 2>&1
-                    if ($LASTEXITCODE -ne 0) {
-                        Write-Host "  [ERROR] No se pudo cambiar ni crear la rama de produccion [$mainBranch]." -ForegroundColor Red
-                        Write-Host "  Detalle de Git: $checkoutResult" -ForegroundColor DarkGray
-                        $ScriptExitCode = 1; return
-                    }
-                }
-            }
-            
-            Write-Host "  [Merge] Trayendo ultimos cambios del servidor remoto..." -ForegroundColor Cyan
-            git pull origin $mainBranch --no-edit 2>&1 | Out-Null
-            
-            Write-Host "  [Merge] Fusionando rama [$branchName] en [$mainBranch]..." -ForegroundColor Cyan
-            $mergeResult = git merge $branchName -X theirs -m "merge: consolidar $branchName en $mainBranch" 2>&1
-            
-            if ($LASTEXITCODE -ne 0 -or $mergeResult -match "CONFLICT" -or (git status --porcelain | Where-Object { $_ -match '^UU' })) {
-                Write-Host ""
-                Write-Host "  [CONFLICTO] La fusion automatica encontro conflictos de codigo." -ForegroundColor Yellow
-                Write-Host "  Abortando fusion para proteger la rama de produccion [$mainBranch]..." -ForegroundColor Yellow
-                git merge --abort 2>&1 | Out-Null
-                git checkout $branchName 2>&1 | Out-Null
-                Write-Host "  [WARN] Tu codigo en [$branchName] fue respaldado con exito en GitHub." -ForegroundColor Green
-                Write-Host "  [WARN] Sin embargo, debes resolver los conflictos en [$mainBranch] de forma manual." -ForegroundColor Yellow
-                Write-Host "======================================================================" -ForegroundColor Green
-                Write-BackupLog -Status "WARN" -Target $projectName -Message "Respaldo OK, pero conflicto de auto-merge hacia $mainBranch"
-                # Salir con éxito 0 porque el respaldo principal en develop/develop-branch funcionó
-                $ScriptExitCode = 0; return
-            }
+            # Actualizar la rama local master/main para apuntar a develop/branchName sin realizar checkout
+            git branch -f $mainBranch $branchName 2>&1 | Out-Null
             
             Write-Host "  [Merge] Subiendo consolidacion a GitHub (git push origin $mainBranch --no-verify)..." -ForegroundColor Cyan
             Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
@@ -416,10 +381,8 @@ try {
                 Write-BackupLog -Status "WARN" -Target $projectName -Message "Snapshot de desarrollo OK, pero fallo el push de fusion a $mainBranch (Exit Code: $mergePushExitCode)"
             } else {
                 Write-BackupLog -Status "SUCCESS" -Target $projectName -Message "Sincronizado y fusionado en $mainBranch con exito."
+                Write-Host "  [OK] Proceso completado. Cambios sincronizados en [$branchName] y [$mainBranch]." -ForegroundColor Green
             }
-            
-            git checkout $branchName 2>&1 | Out-Null
-            Write-Host "  [OK] Proceso completado. Cambios sincronizados en [$branchName] y [$mainBranch]." -ForegroundColor Green
         } else {
             Write-Host "  [INFO] Cambios resguardados en la rama de desarrollo [$branchName]. Auto-Merge omitido." -ForegroundColor Gray
         }

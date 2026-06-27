@@ -1,5 +1,17 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-27] - CORE-117: Restricción de Estrategia Auto-Merge para Instancias Cliente
+
+* **Tipo:** Mejora de Experiencia de Usuario (UX) / Control de Versiones / Git
+* **Firma de auditoría:** CORE-117-RESTRICT-AUTO-MERGE-UI
+* **Descripción de Cambios:**
+  - **T1 — Ocultación del Toggle en la UI:** En el componente [`GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx), se inyectó la validación `!selected?.path?.includes('Instancias Clientes')` en la directiva de renderizado del interruptor de "Auto-Merge a producción". Esto oculta de forma permanente este selector cuando el objetivo es una instancia o cliente, dado que estos operan bajo una única rama dedicada y carecen de una rama principal de producción/main.
+  - **T2 — Inhabilitación de Estado Interno al Seleccionar:** Se modificó `handleSelectTarget` para evaluar de manera dinámica si el repositorio elegido pertenece a un cliente (`Instancias Clientes`). De ser el caso, establece el estado `doAutoMerge` en `false` por defecto, garantizando que el CLI Bridge envíe el parámetro desactivado a los scripts de PowerShell y evitando consolidaciones no deseadas.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+
+---
+
 ### [2026-06-27] - CORE-115/116: Respaldos No Disruptivos y Activación por Defecto del Auto-Merge
 
 * **Tipo:** Refactorización / Control de Versiones / UX/UI / Robustez / Git
@@ -7,11 +19,17 @@
 * **Descripción de Cambios:**
   - **T1 — Remoción de Cierre Forzado de Procesos (CORE-115):** Se eliminó la rutina que invocaba `Stop-Process` contra servidores de desarrollo Vite/Node activos en los scripts de respaldo de PowerShell (`git_backup.ps1`, `subproject_backup.ps1`, `menu_backup.ps1`). Dado que el motor de renombrado temporal de repositorios Git (`.git` <-> `.git-backup-temp`) cuenta con un bucle tolerante de reintentos y que Vite ignora la carpeta `.git`, la detención de procesos resultaba redundante y causaba el cierre abrupto del Dashboard y aplicaciones cliente.
   - **T2 — Auto-Merge a Producción Activado por Defecto (CORE-116):** Se modificó el valor inicial del estado `doAutoMerge` de `false` a `true` en el componente [`GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) del Dashboard. Esto asegura que, por defecto, los respaldos guarden y envíen los cambios a la rama de desarrollo (ej. `develop`) y ejecuten automáticamente el Auto-Merge y push hacia la rama principal (`master` o `main`), regresando el HEAD local de forma transparente a `develop`.
+  - **T3 — Prevención de Bloqueos y Recarga en Caliente de Vite:** Se agregó la regla de exclusión `watch.ignored: ['**/.git-backup-temp**']` en `vite.config.js` en todos los proyectos del ecosistema. Esto previene que el watcher de Vite (Chokidar) intente monitorear y bloquear archivos dentro de la carpeta temporal de Git durante el proceso de respaldo, eliminando el fallo de `"Acceso denegado / No se pudo renombrar a .git"` y evitando recargas y parpadeos molestos en el navegador.
+  - **T4 — Estrategia de Fusión Zero-Checkout (CORE-116):** Se rediseñó el mecanismo de Auto-Merge en los scripts `git_backup.ps1` y `subproject_backup.ps1`. En lugar de realizar un checkout de la rama de producción (`master`/`main`), hacer pull, merge local y regresar mediante otro checkout (lo cual alteraba físicamente el árbol de archivos en el disco y gatillaba recargas HMR en los servidores Vite activos), ahora el script actualiza la referencia de la rama local mediante `git branch -f` y la empuja directamente a GitHub. Esto mantiene el árbol de archivos completamente estático, logrando un merge instantáneo con cero recargas en el navegador.
 * **Archivos Modificados:**
   - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
   - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
   - [`menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
   - [`Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/vite.config.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/vite.config.js) [MODIFY]
+  - [`Plantillas Core/App Ventas/vite.config.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/vite.config.js) [MODIFY]
+  - [`Instancias Clientes/ventas/ventas-moni-app/vite.config.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/vite.config.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-ventas/vite.config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js) [MODIFY]
   - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
   - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
 
