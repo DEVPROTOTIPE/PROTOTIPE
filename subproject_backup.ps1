@@ -447,7 +447,7 @@ try {
             git pull origin $mainBranch --no-edit 2>&1 | Out-Null
             
             Write-Host "  [Merge] Fusionando rama [$branchName] en [$mainBranch]..." -ForegroundColor Cyan
-            $mergeResult = git merge $branchName -m "merge: consolidar $branchName en $mainBranch" 2>&1
+            $mergeResult = git merge $branchName -X theirs -m "merge: consolidar $branchName en $mainBranch" 2>&1
             
             if ($LASTEXITCODE -ne 0 -or $mergeResult -match "CONFLICT" -or (git status --porcelain | Where-Object { $_ -match '^UU' })) {
                 Write-Host ""
