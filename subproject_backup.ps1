@@ -12,6 +12,8 @@ param (
     [switch]$Interactive = $false
 )
 
+$ScriptExitCode = 0
+
 # Forzar consola a UTF-8 para evitar caracteres extranos en Windows
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -237,7 +239,7 @@ try {
         Write-Host "    -> Ninguno. Tu repositorio local esta 100% al dia." -ForegroundColor Green
         Write-Host ""
         Write-Host "======================================================================" -ForegroundColor Green
-        exit 0
+        $ScriptExitCode = 0; return
     }
     
     # Validar fugas de seguridad de variables de entorno (.env) antes de continuar
@@ -260,7 +262,7 @@ try {
         Write-Host "  [CRITICAL SECURITY] Proceso abortado para prevenir fugas de credenciales en GitHub." -ForegroundColor Red
         Write-Host "  Por favor, agrega estos archivos a tu .gitignore antes de continuar." -ForegroundColor Yellow
         Write-Host "======================================================================" -ForegroundColor Red
-        exit 1
+        $ScriptExitCode = 1; return
     }
     
     Write-Host $statusShort -ForegroundColor Gray
@@ -309,7 +311,7 @@ try {
         Write-Host "  [ERROR] Fallo al indexar archivos (git add .)." -ForegroundColor Red
         if ($addErr) { Write-Host "    -> Detalle: $addErr" -ForegroundColor DarkGray }
         Write-BackupLog -Status "FAILED" -Target $projectName -Message "Fallo git add en subproyecto: $addErr"
-        exit 1
+        $ScriptExitCode = 1; return
     }
     
     Write-Host "  [2/3] Creando commit local..." -ForegroundColor Cyan
@@ -321,7 +323,7 @@ try {
         Write-Host "  [3/3] Modo Solo-Local: commit guardado localmente. Push omitido por configuracion." -ForegroundColor Yellow
         Write-Host "======================================================================" -ForegroundColor Green
         Write-BackupLog -Status "SUCCESS" -Target $projectName -Message "Snapshot de subproyecto exitoso: $CommitMessage (Push omitido)"
-        exit 0
+        $ScriptExitCode = 0; return
     }
     
     # Verificar conexion con el servidor remoto
@@ -344,20 +346,20 @@ try {
                 Write-Host "  [OK] Respaldo local guardado con exito. Los cambios se subiran a GitHub la proxima vez que tenga conexion." -ForegroundColor Green
                 Write-Host "======================================================================" -ForegroundColor Green
                 Write-BackupLog -Status "SUCCESS" -Target $projectName -Message "Snapshot de subproyecto guardado localmente: $CommitMessage (Sin red)"
-                exit 0
+                $ScriptExitCode = 0; return
             } else {
                 Write-Host "  Deshaciendo commit local para mantener el estado original..." -ForegroundColor Yellow
                 git reset --soft HEAD~1 2>&1 | Out-Null
                 Write-Host "  [CANCELADO] Proceso abortado por el usuario." -ForegroundColor Red
                 Write-Host "======================================================================" -ForegroundColor Red
                 Write-BackupLog -Status "FAILED" -Target $projectName -Message "Respaldo cancelado por falta de red."
-                exit 1
+                $ScriptExitCode = 1; return
             }
         } else {
             Write-Host "  [INFO] Ejecuta 'git push' cuando tengas conexion disponible." -ForegroundColor Gray
             Write-Host "======================================================================" -ForegroundColor Yellow
             Write-BackupLog -Status "SUCCESS" -Target $projectName -Message "Snapshot de subproyecto guardado localmente: $CommitMessage (Sin red)"
-            exit 0
+            $ScriptExitCode = 0; return
         }
     }
     
@@ -383,7 +385,7 @@ try {
             Write-Host "  [INFO] Proceso cancelado. Por favor, resuelve los conflictos manualmente." -ForegroundColor Yellow
             Write-Host "======================================================================" -ForegroundColor Red
             Write-BackupLog -Status "FAILED" -Target $projectName -Message "Conflicto al sincronizar con GitHub en subproyecto en rama $branchName"
-            exit 1
+            $ScriptExitCode = 1; return
         }
     } else {
         Write-Host "    -> La rama no existe en el servidor remoto. Omitiendo pull preventivo." -ForegroundColor Gray
@@ -399,7 +401,7 @@ try {
         Write-Host "  [ERROR] Fallo al subir los cambios a GitHub (git push origin $branchName)." -ForegroundColor Red
         Write-Host "  Por favor, verifica tus permisos, credenciales SSH o estado de la red o ejecuta 'git push' manualmente." -ForegroundColor Yellow
         Write-BackupLog -Status "FAILED" -Target $projectName -Message "Fallo git push a origin $branchName (Exit Code: $pushExitCode)"
-        exit 1
+        $ScriptExitCode = 1; return
     }
     
     Write-BackupLog -Status "SUCCESS" -Target $projectName -Message "Snapshot y push exitosos en subproyecto. Rama: $branchName, Commit: $CommitMessage"
@@ -460,7 +462,7 @@ try {
                 Write-Host "======================================================================" -ForegroundColor Green
                 Write-BackupLog -Status "WARN" -Target $projectName -Message "Respaldo OK, pero conflicto de auto-merge hacia $mainBranch"
                 # Salir con éxito 0 porque el respaldo principal en develop/develop-branch funcionó
-                Exit-WithPause 0
+                $ScriptExitCode = 0; return
             }
             
             Write-Host "  [Merge] Subiendo consolidacion a GitHub (git push origin $mainBranch --no-verify)..." -ForegroundColor Cyan
@@ -492,7 +494,7 @@ catch {
     Write-Host "    -> $_" -ForegroundColor Red
     Write-Host ""
     Write-BackupLog -Status "FAILED" -Target $projectName -Message "Excepcion en subproyecto: $_"
-    Exit-WithPause 1
+    $ScriptExitCode = 1; return
 }
 finally {
     # Asegurar que los componentes base (Core, Dashboard, etc.) queden en develop. Instancias de clientes regresan a su rama de cliente.
@@ -543,3 +545,5 @@ finally {
         Start-Process powershell -ArgumentList "-NoProfile -NoExit -Command `"Set-Location '$SubprojectPath'; npm run dev`"" -WindowStyle Normal
     }
 }
+
+Exit-WithPause $ScriptExitCode
