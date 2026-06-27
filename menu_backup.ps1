@@ -132,13 +132,9 @@ function Show-Header {
     Write-Host ""
     Write-Host "  ╔════════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
     Write-Host "  ║  " -NoNewline -ForegroundColor Cyan
-    Write-Host "⚡  PROTOTIPE ECOSISTEMA" -NoNewline -ForegroundColor White
-    Write-Host "  ─  GESTOR DE RESPALDOS GIT                          " -NoNewline -ForegroundColor DarkCyan
-    Write-Host "║" -ForegroundColor Cyan
+    Write-Host "⚡  PROTOTIPE ECOSISTEMA  ─  GESTOR DE RESPALDOS GIT" -ForegroundColor White
     Write-Host "  ║     " -NoNewline -ForegroundColor Cyan
-    Write-Host "$rootDir" -NoNewline -ForegroundColor DarkGray
-    Write-Host "  ·  $ts" -NoNewline -ForegroundColor DarkGray
-    Write-Host "" 
+    Write-Host "$rootDir  ·  $ts" -ForegroundColor DarkGray
     Write-Host "  ╚════════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
 }
@@ -151,7 +147,7 @@ function Show-StatusPanel {
     # Helper interno para imprimir una fila de estado
     function Write-RepoRow {
         param([string]$Icon, [string]$Label, [string]$Branch, [int]$Changes)
-        $label = $Label.PadRight(30)
+        $label = $Label.PadRight(29)
         $branchText = if ($Branch) { "[$Branch]" } else { "[?]" }
         $branchColor = if ($Branch -eq "develop") { "Cyan" } elseif ($Branch -eq "master" -or $Branch -eq "main") { "Green" } else { "DarkYellow" }
         if ($Changes -eq -1) {
