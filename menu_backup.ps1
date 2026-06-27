@@ -129,13 +129,16 @@ function Get-GitChangesCount {
 function Show-Header {
     Clear-Host
     $ts = Get-Date -Format "dd MMM yyyy  HH:mm"
+    $line = "  " + ([string]([char]0x2550) * 68)
     Write-Host ""
-    Write-Host "  ╔════════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "  ║  " -NoNewline -ForegroundColor Cyan
-    Write-Host "⚡  PROTOTIPE ECOSISTEMA  ─  GESTOR DE RESPALDOS GIT" -ForegroundColor White
-    Write-Host "  ║     " -NoNewline -ForegroundColor Cyan
-    Write-Host "$rootDir  ·  $ts" -ForegroundColor DarkGray
-    Write-Host "  ╚════════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host $line -ForegroundColor Cyan
+    Write-Host "  " -NoNewline
+    Write-Host ">> PROTOTIPE ECOSISTEMA" -NoNewline -ForegroundColor White
+    Write-Host "  --  GESTOR DE RESPALDOS GIT" -ForegroundColor DarkCyan
+    Write-Host "     " -NoNewline
+    Write-Host "$rootDir" -NoNewline -ForegroundColor DarkGray
+    Write-Host "  .  $ts" -ForegroundColor DarkGray
+    Write-Host $line -ForegroundColor Cyan
     Write-Host ""
 }
 
@@ -225,11 +228,10 @@ function Get-MenuSelection {
 
             for ($i = 0; $i -lt $Options.Count; $i++) {
                 if ($i -eq $selectedIndex) {
-                    Write-Host "  " -NoNewline
-                    Write-Host "❯  " -NoNewline -ForegroundColor Cyan
+                    Write-Host "  > " -NoNewline -ForegroundColor Cyan
                     Write-Host $Options[$i] -ForegroundColor White
                 } else {
-                    Write-Host "     " -NoNewline
+                    Write-Host "    " -NoNewline
                     Write-Host $Options[$i] -ForegroundColor DarkGray
                 }
             }
