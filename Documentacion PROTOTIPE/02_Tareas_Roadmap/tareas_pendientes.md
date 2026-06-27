@@ -4,6 +4,13 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-100: Selector Interactivo y Cambio de Ramas Dinámico en Control Git~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Implementación de la funcionalidad para cambiar dinámicamente de rama Git desde el panel del Dashboard. Se crearon los endpoints `GET /api/git/branches` y `POST /api/git/checkout` en el servidor CLI (`server.js`), integrando soporte completo y transparente para repositorios inactivos renombrados como `.git-backup-temp`. Se optimizó la lectura de la rama activa en la CLI (`getGitBranch`) para que acceda de forma directa al archivo `HEAD` en disco (evitando comandos de Git lentos o colisiones ascendentes en directorios anidados). En el frontend del Dashboard (`GitBackupPanel.jsx`), se reemplazó el componente estático `BranchBadge` por el componente interactivo `BranchSelector`, que proporciona un dropdown con estilo de vidrio difuminado (glassmorphism) para elegir entre las ramas locales disponibles, protegido con diálogos de confirmación y feedback de loading con spinner durante el proceso de checkout.
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-099: Desacoplamiento de Repositorios Git y Corrección de Fugas de Archivos en Control Git~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-26

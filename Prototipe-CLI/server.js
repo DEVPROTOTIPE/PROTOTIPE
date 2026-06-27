@@ -3922,6 +3922,97 @@ app.get('/api/git/diff-file', async (req, res) => {
   }
 });
 
+// GET /api/git/branches - Obtener todas las ramas locales de un repositorio
+app.get('/api/git/branches', async (req, res) => {
+  const { path: targetPath } = req.query;
+  if (!targetPath) {
+    return res.status(400).json({ error: 'El parámetro "path" es obligatorio.' });
+  }
+
+  if (!isPathContained(GIT_ROOT, targetPath)) {
+    return res.status(403).json({ error: 'Ruta fuera del ecosistema PROTOTIPE. Acceso denegado.' });
+  }
+  const projectDir = path.resolve(targetPath);
+  if (!await fs.pathExists(projectDir)) {
+    return res.status(404).json({ error: 'No se encontró el directorio del repositorio.' });
+  }
+
+  let tempRenamed = false;
+  const gitTempPath = path.join(projectDir, '.git-backup-temp');
+  const gitNormalPath = path.join(projectDir, '.git');
+
+  try {
+    // Si no hay .git pero sí .git-backup-temp, renombrar temporalmente
+    if (await fs.pathExists(gitTempPath) && !await fs.pathExists(gitNormalPath)) {
+      await fs.rename(gitTempPath, gitNormalPath);
+      tempRenamed = true;
+    }
+
+    const { stdout } = await execGitCommand('git branch --format="%(refname:short)"', projectDir);
+    const branches = stdout
+      .split('\n')
+      .map(b => b.trim())
+      .filter(Boolean)
+      .map(b => b.replace(/^origin\//, '')); // Omitir prefijo remoto si se requiere
+    
+    // Devolver lista única de ramas
+    const uniqueBranches = [...new Set(branches)];
+    res.json({ success: true, branches: uniqueBranches });
+  } catch (err) {
+    console.error(`[API /api/git/branches] Error:`, err.message);
+    res.status(500).json({ error: `Fallo al obtener ramas: ${err.message}` });
+  } finally {
+    // Restaurar si renombramos
+    if (tempRenamed && await fs.pathExists(gitNormalPath)) {
+      await fs.rename(gitNormalPath, gitTempPath);
+    }
+  }
+});
+
+// POST /api/git/checkout - Cambiar de rama en un repositorio (checkout)
+app.post('/api/git/checkout', async (req, res) => {
+  const { path: targetPath, branch } = req.body;
+  if (!targetPath || !branch) {
+    return res.status(400).json({ error: 'Los parámetros "path" y "branch" son obligatorios.' });
+  }
+
+  if (!isPathContained(GIT_ROOT, targetPath)) {
+    return res.status(403).json({ error: 'Ruta fuera del ecosistema PROTOTIPE. Acceso denegado.' });
+  }
+  const projectDir = path.resolve(targetPath);
+  if (!await fs.pathExists(projectDir)) {
+    return res.status(404).json({ error: 'No se encontró el directorio del repositorio.' });
+  }
+
+  const safeBranch = sanitizeShellArgument(branch);
+  if (!safeBranch) {
+    return res.status(400).json({ error: 'Nombre de rama no válido.' });
+  }
+
+  let tempRenamed = false;
+  const gitTempPath = path.join(projectDir, '.git-backup-temp');
+  const gitNormalPath = path.join(projectDir, '.git');
+
+  try {
+    // Si no hay .git pero sí .git-backup-temp, renombrar temporalmente
+    if (await fs.pathExists(gitTempPath) && !await fs.pathExists(gitNormalPath)) {
+      await fs.rename(gitTempPath, gitNormalPath);
+      tempRenamed = true;
+    }
+
+    await execGitCommand(`git checkout "${safeBranch}"`, projectDir);
+    res.json({ success: true, message: `Cambiado con éxito a la rama ${branch}.` });
+  } catch (err) {
+    console.error(`[API /api/git/checkout] Error:`, err.message);
+    res.status(500).json({ error: `Fallo al realizar checkout: ${err.message}` });
+  } finally {
+    // Restaurar si renombramos
+    if (tempRenamed && await fs.pathExists(gitNormalPath)) {
+      await fs.rename(gitNormalPath, gitTempPath);
+    }
+  }
+});
+
 // --- GESTOR DE DEPENDENCIAS (NPM INSTALL SSE) ---
 app.get('/api/project/dependencies/install', async (req, res) => {
   const { clientId } = req.query;
@@ -4006,8 +4097,25 @@ async function execGitCommand(cmd, dir) {
 
 async function getGitBranch(dir) {
   try {
-    const { stdout } = await execGitCommand('git rev-parse --abbrev-ref HEAD', dir);
-    return stdout.trim();
+    const headPath = path.join(dir, '.git', 'HEAD');
+    const tempHeadPath = path.join(dir, '.git-backup-temp', 'HEAD');
+    let headContent = '';
+    
+    if (await fs.pathExists(headPath)) {
+      headContent = await fs.readFile(headPath, 'utf8');
+    } else if (await fs.pathExists(tempHeadPath)) {
+      headContent = await fs.readFile(tempHeadPath, 'utf8');
+    } else {
+      // Fallback a comando git tradicional
+      const { stdout } = await execGitCommand('git rev-parse --abbrev-ref HEAD', dir);
+      return stdout.trim();
+    }
+    
+    headContent = headContent.trim();
+    if (headContent.startsWith('ref: ')) {
+      return headContent.replace(/^ref: refs\/heads\//, '');
+    }
+    return headContent.substring(0, 7); // Detached HEAD
   } catch (_) { return null; }
 }
 
