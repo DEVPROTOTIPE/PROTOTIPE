@@ -43,5 +43,6 @@ Thumbs.db
 # Exclusión de subproyectos (tienen sus propios repositorios Git independientes)
 Plantillas Core/
 Instancias Clientes/
+Central PROTOTIPE/
 Prototipe-CLI/templates/template-ventas/
 Prototipe-CLI/templates/template-core-seed/
