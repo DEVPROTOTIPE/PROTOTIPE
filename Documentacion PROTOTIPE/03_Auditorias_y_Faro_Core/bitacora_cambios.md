@@ -1,5 +1,20 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-26] - CORE-099-REV: Resiliencia de Auto-Merge y Prevención de Recargas de Vite
+
+* **Tipo:** Corrección de Bugs / Robustecimiento / Git
+* **Descripción de Cambios:**
+  - **P1 — Prevención de Recargas del Dashboard al Respaldar el Maestro**: Se desindexó físicamente la carpeta `Central PROTOTIPE/` del repositorio raíz Git de `D:\PROTOTIPE` y se agregó a `.gitignore` del raíz. Esto evita que los checkouts del script de respaldo Maestro reescriban o modifiquen los metadatos de los archivos del Dashboard, suprimiendo de raíz las falsas alertas del watcher de Vite y previniendo que el dashboard se recargue/reinicie enviando al usuario al login.
+  - **P2 — Restauración Garantizada a develop en try-finally**: Se refactorizaron los scripts `git_backup.ps1` y `subproject_backup.ps1` reemplazando todas las llamadas directas a `exit`/`Exit-WithPause` dentro del bloque `try` y `catch` por asignaciones a la variable `$ScriptExitCode` seguidas de `return`. Esto asegura que el bloque `finally` siempre se ejecute en PowerShell, garantizando que tanto el Maestro como los Cores y Dashboard queden situados en su rama de desarrollo activa (`develop`) y sus directorios `.git` se restauren de forma segura ante cualquier éxito, advertencia o excepción.
+  - **P3 — Auto-Resolución de Conflictos en Auto-Merge**: Se inyectó el parámetro `-X theirs` a la instrucción `git merge` de los scripts de respaldo de PowerShell (`git_backup.ps1` y `subproject_backup.ps1`). Esto le indica a Git que resuelva automáticamente cualquier colisión de código a favor de la rama de desarrollo activa (`develop`), logrando un flujo de "Auto-Merge a producción" sin interrupciones ni necesidad de fusiones manuales.
+  - **P4 — Saneamiento de Ahead Status (+1) y Ramas**: Se alineó localmente la plantilla Core `App Ventas` situándola en la rama `develop`, y se subieron los commits locales pendientes del Dashboard y el Maestro a GitHub (`git push`), limpiando por completo el estado "Ahead (+1)" (Adelantado) en la UI y dejando todas las ramas de trabajo en estado `Limpias` e idénticas en remoto.
+* **Archivos Modificados:**
+  - [`.gitignore`](file:///d:/PROTOTIPE/.gitignore) [MODIFY]
+  - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+  - [`Plantillas Core/App Ventas/`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/) [CHECKOUT_DEVELOP]
+  - [`Central PROTOTIPE/dev-dashboard/`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/) [CHECKOUT_DEVELOP/PUSH_MASTER]
+
 ### [2026-06-26] - CORE-098: Poda Limpia de Firebase Cloud Messaging (FCM) e Inactividad Push
 
 * **Tipo:** Remoción de Código / Optimización / Consistencia
