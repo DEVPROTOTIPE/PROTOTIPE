@@ -1,5 +1,25 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-27] - CORE-122: Blindaje del Sistema de Inyección de Componentes en Cliente
+
+* **Tipo:** Seguridad / Robustez / UX / Arquitectura SSE
+* **Firma de auditoría:** CORE-122-INJECT-BLINDAJE
+* **Descripción de Cambios:**
+  - **T1 — Helper `extractCodeFromMarkdown` (server.js):** Se extrajo la lógica de extracción de código de los `.md` a un helper compartido con 4 estrategias en cascada: (E1) heading numerado con "Código", (E2) heading sin número, (E3) primer bloque jsx/js del archivo. Elimina los fallos silenciosos del regex frágil anterior que dependía de un formato de heading exacto.
+  - **T2 — Endpoint `POST /api/library/inject/preflight` (server.js):** Nuevo endpoint de pre-validación sin efectos secundarios. Verifica extraíble el código, detecta manifest ausente (con warning), comprueba si el archivo destino ya existe (con warning y flag `destinationExists`). Devuelve `{ canInject, blockers[], warnings[], codeExtractable, manifestFound, destinationExists }`.
+  - **T3 — Endpoint SSE `POST /api/library/inject/stream` (server.js):** Nuevo endpoint de inyección con progreso en vivo via Server-Sent Events. Emite eventos tipados: `start`, `step` (con `phase: npm|file|dependency`), `complete`, `error`. Incluye `recurseInjectSSE` para inyección en cascada de dependencias internas. El NPM install se hace por paquete individual con timeout de 90s. Protegido con `visited Set` anti-loops y validación `isPathContained` en cada escritura.
+  - **T4 — `searchFileRecursive` con límite de profundidad (server.js):** Añadido parámetro `maxDepth=5` y `depth` incremental. Previene búsquedas infinitas en proyectos grandes. Los errores de `fs.stat` ya no lanzan excepción sino que son ignorados con `.catch(() => null)`.
+  - **T5 — `getDefaultRelativePath` mejorado (server.js):** Añadida heurística por subcarpeta de biblioteca: `Logica_y_Hooks/` → `src/hooks/`, `Servicios_y_Firebase/` → `src/services/`, `Utilidades/` → `src/utils/`, `Paginas/` → `src/pages/`, `Modulos_Completos/` → `src/components/common/`.
+  - **T6 — Modal Wizard 3 pasos (ComponentLibraryView.jsx):** Reemplazado el panel inline antiguo por un modal overlay con blur backdrop y animación spring. Paso 1: selección de cliente + ruta + preflight. Paso 2: diagnóstico de dependencias NPM e internas con estados visuales. Paso 3: progreso en vivo via SSE con iconografía de estado por línea (⏳/🔄/✅/❌). Al finalizar muestra resumen de archivos creados y paquetes instalados.
+  - **T7 — Reset de estado al cambiar componente (ComponentLibraryView.jsx):** El `useEffect([selectedComponent])` ahora resetea `showInjectPanel`, `injectStep`, `diagnoseResult`, `preflightResult`, `injectLog`, `injectDone`, `overwrite`. Elimina el bug de diagnóstico del componente anterior visible al cambiar de selección.
+  - **T8 — Limpieza de código huérfano:** Se eliminaron las 5 líneas del botón inline antiguo que quedaron sueltas tras la migración al modal wizard.
+* **Build verificado:** ✅ `built in 1.22s`, 2991 módulos, integridad de biblioteca 100%.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY] — helpers + 2 endpoints nuevos (preflight, stream)
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY] — modal wizard, nuevos estados, reset, limpieza
+
+---
+
 ### [2026-06-27] - CORE-121: Filtrabilidad Total Garantizada de la Biblioteca de Componentes
 
 * **Tipo:** Mejora de Arquitectura de Datos / UX / Reglas de Proyecto

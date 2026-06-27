@@ -853,6 +853,26 @@ graph TD
   }
 });
 
+// ─── Extractor de código robusto con 4 estrategias en cascada ───────────────
+// Estrategia 1: heading numerado con "Código" o "Codigo"
+// Estrategia 2: heading "## Código React Completo" sin número
+// Estrategia 3: primer bloque de código jsx/js/ts del archivo
+// Si ninguna funciona, devuelve null
+function extractCodeFromMarkdown(md) {
+  if (!md || typeof md !== 'string') return null;
+  let match;
+  // E1: ## 3. Código React Completo ...
+  match = md.match(/##\s+\d+\..*?C[óo]digo[^\n]*\n[\s\S]*?```(?:javascript|jsx|js|tsx|ts)\n([\s\S]*?)```/i);
+  if (match) return match[1].trim();
+  // E2: ## Código React Completo (sin número)
+  match = md.match(/##\s+C[óo]digo[^\n]*\n[\s\S]*?```(?:javascript|jsx|js|tsx|ts)\n([\s\S]*?)```/i);
+  if (match) return match[1].trim();
+  // E3: primer bloque jsx/js del archivo (fallback liberal)
+  match = md.match(/```(?:javascript|jsx|js|tsx|ts)\n([\s\S]*?)```/);
+  if (match) return match[1].trim();
+  return null;
+}
+
 // Helper to recursively find if a file named cleanName (without extension) exists in projectDir/src
 async function findInternalFile(projectDir, name, type) {
   const commonPaths = [];
@@ -907,13 +927,15 @@ async function findInternalFile(projectDir, name, type) {
   return null;
 }
 
-async function searchFileRecursive(dir, nameClean) {
-  const items = await fs.readdir(dir);
+async function searchFileRecursive(dir, nameClean, depth = 0, maxDepth = 5) {
+  if (depth >= maxDepth) return null;
+  const items = await fs.readdir(dir).catch(() => []);
   for (const item of items) {
     const fullPath = path.join(dir, item);
-    const stat = await fs.stat(fullPath);
+    const stat = await fs.stat(fullPath).catch(() => null);
+    if (!stat) continue;
     if (stat.isDirectory()) {
-      const res = await searchFileRecursive(fullPath, nameClean);
+      const res = await searchFileRecursive(fullPath, nameClean, depth + 1, maxDepth);
       if (res) return res;
     } else {
       const ext = path.extname(item);
@@ -933,16 +955,104 @@ function getResourceTypeFromPath(filePath) {
   return 'ui';
 }
 
-function getDefaultRelativePath(name, type) {
+function getDefaultRelativePath(name, type, mdFilePath = '') {
   const cleanName = name.replace(/\.(js|jsx|ts|tsx)$/, '');
-  if (type === 'hook') {
-    return `src/hooks/${cleanName}.js`;
-  }
-  if (type === 'service') {
-    return `src/services/${cleanName}.js`;
-  }
+  if (type === 'hook') return `src/hooks/${cleanName}.js`;
+  if (type === 'service') return `src/services/${cleanName}.js`;
+  if (type === 'util' || type === 'utility') return `src/utils/${cleanName}.js`;
+  if (type === 'page') return `src/pages/${cleanName}.jsx`;
+  // Heurística por subcarpeta de biblioteca
+  const p = mdFilePath.toLowerCase();
+  if (p.includes('logica_y_hooks') || p.includes('/hooks/')) return `src/hooks/${cleanName}.js`;
+  if (p.includes('servicios_y_firebase') || p.includes('/servicios/')) return `src/services/${cleanName}.js`;
+  if (p.includes('utilidades') || p.includes('/utils/')) return `src/utils/${cleanName}.js`;
+  if (p.includes('paginas') || p.includes('/pages/')) return `src/pages/${cleanName}.jsx`;
+  if (p.includes('modulos_completos') || type === 'module') return `src/components/common/${cleanName}.jsx`;
   return `src/components/ui/${cleanName}.jsx`;
 }
+
+// POST /api/library/inject/preflight — Pre-validación sin efectos secundarios
+// Verifica que el componente es inyectable ANTES de mostrar el diagnóstico.
+// No escribe nada, no instala nada. Solo valida.
+app.post('/api/library/inject/preflight', async (req, res) => {
+  const { componentLink, targetRelativePath, clientId } = req.body;
+  if (!componentLink) return res.status(400).json({ error: 'El campo "componentLink" es obligatorio.' });
+
+  const blockers = [];
+  const warnings = [];
+  let codeExtractable = false;
+  let manifestFound = false;
+  let destinationExists = false;
+  let destinationPath = null;
+
+  try {
+    // 1. Resolver ruta del .md
+    let rawPath = componentLink.replace(/^file:\/\/\//, '');
+    rawPath = decodeURIComponent(rawPath);
+    if (rawPath.toLowerCase().includes('biblioteca de componentes')) {
+      rawPath = rawPath.replace(/biblioteca de componentes/i, '06_Biblioteca_Componentes');
+    }
+    const baseDocDir = path.resolve(getDocumentationRoot());
+    const filePath = path.resolve(rawPath);
+
+    if (!isPathContained(baseDocDir, filePath)) {
+      return res.status(403).json({ error: 'Acceso denegado. La ruta está fuera del directorio de documentación.' });
+    }
+    if (!await fs.pathExists(filePath)) {
+      blockers.push(`El archivo de documentación no existe: ${path.basename(filePath)}`);
+      return res.json({ canInject: false, blockers, warnings, codeExtractable, manifestFound, destinationExists, destinationPath });
+    }
+
+    // 2. Leer markdown y validar
+    const md = await fs.readFile(filePath, 'utf-8');
+
+    // 2a. Verificar manifest JSON
+    const manifestMatch = md.match(/<!--\s*(\{[\s\S]*?\})\s*-->/);
+    if (manifestMatch) {
+      try { JSON.parse(manifestMatch[1]); manifestFound = true; }
+      catch { warnings.push('El bloque manifest JSON del componente tiene sintaxis inválida. Las dependencias no se instalarán automáticamente.'); }
+    } else {
+      warnings.push('Este componente no tiene manifest de dependencias (<!-- {} -->). Se inyectará el código pero sin instalar librerías NPM ni dependencias internas automáticamente.');
+    }
+
+    // 2b. Verificar extraíble el código
+    const code = extractCodeFromMarkdown(md);
+    if (!code) {
+      blockers.push('No se pudo extraer el código del componente. Verifica que el archivo .md tenga un bloque de código válido (```jsx o ```js).');
+    } else {
+      codeExtractable = true;
+    }
+
+    // 3. Verificar si el archivo destino ya existe
+    if (clientId && targetRelativePath) {
+      const targetProjectDir = await findProjectDir(clientId);
+      if (targetProjectDir) {
+        let relPath = targetRelativePath.startsWith('/') ? targetRelativePath.slice(1) : targetRelativePath;
+        const fullDest = path.resolve(targetProjectDir, relPath);
+        if (isPathContained(targetProjectDir, fullDest)) {
+          destinationPath = relPath;
+          destinationExists = await fs.pathExists(fullDest);
+          if (destinationExists) {
+            warnings.push(`El archivo destino ya existe: ${relPath}. Se sobrescribirá si confirmas la inyección.`);
+          }
+        }
+      }
+    }
+
+    res.json({
+      canInject: blockers.length === 0,
+      codeExtractable,
+      manifestFound,
+      destinationExists,
+      destinationPath,
+      blockers,
+      warnings
+    });
+  } catch (err) {
+    console.error(`[API /library/inject/preflight] Error: ${err.message}`);
+    res.status(500).json({ error: `Error en preflight: ${err.message}` });
+  }
+});
 
 // POST /api/library/inject/diagnose — Obtiene dependencias NPM faltantes y subdependencias locales faltantes
 app.post('/api/library/inject/diagnose', async (req, res) => {
@@ -1134,18 +1244,17 @@ app.post('/api/library/inject', async (req, res) => {
         }
       }
 
-      // 4. Inyectar el archivo de código
-      const match = markdownContent.match(/## \d+\..*?C[óo]digo[\s\S]*?```(?:javascript|jsx|js|tsx|ts)\n?([\s\S]*?)(?:```|(?=\n## \d+\.)|(?=\n---)|$)/i);
-      if (!match) {
-        throw new Error(`No se pudo encontrar código React válido en ${filePath}`);
+      // 4. Inyectar el archivo de código (usando helper robusto con 4 estrategias)
+      const codeToInject = extractCodeFromMarkdown(markdownContent);
+      if (!codeToInject) {
+        throw new Error(`No se pudo extraer código válido de ${path.basename(filePath)}. Verifica que el archivo .md tenga un bloque de código (\`\`\`jsx o \`\`\`js).`);
       }
-      const codeToInject = match[1].trim();
 
       // Determinar ruta destino física
       let relativeFilePath = destRelPath;
       if (!relativeFilePath) {
         const type = getResourceTypeFromPath(filePath);
-        relativeFilePath = getDefaultRelativePath(manifest.technicalName || path.basename(filePath, '.md'), type);
+        relativeFilePath = getDefaultRelativePath(manifest.technicalName || path.basename(filePath, '.md'), type, filePath);
       }
 
       if (relativeFilePath.startsWith('/')) {
@@ -1179,6 +1288,138 @@ app.post('/api/library/inject', async (req, res) => {
   } catch (err) {
     console.error(`[API /library/inject] Error en inyección inteligente: ${err.message}`);
     res.status(500).json({ error: `Error en inyección inteligente: ${err.message}` });
+  }
+});
+
+// POST /api/library/inject/stream — Inyección con progreso en vivo via Server-Sent Events (SSE)
+// Body: { clientId, componentLink, targetRelativePath, overwrite? }
+app.post('/api/library/inject/stream', async (req, res) => {
+  const { clientId, componentLink, targetRelativePath, overwrite = false } = req.body;
+  if (!clientId || !componentLink || !targetRelativePath) {
+    return res.status(400).json({ error: 'Los campos "clientId", "componentLink" y "targetRelativePath" son obligatorios.' });
+  }
+
+  // Configurar SSE
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders();
+
+  const emit = (event, data) => {
+    res.write(`data: ${JSON.stringify({ event, ...data })}\n\n`);
+  };
+
+  const results = [];
+
+  try {
+    const targetProjectDir = await findProjectDir(clientId);
+    if (!targetProjectDir) {
+      emit('error', { message: `No se pudo encontrar el directorio del proyecto: ${clientId}` });
+      return res.end();
+    }
+
+    const visited = new Set();
+
+    async function recurseInjectSSE(currentLink, isPrimary = false, destRelPath = null) {
+      if (visited.has(currentLink)) return;
+      visited.add(currentLink);
+
+      let rawPath = currentLink.replace(/^file:\/\/\//, '');
+      rawPath = decodeURIComponent(rawPath);
+      if (rawPath.toLowerCase().includes('biblioteca de componentes')) {
+        rawPath = rawPath.replace(/biblioteca de componentes/i, '06_Biblioteca_Componentes');
+      }
+      const baseDocDir = path.resolve(getDocumentationRoot());
+      const filePath = path.resolve(rawPath);
+
+      if (!isPathContained(baseDocDir, filePath)) throw new Error(`Acceso denegado: ${filePath}`);
+      if (!await fs.pathExists(filePath)) throw new Error(`Archivo no encontrado: ${filePath}`);
+
+      const md = await fs.readFile(filePath, 'utf-8');
+
+      // Parsear manifest
+      const manifestMatch = md.match(/<!--\s*(\{[\s\S]*?\})\s*-->/);
+      let manifest = {};
+      if (manifestMatch) { try { manifest = JSON.parse(manifestMatch[1]); } catch {} }
+
+      const compName = manifest.technicalName || path.basename(filePath, '.md');
+
+      // NPM dependencies
+      if (manifest.dependencies?.npm) {
+        const packageJsonPath = path.join(targetProjectDir, 'package.json');
+        if (await fs.pathExists(packageJsonPath)) {
+          const pkg = await fs.readJson(packageJsonPath);
+          const clientDeps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+          const missingPkgs = Object.entries(manifest.dependencies.npm).filter(([n]) => !clientDeps[n]);
+          for (const [pkgName, pkgVer] of missingPkgs) {
+            emit('step', { phase: 'npm', pkg: pkgName, status: 'installing', message: `Instalando ${pkgName}@${pkgVer}...` });
+            try {
+              await execAsync(`npm install ${pkgName}@${pkgVer} --no-audit --no-fund`, { cwd: targetProjectDir, timeout: 90000 });
+              emit('step', { phase: 'npm', pkg: pkgName, status: 'done', message: `${pkgName} instalado correctamente.` });
+              results.push({ type: 'npm', name: pkgName, status: 'installed', version: pkgVer });
+            } catch (installErr) {
+              emit('step', { phase: 'npm', pkg: pkgName, status: 'error', message: `Error al instalar ${pkgName}: ${installErr.message}` });
+              results.push({ type: 'npm', name: pkgName, status: 'failed', error: installErr.message });
+            }
+          }
+        }
+      }
+
+      // Internal dependencies (recursivo)
+      if (manifest.dependencies?.internal) {
+        for (const dep of manifest.dependencies.internal) {
+          if (!dep.link) continue;
+          const existingPath = await findInternalFile(targetProjectDir, dep.name, dep.type);
+          if (!existingPath) {
+            const defaultPath = getDefaultRelativePath(dep.name, dep.type, filePath);
+            emit('step', { phase: 'dependency', name: dep.name, status: 'injecting', message: `Inyectando dependencia: ${dep.name}` });
+            await recurseInjectSSE(dep.link, false, defaultPath);
+          } else {
+            results.push({ type: 'internal', name: dep.name, status: 'already_present', path: path.relative(targetProjectDir, existingPath) });
+          }
+        }
+      }
+
+      // Extraer código con helper robusto
+      const codeToInject = extractCodeFromMarkdown(md);
+      if (!codeToInject) throw new Error(`No se pudo extraer código de ${path.basename(filePath)}`);
+
+      let relativeFilePath = destRelPath;
+      if (!relativeFilePath) {
+        const type = getResourceTypeFromPath(filePath);
+        relativeFilePath = getDefaultRelativePath(compName, type, filePath);
+      }
+      if (relativeFilePath.startsWith('/')) relativeFilePath = relativeFilePath.slice(1);
+
+      const finalTargetFilePath = path.resolve(targetProjectDir, relativeFilePath);
+      if (!isPathContained(targetProjectDir, finalTargetFilePath)) {
+        throw new Error(`Ruta de destino fuera del proyecto: ${finalTargetFilePath}`);
+      }
+
+      // Verificar sobrescritura
+      const fileExists = await fs.pathExists(finalTargetFilePath);
+      if (fileExists && !overwrite && isPrimary) {
+        throw new Error(`El archivo ya existe: ${relativeFilePath}. Activa "Sobrescribir" para reemplazarlo.`);
+      }
+
+      emit('step', { phase: 'file', name: compName, path: relativeFilePath, status: 'writing', message: `Escribiendo ${relativeFilePath}...` });
+      await fs.ensureDir(path.dirname(finalTargetFilePath));
+      await fs.writeFile(finalTargetFilePath, codeToInject, 'utf-8');
+
+      const resultItem = { type: isPrimary ? 'primary' : 'dependency', name: compName, status: 'injected', path: relativeFilePath };
+      results.push(resultItem);
+      emit('step', { phase: 'file', name: compName, path: relativeFilePath, status: 'done', message: `✓ ${relativeFilePath} creado.` });
+    }
+
+    emit('start', { message: `Iniciando instalación de componente en ${clientId}...` });
+    await recurseInjectSSE(componentLink, true, targetRelativePath);
+    emit('complete', { message: 'Instalación completada exitosamente.', results });
+  } catch (err) {
+    console.error(`[API /library/inject/stream] Error: ${err.message}`);
+    emit('error', { message: err.message });
+  } finally {
+    res.end();
   }
 });
 

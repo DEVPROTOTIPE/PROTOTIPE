@@ -4,6 +4,13 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-122: Blindaje del Sistema de Inyección de Componentes en Cliente~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Auditoría exhaustiva y blindaje completo del flujo "Instalar en Cliente". Se corrigieron 5 bugs críticos (regex frágil, sin feedback, NPM bloqueante, sobrescritura ciega, manifest ausente silencioso). Se implementaron 2 nuevos endpoints aditivos (`/preflight` y `/stream` SSE) que no modifican el endpoint original `/api/library/inject`. Se reemplazó el panel inline por un modal wizard de 3 pasos guiados con validación previa, diagnóstico de dependencias y progreso en vivo. Build verificado en ✅ 1.22s.
+  - Archivos: [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-120: Rediseño Visual y de Experiencia de Usuario de la Biblioteca~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-27
