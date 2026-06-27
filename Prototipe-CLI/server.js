@@ -3948,12 +3948,13 @@ app.get('/api/git/branches', async (req, res) => {
       tempRenamed = true;
     }
 
-    const { stdout } = await execGitCommand('git branch --format="%(refname:short)"', projectDir);
+    const { stdout } = await execGitCommand('git branch -a --format="%(refname:short)"', projectDir);
     const branches = stdout
       .split('\n')
       .map(b => b.trim())
       .filter(Boolean)
-      .map(b => b.replace(/^origin\//, '')); // Omitir prefijo remoto si se requiere
+      .map(b => b.replace(/^remotes\/origin\//, '').replace(/^origin\//, ''))
+      .filter(b => b !== 'HEAD' && !b.includes('HEAD') && !b.includes('*'));
     
     // Devolver lista única de ramas
     const uniqueBranches = [...new Set(branches)];
