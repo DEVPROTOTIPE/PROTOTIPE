@@ -1,5 +1,17 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-26] - CORE-100: Selector de Ramas Dinámico y Consulta Remota de Git
+
+* **Tipo:** Nuevas Funcionalidades / UI/UX / Git / Corrección de Bugs
+* **Descripción de Cambios:**
+  - **F1 — Selector Interactivo de Ramas (BranchSelector)**: Diseñado e integrado un selector interactivo tipo dropdown al lado de la insignia de estado de Git en la UI del Dashboard. Permite desplegar y cambiar de rama de forma dinámica mediante peticiones al backend.
+  - **F2 — Endpoints de Checkout y Lista de Ramas en CLI**: Implementados los endpoints `GET /api/git/branches` y `POST /api/git/checkout` en el servidor CLI Bridge, con soporte nativo para repositorios inactivos renombrados como `.git-backup-temp/` mediante inyección controlada de variables de entorno de Git en Node (`GIT_DIR` y `GIT_WORK_TREE`).
+  - **C1 — Corrección de Apilamiento de UI (z-index)**: Añadida la propiedad `relative z-40` al contenedor de la cabecera activa del repositorio en `GitBackupPanel.jsx` para evitar que el dropdown del selector se corte o tape con la tarjeta de "Cambios Detectados".
+  - **C2 — Habilitación de git fetch Real en API de Estado**: Corregido un bug en `/api/git/status` donde se utilizaba `git fetch --dry-run` a través de `execAsync`. Se reemplazó por un `git fetch` real a través de `execGitCommand`, lo que permite consultar y sincronizar de forma efectiva el estado local con respecto al repositorio en GitHub (ahead / behind / sync) incluso para repositorios inactivos.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+
 ### [2026-06-26] - CORE-099-REV: Resiliencia de Auto-Merge y Prevención de Recargas de Vite
 
 * **Tipo:** Corrección de Bugs / Robustecimiento / Git

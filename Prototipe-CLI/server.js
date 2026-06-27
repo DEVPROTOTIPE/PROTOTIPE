@@ -4342,8 +4342,8 @@ app.get('/api/git/status', async (req, res) => {
     const doFetch = req.query.fetch === 'true';
     if (doFetch) {
       try {
-        // Fetch ligero con timeout de 8 segundos para evitar bloqueos por falta de red
-        await execAsync('git fetch --dry-run', { cwd: resolvedPath, timeout: 8000 });
+        // Fetch real usando execGitCommand para soportar repositorios activos e inactivos (.git-backup-temp)
+        await execGitCommand('git fetch', resolvedPath);
       } catch (fetchErr) {
         console.warn(`[API /git/status] Warning al hacer fetch en ${resolvedPath}:`, fetchErr.message);
       }
