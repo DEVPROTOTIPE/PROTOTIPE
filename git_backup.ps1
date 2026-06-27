@@ -459,6 +459,16 @@ catch {
     Write-BackupLog -Status "FAILED" -Target "Maestro" -Message "Excepcion imprevista: $_"
 }
 finally {
+    # Asegurar que el repositorio raíz regrese a la rama original de trabajo en cualquier escenario
+    if ($branchName) {
+        $currentBranch = (git rev-parse --abbrev-ref HEAD 2>$null)
+        if ($currentBranch -and $currentBranch -ne $branchName) {
+            Write-Host " [Restauración] Regresando de emergencia a tu rama de trabajo original: [$branchName]..." -ForegroundColor Yellow
+            git merge --abort 2>&1 | Out-Null
+            git checkout $branchName 2>&1 | Out-Null
+        }
+    }
+
     # 6. Restaurar de forma 100% segura los directorios .git de desarrollo
     $renamedCount = $renamedDirs.Count
     if ($renamedCount -gt 0) {
