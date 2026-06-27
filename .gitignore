@@ -39,3 +39,9 @@ Thumbs.db
 .git-backup-temp
 **/.git-backup-temp
 **/.git-backup-temp/
+
+# Exclusión de subproyectos (tienen sus propios repositorios Git independientes)
+Plantillas Core/
+Instancias Clientes/
+Prototipe-CLI/templates/template-ventas/
+Prototipe-CLI/templates/template-core-seed/
