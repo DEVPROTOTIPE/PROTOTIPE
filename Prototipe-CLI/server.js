@@ -4010,9 +4010,12 @@ async function getGitBranch(dir) {
   } catch (_) { return null; }
 }
 
-// Detecta si un directorio tiene o está dentro de un repo git aislado
+// Detecta si un directorio tiene o está dentro de un repo git aislado (soportando repositorios inactivos .git-backup-temp)
 async function isInsideGitRepo(dir) {
   try {
+    if (await fs.pathExists(path.join(dir, '.git')) || await fs.pathExists(path.join(dir, '.git-backup-temp'))) {
+      return true;
+    }
     const { stdout } = await execGitCommand('git rev-parse --is-inside-work-tree', dir);
     return stdout.trim() === 'true';
   } catch (_) { return false; }
@@ -4284,9 +4287,9 @@ app.get('/api/git/log', async (req, res) => {
   }
 
   try {
-    const { stdout } = await execGitCommand('git log -n 5 --pretty=format:"%h|%an|%ar|%s"', resolvedPath);
+    const { stdout } = await execGitCommand('git log -n 5 --pretty=format:"%h:::%an:::%ar:::%s"', resolvedPath);
     const commits = stdout.split('\n').filter(l => l.trim()).map(line => {
-      const parts = line.replace(/^"/, '').replace(/"$/, '').split('|');
+      const parts = line.replace(/^"/, '').replace(/"$/, '').split(':::');
       return {
         hash: parts[0],
         author: parts[1],
