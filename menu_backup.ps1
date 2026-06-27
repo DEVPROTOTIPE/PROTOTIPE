@@ -128,9 +128,68 @@ function Get-GitChangesCount {
 
 function Show-Header {
     Clear-Host
-    Write-Host "======================================================================" -ForegroundColor Cyan
-    Write-Host "         [PROTOTIPE ECOSISTEMA - GESTOR DE RESPALDOS GIT]" -ForegroundColor Cyan
-    Write-Host "======================================================================" -ForegroundColor Cyan
+    $ts = Get-Date -Format "dd MMM yyyy  HH:mm"
+    Write-Host ""
+    Write-Host "  ╔════════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
+    Write-Host "  ║  " -NoNewline -ForegroundColor Cyan
+    Write-Host "⚡  PROTOTIPE ECOSISTEMA" -NoNewline -ForegroundColor White
+    Write-Host "  ─  GESTOR DE RESPALDOS GIT                          " -NoNewline -ForegroundColor DarkCyan
+    Write-Host "║" -ForegroundColor Cyan
+    Write-Host "  ║     " -NoNewline -ForegroundColor Cyan
+    Write-Host "$rootDir" -NoNewline -ForegroundColor DarkGray
+    Write-Host "  ·  $ts" -NoNewline -ForegroundColor DarkGray
+    Write-Host "" 
+    Write-Host "  ╚════════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host ""
+}
+
+function Show-StatusPanel {
+    $sep = "  " + ("─" * 65)
+    Write-Host "  ESTADO DEL ECOSISTEMA" -ForegroundColor Yellow
+    Write-Host $sep -ForegroundColor DarkGray
+
+    # Helper interno para imprimir una fila de estado
+    function Write-RepoRow {
+        param([string]$Icon, [string]$Label, [string]$Branch, [int]$Changes)
+        $label = $Label.PadRight(30)
+        $branchText = if ($Branch) { "[$Branch]" } else { "[?]" }
+        $branchColor = if ($Branch -eq "develop") { "Cyan" } elseif ($Branch -eq "master" -or $Branch -eq "main") { "Green" } else { "DarkYellow" }
+        if ($Changes -eq -1) {
+            $statusText  = "~ Sin Git";  $statusColor = "DarkGray"
+        } elseif ($Changes -eq 0) {
+            $statusText  = "✓ Limpio";   $statusColor = "Green"
+        } else {
+            $statusText  = "● $Changes cambios"; $statusColor = "Yellow"
+        }
+        Write-Host "  $Icon  " -NoNewline -ForegroundColor White
+        Write-Host $label -NoNewline -ForegroundColor White
+        Write-Host $branchText.PadRight(14) -NoNewline -ForegroundColor $branchColor
+        Write-Host $statusText -ForegroundColor $statusColor
+    }
+
+    # Maestro (raiz del proyecto)
+    $mChanges = Get-GitChangesCount -Path $rootDir
+    $mBranch  = (git -C $rootDir rev-parse --abbrev-ref HEAD 2>$null)
+    Write-RepoRow -Icon "📦" -Label "Maestro (PROTOTIPE)" -Branch $mBranch -Changes $mChanges
+
+    # Dashboard
+    if (Test-Path $dashboardDir) {
+        $dChanges = Get-GitChangesCount -Path $dashboardDir
+        $dBranch  = (git -C $dashboardDir rev-parse --abbrev-ref HEAD 2>$null)
+        Write-RepoRow -Icon "🖥" -Label "Dashboard (dev-dashboard)" -Branch $dBranch -Changes $dChanges
+    }
+
+    # Cores
+    if (Test-Path $coresDir) {
+        foreach ($core in (Get-ChildItem -Path $coresDir -Directory -ErrorAction SilentlyContinue)) {
+            $cChanges = Get-GitChangesCount -Path $core.FullName
+            $gitDir   = if (Test-Path "$($core.FullName)\.git") { "$($core.FullName)\.git" } else { "$($core.FullName)\.git-backup-temp" }
+            $cBranch  = (git --git-dir="$gitDir" rev-parse --abbrev-ref HEAD 2>$null)
+            Write-RepoRow -Icon "🧩" -Label $core.Name -Branch $cBranch -Changes $cChanges
+        }
+    }
+
+    Write-Host $sep -ForegroundColor DarkGray
     Write-Host ""
 }
 
@@ -138,75 +197,70 @@ function Show-Header {
 function Get-MenuSelection {
     param (
         [string]$Title,
-        [string[]]$Options
+        [string[]]$Options,
+        [switch]$ShowStatus
     )
-    
+
     $selectedIndex = 0
     $key = 0
-    
-    # Ocultar el cursor para una interfaz mas limpia usando secuencias ANSI
+    $sep = "  " + ("─" * 65)
+
     Write-Host "$([char]27)[?25l" -NoNewline
-    
+
     $cursorSizeRestored = $false
     try {
-        # Intentar guardar el tamaño del cursor original si la consola lo soporta
         $cursorSize = 25
         try {
             $cursorSize = $Host.UI.RawUI.CursorSize
-            if ($cursorSize -gt 0) {
-                $Host.UI.RawUI.CursorSize = 1
-            }
+            if ($cursorSize -gt 0) { $Host.UI.RawUI.CursorSize = 1 }
         } catch {}
 
         while ($true) {
             Show-Header
-            Write-Host " $Title" -ForegroundColor Yellow
-            Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
-            Write-Host " Use las flechas [Up / Down] para navegar y [Enter] para seleccionar:" -ForegroundColor Gray
+
+            if ($ShowStatus) { Show-StatusPanel }
+
+            # Titulo de seccion
+            Write-Host "  $Title" -ForegroundColor Yellow
+            Write-Host "  " -NoNewline
+            Write-Host "↑↓ Navegar  ·  Enter Seleccionar  ·  Q Salir" -ForegroundColor DarkGray
+            Write-Host $sep -ForegroundColor DarkGray
             Write-Host ""
-            
+
             for ($i = 0; $i -lt $Options.Count; $i++) {
                 if ($i -eq $selectedIndex) {
-                    Write-Host "  >  $($Options[$i])" -ForegroundColor Cyan
+                    Write-Host "  " -NoNewline
+                    Write-Host "❯  " -NoNewline -ForegroundColor Cyan
+                    Write-Host $Options[$i] -ForegroundColor White
                 } else {
-                    Write-Host "     $($Options[$i])" -ForegroundColor White
+                    Write-Host "     " -NoNewline
+                    Write-Host $Options[$i] -ForegroundColor DarkGray
                 }
             }
+
             Write-Host ""
-            Write-Host "======================================================================" -ForegroundColor Cyan
-            
-            # Capturar tecla presionada
+            Write-Host $sep -ForegroundColor DarkGray
+
             $keyInfo = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
             $key = $keyInfo.VirtualKeyCode
-            
-            # Flecha Arriba (Virtual Key 38)
+
             if ($key -eq 38) {
                 $selectedIndex--
                 if ($selectedIndex -lt 0) { $selectedIndex = $Options.Count - 1 }
-            }
-            # Flecha Abajo (Virtual Key 40)
-            elseif ($key -eq 40) {
+            } elseif ($key -eq 40) {
                 $selectedIndex++
                 if ($selectedIndex -ge $Options.Count) { $selectedIndex = 0 }
-            }
-            # Enter (Virtual Key 13)
-            elseif ($key -eq 13) {
+            } elseif ($key -eq 13) {
                 return $selectedIndex
-            }
-            # Tecla Q o Escape (Virtual Key 81 o 27)
-            elseif ($key -eq 81 -or $key -eq 27) {
+            } elseif ($key -eq 81 -or $key -eq 27) {
                 return -1
             }
         }
-    }
-    finally {
-        # Restaurar el cursor al salir
+    } finally {
         Write-Host "$([char]27)[?25h" -NoNewline
         if (-not $cursorSizeRestored) {
             try {
-                if ($cursorSize -gt 0) {
-                    $Host.UI.RawUI.CursorSize = $cursorSize
-                }
+                if ($cursorSize -gt 0) { $Host.UI.RawUI.CursorSize = $cursorSize }
             } catch {}
         }
     }
@@ -214,9 +268,11 @@ function Get-MenuSelection {
 
 function Run-Master-Backup {
     Show-Header
-    Write-Host " [INICIANDO RESPALDO MAESTRO DE TODO EL PROYECTO]" -ForegroundColor Yellow
+    $sep = "  " + ("─" * 65)
+    Write-Host "  ╔════════════════════════════════════════════════════════════════════╗" -ForegroundColor Yellow
+    Write-Host "  ║  💾  RESPALDO MAESTRO COMPLETO DE PROTOTIPE                         ║" -ForegroundColor Yellow
+    Write-Host "  ╚════════════════════════════════════════════════════════════════════╝" -ForegroundColor Yellow
     Write-Host ""
-    # Llamar al script existente de backup general
     powershell -NoProfile -ExecutionPolicy Bypass -File "$rootDir\git_backup.ps1" -Interactive
 }
 
@@ -362,17 +418,17 @@ function Manage-Instances {
 
 # Opciones del Menu Principal
 $mainOptions = @(
-    "Respaldo Maestro de todo PROTOTIPE (Snapshot Fisico)",
-    "Guardar / Subir Consola Central (dev-dashboard)",
-    "Guardar / Subir una Plantilla Core (Molde)",
-    "Guardar / Subir una Instancia de Cliente (Produccion/Dev)",
-    "Salir"
+    "💾  Respaldo Maestro de todo PROTOTIPE (Snapshot Fisico)",
+    "🖥  Guardar / Subir Consola Central (dev-dashboard)",
+    "🧩  Guardar / Subir una Plantilla Core (Molde)",
+    "👤  Guardar / Subir una Instancia de Cliente (Produccion/Dev)",
+    "✖   Salir"
 )
 
 # Bucle principal del menu
 $keepRunning = $true
 do {
-    $choice = Get-MenuSelection -Title "SELECCIONE LA ACCION QUE DESEA REALIZAR:" -Options $mainOptions
+    $choice = Get-MenuSelection -Title "SELECCIONE LA ACCION QUE DESEA REALIZAR:" -Options $mainOptions -ShowStatus
     
     switch ($choice) {
         0 { Run-Master-Backup; Write-Host " Presione cualquier tecla para volver al menu..."; Read-Host | Out-Null }
