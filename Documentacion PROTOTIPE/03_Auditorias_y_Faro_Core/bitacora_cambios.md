@@ -1,5 +1,62 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-26] - CORE-098: Poda Limpia de Firebase Cloud Messaging (FCM) e Inactividad Push
+
+* **Tipo:** Remoción de Código / Optimización / Consistencia
+* **Descripción de Cambios:**
+  - **P1 — Eliminación física de archivos de mensajería push**: Se eliminaron de forma definitiva los archivos `src/hooks/useFCMPermission.js` y `src/components/client/SoftPushPrompt.jsx` para suprimir el peso innecesario en los bundles y mitigar fallos de carga.
+  - **P2 — Saneamiento de Layouts**: Se eliminó la importación y la llamada al hook `useFCMPermission` en los componentes de enrutamiento raíz de la interfaz de usuario:
+    - `src/layouts/AdminLayout.jsx` (Módulo Administración)
+    - `src/layouts/PortalLayout.jsx` (Portal de Empleados)
+    - `src/layouts/ClientLayout.jsx` (Tienda PWA del Cliente)
+  - **P3 — Limpieza de Dependencias**: Se eliminó la importación y renderizado de `SoftPushPrompt` en `src/pages/client/OrderTracking.jsx` (Seguimiento de pedidos de Clientes).
+  - **P4 — Sincronización y Paridad Ecosistema**: Los cambios se propagaron y aplicaron simultáneamente en tres directorios de trabajo del disco:
+    - Core Genérico de Referencia (`Plantillas Core/App Ventas`)
+    - Generador de Proyectos de la CLI (`Prototipe-CLI/templates/template-ventas`)
+    - Instancia de Cliente Activa (`Instancias Clientes/ventas/ventas-moni-app`)
+  - **P5 — Compilación Exitosa**: Se corrió la compilación de producción de Vite (`npm run build`) en la carpeta del Core, validando la ausencia de enlaces o importaciones rotas con éxito total.
+* **Archivos Modificados:**
+  - [`Plantillas Core/App Ventas/`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/) [MODIFY/DELETE]
+  - [`Prototipe-CLI/templates/template-ventas/`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/) [MODIFY/DELETE]
+  - [`Instancias Clientes/ventas/ventas-moni-app/`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/) [MODIFY/DELETE]
+
+### [2026-06-26] - CORE-097: Robustecimiento y Expansión del Módulo de Control Git
+
+* **Tipo:** Auditoría / Consistencia / Seguridad / UI/UX / Nuevas Funcionalidades
+* **Descripción de Cambios:**
+  - **A1 — APIs Generales (Soporte Universal de Rutas)**: Modificados los endpoints `POST /api/git/discard` and `GET /api/git/diff-file` para recibir el parámetro `path` (ruta absoluta del repositorio) con validación estricta de Path Traversal (`isPathContained`), en lugar de estar acoplados rígidamente a `clientId`. Esto permite operar el descarte y diferencia de cambios en el Maestro, la Consola Central y los Cores de forma unificada.
+  - **A2 — Autocuración del Directorio de Control en Subproyectos**: Se implementó el uso de variables de entorno `GIT_DIR` y `GIT_WORK_TREE` de Git en Node.js de forma transparente. Esto permite leer y descartar cambios locales en Cores y Clientes con repositorios inactivos (`.git-backup-temp`) directamente y con cero bloqueos físicos de archivos en Windows.
+  - **F1 — Descarte Selectivo y Masivo de Cambios Locales**: Integrada la funcionalidad de descarte en el frontend (`GitBackupPanel.jsx`). Añadido un botón de restauración (`RefreshCw`) al lado de cada archivo modificado para checkout de archivo individual, y un botón "Descartar todo" en el header del visor, ambos protegidos con diálogos de confirmación nativos (`showConfirm`).
+  - **F2 — Historial de Commits (Git Log)**: Creado el endpoint `GET /api/git/log` e implementado el visor "Historial de Commits Recientes" en la UI, mostrando de forma ordenada los 5 commits locales más recientes de la rama seleccionada. Captura de excepciones en repositorios vacíos (nuevos o sin commits) retornando `commits: []` de forma segura.
+  - **F3 — Estado de Sincronización Remota**: Modificada la API `GET /api/git/status` para calcular en milisegundos commits adelantados/atrasados de la rama local respecto a origin usando `git rev-list`. Se añadió el botón manual "Comprobar GitHub" que dispara un `git fetch` remoto ligero en segundo plano con timeout controlado de 8 segundos para evitar bloqueos por falta de conexión o red lenta.
+  - **A3 — Resiliencia ante Conflictos en Auto-Merge**: Se reestructuraron los scripts de PowerShell `subproject_backup.ps1` y `git_backup.ps1`. Si la estrategia secundaria de auto-merge a producción (`main`) detecta conflictos de código, el script aborta la fusión (`git merge --abort`) y regresa a la rama original, pero en lugar de retornar error 1 (que bloqueaba la UI con un estado de error rojo catastrófico), escribe un aviso amarillo descriptivo en la salida y finaliza con éxito (código 0). Esto garantiza que la subida exitosa del respaldo principal en la rama de desarrollo (`develop`) sea notificada correctamente en la interfaz.
+  - **A4 — Protección Hermética de Procesos del Dashboard**: Se actualizó la expresión regular y lógica de protección de PIDs y procesos en `git_backup.ps1` y `subproject_backup.ps1` para que soporte de forma robusta barras inclinadas hacia adelante `/` y barras invertidas `\`. Se añadió un filtro redundante de CommandLine para el Dashboard de Control Central. Esto garantiza de forma absoluta que el servidor de desarrollo del dashboard nunca sea detenido o interrumpido durante operaciones de guardado/backup, manteniendo el flujo SSE activo.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+### [2026-06-26] - CORE-096: Robustecimiento y Auditoría del Módulo Consola de Errores y Diagnósticos (Con DatePickers y CSV)
+
+* **Tipo:** Auditoría / Corrección de Bugs / Optimización de Performance / UI/UX
+* **Descripción de Cambios:**
+  - **C1 — Límite Firestore:** Agregado `limit(500)` al `query` de `app_failures` para evitar descarga ilimitada de documentos.
+  - **C2 — Anti-spam de logs:** Implementado flag `isFailuresInitialLoad` en el `onSnapshot` para evitar inundar el panel de actividad con mensajes históricos al inicializar.
+  - **C3 — Consistencia de resolución masiva:** `handleResolveAllFailures` ahora graba `resolvedAt` e `resolutionNote: null` consistente con el flujo individual de resolución. Actualización local optimista post-escritura.
+  - **C4 — writeBatch seguro:** `handleClearAllFailures` refactorizado a `writeBatch` en chunks de 450 operaciones para no superar el límite nativo de Firestore (500 ops/batch).
+  - **M1 — Uptime calculado:** El indicador "Uptime del Motor" muestra ahora un porcentaje real derivado del ratio fallos activos/histórico en lugar de valores hardcodeados.
+  - **M2, M3, M5 — useMemo en filtros:** `rawFilteredFailures`, `filteredFailures` y `clientFilterOptions` envueltos en `useMemo` con dependencias estrictas para eliminar recalcados en cada keystroke.
+  - **M4 — Eliminación de código duplicado:** Extraída `extractFileAndLine()` como función utilitaria pura (antes del componente App), eliminando 50+ líneas duplicadas entre el `useEffect` de carga de código y el modal de diagnóstico.
+  - **F1 — Rango de Fechas Custom (Centrado y Autocurativo):** Implementado el componente premium interactivo `DatePickerCustom` con diseño glassmorphic, que sustituye a los inputs de tipo date nativos de HTML y se integra al layout con altura `h-9` (`36px`). Se adaptó para renderizarse centrado en pantalla en un modal con backdrop blur (`backdrop-blur-sm`) en lugar de dropdown absolute, evitando desbordamientos de la UI en cualquier resolución.
+  - **F2 — Exportación CSV:** Diseñada e integrada la función `handleExportFailuresCSV()` que de-duplica y escapa de forma segura caracteres y saltos de línea para exportar todos los incidentes filtrados en un archivo CSV formateado con columnas limpias.
+  - **F3 — Renderizado de Versión App:** Añadido soporte para pintar el badge de versión de la app (`vX.Y.Z`) en cada tarjeta de incidente (si está disponible) y visualización del campo `Versión App` en el modal de diagnóstico.
+  - **F4 — Badge de notificación:** Implementado badge rojo con `animate-pulse` en el sidebar y en la barra de navegación móvil, mostrando conteo de errores activos cuando el usuario está en otra sección. Cap visual en "9+".
+  - **F6 — getSeverity centralizado:** Extraída función `getSeverity(fail)` para normalizar el campo `type` del fallo. Reemplazados 2 usos inline dispersos (filtro `useMemo` y card del listado) para garantizar consistencia total.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+---
+
 ### [2026-06-26] - CORE-095: Corrección de Cierre de Servidor Dev-Dashboard en Backups de Git
 
 * **Tipo:** Corrección de Bugs / Robustez / Scripts de Automatización / Control de Versiones

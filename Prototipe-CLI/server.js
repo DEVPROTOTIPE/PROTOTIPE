@@ -3853,11 +3853,21 @@ app.get('/api/project/drift/global', async (req, res) => {
 
 // --- CENTRO DE OPERACIONES GIT (DESHACER Y DIFF) ---
 app.post('/api/git/discard', async (req, res) => {
-  const { clientId, file, all } = req.body;
-  if (!clientId) return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+  const { clientId, path: targetPath, file, all } = req.body;
+  
+  let projectDir = '';
+  if (targetPath) {
+    if (!isPathContained(GIT_ROOT, targetPath)) {
+      return res.status(403).json({ error: 'Ruta fuera del ecosistema PROTOTIPE. Acceso denegado.' });
+    }
+    projectDir = path.resolve(targetPath);
+  } else if (clientId) {
+    projectDir = await findProjectDir(clientId);
+  }
 
-  const projectDir = await findProjectDir(clientId);
-  if (!projectDir) return res.status(404).json({ error: `No se encontró el proyecto para: ${clientId}` });
+  if (!projectDir || !await fs.pathExists(projectDir)) {
+    return res.status(404).json({ error: 'No se encontró el directorio del repositorio.' });
+  }
 
   try {
     if (all) {
@@ -3880,13 +3890,24 @@ app.post('/api/git/discard', async (req, res) => {
 });
 
 app.get('/api/git/diff-file', async (req, res) => {
-  const { clientId, file } = req.query;
-  if (!clientId || !file) {
-    return res.status(400).json({ error: 'Los parámetros "clientId" y "file" son obligatorios.' });
+  const { clientId, path: targetPath, file } = req.query;
+  if (!file) {
+    return res.status(400).json({ error: 'El parámetro "file" es obligatorio.' });
   }
 
-  const projectDir = await findProjectDir(clientId);
-  if (!projectDir) return res.status(404).json({ error: `No se encontró el proyecto para: ${clientId}` });
+  let projectDir = '';
+  if (targetPath) {
+    if (!isPathContained(GIT_ROOT, targetPath)) {
+      return res.status(403).json({ error: 'Ruta fuera del ecosistema PROTOTIPE. Acceso denegado.' });
+    }
+    projectDir = path.resolve(targetPath);
+  } else if (clientId) {
+    projectDir = await findProjectDir(clientId);
+  }
+
+  if (!projectDir || !await fs.pathExists(projectDir)) {
+    return res.status(404).json({ error: 'No se encontró el directorio del repositorio.' });
+  }
 
   try {
     const safeFile = sanitizeShellArgument(file);
@@ -4201,10 +4222,86 @@ app.get('/api/git/status', async (req, res) => {
       await processDirChanges(resolvedPath);
     }
 
-    res.json({ success: true, branch, changes, envLeak, envLeakFiles });
+    // F3: Calcular sincronización con control remoto
+    let syncState = 'unknown';
+    let aheadCount = 0;
+    let behindCount = 0;
+
+    const doFetch = req.query.fetch === 'true';
+    if (doFetch) {
+      try {
+        // Fetch ligero con timeout de 8 segundos para evitar bloqueos por falta de red
+        await execAsync('git fetch --dry-run', { cwd: resolvedPath, timeout: 8000 });
+      } catch (fetchErr) {
+        console.warn(`[API /git/status] Warning al hacer fetch en ${resolvedPath}:`, fetchErr.message);
+      }
+    }
+
+    try {
+      // Comparar rama actual contra origin/{branch}
+      const { stdout: diffOutput } = await execGitCommand(`git rev-list --left-right --count HEAD...origin/${branch}`, resolvedPath);
+      // stdout suele ser: "ahead\tbehind" (ej. "2\t0")
+      const parts = diffOutput.trim().split(/\s+/);
+      if (parts.length === 2) {
+        aheadCount = parseInt(parts[0], 10) || 0;
+        behindCount = parseInt(parts[1], 10) || 0;
+        if (aheadCount === 0 && behindCount === 0) {
+          syncState = 'sync';
+        } else if (aheadCount > 0 && behindCount === 0) {
+          syncState = 'ahead';
+        } else if (aheadCount === 0 && behindCount > 0) {
+          syncState = 'behind';
+        } else {
+          syncState = 'diverged';
+        }
+      }
+    } catch (_) {
+      // Si falla es porque no hay tracking remoto configurado o no hay commits comunes
+      syncState = 'local';
+    }
+
+    res.json({ success: true, branch, changes, envLeak, envLeakFiles, syncState, aheadCount, behindCount });
   } catch (err) {
     console.error('[API /git/status] Error:', err.message);
     res.status(500).json({ error: `Error al leer estado Git: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/git/log?path=...
+// Retorna los últimos 5 commits locales de la rama activa.
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/git/log', async (req, res) => {
+  const targetPath = req.query.path;
+  if (!targetPath) return res.status(400).json({ error: 'El parámetro "path" es obligatorio.' });
+
+  if (!isPathContained(GIT_ROOT, targetPath)) {
+    return res.status(403).json({ error: 'Ruta fuera del ecosistema PROTOTIPE. Acceso denegado.' });
+  }
+  const resolvedPath = path.resolve(targetPath);
+  if (!await fs.pathExists(resolvedPath)) {
+    return res.status(404).json({ error: 'La ruta especificada no existe.' });
+  }
+
+  try {
+    const { stdout } = await execGitCommand('git log -n 5 --pretty=format:"%h|%an|%ar|%s"', resolvedPath);
+    const commits = stdout.split('\n').filter(l => l.trim()).map(line => {
+      const parts = line.replace(/^"/, '').replace(/"$/, '').split('|');
+      return {
+        hash: parts[0],
+        author: parts[1],
+        date: parts[2],
+        message: parts[3]
+      };
+    });
+    res.json({ success: true, commits });
+  } catch (err) {
+    // Si falla porque el repositorio no tiene commits aún, retornar array vacío de forma segura
+    if (err.message.includes('does not have any commits yet') || err.message.includes('fatal:')) {
+      return res.json({ success: true, commits: [] });
+    }
+    console.error('[API /api/git/log] Error:', err.message);
+    res.status(500).json({ error: `Error al leer historial Git: ${err.message}` });
   }
 });
 
@@ -4935,15 +5032,16 @@ export { messaging };
 async function auditAndPatchServiceWorker(clientPath, corePath, firebaseConfig, log) {
   const swDestPath = path.join(clientPath, 'public', 'firebase-messaging-sw.js');
   const swSrcPath = path.join(corePath, 'public', 'firebase-messaging-sw.js');
+  
+  // Si el Core no tiene el service worker FCM, omitir en silencio ya que no está activo
+  if (!await fs.pathExists(swSrcPath)) {
+    return;
+  }
+
   if (!await fs.pathExists(swDestPath)) {
-    if (await fs.pathExists(swSrcPath)) {
-      log(`   🔧 Service Worker FCM faltante. Copiando desde el Core...`, 'warn');
-      await fs.ensureDir(path.dirname(swDestPath));
-      await fs.copy(swSrcPath, swDestPath);
-    } else {
-      log(`   ⚠ No se encontró public/firebase-messaging-sw.js en el Core. Omitiendo.`, 'warn');
-      return;
-    }
+    log(`   🔧 Service Worker FCM faltante. Copiando desde el Core...`, 'warn');
+    await fs.ensureDir(path.dirname(swDestPath));
+    await fs.copy(swSrcPath, swDestPath);
   }
   let swContent = await fs.readFile(swDestPath, 'utf8');
   const initRegex = /firebase\.initializeApp\(\{[\s\S]*?\}\)/;
@@ -5007,7 +5105,6 @@ async function auditAndPatchFirebaseJson(clientPath, log) {
     const requiredHeaders = [
       { source: '/index.html', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
       { source: '/sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
-      { source: '/firebase-messaging-sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
       { source: '/manifest.webmanifest', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
       { source: '/manifest.json', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
       { source: '/assets/**', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] }

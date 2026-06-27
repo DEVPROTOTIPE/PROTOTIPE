@@ -64,6 +64,53 @@ Desplegar Hosting  : cmd /c firebase deploy --only hosting
 
 ---
 
+## SECCIÓN 5B — AUTH GUARD PARA FIRESTORE (OBLIGATORIO)
+
+**Regla:** Toda operación de Firestore (`getDocs`, `addDoc`, `updateDoc`, `deleteDoc`) que se ejecute desde un servicio, hook o efecto **debe estar blindada** con el utilitario `firestoreAuthGuard.js` ubicado en `src/utils/firestoreAuthGuard.js`.
+
+**Por qué:** Firebase Auth es asíncrono. Un componente puede montarse y ejecutar un `useEffect` antes de que `onAuthStateChanged` haya resuelto la sesión. En ese instante, `auth.currentUser === null` y Firestore rechaza con `Missing or insufficient permissions`, aunque el usuario ya haya iniciado sesión antes.
+
+**Patrón obligatorio para servicios:**
+```js
+import { withAuth, withAuthSilent, AuthGuardError } from '../utils/firestoreAuthGuard'
+
+// Para escrituras (lanza error si no hay auth):
+export async function miServicioDeEscritura(data) {
+  try {
+    await withAuth(() => addDoc(collection(db, 'coleccion'), data))
+  } catch (error) {
+    if (error instanceof AuthGuardError) return // Silencioso — auth no lista aún
+    console.error('[miServicio] Error:', error)
+  }
+}
+
+// Para lecturas opcionales (retorna null/fallback si no hay auth):
+export async function miServicioDeLectura() {
+  return withAuthSilent(() => getDocs(query(collection(db, 'coleccion'))), null)
+}
+```
+
+**Patrón obligatorio para hooks y efectos:**
+```js
+import { isAuthenticated } from '../utils/firestoreAuthGuard'
+
+useEffect(() => {
+  if (!user || !isAuthenticated()) return  // Guard explícito antes de cualquier llamada
+  miServicio().then(...)
+}, [user])
+```
+
+**Regla de FCM / Service Workers:**
+- Usar `repairFCMStorage()` de `src/utils/swHealthCheck.js` al montar el hook de FCM para prevenir el error `The requested version (N) is less than the existing version (M)`.
+- El hook `useFCMPermission.js` ya incluye esta lógica por defecto.
+
+**Verificación automatizada:**
+- ESLint con `eslint-plugin-react-hooks` está configurado en este proyecto (`eslint.config.js`).
+- `npm run lint` detecta violaciones de `rules-of-hooks` (hooks después de returns condicionales) como errores bloqueantes.
+- Ejecutar `npm run lint` obligatoriamente antes de cada commit.
+
+---
+
 ## SECCIÓN 6 — GESTIÓN DE CONTEXTO INSUFICIENTE
 
 Si los archivos de navegación obligatoria superan el contexto disponible:

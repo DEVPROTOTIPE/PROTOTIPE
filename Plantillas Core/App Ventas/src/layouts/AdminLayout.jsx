@@ -21,7 +21,6 @@ import useAuthStore from '../store/authStore'
 import { useEffect, useState, useMemo, useRef } from 'react'
 
 import useNotificationCenter from '../hooks/useNotificationCenter'
-import useFCMPermission from '../hooks/useFCMPermission'
 import NotificationHistoryTray from '../components/common/NotificationHistoryTray'
 import NCToastContainer from '../components/common/NCToastContainer'
 
@@ -49,14 +48,6 @@ export default function AdminLayout() {
       navigate('/admin/ventas', { replace: true })
     }
   }, [isOnline, location.pathname, navigate])
-
-  // Sincronizar el permiso y tokens de FCM para Admin
-  const { requestPermission } = useFCMPermission(user?.uid || 'admin', 'admin')
-
-  // Solicitar permiso FCM automáticamente al entrar
-  useEffect(() => {
-    requestPermission()
-  }, [requestPermission])
 
   // Hook centralizado del Notification Center
   const [soundEnabled, setSoundEnabled] = useState(true)

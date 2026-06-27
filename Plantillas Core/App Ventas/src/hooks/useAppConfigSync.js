@@ -121,8 +121,9 @@ export default function useAppConfigSync() {
               // Actualizar Zustand inmediatamente para que subscribeToBillingData use valores frescos
               setConfig(billingFieldsFromCentral)
 
-              // Propagar al documento config/settings local (async, sin bloquear UI)
-              if (typeof updateAppConfig === 'function') {
+              // Propagar al documento config/settings local solo si hay un admin autenticado.
+              // Sin sesión activa, Firestore Rules rechaza la escritura (Missing or insufficient permissions).
+              if (typeof updateAppConfig === 'function' && user && role === 'admin') {
                 updateAppConfig(billingFieldsFromCentral).catch((err) => {
                   console.warn('[BillingSync] No se pudo propagar tarifa al config local:', err.message)
                 })

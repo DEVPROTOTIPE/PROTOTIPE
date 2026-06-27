@@ -4,6 +4,7 @@ import { subscribeToAppConfig, subscribeToCatalogFilters, updateAppConfig } from
 import { subscribeToBillingData } from '../services/billingService'
 import { reportMonthlyBillingToDeveloper } from '../services/telemetryService'
 import { getCentralFirestore } from '../services/centralFirebaseService'
+import { isAuthenticated } from '../utils/firestoreAuthGuard'
 import useAppConfigStore from '../store/appConfigStore'
 
 // Variables de entorno del cliente
@@ -81,7 +82,9 @@ export default function useAppConfigSync() {
             }
             if (Object.keys(billingFieldsFromCentral).length > 0) {
               setConfig(billingFieldsFromCentral)
-              if (typeof updateAppConfig === 'function') {
+              // Guard: solo propagar al config local si hay sesión activa.
+              // Sin auth, Firestore Rules rechaza la escritura con "Missing or insufficient permissions".
+              if (typeof updateAppConfig === 'function' && isAuthenticated()) {
                 updateAppConfig(billingFieldsFromCentral).catch((err) => {
                   console.warn('[BillingSync] No se pudo propagar tarifa al config local:', err.message)
                 })

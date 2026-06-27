@@ -2,7 +2,6 @@ import { initializeApp } from 'firebase/app'
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
 import { getStorage } from 'firebase/storage'
-import { getMessaging, isSupported } from 'firebase/messaging'
 
 /**
  * Configuración oficial de Firebase para la aplicación.
@@ -32,15 +31,6 @@ export { db }
 export const auth = getAuth(app)
 export const storage = getStorage(app)
 
-// Exportar mensajería asíncrona y segura
-let messaging = null
-isSupported().then((supported) => {
-  if (supported) {
-    messaging = getMessaging(app)
-  }
-}).catch((err) => {
-  console.warn('[FCM Config] Messaging no soportado:', err)
-})
-
-export { messaging }
+// Exportar mensajería nula de forma segura para compatibilidad de diagnósticos (excluyendo el bundle del SDK)
+export const messaging = null
 export default app

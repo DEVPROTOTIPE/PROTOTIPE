@@ -32,14 +32,20 @@ export default function AdminHome() {
   const [trackingLoading, setTrackingLoading] = useState(true)
 
   useEffect(() => {
+    // Guard: solo consultar métricas de tracking cuando el usuario está autenticado.
+    // Sin sesión activa, Firestore Rules rechaza la lectura con "Missing or insufficient permissions".
+    if (!user) {
+      setTrackingLoading(false)
+      return
+    }
     getTrackingMetrics().then(data => {
       setTrackingMetrics(data)
       setTrackingLoading(false)
     }).catch(err => {
-      console.error(err)
+      console.error('[getTrackingMetrics] Error:', err)
       setTrackingLoading(false)
     })
-  }, [])
+  }, [user])
 
   // ─── CÁLCULO DE MÉTRICAS GENERALES ────────────────────────────────────────
   const metricas = useMemo(() => {

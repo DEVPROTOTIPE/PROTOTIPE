@@ -4,6 +4,27 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-098: Poda Limpia de Firebase Cloud Messaging (FCM) e Inactividad Push~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Remoción completa y segura de la funcionalidad inactiva de notificaciones push de Firebase en todo el ecosistema para suprimir costos innecesarios y optimizar el tamaño del bundle de las aplicaciones. Se eliminaron físicamente `src/hooks/useFCMPermission.js` y `src/components/client/SoftPushPrompt.jsx`. Se depuraron sus importaciones y llamadas del hook de solicitudes de permisos en los layouts clave: `AdminLayout.jsx` (administración), `PortalLayout.jsx` (portal empleados) y `ClientLayout.jsx` (tienda del cliente). Se limpió el componente de seguimiento de pedidos `OrderTracking.jsx` de referencias a `SoftPushPrompt`. Los cambios se aplicaron de forma sincronizada con paridad al Core original (`Plantillas Core/App Ventas`), al generador de la CLI (`Prototipe-CLI/templates/template-ventas`) y a la instancia del cliente activa (`Instancias Clientes/ventas/ventas-moni-app`), validando una compilación de Vite al 100% exitosa tras la remoción.
+  - Archivos: [Plantillas Core/App Ventas/](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/) [MODIFY], [Prototipe-CLI/templates/template-ventas/](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/) [MODIFY]
+
+* **[x] ~~Tarea CORE-097: Robustecimiento y Expansión del Módulo de Control Git~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Auditoría integral del módulo "Control de Versiones" del dashboard y la CLI. Se unificaron los endpoints de descarte (`discard`) y diferencias (`diff-file`) para recibir el parámetro universal `path` (ruta absoluta del repositorio) con validaciones de Path Traversal para independizarlos de `clientId`. Se inyectó soporte transparente para repositorios inactivos (`.git-backup-temp`) utilizando el direccionamiento de entorno `GIT_DIR`/`GIT_WORK_TREE` de Git en Node.js, erradicando bloqueos de archivos físicos en Windows. En el frontend se inyectó la visualización de los 5 commits locales más recientes (`GET /api/git/log`), controles de sincronización dinámica con GitHub (Ahead/Behind/Sync) con fetch remoto opcional bajo demanda, y botones para descartar cambios locales selectiva o masivamente desde la UI con popups de confirmación. Adicionalmente, se robustecieron los scripts de respaldo de PowerShell (`git_backup.ps1` y `subproject_backup.ps1`) para que, ante conflictos en la estrategia secundaria de auto-merge a producción (`main`), el script aborte de forma segura la fusión pero finalice con éxito (código 0) y un aviso de advertencia ("warning"), asegurando que la subida del respaldo en la rama de desarrollo ya completada sea notificada de forma exitosa en la terminal de la UI.
+  - Archivos: [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY], [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY], [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+
+* **[x] ~~Tarea CORE-096: Robustecimiento y Auditoría del Módulo Consola de Errores y Diagnósticos~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-26
+  - Fecha de finalización: 2026-06-26
+  - Descripción: Auditoría integral del módulo "Consola de Errores" en `App.jsx`. Se corrigieron 4 bugs críticos: `onSnapshot` sin `limit()`, spam de logs en carga inicial, falta de `resolvedAt` al resolver en bulk, y uso de `deleteDoc` sin `writeBatch` (límite de 500 operaciones Firestore). Se inyectaron mejoras funcionales críticas (F1, F2, F3): soporte de filtrado por rango de fechas (con el componente premium `DatePickerCustom` de diseño glassmorphic de la central); exportación segura de fallos filtrados en formato CSV (`handleExportFailuresCSV`); y renderizado de la versión de la aplicación (`appVersion`) en las tarjetas de incidentes y en el modal de diagnóstico. Todo el layout de filtros se unificó a una altura exacta de `h-9` (`36px`) para consistencia perfecta y visual premium en PC y móviles. El selector de fecha (`DatePickerCustom`) se adaptó para mostrar el calendario centrado en pantalla en un modal con backdrop blur (`backdrop-blur-sm`), previniendo desbordamientos en resoluciones de laptops, PCs y teléfonos móviles.
+  - Archivos: [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-095: Corrección de Cierre de Servidor Dev-Dashboard en Backups de Git~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-26

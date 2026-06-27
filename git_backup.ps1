@@ -15,9 +15,9 @@ param (
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
-$rootDir = if ($env:PROTOTIPE_WORKSPACE_ROOT) { $env:PROTOTIPE_WORKSPACE_ROOT } else { "D:\PROTOTIPE" }
-if (-not (Test-Path $rootDir)) {
-    $rootDir = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
+$rootDir = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
+if (-not $rootDir -or -not (Test-Path $rootDir)) {
+    $rootDir = "D:\PROTOTIPE"
 }
 Set-Location -Path $rootDir
 
@@ -158,11 +158,11 @@ foreach ($proc in $nodeProcesses) {
     if ($proc.CommandLine -match 'vite' -or ($proc.CommandLine -match 'npm' -and $proc.CommandLine -match 'dev')) {
         # Extraer la ruta raíz del subproyecto de forma precisa
         $procPath = ""
-        if ($proc.CommandLine -match '(?i)(D:\\PROTOTIPE\\(?:Plantillas Core|Central PROTOTIPE)\\[^\\]+|D:\\PROTOTIPE\\Instancias Clientes\\[^\\]+\\[^\\]+)') {
+        if ($proc.CommandLine -match '(?i)(D:[/\\]PROTOTIPE[/\\](?:Plantillas Core|Central PROTOTIPE)[/\\][^/\\]+|D:[/\\]PROTOTIPE[/\\]Instancias Clientes[/\\][^/\\]+[/\\][^/\\]+)') {
             $procPath = $Matches[1]
         }
         
-        if ($procPath -match 'Central PROTOTIPE' -or $procPath -match 'dev-dashboard') {
+        if ($procPath -match 'Central PROTOTIPE' -or $procPath -match 'dev-dashboard' -or $proc.CommandLine -match 'Central PROTOTIPE' -or $proc.CommandLine -match 'dev-dashboard') {
             # Omitir detener el Dashboard de Control Central para mantener la interfaz y conexión SSE vivas
             Write-Host " [INFO] Omitiendo detener el Dashboard de Control Central (PID: $($proc.ProcessId)) para no interrumpir el flujo de datos SSE." -ForegroundColor Gray
             continue
@@ -415,16 +415,18 @@ try {
                 # Validar si hubo fallos o conflictos en el merge
                 if ($LASTEXITCODE -ne 0 -or $mergeResult -match "CONFLICT" -or (git status --porcelain | Where-Object { $_ -match '^UU' })) {
                     Write-Host ""
-                    Write-Host " [CONFLICTO DETECTADO] La fusion automatica encontro conflictos de codigo." -ForegroundColor Red
+                    Write-Host " [CONFLICTO DETECTADO] La fusion automatica encontro conflictos de codigo." -ForegroundColor Yellow
                     Write-Host " Abortando fusion para proteger la rama de produccion [$mainBranch]..." -ForegroundColor Yellow
                     git merge --abort 2>&1 | Out-Null
                     
                     Write-Host " Regresando a tu rama de trabajo [$branchName]..." -ForegroundColor Cyan
                     git checkout $branchName 2>&1 | Out-Null
                     
-                    Write-Host " [INFO] Proceso cancelado. Por favor, resuelve los conflictos manualmente." -ForegroundColor Yellow
-                    Write-Host "======================================================================" -ForegroundColor Red
-                    Exit-WithPause 1
+                    Write-Host " [WARN] Tu codigo en [$branchName] fue respaldado con exito en GitHub." -ForegroundColor Green
+                    Write-Host " [WARN] Sin embargo, debes resolver los conflictos en [$mainBranch] de forma manual." -ForegroundColor Yellow
+                    Write-Host "======================================================================" -ForegroundColor Green
+                    Write-BackupLog -Status "WARN" -Target "Maestro" -Message "Respaldo OK, pero conflicto de auto-merge hacia $mainBranch"
+                    Exit-WithPause 0
                 }
                 
                 Write-Host " [Merge] Subiendo consolidacion a GitHub (git push origin $mainBranch --no-verify)..." -ForegroundColor Cyan
