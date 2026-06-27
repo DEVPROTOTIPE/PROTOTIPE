@@ -183,6 +183,26 @@ function Update-EcosystemStatusCache {
             }
         }
     }
+
+    # Instancias de Clientes
+    if (Test-Path $instancesDir) {
+        $instances = Get-ChildItem -Path $instancesDir -Directory -Recurse -Depth 3 -ErrorAction SilentlyContinue | Where-Object {
+            $path = $_.FullName
+            $path -notmatch 'node_modules|dist|\\\.git|\\\.firebase' -and 
+            ((Test-Path "$path\package.json") -or (Test-Path "$path\.git") -or (Test-Path "$path\.git-backup-temp"))
+        }
+        foreach ($inst in $instances) {
+            $iChanges = Get-GitChangesCount -Path $inst.FullName
+            $gitDir   = if (Test-Path "$($inst.FullName)\.git") { "$($inst.FullName)\.git" } else { "$($inst.FullName)\.git-backup-temp" }
+            $iBranch  = (git --git-dir="$gitDir" rev-parse --abbrev-ref HEAD 2>$null)
+            $Global:EcosystemStatusCache += [PSCustomObject]@{
+                Icon    = "👤"
+                Label   = $inst.Name
+                Branch  = $iBranch
+                Changes = $iChanges
+            }
+        }
+    }
 }
 
 function Show-StatusPanel {
