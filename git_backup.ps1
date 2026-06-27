@@ -403,7 +403,7 @@ try {
                         if ($LASTEXITCODE -ne 0) {
                             Write-Host " [ERROR] No se pudo cambiar ni crear la rama de produccion [$mainBranch]." -ForegroundColor Red
                             Write-Host " Detalle de Git: $checkoutResult" -ForegroundColor DarkGray
-                            Exit-WithPause 1
+                            $ScriptExitCode = 1; return
                         }
                     }
                 }
