@@ -42,10 +42,14 @@ aliases:
 ---
 
 ## Overview
-Esta skill automatiza el bridge entre la Biblioteca de Componentes (documentación)
+Esta skill automatiza el bridge entre la Biblioteca de Componentes y Módulos (documentación)
 y el código fuente de un proyecto destino (producción). El agente lee el `.md`,
 extrae el código funcional, lo adapta al contexto del proyecto destino y lo
 integra sin romper la arquitectura existente.
+
+> [!IMPORTANT]
+> **Preferencia de Auto-Inyección Automática:**
+> Si el dashboard de desarrollo central y el CLI daemon están activos, el desarrollador o el agente debe sugerir al usuario utilizar la funcionalidad **"Instalar en Cliente"** directamente desde la interfaz web del visor de la biblioteca. Esto automatiza la inyección limpia del código React a la carpeta física de la instancia cliente con un solo clic. El flujo manual detallado en esta habilidad debe utilizarse principalmente como alternativa o fallback.
 
 ## Trigger / Activación
 Se activa cuando el usuario escribe **`@portar-componente [PROYECTO_ACTIVO] [NombreComponente]`**.

@@ -27,7 +27,8 @@ aliases:
 > Las rutas de este flujo se construyen dinámicamente usando `[PROYECTO_ACTIVO]`. Las rutas de documentación y biblioteca son siempre fijas (pertenecen al ecosistema, no a un proyecto específico):
 >
 > **Rutas fijas del ecosistema (siempre iguales):**
-> - Biblioteca: `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\`
+> - Biblioteca (Componentes): `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\`
+> - Biblioteca (Módulos Completos): `D:\PROTOTIPE\Documentacion PROTOTIPE\09_Modulos_Completos\`
 > - Bitácora: `D:\PROTOTIPE\Documentacion PROTOTIPE\03_Auditorias_y_Faro_Core\bitacora_cambios.md`
 > - Mapas: `D:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\`
 > - Dev-dashboard: `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\`

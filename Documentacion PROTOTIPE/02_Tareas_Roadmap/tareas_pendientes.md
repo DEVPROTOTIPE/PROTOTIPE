@@ -4,6 +4,27 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-120: Rediseño Visual y de Experiencia de Usuario de la Biblioteca~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Se rediseñó por completo la interfaz del panel de la biblioteca. Se migró a una estructura responsiva de 3 columnas (Búsqueda/Filtros, Cards Premium y Workspace Inspector), integrando tarjetas estilo glassmorphism con badges de tags/estados, atajo `/` para búsqueda global, y un Toggler de Ampliación en la barra de pestañas que expande el inspector a ancho completo (`xl:col-span-12`) colapsando las columnas laterales para dar una cómoda visualización a módulos completos y código extenso.
+  - Archivos: [Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-119: Inyección Inteligente y Resolución de Dependencias~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Implementación técnica completa del sistema de inyección de código autogestionado con resolución inteligente de dependencias. Se estandarizó el uso del path alias `@/` y archivos `jsconfig.json` en los 4 proyectos principales del ecosistema para dar portabilidad universal a los imports. Se desarrollaron endpoints en la CLI para realizar pre-diagnósticos de dependencias e inyecciones en cascada con instalaciones NPM asíncronas seguras, e integró un visor interactivo de checklist de requisitos y progreso en la interfaz web del dashboard.
+  - Archivos: [Central PROTOTIPE/dev-dashboard/vite.config.js](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/vite.config.js) [MODIFY], [Plantillas Core/App Ventas/vite.config.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/vite.config.js) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/vite.config.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/vite.config.js) [MODIFY], [Prototipe-CLI/templates/template-ventas/vite.config.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js) [MODIFY], [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY], [Central PROTOTIPE/dev-dashboard/jsconfig.json](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/jsconfig.json) [NEW], [Plantillas Core/App Ventas/jsconfig.json](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/jsconfig.json) [NEW], [Instancias Clientes/ventas/ventas-moni-app/jsconfig.json](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/jsconfig.json) [NEW], [Prototipe-CLI/templates/template-ventas/jsconfig.json](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/jsconfig.json) [NEW]
+
+* **[x] ~~Tarea CORE-118: Repotenciación de la Biblioteca de Componentes y Módulos~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-27
+  - Fecha de finalización: 2026-06-27
+  - Descripción: Repotenciación e integración del catálogo de componentes y la biblioteca de módulos completos (`09_Modulos_Completos`). Se implementó un sistema de auto-inyección automatizado en un clic hacia instancias locales de clientes, una pestaña dedicada de visualización de código JSX limpio y aislado mediante regex robustas tolerantes a fichas incompletas, una nube de etiquetas (Tag Cloud) lateral interactiva para filtrado rápido de taxonomías y la sincronización y actualización del repositorio de habilidades del ecosistema.
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_creator/SKILL.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_creator/SKILL.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_extractor/SKILL.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_extractor/SKILL.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/portar_componente/SKILL.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/portar_componente/SKILL.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/sandbox_integrator/SKILL.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/sandbox_integrator/SKILL.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-117: Restricción de Estrategia Auto-Merge para Instancias Cliente~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-27

@@ -50,18 +50,22 @@ Esta skill automatiza de manera estricta el ciclo de vida completo al crear e in
 
 ## 📂 Categorías Válidas de la Biblioteca
 
-> Las únicas categorías permitidas al crear la ruta en `06_Biblioteca_Componentes/` son las siguientes. Usar un nombre fuera de esta lista rompe el árbol lateral del dashboard:
-> - `01_Navegacion_y_Layout`
-> - `02_Formularios_y_UI`
-> - `03_Datos_y_Listas`
-> - `04_Feedback_y_Notificaciones`
-> - `05_Ecommerce_y_Carrito`
-> - `06_Mapas_y_Ubicacion`
-> - `07_Autenticacion`
-> - `08_Dashboard_y_Metricas`
-> - `09_Utilitarios`
+> Las únicas categorías físicas permitidas en `06_Biblioteca_Componentes/` o la raíz de documentación son las siguientes. Usar un nombre fuera de esta lista rompe la consistencia e indexación:
+> - `00_Core_Ecosistema_Obligatorios` (Core del Ecosistema)
+> - `Ecommerce_y_Ventas` (Ventas y Carritos)
+> - `Fidelizacion_y_Gamificacion` (Lealtad y Puntos)
+> - `Formularios_y_UI` (Controles Visuales Básicos)
+> - `Logica_y_Hooks` (Estado Local y Hooks React)
+> - `Modales` (Popups y Modales)
+> - `Paginas` (Vistas completas)
+> - `Pedidos_y_Gestion` (Gestión de Pedidos)
+> - `Reservas_y_Citas` (Agendas y Horarios)
+> - `Servicios_y_Firebase` (Servicios JS / Firebase Integraciones)
+> - `Utilidades` (Helpers y utilitarios genéricos)
+> - `Visualizacion` (Gráficos, dashboards)
+> - `09_Modulos_Completos` (Módulos de negocio enteros - ubicados en la raíz del ecosistema)
 > 
-> Si el componente no encaja en ninguna, usar `09_Utilitarios` y notificar al usuario para que evalúe crear una nueva categoría formal.
+> Si el componente no encaja en ninguna, usar `Utilidades` y notificar al usuario para evaluar una nueva carpeta formal.
 >
 > **Nota de Ecosistema:** Estas categorías aplican para todos los proyectos del ecosistema PROTOTIPE. Un componente documentado en la biblioteca es reutilizable por cualquier plantilla o app a la medida, independientemente de en qué proyecto fue creado originalmente.
 
@@ -93,7 +97,21 @@ Antes de escribir una sola línea de código, la IA debe estructurar conceptualm
 ### Paso 2: Creación de la Ficha Técnica Markdown
 Crear un archivo `.md` de documentación en español bajo el directorio específico de la biblioteca:
 - **Ruta de destino:** `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\[Categoría]\[Nombre_En_Español]\[nombre_en_serpiente].md`
-- **Estructura del Markdown:**
+- **Estructura del Markdown:** Debe iniciar obligatoriamente con el bloque de comentarios HTML conteniendo el JSON de Manifiesto de Dependencias para habilitar la resolución automática de dependencias durante la auto-inyección:
+  ```markdown
+  <!--
+  {
+    "resource": "[NombreTécnico]",
+    "technicalName": "[NombreTécnico]",
+    "dependencies": {
+      "npm": {
+        "nombre-libreria": "^version"
+      },
+      "internal": []
+    }
+  }
+  -->
+  ```
   1. **Propósito y Casos de Uso**
   2. **Especificación Visual y Estilos (Tailwind CSS):** Detallar variables HSL y animaciones.
   3. **Código React Completo:** Código 100% funcional, autónomo, portable y sin placeholders. No omitir ninguna línea.

@@ -89,16 +89,33 @@ Antes de documentar, analiza si el componente actual es 100% portátil. Si no lo
 - **Si no existe:** Procede con la documentación.
 
 ### 6. Creación del Documento en la Biblioteca (Carpetización Estricta en Español)
-- **Acción:** Crea la subcarpeta específica para el componente nombrada de forma descriptiva y en **español claro** bajo su categoría correspondiente. Está prohibido dejar archivos sueltos en la raíz de la categoría.
+- **Acción:** Crea la subcarpeta específica para el componente/módulo nombrada de forma descriptiva y en **español claro** bajo su categoría correspondiente. Está prohibido dejar archivos sueltos en la raíz de la categoría.
 - **Ruta de Almacenamiento Obligatoria:**
-```
-D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\<Categoria_En_Español>\<Nombre_Del_Componente_En_Español>\<nombre_archivo_en_ingles_o_espanol>.md
-```
-*Ejemplo:* `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\Formularios_y_UI\Boton_Regreso\back_button.md` (donde la subcarpeta `Boton_Regreso` agrupa el recurso).
+  * **Componentes / Hooks / Servicios (dentro de 06_Biblioteca_Componentes):**
+    `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\<Categoria>\<Nombre_Del_Componente_En_Español>\<nombre_archivo>.md`
+    *Ejemplo:* `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\Formularios_y_UI\Boton_Regreso\back_button.md`
+  * **Módulos Completos (dentro de 09_Modulos_Completos):**
+    `D:\PROTOTIPE\Documentacion PROTOTIPE\09_Modulos_Completos\<Nombre_Del_Modulo_En_Español>\<nombre_archivo>.md`
+    *Ejemplo:* `D:\PROTOTIPE\Documentacion PROTOTIPE\09_Modulos_Completos\Caja_Diaria_POS\caja_diaria_pos.md`
 
-- **Estructura Interna del Archivo:** Usa la siguiente estructura **obligatoria y completa** — sin omitir secciones ni usar placeholders:
+- **Estructura Interna del Archivo:** Usa la siguiente estructura **obligatoria y completa** — sin omitir secciones ni usar placeholders. Debe iniciar estrictamente con el bloque JSON de Manifiesto de Dependencias en comentarios HTML para habilitar la resolución automática de dependencias durante la auto-inyección:
 
 ```markdown
+<!--
+{
+  "resource": "[NombreTécnico]",
+  "technicalName": "[NombreTécnico]",
+  "dependencies": {
+    "npm": {
+      "nombre-libreria": "^version"
+    },
+    "internal": [
+      { "name": "useCustomHook", "type": "hook", "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/..." }
+    ]
+  }
+}
+-->
+
 # [NombreComponente]
 
 ## 1. Propósito y Casos de Uso

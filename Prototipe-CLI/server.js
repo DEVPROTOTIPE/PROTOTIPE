@@ -744,9 +744,13 @@ app.post('/api/library/extract', async (req, res) => {
     return res.status(403).json({ error: 'Acceso denegado: El archivo de origen debe estar dentro del espacio de trabajo del proyecto.' });
   }
 
-  // Ruta destino de la biblioteca
+  // Ruta destino de la biblioteca (soporte dinámico para Módulos Completos)
   const baseDocDir = path.resolve(getDocumentationRoot());
-  const categoryFolder = path.join(baseDocDir, '06_Biblioteca_Componentes', category);
+  const cleanCategory = category.replace(/^\//, '');
+  const isModuleCategory = cleanCategory.includes('09_Modulos_Completos');
+  const categoryFolder = isModuleCategory 
+    ? path.join(baseDocDir, cleanCategory)
+    : path.join(baseDocDir, '06_Biblioteca_Componentes', cleanCategory);
   const componentFolder = path.join(categoryFolder, targetName);
   const targetDocFile = path.join(componentFolder, `${targetName.toLowerCase()}.md`);
 
@@ -756,7 +760,7 @@ app.post('/api/library/extract', async (req, res) => {
     // Copiar el archivo o leer su contenido para documentar
     const codeContent = await fs.readFile(sourceFile, 'utf-8');
 
-    // Generar el Markdown de documentación estándar
+    // Generar el Markdown de documentación estándar (Formato estricto de 5 puntos)
     const mdContent = `# ${targetName.replace(/_/g, ' ')}
     
 ## 1. Propósito y Casos de Uso
@@ -799,17 +803,18 @@ graph TD
     if (await fs.pathExists(readmePath)) {
       let readme = await fs.readFile(readmePath, 'utf-8');
       
-      // Encontrar la categoría correspondiente e insertar
-      const escapedCategory = category.replace(/_/g, ' ');
-      const categoryRegex = new RegExp(`(###\\s+\\d+\\.\\s+[📂📦]\\s+${escapedCategory}.*?\\n)([\\s\\S]*?)(?=\\n###\\s+\\d+\\.\\s+[📂📦]|\\n---|\\n$)`, 'i');
+      // Encontrar la categoría correspondiente e insertar buscando por el nombre técnico de la carpeta entre paréntesis
+      const escapedFolder = cleanCategory.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const categoryRegex = new RegExp(`(###\\s+\\d+\\.\\s+[📂📦].*?\\(\`?\\/?${escapedFolder}\`?\\).*?\\n)([\\s\\S]*?)(?=\\n###\\s+\\d+\\.\\s+[📂📦]|\\n---|\\n$)`, 'i');
       
       const match = readme.match(categoryRegex);
       if (match) {
         const categoryHeader = match[1];
         let categoryContent = match[2];
         
-        // Agregar el componente al listado si no existe ya
-        const componentRef = `* [${targetName.replace(/_/g, ' ')} (${targetName})](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/${category}/${targetName}/${targetName.toLowerCase()}.md): ${description || 'Componente extraído.'}`;
+        // Construir la URL relativa del componente/módulo para evitar enlaces rotos
+        const relativeUrlPath = isModuleCategory ? cleanCategory : `06_Biblioteca_Componentes/${cleanCategory}`;
+        const componentRef = `* [${targetName.replace(/_/g, ' ')} (${targetName})](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/${relativeUrlPath}/${targetName}/${targetName.toLowerCase()}.md): ${description || 'Componente/Módulo extraído.'}`;
         
         if (!categoryContent.includes(`(${targetName})`)) {
           // Agregar debajo del header de la categoría
@@ -829,7 +834,8 @@ graph TD
         const insertRegex = /(\|\\s+\\*\\*README\\.md\\*\\*\\s+\\|[\\s\\S]*?\\|)/i;
         const matchTable = mapaDoc.match(insertRegex) || mapaDoc.match(/(\| \*\*README\.md\*\* \|[\s\S]*?\|)/i);
         if (matchTable) {
-          const newRow = `\n| **${targetName.toLowerCase()}.md** | Ficha del componente ${targetName} | Componente extraído de la aplicación local. | [Ver Componente](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/${category}/${targetName}/${targetName.toLowerCase()}.md) |`;
+          const relativeUrlPath = isModuleCategory ? cleanCategory : `06_Biblioteca_Componentes/${cleanCategory}`;
+          const newRow = `\n| **${targetName.toLowerCase()}.md** | Ficha del componente ${targetName} | Componente extraído de la aplicación local. | [Ver Componente](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/${relativeUrlPath}/${targetName}/${targetName.toLowerCase()}.md) |`;
           mapaDoc = mapaDoc.replace(matchTable[1], matchTable[1] + newRow);
           await fs.writeFile(mapaDocPath, mapaDoc, 'utf-8');
         }
@@ -847,24 +853,412 @@ graph TD
   }
 });
 
+// Helper to recursively find if a file named cleanName (without extension) exists in projectDir/src
+async function findInternalFile(projectDir, name, type) {
+  const commonPaths = [];
+  const nameClean = name.replace(/\.(jsx|js|tsx|ts)$/, '');
+  
+  if (type === 'hook') {
+    commonPaths.push(
+      path.join(projectDir, 'src/hooks', `${nameClean}.js`),
+      path.join(projectDir, 'src/hooks', `${nameClean}.jsx`)
+    );
+  } else if (type === 'service') {
+    commonPaths.push(
+      path.join(projectDir, 'src/services', `${nameClean}.js`),
+      path.join(projectDir, 'src/services', `${nameClean}.jsx`)
+    );
+  } else if (type === 'ui' || type === 'common' || type === 'component') {
+    commonPaths.push(
+      path.join(projectDir, 'src/components/ui', `${nameClean}.jsx`),
+      path.join(projectDir, 'src/components/common', `${nameClean}.jsx`),
+      path.join(projectDir, 'src/components', `${nameClean}.jsx`),
+      path.join(projectDir, 'src/components/ui', `${nameClean}.js`),
+      path.join(projectDir, 'src/components/common', `${nameClean}.js`),
+      path.join(projectDir, 'src/components', `${nameClean}.js`)
+    );
+  } else {
+    commonPaths.push(
+      path.join(projectDir, 'src/hooks', `${nameClean}.js`),
+      path.join(projectDir, 'src/hooks', `${nameClean}.jsx`),
+      path.join(projectDir, 'src/components/ui', `${nameClean}.jsx`),
+      path.join(projectDir, 'src/components/common', `${nameClean}.jsx`),
+      path.join(projectDir, 'src/services', `${nameClean}.js`),
+      path.join(projectDir, 'src/utils', `${nameClean}.js`)
+    );
+  }
+
+  for (const p of commonPaths) {
+    if (await fs.pathExists(p)) {
+      return p;
+    }
+  }
+  
+  const srcDir = path.join(projectDir, 'src');
+  if (await fs.pathExists(srcDir)) {
+    try {
+      const foundPath = await searchFileRecursive(srcDir, nameClean);
+      if (foundPath) return foundPath;
+    } catch (err) {
+      console.error(`[findInternalFile] Error en búsqueda recursiva: ${err.message}`);
+    }
+  }
+
+  return null;
+}
+
+async function searchFileRecursive(dir, nameClean) {
+  const items = await fs.readdir(dir);
+  for (const item of items) {
+    const fullPath = path.join(dir, item);
+    const stat = await fs.stat(fullPath);
+    if (stat.isDirectory()) {
+      const res = await searchFileRecursive(fullPath, nameClean);
+      if (res) return res;
+    } else {
+      const ext = path.extname(item);
+      const base = path.basename(item, ext);
+      if (base === nameClean && ['.js', '.jsx', '.ts', '.tsx'].includes(ext)) {
+        return fullPath;
+      }
+    }
+  }
+  return null;
+}
+
+function getResourceTypeFromPath(filePath) {
+  const p = filePath.toLowerCase();
+  if (p.includes('logica_y_hooks') || p.includes('hooks')) return 'hook';
+  if (p.includes('servicios') || p.includes('services')) return 'service';
+  return 'ui';
+}
+
+function getDefaultRelativePath(name, type) {
+  const cleanName = name.replace(/\.(js|jsx|ts|tsx)$/, '');
+  if (type === 'hook') {
+    return `src/hooks/${cleanName}.js`;
+  }
+  if (type === 'service') {
+    return `src/services/${cleanName}.js`;
+  }
+  return `src/components/ui/${cleanName}.jsx`;
+}
+
+// POST /api/library/inject/diagnose — Obtiene dependencias NPM faltantes y subdependencias locales faltantes
+app.post('/api/library/inject/diagnose', async (req, res) => {
+  const { clientId, componentLink } = req.body;
+  if (!clientId || !componentLink) {
+    return res.status(400).json({ error: 'Los campos "clientId" y "componentLink" son obligatorios.' });
+  }
+
+  try {
+    let rawPath = componentLink.replace(/^file:\/\/\//, '');
+    rawPath = decodeURIComponent(rawPath);
+
+    if (rawPath.toLowerCase().includes('biblioteca de componentes')) {
+      rawPath = rawPath.replace(/biblioteca de componentes/i, '06_Biblioteca_Componentes');
+    }
+
+    const baseDocDir = path.resolve(getDocumentationRoot());
+    const filePath = path.resolve(rawPath);
+
+    if (!isPathContained(baseDocDir, filePath)) {
+      return res.status(403).json({ error: 'Acceso denegado. La ruta está fuera del directorio de documentación.' });
+    }
+
+    if (!await fs.pathExists(filePath)) {
+      return res.status(404).json({ error: `El archivo de documentación no existe: ${filePath}` });
+    }
+
+    const targetProjectDir = await findProjectDir(clientId);
+    if (!targetProjectDir) {
+      return res.status(404).json({ error: `No se pudo encontrar el directorio del proyecto local para el cliente: ${clientId}` });
+    }
+
+    const markdownContent = await fs.readFile(filePath, 'utf-8');
+    
+    // Parsear manifest JSON en comentarios HTML
+    const manifestMatch = markdownContent.match(/<!--\s*(\{[\s\S]*?\})\s*-->/);
+    let manifest = {};
+    if (manifestMatch) {
+      try {
+        manifest = JSON.parse(manifestMatch[1]);
+      } catch (err) {
+        console.warn(`[Diagnose] Error al parsear manifest JSON: ${err.message}`);
+      }
+    }
+
+    const npmMissing = {};
+    if (manifest.dependencies && manifest.dependencies.npm) {
+      const packageJsonPath = path.join(targetProjectDir, 'package.json');
+      if (await fs.pathExists(packageJsonPath)) {
+        const packageJson = await fs.readJson(packageJsonPath);
+        const clientDeps = {
+          ...(packageJson.dependencies || {}),
+          ...(packageJson.devDependencies || {})
+        };
+        for (const [pkgName, pkgVer] of Object.entries(manifest.dependencies.npm)) {
+          if (!clientDeps[pkgName]) {
+            npmMissing[pkgName] = pkgVer;
+          }
+        }
+      }
+    }
+
+    const internalDependencies = [];
+    const internalMissing = [];
+    if (manifest.dependencies && manifest.dependencies.internal) {
+      for (const dep of manifest.dependencies.internal) {
+        const existingPath = await findInternalFile(targetProjectDir, dep.name, dep.type);
+        const depInfo = {
+          name: dep.name,
+          type: dep.type,
+          link: dep.link,
+          exists: !!existingPath,
+          path: existingPath ? path.relative(targetProjectDir, existingPath) : null
+        };
+        internalDependencies.push(depInfo);
+        if (!existingPath) {
+          internalMissing.push(depInfo);
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      npmMissing,
+      internalDependencies,
+      internalMissing,
+      manifest
+    });
+  } catch (err) {
+    console.error(`[API /library/inject/diagnose] Error: ${err.message}`);
+    res.status(500).json({ error: `Error en diagnóstico: ${err.message}` });
+  }
+});
+
+// POST /api/library/inject — Inyecta el código de un componente/módulo y todas sus dependencias en cascada
+app.post('/api/library/inject', async (req, res) => {
+  const { clientId, componentLink, targetRelativePath } = req.body;
+  if (!clientId || !componentLink || !targetRelativePath) {
+    return res.status(400).json({ error: 'Los campos "clientId", "componentLink" y "targetRelativePath" son obligatorios.' });
+  }
+
+  try {
+    const targetProjectDir = await findProjectDir(clientId);
+    if (!targetProjectDir) {
+      return res.status(404).json({ error: `No se pudo encontrar el directorio del proyecto local para el cliente: ${clientId}` });
+    }
+
+    const visited = new Set();
+    const results = [];
+
+    // Helper recursivo interno
+    async function recurseInject(currentLink, isPrimary = false, destRelPath = null) {
+      if (visited.has(currentLink)) return;
+      visited.add(currentLink);
+
+      let rawPath = currentLink.replace(/^file:\/\/\//, '');
+      rawPath = decodeURIComponent(rawPath);
+
+      if (rawPath.toLowerCase().includes('biblioteca de componentes')) {
+        rawPath = rawPath.replace(/biblioteca de componentes/i, '06_Biblioteca_Componentes');
+      }
+
+      const baseDocDir = path.resolve(getDocumentationRoot());
+      const filePath = path.resolve(rawPath);
+
+      if (!isPathContained(baseDocDir, filePath)) {
+        throw new Error(`Acceso denegado. La ruta ${filePath} está fuera de límites.`);
+      }
+
+      if (!await fs.pathExists(filePath)) {
+        throw new Error(`El archivo de documentación no existe: ${filePath}`);
+      }
+
+      const markdownContent = await fs.readFile(filePath, 'utf-8');
+
+      // 1. Parsear manifest
+      const manifestMatch = markdownContent.match(/<!--\s*(\{[\s\S]*?\})\s*-->/);
+      let manifest = {};
+      if (manifestMatch) {
+        try {
+          manifest = JSON.parse(manifestMatch[1]);
+        } catch (err) {
+          console.warn(`[Inject] Error al parsear manifest JSON en ${filePath}: ${err.message}`);
+        }
+      }
+
+      // 2. Resolver dependencias NPM
+      if (manifest.dependencies && manifest.dependencies.npm) {
+        const packageJsonPath = path.join(targetProjectDir, 'package.json');
+        if (await fs.pathExists(packageJsonPath)) {
+          const packageJson = await fs.readJson(packageJsonPath);
+          const clientDeps = {
+            ...(packageJson.dependencies || {}),
+            ...(packageJson.devDependencies || {})
+          };
+          for (const [pkgName, pkgVer] of Object.entries(manifest.dependencies.npm)) {
+            if (!clientDeps[pkgName]) {
+              console.log(`[Inject] Instalando librería NPM faltante: ${pkgName}@${pkgVer} en ${clientId}`);
+              try {
+                // Ejecución no bloqueante con execAsync
+                await execAsync(`npm install ${pkgName}@${pkgVer} --no-audit --no-fund`, {
+                  cwd: targetProjectDir,
+                  timeout: 60000
+                });
+                results.push({ type: 'npm', name: pkgName, status: 'installed', version: pkgVer });
+              } catch (installErr) {
+                console.error(`[Inject] Error al instalar ${pkgName}: ${installErr.message}`);
+                results.push({ type: 'npm', name: pkgName, status: 'failed', error: installErr.message });
+              }
+            } else {
+              results.push({ type: 'npm', name: pkgName, status: 'already_present' });
+            }
+          }
+        }
+      }
+
+      // 3. Procesar dependencias internas recursivamente
+      if (manifest.dependencies && manifest.dependencies.internal) {
+        for (const dep of manifest.dependencies.internal) {
+          if (dep.link) {
+            const existingPath = await findInternalFile(targetProjectDir, dep.name, dep.type);
+            if (!existingPath) {
+              const defaultPath = getDefaultRelativePath(dep.name, dep.type);
+              await recurseInject(dep.link, false, defaultPath);
+            } else {
+              results.push({ type: 'internal', name: dep.name, status: 'already_present', path: path.relative(targetProjectDir, existingPath) });
+            }
+          }
+        }
+      }
+
+      // 4. Inyectar el archivo de código
+      const match = markdownContent.match(/## \d+\..*?C[óo]digo[\s\S]*?```(?:javascript|jsx|js|tsx|ts)\n?([\s\S]*?)(?:```|(?=\n## \d+\.)|(?=\n---)|$)/i);
+      if (!match) {
+        throw new Error(`No se pudo encontrar código React válido en ${filePath}`);
+      }
+      const codeToInject = match[1].trim();
+
+      // Determinar ruta destino física
+      let relativeFilePath = destRelPath;
+      if (!relativeFilePath) {
+        const type = getResourceTypeFromPath(filePath);
+        relativeFilePath = getDefaultRelativePath(manifest.technicalName || path.basename(filePath, '.md'), type);
+      }
+
+      if (relativeFilePath.startsWith('/')) {
+        relativeFilePath = relativeFilePath.slice(1);
+      }
+      const finalTargetFilePath = path.resolve(targetProjectDir, relativeFilePath);
+
+      if (!isPathContained(targetProjectDir, finalTargetFilePath)) {
+        throw new Error(`Acceso denegado. La ruta de destino ${finalTargetFilePath} está fuera del proyecto.`);
+      }
+
+      await fs.ensureDir(path.dirname(finalTargetFilePath));
+      await fs.writeFile(finalTargetFilePath, codeToInject, 'utf-8');
+      
+      results.push({
+        type: isPrimary ? 'primary' : 'dependency',
+        name: manifest.technicalName || path.basename(filePath, '.md'),
+        status: 'injected',
+        path: relativeFilePath
+      });
+    }
+
+    // Ejecutar recursión partiendo del componente principal
+    await recurseInject(componentLink, true, targetRelativePath);
+
+    res.json({
+      success: true,
+      message: `Proceso de inyección inteligente completado en ${clientId}.`,
+      results
+    });
+  } catch (err) {
+    console.error(`[API /library/inject] Error en inyección inteligente: ${err.message}`);
+    res.status(500).json({ error: `Error en inyección inteligente: ${err.message}` });
+  }
+});
+
 function buildTags(name, technicalName, description, category) {
   const text = `${name} ${technicalName} ${description} ${category}`.toLowerCase();
-  const tags = [];
-  if (text.includes('firebase') || text.includes('firestore')) tags.push('firebase');
-  if (text.includes('hook') || text.includes('use')) tags.push('hook');
-  if (text.includes('modal')) tags.push('modal');
-  if (text.includes('pwa') || text.includes('install')) tags.push('pwa');
-  if (text.includes('pdf') || text.includes('exporta')) tags.push('pdf');
-  if (text.includes('toast') || text.includes('notifica')) tags.push('notificacion');
-  if (text.includes('carrito') || text.includes('cart')) tags.push('ecommerce');
-  if (text.includes('whatsapp')) tags.push('whatsapp');
-  if (text.includes('mapa') || text.includes('leaflet')) tags.push('mapa');
-  if (text.includes('zustand') || text.includes('store')) tags.push('estado');
-  if (text.includes('dark') || text.includes('tema') || text.includes('theme')) tags.push('tema');
-  if (text.includes('checkout') || text.includes('pago')) tags.push('pago');
-  if (text.includes('qr')) tags.push('qr');
-  if (text.includes('animac') || text.includes('framer')) tags.push('animacion');
-  return tags;
+  const tags = new Set();
+
+  // ── Tag de categoría (siempre presente) ──
+  // Remueve prefijo numérico (ej. "02_") y normaliza
+  const catSlug = category
+    .replace(/^\d+_/, '')
+    .replace(/\s+/g, '_')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // quitar tildes
+  if (catSlug) tags.add(catSlug);
+
+  // ── Tag de tipo de recurso ──
+  // Permite filtrar por "modulo" o "componente" desde la nube de tags también
+  if (category.toLowerCase().includes('módulo') || category.toLowerCase().includes('modulo')) {
+    tags.add('modulo');
+  }
+
+  // ── Firebase / Backend ──
+  if (text.includes('firebase') || text.includes('firestore') || text.includes('auth')) tags.add('firebase');
+
+  // ── Hooks / Estado ──
+  if (/\buse[a-z]/.test(text) || text.includes('hook')) tags.add('hook');
+  if (text.includes('zustand') || text.includes('store') || text.includes('estado') || text.includes('contexto')) tags.add('estado');
+
+  // ── UI / Interacción ──
+  if (text.includes('modal') || text.includes('dialog')) tags.add('modal');
+  if (text.includes('toast') || text.includes('notifica') || text.includes('alert')) tags.add('notificacion');
+  if (text.includes('animac') || text.includes('framer') || text.includes('motion') || text.includes('tilt') || text.includes('glow') || text.includes('magnetic') || text.includes('marquee') || text.includes('parallax')) tags.add('animacion');
+  if (text.includes('cursor') || text.includes('ambient')) tags.add('efecto');
+  if (text.includes('skeleton') || text.includes('loader') || text.includes('loading') || text.includes('carga')) tags.add('loading');
+  if (text.includes('swipe') || text.includes('sheet') || text.includes('bottom')) tags.add('mobile');
+  if (text.includes('dark') || text.includes('tema') || text.includes('theme') || text.includes('modo')) tags.add('tema');
+  if (text.includes('card') || text.includes('tarjeta') || text.includes('bento') || text.includes('carrusel')) tags.add('card');
+  if (text.includes('form') || text.includes('input') || text.includes('campo') || text.includes('selector') || text.includes('picker') || text.includes('otp') || text.includes('currency') || text.includes('date')) tags.add('formulario');
+  if (text.includes('table') || text.includes('tabla') || text.includes('grid') || text.includes('heatmap')) tags.add('tabla');
+  if (text.includes('button') || text.includes('boton') || text.includes('btn')) tags.add('boton');
+  if (text.includes('breadcrumb') || text.includes('header') || text.includes('nav') || text.includes('menu') || text.includes('radial')) tags.add('navegacion');
+  if (text.includes('stepper') || text.includes('wizard') || text.includes('paso') || text.includes('tour') || text.includes('tutorial') || text.includes('onboard')) tags.add('flujo');
+  if (text.includes('coupon') || text.includes('cupon') || text.includes('badge') || text.includes('descuento') || text.includes('ruleta') || text.includes('rifa') || text.includes('boleta') || text.includes('suerte')) tags.add('gamificacion');
+  if (text.includes('logo') || text.includes('brand') || text.includes('marca')) tags.add('branding');
+
+  // ── E-commerce / Negocio ──
+  if (text.includes('carrito') || text.includes('cart') || text.includes('producto') || text.includes('catalog') || text.includes('tienda') || text.includes('shop')) tags.add('ecommerce');
+  if (text.includes('checkout') || text.includes('pago') || text.includes('payment')) tags.add('pago');
+  if (text.includes('pos') || text.includes('caja') || text.includes('scanner') || text.includes('scan') || text.includes('barcode') || text.includes('qr')) tags.add('pos');
+  if (text.includes('qr')) tags.add('qr');
+  if (text.includes('pedido') || text.includes('order') || text.includes('tracking') || text.includes('seguimiento')) tags.add('pedidos');
+  if (text.includes('factura') || text.includes('invoice') || text.includes('comision') || text.includes('billing')) tags.add('facturacion');
+  if (text.includes('inventari') || text.includes('stock') || text.includes('bodega') || text.includes('almac')) tags.add('inventario');
+  if (text.includes('cocina') || text.includes('kds') || text.includes('kitchen')) tags.add('kds');
+  if (text.includes('domicili') || text.includes('delivery') || text.includes('reparto') || text.includes('repartidor')) tags.add('domicilios');
+
+  // ── Servicios / Agenda ──
+  if (text.includes('agenda') || text.includes('reserva') || text.includes('cita') || text.includes('calendar') || text.includes('fecha')) tags.add('agenda');
+  if (text.includes('whatsapp') || text.includes('omnicanal') || text.includes('chat') || text.includes('mensaje')) tags.add('whatsapp');
+  if (text.includes('mapa') || text.includes('leaflet') || text.includes('geo') || text.includes('ubicac')) tags.add('mapa');
+
+  // ── Auth / Seguridad ──
+  if (text.includes('auth') || text.includes('login') || text.includes('sesion') || text.includes('guard') || text.includes('perfil') || text.includes('profile') || text.includes('user')) tags.add('auth');
+  if (text.includes('error') || text.includes('boundary') || text.includes('fallback') || text.includes('empty') || text.includes('estado vacio') || text.includes('empty state')) tags.add('error');
+
+  // ── PWA / Técnico ──
+  if (text.includes('pwa') || text.includes('install') || text.includes('offline') || text.includes('manifest')) tags.add('pwa');
+  if (text.includes('pdf') || text.includes('exporta') || text.includes('report') || text.includes('report')) tags.add('pdf');
+  if (text.includes('telemetria') || text.includes('analytics') || text.includes('monitoreo') || text.includes('log')) tags.add('telemetria');
+  if (text.includes('kbar') || text.includes('command') || text.includes('palette') || text.includes('spotlight')) tags.add('command');
+  if (text.includes('connectivity') || text.includes('red') || text.includes('offline') || text.includes('network')) tags.add('conectividad');
+  if (text.includes('local storage') || text.includes('localstorage') || text.includes('persist') || text.includes('cache')) tags.add('storage');
+  if (text.includes('debounce') || text.includes('throttle') || text.includes('timeout')) tags.add('performance');
+  if (text.includes('pagina') || text.includes('paginac') || text.includes('pagination')) tags.add('paginacion');
+  if (text.includes('contador') || text.includes('quantity') || text.includes('cantidad')) tags.add('cantidad');
+  if (text.includes('portafolio') || text.includes('galeria') || text.includes('media')) tags.add('media');
+  if (text.includes('sistema de notificaciones') || text.includes('notification system') || text.includes('notif center')) tags.add('sistema_notif');
+
+  return [...tags];
 }
 
 // Endpoint para leer un archivo de código fuente de un proyecto local

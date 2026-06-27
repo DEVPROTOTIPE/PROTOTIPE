@@ -1,5 +1,79 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-27] - CORE-121: Filtrabilidad Total Garantizada de la Biblioteca de Componentes
+
+* **Tipo:** Mejora de Arquitectura de Datos / UX / Reglas de Proyecto
+* **Firma de auditoría:** CORE-121-FULL-FILTERABILITY
+* **Descripción de Cambios:**
+  - **T1 — Reescritura de `buildTags` en `server.js`:** Se reemplazó el array plano de tags por un `Set` para garantizar deduplicación. Se añadieron 25+ nuevas categorías de keywords cubriendo todos los nichos de negocio de PROTOTIPE: `pos`, `pedidos`, `facturacion`, `inventario`, `kds`, `domicilios`, `agenda`, `auth`, `error`, `loading`, `mobile`, `card`, `formulario`, `tabla`, `boton`, `navegacion`, `flujo`, `gamificacion`, `branding`, `telemetria`, `command`, `conectividad`, `storage`, `performance`, `paginacion`, `cantidad`, `media`. Se añadió un tag automático de categoría (`catSlug`) para garantizar que TODO componente tenga al menos un tag. Se añadió tag `modulo` para módulos completos.
+  - **T2 — Extensión del `matchesSearch` en `ComponentLibraryView.jsx`:** La búsqueda textual ahora indexa también el array de `tags` del componente concatenado como texto. Esto garantiza que buscar "pos", "agenda", "auth" o cualquier tag en el buscador retorne los componentes correctos.
+  - **T3 — Creación de `d:/PROTOTIPE/.agents/AGENTS.md`:** Se creó el archivo de reglas del workspace con el estándar obligatorio de tags y filtrabilidad, la tabla de keywords por nicho, y el estándar de layout de la biblioteca. Este archivo funciona como blindaje a futuro para que ningún nuevo componente quede sin tags.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY] — `buildTags()` reescrita con Set + 25 categorías nuevas
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY] — `matchesSearch` indexa `tags`
+  - [`d:/PROTOTIPE/.agents/AGENTS.md`](file:///d:/PROTOTIPE/.agents/AGENTS.md) [NEW] — Estándar de tags y layout de biblioteca
+
+---
+
+### [2026-06-27] - CORE-120: Rediseño Visual y de Experiencia de Usuario de la Biblioteca
+
+* **Tipo:** Mejora de Experiencia de Usuario (UX/UI) / Rediseño / Maquetación responsiva
+* **Firma de auditoría:** CORE-120-VISUAL-REDESIGN
+* **Descripción de Cambios:**
+  - **T1 — Atajo de Teclado `/` (Buscador):** Se importó y utilizó el hook `useRef` para referenciar el campo de búsqueda global, y se integró un listener global de teclado en `ComponentLibraryView.jsx` que enfoca inmediatamente la barra de búsqueda al presionar `/`, exceptuando la acción si el foco activo está en elementos editables (`input`, `textarea`, `select`). Se añadió además un indicador visual estético del atajo (`/`) dentro del input.
+  - **T2 — Estructuración en Dos Columnas con Toggler de Ampliación y Optimización Vertical:** Se configuró el panel en 2 columnas responsivas (Lateral de filtros + árbol con ancho 33%/col-span-4, y Workspace de detalle con ancho 67%/col-span-8). Se inyectó un estado `isWorkspaceExpanded` y un botón en la barra de pestañas que permite colapsar temporalmente el panel izquierdo, ampliando el Workspace a ancho completo (`xl:col-span-12`). Se redujo a la mitad el alto vertical de los 6 botones de filtrado (convirtiéndolos a modo flex-row horizontal) y se maquetó la nube de etiquetas de forma horizontal con scroll (`overflow-x-auto whitespace-nowrap`) para evitar que el catálogo de componentes sea desplazado hacia abajo.
+  - **T3 — Tarjetas Premium Glassmorphism (Cards):** Se reemplazó el listado plano de texto por tarjetas interactivas de componentes con estilo premium glassmorphism. Cada card incluye un icono representativo de recurso (`Code2` o `Package`), título con resaltado, badge verde `LIVE` si cuenta con sandbox simulable, descripción recortada a un máximo de dos líneas para uniformidad, nombre técnico en mono y badges HSL con los tags propios del componente.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+
+---
+
+### [2026-06-27] - CORE-119: Inyección Inteligente y Resolución de Dependencias
+
+* **Tipo:** Mejora de Experiencia de Usuario (UX) / Automatización / Arquitectura / Dependencias
+* **Firma de auditoría:** CORE-119-INTELLIGENT-INJECTION
+* **Descripción de Cambios:**
+  - **T1 — Estandarización de Path Aliasing (`@/*`):** Se crearon los archivos `jsconfig.json` en los 4 proyectos del ecosistema y se modificaron sus correspondientes `vite.config.js` para añadir el resolvedor de alias `@/` apuntando a `src/`. Se utilizó la sintaxis nativa de Node.js `fileURLToPath` y `URL` para garantizar compatibilidad absoluta con ES Modules y prevenir fallos de importación.
+  - **T2 — Endpoint de Diagnóstico (Backend):** Se implementó `/api/library/inject/diagnose` en [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js). Este lee la ficha técnica Markdown del componente, extrae el bloque JSON de manifiesto `<!-- { ... } -->`, analiza el `package.json` del cliente destino para listar librerías NPM faltantes y busca de forma proactiva (mediante rutas comunes y búsqueda recursiva en `src/`) si los subcomponentes o hooks locales ya existen.
+  - **T3 — Inyección en Cascada y NPM Automatizado (Backend):** Se actualizó `/api/library/inject` en [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) para instalar asíncronamente las librerías NPM requeridas usando `npm install` no bloqueante con timeout y para copiar recursivamente en cascada todas las subdependencias internas del manifiesto (hooks, helpers, components) protegiendo el flujo contra dependencias circulares mediante un `visited Set`.
+  - **T4 — Checklist de Dependencias en UI (Frontend):** Se actualizó [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) para ejecutar el preflight check de diagnóstico al seleccionar un cliente y mostrar un panel detallado de requisitos (librerías NPM a instalar y subcomponentes locales a inyectar) con estados interactivos de progreso durante la instalación.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/vite.config.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/vite.config.js) [MODIFY]
+  - [`Plantillas Core/App Ventas/vite.config.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/vite.config.js) [MODIFY]
+  - [`Instancias Clientes/ventas/ventas-moni-app/vite.config.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/vite.config.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-ventas/vite.config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js) [MODIFY]
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/jsconfig.json`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/jsconfig.json) [NEW]
+  - [`Plantillas Core/App Ventas/jsconfig.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/jsconfig.json) [NEW]
+  - [`Instancias Clientes/ventas/ventas-moni-app/jsconfig.json`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/jsconfig.json) [NEW]
+  - [`Prototipe-CLI/templates/template-ventas/jsconfig.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/jsconfig.json) [NEW]
+
+---
+
+### [2026-06-27] - CORE-118: Repotenciación de la Biblioteca de Componentes y Módulos
+
+* **Tipo:** Refactorización / Automatización / UX/UI / Robustez / Seguridad
+* **Firma de auditoría:** CORE-118-LIBRARY-REPOWERING
+* **Descripción de Cambios:**
+  - **T1 — Auto-Inyección de 1 Clic (Backend):** Se implementó el endpoint `POST /api/library/inject` en [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js). Resuelve la URI de la documentación, aísla de manera robusta el bloque de código React JSX y lo escribe físicamente en el proyecto cliente seleccionado con validación de seguridad contra directory traversal (`isPathContained`).
+  - **T2 — Soporte Completo para Módulos:** Se adaptaron los endpoints `/api/library/extract` y `/api/library/inject` en [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) para detectar dinámicamente si la categoría es `09_Modulos_Completos`. Si es así, escribe los archivos y referencias de URL en el `README.md` directamente en la raíz de módulos, previniendo enlaces rotos y asegurando que el script prebuild `verify_library_integrity.cjs` pase sin fallos.
+  - **T3 — Regex Tolerante de Aislamiento de Código:** Se rediseñó el motor de extracción de JSX tanto en el backend como en el frontend (función `extractReactCode` en [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx)) con un regex robusto tolerante a bloques de código React sin un token ` ``` ` de cierre explícito (ej. `DeveloperBillingPanel`), finalizando la captura ante un nuevo encabezado `## \d+\.`, una regla horizontal `---`, o el final del archivo.
+  - **T4 — Pestaña de Código Fuente en UI:** Se agregó la pestaña dedicada "Código Fuente" (`code`) en el panel de detalle de [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) que aísla y renderiza exclusivamente el código JSX limpio con scroll, tipografía mono y botón de copia rápida.
+  - **T5 — Nube de Etiquetas (Tag Cloud) en UI:** Se integró un panel lateral en [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) que compila todas las etiquetas únicas (`tags`) presentes en los componentes/módulos y permite filtrar el catálogo en un clic.
+  - **T6 — Interfaz de Auto-Inyección:** Se renderizó la sección "Instalar en Cliente" en [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) con un selector de instancias cliente locales, autocompletado inteligente de rutas relativas y avisos preventivos sobre la revisión de dependencias e imports internos.
+  - **T7 — Sincronización de Habilidades (Skills Reference):** Se actualizaron las instrucciones de las habilidades del ecosistema (`component_creator`, `component_extractor`, `portar_componente`, `sandbox_integrator`) en el repositorio central de documentación para incorporar la estructura física de categorías reales, la ruta de `09_Modulos_Completos` y la sugerencia prioritaria de usar el flujo de auto-inyección automatizado.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_creator/SKILL.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_creator/SKILL.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_extractor/SKILL.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_extractor/SKILL.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/portar_componente/SKILL.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/portar_componente/SKILL.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/sandbox_integrator/SKILL.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/sandbox_integrator/SKILL.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
 ### [2026-06-27] - CORE-117: Restricción de Estrategia Auto-Merge para Instancias Cliente
 
 * **Tipo:** Mejora de Experiencia de Usuario (UX) / Control de Versiones / Git
