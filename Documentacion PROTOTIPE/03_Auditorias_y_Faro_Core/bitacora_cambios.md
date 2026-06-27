@@ -1,5 +1,19 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-27] - CORE-101: Eliminación de Selector Interactivo de Ramas y Robustecimiento del Backup
+
+* **Tipo:** Refactorización / Corrección de Bugs / Scripts de PowerShell
+* **Descripción de Cambios:**
+  - **R1 — Eliminación de `BranchSelector`**: Se eliminó por completo el componente interactivo `BranchSelector` de `GitBackupPanel.jsx` (144 líneas de JSX/lógica) junto con sus estados `isOpen`, `branches`, `loadingList`, `switching` y sus callbacks `loadBranches`, `handleToggle`, `handleCheckout`. La insignia de rama en el card activo fue restaurada a `<BranchBadge>` estático que muestra la rama local leída del `HEAD` en disco.
+  - **R2 — Eliminación de Endpoints de la CLI**: Se eliminaron los endpoints `GET /api/git/branches` y `POST /api/git/checkout` de `server.js` (~100 líneas) sin afectar ningún otro endpoint existente.
+  - **B1 — Corrección de `finally` en `git_backup.ps1`**: Se reemplazó la llamada a `Exit-WithPause 1` (línea 406) por `$ScriptExitCode = 1; return`. En PowerShell, `exit` dentro de un bloque `try` salta el `finally`, impidiendo el retorno garantizado a `develop`. Este fix asegura ejecución correcta del bloque de restauración.
+  - **B2 — Corrección de `finally` en `subproject_backup.ps1`**: Idem al punto anterior, línea 443. Garantiza que Cores, Dashboard y plantillas siempre queden en `develop` al terminar el backup, incluso si el auto-merge falla.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+
 ### [2026-06-26] - CORE-100: Selector de Ramas Dinámico y Consulta Remota de Git
 
 * **Tipo:** Nuevas Funcionalidades / UI/UX / Git / Corrección de Bugs
