@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "useGuidedStore",
+  "targetPath": "src/hooks/useGuidedStore.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Hook de Control del Asistente Guiado (useGuidedStore)
 
 Store global de Zustand diseñado para orquestar la lógica del **Sistema de Compra Guiada Inteligente** en aplicaciones de comercio electrónico. Permite monitorear el progreso del usuario, almacenar de forma persistente qué tooltips/ayudas ya han sido visualizadas (evitando repetir guías redundantes) e identificar de forma autónoma el nivel de experiencia del comprador basado en su historial de pedidos.

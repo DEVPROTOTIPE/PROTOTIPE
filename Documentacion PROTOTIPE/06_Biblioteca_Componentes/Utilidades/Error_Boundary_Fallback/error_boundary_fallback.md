@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "ErrorBoundaryFallback",
+  "targetPath": "src/utils/ErrorBoundaryFallback.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Error Boundary y UI de Recuperación Fallback (`ErrorBoundaryFallback`)
 
 ## 1. Propósito y Casos de Uso

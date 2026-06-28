@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "QuantitySelector",
+  "targetPath": "src/components/ui/QuantitySelector.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Selector de Cantidad (QuantitySelector)
 
 Componente atómico para el ajuste e incremento/decremento de cantidades de artículos con soporte de límites mínimos y máximos, estados deshabilitados y consumo de variables HSL.

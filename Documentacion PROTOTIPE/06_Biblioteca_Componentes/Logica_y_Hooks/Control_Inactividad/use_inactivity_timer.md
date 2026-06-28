@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "useInactivityTimer",
+  "targetPath": "src/hooks/useInactivityTimer.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Hook de Control de Inactividad (useInactivityTimer)
 
 ## 1. Propósito y Casos de Uso

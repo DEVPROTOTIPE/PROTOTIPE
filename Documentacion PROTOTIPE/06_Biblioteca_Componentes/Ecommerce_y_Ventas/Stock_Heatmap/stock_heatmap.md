@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "StockHeatmap",
+  "targetPath": "src/components/common/StockHeatmap.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Indicador de Stock Crítico (`StockHeatmap`)
 
 ## 1. Propósito y Casos de Uso

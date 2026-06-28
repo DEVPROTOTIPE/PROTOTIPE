@@ -48,7 +48,7 @@
 | **mapa_aplicacion.md (dev-dashboard)** | Estructura de archivos | Para conocer la arquitectura física de archivos del dev-dashboard. | [Ver Mapa dev-dashboard](file:///D:/PROTOTIPE/Central%20PROTOTIPE/Documentacion%20dev-dashboard/mapa_aplicacion.md) |
 | **flujos_aplicacion.md (dev-dashboard)** | Flujos Operativos y de Datos | **Para comprender la integración de procesos:** Describe la secuencia de aprovisionamiento de clientes, telemetría de fallos con visor de código y consolidación de comisiones de desarrollo. | [Ver Flujos dev-dashboard](file:///D:/PROTOTIPE/Central%20PROTOTIPE/Documentacion%20dev-dashboard/flujos_aplicacion.md) |
 | **plan_sincronizacion_cores.md (dev-dashboard)** | Plan de Sincronización y Deploy | **Para sincronizar o desplegar en lote:** Guía detallada para la integración del CoreSyncPanel en el dashboard y el aislamiento de deploys en carpetas físicas de clientes. | [Ver Plan Sincronización](file:///D:/PROTOTIPE/Central%20PROTOTIPE/Documentacion%20dev-dashboard/plan_sincronizacion_cores.md) |
-| **mapa_documentacion_ia.md** | GPS Semántico de la Documentación | **Obligatorio para ubicar cualquier manual:** GPS de la IA para referenciar instantáneamente cualquier componente de la biblioteca, estándar o bitácora de cambios. Sincronizado: 2026-06-27 (CORE-120-VISUAL-REDESIGN). | [Ver Mapa Semántico](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) |
+| **mapa_documentacion_ia.md** | GPS Semántico de la Documentación | **Obligatorio para ubicar cualquier manual:** GPS de la IA para referenciar instantáneamente cualquier componente de la biblioteca, estándar o bitácora de cambios. Sincronizado: 2026-06-28 (CORE-103-POWERSHELL-BOM). | [Ver Mapa Semántico](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) |
 
 
 <!-- START_AUTO_CORES_DOCS -->
@@ -364,4 +364,14 @@
    - **SIEMPRE** verificar si la librería ya está instalada en `package.json` antes de proponer instalarla.
    - El catálogo aplica a todos los proyectos del ecosistema: App Ventas, verticales y proyectos de clientes.
    - Si al resolver una funcionalidad se identifica un nuevo repositorio útil no listado, proponer al usuario agregarlo al catálogo.
+6. **Auditoría de Inyecciones (CORE-127):** Todo historial de inyecciones, rollbacks y auto-rollbacks se genera automáticamente en `10_Historial_Inyecciones/`. La IA debe leer `INDEX.md` para identificar clientes con historial, y `historial_<clientId>.md` para analizar operaciones específicas. La fuente primaria de datos es `.prototipe-audit-trail.jsonl` en el proyecto del cliente (consultable vía `GET /api/library/inject/audit-trail`).
 
+---
+
+## 📂 Sección 7 — Historial de Inyecciones (CORE-127)
+
+| Archivo | Rol Técnico | Cuándo Usarlo (Criterio de Decisión IA) | Ruta de Acceso Directo |
+| :--- | :--- | :--- | :--- |
+| **INDEX.md** | Índice global de clientes con historial | Al identificar qué clientes han tenido inyecciones de componentes y cuál fue su última operación. Actualizado automáticamente en cada operación. | [Ver INDEX](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/10_Historial_Inyecciones/INDEX.md) |
+| **historial_<clientId>.md** | Historial narrativo de un cliente | Al necesitar trazabilidad de qué componentes se inyectaron, en qué rutas, con qué NPM packages y env vars, y si el build fue exitoso. Generado automáticamente. | Ruta: `10_Historial_Inyecciones/historial_<clientId>.md` |
+| **.prototipe-audit-trail.jsonl** | Log inmutable append-only (por proyecto) | Al analizar operaciones de inyección de forma programática. Formato: JSONL, orden cronológico, consultable con `GET /audit-trail`. | En el directorio del proyecto cliente |

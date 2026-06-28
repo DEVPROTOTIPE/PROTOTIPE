@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "InventoryTransactionService",
+  "targetPath": "src/services/InventoryTransactionService.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Sistema de Transacciones Atómicas de Inventario (InventoryTransactionService)
 
 ## 1. Propósito y Casos de Uso

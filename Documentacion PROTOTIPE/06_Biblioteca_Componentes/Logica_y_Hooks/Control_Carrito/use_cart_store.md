@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "useCartStore",
+  "targetPath": "src/hooks/useCartStore.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Hook de Carrito de Compras (useCartStore)
 
 Store global de Zustand diseñado para orquestar la lógica transaccional de un carrito de compras digital de marca blanca. Ofrece soporte nativo para persistencia local automática, control estricto de topes de stock máximos por variante, y cómputos reactivos de totales y recuentos de unidades.

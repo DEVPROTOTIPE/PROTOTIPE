@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "BentoGrid",
+  "targetPath": "src/components/ui/BentoGrid.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Cuadrícula Bento Responsiva (BentoGrid)
 
 ## Propósito y Casos de Uso

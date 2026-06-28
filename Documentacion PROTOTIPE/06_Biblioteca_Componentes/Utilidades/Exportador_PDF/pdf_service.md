@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "PdfService",
+  "targetPath": "src/utils/PdfService.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Servicio de PDF (PDF Service Utility)
 
 Módulo de utilidad centralizado para la generación y exportación homogénea de reportes y recibos PDF de la plataforma, abstrayendo y encapsulando las dependencias de `jspdf` y `jspdf-autotable`.

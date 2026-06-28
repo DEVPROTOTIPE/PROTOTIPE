@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "DatePickerPremium",
+  "targetPath": "src/components/ui/DatePickerPremium.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Selector de Fecha y Rangos Premium (`DatePickerPremium`)
 
 Componente de calendario y selector de fechas/rangos de nivel premium. Diseñado con una interfaz moderna y elástica, soporte de presets dinámicos, navegación fluida de meses y consumo nativo de variables HSL del sistema de diseño para marca blanca.

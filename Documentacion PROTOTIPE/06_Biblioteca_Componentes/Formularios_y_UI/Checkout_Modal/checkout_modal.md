@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "Checkout_Modal",
+  "targetPath": "src/components/ui/Checkout_Modal.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Modal de Checkout Multipaso (`Checkout_Modal`)
 
 Este módulo proporciona una interfaz de pago y formalización de pedidos tipo "wizard" multipaso de alta fidelidad. Es ideal para aplicaciones de marca blanca y comercio electrónico móvil (mobile-first), encapsulando la navegación por pasos, validación dinámica de datos de entrega y cálculo de subtotales con cupones.

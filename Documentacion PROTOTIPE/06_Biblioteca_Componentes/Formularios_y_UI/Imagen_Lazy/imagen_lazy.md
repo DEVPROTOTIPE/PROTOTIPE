@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "ImagenLazy",
+  "targetPath": "src/components/ui/ImagenLazy.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 ## Versión: 1.1.0
 ## Changelog:
   - v1.1.0: Robustecido con useRef y la propiedad complete nativa del objeto Image para resolver de inmediato la renderización en imágenes cacheadas por el navegador.

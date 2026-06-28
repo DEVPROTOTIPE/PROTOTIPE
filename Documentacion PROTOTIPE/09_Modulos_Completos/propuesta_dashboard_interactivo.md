@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "PropuestaDashboardInteractivo",
+  "targetPath": "src/components/modules/PropuestaDashboardInteractivo.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # 📋 Propuesta de Dashboard Interactivo Inline (Hero Mockup)
 
 Este documento detalla la propuesta técnica y de diseño visual para convertir el mockup estático del dashboard en el Hero (el SVG en miniatura que agrupa **Ventas del Mes**, **Lista de Control** y **Últimos Pedidos**) en una experiencia interactiva en tiempo real ("Playable Preview") directamente sobre la landing page.

@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "PWAInstallBanner",
+  "targetPath": "src/components/ui/PWAInstallBanner.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Banner de Instalación PWA (PWAInstallBanner)
 
 ## 1. Propósito y Casos de Uso

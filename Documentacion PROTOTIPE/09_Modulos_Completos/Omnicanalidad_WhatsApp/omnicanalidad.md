@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "Omnicanalidad",
+  "targetPath": "src/components/modules/Omnicanalidad.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Motor de Omnicanalidad y Mensajería Dinámica (WhatsApp & Notificaciones)
 
 ## 1. Propósito y Casos de Uso

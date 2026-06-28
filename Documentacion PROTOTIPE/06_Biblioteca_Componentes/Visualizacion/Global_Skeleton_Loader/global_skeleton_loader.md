@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "GlobalSkeletonLoader",
+  "targetPath": "src/components/ui/GlobalSkeletonLoader.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Skeleton Loader Premium Global (`GlobalSkeletonLoader`)
 
 ## 1. Propósito y Casos de Uso

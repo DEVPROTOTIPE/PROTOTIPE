@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "MagneticButton",
+  "targetPath": "src/components/ui/MagneticButton.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Botón Magnético Reactivo (`MagneticButton`)
 
 Componente de llamada a la acción (CTA) premium con atracción gravitacional hacia el cursor del ratón. Al aproximar el puntero dentro de un radio determinado, el botón y su contenido se desplazan suavemente siguiendo el cursor, creando una sensación de "succión" o magnetismo de alta fidelidad.

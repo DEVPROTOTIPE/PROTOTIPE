@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "ConnectivityToast",
+  "targetPath": "src/components/ui/ConnectivityToast.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Alertas de Conectividad en Caliente (ConnectivityToast)
 
 Componente de interfaz global y responsivo que monitorea en tiempo real el estado de red de la aplicación (online/offline) a través de los eventos del navegador, mostrando una alerta flotante en la cabecera con animaciones elásticas y desenfoque de fondo cuando ocurre una desconexión o cuando se restablece el servicio.

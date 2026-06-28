@@ -862,13 +862,13 @@ function extractCodeFromMarkdown(md) {
   if (!md || typeof md !== 'string') return null;
   let match;
   // E1: ## 3. Código React Completo ...
-  match = md.match(/##\s+\d+\..*?C[óo]digo[^\n]*\n[\s\S]*?```(?:javascript|jsx|js|tsx|ts)\n([\s\S]*?)```/i);
+  match = md.match(/##\s+\d+\..*?C[óo]digo[^\r\n]*\r?\n[\s\S]*?```(?:javascript|jsx|js|tsx|ts)\r?\n([\s\S]*?)```/i);
   if (match) return match[1].trim();
   // E2: ## Código React Completo (sin número)
-  match = md.match(/##\s+C[óo]digo[^\n]*\n[\s\S]*?```(?:javascript|jsx|js|tsx|ts)\n([\s\S]*?)```/i);
+  match = md.match(/##\s+C[óo]digo[^\r\n]*\r?\n[\s\S]*?```(?:javascript|jsx|js|tsx|ts)\r?\n([\s\S]*?)```/i);
   if (match) return match[1].trim();
   // E3: primer bloque jsx/js del archivo (fallback liberal)
-  match = md.match(/```(?:javascript|jsx|js|tsx|ts)\n([\s\S]*?)```/);
+  match = md.match(/```(?:javascript|jsx|js|tsx|ts)\r?\n([\s\S]*?)```/);
   if (match) return match[1].trim();
   return null;
 }
@@ -948,6 +948,52 @@ async function searchFileRecursive(dir, nameClean, depth = 0, maxDepth = 5) {
   return null;
 }
 
+async function findClientCSSFile(projectDir) {
+  const commonPaths = [
+    'src/index.css',
+    'src/global.css',
+    'src/styles/global.css',
+    'src/styles.css',
+    'src/App.css'
+  ];
+  for (const relPath of commonPaths) {
+    const full = path.join(projectDir, relPath);
+    if (await fs.pathExists(full)) {
+      return relPath;
+    }
+  }
+
+  const srcDir = path.join(projectDir, 'src');
+  if (!await fs.pathExists(srcDir)) return null;
+
+  async function scanDir(dir) {
+    const entries = await fs.readdir(dir).catch(() => []);
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry);
+      const stat = await fs.stat(fullPath).catch(() => null);
+      if (stat && stat.isDirectory()) {
+        const found = await scanDir(fullPath);
+        if (found) return found;
+      } else if (stat && stat.isFile() && entry.endsWith('.css')) {
+        return path.relative(projectDir, fullPath);
+      }
+    }
+    return null;
+  }
+
+  return await scanDir(srcDir);
+}
+
+function extractCSSVarsFromCode(code) {
+  const regex = /var\((--[a-zA-Z0-9_-]+)\)/g;
+  const vars = new Set();
+  let match;
+  while ((match = regex.exec(code)) !== null) {
+    vars.add(match[1]);
+  }
+  return Array.from(vars);
+}
+
 function getResourceTypeFromPath(filePath) {
   const p = filePath.toLowerCase();
   if (p.includes('logica_y_hooks') || p.includes('hooks')) return 'hook';
@@ -955,22 +1001,630 @@ function getResourceTypeFromPath(filePath) {
   return 'ui';
 }
 
-function getDefaultRelativePath(name, type, mdFilePath = '') {
+function getDefaultRelativePath(name, type, mdFilePath = '', manifest = null) {
   const cleanName = name.replace(/\.(js|jsx|ts|tsx)$/, '');
+
+  // CORE-124 — NIVEL 1: targetPath declarativo en el manifest (máxima precisión)
+  if (manifest?.targetPath) {
+    return manifest.targetPath.replace(/{technicalName}/g, cleanName);
+  }
+
+  // NIVEL 2: type explícito del manifest/dependencia interna
   if (type === 'hook') return `src/hooks/${cleanName}.js`;
   if (type === 'service') return `src/services/${cleanName}.js`;
   if (type === 'util' || type === 'utility') return `src/utils/${cleanName}.js`;
   if (type === 'page') return `src/pages/${cleanName}.jsx`;
-  // Heurística por subcarpeta de biblioteca
+
+  // NIVEL 3: Heurística por subcarpeta física de la biblioteca (fallback robusto)
   const p = mdFilePath.toLowerCase();
   if (p.includes('logica_y_hooks') || p.includes('/hooks/')) return `src/hooks/${cleanName}.js`;
   if (p.includes('servicios_y_firebase') || p.includes('/servicios/')) return `src/services/${cleanName}.js`;
   if (p.includes('utilidades') || p.includes('/utils/')) return `src/utils/${cleanName}.js`;
   if (p.includes('paginas') || p.includes('/pages/')) return `src/pages/${cleanName}.jsx`;
-  if (p.includes('modulos_completos') || type === 'module') return `src/components/common/${cleanName}.jsx`;
+  if (p.includes('modulos_completos') || type === 'module') return `src/components/modules/${cleanName}.jsx`;
+  if (p.includes('pedidos') || p.includes('reservas') || p.includes('ecommerce') || p.includes('fideliza')) return `src/components/common/${cleanName}.jsx`;
+
+  // NIVEL 4: Fallback universal — componentes UI / átomos
   return `src/components/ui/${cleanName}.jsx`;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CORE-123 HELPERS — Sistema de Instalación Inteligente de Componentes
+// Todas las funciones son puras (sin efectos secundarios externos directos)
+// y utilizan los mismos patterns de seguridad del resto del servidor.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Analiza el código de un componente para auto-detectar sus dependencias
+ * cuando no existe un bloque manifest <!-- {} -->.
+ * @param {string} code — Código JSX/JS extraído del .md
+ * @returns {{ npm: string[], envVars: string[], firebaseImports: boolean, relativeImports: string[], cssVars: string[] }}
+ */
+function analyzeCodeDependencies(code) {
+  const result = { npm: [], envVars: [], firebaseImports: false, relativeImports: [], cssVars: [] };
+  if (!code) return result;
+
+  // A) Paquetes NPM externos (no empiezan con . o / — son paquetes de node_modules)
+  const npmSet = new Set();
+  const npmPattern = /^import\s+(?:[\s\S]*?)\s+from\s+['"]([^./'\"][^'"]*)['"]/gm;
+  let m;
+  while ((m = npmPattern.exec(code)) !== null) {
+    const pkg = m[1].split('/')[0]; // Solo el nombre raíz del paquete (ej. 'framer-motion')
+    if (!pkg.startsWith('@types')) npmSet.add(pkg);
+  }
+  result.npm = [...npmSet];
+
+  // B) Variables de entorno Vite
+  const envSet = new Set();
+  const envPattern = /import\.meta\.env\.(VITE_[A-Z_0-9]+)/g;
+  while ((m = envPattern.exec(code)) !== null) envSet.add(m[1]);
+  result.envVars = [...envSet];
+
+  // C) Detectar si el componente importa Firebase
+  result.firebaseImports = /from\s+['"](?:firebase\/|\.+\/.*(?:firebase|firebaseConfig|config\/firebase))['"]/i.test(code);
+
+  // D) Imports relativos internos del proyecto (empiezan con ./ o ../)
+  const relSet = new Set();
+  const relPattern = /^import\s+(?:[\s\S]*?)\s+from\s+['"](\.[^'"]+)['"]/gm;
+  while ((m = relPattern.exec(code)) !== null) relSet.add(m[1]);
+  result.relativeImports = [...relSet];
+
+  // E) CSS Custom Properties usadas (var(--nombre))
+  const cssSet = new Set();
+  const cssPattern = /var\(--([a-zA-Z0-9-]+)\)/g;
+  while ((m = cssPattern.exec(code)) !== null) cssSet.add(m[1]);
+  result.cssVars = [...cssSet];
+
+  return result;
+}
+
+/**
+ * Escanea recursivamente todo el árbol de dependencias del componente para extraer
+ * el conjunto unificado de variables de entorno VITE_* requeridas.
+ */
+async function extractAllEnvVarsRecursively(componentLink, baseDocDir, visited = new Set()) {
+  if (visited.has(componentLink)) return [];
+  visited.add(componentLink);
+
+  let rawPath = componentLink.replace(/^file:\/\/\//, '');
+  rawPath = decodeURIComponent(rawPath);
+  if (rawPath.toLowerCase().includes('biblioteca de componentes')) {
+    rawPath = rawPath.replace(/biblioteca de componentes/i, '06_Biblioteca_Componentes');
+  }
+  const filePath = path.resolve(rawPath);
+  if (!isPathContained(baseDocDir, filePath) || !await fs.pathExists(filePath)) return [];
+
+  const md = await fs.readFile(filePath, 'utf-8');
+  const code = extractCodeFromMarkdown(md);
+  const localVars = code ? analyzeCodeDependencies(code).envVars : [];
+
+  // Buscar manifest y dependencias internas recursivamente
+  const manifestMatch = md.match(/<!--\s*(\{[\s\S]*?\})\s*-->/);
+  let internalVars = [];
+  if (manifestMatch) {
+    try {
+      const manifest = JSON.parse(manifestMatch[1]);
+      if (manifest.dependencies?.internal) {
+        for (const dep of manifest.dependencies.internal) {
+          if (dep.link) {
+            const nestedVars = await extractAllEnvVarsRecursively(dep.link, baseDocDir, visited);
+            internalVars = internalVars.concat(nestedVars);
+          }
+        }
+      }
+    } catch {}
+  }
+
+  return [...new Set([...localVars, ...internalVars])];
+}
+
+async function extractAllCSSVarsRecursively(componentLink, baseDocDir, visited = new Set()) {
+  if (visited.has(componentLink)) return [];
+  visited.add(componentLink);
+
+  let rawPath = componentLink.replace(/^file:\/\/\//, '');
+  rawPath = decodeURIComponent(rawPath);
+  if (rawPath.toLowerCase().includes('biblioteca de componentes')) {
+    rawPath = rawPath.replace(/biblioteca de componentes/i, '06_Biblioteca_Componentes');
+  }
+  const filePath = path.resolve(rawPath);
+  if (!isPathContained(baseDocDir, filePath) || !await fs.pathExists(filePath)) return [];
+
+  const md = await fs.readFile(filePath, 'utf-8');
+  const code = extractCodeFromMarkdown(md);
+  
+  // 1. Extraer variables CSS del código
+  const localVars = code ? extractCSSVarsFromCode(code) : [];
+
+  // 2. Extraer del manifest del .md y buscar subdependencias
+  const manifestMatch = md.match(/<!--\s*(\{[\s\S]*?\})\s*-->/);
+  let manifestVars = [];
+  let internalVars = [];
+
+  if (manifestMatch) {
+    try {
+      const manifest = JSON.parse(manifestMatch[1]);
+      if (manifest.cssVariables && Array.isArray(manifest.cssVariables)) {
+        manifestVars = manifest.cssVariables;
+      }
+      if (manifest.dependencies?.internal) {
+        for (const dep of manifest.dependencies.internal) {
+          if (dep.link) {
+            const nestedVars = await extractAllCSSVarsRecursively(dep.link, baseDocDir, visited);
+            internalVars = internalVars.concat(nestedVars);
+          }
+        }
+      }
+    } catch {}
+  }
+
+  return [...new Set([...localVars, ...manifestVars, ...internalVars])];
+}
+
+/**
+ * Escribe las variables de entorno configuradas/faltantes en el .env.local del cliente,
+ * evitando duplicación y sobrescribiendo placeholders de forma inteligente.
+ */
+async function writeEnvVarsToClient(projectDir, envVars, envValues = {}, primaryCompName = 'Componente') {
+  if (!envVars || envVars.length === 0) return;
+  const envPath = path.join(projectDir, '.env.local');
+  let envContent = '';
+  if (await fs.pathExists(envPath)) {
+    envContent = await fs.readFile(envPath, 'utf-8');
+  }
+
+  const newLines = [];
+  let modified = false;
+
+  for (const v of envVars) {
+    const rawVal = envValues[v];
+    const hasUserValue = rawVal !== undefined && rawVal.trim() !== '';
+    let finalVal = hasUserValue ? rawVal.trim() : `TU_VALOR_AQUI_${v}`;
+    // Escapar comillas dobles internas para no romper dotenv
+    finalVal = finalVal.replace(/"/g, '\\"');
+    
+    // Si contiene espacios o caracteres especiales, los protegemos
+    const formattedLine = `${v}="${finalVal}"`;
+    const regex = new RegExp('^' + v + '\\s*=.*$', 'm');
+
+    if (regex.test(envContent)) {
+      // Si ya existe en el archivo
+      const existingLine = envContent.match(regex)[0];
+      const isPlaceholder = existingLine.includes('TU_VALOR_AQUI');
+      
+      // Sobrescribimos el valor si el usuario ingresó un valor real o si la línea actual es un placeholder
+      if (hasUserValue || isPlaceholder) {
+        envContent = envContent.replace(regex, formattedLine);
+        modified = true;
+      }
+    } else {
+      // No existe, la agregamos al bloque nuevo
+      newLines.push(formattedLine);
+    }
+  }
+
+  if (newLines.length > 0) {
+    if (envContent && !envContent.endsWith('\n')) envContent += '\n';
+    envContent += `\n# Variables requeridas por ${primaryCompName} (agregadas por Prototipe)\n` + newLines.join('\n') + '\n';
+    modified = true;
+  }
+
+  if (modified || newLines.length > 0) {
+    await fs.writeFile(envPath, envContent, 'utf-8');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CORE-127: Sistema de Auditoría Inmutable — Helpers de escritura
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Cola de escritura asíncrona para append-only JSONL.
+ * Garantiza escrituras serializadas sin race conditions.
+ */
+class WriteQueue {
+  constructor() { this._queue = Promise.resolve(); }
+  push(fn) {
+    this._queue = this._queue.then(() => fn().catch(e => console.error('[WriteQueue]', e.message)));
+    return this._queue;
+  }
+}
+const _auditWriteQueues = new Map(); // keyed by file path (jsonl OR markdown)
+
+function getAuditQueue(filePath) {
+  if (!_auditWriteQueues.has(filePath)) _auditWriteQueues.set(filePath, new WriteQueue());
+  return _auditWriteQueues.get(filePath);
+}
+
+/**
+ * Escribe una entrada inmutable al JSONL de auditoría del cliente.
+ * Escritura append-only, atómica via cola serializada.
+ * @param {string} clientId
+ * @param {object} entry - Datos de la operación a auditar
+ */
+async function appendAuditTrailEntry(clientId, entry) {
+  try {
+    const projectDir = await findProjectDir(clientId);
+    if (!projectDir) return;
+    const jsonlPath = path.join(projectDir, '.prototipe-audit-trail.jsonl');
+    const line = JSON.stringify({
+      ...entry,
+      clientId,
+      schemaVersion: 1,
+      _immutable: true
+    }) + '\n';
+    getAuditQueue(jsonlPath).push(() => fs.appendFile(jsonlPath, line, 'utf-8'));
+    // También escribir en Documentación de forma asíncrona
+    writeAuditMarkdown(clientId, entry).catch(e => console.warn('[CORE-127] Markdown audit error:', e.message));
+  } catch (e) {
+    console.warn('[CORE-127] appendAuditTrailEntry error:', e.message);
+  }
+}
+
+/**
+ * Escribe/actualiza el archivo Markdown de historial en 10_Historial_Inyecciones/
+ * Mantiene un índice + secciones cronológicas. Escritura atómica (tmp → rename).
+ */
+async function writeAuditMarkdown(clientId, entry) {
+  try {
+    const docRoot = path.resolve(getDocumentationRoot());
+    const histDir = path.join(docRoot, '10_Historial_Inyecciones');
+    await fs.ensureDir(histDir);
+
+    const mdPath = path.join(histDir, `historial_${clientId}.md`);
+    const indexPath = path.join(histDir, 'INDEX.md');
+
+    // ── Construir sección nueva ──
+    const ts = entry.timestamp || new Date().toISOString();
+    const icon = entry.operation === 'inject' ? '📦' : entry.operation === 'rollback' ? '↩️' : entry.operation === 'auto-rollback' ? '🛡️' : '🔧';
+    const statusBadge = entry.status === 'success' ? '✅' : entry.status === 'error' ? '❌' : '⚠️';
+    const compName = entry.primaryComponent?.name || entry.componentId || 'desconocido';
+    const targetPath = entry.primaryComponent?.targetPath || entry.targetPath || '-';
+    const buildStatus = entry.buildLog?.status || 'N/A';
+    const buildIcon = buildStatus === 'success' ? '✅' : buildStatus === 'error' ? '❌' : '⚠️';
+
+    const depsSection = Array.isArray(entry.dependencies) && entry.dependencies.length > 0
+      ? '\n**Dependencias inyectadas:**\n' + entry.dependencies.map(d => `- \`${d.name}\` → \`${d.targetPath}\``).join('\n')
+      : '';
+    const npmSection = Array.isArray(entry.npmPackages) && entry.npmPackages.length > 0
+      ? '\n**Paquetes NPM instalados:**\n' + entry.npmPackages.map(p => `- \`${p.name}@${p.version}\` (${p.status})`).join('\n')
+      : '';
+    const envSection = Array.isArray(entry.envVarsConfigured) && entry.envVarsConfigured.length > 0
+      ? '\n**Variables de entorno configuradas:**\n' + entry.envVarsConfigured.map(v => `- \`${v}\``).join('\n')
+      : '';
+    const checksumSection = entry.primaryComponent?.checksum
+      ? `\n**SHA-256 (12 chars):** \`${entry.primaryComponent.checksum}\``
+      : '';
+
+    const newSection = `\n---\n\n## ${icon} ${ts.slice(0, 19).replace('T', ' ')} — ${statusBadge} ${entry.operation.toUpperCase()}: ${compName}\n\n| Campo | Valor |\n|---|---|\n| **Cliente** | \`${clientId}\` |\n| **Operación** | \`${entry.operation}\` |\n| **Estado** | ${statusBadge} \`${entry.status}\` |\n| **Ruta destino** | \`${targetPath}\` |\n| **Build** | ${buildIcon} \`${buildStatus}\` |\n| **ID de entrada** | \`${entry.id}\` |\n| **Timestamp** | \`${ts}\` |\n${depsSection}${npmSection}${envSection}${checksumSection}\n`;
+
+    // ── Leer o crear el archivo Markdown del cliente ──
+    let mdContent = '';
+    if (await fs.pathExists(mdPath)) {
+      mdContent = await fs.readFile(mdPath, 'utf-8');
+    } else {
+      mdContent = `# 📋 Historial de Inyecciones — Cliente: \`${clientId}\`\n\n> Archivo generado automáticamente por Prototipe CLI — CORE-127\n> **NO modificar manualmente.** Es un registro de auditoría inmutable.\n`;
+    }
+    mdContent += newSection;
+
+    // ── Escritura atómica del historial de cliente (serializada por WriteQueue) ──
+    await getAuditQueue(mdPath).push(async () => {
+      const tmpMd = mdPath + '.tmp';
+      await fs.writeFile(tmpMd, mdContent, 'utf-8');
+      await fs.rename(tmpMd, mdPath);
+    });
+
+    // ── Actualizar índice global (serializado por su propia WriteQueue) ──
+    await getAuditQueue(indexPath).push(async () => {
+      let indexContent = '';
+      if (await fs.pathExists(indexPath)) {
+        indexContent = await fs.readFile(indexPath, 'utf-8');
+      } else {
+        indexContent = `# 🗂️ Índice de Historiales de Inyección — Prototipe\n\n> Generado automáticamente por CORE-127\n\n| Cliente | Última Operación | Timestamp | Estado |\n|---|---|---|---|\n`;
+      }
+      const rowRegex = new RegExp(`\\| \`${clientId}\` \\|.*`);
+      const newRow = `| \`${clientId}\` | \`${entry.operation}\` | \`${ts.slice(0, 19).replace('T', ' ')}\` | ${statusBadge} |`;
+      if (rowRegex.test(indexContent)) {
+        indexContent = indexContent.replace(rowRegex, newRow);
+      } else {
+        indexContent += newRow + '\n';
+      }
+      const tmpIdx = indexPath + '.tmp';
+      await fs.writeFile(tmpIdx, indexContent, 'utf-8');
+      await fs.rename(tmpIdx, indexPath);
+    });
+  } catch (e) {
+    console.warn('[CORE-127] writeAuditMarkdown error:', e.message);
+  }
+}
+
+/**
+ * Prueba el stack tecnológico del proyecto cliente destino.
+ * Lee: vite.config.js (alias @/), package.json (deps), .env.local (vars definidas),
+ * y busca el archivo de configuración de Firebase.
+ * @param {string} projectDir — Ruta absoluta del directorio del proyecto cliente
+ * @returns {Promise<{hasAtAlias, hasTailwind, hasTypeScript, firebaseConfigRelPath, installedPackages, envVarsDefined}>}
+ */
+async function probeTargetStack(projectDir) {
+  const result = {
+    hasAtAlias: false,
+    hasTailwind: false,
+    hasTypeScript: false,
+    firebaseConfigRelPath: null, // ruta relativa desde src/ al firebase config
+    installedPackages: {},       // { packageName: version }
+    envVarsDefined: []           // nombres de vars definidas en .env.local
+  };
+
+  try {
+    // 1. Leer package.json para dependencias y TypeScript
+    const pkgPath = path.join(projectDir, 'package.json');
+    if (await fs.pathExists(pkgPath)) {
+      const pkg = await fs.readJson(pkgPath);
+      const allDeps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+      result.installedPackages = allDeps;
+      result.hasTailwind = 'tailwindcss' in allDeps || '@tailwindcss/vite' in allDeps;
+      result.hasTypeScript = 'typescript' in allDeps;
+    }
+
+    // 2. Leer vite.config.js para alias @/
+    const viteConfigPath = path.join(projectDir, 'vite.config.js');
+    if (await fs.pathExists(viteConfigPath)) {
+      const viteContent = await fs.readFile(viteConfigPath, 'utf-8');
+      result.hasAtAlias = /'@'\s*:|"@"\s*:|alias.*@.*fileURLToPath|@.*import\.meta\.url/.test(viteContent);
+    }
+
+    // 3. Leer .env.local para variables de entorno definidas
+    const envPath = path.join(projectDir, '.env.local');
+    if (await fs.pathExists(envPath)) {
+      const envContent = await fs.readFile(envPath, 'utf-8');
+      const definedVars = envContent.match(/^(VITE_[A-Z_0-9]+)\s*=/gm) || [];
+      result.envVarsDefined = definedVars.map(v => v.replace(/\s*=.*/, '').trim());
+    }
+
+    // 4. Buscar archivo de configuración de Firebase en 6 ubicaciones canónicas
+    const firebaseSearchPaths = [
+      'src/config/firebaseConfig.js',
+      'src/config/firebase.js',
+      'src/firebase.js',
+      'src/services/firebase.js',
+      'src/lib/firebase.js',
+      'src/firebaseConfig.js'
+    ];
+    for (const relFbPath of firebaseSearchPaths) {
+      if (await fs.pathExists(path.join(projectDir, relFbPath))) {
+        result.firebaseConfigRelPath = relFbPath;
+        break;
+      }
+    }
+  } catch (probeErr) {
+    console.warn(`[probeTargetStack] Error leyendo stack de ${path.basename(projectDir)}: ${probeErr.message}`);
+  }
+
+  return result;
+}
+
+/**
+ * Reescribe los imports relativos (../ y ./) en el código inyectado para
+ * adaptarlos al proyecto destino. Si el target tiene alias @/, convierte
+ * todos los imports relativos a @/ (más robusto y portable).
+ * Si el firebase path fue detectado, lo usa para reescribir imports de Firebase.
+ * @param {string} code
+ * @param {string} targetRelPath — Ruta relativa del archivo en el proyecto destino
+ * @param {{ hasAtAlias: boolean, firebaseConfigRelPath: string|null }} targetStack
+ * @returns {{ code: string, warnings: string[], rewriteCount: number }}
+ */
+function rewriteImports(code, targetRelPath, targetStack) {
+  const warnings = [];
+  let rewritten = code;
+  let rewriteCount = 0;
+
+  // Solo reescribir si el target tiene alias @/ — es la estrategia más segura
+  if (!targetStack.hasAtAlias) {
+    warnings.push('El proyecto destino no tiene alias @/ detectado en vite.config.js. Los imports relativos se dejan como están — verifica manualmente si los paths son correctos.');
+    return { code, warnings, rewriteCount: 0 };
+  }
+
+  // Estrategia: Convertir '../../../algo' y './algo' → '@/algo'
+  // Para imports de Firebase con ruta detectada: usar la ruta real del proyecto
+  rewritten = rewritten.replace(
+    /(from\s+)(['"])(\.{1,2}\/[^'"]+)(['"])/g,
+    (match, fromKw, q1, relPath, q2) => {
+      // Extraer el "canonical path" eliminando todos los ../ y ./
+      const canonicalPath = relPath.replace(/^(\.\.\/|\.\/)+/, '');
+
+      // Caso especial: imports de Firebase — usar el path real detectado
+      if (targetStack.firebaseConfigRelPath) {
+        const firebasePatterns = ['config/firebaseconfig', 'config/firebase', 'firebase', 'firebaseconfig'];
+        const cleanLower = canonicalPath.toLowerCase().replace('.js', '');
+        if (firebasePatterns.some(p => cleanLower.endsWith(p))) {
+          // Convertir la ruta relativa del firebase al formato @/
+          const fbRelFromSrc = targetStack.firebaseConfigRelPath.replace(/^src\//, '');
+          rewriteCount++;
+          return `${fromKw}${q1}@/${fbRelFromSrc}${q2}`;
+        }
+      }
+
+      // Caso general: convertir ../../../algo → @/algo
+      rewriteCount++;
+      return `${fromKw}${q1}@/${canonicalPath}${q2}`;
+    }
+  );
+
+  if (rewriteCount > 0) {
+    console.log(`[rewriteImports] ${rewriteCount} import(s) reescritos en ${targetRelPath}`);
+  }
+
+  return { code: rewritten, warnings, rewriteCount };
+}
+
+/**
+ * Crea un backup del archivo antes de sobrescribirlo.
+ * Los backups se guardan en .prototipe-backup/{ISO-timestamp}/{relPath relativo al proyecto}
+ * @param {string} projectDir
+ * @param {string} filePath — Ruta absoluta del archivo a respaldar
+ * @returns {Promise<string|null>} — Ruta absoluta del backup, o null si el archivo no existía
+ */
+async function createBackupBeforeWrite(projectDir, filePath, currentTs = null) {
+  if (!await fs.pathExists(filePath)) return null;
+  try {
+    const ts = currentTs || new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const relativePath = path.relative(projectDir, filePath);
+    const backupDir = path.join(projectDir, '.prototipe-backup', ts);
+    const backupPath = path.join(backupDir, relativePath);
+
+    // Validación de contención estricta
+    if (!isPathContained(projectDir, backupPath)) {
+      console.warn(`[createBackupBeforeWrite] Intento de backup fuera del proyecto abortado: ${backupPath}`);
+      return null;
+    }
+
+    await fs.ensureDir(path.dirname(backupPath));
+    await fs.copy(filePath, backupPath);
+
+    // Asegurar que .prototipe-backup esté en .gitignore del proyecto
+    const gitignorePath = path.join(projectDir, '.gitignore');
+    if (await fs.pathExists(gitignorePath)) {
+      const gitignoreContent = await fs.readFile(gitignorePath, 'utf-8');
+      if (!gitignoreContent.includes('.prototipe-backup')) {
+        await fs.appendFile(gitignorePath, '\n# Prototipe injection backups\n.prototipe-backup/\n');
+      }
+    }
+
+    return path.relative(projectDir, backupPath);
+  } catch (backupErr) {
+    console.warn(`[createBackupBeforeWrite] No se pudo crear backup de ${filePath}: ${backupErr.message}`);
+    return null;
+  }
+}
+
+/**
+ * Limita el historial de backups conservando solo las últimas N sesiones.
+ * @param {string} projectDir
+ * @param {number} maxVersions
+ */
+async function pruneBackups(projectDir, maxVersions = 5) {
+  const backupDir = path.join(projectDir, '.prototipe-backup');
+  if (!await fs.pathExists(backupDir)) return;
+  try {
+    const items = await fs.readdir(backupDir);
+    const sessions = [];
+    for (const item of items) {
+      const fullPath = path.join(backupDir, item);
+      const stat = await fs.stat(fullPath);
+      if (stat.isDirectory()) {
+        sessions.push({ name: item, path: fullPath, mtime: stat.mtimeMs });
+      }
+    }
+    // Ordenar de más viejo a más nuevo
+    sessions.sort((a, b) => a.mtime - b.mtime);
+
+    if (sessions.length > maxVersions) {
+      const toRemove = sessions.slice(0, sessions.length - maxVersions);
+      for (const sess of toRemove) {
+        await fs.remove(sess.path);
+        console.log(`[pruneBackups] Purgado backup antiguo: ${sess.name}`);
+      }
+    }
+  } catch (err) {
+    console.warn(`[pruneBackups] Error al podar backups en ${projectDir}: ${err.message}`);
+  }
+}
+
+
+/**
+ * Actualiza el archivo .prototipe-injected.json en el proyecto cliente.
+ * Este archivo actúa como registro de todos los componentes instalados.
+ * Si el componente ya existe en el registro, actualiza su entry.
+ * @param {string} projectDir
+ * @param {{ id, name, sourceLink, category, targetPath, npmInstalled, backupPath, envVarsRequired, checksum }} entry
+ */
+async function updateComponentRegistry(projectDir, entry) {
+  const registryPath = path.join(projectDir, '.prototipe-injected.json');
+  let registry = { version: 1, lastUpdated: null, components: [] };
+
+  try {
+    if (await fs.pathExists(registryPath)) {
+      registry = await fs.readJson(registryPath);
+    }
+
+    // Calcular checksum SHA256 del archivo inyectado
+    const crypto = await import('crypto');
+    let checksum = null;
+    if (await fs.pathExists(path.join(projectDir, entry.targetPath))) {
+      const content = await fs.readFile(path.join(projectDir, entry.targetPath));
+      checksum = crypto.createHash('sha256').update(content).digest('hex').slice(0, 12);
+    }
+
+    const newEntry = {
+      id: entry.id,
+      name: entry.name,
+      sourceLink: entry.sourceLink,
+      category: entry.category || 'unknown',
+      targetPath: entry.targetPath,
+      installedAt: new Date().toISOString(),
+      installedBy: 'wizard-sse-v2',
+      npmInstalled: entry.npmInstalled || [],
+      dependenciesInjected: entry.dependenciesInjected || [],
+      backupPath: entry.backupPath || null,
+      envVarsRequired: entry.envVarsRequired || [],
+      checksum,
+      status: 'active'
+    };
+
+    // Reemplazar o agregar
+    const idx = registry.components.findIndex(c => c.id === entry.id);
+    if (idx >= 0) registry.components[idx] = newEntry;
+    else registry.components.push(newEntry);
+
+    registry.lastUpdated = new Date().toISOString();
+    await fs.writeJson(registryPath, registry, { spaces: 2 });
+  } catch (regErr) {
+    console.warn(`[updateComponentRegistry] No se pudo actualizar el registry: ${regErr.message}`);
+  }
+}
+
+/**
+ * Auto-genera un snippet de uso del componente a partir de su código.
+ * Extrae el nombre del export default y los parámetros del componente.
+ * @param {string} code
+ * @param {boolean} hasAtAlias
+ * @param {string} targetRelPath
+ * @returns {string} — Snippet JSX listo para mostrar al usuario
+ */
+function generateIntegrationSnippet(code, hasAtAlias, targetRelPath) {
+  try {
+    // Extraer nombre del export default function
+    const nameMatch = code.match(/export\s+default\s+function\s+(\w+)/);
+    if (!nameMatch) return null;
+    const componentName = nameMatch[1];
+
+    // Extraer parámetros del componente (destructuring del primer parámetro)
+    const propsMatch = code.match(/function\s+\w+\s*\(\s*\{([^}]+)\}/);
+    let propsSnippet = '';
+    if (propsMatch) {
+      const rawProps = propsMatch[1].split(',').map(p => p.trim().split('=')[0].trim()).filter(Boolean);
+      propsSnippet = rawProps.slice(0, 4).map(p => `  ${p}={/* ... */}`).join('\n');
+    }
+
+    // Calcular la ruta de import
+    const cleanPath = targetRelPath.replace(/\.(jsx?|tsx?)$/, '');
+    const importPath = hasAtAlias ? `@/${cleanPath}` : `./${path.basename(cleanPath)}`;
+
+    return [
+      `// 📋 Cómo usar este componente:`,
+      `import ${componentName} from '${importPath}';`,
+      ``,
+      `// En tu JSX:`,
+      propsSnippet
+        ? `<${componentName}\n${propsSnippet}\n/>`
+        : `<${componentName} />`
+    ].join('\n');
+  } catch {
+    return null;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // POST /api/library/inject/preflight — Pre-validación sin efectos secundarios
 // Verifica que el componente es inyectable ANTES de mostrar el diagnóstico.
 // No escribe nada, no instala nada. Solo valida.
@@ -984,6 +1638,10 @@ app.post('/api/library/inject/preflight', async (req, res) => {
   let manifestFound = false;
   let destinationExists = false;
   let destinationPath = null;
+  let autoDetectedDeps = null;   // CORE-123: deps auto-detectadas del código
+  let targetStack = null;         // CORE-123: stack del proyecto destino
+  let envVarsMissing = [];        // CORE-123: vars de entorno usadas pero no definidas
+  let integrationSnippet = null; // CORE-123: snippet de uso auto-generado
 
   try {
     // 1. Resolver ruta del .md
@@ -1012,7 +1670,7 @@ app.post('/api/library/inject/preflight', async (req, res) => {
       try { JSON.parse(manifestMatch[1]); manifestFound = true; }
       catch { warnings.push('El bloque manifest JSON del componente tiene sintaxis inválida. Las dependencias no se instalarán automáticamente.'); }
     } else {
-      warnings.push('Este componente no tiene manifest de dependencias (<!-- {} -->). Se inyectará el código pero sin instalar librerías NPM ni dependencias internas automáticamente.');
+      warnings.push('Este componente no tiene manifest de dependencias (<!-- {} -->). Las dependencias NPM se detectarán automáticamente del código.');
     }
 
     // 2b. Verificar extraíble el código
@@ -1021,9 +1679,17 @@ app.post('/api/library/inject/preflight', async (req, res) => {
       blockers.push('No se pudo extraer el código del componente. Verifica que el archivo .md tenga un bloque de código válido (```jsx o ```js).');
     } else {
       codeExtractable = true;
+
+      // CORE-123: Analizar dependencias del código automáticamente
+      autoDetectedDeps = analyzeCodeDependencies(code);
+
+      // CORE-123: Generar snippet de uso
+      if (targetRelativePath) {
+        integrationSnippet = generateIntegrationSnippet(code, true, targetRelativePath);
+      }
     }
 
-    // 3. Verificar si el archivo destino ya existe
+    // 3. Verificar si el archivo destino ya existe + probeTargetStack
     if (clientId && targetRelativePath) {
       const targetProjectDir = await findProjectDir(clientId);
       if (targetProjectDir) {
@@ -1033,10 +1699,87 @@ app.post('/api/library/inject/preflight', async (req, res) => {
           destinationPath = relPath;
           destinationExists = await fs.pathExists(fullDest);
           if (destinationExists) {
-            warnings.push(`El archivo destino ya existe: ${relPath}. Se sobrescribirá si confirmas la inyección.`);
+            warnings.push(`El archivo destino ya existe: ${relPath}. Se creará un backup automático antes de sobrescribir.`);
           }
         }
+
+        // CORE-123: Probe del stack del cliente destino
+        targetStack = await probeTargetStack(targetProjectDir);
+
+        // CORE-126: Detectar variables de entorno faltantes de forma recursiva en el árbol de dependencias
+        const allEnvVars = await extractAllEnvVarsRecursively(componentLink, baseDocDir);
+        if (allEnvVars.length > 0) {
+          envVarsMissing = allEnvVars.filter(v => !targetStack.envVarsDefined.includes(v));
+          if (envVarsMissing.length > 0) {
+            warnings.push(`Este componente y sus dependencias usan ${envVarsMissing.length} variable(s) de entorno no definidas en el cliente: ${envVarsMissing.join(', ')}.`);
+          }
+        }
+
+        // CSS Variables: Detectar variables CSS requeridas de forma recursiva
+        let componentCSSVars = await extractAllCSSVarsRecursively(componentLink, baseDocDir);
+        let clientCSSFilePath = await findClientCSSFile(targetProjectDir);
+        let cssVarsMissing = [];
+        let cssVarsDefined = [];
+
+        if (clientCSSFilePath) {
+          const fullCSSPath = path.join(targetProjectDir, clientCSSFilePath);
+          if (await fs.pathExists(fullCSSPath)) {
+            const cssContent = await fs.readFile(fullCSSPath, 'utf-8');
+            for (const cssVar of componentCSSVars) {
+              const escapedVar = cssVar.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+              const hasVar = new RegExp(`${escapedVar}\\s*:`, 'i').test(cssContent);
+              if (hasVar) {
+                cssVarsDefined.push(cssVar);
+              } else {
+                cssVarsMissing.push(cssVar);
+              }
+            }
+          } else {
+            cssVarsMissing = [...componentCSSVars];
+          }
+        } else if (componentCSSVars.length > 0) {
+          cssVarsMissing = [...componentCSSVars];
+        }
+
+        if (cssVarsMissing.length > 0) {
+          warnings.push(`Este componente y sus dependencias usan ${cssVarsMissing.length} variable(s) CSS no definidas en el cliente: ${cssVarsMissing.join(', ')}.`);
+        }
+
+        // CORE-123: Regenerar snippet con info de alias real del target
+        if (code && targetRelativePath) {
+          integrationSnippet = generateIntegrationSnippet(code, targetStack.hasAtAlias, targetRelativePath);
+        }
+
+        // CORE-123: Advertencia si el componente usa Firebase pero no hay config detectada
+        if (autoDetectedDeps?.firebaseImports && !targetStack.firebaseConfigRelPath) {
+          warnings.push('Este componente importa Firebase pero no se detectó el archivo de configuración (firebaseConfig.js) en el proyecto cliente. Los imports de Firebase se dejarán como están.');
+        }
+
+        // CORE-123: Advertencia si no hay alias @/ y hay imports relativos
+        if (autoDetectedDeps?.relativeImports.length > 0 && !targetStack.hasAtAlias) {
+          warnings.push(`El componente tiene ${autoDetectedDeps.relativeImports.length} import(s) relativo(s). El proyecto destino no tiene alias @/ configurado — verifica los paths manualmente tras la inyección.`);
+        }
+
+        // Añadir propiedades CSS al targetStack para el Paso 2
+        targetStack.clientCSSFilePath = clientCSSFilePath;
+        targetStack.cssVarsMissing = cssVarsMissing;
+        targetStack.cssVarsDefined = cssVarsDefined;
+        targetStack.componentCSSVars = componentCSSVars;
       }
+    }
+
+    // CORE-124: calcular ruta sugerida declarativa o heurística
+    let suggestedPath = null;
+    if (codeExtractable) {
+      let parsedManifest = null;
+      try {
+        const mMatch = md.match(/<!--\s*(\{[\s\S]*?\})\s*-->/);
+        if (mMatch) parsedManifest = JSON.parse(mMatch[1]);
+      } catch {}
+      const compName = parsedManifest?.technicalName ||
+        path.basename(componentLink.replace(/^file:\/\/\//, '').split('?')[0], '.md');
+      const fPath = componentLink.replace(/^file:\/\/\//, '');
+      suggestedPath = getDefaultRelativePath(compName, getResourceTypeFromPath(fPath), decodeURIComponent(fPath), parsedManifest);
     }
 
     res.json({
@@ -1046,13 +1789,195 @@ app.post('/api/library/inject/preflight', async (req, res) => {
       destinationExists,
       destinationPath,
       blockers,
-      warnings
+      warnings,
+      // CORE-123: campos enriquecidos
+      autoDetectedDeps,
+      targetStack,
+      envVarsMissing,
+      integrationSnippet,
+      // CORE-124: ruta sugerida (declarativa > heurística)
+      suggestedPath
     });
   } catch (err) {
     console.error(`[API /library/inject/preflight] Error: ${err.message}`);
     res.status(500).json({ error: `Error en preflight: ${err.message}` });
   }
 });
+
+function getCSSVariableFallback(varName) {
+  const name = varName.toLowerCase();
+  if (name.includes('primary')) return '#6366f1'; // Indigo premium
+  if (name.includes('secondary')) return '#475569'; // Slate
+  if (name.includes('accent')) return '#f59e0b'; // Amber
+  if (name.includes('background') || name.includes('bg')) return '#0f172a'; // Dark slate slate-900
+  if (name.includes('surface')) return '#1e293b'; // Slate-800
+  if (name.includes('border')) return '#334155'; // Slate-700
+  if (name.includes('text-muted')) return '#94a3b8'; // Slate-400
+  if (name.includes('text')) return '#f8fafc'; // Slate-50
+  if (name.includes('radius') || name.includes('rounded')) {
+    if (name.includes('xl')) return '1rem';
+    if (name.includes('lg')) return '0.75rem';
+    if (name.includes('md')) return '0.5rem';
+    return '0.375rem';
+  }
+  if (name.includes('shadow')) return '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+  return '#cccccc'; // Fallback neutral grey
+}
+
+app.post('/api/library/inject/css-doctor', async (req, res) => {
+  const { clientId, cssVarsMissing } = req.body;
+  if (!clientId || !Array.isArray(cssVarsMissing) || cssVarsMissing.length === 0) {
+    return res.json({ success: true, message: 'No hay variables CSS faltantes que inyectar.' });
+  }
+
+  try {
+    const targetProjectDir = await findProjectDir(clientId);
+    if (!targetProjectDir) {
+      return res.status(404).json({ error: `No se encontró el directorio del proyecto para el cliente: ${clientId}` });
+    }
+
+    let clientCSSFilePath = await findClientCSSFile(targetProjectDir);
+    if (!clientCSSFilePath) {
+      clientCSSFilePath = 'src/index.css';
+    }
+
+    const fullCSSPath = path.join(targetProjectDir, clientCSSFilePath);
+    await fs.ensureDir(path.dirname(fullCSSPath));
+
+    let cssContent = '';
+    if (await fs.pathExists(fullCSSPath)) {
+      cssContent = await fs.readFile(fullCSSPath, 'utf-8');
+      
+      const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      await createBackupBeforeWrite(targetProjectDir, fullCSSPath, `css-doctor-${ts}`);
+    }
+
+    let cleanBaseContent = cssContent;
+    let existingVars = {};
+
+    const startIdx = cssContent.indexOf('/* === CSS DOCTOR START === */');
+    const endIdx = cssContent.indexOf('/* === CSS DOCTOR END === */');
+
+    if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+      const doctorBlock = cssContent.slice(startIdx, endIdx + '/* === CSS DOCTOR END === */'.length);
+      const varRegex = /(--[a-zA-Z0-9-]+)\s*:\s*([^;]+);/g;
+      let match;
+      while ((match = varRegex.exec(doctorBlock)) !== null) {
+        existingVars[match[1]] = match[2].trim();
+      }
+      cleanBaseContent = cssContent.slice(0, startIdx).trimEnd() + '\n\n' + cssContent.slice(endIdx + '/* === CSS DOCTOR END === */'.length).trimStart();
+    }
+
+    const mergedVars = { ...existingVars };
+    for (const cssVar of cssVarsMissing) {
+      if (!mergedVars[cssVar]) {
+        mergedVars[cssVar] = getCSSVariableFallback(cssVar);
+      }
+    }
+
+    let injectionBlock = '\n\n/* === CSS DOCTOR START === */\n';
+    injectionBlock += '/* Las variables inyectadas automáticamente por CSS Doctor se guardan en este bloque */\n';
+    injectionBlock += ':root {\n';
+    for (const [v, val] of Object.entries(mergedVars)) {
+      injectionBlock += `  ${v}: ${val};\n`;
+    }
+    injectionBlock += '}\n';
+    injectionBlock += '/* === CSS DOCTOR END === */\n';
+
+    await fs.writeFile(fullCSSPath, cleanBaseContent.trimEnd() + injectionBlock, 'utf-8');
+
+    res.json({
+      success: true,
+      message: `Variables CSS inyectadas de forma segura en ${clientCSSFilePath}`,
+      injectedVars: cssVarsMissing,
+      filePath: clientCSSFilePath
+    });
+  } catch (err) {
+    console.error(`[API /library/inject/css-doctor] Error: ${err.message}`);
+    res.status(500).json({ error: `Error al inyectar variables CSS: ${err.message}` });
+  }
+});
+
+app.post('/api/library/sandbox/scaffold', async (req, res) => {
+  const { componentLink, technicalName } = req.body;
+  if (!componentLink || !technicalName) {
+    return res.status(400).json({ error: 'Los campos "componentLink" y "technicalName" son obligatorios.' });
+  }
+
+  try {
+    let rawPath = componentLink.replace(/^file:\/\/\//, '');
+    rawPath = decodeURIComponent(rawPath);
+    if (rawPath.toLowerCase().includes('biblioteca de componentes')) {
+      rawPath = rawPath.replace(/biblioteca de componentes/i, '06_Biblioteca_Componentes');
+    }
+    const baseDocDir = path.resolve(getDocumentationRoot());
+    const filePath = path.resolve(rawPath);
+
+    if (!isPathContained(baseDocDir, filePath) || !await fs.pathExists(filePath)) {
+      return res.status(404).json({ error: 'El archivo de documentación del componente no existe.' });
+    }
+
+    const md = await fs.readFile(filePath, 'utf-8');
+    const code = extractCodeFromMarkdown(md);
+    if (!code) {
+      return res.status(400).json({ error: 'No se pudo extraer código del componente para crear el sandbox.' });
+    }
+
+    let processedCode = code;
+    
+    const exportDefaultRegex = new RegExp(`export\\s+default\\s+function\\s+${technicalName}`, 'g');
+    if (exportDefaultRegex.test(processedCode)) {
+      processedCode = processedCode.replace(exportDefaultRegex, `function ${technicalName}`);
+    } else {
+      processedCode = processedCode.replace(/export\s+default\s+function/g, 'function');
+      processedCode = processedCode.replace(/export\s+default/g, '/* export default */');
+    }
+
+    let finalCode = '';
+    if (!processedCode.includes("import { SandboxLayout }")) {
+      finalCode += `import { SandboxLayout } from './SandboxLayout';\n`;
+    }
+    finalCode += processedCode;
+
+    finalCode += `\n\nexport default function ${technicalName}Sandbox() {\n`;
+    finalCode += `  return (\n`;
+    finalCode += `    <SandboxLayout\n`;
+    finalCode += `      title="${technicalName}"\n`;
+    finalCode += `      description="Playground autogenerado por Scaffold Sandbox. Visualización del componente en aislamiento."\n`;
+    finalCode += `      controls={[]}\n`;
+    finalCode += `    >\n`;
+    finalCode += `      <div className="w-full flex items-center justify-center p-6 bg-slate-900/50 border border-slate-800 rounded-3xl min-h-[160px]">\n`;
+    finalCode += `        <${technicalName} />\n`;
+    finalCode += `      </div>\n`;
+    finalCode += `    </SandboxLayout>\n`;
+    finalCode += `  );\n`;
+    finalCode += `}\n`;
+
+    const sandboxFilePath = path.join(
+      getWorkspaceRoot(),
+      'Central PROTOTIPE',
+      'dev-dashboard',
+      'src',
+      'components',
+      'admin',
+      'sandboxes',
+      `${technicalName}Sandbox.jsx`
+    );
+
+    await fs.ensureDir(path.dirname(sandboxFilePath));
+    await fs.writeFile(sandboxFilePath, finalCode, 'utf-8');
+
+    res.json({
+      success: true,
+      message: `Sandbox creado con éxito en ${path.basename(sandboxFilePath)}`,
+      sandboxPath: sandboxFilePath
+    });
+  } catch (err) {
+    console.error(`[API /library/sandbox/scaffold] Error: ${err.message}`);
+    res.status(500).json({ error: `Error al crear el scaffold del sandbox: ${err.message}` });
+  }
+});
+
 
 // POST /api/library/inject/diagnose — Obtiene dependencias NPM faltantes y subdependencias locales faltantes
 app.post('/api/library/inject/diagnose', async (req, res) => {
@@ -1235,7 +2160,7 @@ app.post('/api/library/inject', async (req, res) => {
           if (dep.link) {
             const existingPath = await findInternalFile(targetProjectDir, dep.name, dep.type);
             if (!existingPath) {
-              const defaultPath = getDefaultRelativePath(dep.name, dep.type);
+              const defaultPath = getDefaultRelativePath(dep.name, dep.type, filePath, dep.targetPath ? { targetPath: dep.targetPath } : null);
               await recurseInject(dep.link, false, defaultPath);
             } else {
               results.push({ type: 'internal', name: dep.name, status: 'already_present', path: path.relative(targetProjectDir, existingPath) });
@@ -1254,7 +2179,7 @@ app.post('/api/library/inject', async (req, res) => {
       let relativeFilePath = destRelPath;
       if (!relativeFilePath) {
         const type = getResourceTypeFromPath(filePath);
-        relativeFilePath = getDefaultRelativePath(manifest.technicalName || path.basename(filePath, '.md'), type, filePath);
+        relativeFilePath = getDefaultRelativePath(manifest.technicalName || path.basename(filePath, '.md'), type, filePath, manifest);
       }
 
       if (relativeFilePath.startsWith('/')) {
@@ -1311,15 +2236,23 @@ app.post('/api/library/inject/stream', async (req, res) => {
   };
 
   const results = [];
+  let targetProjectDir = null;
 
   try {
-    const targetProjectDir = await findProjectDir(clientId);
+    targetProjectDir = await findProjectDir(clientId);
     if (!targetProjectDir) {
       emit('error', { message: `No se pudo encontrar el directorio del proyecto: ${clientId}` });
       return res.end();
     }
 
+    // CORE-123: Probe del stack del proyecto destino (una sola vez, compartido en toda la sesión)
+    const targetStack = await probeTargetStack(targetProjectDir);
+    emit('step', { phase: 'init', status: 'info', message: `Stack detectado: alias @/${targetStack.hasAtAlias ? '✓' : '✗'} | Firebase: ${targetStack.firebaseConfigRelPath || 'no detectado'} | Tailwind: ${targetStack.hasTailwind ? '✓' : '✗'}` });
+
     const visited = new Set();
+    const primaryCompName = path.basename(targetRelativePath, path.extname(targetRelativePath));
+    const sessionInjections = [];
+    const sessionTs = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 
     async function recurseInjectSSE(currentLink, isPrimary = false, destRelPath = null) {
       if (visited.has(currentLink)) return;
@@ -1372,7 +2305,7 @@ app.post('/api/library/inject/stream', async (req, res) => {
           if (!dep.link) continue;
           const existingPath = await findInternalFile(targetProjectDir, dep.name, dep.type);
           if (!existingPath) {
-            const defaultPath = getDefaultRelativePath(dep.name, dep.type, filePath);
+            const defaultPath = getDefaultRelativePath(dep.name, dep.type, filePath, dep.targetPath ? { targetPath: dep.targetPath } : null);
             emit('step', { phase: 'dependency', name: dep.name, status: 'injecting', message: `Inyectando dependencia: ${dep.name}` });
             await recurseInjectSSE(dep.link, false, defaultPath);
           } else {
@@ -1382,13 +2315,13 @@ app.post('/api/library/inject/stream', async (req, res) => {
       }
 
       // Extraer código con helper robusto
-      const codeToInject = extractCodeFromMarkdown(md);
+      let codeToInject = extractCodeFromMarkdown(md);
       if (!codeToInject) throw new Error(`No se pudo extraer código de ${path.basename(filePath)}`);
 
       let relativeFilePath = destRelPath;
       if (!relativeFilePath) {
         const type = getResourceTypeFromPath(filePath);
-        relativeFilePath = getDefaultRelativePath(compName, type, filePath);
+        relativeFilePath = getDefaultRelativePath(compName, type, filePath, manifest);
       }
       if (relativeFilePath.startsWith('/')) relativeFilePath = relativeFilePath.slice(1);
 
@@ -1397,29 +2330,526 @@ app.post('/api/library/inject/stream', async (req, res) => {
         throw new Error(`Ruta de destino fuera del proyecto: ${finalTargetFilePath}`);
       }
 
-      // Verificar sobrescritura
+      // CORE-123: Reescribir imports relativos → @/ usando el stack del target
+      const { code: rewrittenCode, warnings: rewriteWarnings, rewriteCount } = rewriteImports(codeToInject, relativeFilePath, targetStack);
+      codeToInject = rewrittenCode;
+      if (rewriteCount > 0) {
+        emit('step', { phase: 'transform', name: compName, status: 'info', message: `✎ ${rewriteCount} import(s) reescritos para el proyecto destino.` });
+      }
+      for (const w of rewriteWarnings) {
+        emit('step', { phase: 'transform', name: compName, status: 'warn', message: `⚠ ${w}` });
+      }
+
+      // CORE-123: Fix bug isPrimary — verificar sobrescritura para TODOS los archivos (primary y deps)
       const fileExists = await fs.pathExists(finalTargetFilePath);
-      if (fileExists && !overwrite && isPrimary) {
-        throw new Error(`El archivo ya existe: ${relativeFilePath}. Activa "Sobrescribir" para reemplazarlo.`);
+      if (fileExists && !overwrite) {
+        if (isPrimary) {
+          throw new Error(`El archivo ya existe: ${relativeFilePath}. Activa "Sobrescribir" para reemplazarlo.`);
+        } else {
+          // Para dependencias: advertir y saltar en lugar de sobrescribir silenciosamente
+          emit('step', { phase: 'file', name: compName, path: relativeFilePath, status: 'skipped', message: `⏭ Dependencia ${relativeFilePath} ya existe — saltando para no sobreescribir código personalizado.` });
+          results.push({ type: 'dependency', name: compName, status: 'skipped', path: relativeFilePath });
+          return;
+        }
+      }
+
+      // CORE-123: Backup antes de sobrescribir (agrupados por timestamp único de sesión)
+      let backupPath = null;
+      if (fileExists && overwrite) {
+        backupPath = await createBackupBeforeWrite(targetProjectDir, finalTargetFilePath, sessionTs);
+        if (backupPath) {
+          emit('step', { phase: 'backup', name: compName, status: 'done', message: `🗄 Backup creado: ${backupPath}` });
+        }
       }
 
       emit('step', { phase: 'file', name: compName, path: relativeFilePath, status: 'writing', message: `Escribiendo ${relativeFilePath}...` });
       await fs.ensureDir(path.dirname(finalTargetFilePath));
       await fs.writeFile(finalTargetFilePath, codeToInject, 'utf-8');
 
+      // Calcular checksum SHA256 para el registro de auditoría
+      const crypto = await import('crypto');
+      const checksum = crypto.createHash('sha256').update(codeToInject).digest('hex').slice(0, 12);
+
+      sessionInjections.push({
+        id: compName,
+        name: manifest.name || compName,
+        type: isPrimary ? 'primary' : 'dependency',
+        targetPath: relativeFilePath,
+        backupPath: backupPath,
+        checksum: checksum,
+        isNew: !fileExists
+      });
+
       const resultItem = { type: isPrimary ? 'primary' : 'dependency', name: compName, status: 'injected', path: relativeFilePath };
       results.push(resultItem);
       emit('step', { phase: 'file', name: compName, path: relativeFilePath, status: 'done', message: `✓ ${relativeFilePath} creado.` });
+
+      // CORE-123/CORE-125: Registrar componente inyectado en .prototipe-injected.json
+      if (isPrimary) {
+        const primaryEntry = sessionInjections.find(inj => inj.type === 'primary');
+        const depsEntries = sessionInjections.filter(inj => inj.type === 'dependency');
+        const autoDetected = analyzeCodeDependencies(codeToInject);
+
+        await updateComponentRegistry(targetProjectDir, {
+          id: compName,
+          name: manifest.name || compName,
+          sourceLink: currentLink,
+          category: path.basename(path.dirname(path.dirname(filePath))),
+          targetPath: relativeFilePath,
+          npmInstalled: Object.keys(manifest.dependencies?.npm || {}),
+          dependenciesInjected: depsEntries.map(d => ({
+            id: d.id,
+            name: d.name,
+            targetPath: d.targetPath,
+            backupPath: d.backupPath,
+            checksum: d.checksum,
+            isNew: d.isNew
+          })),
+          backupPath: primaryEntry ? primaryEntry.backupPath : null,
+          envVarsRequired: autoDetected.envVars
+        });
+      }
     }
 
     emit('start', { message: `Iniciando instalación de componente en ${clientId}...` });
     await recurseInjectSSE(componentLink, true, targetRelativePath);
-    emit('complete', { message: 'Instalación completada exitosamente.', results });
+
+    // CORE-125: Purgar copias redundantes de backups
+    await pruneBackups(targetProjectDir, 5);
+
+    // CORE-126: Inyectar variables de entorno recursivas y configurar valores reales ingresados por el usuario
+    try {
+      const baseDocDir = path.resolve(getDocumentationRoot());
+      const allEnvVars = await extractAllEnvVarsRecursively(componentLink, baseDocDir);
+      if (allEnvVars.length > 0) {
+        await writeEnvVarsToClient(targetProjectDir, allEnvVars, req.body.envValues || {}, primaryCompName);
+        emit('step', { phase: 'env', status: 'done', message: `📋 Configuración de variables de entorno procesada en .env.local: ${allEnvVars.join(', ')}` });
+      }
+    } catch (envErr) {
+      console.warn(`[inject/stream] No se pudieron inyectar env vars: ${envErr.message}`);
+    }
+
+    // CORE-123: Generar snippet de integración del componente principal
+    let snippet = null;
+    try {
+      const primaryMdRaw = await fs.readFile(
+        path.resolve(decodeURIComponent(componentLink.replace(/^file:\/\/\//, '')).replace(/biblioteca de componentes/i, '06_Biblioteca_Componentes')),
+        'utf-8'
+      );
+      const primaryCode = extractCodeFromMarkdown(primaryMdRaw);
+      snippet = generateIntegrationSnippet(primaryCode, targetStack.hasAtAlias, targetRelativePath);
+    } catch {}
+
+    emit('complete', { message: 'Instalación completada exitosamente.', results, integrationSnippet: snippet });
+
+    // CORE-123: Build automático post-inyección via SSE
+    // CORE-127: La auditoría se escribe DESPUÉS del build para capturar el resultado real
+    emit('step', { phase: 'build', status: 'starting', message: '🔨 Verificando compilación del proyecto...' });
+    let _buildStatus = 'unknown';
+    let _buildLines = [];
+    try {
+      await new Promise((resolve) => {
+        const buildProc = require('child_process').spawn('npm', ['run', 'build', '--', '--logLevel=warn'], {
+          cwd: targetProjectDir,
+          shell: true,
+          env: { ...process.env, FORCE_COLOR: '0' }
+        });
+        buildProc.stdout.on('data', d => {
+          const line = d.toString().trim();
+          if (line) { _buildLines.push(line); emit('step', { phase: 'build', status: 'progress', message: line }); }
+        });
+        buildProc.stderr.on('data', d => {
+          const line = d.toString().trim();
+          if (line) { _buildLines.push('ERR: ' + line); emit('step', { phase: 'build', status: 'progress', message: line }); }
+        });
+        buildProc.on('close', code => {
+          if (code === 0) {
+            _buildStatus = 'success';
+            emit('step', { phase: 'build', status: 'success', message: '✅ Compilación exitosa. El componente está correctamente integrado.' });
+          } else {
+            _buildStatus = 'error';
+            emit('step', { phase: 'build', status: 'error', message: `❌ La compilación falló (código ${code}). Revisa los errores anteriores.` });
+          }
+          resolve();
+        });
+        buildProc.on('error', err => {
+          _buildStatus = 'warn';
+          _buildLines.push(`spawn error: ${err.message}`);
+          emit('step', { phase: 'build', status: 'warn', message: `⚠ No se pudo ejecutar npm run build: ${err.message}` });
+          resolve();
+        });
+      });
+    } catch (buildErr) {
+      _buildStatus = 'warn';
+      _buildLines.push(buildErr.message);
+      emit('step', { phase: 'build', status: 'warn', message: `⚠ Error al verificar compilación: ${buildErr.message}` });
+    }
+
+    // CORE-127: Registrar entrada de auditoría con build result real — asíncrono, no bloquea SSE
+    {
+      const primaryResult = results.find(r => r.type === 'primary');
+      const depsResult = results.filter(r => r.type === 'dependency');
+      const npmResult = results.filter(r => r.type === 'npm');
+      const envVarsUsed = req.body.envValues ? Object.keys(req.body.envValues) : [];
+      appendAuditTrailEntry(clientId, {
+        id: `inj-${sessionTs}-${clientId}`,
+        operation: 'inject',
+        status: 'success',
+        timestamp: new Date().toISOString(),
+        primaryComponent: primaryResult ? {
+          name: primaryCompName,
+          targetPath: primaryResult.path,
+          sourceLink: componentLink,
+          checksum: primaryResult.checksum || null
+        } : { name: primaryCompName, targetPath: targetRelativePath, sourceLink: componentLink },
+        dependencies: depsResult.map(d => ({ name: d.name, targetPath: d.path || d.targetPath || '-', checksum: d.checksum || null })),
+        npmPackages: npmResult.map(n => ({ name: n.name, version: n.version || '?', status: n.status })),
+        envVarsConfigured: envVarsUsed,
+        buildLog: { status: _buildStatus, lines: _buildLines.slice(-20) }, // últimas 20 líneas máx
+        stack: { hasAtAlias: targetStack.hasAtAlias, hasTailwind: targetStack.hasTailwind, firebaseConfig: targetStack.firebaseConfigRelPath }
+      });
+    }
   } catch (err) {
+    // CORE-127: Registrar entrada de auditoría (error/auto-rollback)
+    appendAuditTrailEntry(clientId, {
+      id: `inj-err-${Date.now()}-${clientId}`,
+      operation: 'auto-rollback',
+      status: 'error',
+      timestamp: new Date().toISOString(),
+      primaryComponent: { name: primaryCompName || 'desconocido', targetPath: targetRelativePath, sourceLink: componentLink },
+      dependencies: [],
+      npmPackages: [],
+      envVarsConfigured: [],
+      buildLog: { status: 'error', lines: [err.message] },
+      errorMessage: err.message
+    }).catch(() => {});
     console.error(`[API /library/inject/stream] Error: ${err.message}`);
+    
+    // CORE-125: Auto-rollback transaccional si falla la inyección a mitad de camino
+    if (targetProjectDir && typeof sessionInjections !== 'undefined' && sessionInjections.length > 0) {
+      emit('step', { phase: 'rollback', status: 'starting', message: `⚠️ Fallo en la instalación. Ejecutando auto-rollback de seguridad...` });
+      for (const inj of sessionInjections) {
+        try {
+          const targetFilePath = path.resolve(targetProjectDir, inj.targetPath);
+          if (inj.isNew) {
+            if (await fs.pathExists(targetFilePath)) {
+              await fs.remove(targetFilePath);
+              emit('step', { phase: 'rollback', name: inj.name, status: 'progress', message: `🗑️ Removido archivo huérfano: ${inj.targetPath}` });
+            }
+          } else if (inj.backupPath) {
+            const absoluteBackupPath = path.resolve(
+              targetProjectDir,
+              path.isAbsolute(inj.backupPath) ? inj.backupPath : path.join(targetProjectDir, inj.backupPath)
+            );
+            if (await fs.pathExists(absoluteBackupPath)) {
+              await fs.copy(absoluteBackupPath, targetFilePath, { overwrite: true });
+              emit('step', { phase: 'rollback', name: inj.name, status: 'progress', message: `🗄️ Restaurado desde backup: ${inj.targetPath}` });
+            }
+          }
+        } catch (rollbackErr) {
+          console.error(`[inject/stream] Error en auto-rollback de ${inj.targetPath}:`, rollbackErr.message);
+        }
+      }
+      emit('step', { phase: 'rollback', status: 'done', message: `✅ Auto-rollback completado. Workspace restaurado a su estado original.` });
+    }
     emit('error', { message: err.message });
   } finally {
     res.end();
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CORE-123: Endpoints de Registro e Inventario de Componentes Instalados
+// ─────────────────────────────────────────────────────────────────────────────
+
+// GET /api/library/inject/registry — Retorna los componentes instalados en un cliente
+// Query: ?clientId=ventas
+app.get('/api/library/inject/registry', async (req, res) => {
+  const { clientId } = req.query;
+  if (!clientId) return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+
+  try {
+    const targetProjectDir = await findProjectDir(clientId);
+    if (!targetProjectDir) return res.status(404).json({ error: `Cliente no encontrado: ${clientId}` });
+
+    const registryPath = path.join(targetProjectDir, '.prototipe-injected.json');
+    if (!await fs.pathExists(registryPath)) {
+      return res.json({ version: 1, lastUpdated: null, components: [] });
+    }
+
+    const registry = await fs.readJson(registryPath);
+
+    // Verificar si los archivos inyectados y sus dependencias siguen existiendo y si fueron modificados externamente
+    for (const comp of registry.components) {
+      const filePath = path.join(targetProjectDir, comp.targetPath);
+      let globalStatus = 'active';
+
+      if (!await fs.pathExists(filePath)) {
+        globalStatus = 'missing';
+      } else if (comp.checksum) {
+        const crypto = await import('crypto');
+        const content = await fs.readFile(filePath);
+        const currentChecksum = crypto.createHash('sha256').update(content).digest('hex').slice(0, 12);
+        if (currentChecksum !== comp.checksum) globalStatus = 'modified';
+      }
+
+      // Si el archivo principal está intacto, validamos sus dependencias inyectadas en cascada
+      if (globalStatus === 'active' && Array.isArray(comp.dependenciesInjected)) {
+        const crypto = await import('crypto');
+        for (const dep of comp.dependenciesInjected) {
+          const depFilePath = path.join(targetProjectDir, dep.targetPath);
+          if (!await fs.pathExists(depFilePath)) {
+            globalStatus = 'modified'; // Marcamos modificado si falta alguna dependencia interna inyectada
+            dep.status = 'missing';
+          } else if (dep.checksum) {
+            const depContent = await fs.readFile(depFilePath);
+            const depChecksum = crypto.createHash('sha256').update(depContent).digest('hex').slice(0, 12);
+            if (depChecksum !== dep.checksum) {
+              globalStatus = 'modified';
+              dep.status = 'modified';
+            } else {
+              dep.status = 'active';
+            }
+          }
+        }
+      }
+
+      comp.status = globalStatus;
+    }
+
+    res.json(registry);
+  } catch (err) {
+    console.error(`[API /library/inject/registry] Error: ${err.message}`);
+    res.status(500).json({ error: `Error al leer el registro: ${err.message}` });
+  }
+});
+
+// POST /api/library/inject/rollback — Restaura un componente desde su backup
+// Body: { clientId, componentId }
+app.post('/api/library/inject/rollback', async (req, res) => {
+  const { clientId, componentId } = req.body;
+  if (!clientId || !componentId) {
+    return res.status(400).json({ error: 'Los campos "clientId" y "componentId" son obligatorios.' });
+  }
+
+  try {
+    const targetProjectDir = await findProjectDir(clientId);
+    if (!targetProjectDir) return res.status(404).json({ error: `Cliente no encontrado: ${clientId}` });
+
+    const registryPath = path.join(targetProjectDir, '.prototipe-injected.json');
+    if (!await fs.pathExists(registryPath)) {
+      return res.status(404).json({ error: 'No existe registro de componentes instalados en este cliente.' });
+    }
+
+    const registry = await fs.readJson(registryPath);
+    const comp = registry.components.find(c => c.id === componentId);
+    if (!comp) return res.status(404).json({ error: `Componente "${componentId}" no encontrado en el registro.` });
+
+    // 1. Reversión de dependencias inyectadas en cascada
+    const revertedDeps = [];
+    if (Array.isArray(comp.dependenciesInjected)) {
+      for (const dep of comp.dependenciesInjected) {
+        const depTargetFilePath = path.resolve(targetProjectDir, dep.targetPath);
+        if (!isPathContained(targetProjectDir, depTargetFilePath)) continue;
+
+        if (dep.isNew) {
+          if (await fs.pathExists(depTargetFilePath)) {
+            await fs.remove(depTargetFilePath);
+            revertedDeps.push({ name: dep.name, action: 'deleted', path: dep.targetPath });
+          }
+        } else if (dep.backupPath) {
+          const depAbsoluteBackupPath = path.resolve(
+            targetProjectDir,
+            path.isAbsolute(dep.backupPath) ? dep.backupPath : path.join(targetProjectDir, dep.backupPath)
+          );
+          if (!isPathContained(targetProjectDir, depAbsoluteBackupPath)) continue;
+
+          if (await fs.pathExists(depAbsoluteBackupPath)) {
+            await fs.ensureDir(path.dirname(depTargetFilePath));
+            await fs.copy(depAbsoluteBackupPath, depTargetFilePath, { overwrite: true });
+            revertedDeps.push({ name: dep.name, action: 'restored', path: dep.targetPath });
+          }
+        }
+      }
+    }
+
+    // 2. Restauración/Eliminación del componente primario
+    const targetFilePath = path.resolve(targetProjectDir, comp.targetPath);
+    if (!isPathContained(targetProjectDir, targetFilePath)) {
+      return res.status(403).json({ error: 'Ruta destino de restauración fuera del proyecto. Operación denegada.' });
+    }
+
+    let primaryAction = 'none';
+    if (!comp.backupPath) {
+      // Si no hay backupPath, el archivo no existía previamente, por ende se elimina físicamente
+      if (await fs.pathExists(targetFilePath)) {
+        await fs.remove(targetFilePath);
+        primaryAction = 'deleted';
+      }
+    } else {
+      // Restauración de backup
+      const absoluteBackupPath = path.resolve(
+        targetProjectDir,
+        path.isAbsolute(comp.backupPath) ? comp.backupPath : path.join(targetProjectDir, comp.backupPath)
+      );
+
+      if (!isPathContained(targetProjectDir, absoluteBackupPath)) {
+        return res.status(403).json({ error: 'Ruta de backup fuera del proyecto. Operación denegada.' });
+      }
+
+      if (!await fs.pathExists(absoluteBackupPath)) {
+        return res.status(404).json({ error: `El archivo de backup no existe: ${comp.backupPath}` });
+      }
+
+      await fs.ensureDir(path.dirname(targetFilePath));
+      await fs.copy(absoluteBackupPath, targetFilePath, { overwrite: true });
+      primaryAction = 'restored';
+    }
+
+    // Actualizar estado en el registry
+    comp.status = 'rolledback';
+    comp.rolledbackAt = new Date().toISOString();
+    registry.lastUpdated = new Date().toISOString();
+    await fs.writeJson(registryPath, registry, { spaces: 2 });
+
+    // CORE-127: Registrar rollback en auditoría
+    appendAuditTrailEntry(clientId, {
+      id: `rbk-${Date.now()}-${clientId}`,
+      operation: 'rollback',
+      status: 'success',
+      timestamp: new Date().toISOString(),
+      componentId,
+      primaryComponent: { name: comp.name || componentId, targetPath: comp.targetPath, action: primaryAction },
+      dependencies: revertedDeps.map(d => ({ name: d.name, targetPath: d.path, action: d.action })),
+      npmPackages: [],
+      envVarsConfigured: [],
+      buildLog: { status: 'N/A', lines: [] }
+    }).catch(() => {});
+
+    res.json({
+      success: true,
+      message: `Componente "${componentId}" revertido exitosamente.`,
+      primaryAction,
+      revertedDependencies: revertedDeps,
+      restoredTo: comp.targetPath
+    });
+  } catch (err) {
+    console.error(`[API /library/inject/rollback] Error: ${err.message}`);
+    res.status(500).json({ error: `Error en rollback: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CORE-127: Endpoints de Auditoría — Historial de Inyecciones
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/library/inject/audit-trail
+ * Query: ?clientId=ventas&page=1&limit=20&operation=inject&status=success&search=
+ * Retorna el historial paginado del cliente en orden cronológico inverso.
+ */
+app.get('/api/library/inject/audit-trail', async (req, res) => {
+  const { clientId, page = '1', limit = '20', operation, status, search } = req.query;
+  if (!clientId) return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+
+  try {
+    const projectDir = await findProjectDir(clientId);
+    if (!projectDir) return res.status(404).json({ error: `Cliente no encontrado: ${clientId}` });
+
+    const jsonlPath = path.join(projectDir, '.prototipe-audit-trail.jsonl');
+    if (!await fs.pathExists(jsonlPath)) {
+      return res.json({ total: 0, page: 1, limit: parseInt(limit), entries: [] });
+    }
+
+    const raw = await fs.readFile(jsonlPath, 'utf-8');
+    const MAX_ENTRIES = 2000; // Cap anti-OOM: máximo 2000 entradas en memoria
+    const allLines = raw.trim().split('\n').filter(Boolean);
+    // Solo procesar las últimas MAX_ENTRIES líneas (las más recientes al final del JSONL)
+    const linesToParse = allLines.length > MAX_ENTRIES ? allLines.slice(-MAX_ENTRIES) : allLines;
+    let entries = linesToParse.map(line => {
+      try { return JSON.parse(line); } catch { return null; }
+    }).filter(Boolean);
+
+    // Orden cronológico inverso
+    entries.reverse();
+
+    // Filtros
+    if (operation) entries = entries.filter(e => e.operation === operation);
+    if (status) entries = entries.filter(e => e.status === status);
+    if (search) {
+      const sq = search.toLowerCase();
+      entries = entries.filter(e =>
+        JSON.stringify(e).toLowerCase().includes(sq)
+      );
+    }
+
+    // Paginación
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+    const total = entries.length;
+    const paginated = entries.slice((pageNum - 1) * limitNum, pageNum * limitNum);
+
+    res.json({
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(total / limitNum),
+      entries: paginated
+    });
+  } catch (err) {
+    console.error(`[API /audit-trail] Error: ${err.message}`);
+    res.status(500).json({ error: `Error al leer el historial: ${err.message}` });
+  }
+});
+
+/**
+ * GET /api/library/inject/audit-diff
+ * Query: ?clientId=ventas&componentId=MiComponente
+ * Retorna el diff de texto entre la versión de backup y la versión actual del componente.
+ */
+app.get('/api/library/inject/audit-diff', async (req, res) => {
+  const { clientId, componentId } = req.query;
+  if (!clientId || !componentId) return res.status(400).json({ error: 'Los parámetros "clientId" y "componentId" son obligatorios.' });
+
+  try {
+    const projectDir = await findProjectDir(clientId);
+    if (!projectDir) return res.status(404).json({ error: `Cliente no encontrado: ${clientId}` });
+
+    const registryPath = path.join(projectDir, '.prototipe-injected.json');
+    if (!await fs.pathExists(registryPath)) return res.status(404).json({ error: 'No hay registro de componentes.' });
+
+    const registry = await fs.readJson(registryPath);
+    const comp = registry.components.find(c => c.id === componentId);
+    if (!comp) return res.status(404).json({ error: `Componente "${componentId}" no encontrado.` });
+
+    const currentPath = path.resolve(projectDir, comp.targetPath);
+    const backupPath = comp.backupPath
+      ? path.resolve(projectDir, path.isAbsolute(comp.backupPath) ? comp.backupPath : path.join(projectDir, comp.backupPath))
+      : null;
+
+    if (!isPathContained(projectDir, currentPath)) return res.status(403).json({ error: 'Acceso denegado.' });
+
+    const currentContent = await fs.pathExists(currentPath) ? await fs.readFile(currentPath, 'utf-8') : '';
+    const backupContent = (backupPath && await fs.pathExists(backupPath)) ? await fs.readFile(backupPath, 'utf-8') : '';
+
+    const diff = Diff.createTwoFilesPatch(
+      `${componentId} (backup/original)`,
+      `${componentId} (actual)`,
+      backupContent,
+      currentContent
+    );
+
+    res.json({
+      componentId,
+      targetPath: comp.targetPath,
+      backupPath: comp.backupPath || null,
+      hasBackup: !!backupContent,
+      hasCurrent: !!currentContent,
+      diff
+    });
+  } catch (err) {
+    console.error(`[API /audit-diff] Error: ${err.message}`);
+    res.status(500).json({ error: `Error al generar diff: ${err.message}` });
   }
 });
 
@@ -3751,8 +5181,10 @@ function isPathExcludedFromSync(relativePath) {
     rel === '.firebaserc' ||
     rel === 'firebase.json' ||
     rel === '.prototipe.json' ||
+    rel === '.prototipe-injected.json' ||
     rel === 'package-lock.json' ||
-    rel === '.gitignore'
+    rel === '.gitignore' ||
+    rel === '.prototipe-backup' || rel.startsWith('.prototipe-backup/')
   ) {
     return true;
   }

@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "WelcomePage",
+  "targetPath": "src/pages/WelcomePage.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Pantalla de Bienvenida con Animación Sonar (WelcomePage)
 
 ## 1. Propósito y Casos de Uso

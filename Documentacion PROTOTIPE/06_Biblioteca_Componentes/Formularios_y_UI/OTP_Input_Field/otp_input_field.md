@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "OtpInputField",
+  "targetPath": "src/components/ui/OtpInputField.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # OTPInputField — Entrada de Código de Verificación Celular
 
 ## 1. Propósito y Casos de Uso

@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "CommandPaletteKbar",
+  "targetPath": "src/components/ui/CommandPaletteKbar.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # CommandPaletteKBar — Paleta de Comandos Globales CMD+K
 
 ## 1. Propósito y Casos de Uso

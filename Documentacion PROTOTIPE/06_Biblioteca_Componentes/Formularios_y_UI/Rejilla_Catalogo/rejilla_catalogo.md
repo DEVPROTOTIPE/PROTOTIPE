@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "Rejilla_Catalogo",
+  "targetPath": "src/components/ui/Rejilla_Catalogo.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Rejilla de Catálogo Inteligente (`Rejilla_Catalogo`)
 
 Este módulo proporciona una rejilla de maquetación de catálogo comercial responsiva y de alto rendimiento (`CatalogGrid`). Está programada de forma agnóstica para soportar conmutaciones en caliente entre múltiples variantes de distribución visual (`grid2`, `grid3`, `list`), sincronizar cargadores estructurales (*shimmer skeletons*) e integrar una interfaz comercial premium de no-resultados (*Empty State*).

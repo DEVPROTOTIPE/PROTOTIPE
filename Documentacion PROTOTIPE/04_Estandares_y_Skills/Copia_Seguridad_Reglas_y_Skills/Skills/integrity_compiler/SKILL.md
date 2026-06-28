@@ -45,7 +45,7 @@ Actúas como un Ingeniero de Integración Continua (CI/CD) y DevOps. Cuando esta
 
 1. **Build de Control**: 
    ⛔ **BLOQUEANTE:** Si el build falla, los pasos 2 al 5 no se ejecutan. Reporta el error de compilación al usuario y espera que lo resuelva antes de continuar con la validación documental.
-   Proponer la compilación del proyecto con `cmd /c npm run build` en la ruta de `[PROYECTO_ACTIVO]` para asegurar la ausencia de fallos estáticos o de empaquetado.
+   Proponer la compilación del proyecto con `cmd /c npm run build` en la ruta de `[PROYECTO_ACTIVO]` para asegurar la ausencia de fallos estáticos o de empaquetado. Si los cambios afectan a la biblioteca de componentes, archivos de documentación, herramientas del CLI o configuraciones del dashboard, se debe proponer obligatoriamente también la compilación del dashboard central (`cmd /c npm run build` en `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard`) para correr el validador de integridad del catálogo.
 2. **Validación de Reglas**: Comprobar la integridad sintáctica de `firestore.rules`.
 3. **Registro de Auditoría**: Escribir de forma proactiva la entrada cronológica de la solución en `D:\PROTOTIPE\Documentacion PROTOTIPE\03_Auditorias_y_Faro_Core\bitacora_cambios.md`.
 4. **Sincronización del Mapa**: Si el cambio crea o renombra archivos, actualizar `D:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\mapa_aplicacion.md` y `D:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\mapa_documentacion_ia.md`.

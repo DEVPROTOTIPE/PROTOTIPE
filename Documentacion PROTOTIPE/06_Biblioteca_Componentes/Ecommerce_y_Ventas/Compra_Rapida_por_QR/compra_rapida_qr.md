@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "CompraRapidaQr",
+  "targetPath": "src/components/common/CompraRapidaQr.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Componente de Compra Rápida por Código QR (White-Label QR Purchase Flow)
 
 ## 1. Propósito y Casos de Uso

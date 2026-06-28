@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "SwipeableBottomSheet",
+  "targetPath": "src/components/ui/SwipeableBottomSheet.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # SwipeableBottomSheet — Panel Deslizable Inferior Táctil
 
 ## 1. Propósito y Casos de Uso

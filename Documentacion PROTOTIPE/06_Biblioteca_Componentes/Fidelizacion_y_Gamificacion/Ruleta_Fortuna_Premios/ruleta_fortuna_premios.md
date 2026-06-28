@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "RaffleWheelOfFortune",
+  "targetPath": "src/components/common/RaffleWheelOfFortune.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Ruleta de la Fortuna de Premios (`RaffleWheelOfFortune`)
 
 Componente premium de marca blanca para fidelización de clientes mediante gamificación. Dibuja una ruleta segmentada de premios y cupones mediante SVG responsivo con aro exterior metálico dorado de alta fidelidad, bombillos LED parpadeantes mediante CSS Keyframes y textos radiales completos que crecen hacia el centro para evitar solapamientos con el botón central de giro.

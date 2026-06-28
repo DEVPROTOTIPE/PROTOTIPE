@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "CurrencyInput",
+  "targetPath": "src/components/ui/CurrencyInput.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Entrada de Moneda Formateada COP (CurrencyInput)
 
 Componente atómico de formulario diseñado para proporcionar una máscara de entrada de moneda en pesos colombianos (`$ XX.XXX`) en tiempo real sobre el DOM, propagando el valor numérico entero limpio al estado padre y consumiendo variables HSL del sistema de diseño para marca blanca.

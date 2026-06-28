@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "EmptyState",
+  "targetPath": "src/components/ui/EmptyState.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Empty State Premium Interactivo (EmptyState)
 
 Componente de interfaz reutilizable diseñado para presentar estados vacíos elegantes (cuando no existen elementos en un listado, carrito vacío, búsquedas sin resultados o historiales limpios). Combina ilustraciones animadas o iconos HSL con textos descriptivos y un botón de llamada a la acción (CTA) elástico para reenganchar al usuario.

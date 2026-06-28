@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "DarkModeToggle",
+  "targetPath": "src/components/ui/DarkModeToggle.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Switch de Modo Oscuro Premium (DarkModeToggle)
 
 ## 1. Propósito y Casos de Uso

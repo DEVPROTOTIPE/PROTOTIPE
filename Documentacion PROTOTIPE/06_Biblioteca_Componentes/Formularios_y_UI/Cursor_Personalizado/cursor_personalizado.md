@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "CursorPersonalizado",
+  "targetPath": "src/components/ui/CursorPersonalizado.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # CustomCursor
 
 ## 1. Propósito y Casos de Uso

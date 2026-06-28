@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "RadialInteractiveMenu",
+  "targetPath": "src/components/ui/RadialInteractiveMenu.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Menú de Acción Flotante Radial (`RadialInteractiveMenu`)
 
 Componente de menú flotante radial (tipo abanico/telaraña). Agrupa múltiples acciones secundarias rápidas bajo un único disparador interactivo en una esquina de la pantalla. Cada sub-botón es desplegado mediante cálculo trigonométrico con un efecto elástico secuencial (staggered).

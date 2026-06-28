@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "GestorCategorias",
+  "targetPath": "src/components/ui/GestorCategorias.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Gestor de Categorías (CategoryManager Component)
 
 Componente de UI diseñado para administrar, buscar, crear, editar y eliminar las categorías del catálogo. Este componente es 100% stateless y portable, lo que permite su integración con cualquier motor de persistencia (Firebase, Supabase, APIs REST, LocalStorage, etc.) y no depende de librerías de íconos externas como Lucide, utilizando un set integrado de SVGs nativos.

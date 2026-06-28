@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "ReservasAgendaCitas",
+  "targetPath": "src/components/modules/ReservasAgendaCitas.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Módulo de Reservas y Agenda de Citas Premium
 
 ## 1. Propósito y Casos de Uso

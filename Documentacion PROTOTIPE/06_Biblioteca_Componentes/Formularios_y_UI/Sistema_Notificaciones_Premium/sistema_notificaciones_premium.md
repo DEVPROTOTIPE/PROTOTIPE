@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "SistemaNotificacionesPremium",
+  "targetPath": "src/components/ui/SistemaNotificacionesPremium.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Sistema de Notificaciones Premium
 
 ## 1. Propósito y Casos de Uso

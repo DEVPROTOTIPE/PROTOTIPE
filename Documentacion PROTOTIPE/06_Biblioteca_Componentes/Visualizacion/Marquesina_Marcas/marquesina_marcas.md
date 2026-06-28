@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "InfiniteLogoMarquee",
+  "targetPath": "src/components/ui/InfiniteLogoMarquee.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Marquesina de Marcas Infinita (`InfiniteLogoMarquee`)
 
 Componente de marquesina (ticker) infinita horizontal de alto rendimiento. Diseñado para mostrar logos de clientes, marcas aliadas o trust badges con una animación continua que desacelera suave y elásticamente al pasar el cursor (hover).

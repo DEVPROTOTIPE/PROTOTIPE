@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "ConsolaErroresDiagnostico",
+  "targetPath": "src/services/ConsolaErroresDiagnostico.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Consola de Errores y Diagnóstico Inteligente (Error Diagnostic Console)
 
 Este componente modular unifica el monitoreo en tiempo real de excepciones no controladas e incidentes de telemetría reportados por las aplicaciones de los clientes en el ecosistema, integrando un Asistente de Diagnóstico Lateral (Drawer) y un Generador de Prompts automatizados para el agente **Antigravity**.

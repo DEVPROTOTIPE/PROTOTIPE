@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "LeafletMapPicker",
+  "targetPath": "src/components/ui/LeafletMapPicker.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Mapa Interactivo (LeafletMapPicker)
 
 ## 1. Propósito y Casos de Uso

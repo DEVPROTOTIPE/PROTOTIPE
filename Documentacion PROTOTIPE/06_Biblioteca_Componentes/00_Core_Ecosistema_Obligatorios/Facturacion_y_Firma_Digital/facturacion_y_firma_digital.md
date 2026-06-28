@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "FacturacionYFirmaDigital",
+  "targetPath": "src/components/ui/FacturacionYFirmaDigital.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Facturación y Firma Digital (DeveloperBillingPanel & Exportador PDF)
 
 Este componente y flujo de trabajo es **MANDATORIO** en todas las aplicaciones del ecosistema **PROTOTIPE**. Centraliza el monitoreo de comisiones del desarrollador y sella el acuerdo de conformidad del período mediante firma digital, exportación de recibos e integra la telemetría/diagnósticos en un solo panel unificado y portable.
@@ -460,6 +471,7 @@ export default function DeveloperBillingPanel({ config, setSaveMessage }) {
     </div>
   )
 }
+```
 
 ---
 

@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "AuthGuard",
+  "targetPath": "src/hooks/AuthGuard.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Guard de Autenticación y Perfil de Usuario (`AuthGuard` & `UserProfile`)
 
 ## 1. Propósito y Casos de Uso

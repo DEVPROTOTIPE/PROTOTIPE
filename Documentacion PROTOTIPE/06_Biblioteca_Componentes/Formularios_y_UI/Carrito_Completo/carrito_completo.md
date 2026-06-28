@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "Cart_Completo",
+  "targetPath": "src/components/ui/Cart_Completo.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Módulo de Carrito de Compras (`Cart_Completo`)
 
 Este módulo proporciona un sistema integral de carrito de compras premium para aplicaciones de comercio electrónico. Se compone de un store global reactivo y persistente utilizando **Zustand** y un componente visual tipo panel deslizable lateral (**Drawer**) construido con **Tailwind CSS** y animado de manera fluida con **Framer Motion**.

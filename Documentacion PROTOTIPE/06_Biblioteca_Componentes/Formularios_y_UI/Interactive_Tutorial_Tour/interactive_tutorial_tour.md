@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "InteractiveTutorialTour",
+  "targetPath": "src/components/ui/InteractiveTutorialTour.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # InteractiveTutorialTour — Guía de Onboarding Paso a Paso
 
 ## 1. Propósito y Casos de Uso

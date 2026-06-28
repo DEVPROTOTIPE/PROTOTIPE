@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "CajaDiariaPos",
+  "targetPath": "src/components/modules/CajaDiariaPos.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # CajaDiariaPOS (Control de Caja y Cierre de Turno)
 
 ## 1. Propósito y Casos de Uso

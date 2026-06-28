@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "SeguimientoPedido",
+  "targetPath": "src/components/ui/SeguimientoPedido.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # OrderTracking (Seguimiento Público de Pedidos)
 
 ## 1. Propósito y Casos de Uso

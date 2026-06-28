@@ -4,6 +4,55 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-129: Suite de Gestión Avanzada de Biblioteca de Componentes (CSS Doctor, Scaffold Sandbox, Import Copy)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-28
+  - Fecha de finalización: 2026-06-28
+  - Descripción: Implementación de la suite de gestión avanzada. **Backend:** Endpoint `/preflight` mejorado para análisis de variables CSS; endpoint `/inject/css-doctor` rediseñado con delimitadores de bloque para fusión atómica no destructiva en `index.css`; endpoint `/sandbox/scaffold` para generación en caliente de playgrounds en blanco. Corrección de robustez en la regex de `extractCodeFromMarkdown` para dar soporte cross-platform a CRLF (`\r\n`) de Windows. **Frontend (dev-dashboard):** Visualización en cascada (árbol interactivo) de dependencias físicas y NPM en Paso 2; botón "CSS Doctor" para autocuración; inputs para variables de entorno. Refactor de `ComponentSandbox.jsx` para carga dinámica mediante `import.meta.glob('./sandboxes/*.jsx')`. **Estandarización y Calidad:** Procesamiento en masa de las 87 fichas de la biblioteca para inyectar bloques JSON manifest en cabeceras y validación estricta en el compilador prebuild `verify_library_integrity.cjs`. Corrección de cierres de bloques de código JSX mal formados en `facturacion_y_firma_digital.md` y `pantalla_cocina_kds.md`. Integrado en la compilación prebuild la verificación recursiva de existencia física en disco para todos los enlaces a archivos locales (`dependencies.internal[].link`) de los manifiestos JSON. **Skills:** Actualización y sincronización de `component_creator/SKILL.md`, `sandbox_integrator/SKILL.md` y `component_extractor/SKILL.md` para alinearlos al estándar de globbing asíncrono y coincidencia difusa en el dashboard.
+  - Archivos: [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY], [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY], [`verify_library_integrity.cjs`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [MODIFY], [`Skills/`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills) [MODIFY]
+
+* **[x] ~~Tarea CORE-128: Reemplazo de Selectores Nativos por Componente CustomSelect Premium~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-28
+  - Fecha de finalización: 2026-06-28
+  - Descripción: Se refactorizaron por completo los selectores y listas desplegables nativas del Dashboard Central, los cuales presentaban un aspecto inconsistente y tosco debido a la renderización por defecto del sistema operativo/navegador. Se diseñó el componente local premium `CustomSelect` utilizando Framer Motion para animaciones de escala, opacidad y deslizamiento, incorporando soporte para íconos descriptivos, subetiquetas (subLabel) para mostrar ramas de Git activas en los clientes locales, control de tamaño (`sm`/`md`) y un hook de efecto para detección y cierre al hacer clic fuera del elemento (click-outside). Se reemplazaron exitosamente las 4 listas desplegables nativas: Categoría del Catálogo (Extractor de Componentes), Proyecto Destino del Cliente (Wizard de Instalación), y los filtros de Operación y Estado de la pestaña Historial.
+  - Archivos: [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-127: Sistema de Auditoría Inmutable e Historial de Inyecciones~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-28
+  - Fecha de finalización: 2026-06-28
+  - Descripción: Implementación completa del sistema de trazabilidad inmutable para todas las operaciones del motor de inyección. **Backend:** Clase `WriteQueue` para serializar escrituras sin race conditions, helpers `appendAuditTrailEntry` y `writeAuditMarkdown` con escritura atómica (tmp→rename) al archivo `.prototipe-audit-trail.jsonl` (append-only) y a `Documentacion PROTOTIPE/10_Historial_Inyecciones/historial_<clientId>.md`. Hooks integrados en `/inject/stream` (éxito + auto-rollback) y `/inject/rollback`. 2 endpoints nuevos: `GET /audit-trail` (paginado, con filtros por operación/estado/texto) y `GET /audit-diff` (diff unified patch backup vs. actual). **Frontend:** Nueva pestaña "Historial" en `ComponentLibraryView.jsx` con timeline interactivo, visor de diffs con coloreado por línea (+/-/@@), filtros en tiempo real, paginación, info de stack, NPM packages, env vars, dependencias y mensaje de error. **Documentación:** Creación de `10_Historial_Inyecciones/` con `INDEX.md` actualizado automáticamente por el CLI.
+  - Archivos: [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY], [`10_Historial_Inyecciones/INDEX.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/10_Historial_Inyecciones/INDEX.md) [NEW]
+
+* **[x] ~~Tarea CORE-126: Inyección Dinámica e Interactiva de Variables de Entorno en Caliente~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-28
+  - Fecha de finalización: 2026-06-28
+  - Descripción: Implementación de la configuración de variables de entorno de forma dinámica e interactiva directamente desde el dashboard. Se diseñaron e implementaron dos nuevos helpers en el backend (`extractAllEnvVarsRecursively` y `writeEnvVarsToClient`) para realizar la detección recursiva en todo el árbol de dependencias del componente y escribir los valores reales en el archivo `.env.local` del cliente de forma no destructiva, evitando duplicados y formateando los strings con comillas dobles. En el frontend, se inyectó una sección estilizada `"🔑 Configurar Variables de Entorno"` en el Paso 2 (Diagnóstico) del wizard de inyección, enlazándola asíncronamente con el payload del endpoint de stream en el Paso 3.
+  - Archivos: [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-125: Blindaje y Robustecimiento del Sistema de Rollback en Cascada~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-28
+  - Fecha de finalización: 2026-06-28
+  - Descripción: Robustecimiento integral del sistema de restauración (rollback) e inyección en cascada. Se implementó una sesión de backup basada en timestamp único para agrupar copias de seguridad de primario y dependencias relativas portables al espacio de trabajo. Se integró un podador de backups (`pruneBackups`) que limita automáticamente a un máximo de 5 versiones el historial por componente. Y se modificó el endpoint de rollback para que sea 100% reversible: en caso de dependencias o archivos primarios inyectados nuevos que no existían previamente, el sistema los **borra físicamente** del disco del cliente, garantizando la consistencia exacta de su estado original. Cuenta con validaciones estrictas `isPathContained` contra ataques de Path Traversal.
+  - Archivos: [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-124: Estandarización de Rutas de Destino en Ciclo de Componentes~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-28
+  - Fecha de finalización: 2026-06-28
+  - Descripción: Estandarización de la ruta de destino (targetPath) a través de todo el ciclo de vida de los componentes. Se modificó la firma de `getDefaultRelativePath` para leer la propiedad `targetPath` declarativa de los manifiestos JSON. Se expuso `suggestedPath` en el response del endpoint `/preflight`. Se creó el helper `updateSuggestedPath(clientId)` en el dashboard para autocompletar la ruta en el wizard de forma silenciosa. Y se actualizaron las plantillas de manifest en las skills del ecosistema (`component_creator`, `component_extractor`, `portar_componente`) para exigir el campo `targetPath` en futuros componentes.
+  - Archivos: [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY], [`component_creator/SKILL.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_creator/SKILL.md) [MODIFY], [`component_extractor/SKILL.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_extractor/SKILL.md) [MODIFY], [`portar_componente/SKILL.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/portar_componente/SKILL.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-123: Sistema de Instalación Inteligente de Componentes~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-28
+  - Fecha de finalización: 2026-06-28
+  - Descripción: Implementación del Sistema de Instalación Inteligente. 6 helpers nuevos en server.js: `analyzeCodeDependencies`, `probeTargetStack`, `rewriteImports`, `createBackupBeforeWrite`, `updateComponentRegistry`, `generateIntegrationSnippet`. Refactor de `/inject/stream` con detección de stack, reescritura de imports, backup automático, registro JSON con checksum SHA256, placeholders de env vars en `.env.local`, y build automático post-inyección via SSE. 2 nuevos endpoints: `GET /registry` (inventario live con checksum diff) y `POST /rollback` (restauración segura). Frontend: 6 estados nuevos, badges de stack en Step 1, snippet copiable + indicador de build en Step 3, clasificación visual por fase en log SSE. Build verificado ✅ 1.28s, `node --check` limpio.
+  - Archivos: [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-122: Blindaje del Sistema de Inyección de Componentes en Cliente~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-27
@@ -1101,4 +1150,11 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
   - Fecha de registro: 2026-06-10
   - Fecha de finalización: 2026-06-10
   - Descripción: Redireccionados logs en `worker_create_project.js` por IPC y agregadas APIs `/api/library/extract`, `/api/project/deploy` y getters/setters de variables de entorno en `/api/project/env`.
-  - Archivos: [server.js](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [worker_create_project.js](file:///D:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+  - Archivos: [server.js](file:///D:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [worker_create_project.js](file:///D:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-103: Saneamiento de Codificacion y BOM de Scripts de PowerShell (menu_backup.ps1)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-28
+  - Fecha de finalización: 2026-06-28
+  - Descripcion: Correccion al error de parseo en menu_backup.ps1 al iniciarse. Los emojis de caja (📦) y lineas de separacion (─) guardados en UTF-8 sin BOM se interpretaban como caracteres ANSI rotos por el interprete de PowerShell 5.1 en Windows, rompiendo la sintaxis y arrojando errores inesperados. Se escribio un script automatizado para forzar el guardado en codificacion UTF-8 con BOM en todos los scripts de soporte de PowerShell (menu_backup.ps1, git_backup.ps1 y subproject_backup.ps1).
+  - Archivos: [menu_backup.ps1](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY], [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]

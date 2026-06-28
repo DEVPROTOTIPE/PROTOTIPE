@@ -110,27 +110,18 @@ export default function NombreComponenteSandbox() {
 }
 ```
 
-#### 3b. Registrar en `ComponentSandbox.jsx`
-Edita `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\ComponentSandbox.jsx`:
-1. **Importación Dinámica Perezosa:** Registrar el nuevo sandbox al inicio usando importación dinámica:
-   `const NombreComponenteSandbox = React.lazy(() => import('./sandboxes/NombreComponenteSandbox'));`
-2. **Registro en `SANDBOXES`:** Registrar la clave del playground en el diccionario `SANDBOXES` envuelto en `React.Suspense` con el cargador común:
-   ```javascript
-   'nombre_clave': () => (
-     <React.Suspense fallback={<LoaderSpinner />}>
-       <NombreComponenteSandbox />
-     </React.Suspense>
-   ),
-   ```
-3. **Aliases en `COMPONENT_SANDBOX_MAP`:** Registrar todos los aliases en minúsculas (nombre natural, técnico, variantes ES/EN):
-   ```javascript
-   // Nombre en minúsculas con tildes — exactamente como aparece en el árbol del visor
-   'nombre exacto del componente': 'nombre_clave',
-   // Alias adicionales si el nombre puede variar
-   'nombre alternativo': 'nombre_clave',
-   ```
+#### 3b. Mapeo en `ComponentSandbox.jsx` (Opcional)
+La Consola Central resuelve y monta los playgrounds dinámicamente escaneando la carpeta `/sandboxes/` mediante `import.meta.glob('./sandboxes/*.jsx')`. No necesitas escribir importaciones perezosas ni entradas `React.lazy` ni wrappers `React.Suspense`.
 
-**Regla crítica de nombres:** La clave del mapa debe ser el nombre del componente en **minúsculas con tildes**, tal y como aparece en el `README.md` de la biblioteca.
+Si el nombre del archivo Sandbox no coincide de forma predecible con el nombre o technicalName del componente, registra el alias en `COMPONENT_SANDBOX_MAP` de `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\ComponentSandbox.jsx`:
+```javascript
+// Nombre en minúsculas con tildes — exactamente como aparece en el árbol del visor
+'nombre exacto del componente': 'nombre_clave_del_archivo_en_snake_case',
+// Alias adicionales si el nombre puede variar
+'nombre alternativo': 'nombre_clave_del_archivo_en_snake_case',
+```
+
+**Regla de coincidencia difusa (Opcional):** Si el componente requiere coincidencia difusa avanzada, añade una regla `str.includes('...')` en la función `check()` dentro de `getSandboxKey()`.
 
 ### 4. Si NO es simulable — Registrar en `COMPONENT_META`
 Agrega la entrada en el objeto `COMPONENT_META` dentro de `ComponentSandbox.jsx`:
@@ -180,8 +171,9 @@ El playground debe verse y comportarse como el componente real. Si el `.md` incl
 ---
 
 ## Common Mistakes
-* **Importar el componente real desde otro proyecto:** Imposible. Siempre recrear inline.
-* **No verificar el build:** Todo cambio en `ComponentSandbox.jsx` debe compilar antes de reportar.
-* **Clave del mapa con mayúsculas o sin tildes:** Debe coincidir exactamente con el nombre que aparece en el árbol del visor (minúsculas con tildes incluidas).
+* **Importar el componente real desde otro proyecto:** Imposible. Siempre recrear inline en el sandbox.
+* **No crear el archivo físico del Sandbox en la ruta correcta o sin extensión `.jsx`:** El archivo debe crearse obligatoriamente en `/sandboxes/[NombreComponente]Sandbox.jsx`.
+* **No verificar el build:** Todo cambio o creación de sandbox debe compilar antes de reportar el éxito.
+* **Clave del mapa con mayúsculas o sin tildes (en alias):** Si usas alias, la clave debe coincidir exactamente en minúsculas y tildes con el nombre en el README.md.
 * **Agregar controles para props de Firebase:** Los callbacks, rutas de colección y tokens no se controlan en el sandbox.
 * **Detener la ejecución sin reportar:** Si el componente no es simulable, siempre registrar en `COMPONENT_META` — nunca dejar el componente sin ninguna entrada.

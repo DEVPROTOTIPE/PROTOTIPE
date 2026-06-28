@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "BackButton",
+  "targetPath": "src/components/ui/BackButton.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Botón de Regreso (BackButton Component)
 
 Componente atómico de navegación diseñado para estandarizar la acción de regresar a la pantalla anterior o navegar a una ruta definida de forma segura, garantizando transiciones de interfaz homogéneas y desacoplamiento absoluto de enrutadores o librerías de iconos.

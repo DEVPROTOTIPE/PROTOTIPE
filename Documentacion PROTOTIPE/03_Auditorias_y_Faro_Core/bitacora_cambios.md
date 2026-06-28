@@ -1,5 +1,183 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-28] - CORE-129: Suite de Gestión Avanzada de Biblioteca de Componentes (CSS Doctor, Scaffold Sandbox, Import Copy)
+
+* **Tipo:** Feature / Robustez / UX / Automatización
+* **Firma de auditoría:** CORE-129-ADVANCED-LIBRARY-SUITE
+* **Descripción de Cambios:**
+  - **CSS Doctor (Diagnóstico e Inyección Segura):** Modificado el endpoint `/preflight` en `server.js` para extraer variables CSS requeridas (`var(--color-...)`) tanto del manifest como recursivamente del código JSX del componente y compararlas con las variables declaradas en el CSS global del cliente. Se rediseñó el endpoint `/inject/css-doctor` con delimitadores `/* === CSS DOCTOR START === */` y `/* === CSS DOCTOR END === */` que permite hacer fusiones atómicas no destructivas y limpias de variables CSS en `index.css`, evitando bloques duplicados.
+  - **Estandarización y Validación de Manifiestos:** Ejecutado script autónomo de reparación en masa que analizó y agregó bloques manifest `<!-- { ... } -->` normalizados en la cabecera de los 87 archivos Markdown físicos. Se integró una validación estricta (Paso 5) en `verify_library_integrity.cjs` que verifica la existencia y sintaxis correcta de los metadatos JSON a nivel de compilación prebuild.
+  - **Detección y Reparación de Código Faltante (CRLF & Closures):** Refactorizada la regex de `extractCodeFromMarkdown` en `server.js` para que soporte de manera robusta fines de línea tipo CRLF (`\r\n`) de Windows. Se ejecutó una auditoría automatizada en todos los archivos Markdown de la biblioteca, detectando y corrigiendo cierres de bloques de código incompletos en `facturacion_y_firma_digital.md` y `pantalla_cocina_kds.md` para garantizar inyección limpia al 100%.
+  - **Alineación de Skills del Ecosistema:** Sincronizadas las skills de documentación (`component_creator/SKILL.md`, `sandbox_integrator/SKILL.md` y `component_extractor/SKILL.md`) reemplazando las instrucciones obsoletas de registro manual/lazy por el estándar automatizado de coincidencia difusa y Vite globbing en caliente (`import.meta.glob`).
+  - **Blindaje y Validación de Dependencias Internas:** Se extendió el Paso 5 en `verify_library_integrity.cjs` para validar de forma recursiva que todos los enlaces a archivos locales (`dependencies.internal[].link`) declarados en los manifiestos JSON de los 87 componentes realmente existan en disco, previniendo fallos al resolver cascadas de dependencias durante inyecciones automáticas.
+  - **Árbol de Dependencias en Cascada (Frontend):** Se rediseñó el Paso 2 de instalación en `ComponentLibraryView.jsx` para mostrar las dependencias NPM y componentes internos de forma jerárquica con semáforos de estado (Verde: Instalado/Existente, Índigo: Faltante/A inyectar).
+  - **Panel de Curación e Inputs .env.local:** Integrado el botón interactivo de "CSS Doctor" para curación en 1-clic y inputs para ingresar los valores reales de variables de entorno requeridas en el Paso 2 de instalación.
+  - **Scaffold Sandbox (Automated Playgrounds):** Refactorizado `ComponentSandbox.jsx` eliminando las 65 líneas de importación manual (`React.lazy`) y el mapa estático de sandboxes, reemplazándolos con carga dinámica reactiva basada en `import.meta.glob('./sandboxes/*.jsx')`. Si un componente visual no tiene un sandbox asociado, se presenta el botón "Crear Playground Sandbox" conectado al nuevo endpoint `/api/library/sandbox/scaffold`, el cual extrae el código del `.md` y escribe una plantilla en caliente que es auto-detectada por Vite.
+  - **Copia de Importación Inteligente (Import Path Copy):** Implementado un widget en la pestaña Código Fuente de `ComponentSender` o `ComponentLibraryView.jsx` que calcula dinámicamente la declaración de importación recomendada (convención `@/`) basada en el `suggestedPath` del preflight.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Roadmap_Tareas/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-28] - CORE-103: Saneamiento de Codificacion y BOM en Scripts de PowerShell
+
+* **Tipo:** Correccion de Bugs / Herramientas de Backup / PowerShell
+* **Descripción de Cambios:**
+  - **Saneamiento de Codificación de Scripts:** Se solucionó el fallo de análisis (`ParserError`) que impedía la ejecución del gestor de respaldos `menu_backup.ps1` en la consola de comandos de Windows. La causa raíz fue que los emojis como la caja (`📦`) y las líneas decorativas de caja (`─`) se guardaron en codificación UTF-8 pura (sin BOM). Windows PowerShell 5.1 (por defecto en Windows 11/10) interpreta por defecto estos archivos en ANSI/Windows-1252, provocando que los bytes UTF-8 mutaran en secuencias rotas (como `ðŸ“¦` y `â”€`) que corrompían las cadenas y los literales de hash. Se implementó un script que convierte y re-guarda de forma segura los scripts `menu_backup.ps1`, `git_backup.ps1` y `subproject_backup.ps1` en UTF-8 con BOM.
+* **Archivos Modificados:**
+  - [`menu_backup.ps1`](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY]
+  - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+  - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-28] - CORE-128: Reemplazo de Selectores Nativos por CustomSelect Premium
+
+* **Tipo:** Refactor de UI/UX / Diseño Premium
+* **Firma de auditoría:** CORE-128-CUSTOM-SELECT-DARK
+* **Descripción de Cambios:**
+  - **Creación de `CustomSelect`:** Componente local de React con diseño premium de vidrio esmerilado (glassmorphism), control interactivo de estado de apertura `isOpen` y animaciones de entrada/salida (fade + scale + slide) usando Framer Motion `AnimatePresence` / `motion.div`.
+  - **Soporte de Metadatos Avanzados:** Permite renderizar íconos inline y subetiquetas (subLabel) para mostrar información secundaria de forma organizada (por ejemplo, mostrando la rama Git activa de cada cliente local en el selector de instalación).
+  - **Eventos y Detección de Foco:** Incorpora un listener a nivel de documento (`mousedown`) con un `ref` de React para detectar clics fuera del componente (click-outside) y contraer automáticamente el menú desplegable.
+  - **Soporte para Múltiples Tamaños:** Soporta el prop `size` (`sm` para filtros en línea compactos en la pestaña de Historial, y `md` para formularios y el panel de configuración principal).
+  - **Reemplazo Completo:** Se eliminaron las 4 listas desplegables nativas `<select>` que chocaban estéticamente con el diseño del Dashboard y se sustituyeron por `<CustomSelect>` en:
+    1. Selector de categoría en el Extractor de Componentes.
+    2. Selector de Proyecto Destino (Cliente) en el Paso 1 de instalación.
+    3. Selector de filtro por Operación en el Historial de inyecciones.
+    4. Selector de filtro por Estado en el Historial de inyecciones.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+
+---
+
+### [2026-06-28] - CORE-127 (Post-fix): Robustecimiento del Sistema de Auditoría Inmutable
+
+* **Tipo:** Robustez / Concurrencia / Escalabilidad
+* **Firma de auditoría:** CORE-127-ROBUSTNESS-v2
+* **Descripción de Cambios:**
+  - **Fix 1 — `WriteQueue` extendida a archivos Markdown:** `_auditWriteQueues` es ahora un Map genérico keyed por cualquier ruta de archivo (JSONL, MD, INDEX). La función `writeAuditMarkdown` ahora serializa sus dos escrituras (historial de cliente + INDEX global) con sus propias colas independientes, eliminando la race condition entre instancias concurrentes.
+  - **Fix 2 — Build result real en auditoría de éxito:** El bloque `appendAuditTrailEntry` del path exitoso fue reordenado para ejecutarse DESPUÉS del build (no antes). `_buildStatus` y `_buildLines` capturan el resultado exacto del proceso, permitiendo que `buildLog.status` sea `'success'`, `'error'` o `'warn'` en lugar del incorrecto `'pending'` anterior. Se limitan a las últimas 20 líneas para no inflar el JSONL.
+  - **Fix 3 — Cap anti-OOM en `/audit-trail`:** El endpoint ahora parsea máximo las últimas 2000 entradas del JSONL antes de aplicar filtros, previniendo ataques de memory exhaustion con archivos de historial masivos.
+  - **Fix 4 — Limpieza de promesas:** Eliminados `.catch(() => {})` stale en los 3 llamadores de `appendAuditTrailEntry` (inject éxito, auto-rollback, rollback manual) — la función tiene su propio manejo de errores interno.
+* **Sintaxis verificada:** ✅ `node --check server.js` exitoso.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+---
+
+### [2026-06-28] - CORE-127: Sistema de Auditoría Inmutable e Historial de Inyecciones
+
+
+* **Tipo:** Trazabilidad / Seguridad / Escalabilidad / UX Dashboard
+* **Firma de auditoría:** CORE-127-AUDIT-TRAIL-IMMUTABLE
+* **Descripción de Cambios:**
+  - **T1 — Clase `WriteQueue` (server.js):** Implementada cola FIFO serializada por path de archivo para garantizar escrituras append-only sin race conditions en sistemas de alta concurrencia. Map global `_auditWriteQueues` keyed por ruta JSONL.
+  - **T2 — Helper `appendAuditTrailEntry` (server.js):** Persiste cada operación (inject, rollback, auto-rollback) como una línea JSON inmutable en `.prototipe-audit-trail.jsonl` dentro del directorio del proyecto cliente. Campos: `id`, `operation`, `status`, `timestamp`, `primaryComponent`, `dependencies`, `npmPackages`, `envVarsConfigured`, `buildLog`, `stack`, `schemaVersion`, `_immutable`.
+  - **T3 — Helper `writeAuditMarkdown` (server.js):** Genera/actualiza en paralelo el archivo `10_Historial_Inyecciones/historial_<clientId>.md` con escritura atómica (write tmp → fs.rename) para cero corrupción de archivos. También actualiza el índice global `INDEX.md` reemplazando la fila del cliente si ya existe o añadiendo una nueva fila.
+  - **T4 — Hooks en `/inject/stream` (server.js):** Se integró llamada asíncrona a `appendAuditTrailEntry` en el path de éxito (tras el evento `complete`) y en el bloque `catch` del auto-rollback transaccional, sin bloquear el flujo SSE.
+  - **T5 — Hook en `/inject/rollback` (server.js):** Se registra el rollback manual con su detalle de archivos revertidos/eliminados antes del `res.json()` de confirmación.
+  - **T6 — Endpoint `GET /audit-trail` (server.js):** Lee y parsea el JSONL de cada cliente, aplica paginación (máx. 100/página), y filtros dinámicos por `operation`, `status` y búsqueda full-text sobre el JSON serializado.
+  - **T7 — Endpoint `GET /audit-diff` (server.js):** Genera un unified diff (formato GNU patch) entre el backup y la versión actual de cualquier componente del registry. Usa la librería `diff` ya importada en el proyecto.
+  - **T8 — Estructura docs `10_Historial_Inyecciones/` (Documentación):** Creación de la nueva carpeta y `INDEX.md` base en el directorio de documentación Prototipe. La carpeta se llena automáticamente en tiempo de ejecución.
+  - **T9 — Pestaña "Historial" en `ComponentLibraryView.jsx`:** Nueva pestaña en el workspace de detalle con: timeline de entradas expandibles, filtros por operación/estado/búsqueda, paginación, visor de diff con coloreado por línea (+/-/@@), chips de NPM packages / env vars / dependencias, info de stack detectado, mensaje de error en rojo para auto-rollbacks fallidos.
+* **Build verificado:** Pendiente verificación post-reinicio del servidor CLI.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/10_Historial_Inyecciones/INDEX.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/10_Historial_Inyecciones/INDEX.md) [NEW]
+
+---
+
+### [2026-06-28] - CORE-126: Inyección Dinámica e Interactiva de Variables de Entorno en Caliente
+
+* **Tipo:** UX / Robustez / Seguridad / Consistencia de Datos
+* **Firma de auditoría:** CORE-126-INTERACTIVE-ENV-VARS
+* **Descripción de Cambios:**
+  - **T1 — Helper `extractAllEnvVarsRecursively` (server.js):** Se implementó la resolución recursiva de variables de entorno analizando el markdown del componente principal y todas sus dependencias internas inyectadas en la sesión. Evita dejar subcomponentes o hooks huérfanos de configuración.
+  - **T2 — Helper `writeEnvVarsToClient` (server.js):** Se construyó el motor de escritura no destructiva para `.env.local` que realiza el reemplazo en caliente de placeholders anteriores y formatea las nuevas variables usando comillas dobles, previniendo duplicados de variables. Escapa de forma proactiva comillas dobles internas (`\"`) ingresadas por el usuario para no romper la sintaxis dotenv de Vite.
+  - **T3 — Integración en Preflight (server.js):** Se actualizó el endpoint `/api/library/inject/preflight` para que resuelva `envVarsMissing` recursivamente mediante el nuevo helper.
+  - **T4 — Payload interactivo en `/inject/stream` (server.js):** Se adaptó el endpoint de inyección para recibir `envValues` desde el request body, inyectando los valores reales ingresados por el usuario o usando placeholders de fallback si se dejan vacíos.
+  - **T5 — Formulario interactivo en Paso 2 (ComponentLibraryView.jsx):** Se inyectó una sección estilizada `"🔑 Configurar Variables de Entorno"` que solicita los valores de las variables requeridas usando inputs con diseño glassmorphism alineados a los estándares de diseño.
+  - **T6 — Paso de payload en Paso 3 (ComponentLibraryView.jsx):** Se modificó la llamada fetch del stream SSE para transmitir el estado `envVarsValues` en el body del request.
+* **Build verificado:** ✅ `built in 1.19s` exitoso.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+
+---
+
+### [2026-06-28] - CORE-125: Blindaje y Robustecimiento del Sistema de Rollback en Cascada
+
+* **Tipo:** Seguridad / Robustez / Calidad de Código
+* **Firma de auditoría:** CORE-125-ROLLBACK-SHIELD
+* **Descripción de Cambios:**
+  - **T1 — Backups agrupados y portables:** Se refactorizó `createBackupBeforeWrite(projectDir, filePath, currentTs)` para agrupar copias de seguridad de componentes primarios y dependencias bajo una misma carpeta de sesión basada en un timestamp único. Además, devuelve rutas relativas portables al proyecto del cliente en lugar de paths absolutos locales.
+  - **T2 — Inyección en cascada con registro:** Se refactorizó `recurseInjectSSE` para capturar la ruta destino, backup, checksum SHA256 y el flag `isNew` (si el archivo no existía en el cliente) de todas las dependencias inyectadas en la sesión, escribiéndolas como un array estructurado de objetos dentro del registry `.prototipe-injected.json` del cliente.
+  - **T3 — Podador de Backups (`pruneBackups`):** Se creó e implementó el helper `pruneBackups(projectDir, maxVersions)` para limitar el historial de almacenamiento a las últimas 5 sesiones de inyección de componentes en el disco de Sergio, previniendo cuellos de botella de disco.
+  - **T4 — Rollback seguro en cascada y limpieza física:** Se reescribió por completo el endpoint `POST /api/library/inject/rollback` para revertir tanto dependencias como el primario. Si el archivo inyectado era nuevo en el cliente (sin backup previo), el rollback lo **borra físicamente** del disco del cliente, garantizando el retorno exacto al estado anterior de la app. Incluye validación de contención de rutas estricta (`isPathContained`) para prevenir ataques de path traversal.
+* **Build verificado:** ✅ `built in 1.19s` exitoso.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+---
+
+### [2026-06-28] - CORE-124: Estandarización de Rutas de Destino en Ciclo de Componentes
+
+* **Tipo:** Refactor / Estándar / UX / Robustez
+* **Firma de auditoría:** CORE-124-ROUTE-STANDARDIZATION
+* **Descripción de Cambios:**
+  - **T1 — Soporte targetPath en `getDefaultRelativePath` (server.js):** Se modificó la firma para aceptar el objeto `manifest`. Si el manifest tiene la clave declarativa `targetPath`, se usa de forma inmediata con reemplazo dinámico `{technicalName}`, logrando que la ruta de destino esté gobernada por la metadata del componente en lugar de heurísticas rígidas de carpetas físicas.
+  - **T2 — Inyección de ruta sugerida en `/preflight` (server.js):** El endpoint `/api/library/inject/preflight` ahora calcula y retorna el campo `suggestedPath` resolviendo la cascada (Manifest targetPath > Heurística por carpeta biblioteca > Fallback). Permite pre-rellenar el formulario en el frontend de manera sutil e inteligente.
+  - **T3 — Vinculación automática en Frontend (ComponentLibraryView.jsx):** Se creó la función helper `updateSuggestedPath(clientId)` en el dashboard. Esta función llama silenciosamente a `/preflight` al seleccionar un proyecto en el dropdown, configurando el input `injectRelativePath` automáticamente con la ruta sugerida oficial calculada en el backend.
+  - **T4 — Actualización de Plantillas en SKILL.md:** Se modificaron los manifiestos JSON de ejemplo en `component_creator/SKILL.md` y `component_extractor/SKILL.md` para incorporar el campo obligatorio `"targetPath": "[ruta/destino/Nombre.jsx]"`.
+  - **T5 — Actualización de Flujo en `portar_componente/SKILL.md`:** Se reescribió el Paso 4 para priorizar el Manifest JSON (`targetPath`) sobre la tabla de fallback canónica, e incorporó el destino `src/components/modules/` para componentes complejos tipo Módulo Completo (`09_Modulos_Completos`).
+* **Build verificado:** ✅ `built in 1.20s` exitoso.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_creator/SKILL.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_creator/SKILL.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_extractor/SKILL.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/component_extractor/SKILL.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/portar_componente/SKILL.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/portar_componente/SKILL.md) [MODIFY]
+
+---
+
+### [2026-06-28] - CORE-123: Sistema de Instalación Inteligente de Componentes
+
+
+* **Tipo:** Feature / Arquitectura / Seguridad / UX
+* **Firma de auditoría:** CORE-123-SMART-INJECT
+* **Descripción de Cambios:**
+  - **T1 — Helper `analyzeCodeDependencies(code)` (server.js):** Auto-detecta en el código: imports NPM, imports relativos, variables `VITE_*`, bloques Firebase, y variables CSS. Permite al servidor razonar sobre las dependencias reales del código sin parsearlo con AST.
+  - **T2 — Helper `probeTargetStack(projectDir)` (server.js):** Lee `vite.config.js/ts`, `package.json`, `.env.local` y busca `firebaseConfig` para construir un objeto de contexto del proyecto destino (`hasAtAlias`, `hasTailwind`, `hasTypeScript`, `firebaseConfigRelPath`, `installedPackages[]`).
+  - **T3 — Helper `rewriteImports(code, relPath, stack)` (server.js):** Convierte rutas relativas `../components/...` a rutas con alias `@/components/...` si el proyecto destino lo soporta. Reporta contador de rewrites y warnings para mostrar en SSE.
+  - **T4 — Helper `createBackupBeforeWrite(dir, file)` (server.js):** Antes de sobrescribir un archivo, crea backup en `.prototipe-backup/{timestamp}/`. Añade `.prototipe-backup/` al `.gitignore` del proyecto destino automáticamente.
+  - **T5 — Helper `updateComponentRegistry(dir, entry)` (server.js):** Gestiona `.prototipe-injected.json` en el proyecto destino — crea/actualiza entradas con checksum SHA256, timestamp, lista de dependencias NPM instaladas, env vars requeridas y path del backup.
+  - **T6 — Helper `generateIntegrationSnippet(code, alias, path)` (server.js):** Extrae el nombre del export default del componente y genera el snippet JSX de import + uso listo para copiar.
+  - **T7 — Refactor `POST /api/library/inject/preflight` (server.js):** Ahora devuelve campos enriquecidos: `targetStack`, `envVarsMissing`, `integrationSnippet`, `autoDetectedDeps`. El preflight hace diagnóstico completo del par componente↔cliente sin efectos secundarios.
+  - **T8 — Refactor `POST /api/library/inject/stream` (server.js):** Integra: (1) probe del stack al inicio, (2) `rewriteImports` antes de escribir, (3) fix bug sobrescritura de dependencias: antes solo bloqueaba el archivo primario, ahora las dependencias emiten evento `skipped` y retornan sin sobrescribir, (4) backup automático previo a sobrescritura, (5) `updateComponentRegistry` por cada inyección primaria, (6) inyección de placeholders en `.env.local` para vars faltantes, (7) generación de snippet post-install, (8) **build automático via `child_process`** con output línea a línea como eventos SSE de fase `build`.
+  - **T9 — Nuevo endpoint `GET /api/library/inject/registry` (server.js):** Retorna el inventario `.prototipe-injected.json` de un cliente con verificación live de checksum (estado: `active`, `modified`, `missing`, `rolledback`).
+  - **T10 — Nuevo endpoint `POST /api/library/inject/rollback` (server.js):** Restaura un componente inyectado desde su backup con validación de seguridad `isPathContained`. Actualiza el registro con estado `rolledback`.
+  - **T11 — Estados CORE-123 en `ComponentLibraryView.jsx`:** Añadidos 6 estados: `targetStack`, `envVarsMissing`, `integrationSnippet`, `buildPhase`, `clientRegistry`, `showInventory`. Todos reseteados en el `useEffect([selectedComponent])` y al cambiar de cliente.
+  - **T12 — Preflight handler (ComponentLibraryView.jsx):** Sincroniza `targetStack`, `envVarsMissing`, `integrationSnippet` desde el response del endpoint. Resetea los 6 estados nuevos antes de cada verificación.
+  - **T13 — Step 1 wizard (ComponentLibraryView.jsx):** Añadidos badges de stack detectado (`@/`, Tailwind, Firebase) y banner de env vars faltantes con chips de nombre de variable. Texto del checkbox sobrescritura actualizado para indicar backup automático.
+  - **T14 — SSE consumer (ComponentLibraryView.jsx):** Detecta evento `complete` → guarda snippet + activa `buildPhase='running'`. Detecta `phase: 'build'` → actualiza `buildPhase` a `success`/`error`.
+  - **T15 — Log visual Step 3 (ComponentLibraryView.jsx):** Clasificación visual por fase: `build` → indigo pulsante, `info`/`warn`/`env`/`backup`/`transform` → slate, `progress` → surface muted, `error` → rojo, `done` → verde.
+  - **T16 — Resultado final Step 3 (ComponentLibraryView.jsx):** Tres bloques: (1) banner éxito/error con lista de archivos, (2) indicador de build con estado animado (running/success/error), (3) snippet de integración copiable con botón `Copiar` vía `navigator.clipboard`.
+* **Build verificado:** ✅ `built in 1.28s`, 2991 módulos, integridad de biblioteca 100%.
+* **Sintaxis server.js:** ✅ `node --check` sin errores.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY] — 6 helpers + refactor preflight/stream + 2 endpoints nuevos
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY] — 6 estados + preflight sync + Step 1 badges + SSE consumer + Step 3 resultado + reset
+
+---
+
 ### [2026-06-27] - CORE-122: Blindaje del Sistema de Inyección de Componentes en Cliente
 
 * **Tipo:** Seguridad / Robustez / UX / Arquitectura SSE

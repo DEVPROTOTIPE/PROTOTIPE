@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "Pagination",
+  "targetPath": "src/components/ui/Pagination.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Componente de Paginación Fluida (`Pagination.jsx`)
 
 ## 1. Propósito y Casos de Uso

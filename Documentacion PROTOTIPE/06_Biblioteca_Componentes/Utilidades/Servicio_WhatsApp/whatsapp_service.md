@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "WhatsappService",
+  "targetPath": "src/utils/WhatsappService.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Servicio de WhatsApp (WhatsApp Service Utility)
 
 Módulo de utilidad centralizado diseñado para procesar, sanitizar y redirigir de forma homogénea las comunicaciones hacia WhatsApp en toda la plataforma.

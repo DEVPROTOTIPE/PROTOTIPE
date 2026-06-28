@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "AppResetTool",
+  "targetPath": "src/utils/AppResetTool.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Restaurador de Aplicación a Fábrica (AppResetTool)
 
 ## 1. Propósito y Casos de Uso

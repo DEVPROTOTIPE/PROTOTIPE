@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "FilterPanel",
+  "targetPath": "src/components/ui/FilterPanel.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Panel de Filtros de Catálogo (FilterPanel)
 
 ## 1. Propósito y Casos de Uso

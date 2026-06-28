@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "LoginPage",
+  "targetPath": "src/pages/LoginPage.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Página de Login Híbrida (LoginPage Component)
 
 Componente de página principal diseñado para gestionar el ingreso a la plataforma bajo un modelo híbrido: inicio de sesión sin contraseña para clientes (número telefónico) y credenciales clásicas para administradores.

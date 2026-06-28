@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "CreditService",
+  "targetPath": "src/components/modules/CreditService.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Motor Financiero Transaccional de Créditos y Saldos (CreditService)
 
 ## 1. Propósito y Casos de Uso

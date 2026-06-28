@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "DeliveryPanel",
+  "targetPath": "src/pages/DeliveryPanel.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Panel de Domicilios (DeliveryPanel)
 
 Componente de página de nivel de producción que actúa como el espacio de trabajo centralizado para domiciliarios (delivery drivers). Permite la autenticación por PIN, la autogestión de despachos, control de entregas, geolocalización integrada y contabilidad rápida de dinero en efectivo recaudado.

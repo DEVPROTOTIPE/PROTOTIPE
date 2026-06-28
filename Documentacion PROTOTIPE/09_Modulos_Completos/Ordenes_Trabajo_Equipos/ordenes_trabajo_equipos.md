@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "OT",
+  "targetPath": "src/components/modules/OT.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Módulo de Órdenes de Trabajo (OT) y Equipos
 
 ## 1. Propósito y Casos de Uso

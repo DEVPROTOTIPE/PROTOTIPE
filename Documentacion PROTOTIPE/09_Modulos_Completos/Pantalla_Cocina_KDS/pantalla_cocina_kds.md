@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "PantallaCocinaKds",
+  "targetPath": "src/components/modules/PantallaCocinaKds.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Módulo de Pantalla de Cocina KDS (Kitchen Display System)
 
 ## 1. Propósito y Casos de Uso
@@ -276,3 +287,5 @@ export default function PantallaCocinaKDS() {
     </div>
   );
 }
+```
+```

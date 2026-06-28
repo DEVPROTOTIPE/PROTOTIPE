@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "InteractiveAmbientGlow",
+  "targetPath": "src/components/ui/InteractiveAmbientGlow.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Fondo de Luces Orgánicas Interactivas (`InteractiveAmbientGlow`)
 
 Fondo decorativo animado de alto impacto visual. Combina esferas fluidas de gradientes HSL (blobs) que flotan de manera orgánica mediante keyframes y reaccionan de forma interactiva y con inercia a las coordenadas de movimiento del ratón, integrándose bajo un efecto de cristal esmerilado (glassmorphism).

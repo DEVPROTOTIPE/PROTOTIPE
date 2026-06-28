@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "TelemetriaEcosistemaGlobal",
+  "targetPath": "src/components/ui/TelemetriaEcosistemaGlobal.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 ## Versión: 2.0.0
 ## Changelog:
   - v2.0.0 [BREAKING]: Rediseñada la telemetría centralizada migrando a Firebase Cloud Functions Gen 2 (desplegada sobre Google Cloud Run con `cors: true`) y requiriendo Authorization Bearer Token. Se deshabilitaron los bypasses locales para permitir integraciones reales en caliente y se eliminaron comillas redundantes en las variables de entorno.

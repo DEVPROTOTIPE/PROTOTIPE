@@ -60,3 +60,13 @@ Si se detecta un nuevo nicho comercial no cubierto por `buildTags`, se debe:
 - Búsqueda: Atajo de teclado `/` para enfocar el buscador global
 
 ---
+
+## ESTÁNDAR DE PLAYGROUNDS Y "STORYBOOK"
+
+- **Equivalencia de Storybook:** En el ecosistema PROTOTIPE, el dashboard de desarrollo central y sus playgrounds aislados en `dev-dashboard` hacen la función de **Storybook**.
+- **Creación de Playgrounds:** Todo componente visual interactivo debe contar con su archivo de sandbox en `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\[NombreComponente]Sandbox.jsx`.
+- **Estructura Requerida del Sandbox:** Debe usar `<SandboxLayout>` exponiendo controles interactivos de tipo `toggle`, `select`, `text` o `number` para configurar visualmente las propiedades del componente.
+- **Resolución en Caliente:** No intentes importar ni declarar el playground en `ComponentSandbox.jsx` de forma manual; el dashboard escanea automáticamente la carpeta usando `import.meta.glob`.
+- **Componentes No Simulables:** Los servicios sin UI o hooks de Firebase se declaran en `COMPONENT_META` de `ComponentSandbox.jsx` con una nota aclaratoria detallada de su funcionamiento.
+
+---

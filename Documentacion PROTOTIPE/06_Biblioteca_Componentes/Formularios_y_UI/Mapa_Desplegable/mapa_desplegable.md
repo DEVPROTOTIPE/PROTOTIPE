@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "MapaDesplegable",
+  "targetPath": "src/components/ui/MapaDesplegable.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # MapToggle — Mapa Desplegable del Cliente
 
 > **Origen:** Extraído de `src/pages/admin/AdminOrders.jsx` (líneas 25–58)

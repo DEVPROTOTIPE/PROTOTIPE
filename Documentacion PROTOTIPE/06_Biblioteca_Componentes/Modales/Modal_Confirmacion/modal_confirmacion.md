@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "ModalConfirm",
+  "targetPath": "src/components/ui/ModalConfirm.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Modal de Confirmación (ModalConfirm)
 
 Componente de diálogo emergente especializado para confirmación de acciones críticas o transaccionales del usuario. Ofrece variantes visuales semánticas (eliminar, advertir, informar) y bloquea la interacción en segundo plano.

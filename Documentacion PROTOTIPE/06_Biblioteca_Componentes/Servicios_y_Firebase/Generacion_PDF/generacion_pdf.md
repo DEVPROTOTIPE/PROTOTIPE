@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "GeneracionPdf",
+  "targetPath": "src/services/GeneracionPdf.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # pdfService (Motor de Generación de Documentos PDF Premium)
 
 ## 1. Propósito y Casos de Uso

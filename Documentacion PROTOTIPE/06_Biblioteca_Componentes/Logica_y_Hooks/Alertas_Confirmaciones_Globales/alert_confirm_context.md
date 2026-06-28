@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "AlertConfirmContext",
+  "targetPath": "src/hooks/AlertConfirmContext.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Alertas y Confirmaciones Globales (`AlertConfirmContext.jsx`)
 
 ## 1. Propósito y Casos de Uso

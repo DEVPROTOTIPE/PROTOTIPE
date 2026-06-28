@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "TarjetaPedidoAdmin",
+  "targetPath": "src/components/common/TarjetaPedidoAdmin.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # OrderCard — Tarjeta de Pedido Admin
 
 > **Origen:** Extraído y refactorizado de `src/pages/admin/AdminOrders.jsx` — función `renderOrderCard` (líneas 597–820)

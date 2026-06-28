@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "CatalogFiltersCreator",
+  "targetPath": "src/components/ui/CatalogFiltersCreator.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Creador de Filtros de Catálogo (CatalogFiltersCreator)
 
 ## 1. Propósito y Casos de Uso

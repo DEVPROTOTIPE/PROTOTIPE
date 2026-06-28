@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "useDebounceValue",
+  "targetPath": "src/hooks/useDebounceValue.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Hook de Optimización de Búsqueda (`useDebounceValue`)
 
 ## 1. Propósito y Casos de Uso

@@ -103,6 +103,7 @@ Crear un archivo `.md` de documentación en español bajo el directorio específ
   {
     "resource": "[NombreTécnico]",
     "technicalName": "[NombreTécnico]",
+    "targetPath": "[ruta/destino/en/proyecto/cliente/NombreTécnico.jsx]",
     "dependencies": {
       "npm": {
         "nombre-libreria": "^version"
@@ -126,22 +127,15 @@ Crear un archivo `.md` de documentación en español bajo el directorio específ
 ### Paso 3: Implementación e Inyección en `ComponentSandbox.jsx` y Sandboxes Individuales
 - **Rutas clave:**
   - Archivo de Sandbox: [NEW] `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\[NombreComponente]Sandbox.jsx`
-  - Consola Central: [MODIFY] `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\ComponentSandbox.jsx`
+  - Consola Central: [MODIFY (Opcional)] `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\ComponentSandbox.jsx`
 - **Tareas Obligatorias:**
-  1. **Creación del Archivo de Sandbox:** Queda estrictamente PROHIBIDO inyectar la lógica del componente o del playground inline en `ComponentSandbox.jsx`. Se debe crear un archivo independiente `src/components/admin/sandboxes/[NombreComponente]Sandbox.jsx` que exporte por defecto el sandbox interactivo con sus propios controles, imports y componentes de apoyo embebidos.
-  2. **Importación Dinámica Perezosa:** En `ComponentSandbox.jsx`, registrar el nuevo sandbox al inicio usando importación dinámica:
-     `const [NombreComponente]Sandbox = React.lazy(() => import('./sandboxes/[NombreComponente]Sandbox'));`
-  3. **Registro en `SANDBOXES`:** Registrar la clave del playground en el diccionario `SANDBOXES` envuelto en `React.Suspense` con el cargador común:
+  1. **Creación del Archivo de Sandbox:** Queda estrictamente PROHIBIDO inyectar la lógica del componente o del playground inline en `ComponentSandbox.jsx`. Se debe crear un archivo independiente `src/components/admin/sandboxes/[NombreComponente]Sandbox.jsx` (ejemplo: `SelectorFechaSandbox.jsx`) que exporte por defecto el sandbox interactivo con sus propios controles, imports y componentes de apoyo embebidos.
+  2. **Resolución Automática por Globbing:** La Consola Central resuelve y carga dinámicamente los playgrounds usando `import.meta.glob('./sandboxes/*.jsx')`. No es necesario registrar imports estáticos ni wrappers `React.lazy` ni la entrada `SANDBOXES`.
+  3. **Registro de Aliases en `COMPONENT_SANDBOX_MAP`:** Si el nombre físico de tu archivo Sandbox no coincide exactamente con el nombre o technicalName del componente de forma predecible, edita `ComponentSandbox.jsx` y agrega el mapeo de alias en minúsculas y sin tildes en `COMPONENT_SANDBOX_MAP`:
      ```javascript
-     'nombre_clave': () => (
-       <React.Suspense fallback={<LoaderSpinner />}>
-         <[NombreComponente]Sandbox />
-       </React.Suspense>
-     ),
+     'nombre alternativo': 'nombre_clave_del_archivo_en_snake_case',
      ```
-  4. **aliases en `COMPONENT_SANDBOX_MAP`:** Registrar todos los aliases en minúsculas (nombre natural, técnico, variantes ES/EN).
-  
-  > **Regla fuzzy en getSandboxKey:** En la función `check()` de `ComponentSandbox.jsx`, agregar la regla `str.includes('nombre_clave')` para el nuevo componente, usando las mismas variantes en minúsculas registradas en COMPONENT_SANDBOX_MAP.
+  4. **Regla fuzzy en getSandboxKey (Opcional):** Si el componente requiere coincidencia difusa avanzada, añade una regla `str.includes('...')` en la función `check()` dentro de `getSandboxKey()`.
 
 ---
 
@@ -196,16 +190,14 @@ Antes de declarar el componente como "completado", verificar **cada ítem**:
 |---|-----------|-----------------|
 | 1 | Ficha `.md` creada con código completo | `06_Biblioteca_Componentes/[Cat]/[Nombre]/archivo.md` |
 | 2 | Archivo Sandbox independiente creado | `src/components/admin/sandboxes/[NombreComponente]Sandbox.jsx` |
-| 3 | Import perezoso y Suspense registrado | `ComponentSandbox.jsx` → imports y `SANDBOXES` dict |
-| 4 | Aliases en `COMPONENT_SANDBOX_MAP` | `ComponentSandbox.jsx` → mapa de resolución |
-| 5 | Regla fuzzy en `getSandboxKey` → `check()` | `ComponentSandbox.jsx` → función check |
-| **6** | **Entrada en `README.md` de la biblioteca** ← **BLOQUEANTE** | **`06_Biblioteca_Componentes/README.md`** |
-| 7 | Entrada en `mapa_documentacion_ia.md` | `04_Estandares_y_Skills/mapa_documentacion_ia.md` |
-| 8 | Registro en `bitacora_cambios.md` | `03_Auditorias_y_Faro_Core/bitacora_cambios.md` |
-| 9 | Build exitoso sin errores | `cmd /c npm run build` en `dev-dashboard` |
+| 3 | Mapeo de alias en `COMPONENT_SANDBOX_MAP` (Opcional) | `ComponentSandbox.jsx` → solo si difiere del nombre técnico |
+| 4 | Entrada en `README.md` de la biblioteca ← **BLOQUEANTE** | **`06_Biblioteca_Componentes/README.md`** |
+| 5 | Entrada en `mapa_documentacion_ia.md` | `04_Estandares_y_Skills/mapa_documentacion_ia.md` |
+| 6 | Registro en `bitacora_cambios.md` | `03_Auditorias_y_Faro_Core/bitacora_cambios.md` |
+| 7 | Build exitoso sin errores | `cmd /c npm run build` en `dev-dashboard` |
 
 > [!IMPORTANT]
-> Si el ítem **#6 (README.md)** no está completado, el componente es **invisible en el dashboard**. El checklist no se considera superado sin este paso.
+> Si el ítem **#4 (README.md)** no está completado, el componente es **invisible en el dashboard**. El checklist no se considera superado sin este paso.
 
 ---
 

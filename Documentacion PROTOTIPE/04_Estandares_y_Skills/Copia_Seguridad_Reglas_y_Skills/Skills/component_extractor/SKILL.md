@@ -105,12 +105,13 @@ Antes de documentar, analiza si el componente actual es 100% portátil. Si no lo
 {
   "resource": "[NombreTécnico]",
   "technicalName": "[NombreTécnico]",
+  "targetPath": "[ruta/destino/en/proyecto/cliente/NombreTécnico.jsx]",
   "dependencies": {
     "npm": {
       "nombre-libreria": "^version"
     },
     "internal": [
-      { "name": "useCustomHook", "type": "hook", "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/..." }
+      { "name": "useCustomHook", "type": "hook", "targetPath": "src/hooks/useCustomHook.js", "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/..." }
     ]
   }
 }
@@ -199,26 +200,18 @@ Analiza el código del componente extraído aplicando estas reglas en orden:
 Queda estrictamente PROHIBIDO inyectar la lógica del componente o del playground inline en `ComponentSandbox.jsx`.
 
 1. **Creación del archivo de Sandbox:** Crea un archivo independiente en `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\[NombreComponente]Sandbox.jsx`. Debe exportar por defecto el sandbox interactivo con sus propios controles, imports y componentes de apoyo embebidos.
-2. **Registrar en `ComponentSandbox.jsx`:**
-   - **Importación Dinámica Perezosa:** Registrar el nuevo sandbox al inicio usando importación dinámica:
-     `const [NombreComponente]Sandbox = React.lazy(() => import('./sandboxes/[NombreComponente]Sandbox'));`
-   - **Registro en `SANDBOXES`:** Registrar la clave del playground en el diccionario `SANDBOXES` envuelto en `React.Suspense` con el cargador común:
-     ```javascript
-     'nombre_clave': () => (
-       <React.Suspense fallback={<LoaderSpinner />}>
-         <[NombreComponente]Sandbox />
-       </React.Suspense>
-     ),
-     ```
-   - **Aliases en `COMPONENT_SANDBOX_MAP`:** Registrar todos los aliases en minúsculas (nombre natural, técnico, variantes ES/EN):
-     ```javascript
-     // Nombre en minúsculas con tildes — exactamente como aparece en el árbol del visor
-     'nombre exacto del componente': 'nombre_clave',
-     // Alias adicionales si el nombre puede variar
-     'nombre alternativo': 'nombre_clave',
-     ```
-
-**Regla de nombres**: La clave del mapa debe ser el nombre del componente en **minúsculas con tildes — exactamente como aparece en el árbol del visor de la biblioteca.**
+2. **Mapeo en `ComponentSandbox.jsx` (Opcional):**
+   La Consola Central resuelve y carga dinámicamente todos los playgrounds en `/sandboxes/` usando `import.meta.glob('./sandboxes/*.jsx')`. No es necesario realizar importaciones perezosas manuales ni declarar wrappers en `SANDBOXES`.
+   
+   Solo si el nombre de archivo Sandbox difiere de forma no predecible del nombre del componente, edita `ComponentSandbox.jsx` para declarar su alias en `COMPONENT_SANDBOX_MAP`:
+   ```javascript
+   // Nombre en minúsculas con tildes — exactamente como aparece en el árbol del visor
+   'nombre exacto del componente': 'nombre_clave_del_archivo_en_snake_case',
+   // Alias adicionales si el nombre puede variar
+   'nombre alternativo': 'nombre_clave_del_archivo_en_snake_case',
+   ```
+   
+   **Coincidencia difusa (Opcional):** Si el componente requiere coincidencia difusa avanzada, añade una regla `str.includes('...')` en la función `check()` dentro de `getSandboxKey()`.
 
 #### 10.3 — Si NO es simulable: registrar en COMPONENT_META
 Agrega la entrada correspondiente en el objeto `COMPONENT_META` dentro de `ComponentSandbox.jsx`:

@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "HolographicTiltCard",
+  "targetPath": "src/components/ui/HolographicTiltCard.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Tarjeta 3D Holográfica (`HolographicTiltCard`)
 
 Componente de tarjeta interactiva con efecto de rotación 3D física y reflejo holográfico dinámico. Captura la posición relativa del cursor en caliente para inclinar la superficie en el espacio 3D y renderizar un destello de luz metalizado que sigue al puntero.

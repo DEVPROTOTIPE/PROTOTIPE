@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "CustomSelect",
+  "targetPath": "src/components/ui/CustomSelect.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Selector Desplegable Animado Premium (CustomSelect)
 ## Biblioteca de Componentes: Formularios y UI
 

@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "RaffleNumberSelector",
+  "targetPath": "src/components/common/RaffleNumberSelector.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Selector de Boletas de Rifa Premium (`RaffleNumberSelector`)
 
 Componente premium de marca blanca para la selección interactiva de números de rifa/lotería en un rango de `00` a `99` (100 números). Soporta selección por arrastre de dedo (Swipe-to-Select), efecto ruleta para elecciones aleatorias (Lucky Draw), sincronización de estados y un panel CRM de administración para consultar compradores de boletas en tiempo real.

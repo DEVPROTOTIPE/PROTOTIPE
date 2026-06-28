@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "PosExpressScanner",
+  "targetPath": "src/components/modules/PosExpressScanner.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Módulo de Cobro POS Exprés por Lector de Barras
 
 ## 1. Propósito y Casos de Uso

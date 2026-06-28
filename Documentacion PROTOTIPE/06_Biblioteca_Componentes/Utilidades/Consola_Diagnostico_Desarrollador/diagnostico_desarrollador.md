@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "DeveloperDiagnosticsModal",
+  "targetPath": "src/utils/DeveloperDiagnosticsModal.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Consola de Diagnóstico de Desarrollador (DeveloperDiagnosticsModal)
 
 ## 1. Propósito y Casos de Uso

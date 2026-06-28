@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "AgendaReservationCalendar",
+  "targetPath": "src/components/common/AgendaReservationCalendar.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Selector de Reservas de Citas tipo Agenda (`AgendaReservationCalendar`)
 
 Componente premium de marca blanca en formato agenda para la reserva de citas y gestión de turnos comerciales. Permite al cliente elegir una fecha mediante un selector semanal responsivo y agendar una hora disponible a partir de una rejilla dinámica parametrizada con control de horas ocupadas y formulario con selector desplegable custom animado con Framer Motion.

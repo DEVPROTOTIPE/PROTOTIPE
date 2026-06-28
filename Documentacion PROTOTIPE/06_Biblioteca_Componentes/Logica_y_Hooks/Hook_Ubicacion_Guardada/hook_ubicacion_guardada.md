@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "HookUbicacionGuardada",
+  "targetPath": "src/hooks/HookUbicacionGuardada.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # useSavedLocation (Hook de Persistencia y Autocompletado de Ubicación)
 
 ## 1. Propósito y Casos de Uso

@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "VariantSelector",
+  "targetPath": "src/components/ui/VariantSelector.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Selector de Variantes (VariantSelector)
 
 ## 1. Propósito y Casos de Uso

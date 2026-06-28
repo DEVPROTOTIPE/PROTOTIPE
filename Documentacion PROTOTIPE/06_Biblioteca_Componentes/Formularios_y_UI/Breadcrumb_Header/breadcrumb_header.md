@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "BreadcrumbHeader",
+  "targetPath": "src/components/ui/BreadcrumbHeader.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Breadcrumb y Header Contextual Adaptativo (`BreadcrumbHeader`)
 
 ## 1. Propósito y Casos de Uso

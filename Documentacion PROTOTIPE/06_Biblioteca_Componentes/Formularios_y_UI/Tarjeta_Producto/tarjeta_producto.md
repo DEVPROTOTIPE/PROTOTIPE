@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "Tarjeta_Producto",
+  "targetPath": "src/components/ui/Tarjeta_Producto.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Tarjeta de Producto Adaptativa (`Tarjeta_Producto`)
 
 Este módulo proporciona un componente premium e interactivo para renderizar productos en el catálogo comercial (`ProductCard`). Soporta de forma nativa layouts adaptativos dinámicos, gestión visual de stock agotado, micro-animaciones aceleradas por hardware, control de favoritos y efectos avanzados de atención visual ("Glow") para ofertas destacadas. Incluye su contraparte estructural (`ProductCardSkeleton`) para cargas fluidas.

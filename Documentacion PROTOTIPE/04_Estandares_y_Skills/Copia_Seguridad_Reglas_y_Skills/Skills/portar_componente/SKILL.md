@@ -74,7 +74,10 @@ Se activa cuando el usuario escribe **`@portar-componente [PROYECTO_ACTIVO] [Nom
 - Si hay múltiples bloques (ej. hook + componente), extráelos todos.
 
 ### 4. Determinar la ruta de destino correcta
-Aplica esta lógica según el tipo de componente:
+Aplica esta cascada de decisión en orden de prioridad:
+
+1. **Prioridad 1 — Manifest JSON**: Lee el bloque manifest `<!-- {...} -->` al inicio del archivo `.md` del componente. Si define la propiedad `targetPath`, utiliza esa ruta exacta como destino de instalación.
+2. **Prioridad 2 — Tabla de Fallback**: Si no existe `targetPath` en el manifest, aplica la siguiente lógica según el tipo de componente:
 
 | Tipo de componente | Ruta destino |
 |---|---|
@@ -84,6 +87,7 @@ Aplica esta lógica según el tipo de componente:
 | Servicio JS puro (sin UI) | `src/services/` |
 | Página completa | `src/pages/` |
 | Utilidad/helper | `src/utils/` |
+| Módulo Completo (09_Modulos_Completos) | `src/components/modules/` |
 
 Si hay ambigüedad, elige la ruta más conservadora y documenta la decisión.
 

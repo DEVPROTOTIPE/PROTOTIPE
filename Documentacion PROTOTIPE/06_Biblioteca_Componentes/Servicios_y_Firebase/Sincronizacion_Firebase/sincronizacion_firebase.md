@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "Firebase_Sync_Hook",
+  "targetPath": "src/services/Firebase_Sync_Hook.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Sincronización en Tiempo Real con Firebase (`Firebase_Sync_Hook`)
 
 Este módulo proporciona un Hook React genérico de alto rendimiento (`useFirestoreCollection`) que gestiona suscripciones activas en tiempo real a colecciones de **Firestore** utilizando `onSnapshot`. Está diseñado para aplicaciones de marca blanca con soporte integrado de caché de lectura local offline y prevención de fugas de memoria.

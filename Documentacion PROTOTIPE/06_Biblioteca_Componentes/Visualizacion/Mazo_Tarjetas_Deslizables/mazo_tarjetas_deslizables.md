@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "SwipeableCardStack",
+  "targetPath": "src/components/ui/SwipeableCardStack.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Mazo de Tarjetas Deslizables (`SwipeableCardStack`)
 
 Componente de visualización tridimensional en forma de pila de tarjetas interactiva de marca blanca. Permite al usuario arrastrar la tarjeta superior hacia la izquierda o derecha (utilizando el ratón en escritorio o gestos táctiles en pantallas móviles) para descartarla u operar acciones con transiciones fluidas de rotación, escala y opacidad. Incluye además mecánicas de autoplay por inactividad e instrucciones visuales dinámicas.

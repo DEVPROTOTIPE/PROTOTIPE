@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "couponService",
+  "targetPath": "src/services/couponService.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Motor Dinámico de Cupones (couponService)
 
 ## 1. Propósito y Casos de Uso

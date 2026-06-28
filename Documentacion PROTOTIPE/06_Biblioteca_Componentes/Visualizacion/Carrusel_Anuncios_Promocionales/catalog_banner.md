@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "CatalogBanner",
+  "targetPath": "src/components/ui/CatalogBanner.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Carrusel de Anuncios Promocionales (CatalogBanner)
 
 ## 1. Propósito y Casos de Uso

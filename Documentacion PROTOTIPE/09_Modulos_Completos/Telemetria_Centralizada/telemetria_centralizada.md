@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "TelemetriaCentralizada",
+  "targetPath": "src/components/modules/TelemetriaCentralizada.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Telemetría Centralizada (Ecosistema Telemetry & Billing Sync - Plan Blaze HTTPS)
 
 Este servicio encapsula la lógica para reportar acumulados financieros mensuales e históricos de una tienda cliente hacia la Cloud Function de la Consola Central del Desarrollador (`dev-dashboard` / Firestore Central). Opera de forma 100% segura mediante peticiones HTTPS (Camino B), eliminando la exposición de credenciales y API keys de la base de datos central en el frontend del cliente.

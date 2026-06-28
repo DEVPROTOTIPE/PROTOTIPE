@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "useLocalStorageState",
+  "targetPath": "src/hooks/useLocalStorageState.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Hook de Estado Auto Persistente (useLocalStorageState)
 
 ## Propósito y Casos de Uso

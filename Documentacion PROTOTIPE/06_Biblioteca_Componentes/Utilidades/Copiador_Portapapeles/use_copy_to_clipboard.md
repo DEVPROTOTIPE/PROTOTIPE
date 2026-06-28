@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "useCopyToClipboard",
+  "targetPath": "src/utils/useCopyToClipboard.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Hook de Copiado al Portapapeles (useCopyToClipboard)
 
 Custom hook de React diseñado para encapsular la lógica del portapapeles (`navigator.clipboard.writeText`) y proveer un estado temporal de éxito para feedback visual del usuario que se restablece de forma automática.

@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "GuidedToast",
+  "targetPath": "src/components/ui/GuidedToast.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Notificación Toast Interactiva (GuidedToast)
 
 ## 1. Propósito y Casos de Uso

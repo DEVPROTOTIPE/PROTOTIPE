@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "ModalTemplate",
+  "targetPath": "src/components/ui/ModalTemplate.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Modal Base Premium (ModalTemplate)
 
 Componente de Modal premium controlado y reutilizable. Cumple con los estándares de React Portals, Body Scroll Lock, microinteracciones fluidas y un diseño responsivo móvil-primero.

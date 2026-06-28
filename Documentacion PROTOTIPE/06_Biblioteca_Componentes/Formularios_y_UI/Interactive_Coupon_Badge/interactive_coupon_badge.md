@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "InteractiveCouponBadge",
+  "targetPath": "src/components/ui/InteractiveCouponBadge.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # InteractiveCouponBadge — Aplicador Animado de Cupones con Confeti
 
 ## 1. Propósito y Casos de Uso

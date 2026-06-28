@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "PropuestaCommitsDespliegues",
+  "targetPath": "src/components/modules/PropuestaCommitsDespliegues.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # 🛡️ Propuesta Técnica: Módulo Visual de Commits y Despliegues en Dashboard (Git & Backups)
 
 Esta propuesta técnica detalla el diseño, la arquitectura y la implementación para incorporar una nueva sección de **"Commits & Despliegues"** dentro de la consola central de control (**dev-dashboard**). El objetivo es centralizar la gestión de control de versiones y copias de seguridad de todo el ecosistema (Consola, Cores e Instancias de Clientes) directamente en la interfaz web, consumiendo y potenciando el motor de scripts de PowerShell (`git_backup.ps1` y `subproject_backup.ps1`) existente en la raíz de `D:\PROTOTIPE\`.

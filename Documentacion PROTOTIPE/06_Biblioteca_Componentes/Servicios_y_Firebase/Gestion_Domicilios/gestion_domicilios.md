@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "DeliveryService",
+  "targetPath": "src/services/DeliveryService.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Servicio de Gestión de Domicilios (DeliveryService)
 
 Este servicio encapsula la lógica para administrar el ciclo de vida logístico de las entregas (domicilios), asignación de mensajeros (empleados o externos), rastreo de estados, sincronización con pedidos principales y acumulación de analíticas diarias.

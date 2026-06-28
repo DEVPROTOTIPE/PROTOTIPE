@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "ThemeManager",
+  "targetPath": "src/utils/ThemeManager.js",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Sistema de Temas Dinámicos y Modo Oscuro (ThemeManager)
 
 ## 1. Propósito y Casos de Uso

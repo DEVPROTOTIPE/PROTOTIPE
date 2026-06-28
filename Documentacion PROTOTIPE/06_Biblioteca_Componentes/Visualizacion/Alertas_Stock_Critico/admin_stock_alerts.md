@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "AdminStockAlerts",
+  "targetPath": "src/components/ui/AdminStockAlerts.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # AdminStockAlerts (Widget de Reabastecimiento e Inventario Crítico)
 
 ## 1. Propósito y Casos de Uso

@@ -1,3 +1,14 @@
+<!--
+{
+  "technicalName": "Stepper_Pedidos",
+  "targetPath": "src/components/common/Stepper_Pedidos.jsx",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  }
+}
+-->
+
 # Stepper de Seguimiento de Pedidos (`Stepper_Pedidos`)
 
 Este módulo proporciona un Stepper o línea de tiempo interactiva de seguimiento de orden comercial (`OrderTrackingTimeline`). Está programado de forma modular, portable y responsiva, transicionando entre 4 estados clave del ciclo de facturación y despacho, soportando variables CSS dinámicas y micro-animaciones fluidas aceleradas por hardware en dispositivos móviles.
