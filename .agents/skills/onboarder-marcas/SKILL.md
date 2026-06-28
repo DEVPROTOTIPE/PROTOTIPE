@@ -1,5 +1,5 @@
 ---
-name: multi-instancia-onboarder
+name: onboarder-marcas
 description: >-
   Analiza requerimientos de nuevos clientes del ecosistema App Ventas,
   evalúa la viabilidad contra el catálogo de componentes existentes y
@@ -22,23 +22,21 @@ aliases:
 
 ---
 
-## 📁 Rutas del Proyecto
+## 📁 Rutas del Proyecto Portables
 
-> Las rutas de este flujo se construyen dinámicamente usando `[PROYECTO_ACTIVO]`. Las rutas de documentación y biblioteca son siempre fijas (pertenecen al ecosistema, no a un proyecto específico):
->
-> **Rutas fijas del ecosistema (siempre iguales):**
-> - Biblioteca: `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\`
-> - Bitácora: `D:\PROTOTIPE\Documentacion PROTOTIPE\03_Auditorias_y_Faro_Core\bitacora_cambios.md`
-> - Mapas: `D:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\`
-> - Dev-dashboard: `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\`
+> Las rutas se construyen dinámicamente usando el directorio raíz del ecosistema `[GIT_ROOT]`:
+> - Biblioteca: `[GIT_ROOT]/Documentacion PROTOTIPE/06_Biblioteca_Componentes/`
+> - Bitácora: `[GIT_ROOT]/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`
+> - Mapas: `[GIT_ROOT]/Documentacion PROTOTIPE/04_Estandares_y_Skills/`
+> - Dev-dashboard: `[GIT_ROOT]/Central PROTOTIPE/dev-dashboard/`
 >
 > **Rutas dinámicas del proyecto (dependen de `[PROYECTO_ACTIVO]`):**
-> - Código fuente: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\`
-> - Componentes: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\components\`
-> - Hooks: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\hooks\`
-> - Servicios: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\services\`
-> - Variables de entorno: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\.env.local`
-> - Package: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\package.json`
+> - Código fuente: `[GIT_ROOT]/[PROYECTO_ACTIVO]/src/`
+> - Componentes: `[GIT_ROOT]/[PROYECTO_ACTIVO]/src/components/`
+> - Hooks: `[GIT_ROOT]/[PROYECTO_ACTIVO]/src/hooks/`
+> - Servicios: `[GIT_ROOT]/[PROYECTO_ACTIVO]/src/services/`
+> - Variables de entorno: `[GIT_ROOT]/[PROYECTO_ACTIVO]/.env.local`
+> - Package: `[GIT_ROOT]/[PROYECTO_ACTIVO]/package.json`
 
 ---
 

@@ -22,32 +22,27 @@ aliases:
 
 ---
 
-## 📁 Rutas del Proyecto
+## 📁 Rutas del Proyecto Portables
 
-> Las rutas de este flujo se construyen dinámicamente usando `[PROYECTO_ACTIVO]`. Las rutas de documentación y biblioteca son siempre fijas (pertenecen al ecosistema, no a un proyecto específico):
->
-> **Rutas fijas del ecosistema (siempre iguales):**
-> - Biblioteca (Componentes): `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\`
-> - Biblioteca (Módulos Completos): `D:\PROTOTIPE\Documentacion PROTOTIPE\09_Modulos_Completos\`
-> - Bitácora: `D:\PROTOTIPE\Documentacion PROTOTIPE\03_Auditorias_y_Faro_Core\bitacora_cambios.md`
-> - Mapas: `D:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\`
-> - Dev-dashboard: `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\`
+> Las rutas se construyen dinámicamente usando el directorio raíz del ecosistema `[GIT_ROOT]`:
+> - Biblioteca (Componentes): `[GIT_ROOT]/Documentacion PROTOTIPE/06_Biblioteca_Componentes/`
+> - Biblioteca (Módulos Completos): `[GIT_ROOT]/Documentacion PROTOTIPE/09_Modulos_Completos/`
+> - Bitácora: `[GIT_ROOT]/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`
+> - Mapas: `[GIT_ROOT]/Documentacion PROTOTIPE/04_Estandares_y_Skills/`
+> - Dev-dashboard: `[GIT_ROOT]/Central PROTOTIPE/dev-dashboard/`
 >
 > **Rutas dinámicas del proyecto (dependen de `[PROYECTO_ACTIVO]`):**
-> - Código fuente: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\`
-> - Componentes: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\components\`
-> - Hooks: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\hooks\`
-> - Servicios: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\src\services\`
-> - Variables de entorno: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\.env.local`
-> - Package: `D:\PROTOTIPE\[PROYECTO_ACTIVO]\package.json`
+> - Código fuente: `[GIT_ROOT]/[PROYECTO_ACTIVO]/src/`
+> - Componentes: `[GIT_ROOT]/[PROYECTO_ACTIVO]/src/components/`
+> - Hooks: `[GIT_ROOT]/[PROYECTO_ACTIVO]/src/hooks/`
+> - Servicios: `[GIT_ROOT]/[PROYECTO_ACTIVO]/src/services/`
+> - Variables de entorno: `[GIT_ROOT]/[PROYECTO_ACTIVO]/.env.local`
+> - Package: `[GIT_ROOT]/[PROYECTO_ACTIVO]/package.json`
 
 ---
 
 ## Overview
-Esta skill define el protocolo que el agente ejecuta para conectar un componente
-ya documentado en la biblioteca con el sandbox interactivo del dev-dashboard.
-El agente NO debe hacer preguntas al usuario — debe leer el `.md`, analizar el
-código documentado y tomar decisiones autónomamente.
+Esta skill define el protocolo que el agente ejecuta para conectar un componente ya documentado en la biblioteca con el sandbox interactivo del dev-dashboard. El agente NO debe hacer preguntas al usuario — debe leer el `.md`, analizar el código documentado y tomar decisiones autónomamente.
 
 ## Trigger / Activación
 Se activa cuando el usuario escribe **`@sandbox [PROYECTO_ACTIVO] [NombreComponente]`**.
@@ -57,7 +52,7 @@ Se activa cuando el usuario escribe **`@sandbox [PROYECTO_ACTIVO] [NombreCompone
 ## Workflow
 
 ### 1. Localizar el archivo .md en la Biblioteca
-- Busca en `D:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\` usando `grep_search` con el nombre del componente.
+- Busca en `[GIT_ROOT]/Documentacion PROTOTIPE/06_Biblioteca_Componentes/` usando `grep_search` con el nombre del componente.
 - Si no lo encuentras por nombre exacto, busca por palabras clave del nombre.
 - Lee el archivo `.md` completo con `view_file`.
 - **Si no existe el archivo:** reporta al usuario que el componente no está registrado en la biblioteca y detén la ejecución.
@@ -82,14 +77,13 @@ Analiza el contenido del `.md` (secciones de código, dependencias, integracione
 ### 3. Si ES simulable — Crear el Playground
 
 #### 3a. Crear el archivo de Sandbox independiente
-- Crea un archivo independiente en `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\[NombreComponente]Sandbox.jsx`.
+- Crea un archivo independiente en `[GIT_ROOT]/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/[NombreComponente]Sandbox.jsx`.
 - Queda estrictamente PROHIBIDO inyectar la lógica del componente o del playground inline en `ComponentSandbox.jsx`.
 - Este archivo debe exportar por defecto el sandbox interactivo con sus propios controles, imports y componentes de apoyo embebidos.
 - Estructura básica del archivo de sandbox:
 ```jsx
 import React, { useState } from 'react';
 import SandboxLayout from '../SandboxLayout';
-// Importa iconos de lucide-react u otros componentes auxiliares de UI locales si es necesario
 
 export default function NombreComponenteSandbox() {
   const [prop1, setProp1] = useState(valorDefault);
@@ -113,7 +107,7 @@ export default function NombreComponenteSandbox() {
 #### 3b. Mapeo en `ComponentSandbox.jsx` (Opcional)
 La Consola Central resuelve y monta los playgrounds dinámicamente escaneando la carpeta `/sandboxes/` mediante `import.meta.glob('./sandboxes/*.jsx')`. No necesitas escribir importaciones perezosas ni entradas `React.lazy` ni wrappers `React.Suspense`.
 
-Si el nombre del archivo Sandbox no coincide de forma predecible con el nombre o technicalName del componente, registra el alias en `COMPONENT_SANDBOX_MAP` de `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\ComponentSandbox.jsx`:
+Si el nombre del archivo Sandbox no coincide de forma predecible con el nombre o technicalName del componente, registra el alias en `COMPONENT_SANDBOX_MAP` de `[GIT_ROOT]/Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`:
 ```javascript
 // Nombre en minúsculas con tildes — exactamente como aparece en el árbol del visor
 'nombre exacto del componente': 'nombre_clave_del_archivo_en_snake_case',
@@ -147,7 +141,7 @@ Agrega la entrada en el objeto `COMPONENT_META` dentro de `ComponentSandbox.jsx`
 ```bash
 cmd /c npm run build
 ```
-Ejecutar en `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard`. Confirmar que compile sin errores.
+Ejecutar en `[GIT_ROOT]/Central PROTOTIPE/dev-dashboard`. Confirmar que compile sin errores.
 Si hay errores de compilación, corregirlos antes de reportar al usuario.
 
 ### 6. Reportar al Usuario

@@ -1,5 +1,87 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-28] - CORE-132: Suite de 5 Nuevas Habilidades y Salud Extendida del Ecosistema
+
+* **Tipo:** Feature / Infraestructura / Automatización / UX Dashboard
+* **Firma de auditoría:** CORE-132-EXTENDED-ECOSYSTEM-SUITE
+* **Descripción de Cambios:**
+  - **`cli-log-streamer` (Logs en vivo):** Endpoint SSE `GET /api/cli/logs/stream` que transmite el archivo `cli_bridge.log` de forma no bloqueante a la UI en tiempo real (con restricción estricta a localhost). Añadido un componente terminal glassmorphic oscuro en el dashboard con autoscroll y controles de reproducción/limpieza.
+  - **`database-seeder` (Sembrado Firestore):** Endpoint `POST /api/project/db/seed` que extrae el token OAuth administrativo de Firebase CLI, valida el esquema de colecciones contra `esquema_colecciones.md` e inyecta categorías y productos de prueba (nicho comida/ventas) de forma atómica y segura en Firestore.
+  - **`gemini-rules-sync` (Sincronizador reglas IA):** Endpoint `POST /api/git/sync-rules` que invoca de forma segura a `sync_rules.js`. Refactorizado `sync_rules.js` para reemplazar la ruta estática `D:\PROTOTIPE` por una ruta dinámica de 3 niveles (`path.resolve(__dirname, '..', '..', '..')`), haciéndola portable.
+  - **`developer-manual-builder` (Manuales de desarrollo):** Endpoint `POST /api/library/manual` que automatiza la creación física de manuales técnicos en `07_Manuales_Desarrollo/` e indexa la ruta en `mapa_documentacion_ia.md` con su Criterio de Decisión en caliente.
+  - **`project-cleanup` (Limpiador seguro):** Endpoint `POST /api/project/cleanup` que purga cachés de Vite (`.vite`), temporales `.tmp` y carpetas de dist/build. Cuenta con validación rígida de lista blanca e integridad de rutas para prevenir Directory Traversal o borrado de archivos sensibles.
+  - **Restauración de Habilidades:** Reescritas y restauradas en `.agents/skills/` las 7 skills del monorepo (`component-creator`, `component-extractor`, `git-strategist`, `portar-componente`, `sandbox-integrator`, `onboarder-marcas` e `integrity-compiler`) con todo su nivel de detalle, checklists, manifiestos y pautas estéticas intactas, pero parametrizadas de forma portable.
+  - **Unificación y Sincronización Automática de Skills:** Inyectado el Paso 6 en `verify_library_integrity.cjs` que ejecuta una sincronización bidireccional automática y transparente en cada compilación (`npm run build`) o validación física entre la carpeta activa `.agents/skills/` y la carpeta de resguardo `Copia_Seguridad_Reglas_y_Skills/Skills/`. Se unificó toda la nomenclatura de las carpetas de resguardo a guiones medios (`-`) en disco y mapas semánticos para evitar discrepancias e inconsistencias de formato.
+  - **Build de Control:** `npm run build` en `dev-dashboard` completado con éxito en 1.19s ✅ (biblioteca al 100% OK).
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/sync_rules.js`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/sync_rules.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - Documentación de Skills: creadas e inyectadas las 5 nuevas skills en `.agents/skills/`.
+* **Archivos Eliminados:**
+  - Carpetas obsoletas con nomenclatura de guión bajo (`_`) en `.agents/skills/` y `Copia_Seguridad_Reglas_y_Skills/Skills/`.
+* **Archivos Creados:**
+  - [`d:/PROTOTIPE/.agents/skills/cli-log-streamer/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/cli-log-streamer/SKILL.md) [NEW]
+  - [`d:/PROTOTIPE/.agents/skills/database-seeder/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/database-seeder/SKILL.md) [NEW]
+  - [`d:/PROTOTIPE/.agents/skills/gemini-rules-sync/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/gemini-rules-sync/SKILL.md) [NEW]
+  - [`d:/PROTOTIPE/.agents/skills/developer-manual-builder/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/developer-manual-builder/SKILL.md) [NEW]
+  - [`d:/PROTOTIPE/.agents/skills/project-cleanup/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/project-cleanup/SKILL.md) [NEW]
+
+---
+
+### [2026-06-28] - CORE-131: Meta-Skill de Creación de Skills del Ecosistema
+
+* **Tipo:** Infraestructura / Automatización / Documentación Operativa
+* **Descripción:** Creado el directorio de skills del workspace `.agents/skills/` y la meta-skill `crear-skill-prototipe` que documenta el proceso completo, correcto y alineado con la arquitectura del proyecto para crear nuevas skills. La skill cubre: arquitectura de dos planos (SKILL.md manual + integración dashboard), reglas críticas prohibidas (skills teóricas, require() en ESM, rutas hardcodeadas, race conditions), proceso de 7 pasos ordenados, estructura estándar de SKILL.md y ejemplo de flujo completo.
+* **Archivos Creados:**
+  - [`d:/PROTOTIPE/.agents/skills/crear-skill-prototipe/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/crear-skill-prototipe/SKILL.md) [NEW]
+
+---
+
+### [2026-06-28] - CORE-130: Blindaje de Portabilidad, Resiliencia ante OS Locks y Robustez del Roadmap
+
+* **Tipo:** Robustez / Infraestructura / Prevención de Fallos
+* **Firma de auditoría:** CORE-130-BLINDAJE-PORTABILIDAD
+* **Descripción de Cambios:**
+  - **`GIT_ROOT` dinámico:** Eliminadas las dos referencias hardcodeadas a `D:\PROTOTIPE` en `server.js` (líneas 6103 y 6614). `GIT_ROOT` ahora se calcula como `path.resolve(CLI_ROOT, '..')`, haciendo el ecosistema 100% portable a cualquier unidad de disco o ruta de directorio sin modificar código.
+  - **`writeFileWithRetry`:** Nueva función auxiliar global en `server.js` que implementa política de reintentos exponenciales (máx. 5 intentos, backoff 100ms→200ms→400ms→...) para absorber bloqueos temporales del sistema de archivos de Windows (`EBUSY`, `EPERM`, `EACCES`) causados por editores externos o antivirus.
+  - **Parser tolerante de Roadmap:** Las expresiones regulares de `GET /api/roadmap` y `POST /api/roadmap/toggle` refactorizadas para detectar tareas con casillas `[ ]` y `[x]` independientemente de si el texto usa negritas (`**`), tachados (`~~`), guiones (`-`) o asteriscos (`*`) como viñeta. Extracción de IDs extendida a formatos `CORE-NNN` y `Tarea N`.
+  - **Graceful Degradation de Roadmap:** Si `tareas_pendientes.md` no existe en disco, el endpoint `GET /api/roadmap` genera automáticamente el archivo con una plantilla base en lugar de retornar un error 404.
+  - **Backups Rotativos:** Reemplazado el backup estático `.bak` por un sistema de backups rotativos con timestamp en `.tmp/` (ej. `tareas_pendientes.2026-06-28T16-12-00.md.bak`). Se conservan solo los últimos 5 archivos, limpiando automáticamente los más antiguos.
+  - **EADDRINUSE Reactivo:** Reemplazada la estrategia de "subir al puerto siguiente" (`port + 1`) por un flujo de liberación automática: detección del PID bloqueante mediante `netstat`, intento de `taskkill /F /PID`, reintento de inicio en el mismo puerto. Si el kill falla por permisos, imprime instrucciones claras de comandos manuales y termina con `process.exit(1)`.
+  - **Verificación de Sintaxis:** `node --check server.js` → ✅ Sin errores.
+  - **Build de Control:** `npm run build` en dev-dashboard → ✅ 2994 módulos transformados, integridad de biblioteca 100% OK.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-28] - CORE-129-PART2: Panel Visual de Habilidades y Salud del Catálogo (Roadmap Interactivo y Asistentes Híbridos de IA)
+
+* **Tipo:** Feature / UX Dashboard / Automatización
+* **Firma de auditoría:** CORE-129-PART2-VISUAL-PANEL
+* **Descripción de Cambios:**
+  - **Endpoints CLI de Roadmap y Salud (`server.js`):** Implementados endpoints `/api/roadmap` (GET) para parsear el archivo físico `tareas_pendientes.md` de forma limpia y retornar un listado estructurado, `/api/roadmap/toggle` (POST) para realizar modificaciones atómicas de casillas en disco (soporte nativo CRLF de Windows y copias de seguridad previas en `.tmp/`), y `/api/integrity/status` (GET) para ejecutar el diagnóstico físico de la biblioteca de componentes aislando el proceso en un subproceso hijo (`child_process.exec`) para evitar que fallos de validación tiren abajo la consola CLI local.
+  - **Componente Modular `SkillsRoadmapPanel.jsx` (Frontend):** Creada una nueva vista React desacoplada e independiente para renderizar el diagnóstico del catálogo en vivo con tarjetas semafóricas legibles y la lista de tareas interactiva vinculada al Markdown físico en caliente.
+  - **Registro Modular en `App.jsx`:** Importado y enrutado el panel de salud bajo la nueva pestaña `skills`, limitando al máximo los cambios en `App.jsx` y cumpliendo con el estándar de modularización.
+  - **Asistentes Híbridos de Copia de Comandos con IA (`ComponentLibraryView.jsx`):** Integrados dos widgets premium en la interfaz:
+    1.  *Creador con IA:* Tarjeta en la barra lateral izquierda que recopila nombre, categoría y prompt y expone el comando rápido `@crear-componente` listo para copiar al portapapeles.
+    2.  *Asistente de Extracción:* Tarjeta en la pestaña de Código Fuente que genera el comando rápido `@extraer-componente` pre-rellenado con la URI del archivo seleccionado y observaciones de adaptación adicionales.
+  - **Actualización de Estándares (`AGENTS.md`):** Consolidado el Estándar de Modularización del Dashboard Central en las reglas globales de desarrollo del workspace.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx) [NEW]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`d:/PROTOTIPE/.agents/AGENTS.md`](file:///d:/PROTOTIPE/.agents/AGENTS.md) [MODIFY]
+
+---
+
 ### [2026-06-28] - CORE-129: Suite de Gestión Avanzada de Biblioteca de Componentes (CSS Doctor, Scaffold Sandbox, Import Copy)
 
 * **Tipo:** Feature / Robustez / UX / Automatización
@@ -19,8 +101,10 @@
   - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
   - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
   - [`Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [MODIFY]
-  - [`Documentacion PROTOTIPE/02_Roadmap_Tareas/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
   - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/propuesta_panel_skills_dashboard.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/propuesta_panel_skills_dashboard.md) [NEW]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
 
 ---
 

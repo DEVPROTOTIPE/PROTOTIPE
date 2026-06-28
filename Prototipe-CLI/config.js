@@ -1,7 +1,13 @@
 import path from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs-extra';
 
-const CLI_ROOT = process.cwd();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// CLI_ROOT es la carpeta donde reside config.js (Prototipe-CLI/)
+// GIT_ROOT_CFG es la raíz del monorepo — portable a cualquier disco o ruta
+const CLI_ROOT = __dirname;
+const GIT_ROOT_CFG = path.resolve(CLI_ROOT, '..');
 const REGISTRO_PATH = path.join(CLI_ROOT, 'plantillas_registro.json');
 
 // Cargar variables de entorno del archivo .env local si existe
@@ -21,12 +27,13 @@ if (fs.existsSync(envPath)) {
 }
 
 // Determinar el Workspace Root (APPLICATIONS_DIR)
-const APPLICATIONS_DIR = process.env.PROTOTIPE_WORKSPACE_ROOT || process.env.APPLICATIONS_DIR || 'D:\\PROTOTIPE\\Instancias Clientes';
+// Prioridad: variable de entorno explícita → fallback dinámico relativo al monorepo
+const APPLICATIONS_DIR = process.env.PROTOTIPE_WORKSPACE_ROOT || process.env.APPLICATIONS_DIR || path.join(GIT_ROOT_CFG, 'Instancias Clientes');
 const TEMPLATES_DIR = path.join(CLI_ROOT, 'templates');
 
 // Determinar la ruta al directorio de Documentación (puede sobreescribirse vía env)
 const DOCUMENTATION_DIR = process.env.PROTOTIPE_DOCS_ROOT
-  || path.join(APPLICATIONS_DIR, 'Documentacion PROTOTIPE');
+  || path.join(GIT_ROOT_CFG, 'Documentacion PROTOTIPE');
 
 /**
  * Retorna la ruta física del Workspace Root

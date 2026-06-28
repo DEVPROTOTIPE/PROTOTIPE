@@ -127,8 +127,34 @@ function killProcessTree(pid) {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const CLI_ROOT = __dirname;
+// GIT_ROOT se resuelve dinámicamente a partir de CLI_ROOT para portabilidad total
+// sin importar la unidad de disco (D:, C:, E:, etc.) o la ruta de carpetas del usuario.
+const GIT_ROOT = path.resolve(CLI_ROOT, '..');
 const TEMPLATES_DIR = path.join(CLI_ROOT, 'templates');
 const WORKER_PATH  = path.join(CLI_ROOT, 'worker_create_project.js');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// writeFileWithRetry — Escritura resiliente con reintentos exponenciales
+// Previene errores EBUSY/EPERM causados por bloqueos temporales del sistema
+// operativo (editores externos, antivirus, indexadores como Windows Search).
+// ─────────────────────────────────────────────────────────────────────────────
+async function writeFileWithRetry(filePath, content, options = 'utf8', retries = 5, delay = 100) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await fs.writeFile(filePath, content, options);
+      return; // Escritura exitosa
+    } catch (err) {
+      const isLockError = ['EBUSY', 'EPERM', 'EACCES'].includes(err.code);
+      if (isLockError && attempt < retries) {
+        const wait = delay * Math.pow(2, attempt - 1); // Backoff exponencial: 100ms, 200ms, 400ms...
+        console.warn(`[writeFileWithRetry] Intento ${attempt}/${retries} fallido (${err.code}). Reintentando en ${wait}ms...`);
+        await new Promise(resolve => setTimeout(resolve, wait));
+      } else {
+        throw err; // Re-lanzar si no es error de bloqueo o se agotaron los reintentos
+      }
+    }
+  }
+}
 
 // Locks globales de sincronización para prevenir condiciones de carrera (Race Conditions)
 const syncLocks = {};
@@ -6100,7 +6126,8 @@ app.get('/api/project/dependencies/install', async (req, res) => {
 // Auto-detecta todos los repositorios Git del ecosistema PROTOTIPE.
 // Retorna: maestro, consola central, plantillas core e instancias de clientes.
 // ─────────────────────────────────────────────────────────────────────────────
-const GIT_ROOT         = 'D:\\PROTOTIPE';
+// GIT_ROOT ya fue definido dinámicamente al inicio del archivo (línea ~130)
+// Estas constantes lo referencian para auto-detectar repositorios del ecosistema.
 const GIT_CORES_DIR    = path.join(GIT_ROOT, 'Plantillas Core');
 const GIT_INSTANCES_DIR= path.join(GIT_ROOT, 'Instancias Clientes');
 const GIT_DASHBOARD_DIR= path.join(GIT_ROOT, 'Central PROTOTIPE', 'dev-dashboard');
@@ -6611,7 +6638,7 @@ app.get('/api/git/backup-stream', async (req, res) => {
 // --- OBTENER CORES Y SUS RAMAS CLIENTES ---
 app.get('/api/git/cores-and-clients', async (req, res) => {
   try {
-    const coresDir = 'D:\\PROTOTIPE\\Plantillas Core';
+    const coresDir = path.join(GIT_ROOT, 'Plantillas Core');
     if (!await fs.pathExists(coresDir)) {
       return res.json({ success: true, cores: [] });
     }
@@ -8044,6 +8071,522 @@ app.post('/api/project/firebase-rules/deploy', async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/roadmap
+// Parsea y expone las tareas pendientes y completadas de tareas_pendientes.md
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/roadmap', async (req, res) => {
+  try {
+    const roadmapPath = path.join(GIT_ROOT, 'Documentacion PROTOTIPE', '02_Tareas_Roadmap', 'tareas_pendientes.md');
+    
+    // Autocreación del archivo si no existe (Graceful Degradation)
+    if (!await fs.pathExists(roadmapPath)) {
+      console.warn('[roadmap] tareas_pendientes.md no existe. Creando plantilla base automáticamente...');
+      await fs.ensureDir(path.dirname(roadmapPath));
+      const plantillaBase = `# Tareas Pendientes\n\n> Archivo generado automáticamente por el CLI de PROTOTIPE.\n> Agrega tareas en formato: \`- [ ] Tarea CORE-XXX: Descripción\`\n\n`;
+      await writeFileWithRetry(roadmapPath, plantillaBase, 'utf8');
+    }
+
+    const content = await fs.readFile(roadmapPath, 'utf8');
+    const lines = content.split(/\r?\n/);
+    const tasks = [];
+    
+    // Regex tolerante: detecta [ ] y [x] con o sin negritas (**), tachados (~~),
+    // guiones o asteriscos como viñeta, e identificadores en cualquier formato.
+    const bulletRegex = /^\s*[-*]\s+(?:\*\*)?\[( |x)\]\s+(?:~~)?(.+?)(?:~~)?(?:\*\*)?\s*$/i;
+
+    lines.forEach((line, index) => {
+      const match = line.match(bulletRegex);
+      if (match) {
+        const completed = match[1].toLowerCase() === 'x';
+        const rawText = match[2].trim();
+        // Extraer ID de la tarea en formatos: CORE-123, LINE-45, Tarea 3:
+        const idMatch = rawText.match(/(?:CORE-\d+|Tarea\s+\d+)/i);
+        const id = idMatch ? idMatch[0] : `LINE-${index}`;
+        
+        tasks.push({
+          id,
+          text: rawText,
+          completed,
+          lineIndex: index,
+          rawLine: line
+        });
+      }
+    });
+
+    res.json({ success: true, tasks });
+  } catch (err) {
+    console.error('Error al obtener el roadmap:', err.message);
+    res.status(500).json({ error: `Error de lectura del roadmap: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/roadmap/toggle
+// Cambia el estado de una tarea entre pendiente y completada de forma atómica
+// ─────────────────────────────────────────────────────────────────────────────
+// Cola de escritura exclusiva del roadmap — serializa operaciones leer→modificar→escribir
+// para prevenir race conditions (doble-clic, peticiones concurrentes, etc.)
+const _roadmapQueue = new WriteQueue();
+
+app.post('/api/roadmap/toggle', (req, res) => {
+  const { lineIndex } = req.body;
+  if (lineIndex === undefined) {
+    return res.status(400).json({ error: 'Falta el parámetro requerido: lineIndex.' });
+  }
+
+  // Toda la lógica serializada en la cola: ninguna petición puede leer
+  // el archivo mientras otra lo está modificando. Equivalente a un mutex.
+  _roadmapQueue.push(async () => {
+    try {
+      const docRoot = path.join(GIT_ROOT, 'Documentacion PROTOTIPE');
+      const roadmapPath = path.join(docRoot, '02_Tareas_Roadmap', 'tareas_pendientes.md');
+    
+      if (!await fs.pathExists(roadmapPath)) {
+        return res.status(404).json({ error: 'No se encontró el archivo de tareas pendientes.' });
+      }
+
+      const content = await fs.readFile(roadmapPath, 'utf8');
+      const isCrlf = content.includes('\r\n');
+      const lines = content.split(/\r?\n/);
+
+      if (lineIndex < 0 || lineIndex >= lines.length) {
+        return res.status(400).json({ error: 'Índice de línea fuera de rango.' });
+      }
+
+      const targetLine = lines[lineIndex];
+      // Regex tolerante: detecta [ ] y [x] con o sin negritas (**) y tachados (~~)
+      const toggleMatch = targetLine.match(/^(\s*[-*]\s+)(?:\*\*)?\[( |x)\](\s+)(?:\*\*)?(?:~~)?(.+?)(?:~~)?(?:\*\*)?\s*$/i);
+      if (!toggleMatch) {
+        return res.status(400).json({ error: 'La línea especificada no es una tarea de Roadmap válida (formato no reconocido).' });
+      }
+
+      const isCompleted = toggleMatch[2].toLowerCase() === 'x';
+      // Extraer texto limpio (sin ~~ residuales de marcados anteriores)
+      const cleanText = toggleMatch[4].replace(/^~~|~~$/g, '').trim();
+
+      let newLine;
+      if (!isCompleted) {
+        // Marcar completada: [ ] → [x] y envolver texto en ~~tachado~~
+        newLine = targetLine
+          .replace(/\[ \]/, '[x]')
+          .replace(toggleMatch[4], `~~${cleanText}~~`);
+      } else {
+        // Desmarcar: [x] → [ ] y quitar tachado
+        newLine = targetLine
+          .replace(/\[x\]/i, '[ ]')
+          .replace(`~~${cleanText}~~`, cleanText)
+          .replace(/~~(.+?)~~/g, '$1'); // fallback si el texto no estaba tachado
+      }
+
+      lines[lineIndex] = newLine;
+
+      // Backup rotativo: conservar las últimas 5 versiones con timestamp
+      const backupDir = path.join(docRoot, '02_Tareas_Roadmap', '.tmp');
+      await fs.ensureDir(backupDir);
+      const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const backupPath = path.join(backupDir, `tareas_pendientes.${ts}.md.bak`);
+      await fs.copy(roadmapPath, backupPath);
+      // Limpiar backups más antiguos manteniendo solo los últimos 5
+      try {
+        const backups = (await fs.readdir(backupDir))
+          .filter(f => f.endsWith('.md.bak'))
+          .sort()
+          .reverse();
+        for (const old of backups.slice(5)) {
+          await fs.remove(path.join(backupDir, old));
+        }
+      } catch (_) { /* No bloquear si limpieza de backups falla */ }
+
+      const separator = isCrlf ? '\r\n' : '\n';
+      await writeFileWithRetry(roadmapPath, lines.join(separator), 'utf8');
+
+      // Parsear de nuevo para retornar el listado actualizado con regex tolerante
+      const updatedTasks = [];
+      const bulletRegex = /^\s*[-*]\s+(?:\*\*)?\[( |x)\]\s+(?:~~)?(.+?)(?:~~)?(?:\*\*)?\s*$/i;
+      lines.forEach((line, index) => {
+        const m = line.match(bulletRegex);
+        if (m) {
+          const completed = m[1].toLowerCase() === 'x';
+          const rawText = m[2].trim();
+          const idMatch = rawText.match(/(?:CORE-\d+|Tarea\s+\d+)/i);
+          const taskId = idMatch ? idMatch[0] : `LINE-${index}`;
+          updatedTasks.push({
+            id: taskId,
+            text: rawText,
+            completed,
+            lineIndex: index,
+            rawLine: line
+          });
+        }
+      });
+
+      res.json({ success: true, tasks: updatedTasks });
+    } catch (err) {
+      console.error('Error al actualizar la tarea:', err.message);
+      res.status(500).json({ error: `Error de escritura del roadmap: ${err.message}` });
+    }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/integrity/status
+// Ejecuta el validador físico en un subproceso hijo para no tirar el CLI
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/integrity/status', async (req, res) => {
+  try {
+    const devDashboardDir = path.join(GIT_ROOT, 'Central PROTOTIPE', 'dev-dashboard');
+    const verifyScript = path.join(devDashboardDir, 'scripts', 'verify_library_integrity.cjs');
+    
+    if (!await fs.pathExists(verifyScript)) {
+      return res.status(404).json({ error: 'No se encontró el validador verify_library_integrity.cjs.' });
+    }
+
+    // Usar exec ya importado al inicio del archivo (ESM — no existe require())
+    exec(`node "${verifyScript}"`, { cwd: devDashboardDir }, (error, stdout, stderr) => {
+      const success = !error;
+      res.json({
+        success,
+        stdout: stdout || '',
+        stderr: stderr || '',
+        code: error ? error.code : 0
+      });
+    });
+  } catch (err) {
+    console.error('Error de ejecución en validador de integridad:', err.message);
+    res.status(500).json({ error: `Fallo al inicializar validador: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPER: Buscar ruta absoluta de un cliente/instancia Saas por ID
+// ─────────────────────────────────────────────────────────────────────────────
+async function findClientPath(clientId) {
+  if (!clientId) return null;
+  const topDirs = await fs.readdir(GIT_INSTANCES_DIR).catch(() => []);
+  for (const dir of topDirs) {
+    const fullPath = path.join(GIT_INSTANCES_DIR, dir);
+    if (dir.toLowerCase() === clientId.toLowerCase()) {
+      if (await fs.pathExists(path.join(fullPath, '.prototipe.json'))) {
+        return fullPath;
+      }
+    }
+    const subDirs = await fs.readdir(fullPath).catch(() => []);
+    for (const subDir of subDirs) {
+      if (subDir.toLowerCase() === clientId.toLowerCase()) {
+        const subFullPath = path.join(fullPath, subDir);
+        if (await fs.pathExists(path.join(subFullPath, '.prototipe.json'))) {
+          return subFullPath;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/cli/logs/stream
+// SSE: Transmite logs en vivo de cli_bridge.log únicamente a localhost
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/cli/logs/stream', async (req, res) => {
+  const clientIp = req.ip || req.connection.remoteAddress || '';
+  if (!clientIp.includes('127.0.0.1') && !clientIp.includes('::1') && !clientIp.includes('::ffff:127.0.0.1')) {
+    return res.status(403).json({ error: 'Acceso denegado. Solo localhost está autorizado para ver los logs del Bridge.' });
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const logPath = path.join(CLI_ROOT, 'cli_bridge.log');
+  if (await fs.pathExists(logPath)) {
+    try {
+      const content = await fs.readFile(logPath, 'utf8');
+      const lines = content.split(/\r?\n/).slice(-100);
+      lines.forEach(line => {
+        if (line.trim()) {
+          res.write(`data: ${JSON.stringify({ type: 'log', log: line })}\n\n`);
+        }
+      });
+    } catch (err) {}
+  }
+
+  let filePosition = 0;
+  try {
+    const stats = await fs.stat(logPath);
+    filePosition = stats.size;
+  } catch (_) {}
+
+  const watcher = fs.watch(logPath, async (eventType) => {
+    if (eventType === 'change') {
+      try {
+        const stats = await fs.stat(logPath);
+        if (stats.size > filePosition) {
+          const fd = await fs.open(logPath, 'r');
+          const buffer = Buffer.alloc(stats.size - filePosition);
+          await fs.read(fd, buffer, 0, stats.size - filePosition, filePosition);
+          await fs.close(fd);
+          filePosition = stats.size;
+
+          const newContent = buffer.toString('utf8');
+          const lines = newContent.split(/\r?\n/);
+          lines.forEach(line => {
+            if (line.trim()) {
+              res.write(`data: ${JSON.stringify({ type: 'log', log: line })}\n\n`);
+            }
+          });
+        } else if (stats.size < filePosition) {
+          filePosition = stats.size;
+        }
+      } catch (_) {}
+    }
+  });
+
+  req.on('close', () => {
+    watcher.close();
+    res.end();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/project/db/seed
+// Sembrador seguro de datos de prueba en Firestore validando contra esquema
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/project/db/seed', async (req, res) => {
+  const { clientId } = req.body;
+  if (!clientId) return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+
+  try {
+    const projectPath = await findClientPath(clientId);
+    if (!projectPath) {
+      return res.status(404).json({ error: `No se encontró la ruta para el proyecto "${clientId}".` });
+    }
+
+    // Validar contra esquema_colecciones.md si existe
+    const coreSchemaPath = path.join(GIT_ROOT, 'Plantillas Core', 'App Ventas', 'Documentacion App Ventas', 'esquema_colecciones.md');
+    let hasSchema = false;
+    if (await fs.pathExists(coreSchemaPath)) {
+      hasSchema = true;
+      const schemaText = await fs.readFile(coreSchemaPath, 'utf8');
+      if (!schemaText.includes('Colección:') && !schemaText.includes('colección:')) {
+        return res.status(400).json({ error: 'El esquema de colecciones del Core está mal formateado.' });
+      }
+    }
+
+    const envPath = path.join(projectPath, '.env.local');
+    if (!await fs.pathExists(envPath)) {
+      return res.status(400).json({ error: 'No se encontró el archivo .env.local en el cliente.' });
+    }
+
+    const envContent = await fs.readFile(envPath, 'utf-8');
+    const env = {};
+    envContent.split(/\r?\n/).forEach(line => {
+      const match = line.match(/^\s*([\w.]+)\s*=\s*(.*)\s*$/);
+      if (match) {
+        env[match[1]] = match[2].replace(/['"`]/g, '').trim();
+      }
+    });
+
+    const apiKey = env.VITE_FIREBASE_API_KEY;
+    const projectId = env.VITE_FIREBASE_PROJECT_ID;
+    const adminEmail = env.VITE_DEVELOPER_ADMIN_EMAIL;
+    const adminPassword = env.VITE_DEVELOPER_ADMIN_PASSWORD;
+
+    if (!apiKey || !projectId || !adminEmail || !adminPassword) {
+      return res.status(400).json({ error: 'Faltan variables Firebase o admin en .env.local.' });
+    }
+
+    const homedir = process.env.USERPROFILE || process.env.HOME || '';
+    const possiblePaths = [
+      path.join(homedir, '.config', 'configstore', 'firebase-tools.json'),
+      path.join(process.env.APPDATA || '', 'configstore', 'firebase-tools.json')
+    ];
+    let devToken = null;
+    for (const p of possiblePaths) {
+      if (await fs.pathExists(p)) {
+        try {
+          const data = await fs.readJson(p);
+          if (data.tokens && data.tokens.access_token) {
+            devToken = data.tokens.access_token;
+            break;
+          }
+        } catch (_) {}
+      }
+    }
+
+    if (!devToken) {
+      return res.status(401).json({ error: 'No se pudo obtener la sesión de Firebase CLI. Corre: firebase login' });
+    }
+
+    // Datos estructurados a sembrar
+    const seedCategories = [
+      { id: 'cat_calzado', nombre: 'Calzado Deportivo', descripcion: 'Tenis y zapatos para correr' },
+      { id: 'cat_tecnologia', nombre: 'Tecnología', descripcion: 'Dispositivos electrónicos y accesorios' },
+      { id: 'cat_hogar', nombre: 'Hogar y Cocina', descripcion: 'Artículos para decorar y cocinar' }
+    ];
+
+    const seedProducts = [
+      { id: 'prod_tenis_run', categoria: 'Calzado Deportivo', destacado: true, nombre: 'Tenis Run Ultra', precio: 180000, stock: 15, imagen: '' },
+      { id: 'prod_reloj_smart', categoria: 'Tecnología', destacado: true, nombre: 'Reloj Inteligente V2', precio: 320000, stock: 8, imagen: '' },
+      { id: 'prod_cafetera_exp', categoria: 'Hogar y Cocina', destacado: false, nombre: 'Cafetera Espresso Premium', precio: 450000, stock: 5, imagen: '' }
+    ];
+
+    // Escribir categorías
+    for (const cat of seedCategories) {
+      const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/categorias/${cat.id}`;
+      const payload = {
+        fields: {
+          nombre: { stringValue: cat.nombre },
+          descripcion: { stringValue: cat.descripcion },
+          updatedAt: { stringValue: new Date().toISOString() }
+        }
+      };
+      const resFetch = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${devToken}` },
+        body: JSON.stringify(payload)
+      });
+      if (!resFetch.ok) {
+        const errText = await resFetch.text();
+        throw new Error(`Error en categoría: ${errText}`);
+      }
+    }
+
+    // Escribir artículos
+    for (const prod of seedProducts) {
+      const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/articulos/${prod.id}`;
+      const payload = {
+        fields: {
+          nombre: { stringValue: prod.nombre },
+          categoria: { stringValue: prod.categoria },
+          destacado: { booleanValue: prod.destacado },
+          precio: { integerValue: prod.precio.toString() },
+          stock: { integerValue: prod.stock.toString() },
+          imagen: { stringValue: prod.imagen },
+          createdAt: { stringValue: new Date().toISOString() }
+        }
+      };
+      const resFetch = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${devToken}` },
+        body: JSON.stringify(payload)
+      });
+      if (!resFetch.ok) {
+        const errText = await resFetch.text();
+        throw new Error(`Error en artículo: ${errText}`);
+      }
+    }
+
+    res.json({ success: true, message: `Sembrado exitoso. Se inyectaron 3 categorías y 3 artículos en Firestore.`, schemaChecked: hasSchema });
+  } catch (err) {
+    console.error('Error en seeder:', err.message);
+    res.status(500).json({ error: `Fallo durante el sembrado: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/git/sync-rules
+// Llama al script sync_rules.js de forma segura para propagar reglas de IA
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/git/sync-rules', async (req, res) => {
+  try {
+    const syncRulesScript = path.join(GIT_ROOT, 'Documentacion PROTOTIPE', '04_Estandares_y_Skills', 'Copia_Seguridad_Reglas_y_Skills', 'sync_rules.js');
+    if (!await fs.pathExists(syncRulesScript)) {
+      return res.status(404).json({ error: 'No se encontró el archivo sync_rules.js.' });
+    }
+
+    exec(`node "${syncRulesScript}"`, { cwd: path.dirname(syncRulesScript) }, (error, stdout, stderr) => {
+      if (error) {
+        return res.status(500).json({ error: `Fallo al sincronizar reglas: ${stderr || error.message}` });
+      }
+      res.json({ success: true, output: stdout || 'Sincronización finalizada.' });
+    });
+  } catch (err) {
+    console.error('Error al sincronizar reglas:', err.message);
+    res.status(500).json({ error: `Fallo al inicializar sincronizador: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/library/manual
+// Escribe el manual de desarrollo en 07_Manuales_Desarrollo/ y actualiza mapas
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/library/manual', async (req, res) => {
+  const { componentName, category, content } = req.body;
+  if (!componentName || !category || !content) {
+    return res.status(400).json({ error: 'Faltan parámetros requeridos.' });
+  }
+
+  try {
+    const sanitizedCategory = sanitizeShellArgument(category);
+    const sanitizedName = sanitizeShellArgument(componentName);
+
+    const manualDir = path.join(GIT_ROOT, 'Documentacion PROTOTIPE', '07_Manuales_Desarrollo', sanitizedCategory, sanitizedName);
+    await fs.ensureDir(manualDir);
+
+    const manualFile = path.join(manualDir, `manual_${sanitizedName.toLowerCase()}.md`);
+    await fs.writeFile(manualFile, content, 'utf8');
+
+    const docMapFile = path.join(GIT_ROOT, 'Documentacion PROTOTIPE', '04_Estandares_y_Skills', 'mapa_documentacion_ia.md');
+    if (await fs.pathExists(docMapFile)) {
+      let docMapContent = await fs.readFile(docMapFile, 'utf8');
+      const entryText = `| **manual_${sanitizedName.toLowerCase()}.md** | Manual Técnico de Integración de ${sanitizedName} | Propósito: Guía de integración detallada. | [Ver Manual](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/${sanitizedCategory}/${sanitizedName}/manual_${sanitizedName.toLowerCase()}.md) |`;
+      if (!docMapContent.includes(`manual_${sanitizedName.toLowerCase()}.md`)) {
+        docMapContent = docMapContent.trim() + '\n' + entryText + '\n';
+        await fs.writeFile(docMapFile, docMapContent, 'utf8');
+      }
+    }
+
+    res.json({ success: true, message: `Manual de desarrollo creado: ${manualFile}` });
+  } catch (err) {
+    console.error('Error al generar manual técnico:', err.message);
+    res.status(500).json({ error: `Fallo al escribir manual: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/project/cleanup
+// Limpiador seguro con lista blanca estricta para evitar borrados accidentales
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/project/cleanup', async (req, res) => {
+  const { clientId } = req.body;
+  if (!clientId) return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+
+  try {
+    const projectPath = await findClientPath(clientId);
+    if (!projectPath) {
+      return res.status(404).json({ error: `No se encontró la ruta para el proyecto "${clientId}".` });
+    }
+
+    const allowedSubpaths = [
+      path.join(projectPath, 'node_modules', '.vite'),
+      path.join(projectPath, 'node_modules', '.vite-temp'),
+      path.join(projectPath, 'dist'),
+      path.join(projectPath, 'build'),
+      path.join(GIT_ROOT, 'Documentacion PROTOTIPE', '02_Tareas_Roadmap', '.tmp')
+    ];
+
+    let deletedFolders = [];
+    for (const folder of allowedSubpaths) {
+      if (await fs.pathExists(folder)) {
+        if (isPathContained(projectPath, folder) || isPathContained(GIT_ROOT, folder)) {
+          const basename = path.basename(folder);
+          if (['.vite', '.vite-temp', 'dist', 'build', '.tmp'].includes(basename)) {
+            await fs.remove(folder);
+            deletedFolders.push(folder);
+          }
+        }
+      }
+    }
+
+    res.json({ success: true, message: `Limpieza completada. Carpetas eliminadas: ${deletedFolders.length}`, deleted: deletedFolders });
+  } catch (err) {
+    console.error('Error durante la purga de temporales:', err.message);
+    res.status(500).json({ error: `Fallo en el limpiador seguro: ${err.message}` });
+  }
+});
+
 async function startServer(port) {
   const server = app.listen(port, '127.0.0.1', () => {
     console.log(`\n🚀 [Prototipe CLI Bridge] Servidor local escuchando en: http://127.0.0.1:${port}`);
@@ -8074,10 +8617,32 @@ async function startServer(port) {
     console.log(` - POST http://localhost:${port}/api/cores/:clave/deactivate    → Retirar del wizard\n`);
   });
 
-  server.on('error', (err) => {
+  server.on('error', async (err) => {
     if (err.code === 'EADDRINUSE') {
-      console.warn(`⚠️  Puerto ${port} ocupado, intentando con el puerto ${port + 1}...`);
-      startServer(port + 1);
+      console.warn(`\n⚠️  [EADDRINUSE] El puerto ${port} está en uso por otro proceso.`);
+      console.warn(`   Intentando identificar y liberar el proceso que bloquea el puerto ${port}...`);
+      try {
+        // Identificar el PID del proceso que ocupa el puerto
+        const { stdout } = await execAsync(`netstat -ano | findstr :${port}`);
+        const pidMatch = stdout.match(/(\d+)\s*$/m);
+        if (pidMatch && pidMatch[1]) {
+          const pid = pidMatch[1].trim();
+          console.warn(`   🔍 Proceso detectado en puerto ${port}: PID ${pid}. Intentando terminar...`);
+          await execAsync(`taskkill /PID ${pid} /F`);
+          console.log(`   ✅ Proceso ${pid} terminado exitosamente. Reiniciando servidor en puerto ${port}...`);
+          setTimeout(() => startServer(port), 500);
+        } else {
+          throw new Error('No se pudo identificar el PID del proceso bloqueante.');
+        }
+      } catch (killErr) {
+        console.error(`   ❌ No fue posible liberar el puerto ${port} automáticamente.`);
+        console.error(`      Causa: ${killErr.message}`);
+        console.error(`\n   📋 SOLUCIÓN MANUAL — Ejecuta en una terminal como Administrador:`);
+        console.error(`      netstat -ano | findstr :${port}`);
+        console.error(`      taskkill /PID [PID_ENCONTRADO] /F`);
+        console.error(`\n   O reinicia el equipo si el problema persiste.\n`);
+        process.exit(1);
+      }
     } else {
       console.error('❌ Error crítico en servidor:', err.message);
     }

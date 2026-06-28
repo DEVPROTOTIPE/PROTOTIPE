@@ -3,7 +3,7 @@ const path = require('path');
 
 // ─── CONFIGURACIÓN ────────────────────────────────────────────────────────────
 const SOURCE_FILE = path.join(__dirname, 'GEMINI.md');
-const WORKSPACE_DIR = 'D:\\PROTOTIPE';
+const WORKSPACE_DIR = path.resolve(__dirname, '..', '..', '..');
 const CLI_TEMPLATES_DIR = path.join(WORKSPACE_DIR, 'Prototipe-CLI', 'templates');
 
 // Delimitadores de la sección POR-CORE (rutas específicas de cada proyecto).
