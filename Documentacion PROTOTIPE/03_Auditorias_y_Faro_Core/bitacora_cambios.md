@@ -1,5 +1,19 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-01] - CORE-145: Blindaje de Seguridad en Sincronización, Concurrencia y Purgado del CLI
+
+* **Tipo:** Seguridad / Concurrencia / Robustez / Failsafes de Poda / Directory Traversal
+* **Firma de auditoría:** CORE-145-SECURITY-SHIELD-SYNC-CONCURRENCY
+* **Descripción de Cambios:**
+  - **Failsafes de Poda (Borrados Masivos):** Se implementaron guardas en la función `performCoreSync` en `server.js` para asegurar que ni la ruta fuente ni la plantilla destino puedan resolverse vacías o equivaler a la raíz del sistema de archivos (`C:\`, `D:\`). Adicionalmente, se inyectó una validación `isPathContained` que restringe el borrado condicional `prune` únicamente a archivos que residan dentro del directorio del template (`templates/template-[Core]`).
+  - **Locks de Concurrencia:** Se introdujo `projectSyncLocks = {}` en `server.js` y se aplicaron semáforos de bloqueo de procesos concurrentes en todos los endpoints de sincronización (`/api/project/sync-file`, `/api/project/sync-files`, `/api/project/sync-database`) y de activación (`/api/cores/:clave/activate`) para evitar race conditions y colisiones de escritura de archivos.
+  - **Prevención de Directory Traversal:** Se agregaron validaciones cruzadas con `isPathContained` sobre las rutas de origen y destino resueltas absolutas en los endpoints de copia de archivos, denegando accesos si se intentan secuencias de retroceso `../`.
+  - **Normalización de Exclusiones y Case-Sensitivity:** Se forzó la evaluación de exclusiones a minúsculas (`.toLowerCase()`) en Windows para evitar que variaciones en mayúsculas de archivos locales de variables o secretos (.env) se filtren en la plantilla, y se añadieron lockfiles y directorios del sistema de control de versiones a la lista de exclusiones permanentes.
+  - **Uso de React Portals en Modales:** Se refactorizó el modal de auditoría de paridad del core en `CoreCard.jsx` para renderizarse utilizando `createPortal` en `document.body`. Esto soluciona los problemas de apilamiento y posicionamiento ("muy abajo" en pantalla) causados por los contextos CSS tridimensionales y de transformación (`transforms`/`filters`) presentes en los componentes contenedores padre del dashboard.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY]
+
 ### [2026-07-01] - CORE-144: Poda de Archivos Obsoletos de Documentación en performCoreSync
 
 * **Tipo:** Corrección de Bug / Motor de Sincronización del CLI
