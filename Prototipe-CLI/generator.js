@@ -476,12 +476,17 @@ export async function createProject(answers) {
 
   // [BLINDAJE-SEGURIDAD] Generar contraseña admin única e impredecible por instancia.
   // NUNCA usar una contraseña estática compartida entre todas las instancias.
-  const adminPassword = [
+  const generatedAdminPassword = [
     Math.random().toString(36).slice(2, 6).toUpperCase(),
     Math.random().toString(36).slice(2, 6),
     Math.floor(Math.random() * 9000 + 1000),
     '!'
   ].join('');
+
+  const adminEmail = String(answers.adminEmail || `admin@${clientId}.com`).trim();
+  const adminPassword = String(answers.adminPassword || generatedAdminPassword).trim();
+  const whatsappAdmin = String(answers.whatsappAdmin || '').replace(/\D/g, '').trim();
+  const storeAddress = String(answers.storeAddress || '').trim();
 
   // Sanitizar todos los inputs eliminando espacios accidentales
   const fbApiKey = String(answers.firebaseApiKey || '').trim();
@@ -501,9 +506,11 @@ VITE_FIREBASE_APP_ID=${fbAppId}
 VITE_INITIAL_THEME=${themeName}
 VITE_DEVELOPER_EMAIL=${answers.developerEmail || ''}
 
-# Credenciales del Administrador de la Instancia (Autogeneradas — únicas por instancia)
-VITE_DEVELOPER_ADMIN_EMAIL=admin@${clientId}.com
+# Credenciales del Administrador de la Instancia (Personalizadas o Autogeneradas)
+VITE_DEVELOPER_ADMIN_EMAIL=${adminEmail}
 VITE_DEVELOPER_ADMIN_PASSWORD=${adminPassword}
+VITE_DEVELOPER_WHATSAPP_ADMIN=${whatsappAdmin}
+VITE_DEVELOPER_STORE_ADDRESS=${storeAddress}
 
 # Telemetría de Comisiones del Desarrollador (Centralización Central - HTTPS Blaze)
 VITE_DEVELOPER_TELEMETRY_ENDPOINT=https://reporttelemetry-bkwhzlbhlq-uc.a.run.app
@@ -519,7 +526,7 @@ VITE_DEVELOPER_ENABLE_DIAN_BILLING=${answers.enableDianBilling ?? false}
 VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN=${answers.costoPorFacturaDian ?? 0}
 
 # Nicho / Vertical de Negocio (usado por telemetría para contextualizar reportes de error)
-VITE_NICHE=${answers.niche || 'general'}
+VITE_NICHE=${answers.niche || 'general'}`;
 `;
 
   await fs.writeFile(path.join(targetDir, '.env.local'), envContent, 'utf-8');
@@ -1116,6 +1123,8 @@ const adminEmail = env.VITE_DEVELOPER_ADMIN_EMAIL;
 const adminPassword = env.VITE_DEVELOPER_ADMIN_PASSWORD;
 const clientId = env.VITE_DEVELOPER_CLIENT_ID;
 const theme = env.VITE_INITIAL_THEME || 'emerald';
+const whatsappAdmin = env.VITE_DEVELOPER_WHATSAPP_ADMIN || '';
+const storeAddress = env.VITE_DEVELOPER_STORE_ADDRESS || '';
 
 if (!apiKey || !projectId || !adminEmail || !adminPassword) {
   console.error("❌ Error: Faltan variables de Firebase en .env.local");
@@ -1197,13 +1206,14 @@ async function run() {
   // B. Escribir perfil del Admin en Firestore (bypasseando reglas con token OAuth2 de firebase-tools)
   try {
     console.log(\`🗄️  Escribiendo rol administrativo en users/\${uid}...\`);
-    const userDocUrl = \`https://firestore.googleapis.com/v1/projects/\${projectId}/databases/(default)/documents/users/\${uid}?updateMask.fieldPaths=email&updateMask.fieldPaths=role&updateMask.fieldPaths=nombre&updateMask.fieldPaths=updatedAt\`;
+    const userDocUrl = \`https://firestore.googleapis.com/v1/projects/\${projectId}/databases/(default)/documents/users/\${uid}?updateMask.fieldPaths=email&updateMask.fieldPaths=role&updateMask.fieldPaths=nombre&updateMask.fieldPaths=whatsapp&updateMask.fieldPaths=updatedAt\`;
     const userPayload = {
       name: \`projects/\${projectId}/databases/(default)/documents/users/\${uid}\`,
       fields: {
         email: { stringValue: adminEmail },
         role: { stringValue: 'admin' },
         nombre: { stringValue: 'Administrador' },
+        whatsapp: { stringValue: whatsappAdmin },
         updatedAt: { stringValue: new Date().toISOString() }
       }
     };
@@ -1237,12 +1247,45 @@ async function run() {
         sellerName: { stringValue: 'Administrador' },
         appIcon: { stringValue: '' },
         theme: { stringValue: theme },
-        whatsappAdmin: { stringValue: '' },
+        whatsappAdmin: { stringValue: whatsappAdmin },
         adminRegistered: { booleanValue: true },
         appFont: { stringValue: 'inter' },
         appRadius: { stringValue: 'rounded' },
         animationsEnabled: { booleanValue: true },
-        updatedAt: { stringValue: new Date().toISOString() }
+        updatedAt: { stringValue: new Date().toISOString() },
+        deliverySettings: {
+          mapValue: {
+            fields: {
+              pickup: {
+                mapValue: {
+                  fields: {
+                    enabled: { booleanValue: true },
+                    address: { stringValue: storeAddress },
+                    instructions: { stringValue: 'Recoge tu pedido directamente en nuestro local.' }
+                  }
+                }
+              },
+              shipping: {
+                mapValue: {
+                  fields: {
+                    enabled: { booleanValue: true },
+                    cost: { doubleValue: 0 },
+                    estimatedTime: { stringValue: '30 a 60 min' },
+                    instructions: { stringValue: 'Recibe tu pedido en la comodidad de tu casa.' }
+                  }
+                }
+              },
+              digital: {
+                mapValue: {
+                  fields: {
+                    enabled: { booleanValue: false },
+                    instructions: { stringValue: 'Entrega digital o prestación de servicio presencial.' }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     };
     
@@ -1280,12 +1323,13 @@ run();
 
   // [BRECHA-B] Personalizar vite.config.js con puerto determinístico único por clientId.
   // En un ecosistema multi-instancia, si todas usan el puerto 5173 hay colisiones.
-  // El puerto se deriva del hash simple del clientId: rango 5100-5199 (100 puertos únicos).
+  // El puerto se deriva del customPort ingresado o de forma determinística del clientId.
   const stepVite = ora('Personalizar vite.config.js con puerto único por instancia').start();
   try {
     const viteConfigPath = path.join(targetDir, 'vite.config.js');
     if (await fs.pathExists(viteConfigPath)) {
-      const devPort = 5100 + (clientId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 100);
+      const hashPort = 5100 + (clientId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 100);
+      const devPort = answers.customPort ? parseInt(answers.customPort) : hashPort;
       let viteContent = await fs.readFile(viteConfigPath, 'utf-8');
 
       if (/server\s*:\s*\{/.test(viteContent)) {
@@ -1529,6 +1573,9 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
   // 11. Despliegue en Firebase del Cliente
   await deployFirebase(answers, targetDir);
 
+  // 11.1 Auto-siembra de Administrador inicial
+  await runSeedAdmin(answers, targetDir);
+
   // 12. Auto-registro en la Consola Central (Developer Cockpit)
   await registerInCentralConsole(answers, clientId, uniqueToken);
 
@@ -1655,6 +1702,27 @@ async function deployFirebase(answers, targetDir) {
 
   } catch (err) {
     console.warn(pc.yellow(`⚠️  Fallo al desplegar en Firebase: ${err.message}. Asegúrate de tener firebase-cli logueado.`));
+  }
+}
+
+/**
+ * Paso 11.1: Sembrar automáticamente el administrador y la configuración inicial de la base de datos.
+ * @param {Object} answers Payload de aprovisionamiento
+ * @param {string} targetDir Ruta absoluta del proyecto generado
+ */
+async function runSeedAdmin(answers, targetDir) {
+  console.log(pc.cyan('🤖 Sembrando usuario administrador inicial y configuración en Firestore...'));
+  try {
+    // Ejecutar scripts/seed_admin.js
+    execSync('node scripts/seed_admin.js', {
+      cwd: targetDir,
+      stdio: ['ignore', 'ignore', 'pipe'],
+      timeout: 30000 // 30 segundos max
+    });
+    console.log(pc.green('✅ Usuario administrador y configuración base de Firestore inicializados con éxito.'));
+  } catch (err) {
+    const seedStderr = err.stderr ? err.stderr.toString().slice(0, 500) : err.message;
+    console.warn(pc.yellow(`⚠️  No se pudo sembrar el administrador automáticamente:\n${seedStderr}\nPrueba a correr manualmente: npm run seed:admin`));
   }
 }
 
