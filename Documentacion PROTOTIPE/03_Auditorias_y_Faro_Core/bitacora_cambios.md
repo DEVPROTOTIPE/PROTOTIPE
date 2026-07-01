@@ -10,9 +10,11 @@
   - **Consolidación por Cliente:** Añadido un conmutador ("Detalle Periodos" vs "Consolidar Cliente") para agrupar el total recaudado acumulado de cada cliente, proporcionando un desglose por periodos dentro de un Side Drawer interactivo de fácil lectura.
   - **Acciones y Reversión de Pagos:** Implementada la descarga/simulación de comprobantes de cobro en PDF y un botón interactivo de reversión de cobro a pendiente con estados visuales de carga ("updatingState").
   - **Integración y Desacoplamiento:** Modificado `App.jsx` para importar el nuevo panel, registrar la pestaña `cobros` en `NAV_TABS` con ícono `CheckCircle`, redirigir clics desde la tarjeta KPI de comisiones "Cobrado" a la vista, e inyectar el componente condicionalmente. Se eliminaron físicamente de `App.jsx` más de 160 líneas de código obsoletas pertenecientes a los modales de detalle de cobros.
+  - **Rediseño del Sidebar Collapsible:** Reestructurado el menú de navegación lateral en 5 categorías lógicas colapsables mediante una animación de acordeón suave basada en transiciones de alto de cuadrícula CSS (CSS Grid Row Transitions). Se añadieron popovers flotantes con filtro de desenfoque (`backdrop-blur-xl bg-slate-950/95`) a la derecha cuando el sidebar está colapsado y una barra indicadora de estado activo vertical (`.sidebar-indicator`) para lograr una apariencia premium.
 * **Archivos Modificados:**
   - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CobrosPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CobrosPanel.jsx) [NEW]
   - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/index.css`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/index.css) [MODIFY]
   - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
   - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
   - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
