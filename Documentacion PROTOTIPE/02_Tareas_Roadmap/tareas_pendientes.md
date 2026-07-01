@@ -4,6 +4,13 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-143: Sincronización del Canal de Telemetría de Facturación (Dual-Channel Telemetry)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Solución a la falla de enrutamiento y CORS/fetch al reportar telemetría simulada o manual desde el cliente. Se implementó una arquitectura de canal dual en `telemetryService.js` (Core App Ventas, template-ventas e instancia ventas-moni-app), que intenta escribir primero el reporte de facturación comisional (`reportesBilling`) e incidentes (`app_failures`) de forma directa a la base de datos de Firestore Central utilizando el SDK y las credenciales secundarias de `centralFirebaseService.js`, ofreciendo un fallback elástico por HTTPS (Cloud Function) si falla. Esto permite que las pruebas de telemetría lanzadas desde el Dashboard actualicen de inmediato los valores del cliente real sin colisiones de red.
+  - Archivos: [`Plantillas Core/App Ventas/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/telemetryService.js) [MODIFY], [`Prototipe-CLI/templates/template-ventas/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/telemetryService.js) [MODIFY], [`Instancias Clientes/ventas/ventas-moni-app/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/telemetryService.js) [MODIFY]
+
 * **[x] ~~Tarea CORE-142: Rediseño Interactivo y Modular del Radar de Salud (HealthRadar)~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-07-01

@@ -1,5 +1,22 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-01] - CORE-143: Sincronización del Canal de Telemetría de Facturación (Dual-Channel Telemetry)
+
+* **Tipo:** Optimización / Estándar de Desarrollo / Conectividad Híbrida / Tolerancia a fallos
+* **Firma de auditoría:** CORE-143-TELEMETRY-DUALCHANNEL-FIRESTORESINK
+* **Descripción de Cambios:**
+  - **Canal Dual en Telemetría (`telemetryService.js`):** Modificado el servicio de telemetría de la app cliente para soportar conectividad híbrida. Ahora, al emitir reportes de facturación mensual comisional (`reportesBilling`) o reportar fallos (`app_failures`), el servicio intenta primero escribir directamente en la base de datos de Firestore Central utilizando el SDK y el singleton secundario `getCentralFirestore()`.
+  - **HTTPS Fallback:** Si la escritura directa por el SDK de Firebase es rechazada o falla por cualquier causa, el servicio intercepta el error y de forma elástica utiliza la llamada REST HTTPS tradicional (`postTelemetry`) hacia la Cloud Function de Firebase.
+  - **Propagación Completa:** Se sincronizó este cambio en el Core de Oro `App Ventas`, en la carpeta del CLI `template-ventas` y en la instancia activa cliente `ventas-moni-app`.
+* **Archivos Modificados:**
+  - [`Plantillas Core/App Ventas/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/telemetryService.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-ventas/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/telemetryService.js) [MODIFY]
+  - [`Instancias Clientes/ventas/ventas-moni-app/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/telemetryService.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
+---
+
 ### [2026-07-01] - CORE-142: Rediseño Interactivo y Modular del Radar de Salud de Instancias (HealthRadar)
 
 * **Tipo:** UI/UX / Optimización / Estándar de Desarrollo / Escalabilidad Multi-Core
