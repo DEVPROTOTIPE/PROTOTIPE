@@ -158,6 +158,7 @@ async function writeFileWithRetry(filePath, content, options = 'utf8', retries =
 
 // Locks globales de sincronización para prevenir condiciones de carrera (Race Conditions)
 const syncLocks = {};
+const projectSyncLocks = {};
 
 // Tiempo máximo de aprovisionamiento antes de considerar el proceso como colgado (10 min)
 const WORKER_TIMEOUT_MS = 10 * 60 * 1000;
@@ -3645,6 +3646,31 @@ async function performCoreSync(clave, CLI_ROOT, options = {}) {
   const templatePath = config.destino.replace(/\//g, path.sep);
   const prune = options.prune === true;
 
+  // 0. Failsafes físicos y de seguridad contra borrados catastróficos
+  if (!corePath || !templatePath) {
+    throw new Error('Las rutas de origen (corePath) o destino (templatePath) no pueden estar vacías.');
+  }
+
+  const resolvedCore = path.resolve(corePath);
+  const resolvedTemplate = path.resolve(templatePath);
+
+  // Evitar directorios raíz
+  const rootCore = path.parse(resolvedCore).root;
+  const rootTemplate = path.parse(resolvedTemplate).root;
+  if (resolvedCore === rootCore || resolvedTemplate === rootTemplate) {
+    throw new Error('No se permite sincronizar directamente desde o hacia la raíz del sistema de archivos.');
+  }
+
+  // Asegurar que no sean la misma ruta
+  if (resolvedCore === resolvedTemplate) {
+    throw new Error('La ruta de origen y destino no pueden ser idénticas.');
+  }
+
+  // Asegurar que el destino está contenido dentro del directorio de plantillas del CLI
+  if (!isPathContained(TEMPLATES_DIR, resolvedTemplate)) {
+    throw new Error('La ruta de destino de la plantilla debe estar dentro del directorio de plantillas del CLI.');
+  }
+
   // 1. Validar que el core tiene código real
   const hasCode = await fs.pathExists(path.join(corePath, 'src'));
   if (!hasCode) {
@@ -3677,7 +3703,7 @@ async function performCoreSync(clave, CLI_ROOT, options = {}) {
   ];
 
   const EXCLUDE_FROM_TEMPLATE = new Set([
-    // Archivos locales secretos o de configuración de hosting específicos
+    // Archivos locales secretos o de configuración de hosting específicos (en minúsculas para coincidencia case-insensitive)
     '.env.local', '.env', '.firebaserc', 'firebase.json',
     
     // Entornos de compilación y dependencias
@@ -3687,20 +3713,23 @@ async function performCoreSync(clave, CLI_ROOT, options = {}) {
     'scratch', 'playwright-report', 'test-results', '.gitkeep',
     
     // Archivos temporales y metadatos de sistema operativo
-    '.DS_Store', 'Thumbs.db', 'npm-debug.log', 'yarn-error.log', 'pnpm-debug.log', 'firebase-debug.log'
+    '.ds_store', 'thumbs.db', 'npm-debug.log', 'yarn-error.log', 'pnpm-debug.log', 'firebase-debug.log',
+
+    // Exclusiones de seguridad adicionales del Core para evitar fugas de credenciales locales o configuraciones
+    '.npmrc', '.gitattributes', '.github', '.gitignore', 'package-lock.json', 'pnpm-lock.yaml', 'yarn.lock'
   ]);
 
   await fs.ensureDir(templatePath);
   const synced = [];
 
-  // Copiar directorios controlados concurrentemente
+  // Copiar directorios controlados concurrentemente con filtro insensible a mayúsculas
   await Promise.all(SYNC_PATHS.map(async (relPath) => {
     const src  = path.join(corePath, relPath);
     const dest = path.join(templatePath, relPath);
     if (!await fs.pathExists(src)) return;
     await fs.copy(src, dest, {
       overwrite: true,
-      filter: (s) => !EXCLUDE_FROM_TEMPLATE.has(path.basename(s))
+      filter: (s) => !EXCLUDE_FROM_TEMPLATE.has(path.basename(s).toLowerCase())
     });
     synced.push(relPath);
   }));
@@ -3714,7 +3743,7 @@ async function performCoreSync(clave, CLI_ROOT, options = {}) {
       if (stat.isDirectory()) {
         const files = await fs.readdir(fullPath);
         await Promise.all(files.map(file => {
-          if (EXCLUDE_FROM_TEMPLATE.has(file)) return;
+          if (EXCLUDE_FROM_TEMPLATE.has(file.toLowerCase())) return;
           return collectFilesLocal(baseDir, path.join(relPath, file), resultList);
         }));
       } else {
@@ -3745,8 +3774,11 @@ async function performCoreSync(clave, CLI_ROOT, options = {}) {
       if (!coreFilesSet.has(tempFile)) {
         const fileToDelete = path.join(templatePath, tempFile);
         try {
-          await fs.remove(fileToDelete);
-          console.log(`[Sync Prune] Eliminado archivo huérfano del template: ${tempFile}`);
+          // Failsafe redundante por archivo antes de eliminar
+          if (isPathContained(templatePath, fileToDelete)) {
+            await fs.remove(fileToDelete);
+            console.log(`[Sync Prune] Eliminado archivo huérfano del template: ${tempFile}`);
+          }
         } catch (err) {
           console.warn(`[Sync Prune] No se pudo eliminar ${tempFile}:`, err.message);
         }
@@ -3885,6 +3917,7 @@ async function performCoreSync(clave, CLI_ROOT, options = {}) {
   return { synced, templatePath };
 }
 
+
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /api/cores/:clave/activate
 // Sincroniza el código del core al templates/ del CLI y marca activo: true.
@@ -3896,6 +3929,13 @@ app.post('/api/cores/:clave/activate', async (req, res) => {
   const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
   const prune = req.body.prune === true;
 
+  if (syncLocks[clave]) {
+    return res.status(429).json({ 
+      error: `Ya existe un proceso de sincronización o activación activo para el Core "${clave}". Por favor, espera a que termine.` 
+    });
+  }
+
+  syncLocks[clave] = true;
   try {
     const registro = await fs.readJson(registroPath);
     const config = registro.plantillas[clave];
@@ -3921,10 +3961,12 @@ app.post('/api/cores/:clave/activate', async (req, res) => {
   } catch (err) {
     console.error(`[API /cores/${clave}/activate] Error: ${err.message}`);
     res.status(500).json({ error: `Error al activar la plantilla: ${err.message}` });
+  } finally {
+    delete syncLocks[clave];
   }
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
+
 // POST /api/cores/:clave/sync
 // Sincroniza el código del core al templates/ del CLI sin cambiar el estado activo ni la versión.
 // Body: {}
@@ -4591,6 +4633,11 @@ app.post('/api/project/sync-database', async (req, res) => {
     return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
   }
 
+  if (projectSyncLocks[clientId]) {
+    return res.status(429).json({ error: `Ya existe un proceso de sincronización activo para el cliente "${clientId}". Por favor, espera a que termine.` });
+  }
+
+  projectSyncLocks[clientId] = true;
   try {
     const projectDir = await findProjectDir(clientId);
     if (!projectDir) {
@@ -4603,58 +4650,64 @@ app.post('/api/project/sync-database', async (req, res) => {
     }
 
     const meta = await fs.readJson(metaPath);
-    const templateName = meta.template || 'template-core-seed';
-    const firebaseProjectId = await resolveFirebaseProjectId(projectDir, clientId);
+    const templateName = meta.templateId || meta.coreClave || meta.coreId || meta.template || meta.coreType;
+    if (!templateName) {
+      return res.status(400).json({ error: 'No se pudo determinar la plantilla base (templateId) en los metadatos.' });
+    }
 
     const templateDir = path.join(TEMPLATES_DIR, templateName);
-    const filesToSync = ['firestore.rules', 'firestore.indexes.json', 'storage.rules'];
+    if (!await fs.pathExists(templateDir)) {
+      return res.status(404).json({ error: `La plantilla base "${templateName}" no existe en el CLI.` });
+    }
+
+    const fileMappings = [
+      { src: 'firestore.rules', dest: 'firestore.rules' },
+      { src: 'firestore.indexes.json', dest: 'firestore.indexes.json' },
+      { src: 'storage.rules', dest: 'storage.rules' }
+    ];
+
     const auditResults = [];
     let differencesCount = 0;
 
-    for (const fileName of filesToSync) {
-      const srcPath = path.join(templateDir, fileName);
-      const destPath = path.join(projectDir, fileName);
+    for (const mapping of fileMappings) {
+      const srcFile = path.join(templateDir, mapping.src);
+      const destFile = path.join(projectDir, mapping.dest);
+      
+      const srcExists = await fs.pathExists(srcFile);
+      const destExists = await fs.pathExists(destFile);
 
-      const srcExists = await fs.pathExists(srcPath);
-      const destExists = await fs.pathExists(destPath);
+      if (!srcExists) continue;
 
-      let status = 'identical';
-      let srcContent = '';
-      let destContent = '';
+      let srcContent = await fs.readFile(srcFile, 'utf-8');
+      let destContent = destExists ? await fs.readFile(destFile, 'utf-8') : '';
 
-      if (srcExists) srcContent = await fs.readFile(srcPath, 'utf-8');
-      if (destExists) destContent = await fs.readFile(destPath, 'utf-8');
-
-      if (!srcExists) {
-        status = 'source_missing';
-      } else if (!destExists) {
-        status = 'destination_missing';
-        differencesCount++;
-      } else if (srcContent.trim() !== destContent.trim()) {
-        status = 'different';
-        differencesCount++;
+      // Sanitizar ID de proyecto para comparación limpia
+      const firebaseProjectId = meta.firebase?.projectId || '';
+      if (firebaseProjectId) {
+        srcContent = srcContent.replace(/proyecto-cliente-saas/g, firebaseProjectId);
       }
 
+      const hasDiff = srcContent.trim() !== destContent.trim();
+      if (hasDiff) differencesCount++;
+
       auditResults.push({
-        file: fileName,
-        status,
-        srcExists,
-        destExists
+        file: mapping.src,
+        status: hasDiff ? 'drifted' : 'synced',
+        existsInClient: destExists
       });
 
-      // Si se solicita sincronización y hay diferencias/falta el archivo destino
-      if (sync && srcExists && (status === 'different' || status === 'destination_missing')) {
-        await fs.copy(srcPath, destPath, { overwrite: true });
-        // Actualizar el estado en el reporte
-        auditResults[auditResults.length - 1].status = 'synced';
+      if (sync && hasDiff) {
+        await fs.writeFile(destFile, srcContent, 'utf-8');
+        console.log(`[Database Sync] Sincronizado archivo: ${mapping.dest}`);
       }
     }
 
     let deployed = false;
     let deployOutput = '';
+    const firebaseProjectId = meta.firebase?.projectId || '';
 
-    if (sync && differencesCount > 0) {
-      console.log(`[Database Sync] Desplegando reglas e índices para: ${firebaseProjectId}`);
+    if (sync && differencesCount > 0 && firebaseProjectId) {
+      console.log(`[Database Sync] Desplegando reglas automáticas a Firebase para: ${firebaseProjectId}`);
       try {
         const { stdout } = await execAsync(
           `firebase deploy --only firestore:rules,firestore:indexes,storage -P ${firebaseProjectId}`,
@@ -4683,8 +4736,11 @@ app.post('/api/project/sync-database', async (req, res) => {
   } catch (err) {
     console.error(`[API /project/sync-database] Error: ${err.message}`);
     res.status(500).json({ error: `Error en auditoría/sincronización de base de datos: ${err.message}` });
+  } finally {
+    delete projectSyncLocks[clientId];
   }
 });
+
 
 app.post('/api/cores/:clave/deactivate', async (req, res) => {
   const { clave } = req.params;
@@ -5694,9 +5750,14 @@ app.post('/api/project/sync-file', async (req, res) => {
     return res.status(403).json({ error: `El archivo ${file} contiene configuraciones o credenciales específicas de la instancia del cliente y está protegido contra sobrescritura.` });
   }
 
+  if (projectSyncLocks[clientId]) {
+    return res.status(429).json({ error: `Ya existe un proceso de sincronización activo para el cliente "${clientId}". Por favor, espera a que termine.` });
+  }
+
   const projectDir = await findProjectDir(clientId);
   if (!projectDir) return res.status(404).json({ error: `No se encontró el proyecto para: ${clientId}` });
 
+  projectSyncLocks[clientId] = true;
   try {
     const metaPath = path.join(projectDir, '.prototipe.json');
     const meta = await fs.pathExists(metaPath) ? await fs.readJson(metaPath) : {};
@@ -5718,8 +5779,16 @@ app.post('/api/project/sync-file', async (req, res) => {
       return res.status(404).json({ error: `Core de referencia no encontrado: ${coreId}` });
     }
 
-    const srcPath = path.join(coreDir, file);
-    const destPath = path.join(projectDir, file);
+    const srcPath = path.resolve(coreDir, file);
+    const destPath = path.resolve(projectDir, file);
+
+    // Validar Directory Traversal
+    if (!isPathContained(coreDir, srcPath)) {
+      return res.status(403).json({ error: `Acceso denegado. El archivo de origen "${file}" está fuera del Core de referencia.` });
+    }
+    if (!isPathContained(projectDir, destPath)) {
+      return res.status(403).json({ error: `Acceso denegado. El archivo de destino "${file}" está fuera del proyecto del cliente.` });
+    }
 
     if (!await fs.pathExists(srcPath)) {
       return res.status(404).json({ error: `El archivo de origen no existe en el Core: ${file}` });
@@ -5749,8 +5818,11 @@ app.post('/api/project/sync-file', async (req, res) => {
     }
   } catch (err) {
     res.status(500).json({ error: `Error al sincronizar archivo: ${err.message}` });
+  } finally {
+    delete projectSyncLocks[clientId];
   }
 });
+
 
 // Endpoint para sincronizar múltiples archivos desviados desde el Core al Cliente en lote
 app.post('/api/project/sync-files', async (req, res) => {
@@ -5759,9 +5831,14 @@ app.post('/api/project/sync-files', async (req, res) => {
     return res.status(400).json({ error: 'Los parámetros "clientId" y un array de "files" son obligatorios.' });
   }
 
+  if (projectSyncLocks[clientId]) {
+    return res.status(429).json({ error: `Ya existe un proceso de sincronización activo para el cliente "${clientId}". Por favor, espera a que termine.` });
+  }
+
   const projectDir = await findProjectDir(clientId);
   if (!projectDir) return res.status(404).json({ error: `No se encontró el proyecto para: ${clientId}` });
 
+  projectSyncLocks[clientId] = true;
   try {
     const metaPath = path.join(projectDir, '.prototipe.json');
     const meta = await fs.pathExists(metaPath) ? await fs.readJson(metaPath) : {};
@@ -5791,8 +5868,14 @@ app.post('/api/project/sync-files', async (req, res) => {
         continue;
       }
 
-      const srcPath = path.join(coreDir, file);
-      const destPath = path.join(projectDir, file);
+      const srcPath = path.resolve(coreDir, file);
+      const destPath = path.resolve(projectDir, file);
+
+      // Validar Directory Traversal
+      if (!isPathContained(coreDir, srcPath) || !isPathContained(projectDir, destPath)) {
+        results.push({ file, success: false, error: 'Acceso denegado (Directory Traversal detectado)' });
+        continue;
+      }
 
       if (await fs.pathExists(srcPath)) {
         await fs.ensureDir(path.dirname(destPath));
@@ -5829,8 +5912,11 @@ app.post('/api/project/sync-files', async (req, res) => {
     res.json({ success: true, message: `${files.length} archivos procesados.`, results });
   } catch (err) {
     res.status(500).json({ error: `Error al sincronizar lote de archivos: ${err.message}` });
+  } finally {
+    delete projectSyncLocks[clientId];
   }
 });
+
 
 // --- GESTIÓN DE SERVIDORES DE DESARROLLO LOCAL POR CLIENTE ---
 const devServers = new Map(); // clientId -> { child, url, status, logs }
