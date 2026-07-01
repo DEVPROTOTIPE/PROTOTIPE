@@ -2,15 +2,16 @@
 
 ### [2026-07-01] - CORE-150: Automatización Completa y Mejoras de Onboarding en el Asistente
 
-* **Tipo:** Feature / Aprovisionamiento / Automatización de Siembra / Onboarding
-* **Firma de auditoría:** CORE-150-ONBOARDING-AUTOMATION-PORT-VITE-SEED
+* **Tipo:** Feature / Aprovisionamiento / Automatización de Siembra / Onboarding / Accesibilidad WCAG 2.1
+* **Firma de auditoría:** CORE-150-ONBOARDING-AUTOMATION-PORT-VITE-SEED-WCAG-AAA
 * **Descripción de Cambios:**
   - **Auto-Siembra del Admin Inicial:** Se añadieron campos opcionales en el wizard UI para definir el Email y Contraseña del primer administrador. Al finalizar el aprovisionamiento físico, el CLI Bridge ejecuta de forma automatizada `node scripts/seed_admin.js` en segundo plano utilizando el token de sesión de Firebase CLI para crear el usuario en Firebase Auth y Firestore sin requerir intervención manual por parte de la IA o el desarrollador en el primer inicio de sesión.
   - **Puerto Local Vite Personalizado:** Se integró un campo opcional para asignar un puerto de desarrollo local personalizado a la instancia. El generador inyecta dicho puerto directamente en `vite.config.js` y `.env.local` (`VITE_DEVELOPER_CLIENT_ID`), aislando las bases de datos de IndexedDB, LocalStorage y sesiones de Firebase Auth locales para evitar colisiones y flashes de error 403 al alternar entre instancias locales.
   - **WhatsApp y Dirección de Sucursal Onboarding:** Se añadieron inputs en la pestaña de Branding para capturar el número de WhatsApp comercial y dirección física del local. Estos datos son autoinyectados en el documento de configuración global `config/settings` (incluyendo la estructura JSON completa de `deliverySettings.pickup`), reduciendo los pasos de configuración inicial del catálogo.
+  - **Generador Inteligente de Contraste AAA:** Se inyectó un botón interactivo "Generar Paleta AAA" en la pestaña de Branding del wizard. Este generador realiza cálculos matemáticos iterativos de luminancia relativa basados en la especificación W3C WCAG 2.1, encontrando y aplicando de forma aleatoria paletas de colores premium (tanto en modo oscuro como claro) que aseguran un contraste óptimo `>= 7.0:1` tanto en el Botón Primario como en la relación Fondo vs Texto (garantizando un puntaje verde del 100% / AAA Excelente en ambos medidores).
 * **Archivos Modificados:**
   - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY] — Integra lógica de auto-siembra, puerto local e inyección de datos comerciales en el script de seed.
-  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY] — Nuevos inputs y estados en las pestañas Servidor y Branding del Onboarding Wizard.
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY] — Nuevos inputs y estados en las pestañas Servidor y Branding del Onboarding Wizard, y el algoritmo de cálculo de contraste aleatorio.
 
 ### [2026-07-01] - CORE-149: Eliminación de Race Conditions — Errores 403 en Login No Autorizado
 
