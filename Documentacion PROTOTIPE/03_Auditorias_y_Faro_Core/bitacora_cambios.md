@@ -1,6 +1,24 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
-### [2026-07-01] - CORE-148: Corrección de Vulnerabilidad Crítica de Autenticación de Administrador y Solución de Bloqueo de Login
+### [2026-07-01] - CORE-149: Eliminación de Race Conditions — Errores 403 en Login No Autorizado
+
+* **Tipo:** Seguridad / Autenticación / Corrección de Race Conditions / Firestore Rules
+* **Firma de auditoría:** CORE-149-AUTH-RACE-CONDITIONS-FALSE-403-FIX
+* **Descripción de Cambios:**
+  - **Root Cause identificado:** Al intentar login con credenciales no autorizadas, tres race conditions independientes generaban errores `Missing or insufficient permissions` en consola: (1) `getDocFromServer` en `LoginPage.jsx` competía con el `auth.signOut()` de `useAuthInit` — el SDK cancelaba la petición Firestore en vuelo cuando el token era revocado. (2) `AdminHome.jsx` se montaba y disparaba queries de créditos, pedidos y tracking analíticos durante la ventana de ~200ms antes que `useAuthInit` completara la verificación del rol. (3) `useAppConfigSync` propagaba billing porque `role === 'admin'` no había sido limpiado del store aún.
+  - **Fix 1 — Eliminación de `getDocFromServer`:** Se eliminó el bloque de consulta directa al servidor en `LoginPage.handleAdminAuth`. La nueva `isFirstStart()` en las Firestore Rules provee la protección en DB; el cliente usa `adminRegistered` del store local. La seguridad del primer arranque queda garantizada a nivel de reglas, no de lógica de cliente.
+  - **Fix 2 — Guard `isAuthLoading` en `AdminHome`:** Se agrega `isAuthLoading` del `authStore` a `AdminHome.jsx`. Si `isAuthLoading === true` (useAuthInit aún verifica el rol), se retorna `null` antes del JSX principal. Ningún hook de Firestore (`useOrders`, `useCredits`, `useProducts`, `useBilling`, `getTrackingMetrics`) puede disparar queries durante la ventana de validación.
+  - **Fix 3 — `isFirstStart()` en Firestore Rules:** Se agregó el helper `isFirstStart()` que evalúa `!exists(config/settings)`. Se modificaron las reglas de `/config/{document}` y `/users/{userId}` para permitir escritura si `isAdmin() || isFirstStart()`. Esto permite el setup del primer administrador directamente desde el cliente sin requerir service account, y se auto-deshabilita permanentemente una vez creado el documento de configuración.
+* **Archivos Modificados:**
+  - [`Plantillas Core/App Ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/LoginPage.jsx) [MODIFY] — Elimina `getDocFromServer`, usa `adminRegistered` local
+  - [`Plantillas Core/App Ventas/src/pages/admin/AdminHome.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminHome.jsx) [MODIFY] — Guard `isAuthLoading` + early return null
+  - [`Plantillas Core/App Ventas/firestore.rules`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firestore.rules) [MODIFY] — Helper `isFirstStart()` añadido
+  - [`Instancias Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx) [MODIFY] — Sincronizado
+  - [`Instancias Clientes/ventas/ventas-moni-app/src/pages/admin/AdminHome.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/AdminHome.jsx) [MODIFY] — Sincronizado
+  - [`Instancias Clientes/ventas/ventas-moni-app/firestore.rules`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/firestore.rules) [MODIFY] — Sincronizado
+  - [`Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx) [MODIFY] — Sincronizado
+  - [`Prototipe-CLI/templates/template-ventas/firestore.rules`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/firestore.rules) [MODIFY] — Sincronizado
+
 
 * **Tipo:** Seguridad / Autenticación / Failsafe / Mitigación de Desincronización de Cache / UI-Spinner-Fix
 * **Firma de auditoría:** CORE-148-AUTH-BYPASS-EXPLOIT-AND-CACHE-DESYNC-FIX
