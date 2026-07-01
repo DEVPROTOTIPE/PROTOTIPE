@@ -253,7 +253,7 @@ app.get('/api/firebase-config', async (req, res) => {
       const noWebApp = errText.includes('no web apps') || errText.includes('not found');
 
       if (noWebApp) {
-        const appDisplayName = (projectName || safeProjectId).replace(/["\\]/g, '');
+        const appDisplayName = (projectName || safeProjectId).trim().replace(/[^a-zA-Z0-9\s\-_]/g, '');
         console.log(`[API] No se encontró Web App en ${safeProjectId}. Creando "${appDisplayName}"...`);
         await execAsync(
           `firebase apps:create web "${appDisplayName}" --project ${safeProjectId}`,
@@ -381,10 +381,11 @@ app.post('/api/upload-logo', async (req, res) => {
     return res.status(400).json({ error: 'filename y base64 son requeridos.' });
   }
   try {
+    const safeFilename = path.basename(filename);
     const buffer = Buffer.from(base64, 'base64');
     const uploadDir = path.join(CLI_ROOT, 'temp_uploads');
     await fs.ensureDir(uploadDir);
-    const targetPath = path.join(uploadDir, filename);
+    const targetPath = path.join(uploadDir, safeFilename);
 
     // Guardar temporalmente
     await fs.writeFile(targetPath, buffer);
@@ -438,7 +439,9 @@ async function executeCreationTaskInBackground(taskId, answers) {
     console.log(`[Creation Task ${taskId}] ${line}`);
     task.logs.push(line);
     task.listeners.forEach(res => {
-      res.write(`data: ${JSON.stringify({ type: 'log', line })}\n\n`);
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ type: 'log', line })}\n\n`);
+      }
     });
   };
   
@@ -449,53 +452,63 @@ async function executeCreationTaskInBackground(taskId, answers) {
     if (answers.autoProvisionFirebase) {
       log(`[Firebase Automate] Iniciando automatización Firebase para: ${finalProjectId}`);
       
+      const safeProjectId = finalProjectId.replace(/[^a-z0-9\-]/gi, '');
+      const safeProjectName = answers.projectName.replace(/[^a-zA-Z0-9\s\-_]/g, '');
+
       // 1. Crear el proyecto Firebase si no existe
       try {
-        log(`[Firebase Automate] Creando proyecto Firebase "${answers.projectName}" con ID "${finalProjectId}"...`);
-        await execAsync(`firebase projects:create ${finalProjectId} --display-name "${answers.projectName}"`, { timeout: 180000 });
+        log(`[Firebase Automate] Creando proyecto Firebase "${safeProjectName}" con ID "${safeProjectId}"...`);
+        await execAsync(`firebase projects:create ${safeProjectId} --display-name "${safeProjectName}"`, { timeout: 180000 });
         log(`[Firebase Automate] Proyecto Firebase creado exitosamente.`);
       } catch (createErr) {
         if (createErr.message.includes('already exists') || createErr.stderr?.includes('already exists')) {
-          log(`[Firebase Automate] El proyecto "${finalProjectId}" ya existe. Continuando con recursos...`);
+          log(`[Firebase Automate] El proyecto "${safeProjectId}" ya existe. Continuando con recursos...`);
         } else {
           throw createErr;
         }
       }
 
-      // 2. Crear base de datos Firestore default (nam5)
-      try {
-        log(`[Firebase Automate] Inicializando Firestore (default) en nam5...`);
-        await execAsync(`firebase firestore:databases:create "(default)" --project ${finalProjectId} --location nam5`, { timeout: 120000 });
-        log(`[Firebase Automate] Firestore (default) creado con éxito.`);
-      } catch (dbErr) {
-        const errorText = (dbErr.message || '') + (dbErr.stderr || '');
-        if (
-          errorText.includes('already exists') ||
-          errorText.includes('Conflict') ||
-          errorText.includes('409') ||
-          errorText.includes('ALREADY_EXISTS')
-        ) {
-          log(`[Firebase Automate] Firestore ya está inicializado o en proceso de aprovisionamiento.`);
-        } else {
-          log(`[Firebase Automate Warning] No se pudo inicializar la BD default: ${dbErr.message}`);
+      // 2 y 3. Crear base de datos Firestore default (nam5) y Web App en paralelo
+      log(`[Firebase Automate] Creando base de datos Firestore y registrando aplicación Web en paralelo...`);
+      const createDbPromise = (async () => {
+        try {
+          log(`[Firebase Automate] Inicializando Firestore (default) en nam5...`);
+          await execAsync(`firebase firestore:databases:create "(default)" --project ${safeProjectId} --location nam5`, { timeout: 120000 });
+          log(`[Firebase Automate] Firestore (default) creado con éxito.`);
+        } catch (dbErr) {
+          const errorText = (dbErr.message || '') + (dbErr.stderr || '');
+          if (
+            errorText.includes('already exists') ||
+            errorText.includes('Conflict') ||
+            errorText.includes('409') ||
+            errorText.includes('ALREADY_EXISTS')
+          ) {
+            log(`[Firebase Automate] Firestore ya está inicializado.`);
+          } else {
+            log(`[Firebase Automate Warning] No se pudo inicializar la BD default: ${dbErr.message}`);
+          }
         }
-      }
+      })();
 
-      // 3. Crear aplicación Web
-      try {
-        log(`[Firebase Automate] Registrando Web App "${answers.projectName}"...`);
-        await execAsync(`firebase apps:create web "${answers.projectName}" --project ${finalProjectId}`, { timeout: 90000 });
-      } catch (appErr) {
-        if (appErr.message.includes('already exists') || appErr.stderr?.includes('already exists')) {
-          log(`[Firebase Automate] La Web App ya está registrada.`);
-        } else {
-          throw appErr;
+      const createAppPromise = (async () => {
+        try {
+          log(`[Firebase Automate] Registrando Web App "${safeProjectName}"...`);
+          await execAsync(`firebase apps:create web "${safeProjectName}" --project ${safeProjectId}`, { timeout: 90000 });
+          log(`[Firebase Automate] Web App registrada con éxito.`);
+        } catch (appErr) {
+          if (appErr.message.includes('already exists') || appErr.stderr?.includes('already exists')) {
+            log(`[Firebase Automate] La Web App ya está registrada.`);
+          } else {
+            throw appErr;
+          }
         }
-      }
+      })();
+
+      await Promise.all([createDbPromise, createAppPromise]);
 
       // 4. Extraer credenciales SDK
       log(`[Firebase Automate] Extrayendo SDK Config...`);
-      const { stdout } = await execAsync(`firebase apps:sdkconfig web --project ${finalProjectId} --json`, { timeout: 60000 });
+      const { stdout } = await execAsync(`firebase apps:sdkconfig web --project ${safeProjectId} --json`, { timeout: 60000 });
       const jsonMatch = stdout.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('Respuesta inesperada al obtener sdkconfig.');
       const sdkData = JSON.parse(jsonMatch[0]);
@@ -517,20 +530,30 @@ async function executeCreationTaskInBackground(taskId, answers) {
     
     log(`[API Bridge] Proyecto '${answers.projectName}' creado con éxito en: ${result.targetDir}`);
     
+    const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    delete projectSyncLocks[clientId];
+
     task.status = 'success';
     task.data = result;
     task.listeners.forEach(res => {
-      res.write(`data: ${JSON.stringify({ type: 'success', data: result })}\n\n`);
-      res.end();
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ type: 'success', data: result })}\n\n`);
+        res.end();
+      }
     });
     task.listeners = [];
   } catch (err) {
     console.error(`[API Bridge] Error durante la creación en segundo plano: ${err.message}`);
+    const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    delete projectSyncLocks[clientId];
+
     task.status = 'error';
     task.error = err.message;
     task.listeners.forEach(res => {
-      res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`);
-      res.end();
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`);
+        res.end();
+      }
     });
     task.listeners = [];
   }
@@ -541,7 +564,13 @@ app.post('/api/create-project', async (req, res) => {
   projectDirCache.clear();
   const answers = req.body;
   if (answers.projectName) {
-    answers.projectName = sanitizeShellArgument(answers.projectName);
+    answers.projectName = answers.projectName.trim().replace(/[^a-zA-Z0-9\s\-_]/g, '');
+  }
+  if (answers.firebaseProjectId) {
+    answers.firebaseProjectId = answers.firebaseProjectId.trim().replace(/[^a-z0-9\-]/g, '');
+  }
+  if (answers.template) {
+    answers.template = answers.template.trim().replace(/[^a-zA-Z0-9\-_]/g, '');
   }
   
   // Validaciones básicas de campos requeridos
@@ -574,6 +603,14 @@ app.post('/api/create-project', async (req, res) => {
   }
 
   const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  // Validar exclusión mutua
+  if (projectSyncLocks[clientId]) {
+    return res.status(409).json({ error: `Ya hay una tarea de aprovisionamiento activa para el cliente "${clientId}". Por favor espera a que finalice.` });
+  }
+  // Adquirir bloqueo
+  projectSyncLocks[clientId] = true;
+
   const finalProjectId = answers.firebaseProjectId ? answers.firebaseProjectId.trim() : clientId;
   answers.firebaseProjectId = finalProjectId;
 
@@ -648,7 +685,16 @@ app.get('/api/create-project/stream', (req, res) => {
   // Registrar respuesta activa en listeners
   task.listeners.push(res);
 
+  const keepAliveInterval = setInterval(() => {
+    try {
+      res.write(': keep-alive\n\n');
+    } catch (_) {
+      clearInterval(keepAliveInterval);
+    }
+  }, 20000);
+
   req.on('close', () => {
+    clearInterval(keepAliveInterval);
     task.listeners = task.listeners.filter(l => l !== res);
   });
 });
@@ -2198,6 +2244,11 @@ app.post('/api/library/inject', async (req, res) => {
     return res.status(400).json({ error: 'Los campos "clientId", "componentLink" y "targetRelativePath" son obligatorios.' });
   }
 
+  if (projectSyncLocks[clientId]) {
+    return res.status(409).json({ error: 'Ya existe una operación de aprovisionamiento, inyección o sincronización en curso para este cliente.' });
+  }
+  projectSyncLocks[clientId] = true;
+
   try {
     const targetProjectDir = await findProjectDir(clientId);
     if (!targetProjectDir) {
@@ -2332,6 +2383,8 @@ app.post('/api/library/inject', async (req, res) => {
   } catch (err) {
     console.error(`[API /library/inject] Error en inyección inteligente: ${err.message}`);
     res.status(500).json({ error: `Error en inyección inteligente: ${err.message}` });
+  } finally {
+    delete projectSyncLocks[clientId];
   }
 });
 
@@ -2342,6 +2395,17 @@ app.post('/api/library/inject/stream', async (req, res) => {
   if (!clientId || !componentLink || !targetRelativePath) {
     return res.status(400).json({ error: 'Los campos "clientId", "componentLink" y "targetRelativePath" son obligatorios.' });
   }
+
+  if (projectSyncLocks[clientId]) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
+    res.write(`data: ${JSON.stringify({ event: 'error', message: 'Ya existe una operación de aprovisionamiento, inyección o sincronización en curso para este cliente.' })}\n\n`);
+    return res.end();
+  }
+  projectSyncLocks[clientId] = true;
 
   // Configurar SSE
   res.setHeader('Content-Type', 'text/event-stream');
@@ -2673,6 +2737,7 @@ app.post('/api/library/inject/stream', async (req, res) => {
     }
     emit('error', { message: err.message });
   } finally {
+    delete projectSyncLocks[clientId];
     res.end();
   }
 });
@@ -5796,6 +5861,7 @@ app.get('/api/project/drift', async (req, res) => {
         
         const missingDeps = [];
         const mismatchDeps = [];
+        const addedDeps = [];
         
         for (const dep in coreDeps) {
           if (!clientDeps[dep]) {
@@ -5804,15 +5870,44 @@ app.get('/api/project/drift', async (req, res) => {
             mismatchDeps.push({ name: dep, coreVersion: coreDeps[dep], clientVersion: clientDeps[dep] });
           }
         }
+
+        for (const dep in clientDeps) {
+          if (!coreDeps[dep]) {
+            addedDeps.push(dep);
+          }
+        }
         
-        if (missingDeps.length > 0 || mismatchDeps.length > 0) {
+        if (missingDeps.length > 0 || mismatchDeps.length > 0 || addedDeps.length > 0) {
           dependenciesOutOfSync = true;
-          dependencyDetails = { missingDeps, mismatchDeps };
+          dependencyDetails = { missingDeps, mismatchDeps, addedDeps };
         }
       } catch (e) {
         console.warn(`Error al comparar package.json para dependencias de ${clientId}:`, e.message);
       }
     }
+
+    // Auditoría de compilación Vite bajo demanda
+    let buildAuditStatus = 'skipped';
+    let buildAuditOutput = '';
+    const buildAuditRequested = req.query.buildAudit === 'true';
+
+    if (buildAuditRequested) {
+      try {
+        const { stdout } = await execAsync('npm run build', { cwd: projectDir, timeout: 45000 });
+        buildAuditStatus = 'success';
+        buildAuditOutput = stdout ? stdout.trim().slice(-1000) : 'Build exitoso (sin salida).';
+      } catch (buildErr) {
+        buildAuditStatus = 'error';
+        const rawOutput = (buildErr.stdout || '') + '\n' + (buildErr.stderr || '') + '\n' + buildErr.message;
+        buildAuditOutput = rawOutput.trim().slice(-1000);
+      }
+    }
+
+    const npmDriftCount = (dependencyDetails?.missingDeps?.length || 0) + 
+                          (dependencyDetails?.mismatchDeps?.length || 0) + 
+                          (dependencyDetails?.addedDeps?.length || 0);
+    const fileDiffCount = differences.length;
+    const consistencyScore = Math.max(0, 100 - (npmDriftCount * 5) - (fileDiffCount * 2));
 
     res.json({
       success: true,
@@ -5821,7 +5916,10 @@ app.get('/api/project/drift', async (req, res) => {
       parityPercent,
       differences,
       dependenciesOutOfSync,
-      dependencyDetails
+      dependencyDetails,
+      buildAuditStatus,
+      buildAuditOutput,
+      consistencyScore
     });
   } catch (err) {
     console.error(`[API /project/drift] Error: ${err.message}`);
@@ -6013,6 +6111,24 @@ app.post('/api/project/sync-files', async (req, res) => {
 const devServers = new Map(); // clientId -> { child, url, status, logs }
 const devServerLogListeners = new Map(); // clientId -> Set of Response objects
 
+// Registrar hooks globales de salida para evitar procesos Vite zombis
+function cleanupDevServers() {
+  for (const [clientId, serverInfo] of devServers.entries()) {
+    if (serverInfo && serverInfo.child) {
+      try {
+        serverInfo.child.kill('SIGTERM');
+      } catch (_) {}
+    }
+  }
+}
+process.on('SIGINT', () => {
+  cleanupDevServers();
+  process.exit(0);
+});
+process.on('exit', () => {
+  cleanupDevServers();
+});
+
 app.get('/api/project/dev/status', async (req, res) => {
   const { clientId } = req.query;
   if (!clientId) return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
@@ -6047,7 +6163,16 @@ app.get('/api/project/dev/logs-stream', (req, res) => {
   }
   devServerLogListeners.get(clientId).add(res);
 
+  const keepAliveInterval = setInterval(() => {
+    try {
+      res.write(': keep-alive\n\n');
+    } catch (_) {
+      clearInterval(keepAliveInterval);
+    }
+  }, 20000);
+
   req.on('close', () => {
+    clearInterval(keepAliveInterval);
     const listeners = devServerLogListeners.get(clientId);
     if (listeners) {
       listeners.delete(res);
@@ -6444,7 +6569,7 @@ async function hasGitFolder(dir) {
 }
 
 async function execGitCommand(cmd, dir) {
-  if (typeof cmd !== 'string' || /[|;&$`<>]/g.test(cmd)) {
+  if (typeof cmd !== 'string' || /[|;&$`<>\r\n]/g.test(cmd)) {
     throw new Error('Comando de Git contiene caracteres prohibidos o inseguros.');
   }
   const gitFolder = await getGitDirName(dir);
@@ -8648,19 +8773,25 @@ app.get('/api/cli/logs/stream', async (req, res) => {
       try {
         const stats = await fs.stat(logPath);
         if (stats.size > filePosition) {
-          const fd = await fs.open(logPath, 'r');
-          const buffer = Buffer.alloc(stats.size - filePosition);
-          await fs.read(fd, buffer, 0, stats.size - filePosition, filePosition);
-          await fs.close(fd);
-          filePosition = stats.size;
+          let fd;
+          try {
+            fd = await fs.open(logPath, 'r');
+            const buffer = Buffer.alloc(stats.size - filePosition);
+            await fs.read(fd, buffer, 0, stats.size - filePosition, filePosition);
+            filePosition = stats.size;
 
-          const newContent = buffer.toString('utf8');
-          const lines = newContent.split(/\r?\n/);
-          lines.forEach(line => {
-            if (line.trim()) {
-              res.write(`data: ${JSON.stringify({ type: 'log', log: line })}\n\n`);
+            const newContent = buffer.toString('utf8');
+            const lines = newContent.split(/\r?\n/);
+            lines.forEach(line => {
+              if (line.trim()) {
+                res.write(`data: ${JSON.stringify({ type: 'log', log: line })}\n\n`);
+              }
+            });
+          } finally {
+            if (fd !== undefined) {
+              await fs.close(fd).catch(() => {});
             }
-          });
+          }
         } else if (stats.size < filePosition) {
           filePosition = stats.size;
         }
@@ -8668,7 +8799,16 @@ app.get('/api/cli/logs/stream', async (req, res) => {
     }
   });
 
+  const keepAliveInterval = setInterval(() => {
+    try {
+      res.write(': keep-alive\n\n');
+    } catch (_) {
+      clearInterval(keepAliveInterval);
+    }
+  }, 20000);
+
   req.on('close', () => {
+    clearInterval(keepAliveInterval);
     watcher.close();
     res.end();
   });
@@ -9379,6 +9519,103 @@ app.get('/api/health/:clientId', async (req, res) => {
   });
 });
 
+// Caché en memoria para guardar el formato de bucket exitoso de cada cliente
+const storageBucketCache = new Map(); // clientId -> bucketName
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/project/firebase/cors-setup
+// Configuración automatizada de CORS en Google Cloud Storage para el bucket de Firebase
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/project/firebase/cors-setup', async (req, res) => {
+  const { clientId, allowedOrigins } = req.body;
+  if (!clientId) return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+
+  try {
+    const projectPath = await findProjectDir(clientId);
+    if (!projectPath) return res.status(404).json({ error: `Proyecto no encontrado para el cliente: ${clientId}` });
+
+    const firebaseRcPath = path.join(projectPath, '.firebaserc');
+    if (!(await fs.pathExists(firebaseRcPath))) {
+      return res.status(400).json({ error: 'No se encontró el archivo .firebaserc en la instancia del cliente.' });
+    }
+
+    const rc = await fs.readJson(firebaseRcPath);
+    const projectId = rc.projects?.default;
+    if (!projectId) {
+      return res.status(400).json({ error: 'No se definió un proyecto default de Firebase en .firebaserc' });
+    }
+
+    const corsConfig = [
+      {
+        "origin": allowedOrigins || ["http://localhost:5173", "http://localhost:3000", "http://localhost:5174"],
+        "method": ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+        "responseHeader": ["Content-Type", "Authorization", "x-goog-meta-custom-header"],
+        "maxAgeSeconds": 3600
+      }
+    ];
+
+    const tempCorsPath = path.join(projectPath, 'cors-temp.json');
+    await fs.writeJson(tempCorsPath, corsConfig, { spaces: 2 });
+
+    const bucketName1 = `${projectId}.appspot.com`.replace(/[^a-z0-9\-\.\_]/gi, '');
+    const bucketName2 = `${projectId}.firebasestorage.app`.replace(/[^a-z0-9\-\.\_]/gi, '');
+
+    let success = false;
+    let lastError = null;
+    let cmdOutput = '';
+
+    const cachedBucket = storageBucketCache.get(clientId);
+
+    if (cachedBucket) {
+      try {
+        const { stdout, stderr } = await execAsync(`gsutil cors set cors-temp.json gs://${cachedBucket}`, { cwd: projectPath, timeout: 30000 });
+        cmdOutput = `[gsutil] (Caché) Configurando CORS en gs://${cachedBucket}...\n` + (stdout || '') + '\n' + (stderr || '') + '\n[Éxito] Reglas aplicadas correctamente.';
+        success = true;
+      } catch (errCache) {
+        lastError = errCache;
+        storageBucketCache.delete(clientId); // Si falla el caché (ej. se borró el bucket), lo limpiamos
+      }
+    }
+
+    if (!success) {
+      try {
+        const { stdout, stderr } = await execAsync(`gsutil cors set cors-temp.json gs://${bucketName1}`, { cwd: projectPath, timeout: 30000 });
+        cmdOutput = `[gsutil] Configurando CORS en gs://${bucketName1}...\n` + (stdout || '') + '\n' + (stderr || '') + '\n[Éxito] Reglas aplicadas correctamente.';
+        storageBucketCache.set(clientId, bucketName1);
+        success = true;
+      } catch (err1) {
+        lastError = err1;
+        if (err1.message.includes('404') || err1.message.includes('not exist') || err1.message.includes('NotFoundException')) {
+          console.log(`[cors-setup] Bucket ${bucketName1} no encontrado. Intentando fallback con ${bucketName2}...`);
+          try {
+            const { stdout, stderr } = await execAsync(`gsutil cors set cors-temp.json gs://${bucketName2}`, { cwd: projectPath, timeout: 30000 });
+            cmdOutput = `[gsutil] Bucket ${bucketName1} no encontrado (404).\n[gsutil] Configurando CORS en gs://${bucketName2} (Fallback)...\n` + (stdout || '') + '\n' + (stderr || '') + '\n[Éxito] Reglas aplicadas correctamente.';
+            storageBucketCache.set(clientId, bucketName2);
+            success = true;
+          } catch (err2) {
+            lastError = err2;
+          }
+        }
+      }
+    }
+
+    await fs.remove(tempCorsPath);
+
+    if (!success) {
+      throw lastError;
+    }
+
+    res.json({ success: true, message: `Políticas CORS aplicadas con éxito en el bucket.`, output: cmdOutput.trim() });
+  } catch (err) {
+    console.error(`[cors-setup] Error: ${err.message}`);
+    let userFriendlyError = err.message;
+    if (err.message.includes('gsutil') && (err.message.includes('no se reconoce') || err.message.includes('not found') || err.message.includes('ENOENT') || err.message.includes('is not recognized'))) {
+      userFriendlyError = 'El comando "gsutil" de Google Cloud SDK no está instalado o no se encuentra en las Variables de Entorno (PATH) de tu sistema. Solución: 1) Instala "gcloud CLI" de Google Cloud, o 2) Agrega la ruta de instalación de gcloud/bin al PATH de tu Windows.';
+    }
+    res.status(500).json({ error: `Fallo al configurar CORS: ${userFriendlyError}` });
+  }
+});
+
 async function startServer(port) {
   const server = app.listen(port, '127.0.0.1', () => {
     console.log(`\n🚀 [Prototipe CLI Bridge] Servidor local escuchando en: http://127.0.0.1:${port}`);
@@ -9440,6 +9677,17 @@ async function startServer(port) {
     }
   });
 }
+
+// Blindaje de proceso global contra fallos asíncronos no controlados
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('\n⚠️  [Process Shield] Rechazo de promesa no manejado detectado:');
+  console.error(reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('\n⚠️  [Process Shield] Excepción no capturada detectada:');
+  console.error(err.message, err.stack);
+});
 
 // Ejecutar diagnósticos de dependencias del PATH una sola vez al arranque
 await runPreflightChecks();

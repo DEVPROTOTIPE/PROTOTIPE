@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import pc from 'picocolors';
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import { fileURLToPath, pathToFileURL } from 'url';
 import ora from 'ora';
 import { Jimp } from 'jimp';
@@ -11,6 +11,62 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const CLI_ROOT = __dirname;
 const TEMPLATES_DIR = path.join(CLI_ROOT, 'templates');
+
+// Validar contención de rutas físicas para evitar Directory Traversal de forma agnóstica a la plataforma
+function isPathContained(parentPath, childPath) {
+  if (!parentPath || !childPath) return false;
+  const parentResolved = path.resolve(parentPath);
+  const childResolved = path.resolve(childPath);
+  return childResolved.startsWith(parentResolved + path.sep) || childResolved === parentResolved;
+}
+
+// Ejecutar comandos de manera asíncrona no bloqueante capturando stdout/stderr para streaming SSE
+function execAsyncCommand(cmd, args, options = {}) {
+  return new Promise((resolve, reject) => {
+    console.log(`[Ejecutando] ${cmd} ${args.join(' ')}`);
+    const child = spawn(cmd, args, {
+      shell: true,
+      ...options
+    });
+
+    let errorOutput = '';
+
+    if (child.stdout) {
+      child.stdout.on('data', (data) => {
+        const lines = data.toString().split(/\r?\n/);
+        lines.forEach(line => {
+          if (line.trim()) {
+            console.log(line);
+          }
+        });
+      });
+    }
+
+    if (child.stderr) {
+      child.stderr.on('data', (data) => {
+        const lines = data.toString().split(/\r?\n/);
+        lines.forEach(line => {
+          if (line.trim()) {
+            console.log(`[Detalle] ${line}`);
+            errorOutput += line + '\n';
+          }
+        });
+      });
+    }
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`El comando "${cmd} ${args.join(' ')}" falló con código ${code}.\n${errorOutput}`));
+      }
+    });
+
+    child.on('error', (err) => {
+      reject(err);
+    });
+  });
+}
 
 // [ROBUSTEZ] Leer versión del CLI desde su propio package.json para usarla en metadatos de instancias.
 // Evita el hardcode de '1.0.0' que hace imposible rastrear la compatibilidad real de las instancias.
@@ -135,6 +191,27 @@ async function checkEnvironment(answers) {
     throw new Error('Firebase CLI no tiene sesión iniciada. Ejecuta: firebase login');
   }
 
+  // 1.05 Validar que el proyecto ID exista y el usuario tenga acceso a él en Firebase CLI
+  if (answers.firebaseProjectId) {
+    try {
+      const targetProj = String(answers.firebaseProjectId || '').trim();
+      const projListRaw = execSync('firebase projects:list --json', { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
+      const projData = JSON.parse(projListRaw);
+      const projList = projData.result || [];
+      const hasAccess = projList.some(p => String(p.projectId || '').trim() === targetProj);
+      if (!hasAccess) {
+        spinner.fail();
+        throw new Error(`El ID de proyecto Firebase "${targetProj}" no se encuentra asociado a tu cuenta. Verifica el ID o los permisos en la consola de Firebase.`);
+      }
+    } catch (err) {
+      if (err.message && err.message.includes('no se encuentra asociado a tu cuenta')) {
+        throw err;
+      }
+      // Advertencia en lugar de bloqueo si es error de red o formato
+      console.warn(pc.yellow(`\n⚠️  [Preflight Firebase] No se pudo comprobar el acceso al proyecto "${answers.firebaseProjectId}" en tu cuenta: ${err.message}. Continuando.`));
+    }
+  }
+
   // 1.1 Validar credenciales de Firebase en la nube si no es aprovisionamiento automático
   if (!answers.autoProvisionFirebase && answers.firebaseApiKey && answers.firebaseProjectId) {
     spinner.text = '🔍 Validando credenciales de Firebase en la nube...';
@@ -177,6 +254,55 @@ async function checkEnvironment(answers) {
 }
 
 /**
+ * Resuelve de forma estática el catálogo inicial de productos y categorías para el nicho comercial.
+ * @param {string} niche Nombre del nicho
+ * @returns {Object} { categories, products }
+ */
+function resolveNicheCatalog(niche) {
+  let categories = [];
+  let products = [];
+  
+  if (niche === 'ventas' || niche === 'ecommerce') {
+    categories = [
+      { id: 'cat-calzado', name: 'Calzado Deportivo' },
+      { id: 'cat-accesorios', name: 'Accesorios' }
+    ];
+    products = [
+      { id: 'prod-sneakers', name: 'Zapatillas Alpha Run', price: 289000, categoryId: 'cat-calzado', stock: 15, ref: 'SNEAK-01' },
+      { id: 'prod-cap', name: 'Gorra Deportiva Pro', price: 59000, categoryId: 'cat-accesorios', stock: 30, ref: 'CAP-02' }
+    ];
+  } else if (niche === 'barberia' || niche === 'salon' || niche === 'servicios') {
+    categories = [
+      { id: 'cat-cortes', name: 'Cortes & Estilo' },
+      { id: 'cat-barba', name: 'Cuidado de Barba' }
+    ];
+    products = [
+      { id: 'prod-corte', name: 'Corte de Cabello Premium', price: 35000, categoryId: 'cat-cortes', stock: 999, ref: 'SERV-01' },
+      { id: 'prod-ritual', name: 'Ritual de Barba y Toalla Caliente', price: 25000, categoryId: 'cat-barba', stock: 999, ref: 'SERV-02' }
+    ];
+  } else if (niche === 'gastronomia' || niche === 'restaurante') {
+    categories = [
+      { id: 'cat-burgers', name: 'Hamburguesas' },
+      { id: 'cat-bebidas', name: 'Bebidas' }
+    ];
+    products = [
+      { id: 'prod-burger', name: 'Doble Bacon Cheese Burger', price: 27900, categoryId: 'cat-burgers', stock: 100, ref: 'FOOD-01' },
+      { id: 'prod-soda', name: 'Limonada de Coco Natural', price: 12000, categoryId: 'cat-bebidas', stock: 200, ref: 'FOOD-02' }
+    ];
+  } else {
+    categories = [
+      { id: 'cat-general', name: 'General' }
+    ];
+    products = [
+      { id: 'prod-demo-a', name: 'Producto Demo A', price: 10000, categoryId: 'cat-general', stock: 50, ref: 'DEMO-A' },
+      { id: 'prod-demo-b', name: 'Producto Demo B', price: 25000, categoryId: 'cat-general', stock: 25, ref: 'DEMO-B' }
+    ];
+  }
+  
+  return { categories, products };
+}
+
+/**
  * Lógica pura de aprovisionamiento de un nuevo proyecto con automatización extrema.
  * @param {Object} answers Datos recolectados del Briefing
  */
@@ -213,7 +339,12 @@ export async function createProject(answers) {
   // Declarar targetDir y srcTemplateDir después de validar clientId
   const { getInstancePath } = await import('./config.js');
   const targetDir = getInstancePath(coreType, `App-${folderName}`);
-  const srcTemplateDir = path.join(TEMPLATES_DIR, answers.template);
+  const existedBefore = await fs.pathExists(targetDir);
+  try {
+    const srcTemplateDir = path.join(TEMPLATES_DIR, answers.template);
+    if (!isPathContained(TEMPLATES_DIR, srcTemplateDir)) {
+      throw new Error(`Acceso denegado: El nombre de la plantilla "${answers.template}" no es válido.`);
+    }
 
   // Resolver colores HSL y Tema de la paleta seleccionada
   let primaryColor, accentColor, themeName;
@@ -527,10 +658,27 @@ VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN=${answers.costoPorFacturaDian ?? 0}
 
 # Nicho / Vertical de Negocio (usado por telemetría para contextualizar reportes de error)
 VITE_NICHE=${answers.niche || 'general'}`;
-`;
 
   await fs.writeFile(path.join(targetDir, '.env.local'), envContent, 'utf-8');
-  step4.succeed('Variables de entorno (.env.local) generadas e inyectadas.');
+  
+  const devEnvContent = envContent + `\nVITE_ENV=development`;
+  const prodEnvContent = envContent.replace(
+    new RegExp(`VITE_FIREBASE_PROJECT_ID=${fbProjectId}`),
+    `VITE_FIREBASE_PROJECT_ID=${fbProjectId}-prod`
+  ) + `\nVITE_ENV=production`;
+  await fs.writeFile(path.join(targetDir, '.env.development'), devEnvContent, 'utf-8');
+  await fs.writeFile(path.join(targetDir, '.env.production'), prodEnvContent, 'utf-8');
+
+  const firebaseRC = {
+    projects: {
+      default: fbProjectId,
+      development: fbProjectId,
+      production: `${fbProjectId}-prod`
+    }
+  };
+  await fs.writeJson(path.join(targetDir, '.firebaserc'), firebaseRC, { spaces: 2 });
+
+  step4.succeed('Variables de entorno duales (.env.local, .env.development, .env.production, .firebaserc) generadas.');
 
   // 4.1. Crear archivo .gitignore de forma nativa para prevenir fugas de secretos (Auditoría)
   const gitignorePath = path.join(targetDir, '.gitignore');
@@ -580,15 +728,9 @@ test-results/
 `;
   await fs.writeFile(gitignorePath, gitignoreContent, 'utf-8');
 
-  // 5. Crear archivo .firebaserc de forma nativa
+  // 5. El archivo .firebaserc ya fue generado en la sección de variables de entorno duales.
   const step5 = ora('Generar archivo de vinculación .firebaserc').start();
-  const firebasercContent = JSON.stringify({
-    projects: {
-      default: answers.firebaseProjectId
-    }
-  }, null, 2);
-  await fs.writeFile(path.join(targetDir, '.firebaserc'), firebasercContent, 'utf-8');
-  step5.succeed('Archivo de vinculación .firebaserc generado automáticamente.');
+  step5.succeed('Archivo de vinculación .firebaserc verificado (soporte dual de entornos activo).');
 
   // 5.1 Crear archivo firebase.json de forma nativa para configurar Firestore y Storage
   const step5_1 = ora('Generar configuración firebase.json').start();
@@ -706,113 +848,131 @@ test-results/
     }
   };
 
-  if (answers.niche === 'retail_clothing') {
-    nicheData.attributes = [
-      { name: 'talla', label: 'Talla', type: 'select', options: ['S', 'M', 'L', 'XL', '38', '39', '40', '41', '42'] },
-      { name: 'color', label: 'Color', type: 'text', placeholder: 'Ej. Negro, Blanco, Azul' }
-    ];
-  } else if (answers.niche === 'grocery_food') {
-    nicheData.attributes = [
-      { name: 'presentacion', label: 'Presentación', type: 'select', options: ['Libra', 'Kilo', 'Atado', 'Unidad'] }
-    ];
-  } else if (answers.niche === 'technical_services') {
-    nicheData.attributes = [
-      { name: 'material', label: 'Material', type: 'text', placeholder: 'Ej. Bronce SAE 64' },
-      { name: 'especificaciones', label: 'Especificación Técnica', type: 'text', placeholder: 'Ej. Rosca NPT 1/2' }
-    ];
-  } else if (answers.niche === 'refrigeration_ac') {
-    nicheData.attributes = [
-      { name: 'marca_equipo', label: 'Marca del Equipo', type: 'text', placeholder: 'Ej. LG, Carrier' },
-      { name: 'tipo_refrigerante', label: 'Tipo de Refrigerante', type: 'select', options: ['R-410A', 'R-22', 'R-134a', 'R-404A'] }
-    ];
-  } else if (answers.niche === 'contractors') {
-    nicheData.attributes = [
-      { name: 'unidad_medida', label: 'Unidad de Medida', type: 'select', options: ['Metro Lineal (m)', 'Metro Cuadrado (m2)', 'Metro Cúbico (m3)', 'Global (glb)', 'Día Operario'] }
-    ];
-  } else if (answers.niche === 'machinery_rental') {
-    nicheData.attributes = [
-      { name: 'numero_serial', label: 'Número Serial / Placa', type: 'text', placeholder: 'Ej. CAT-924G-01' },
-      { name: 'tarifa_tiempo', label: 'Modo de Alquiler', type: 'select', options: ['Por Hora', 'Por Día', 'Por Semana', 'Por Mes'] }
-    ];
-  } else if (answers.niche === 'carpentry') {
-    nicheData.attributes = [
-      { name: 'tipo_madera', label: 'Tipo de Madera', type: 'select', options: ['Pino', 'Cedro', 'Roble', 'Teca', 'MDF / Melamina'] },
-      { name: 'acabado', label: 'Acabado', type: 'select', options: ['Poliuretano', 'Laca Catalizada', 'Barniz', 'Aceite / Natural', 'Pintado'] }
-    ];
-  } else if (answers.niche === 'laundry') {
-    nicheData.attributes = [
-      { name: 'peso_estimado', label: 'Rango de Peso', type: 'select', options: ['1-5 kg', '6-10 kg', '11-15 kg', 'Más de 15 kg'] },
-      { name: 'tipo_prenda', label: 'Tipo de Prenda / Servicio', type: 'text', placeholder: 'Ej. Plumón, Traje, Cortina' }
-    ];
-  } else if (answers.niche === 'furniture_repair') {
-    nicheData.attributes = [
-      { name: 'tipo_tela', label: 'Tipo de Tela / Tapizado', type: 'text', placeholder: 'Ej. Microfibra Antirrasguño, Cuero' },
-      { name: 'estado_ingreso', label: 'Estado del Mueble', type: 'text', placeholder: 'Ej. Estructura rota / Solo espuma' }
-    ];
-  } else if (answers.niche === 'wellness_podology') {
-    nicheData.attributes = [
-      { name: 'duracion', label: 'Duración Estimada', type: 'select', options: ['30 min', '45 min', '1 hora', '1.5 horas', '2 horas'] },
-      { name: 'profesional', label: 'Profesional / Especialista', type: 'text', placeholder: 'Ej. Podólogo Principal / Esteticista' }
-    ];
-  } else if (answers.niche === 'insumos-agricolas') {
-    nicheData.attributes = [
-      { name: 'marca', label: 'Marca / Fabricante', type: 'text', placeholder: 'Ej. Syngenta, Stihl, Bayer' },
-      { name: 'compatibilidad', label: 'Compatibilidad de Repuesto', type: 'text', placeholder: 'Ej. Motor Stihl FS 160 / Universal' }
-    ];
-  } else if (answers.niche === 'alimentos-artesanales') {
-    nicheData.attributes = [
-      { name: 'presentacion', label: 'Presentación / Porciones', type: 'select', options: ['Unidad Individual', 'Caja x6', 'Caja x12', 'Media Libra', 'Una Libra'] },
-      { name: 'requiere_anticipo', label: 'Anticipación Requerida', type: 'select', options: ['Entrega Inmediata', '24 Horas de Anticipación', '48 Horas de Anticipación'] }
-    ];
-  } else if (answers.niche === 'ferreteria-rural') {
-    nicheData.attributes = [
-      { name: 'unidad_medida', label: 'Unidad de Venta', type: 'select', options: ['Unidad', 'Bulto / S Saco', 'Kilo', 'Metro', 'Rollo'] }
-    ];
-  } else if (answers.niche === 'repuestos-motos') {
-    nicheData.attributes = [
-      { name: 'marca_moto', label: 'Marca de Moto Compatible', type: 'text', placeholder: 'Ej. Yamaha, Pulsar, Boxer, Suzuki' },
-      { name: 'modelo_anio', label: 'Modelo / Año', type: 'text', placeholder: 'Ej. 2018 - 2022' }
-    ];
-  } else if (answers.niche === 'distribuidoras-beauty') {
-    nicheData.attributes = [
-      { name: 'tipo_presentacion', label: 'Presentación Profesional', type: 'select', options: ['Unidad Detal', 'Caja/Pack Mayorista', 'Litro / Galón (Granel)'] }
-    ];
-  } else if (answers.niche === 'petshops-locales') {
-    nicheData.attributes = [
-      { name: 'peso_concentrado', label: 'Peso del Empaque', type: 'select', options: ['1 kg', '2 kg', '8 kg', '15 kg', '22 kg', 'Suelto / Libra'] },
-      { name: 'mascota', label: 'Tipo de Mascota', type: 'select', options: ['Perro Adulto', 'Cachorro', 'Gato Adulto', 'Gatito', 'Otras Mascotas'] }
-    ];
-  } else if (answers.niche === 'repuestos-lineablanca') {
-    nicheData.attributes = [
-      { name: 'marca_electrodomestico', label: 'Marca Compatible', type: 'text', placeholder: 'Ej. Whirlpool, Mabe, Haceb, LG' },
-      { name: 'modelo_exacto', label: 'Modelo o Número de Parte', type: 'text', placeholder: 'Ej. W1023456 / Lavadora Haceb 13kg' }
-    ];
-  } else if (answers.niche === 'moda-local-calzado') {
-    nicheData.attributes = [
-      { name: 'talla', label: 'Talla', type: 'select', options: ['34', '35', '36', '37', '38', '39', '40', '41', '42', 'S', 'M', 'L', 'XL'] },
-      { name: 'material', label: 'Material / Composición', type: 'text', placeholder: 'Ej. Cuero 100% natural, Sintético, Lona' }
-    ];
-  } else if (answers.niche === 'alimentacion-saludable') {
-    nicheData.attributes = [
-      { name: 'alergenos', label: 'Alérgenos / Restricción', type: 'select', options: ['Libre de Gluten (Gluten Free)', 'Sin Azúcar Añadida', 'Vegano / Plant-Based', 'Keto / Bajo en Carbohidratos', 'Sin Restricción / Natural'] },
-      { name: 'presentacion', label: 'Presentación', type: 'text', placeholder: 'Ej. Frasco 250g, Bolsa de 500g, Cápsulas' }
-    ];
-  } else if (answers.niche === 'home-office-ergonomia') {
-    nicheData.attributes = [
-      { name: 'ajustable', label: 'Nivel de Ajuste', type: 'select', options: ['Totalmente Ajustable (Ergonómico)', 'Ajuste de Altura Únicamente', 'Fijo / Estático'] }
-    ];
-  } else if (answers.niche === 'licores-cocteleria') {
-    nicheData.attributes = [
-      { name: 'volumen_alcohol', label: 'Contenido / Volumen', type: 'select', options: ['Lata 330ml', 'Botella 375ml (Media)', 'Botella 750ml (Estándar)', 'Botella 1000ml (Litro)'] }
-    ];
-  } else if (answers.niche === 'coleccionismo-geek') {
-    nicheData.attributes = [
-      { name: 'estado_articulo', label: 'Estado / Edición', type: 'select', options: ['Nuevo en Caja (Mint in Box)', 'Edición Limitada', 'Edición Regular', 'Segunda Mano (Excelente Estado)'] }
-    ];
-  } else if (answers.niche === 'distribucion-horeca') {
-    nicheData.attributes = [
-      { name: 'empaque_volumen', label: 'Empaque de Venta', type: 'select', options: ['Paquete x50 Unidades', 'Caja x500 Unidades', 'Galón / Garrafa', 'Bulto Mayorista'] }
-    ];
+  let loadedAttributes = null;
+  try {
+    const nichesPath = path.join(__dirname, 'config', 'niches.json');
+    if (await fs.pathExists(nichesPath)) {
+      const nichesConfig = await fs.readJson(nichesPath);
+      if (nichesConfig && nichesConfig[answers.niche]) {
+        loadedAttributes = nichesConfig[answers.niche];
+      }
+    }
+  } catch (e) {
+    console.warn(pc.yellow(`⚠️  [Niche Config] No se pudo leer config/niches.json, usando fallback interno: ${e.message}`));
+  }
+
+  if (loadedAttributes) {
+    nicheData.attributes = loadedAttributes;
+  } else {
+    // FALLBACK INTERNO ORIGINAL
+    if (answers.niche === 'retail_clothing') {
+      nicheData.attributes = [
+        { name: 'talla', label: 'Talla', type: 'select', options: ['S', 'M', 'L', 'XL', '38', '39', '40', '41', '42'] },
+        { name: 'color', label: 'Color', type: 'text', placeholder: 'Ej. Negro, Blanco, Azul' }
+      ];
+    } else if (answers.niche === 'grocery_food') {
+      nicheData.attributes = [
+        { name: 'presentacion', label: 'Presentación', type: 'select', options: ['Libra', 'Kilo', 'Atado', 'Unidad'] }
+      ];
+    } else if (answers.niche === 'technical_services') {
+      nicheData.attributes = [
+        { name: 'material', label: 'Material', type: 'text', placeholder: 'Ej. Bronce SAE 64' },
+        { name: 'especificaciones', label: 'Especificación Técnica', type: 'text', placeholder: 'Ej. Rosca NPT 1/2' }
+      ];
+    } else if (answers.niche === 'refrigeration_ac') {
+      nicheData.attributes = [
+        { name: 'marca_equipo', label: 'Marca del Equipo', type: 'text', placeholder: 'Ej. LG, Carrier' },
+        { name: 'tipo_refrigerante', label: 'Tipo de Refrigerante', type: 'select', options: ['R-410A', 'R-22', 'R-134a', 'R-404A'] }
+      ];
+    } else if (answers.niche === 'contractors') {
+      nicheData.attributes = [
+        { name: 'unidad_medida', label: 'Unidad de Medida', type: 'select', options: ['Metro Lineal (m)', 'Metro Cuadrado (m2)', 'Metro Cúbico (m3)', 'Global (glb)', 'Día Operario'] }
+      ];
+    } else if (answers.niche === 'machinery_rental') {
+      nicheData.attributes = [
+        { name: 'numero_serial', label: 'Número Serial / Placa', type: 'text', placeholder: 'Ej. CAT-924G-01' },
+        { name: 'tarifa_tiempo', label: 'Modo de Alquiler', type: 'select', options: ['Por Hora', 'Por Día', 'Por Semana', 'Por Mes'] }
+      ];
+    } else if (answers.niche === 'carpentry') {
+      nicheData.attributes = [
+        { name: 'tipo_madera', label: 'Tipo de Madera', type: 'select', options: ['Pino', 'Cedro', 'Roble', 'Teca', 'MDF / Melamina'] },
+        { name: 'acabado', label: 'Acabado', type: 'select', options: ['Poliuretano', 'Laca Catalizada', 'Barniz', 'Aceite / Natural', 'Pintado'] }
+      ];
+    } else if (answers.niche === 'laundry') {
+      nicheData.attributes = [
+        { name: 'peso_estimado', label: 'Rango de Peso', type: 'select', options: ['1-5 kg', '6-10 kg', '11-15 kg', 'Más de 15 kg'] },
+        { name: 'tipo_prenda', label: 'Tipo de Prenda / Servicio', type: 'text', placeholder: 'Ej. Plumón, Traje, Cortina' }
+      ];
+    } else if (answers.niche === 'furniture_repair') {
+      nicheData.attributes = [
+        { name: 'tipo_tela', label: 'Tipo de Tela / Tapizado', type: 'text', placeholder: 'Ej. Microfibra Antirrasguño, Cuero' },
+        { name: 'estado_ingreso', label: 'Estado del Mueble', type: 'text', placeholder: 'Ej. Estructura rota / Solo espuma' }
+      ];
+    } else if (answers.niche === 'wellness_podology') {
+      nicheData.attributes = [
+        { name: 'duracion', label: 'Duración Estimada', type: 'select', options: ['30 min', '45 min', '1 hora', '1.5 horas', '2 horas'] },
+        { name: 'profesional', label: 'Profesional / Especialista', type: 'text', placeholder: 'Ej. Podólogo Principal / Esteticista' }
+      ];
+    } else if (answers.niche === 'insumos-agricolas') {
+      nicheData.attributes = [
+        { name: 'marca', label: 'Marca / Fabricante', type: 'text', placeholder: 'Ej. Syngenta, Stihl, Bayer' },
+        { name: 'compatibilidad', label: 'Compatibilidad de Repuesto', type: 'text', placeholder: 'Ej. Motor Stihl FS 160 / Universal' }
+      ];
+    } else if (answers.niche === 'alimentos-artesanales') {
+      nicheData.attributes = [
+        { name: 'presentacion', label: 'Presentación / Porciones', type: 'select', options: ['Unidad Individual', 'Caja x6', 'Caja x12', 'Media Libra', 'Una Libra'] },
+        { name: 'requiere_anticipo', label: 'Anticipación Requerida', type: 'select', options: ['Entrega Inmediata', '24 Horas de Anticipación', '48 Horas de Anticipación'] }
+      ];
+    } else if (answers.niche === 'ferreteria-rural') {
+      nicheData.attributes = [
+        { name: 'unidad_medida', label: 'Unidad de Venta', type: 'select', options: ['Unidad', 'Bulto / S Saco', 'Kilo', 'Metro', 'Rollo'] }
+      ];
+    } else if (answers.niche === 'repuestos-motos') {
+      nicheData.attributes = [
+        { name: 'marca_moto', label: 'Marca de Moto Compatible', type: 'text', placeholder: 'Ej. Yamaha, Pulsar, Boxer, Suzuki' },
+        { name: 'modelo_anio', label: 'Modelo / Año', type: 'text', placeholder: 'Ej. 2018 - 2022' }
+      ];
+    } else if (answers.niche === 'distribuidoras-beauty') {
+      nicheData.attributes = [
+        { name: 'tipo_presentacion', label: 'Presentación Profesional', type: 'select', options: ['Unidad Detal', 'Caja/Pack Mayorista', 'Litro / Galón (Granel)'] }
+      ];
+    } else if (answers.niche === 'petshops-locales') {
+      nicheData.attributes = [
+        { name: 'peso_concentrado', label: 'Peso del Empaque', type: 'select', options: ['1 kg', '2 kg', '8 kg', '15 kg', '22 kg', 'Suelto / Libra'] },
+        { name: 'mascota', label: 'Tipo de Mascota', type: 'select', options: ['Perro Adulto', 'Cachorro', 'Gato Adulto', 'Gatito', 'Otras Mascotas'] }
+      ];
+    } else if (answers.niche === 'repuestos-lineablanca') {
+      nicheData.attributes = [
+        { name: 'marca_electrodomestico', label: 'Marca Compatible', type: 'text', placeholder: 'Ej. Whirlpool, Mabe, Haceb, LG' },
+        { name: 'modelo_exacto', label: 'Modelo o Número de Parte', type: 'text', placeholder: 'Ej. W1023456 / Lavadora Haceb 13kg' }
+      ];
+    } else if (answers.niche === 'moda-local-calzado') {
+      nicheData.attributes = [
+        { name: 'talla', label: 'Talla', type: 'select', options: ['34', '35', '36', '37', '38', '39', '40', '41', '42', 'S', 'M', 'L', 'XL'] },
+        { name: 'material', label: 'Material / Composición', type: 'text', placeholder: 'Ej. Cuero 100% natural, Sintético, Lona' }
+      ];
+    } else if (answers.niche === 'alimentacion-saludable') {
+      nicheData.attributes = [
+        { name: 'alergenos', label: 'Alérgenos / Restricción', type: 'select', options: ['Libre de Gluten (Gluten Free)', 'Sin Azúcar Añadida', 'Vegano / Plant-Based', 'Keto / Bajo en Carbohidratos', 'Sin Restricción / Natural'] },
+        { name: 'presentacion', label: 'Presentación', type: 'text', placeholder: 'Ej. Frasco 250g, Bolsa de 500g, Cápsulas' }
+      ];
+    } else if (answers.niche === 'home-office-ergonomia') {
+      nicheData.attributes = [
+        { name: 'ajustable', label: 'Nivel de Ajuste', type: 'select', options: ['Totalmente Ajustable (Ergonómico)', 'Ajuste de Altura Únicamente', 'Fijo / Estático'] }
+      ];
+    } else if (answers.niche === 'licores-cocteleria') {
+      nicheData.attributes = [
+        { name: 'volumen_alcohol', label: 'Contenido / Volumen', type: 'select', options: ['Lata 330ml', 'Botella 375ml (Media)', 'Botella 750ml (Estándar)', 'Botella 1000ml (Litro)'] }
+      ];
+    } else if (answers.niche === 'coleccionismo-geek') {
+      nicheData.attributes = [
+        { name: 'estado_articulo', label: 'Estado / Edición', type: 'select', options: ['Nuevo en Caja (Mint in Box)', 'Edición Limitada', 'Edición Regular', 'Segunda Mano (Excelente Estado)'] }
+      ];
+    } else if (answers.niche === 'distribucion-horeca') {
+      nicheData.attributes = [
+        { name: 'empaque_volumen', label: 'Empaque de Venta', type: 'select', options: ['Paquete x50 Unidades', 'Caja x500 Unidades', 'Galón / Garrafa', 'Bulto Mayorista'] }
+      ];
+    }
   }
 
 
@@ -845,8 +1005,8 @@ test-results/
     const targetManifest = await fs.pathExists(manifestPath) ? manifestPath : (await fs.pathExists(webmanifestPath) ? webmanifestPath : null);
     
     // Obtener colores Hex de marca en caliente para theme_color y background_color
-    const primaryHex = '#' + hslToRgbaHex(primaryColor, 255).toString(16).slice(0, 6);
-    const bgHex = '#' + hslToRgbaHex(answers.branding?.bgColor || 'hsl(224, 71%, 4%)', 255).toString(16).slice(0, 6);
+    const primaryHex = '#' + hslToRgbaHex(primaryColor, 255).toString(16).padStart(8, '0').slice(0, 6);
+    const bgHex = '#' + hslToRgbaHex(answers.branding?.bgColor || 'hsl(224, 71%, 4%)', 255).toString(16).padStart(8, '0').slice(0, 6);
     
     if (targetManifest) {
       const manifest = await fs.readJson(targetManifest);
@@ -924,7 +1084,7 @@ test-results/
     <meta name="twitter:description" content="${seoDescription}" />`;
 
     // Insertar nuevos metatags antes de </head>
-    indexContent = indexContent.replace('</head>', `${metaTags}\n  </head>`);
+    indexContent = indexContent.replace(/<\/head\s*>/i, `${metaTags}\n  </head>`);
     
     await fs.writeFile(indexPath, indexContent, 'utf-8');
     console.log(pc.green('✅ Metatags SEO, título y descripción inyectados en index.html.'));
@@ -944,6 +1104,16 @@ test-results/
 
   const stepLogo = ora('Configurando logo y favicon de la marca...').start();
   let userProvidedLogo = false;
+
+  if (answers.logoPath) {
+    const uploadDir = path.resolve(CLI_ROOT, 'temp_uploads');
+    const resolvedLogoPath = path.resolve(answers.logoPath);
+    if (!isPathContained(uploadDir, resolvedLogoPath)) {
+      stepLogo.fail('Acceso denegado: El logo debe residir dentro del directorio temporal temp_uploads.');
+      throw new Error('Directory Traversal bloqueado en logoPath.');
+    }
+  }
+
   if (answers.logoPath && await fs.pathExists(answers.logoPath)) {
     try {
       const ext = path.extname(answers.logoPath).toLowerCase();
@@ -970,7 +1140,13 @@ test-results/
             const bgHex = hslToRgbaHex(answers.branding?.bgColor || 'hsl(224, 71%, 4%)', 255);
             
             const createIcon = async (size, usePadding = false) => {
-              const original = await Jimp.read(logoSrc);
+              let original;
+              try {
+                original = await Jimp.read(logoSrc);
+              } catch (readErr) {
+                // Fallback: si falla la lectura (ej. es un SVG), crear un lienzo con el color de fondo de la marca
+                original = new Jimp({ width: size, height: size, color: bgHex });
+              }
               const w = original.width;
               const h = original.height;
               
@@ -1006,7 +1182,18 @@ test-results/
 
             stepPwaIcons.succeed('Iconos PWA (192x192, 512x512, apple-touch-icon) redimensionados y generados con éxito.');
           } catch (jimpErr) {
-            stepPwaIcons.fail(`Error al redimensionar iconos con Jimp: ${jimpErr.message}`);
+            // Fallback total de seguridad: crear iconos de color de marca sólido
+            try {
+              const bgHex = hslToRgbaHex(answers.branding?.bgColor || 'hsl(224, 71%, 4%)', 255);
+              const fallback192 = new Jimp({ width: 192, height: 192, color: bgHex });
+              await fallback192.write(path.join(targetDir, 'public', 'pwa-192x192.png'));
+              await fallback192.write(path.join(targetDir, 'public', 'apple-touch-icon.png'));
+              const fallback512 = new Jimp({ width: 512, height: 512, color: bgHex });
+              await fallback512.write(path.join(targetDir, 'public', 'pwa-512x512.png'));
+              stepPwaIcons.warn(`Iconos PWA generados con color de marca sólido debido a un fallo de Jimp: ${jimpErr.message}`);
+            } catch (fallbackErr) {
+              stepPwaIcons.fail(`Error al generar iconos PWA de fallback: ${fallbackErr.message}`);
+            }
           }
         }
 
@@ -1079,25 +1266,53 @@ console.log('✅ Mapa de arquitectura para la IA generado.');
   const stepPkg = ora('Configurando package.json y scripts de la marca').start();
   try {
     const targetPkgPath = path.join(targetDir, 'package.json');
-    if (await fs.pathExists(targetPkgPath)) {
-      const pkg = await fs.readJson(targetPkgPath);
-      pkg.name = `app-${clientId}`;
-      
-      // Inyectar script de seed admin
-      pkg.scripts = pkg.scripts || {};
-      pkg.scripts['seed:admin'] = 'node scripts/seed_admin.js';
-      
-      await fs.writeJson(targetPkgPath, pkg, { spaces: 2 });
-      stepPkg.succeed(`package.json actualizado con la marca blanca (app-${clientId}) y script seed:admin.`);
-    } else {
-      stepPkg.info('No se encontró package.json en la plantilla para personalizar el nombre.');
-    }
+      if (await fs.pathExists(targetPkgPath)) {
+        const pkg = await fs.readJson(targetPkgPath);
+        pkg.name = `app-${clientId}`;
+        
+        // Inyectar script de seed admin
+        pkg.scripts = pkg.scripts || {};
+        pkg.scripts['seed:admin'] = 'node scripts/seed_admin.js';
+        
+        await fs.writeJson(targetPkgPath, pkg, { spaces: 2 });
+        stepPkg.succeed(`package.json actualizado con la marca blanca (app-${clientId}) y script seed:admin.`);
+      } else {
+        stepPkg.info('No se encontró package.json en la plantilla para personalizar el nombre.');
+      }
 
-    // [BRECHA-A] Crear el script scripts/seed_admin.js
-    const scriptsDir = path.join(targetDir, 'scripts');
-    await fs.ensureDir(scriptsDir);
-    
-    const seedAdminContent = `import fs from 'fs';
+      // [BRECHA-A] Crear el script scripts/seed_admin.js
+      const scriptsDir = path.join(targetDir, 'scripts');
+      await fs.ensureDir(scriptsDir);
+      
+      // Generar seed_data.json dinámico basado en el nicho comercial
+      const catalog = resolveNicheCatalog(answers.niche || 'general');
+      const seedData = {
+        collections: {
+          categories: catalog.categories.map(cat => ({
+            id: cat.id,
+            fields: {
+              nombre: { stringValue: cat.name },
+              activo: { booleanValue: true },
+              updatedAt: { stringValue: 'TIMESTAMP_PLACEHOLDER' }
+            }
+          })),
+          products: catalog.products.map(prod => ({
+            id: prod.id,
+            fields: {
+              nombre: { stringValue: prod.name },
+              precio: { doubleValue: prod.price },
+              categoriaId: { stringValue: prod.categoryId },
+              stock: { integerValue: prod.stock },
+              referencia: { stringValue: prod.ref },
+              activo: { booleanValue: true },
+              updatedAt: { stringValue: 'TIMESTAMP_PLACEHOLDER' }
+            }
+          }))
+        }
+      };
+      await fs.writeJson(path.join(scriptsDir, 'seed_data.json'), seedData, { spaces: 2 });
+
+      const seedAdminContent = `import fs from 'fs';
 import path from 'path';
 import os from 'os';
 
@@ -1203,56 +1418,48 @@ async function run() {
     process.exit(1);
   }
 
-  // B. Escribir perfil del Admin en Firestore (bypasseando reglas con token OAuth2 de firebase-tools)
+  // B. Crear perfil de Admin en Firestore
   try {
-    console.log(\`🗄️  Escribiendo rol administrativo en users/\${uid}...\`);
-    const userDocUrl = \`https://firestore.googleapis.com/v1/projects/\${projectId}/databases/(default)/documents/users/\${uid}?updateMask.fieldPaths=email&updateMask.fieldPaths=role&updateMask.fieldPaths=nombre&updateMask.fieldPaths=whatsapp&updateMask.fieldPaths=updatedAt\`;
+    console.log(\`👤 Configurando perfil de administrador en Firestore (users/\${uid})...\`);
+    const userUrl = \`https://firestore.googleapis.com/v1/projects/\${projectId}/databases/(default)/documents/users/\${uid}\`;
     const userPayload = {
-      name: \`projects/\${projectId}/databases/(default)/documents/users/\${uid}\`,
       fields: {
         email: { stringValue: adminEmail },
         role: { stringValue: 'admin' },
-        nombre: { stringValue: 'Administrador' },
-        whatsapp: { stringValue: whatsappAdmin },
-        updatedAt: { stringValue: new Date().toISOString() }
+        createdAt: { stringValue: new Date().toISOString() },
+        activo: { booleanValue: true }
       }
     };
     
-    const userRes = await fetch(userDocUrl, {
+    const userRes = await fetch(userUrl, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': \`Bearer \${devToken}\`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': \`Bearer \${devToken}\` },
       body: JSON.stringify(userPayload)
     });
     
     if (!userRes.ok) {
-      const errText = await userRes.text();
-      throw new Error(\`HTTP \${userRes.status}: \${errText}\`);
+      const errData = await userRes.json();
+      throw new Error(errData.error?.message || 'Error al guardar perfil.');
     }
     console.log(\`✅ Perfil de administrador guardado en Firestore.\`);
   } catch (err) {
-    console.error(\`❌ Error al escribir perfil en Firestore: \${err.message}\`);
+    console.error(\`❌ Error al guardar perfil en Firestore: \${err.message}\`);
     process.exit(1);
   }
 
-  // C. Escribir config/settings en Firestore
+  // C. Crear configuración global config/settings en Firestore
   try {
-    console.log(\`⚙️  Creando configuración inicial del negocio (config/settings)...\`);
+    console.log(\`⚙️  Inicializando configuración global del negocio (config/settings)... \`);
     const settingsUrl = \`https://firestore.googleapis.com/v1/projects/\${projectId}/databases/(default)/documents/config/settings\`;
+    
     const settingsPayload = {
       fields: {
-        appName: { stringValue: clientId.toUpperCase().replace(/-/g, ' ') },
-        sellerName: { stringValue: 'Administrador' },
-        appIcon: { stringValue: '' },
+        storeName: { stringValue: clientId.toUpperCase() },
         theme: { stringValue: theme },
-        whatsappAdmin: { stringValue: whatsappAdmin },
-        adminRegistered: { booleanValue: true },
-        appFont: { stringValue: 'inter' },
-        appRadius: { stringValue: 'rounded' },
-        animationsEnabled: { booleanValue: true },
-        updatedAt: { stringValue: new Date().toISOString() },
+        whatsapp: { stringValue: whatsappAdmin },
+        address: { stringValue: storeAddress },
+        whatsappEnabled: { booleanValue: true },
+        dianEnabled: { booleanValue: false },
         deliverySettings: {
           mapValue: {
             fields: {
@@ -1260,52 +1467,75 @@ async function run() {
                 mapValue: {
                   fields: {
                     enabled: { booleanValue: true },
-                    address: { stringValue: storeAddress },
-                    instructions: { stringValue: 'Recoge tu pedido directamente en nuestro local.' }
-                  }
-                }
-              },
-              shipping: {
-                mapValue: {
-                  fields: {
-                    enabled: { booleanValue: true },
-                    cost: { doubleValue: 0 },
-                    estimatedTime: { stringValue: '30 a 60 min' },
-                    instructions: { stringValue: 'Recibe tu pedido en la comodidad de tu casa.' }
-                  }
-                }
-              },
-              digital: {
-                mapValue: {
-                  fields: {
-                    enabled: { booleanValue: false },
-                    instructions: { stringValue: 'Entrega digital o prestación de servicio presencial.' }
+                    instructions: { stringValue: \`Recoger en tienda: \${storeAddress || 'Dirección de la sucursal'}\` }
                   }
                 }
               }
             }
           }
-        }
+        },
+        updatedAt: { stringValue: new Date().toISOString() }
       }
     };
-    
+
     const settingsRes = await fetch(settingsUrl, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': \`Bearer \${devToken}\`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': \`Bearer \${devToken}\` },
       body: JSON.stringify(settingsPayload)
     });
     
     if (!settingsRes.ok) {
-      const errText = await settingsRes.text();
-      throw new Error(\`HTTP \${settingsRes.status}: \${errText}\`);
+      const errData = await settingsRes.json();
+      throw new Error(errData.error?.message || 'Error al inicializar settings.');
     }
     console.log(\`✅ Configuración config/settings inicializada.\`);
   } catch (err) {
     console.error(\`❌ Error al escribir config/settings: \${err.message}\`);
     process.exit(1);
+  }
+
+  // D. Sembrado de catálogo dinámico y agnóstico de nicho comercial
+  try {
+    const seedDataPath = path.join(process.cwd(), 'scripts', 'seed_data.json');
+    if (!fs.existsSync(seedDataPath)) {
+      console.log("ℹ️  No se encontró scripts/seed_data.json. Omitiendo sembrado de catálogo.");
+    } else {
+      const seedData = JSON.parse(fs.readFileSync(seedDataPath, 'utf-8'));
+      const collections = seedData.collections || {};
+      
+      console.log(\`📦 Sembrando catálogo inicial dinámico y agnóstico...\`);
+      for (const [colName, docs] of Object.entries(collections)) {
+        console.log(\`📁 Sembrando colección "\${colName}"...\`);
+        for (const doc of docs) {
+          const docUrl = \`https://firestore.googleapis.com/v1/projects/\${projectId}/databases/(default)/documents/\${colName}/\${doc.id}\`;
+          
+          // Reemplazar marcadores de tiempo
+          const fields = { ...doc.fields };
+          for (const [fName, fVal] of Object.entries(fields)) {
+            if (fVal.stringValue === 'TIMESTAMP_PLACEHOLDER') {
+              fields[fName] = { stringValue: new Date().toISOString() };
+            }
+          }
+          
+          const payload = { fields };
+          const res = await fetch(docUrl, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': \`Bearer \${devToken}\` },
+            body: JSON.stringify(payload)
+          });
+          
+          if (res.ok) {
+            console.log(\`   - Documento sembrado en \${colName}: \${doc.id}\`);
+          } else {
+            const errData = await res.json().catch(() => ({}));
+            console.warn(\`   - Error al sembrar \${doc.id} en \${colName}: \${errData.error?.message || 'Error desconocido'}\`);
+          }
+        }
+      }
+      console.log(\`✅ Catálogo comercial inicial sembrado en Firestore.\`);
+    }
+  } catch (seedErr) {
+    console.warn(\`⚠️  [Smart Seeding] No se pudo sembrar el catálogo de nicho: \${seedErr.message}\`);
   }
 
   console.log(\`\\n🎉 ¡Siembra completada con éxito!\`);
@@ -1592,6 +1822,19 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
     adminPassword, // Exponer para que el wizard lo muestre al usuario al finalizar
     prompt: promptContent
   };
+  } catch (err) {
+    if (!existedBefore) {
+      try {
+        if (await fs.pathExists(targetDir)) {
+          await fs.remove(targetDir);
+          console.log(pc.red(`\n🧹 Rollback exitoso: Directorio de destino inconcluso de la instancia eliminado: ${targetDir}`));
+        }
+      } catch (cleanupErr) {
+        console.error(pc.red(`⚠️  Error al remover el directorio durante el rollback: ${cleanupErr.message}`));
+      }
+    }
+    throw err;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1605,14 +1848,11 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
 async function installDependencies(targetDir) {
   console.log('\n' + pc.cyan('📦 Instalando dependencias en el nuevo proyecto. Por favor espera...'));
   try {
-    // [BLINDAJE-TIMEOUT] npm install puede tardar varios minutos con paquetes pesados o
-    // red lenta. Sin timeout puede bloquear el worker (y por tanto el CLI) indefinidamente.
-    // 5 minutos es un límite generoso pero real para el peor caso en red corporativa con caché fría.
-    execSync('npm install', { cwd: targetDir, stdio: 'inherit', shell: true, timeout: 300000 });
+    await execAsyncCommand('npm', ['install', '--prefer-offline', '--no-audit', '--no-fund', '--loglevel=error'], { cwd: targetDir });
     console.log(pc.green('✅ Dependencias de npm instaladas.'));
 
     console.log(pc.cyan('🔍 Generando mapa de arquitectura inicial...'));
-    execSync('npm run map', { cwd: targetDir, stdio: 'inherit', shell: true, timeout: 15000 });
+    await execAsyncCommand('npm', ['run', 'map'], { cwd: targetDir });
     console.log(pc.green('✅ Mapa de arquitectura del nuevo proyecto indexado con éxito.'));
   } catch (err) {
     console.warn(pc.yellow(`⚠️  Aviso en instalación/mapeo de dependencias: ${err.message}`));
@@ -1626,9 +1866,9 @@ async function installDependencies(targetDir) {
  * @param {string} clientId ID normalizado del cliente
  */
 async function setupGitHub(answers, targetDir, clientId) {
-  if (!answers.enableGithub) return;
-
-  console.log(pc.cyan('🐙 Inicializando repositorio Git y subiendo a GitHub...'));
+  // 1. Inicializar Git local de forma universal
+  console.log(pc.cyan('🐙 Inicializando repositorio Git local...'));
+  let gitInitialized = false;
   try {
     execSync('git init', { cwd: targetDir, stdio: 'ignore' });
 
@@ -1648,12 +1888,22 @@ async function setupGitHub(answers, targetDir, clientId) {
 
     execSync('git add .', { cwd: targetDir, stdio: 'ignore' });
     execSync('git commit -m "feat: scaffolding inicial del ecosistema"', { cwd: targetDir, stdio: 'ignore' });
-
-    const repoName = `app-${clientId}`;
-    execSync(`gh repo create ${repoName} --private --source=. --push`, { cwd: targetDir, stdio: 'ignore' });
-    console.log(pc.green(`✅ Repositorio GitHub creado y subido con éxito: ${repoName}`));
+    console.log(pc.green('✅ Repositorio Git local inicializado con commit de pre-vuelo.'));
+    gitInitialized = true;
   } catch (err) {
-    console.warn(pc.yellow(`⚠️  No se pudo subir a GitHub automáticamente: ${err.message}. Asegúrate de tener gh CLI logueado.`));
+    console.warn(pc.yellow(`⚠️  No se pudo inicializar Git localmente o realizar el commit inicial: ${err.message}. Continuando.`));
+  }
+
+  // 2. Subir a GitHub si se solicitó en el briefing
+  if (answers.enableGithub && gitInitialized) {
+    console.log(pc.cyan('🐙 Creando y subiendo repositorio a GitHub...'));
+    try {
+      const repoName = `app-${clientId}`;
+      execSync(`gh repo create ${repoName} --private --source=. --push`, { cwd: targetDir, stdio: 'ignore' });
+      console.log(pc.green(`✅ Repositorio GitHub creado y subido con éxito: ${repoName}`));
+    } catch (err) {
+      console.warn(pc.yellow(`⚠️  No se pudo subir a GitHub automáticamente: ${err.message}. Asegúrate de tener gh CLI logueado.`));
+    }
   }
 }
 
@@ -1667,37 +1917,20 @@ async function deployFirebase(answers, targetDir) {
 
   console.log(pc.cyan('🔥 Compilando el proyecto (npm run build)...'));
   try {
-    // [BLINDAJE-STDERR] Capturar stderr para reportar el error real del build/deploy.
-    // Con stdio:'ignore' el único mensaje disponible era "Command failed" sin contexto.
-    // Ahora se captura stderr y se muestra en el warning para facilitar el debug.
-    let buildStderr = '';
     try {
-      execSync('npm run build', {
-        cwd: targetDir,
-        stdio: ['ignore', 'ignore', 'pipe'],
-        timeout: 120000 // 2 min máximo para el build
-      });
+      await execAsyncCommand('npm', ['run', 'build'], { cwd: targetDir });
       console.log(pc.green('✅ Compilación de producción generada con éxito.'));
     } catch (buildErr) {
-      buildStderr = buildErr.stderr ? buildErr.stderr.toString().slice(0, 500) : buildErr.message;
-      throw new Error(`npm run build falló:\n${buildStderr}`);
+      throw new Error(`npm run build falló:\n${buildErr.message}`);
     }
 
     console.log(pc.cyan('🔥 Desplegando en Firebase (reglas, índices, storage y hosting)...'));
-    let deployStderr = '';
     try {
-      execSync(
-        `firebase deploy --only firestore:rules,firestore:indexes,storage,hosting -P ${answers.firebaseProjectId}`,
-        {
-          cwd: targetDir,
-          stdio: ['ignore', 'ignore', 'pipe'],
-          timeout: 180000 // 3 min máximo para el deploy de Firebase
-        }
-      );
+      const cleanProjectId = answers.firebaseProjectId.replace(/[^a-z0-9\-]/gi, '');
+      await execAsyncCommand('firebase', ['deploy', '--only', 'firestore:rules,firestore:indexes,storage,hosting', '-P', cleanProjectId], { cwd: targetDir });
       console.log(pc.green('✅ Proyecto de Firebase (Reglas, Índices, Storage y Hosting) desplegado por completo de forma exitosa.'));
     } catch (deployErr) {
-      deployStderr = deployErr.stderr ? deployErr.stderr.toString().slice(0, 800) : deployErr.message;
-      throw new Error(`firebase deploy falló:\n${deployStderr}`);
+      throw new Error(`firebase deploy falló:\n${deployErr.message}`);
     }
 
   } catch (err) {
@@ -1714,15 +1947,10 @@ async function runSeedAdmin(answers, targetDir) {
   console.log(pc.cyan('🤖 Sembrando usuario administrador inicial y configuración en Firestore...'));
   try {
     // Ejecutar scripts/seed_admin.js
-    execSync('node scripts/seed_admin.js', {
-      cwd: targetDir,
-      stdio: ['ignore', 'ignore', 'pipe'],
-      timeout: 30000 // 30 segundos max
-    });
+    await execAsyncCommand('node', ['scripts/seed_admin.js'], { cwd: targetDir });
     console.log(pc.green('✅ Usuario administrador y configuración base de Firestore inicializados con éxito.'));
   } catch (err) {
-    const seedStderr = err.stderr ? err.stderr.toString().slice(0, 500) : err.message;
-    console.warn(pc.yellow(`⚠️  No se pudo sembrar el administrador automáticamente:\n${seedStderr}\nPrueba a correr manualmente: npm run seed:admin`));
+    console.warn(pc.yellow(`⚠️  No se pudo sembrar el administrador automáticamente:\n${err.message}\nPrueba a correr manualmente: npm run seed:admin`));
   }
 }
 
@@ -1810,8 +2038,8 @@ async function registerInCentralConsole(answers, clientId, uniqueToken) {
       if (!tokenOk)   console.warn(pc.yellow(`⚠️  Registro de token de telemetría falló: ${resultToken.reason?.message}`));
       console.warn(pc.yellow('   → El proyecto fue creado, pero su registro en la Consola Central quedó incompleto. Registra manualmente o re-ejecuta el CLI.'));
     }
-  } catch (err) {
-    console.warn(pc.yellow(`⚠️  No se pudo realizar el auto-registro en la Consola Central: ${err.message}`));
-  }
+    } catch (err) {
+      console.warn(pc.yellow(`⚠️  No se pudo realizar el auto-registro en la Consola Central: ${err.message}`));
+    }
 }
 

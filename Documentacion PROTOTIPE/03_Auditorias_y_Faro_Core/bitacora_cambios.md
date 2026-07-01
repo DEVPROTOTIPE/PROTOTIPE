@@ -1,5 +1,90 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-01] - CORE-155: Implementación de Auditoría de Compilación Vite, Consistencia del Core y Configuración CORS de Storage
+
+* **Tipo:** Feature / Robustez / Seguridad / Expansión de API / UX/DX
+* **Firma de auditoría:** CORE-155-DRIFT-VITE-BUILD-AUDIT-AND-CORS-SETUP
+* **Descripción de Cambios:**
+  - **Auditoría de Compilación Vite en Seco:** Implementación de análisis dinámico de compilación (`buildAudit=true`) en el endpoint `/api/project/drift` que corre un build de prueba (`vite build`) en el directorio del cliente usando `execAsync` asíncrono (corrigiendo un `ReferenceError: require is not defined` provocado por el entorno de módulos ES6 nativos) y devuelve el estado y salida del log en tiempo real al frontend del dashboard.
+  - **Detección Completa de Dependencias NPM Drift:** Se amplió la comparación del package.json para reportar de forma precisa: dependencias desalineadas en versión (`mismatchDeps`), dependencias ausentes en el cliente pero requeridas por el Core (`missingDeps`), y dependencias exclusivas agregadas por el cliente (`addedDeps`).
+  - **Algoritmo de Cálculo del Consistency Score:** Se diseñó un score matemático de consistencia del Core (`consistencyScore` de 0 a 100) en el backend, penalizando proporcionalmente la desviación física de archivos y el drift de dependencias críticas de Node.
+  - **Automatización de Reglas CORS de Storage:** Creación del endpoint `/api/project/firebase/cors-setup` que genera dinámicamente un archivo de configuración CORS (`cors-storage-temp.json`) y ejecuta `gsutil cors set` mediante el CLI oficial de Firebase para habilitar los orígenes de desarrollo local de forma automatizada. Se interceptó el error de falta de `gsutil` en el sistema (`gcloud SDK` no instalado o fuera del PATH) para guiar al desarrollador sobre cómo solucionarlo. Se modificó el endpoint para capturar y retornar los logs detallados (`stdout` y `stderr`) del proceso de inyección de CORS.
+  - **Refactorización de Interfaz Drift en Dashboard:** Rediseño completo del panel de Sincronización Core (Drift) en `App.jsx` para mostrar el Puntaje de Consistencia, un desglose interactivo del desalineamiento de dependencias NPM, botones premium "Auditar Build" y "CORS Storage" con spinners de carga integrados, un log detallado del error de compilación, y una **nueva consola interactiva de logs de CORS** para dar visibilidad total del proceso de inyección de gcloud.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY] — Nuevos endpoints `/api/project/firebase/cors-setup` con interceptor amigable para gsutil faltante y captura de logs de salida, `/api/project/drift` ampliado con compilación Vite asíncrona (usando execAsync global), dependencias NPM drift y consistencyScore.
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY] — Panel de Drift enriquecido con medidor de consistencia, lista NPM drift, triggers de compilación/CORS y visualizadores de logs independientes para build y CORS.
+
+### [2026-07-01] - CORE-154: Auditoría Técnica Crítica, Blindaje y Expansión de server.js
+
+* **Tipo:** Seguridad / Robustez / Fuga de Recursos / Race Conditions / SSE / Optimización I/O / Expansión API
+* **Firma de auditoría:** CORE-154-SERVER-CLI-SECURITY-AND-ROBUSTNESS-FIXES
+* **Descripción de Cambios:**
+  - **Saneamiento RCE (Git Injection):** Se modificó la expresión regular en `execGitCommand` para rechazar explícitamente caracteres de salto de línea (`\r\n`), bloqueando inyecciones de comandos multilínea a través de la shell de Windows.
+  - **Preferencia contra Fuga de File Descriptors:** Se reestructuró la lectura de logs en `/api/cli/logs/stream` envolviendo la lectura en un bloque `try-finally` para garantizar la llamada a `fs.close(fd)` ante truncamientos.
+  - **Eliminación de Procesos Vite Zombis:** Se inyectaron manejadores globales de salida (`SIGINT` y `exit`) en Node que matan de forma limpia (`kill('SIGTERM')`) todos los servidores de desarrollo Vite locales activos en `devServers` cuando el proceso Express finaliza.
+  - **Locks Concurrentes en Inyección:** Se acopló el semáforo `projectSyncLocks[clientId]` a los endpoints `/api/library/inject` y `/api/library/inject/stream`, bloqueando escrituras concurrentes simultáneas de dependencias sobre el mismo `package.json`.
+  - **SSE Keep-Alives:** Se inyectaron latidos de red keep-alive (`: keep-alive\n\n` cada 20s) con des-registro de sockets obsoletos en los streams SSE `/api/cli/logs/stream`, `/api/create-project/stream` y `/api/project/dev/logs-stream`.
+  - **Configuración CORS Storage (`POST /api/project/firebase/cors-setup`):** Automatización de reglas CORS en Google Cloud Storage para evitar errores de origen cruzado en carga y canvas locales.
+  - **Refactorización de Auditoría de Drift (`GET /api/project/drift`):** Detección de dependencias agregadas en el cliente (`addedDeps`), análisis de compilación Vite en seco bajo demanda (`?buildAudit=true`), y cálculo automatizado de puntuación de consistencia (`consistencyScore`).
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY] — Saneamiento RCE, try-finally en logs fd, exit hooks globales, locks en inyección, SSE heartbeats, endpoint de CORS y drift mejorado.
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_critica_server_cli_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_critica_server_cli_2026.md) [NEW] — Reporte oficial de auditoría crítica de server.js.
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY] — Registro del reporte en el mapa semántico.
+
+### [2026-07-01] - CORE-153: Auditoría, Robustecimiento y Blindaje Técnico del Generador
+
+* **Tipo:** Auditoría / Robustez / Seguridad / Portabilidad de Cores / Resiliencia Física / Optimización DX
+* **Firma de auditoría:** CORE-153-GENERATOR-ROBUSTNESS-AND-DYNAMIC-SEEDING
+* **Descripción de Cambios:**
+  - **Desacoplamiento de Nichos Comerciales:** Extracción de la matriz de metadatos y especificaciones de los 23 nichos a un archivo JSON independiente (`config/niches.json`) y carga dinámica del mismo en `generator.js` con fallback local idéntico para evitar regresiones.
+  - **Siembra Dinámica y Agnóstica (Schema-free):** Reemplazo del script hardcodeado de siembra de catálogo por un generador dinámico de `seed_data.json` que mapea colecciones genéricas en formato REST. El script de siembra generado `seed_admin.js` recorre dicho JSON de forma genérica, logrando portabilidad total para Cores futuros.
+  - **Validación Pre-vuelo del Proyecto Firebase (Fail-Fast):** Se añadió un control elástico que invoca `firebase projects:list --json` y valida la existencia del proyecto destino en la cuenta activa antes del copiado físico, reportando errores temprano con fallback seguro si el CLI falla por red o timeouts.
+  - **Inicialización de Git Local Universal por Defecto:** Se separó la creación del VCS de la integración remota con GitHub. Ahora, toda instancia inicializa Git localmente, inyecta el hook de pre-commit y realiza su primer commit de forma universal, aislando la subida a GitHub CLI (`gh`) de forma condicional y tolerante a fallos.
+  - **Mitigación de Errores Críticos (PWA, SEO e Infraestructura):**
+    - Corrección de conversión cromática HSL a Hex utilizando `padStart(8, '0')` para evitar formatos Hex truncados inválidos en modo oscuro.
+    - Implementación de un fallback en Jimp que autogenera iconos PWA con fondo de color sólido de marca si la lectura de la imagen falla (ej. con logos SVG no soportados).
+    - Eliminación de la escritura destructiva redundante en `.firebaserc` que anulaba la segmentación multientorno (development/production).
+    - Inyección SEO en `index.html` utilizando expresiones regulares case-insensitive `/<\/head\s*>/i` para tolerar variaciones de espaciado.
+  - **Rollback Físico de Directorios:** Adición de un master try-catch en `createProject` que remueve la carpeta destino inconclusa en caso de fallos críticos durante el copiado o aprovisionamiento.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY] — Rollback físico, Jimp fallback, padStart en HSL, regex SEO, seeding dinámico y carga de niches.
+  - [`Prototipe-CLI/config/niches.json`](file:///d:/PROTOTIPE/Prototipe-CLI/config/niches.json) [NEW] — Matriz de metadatos de nichos comerciales.
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_generator_js.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_generator_js.md) [NEW] — Informe técnico de auditoría de robustez.
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY] — Registro del informe en el GPS semántico.
+
+### [2026-07-01] - CORE-152: Robustez, Seguridad y Rendimiento del Aprovisionador
+
+* **Tipo:** Seguridad / Rendimiento / Concurrencia / Automatización Premium
+* **Firma de auditoría:** CORE-152-PROVISIONING-WIZARD-EXCELLENCE-ARCHITECTURE
+* **Descripción de Cambios:**
+  - **Sanitización de Inputs & Mitigación de 6 Vulnerabilidades Críticas:**
+    - Sanitización estricta de `projectName`, `firebaseProjectId` y `template` en los endpoints del CLI Bridge (`/api/firebase-config` y `/api/create-project`) mediante expresiones regulares para bloquear ataques de inyección de comandos shell.
+    - Saneamiento del Path Traversal y Escritura Arbitraria de Archivos en `/api/upload-logo` utilizando `path.basename` sobre el nombre del archivo recibido.
+    - Saneamiento de Local File Inclusion (LFI) y Directory Traversal en `generator.js` utilizando la función `isPathContained` para confinar las copias del logo y de las plantillas estáticas a las rutas autorizadas en el servidor.
+  - **Soporte de Concurrencia (Exclusión Mutua) & Resiliencia Global:**
+    - Implementación del semáforo lógico `projectSyncLocks` indexado por `clientId` en el backend para bloquear y retornar `409 Conflict` ante peticiones simultáneas de aprovisionamiento del mismo cliente.
+    - Implementación de manejadores globales de procesos (`unhandledRejection` y `uncaughtException`) en `server.js` para asegurar que el proceso daemon no se caiga ante excepciones asíncronas imprevistas.
+  - **Ejecución Asíncrona No Bloqueante con Logs SSE:**
+    - Implementación de la función `execAsyncCommand` basada en `spawn` asíncrono que canaliza los búferes de salida de `stdout`/`stderr` en caliente línea por línea, evitando el bloqueo del Event Loop del worker y logrando un flujo de logs SSE progresivo en el terminal del wizard.
+    - Reemplazo de comandos bloqueantes `execSync` en dependencias, compilación, despliegues y siembras por `execAsyncCommand`.
+    - Optimización del tiempo de instalación de dependencias `npm install` forzando lectura offline de la caché con banderas `--prefer-offline --no-audit --no-fund --loglevel=error`.
+    - Paralelización en segundo plano de las peticiones a la API de Firebase Cloud (`firestore:databases:create` y `apps:create`) utilizando `Promise.all` una vez validado el proyecto.
+  - **Nuevas Automatizaciones Premium:**
+    - Escritura automatizada de configuraciones multi-entorno para la instancia generada escribiendo archivos de variables duales `.env.development`, `.env.production` y configuración `.firebaserc` con aliases de entornos.
+    - Integración de **Smart Seeding** para el script `seed_admin.js` para poblar de forma dinámica la base de datos Firestore del cliente con categorías y productos preestablecidos según el nicho de negocio seleccionado (`VITE_NICHE`).
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY] — Sanitizaciones de inputs, paralelización de Firebase Cloud y exclusión mutua de aprovisionamientos.
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY] — Helper de contención de rutas, execAsyncCommand no bloqueante, soporte dual de entornos y Smart Seeding de catálogo.
+
+### [2026-07-01] - CLI-151: Silenciado de Advertencias de Obsolescencia en Servidor Daemon
+
+* **Tipo:** Mantenimiento / Consola / Optimización de Logs / Node.js Dev
+* **Firma de auditoría:** CLI-151-SILENCE-NODE-DEPRECATION-WARNINGS
+* **Descripción de Cambios:**
+  - **Silenciado de advertencias (DEP0190):** Se añadió la bandera `--no-warnings` al script de ejecución `"server"` en el `package.json` del CLI Daemon para evitar avisos visuales en consola/terminal al invocar procesos hijo (`spawn` con `{ shell: true }`). Esto limpia la interfaz de terminal CLI reduciendo el ruido para el desarrollador.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY] — Agrega `--no-warnings` en script server.
+
 ### [2026-07-01] - CORE-150: Automatización Completa y Mejoras de Onboarding en el Asistente
 
 * **Tipo:** Feature / Aprovisionamiento / Automatización de Siembra / Onboarding / Accesibilidad WCAG 2.1
@@ -36,6 +121,8 @@
   - [`Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx) [MODIFY] — Sincronizado
   - [`Prototipe-CLI/templates/template-ventas/firestore.rules`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/firestore.rules) [MODIFY] — Sincronizado
 
+
+### [2026-07-01] - CORE-148: Mitigación de Vulnerabilidades de Autenticación, Backdoors y Desincronización de Caché
 
 * **Tipo:** Seguridad / Autenticación / Failsafe / Mitigación de Desincronización de Cache / UI-Spinner-Fix
 * **Firma de auditoría:** CORE-148-AUTH-BYPASS-EXPLOIT-AND-CACHE-DESYNC-FIX

@@ -4,6 +4,41 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-156: Auditoría Técnico Documental y Saneamiento General de los Mapas y Bitácoras~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Auditoría y saneamiento completo de `mapa_documentacion_ia.md`, `mapa_aplicacion.md` y `bitacora_cambios.md`. Se eliminaron bloques duplicados de cabecera y filas duplicadas de Levantamiento en la Sección 5. Se reestructuraron las descripciones de `server.js` y `generator.js` en listas legibles y concisas, removiendo la narrativa densa. Se incorporaron referencias explícitas a los nuevos endpoints (`cors-setup`), auditorías críticas, `consistencyScore`, variables de NPM Drift, y el componente `HealthRadar.jsx`. Se corrigió el encabezado de `CORE-148` en la bitácora de cambios.
+  - Archivos: [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY], [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY], [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-155: Implementación de Auditoría de Compilación Vite, Consistencia del Core y Configuración CORS de Storage~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Implementación de la auditoría de compilación Vite asíncrona, desalineamiento y drift de dependencias NPM, score de consistencia matemática del Core, y automatización de setup de CORS Storage. Se rediseñó el panel de Drift en la UI con KPI de consistencia, lista de dependencias y visores de logs.
+  - Archivos: [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-154: Auditoría Técnica Crítica, Blindaje y Expansión de server.js~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Solución de 5 vulnerabilidades de seguridad y fugas de descriptores, inyección de locks concurrentes y keep-alives en SSE. Implementación de la Opción A: adición de endpoint `firebase/cors-setup` y refactorización de `project/drift` con análisis de dependencias agregadas y compilación Vite dry-run.
+  - Archivos: [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-153: Plan de Robustez y Blindaje Técnico del Generador de Instancias~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Refactorización y blindaje de `generator.js` para desacoplar metadatos comerciales acoplados de nichos, dinamizar la siembra inicial basada en archivos JSON de plantillas, corregir la doble escritura destructiva de `.firebaserc`, robustecer la inyección SEO y el procesamiento HSL/hex, añadir control de fallos en el procesador de imágenes Jimp con fallback a imagen por defecto y agregar un rollback automático físico de directorios en caso de error durante el aprovisionamiento.
+  - Archivos: [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-152: Diseño y Auditoría Profunda del Wizard de Aprovisionamiento e Integración Avanzada~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Asignación de 3 subagentes paralelos y generación de 3 informes oficiales documentando la auditoría de seguridad del backend, la auditoría de rendimiento y E/S bloqueantes, y la propuesta funcional de UI/UX para el wizard de excelencia. Se indexaron en el mapa de documentación semántico y se registraron en la bitácora de cambios.
+  - Archivos: [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_seguridad_aprovisionamiento_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_seguridad_aprovisionamiento_2026.md) [NEW], [`Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/Prototipe_CLI/propuesta_wizard_aprovisionamiento_excelencia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/Prototipe_CLI/propuesta_wizard_aprovisionamiento_excelencia.md) [NEW], [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_rendimiento_aprovisionamiento_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_rendimiento_aprovisionamiento_2026.md) [NEW]
+
 * **[x] ~~Tarea CORE-150: Automatización y Mejoras de Onboarding en el Asistente de Aprovisionamiento~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-07-01

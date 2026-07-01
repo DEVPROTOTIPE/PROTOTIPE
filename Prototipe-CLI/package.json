@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node cli.js",
-    "server": "node server.js",
+    "server": "node --no-warnings server.js",
     "sync": "node sync_templates.js",
     "sync:dry": "node sync_templates.js --dry-run",
     "sync:full": "node sync_templates.js --yes --run-tests",
