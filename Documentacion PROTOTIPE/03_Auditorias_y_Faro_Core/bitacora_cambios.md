@@ -1,5 +1,16 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-01] - CORE-148: Corrección de Vulnerabilidad Crítica de Autenticación de Administrador (Bypass de Registro)
+
+* **Tipo:** Seguridad / Autenticación / Failsafe
+* **Firma de auditoría:** CORE-148-AUTH-BYPASS-EXPLOIT-FIX
+* **Descripción de Cambios:**
+  - **Corrección de Condición en LoginPage:** Se detectó una vulnerabilidad de escalación de privilegios en `LoginPage.jsx` donde cualquier usuario sin credenciales válidas en Firebase Auth podía autoconfigurarse como administrador. La condición original `if (isUserNotFound || !adminRegistered)` autodeclaraba y creaba el usuario en Firebase Auth y Firestore como administrador al no encontrar el correo, sin verificar si ya existía un administrador. Se cambió el operador lógico a `if (isUserNotFound && !adminRegistered)`, restringiendo el registro de administrador exclusivamente al primer inicio/arranque del sistema cuando la base de datos está vacía.
+* **Archivos Modificados:**
+  - [`Plantillas Core/App Ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/LoginPage.jsx) [MODIFY]
+  - [`Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx) [MODIFY]
+  - [`Instancias Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx) [MODIFY]
+
 ### [2026-07-01] - CORE-147: Implementación Asíncrona SSE y Saneamiento del Asistente de Aprovisionamiento
 
 * **Tipo:** UI/UX / Optimización / Scaffolding Asíncrono / Inyección en lote / Saneamiento Visual

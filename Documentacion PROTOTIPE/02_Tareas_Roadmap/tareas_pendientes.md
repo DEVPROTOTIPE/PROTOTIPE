@@ -4,6 +4,13 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-148: Corrección de Vulnerabilidad Crítica de Autenticación de Administrador (Bypass de Registro)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Corrección de una vulnerabilidad crítica en la autenticación del administrador en `LoginPage.jsx` (Core App Ventas, template-ventas e instancia activa ventas-moni-app) donde se utilizaba un operador OR (`isUserNotFound || !adminRegistered`) que permitía registrar cualquier email inexistente como administrador aunque ya hubiera uno registrado en el sistema. Se cambió a operador AND (`isUserNotFound && !adminRegistered`) para deshabilitar registros posteriores al setup inicial.
+  - Archivos: [`Plantillas Core/App Ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/LoginPage.jsx) [MODIFY], [`Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx) [MODIFY], [`Instancias Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-147: Implementación Asíncrona SSE y Saneamiento del Asistente de Aprovisionamiento~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-07-01
