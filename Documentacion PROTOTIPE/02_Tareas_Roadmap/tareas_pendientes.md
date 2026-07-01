@@ -4,6 +4,20 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-150: Automatización y Mejoras de Onboarding en el Asistente de Aprovisionamiento~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Implementación de cuatro mejoras de alto valor para agilizar el onboarding de clientes: (1) Campos opcionales para Email y Contraseña del administrador inicial. Si se especifican, el generador ejecuta de forma automatizada `scripts/seed_admin.js` en el servidor CLI para escribir directamente en Firebase Auth y Firestore sin necesidad de intervención manual posterior. (2) Campo opcional para Puerto Local de Vite personalizado, modificando `vite.config.js` dinámicamente y evitando colisiones de IndexedDB/Cookies en desarrollo local. (3) Campos rápidos para WhatsApp del negocio y dirección física de la sucursal inyectados directo en `config/settings` (incluyendo estructura pre-configurada de `deliverySettings.pickup`).
+  - Archivos: [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-149: Eliminación de Race Conditions en Login y Panel de Administrador~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Corrección de tres race conditions asíncronas independientes que disparaban errores `Permission Denied` (403) falsos en la consola web de los clientes al intentar ingresar con usuarios no autorizados: (1) Eliminación de `getDocFromServer` en `LoginPage.jsx` (competía con el flujo de des-autenticación). (2) Adición de un guard de renderizado `isAuthLoading` en `AdminHome.jsx` para evitar que se disparen peticiones analíticas y subscripciones de créditos y productos a Firestore mientras se valida la sesión. (3) Saneamiento en Firestore Rules mediante el helper `isFirstStart()` para permitir que la base de datos se autoconfigure en su primer inicio sin desatar deadlocks de permisos.
+  - Archivos: [`Plantillas Core/App Ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/LoginPage.jsx) [MODIFY], [`Plantillas Core/App Ventas/src/pages/admin/AdminHome.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminHome.jsx) [MODIFY], [`Plantillas Core/App Ventas/firestore.rules`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firestore.rules) [MODIFY], [`Instancias Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx) [MODIFY], [`Instancias Clientes/ventas/ventas-moni-app/src/pages/admin/AdminHome.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/AdminHome.jsx) [MODIFY], [`Instancias Clientes/ventas/ventas-moni-app/firestore.rules`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/firestore.rules) [MODIFY]
+
 * **[x] ~~Tarea CORE-148: Corrección de Vulnerabilidad Crítica de Autenticación de Administrador (Bypass de Registro)~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-07-01

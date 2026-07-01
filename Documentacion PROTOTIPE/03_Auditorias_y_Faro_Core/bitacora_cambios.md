@@ -1,5 +1,17 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-01] - CORE-150: Automatización Completa y Mejoras de Onboarding en el Asistente
+
+* **Tipo:** Feature / Aprovisionamiento / Automatización de Siembra / Onboarding
+* **Firma de auditoría:** CORE-150-ONBOARDING-AUTOMATION-PORT-VITE-SEED
+* **Descripción de Cambios:**
+  - **Auto-Siembra del Admin Inicial:** Se añadieron campos opcionales en el wizard UI para definir el Email y Contraseña del primer administrador. Al finalizar el aprovisionamiento físico, el CLI Bridge ejecuta de forma automatizada `node scripts/seed_admin.js` en segundo plano utilizando el token de sesión de Firebase CLI para crear el usuario en Firebase Auth y Firestore sin requerir intervención manual por parte de la IA o el desarrollador en el primer inicio de sesión.
+  - **Puerto Local Vite Personalizado:** Se integró un campo opcional para asignar un puerto de desarrollo local personalizado a la instancia. El generador inyecta dicho puerto directamente en `vite.config.js` y `.env.local` (`VITE_DEVELOPER_CLIENT_ID`), aislando las bases de datos de IndexedDB, LocalStorage y sesiones de Firebase Auth locales para evitar colisiones y flashes de error 403 al alternar entre instancias locales.
+  - **WhatsApp y Dirección de Sucursal Onboarding:** Se añadieron inputs en la pestaña de Branding para capturar el número de WhatsApp comercial y dirección física del local. Estos datos son autoinyectados en el documento de configuración global `config/settings` (incluyendo la estructura JSON completa de `deliverySettings.pickup`), reduciendo los pasos de configuración inicial del catálogo.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY] — Integra lógica de auto-siembra, puerto local e inyección de datos comerciales en el script de seed.
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY] — Nuevos inputs y estados en las pestañas Servidor y Branding del Onboarding Wizard.
+
 ### [2026-07-01] - CORE-149: Eliminación de Race Conditions — Errores 403 en Login No Autorizado
 
 * **Tipo:** Seguridad / Autenticación / Corrección de Race Conditions / Firestore Rules
