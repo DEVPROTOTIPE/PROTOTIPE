@@ -1,5 +1,143 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-06-30] - CORE-138: Desacoplamiento Multi-Core basado en Metadatos (Briefing & Flags)
+
+* **Tipo:** Arquitectura / Escalabilidad / Backend / Frontend / Metadata-Driven
+* **Firma de auditoría:** CORE-138-MULTICORE-MANIFEST-DYNAMIC-WIZARD-FLAGS
+* **Descripción de Cambios:**
+  - **Manifiesto de Metadatos de Core (`core-manifest.json`):** Creación del esquema inicial de metadatos en la plantilla core Ventas (`Plantillas Core/App Ventas/core-manifest.json`) que parametriza y describe sus feature flags, reglas lógicas de recomendación, componentes de catálogo sugeridos y los campos dinámicos específicos del wizard de levantamiento.
+  - **Endpoint de Metadatos (`server.js`):** Implementado el endpoint `GET /api/cores/metadata` en el Bridge para consolidar y servir los manifiestos core registrados.
+  - **Parametrización del Análisis y Exportación (`server.js`):** Modificados `/api/briefing/analyze` y `/api/briefing/export` para calcular los puntajes de cotización, sugerencias de componentes, y la sección de destino en Obsidian dinámicamente mediante el manifiesto del core seleccionado (`coreKey`).
+  - **Wizard Autoadaptable (`BriefingStudioView.jsx`):** Agregada la carga de metadatos de cores y un selector dropdown de Core Base en el Paso 1. Se implementó el componente helper `renderDynamicManifestFields(stepNumber)` para pintar los formularios y tipos de input (textarea, select, checkbox_group) declarados en el JSON.
+  - **Feature Flag Manager Dinámico (`FeatureFlagManager.jsx`):** Refactorizado para cargar los metadatos de cores del Bridge, leer el core de base de la instancia seleccionada (`coreBase`) y renderizar en pantalla y en lote (`handleBulkAction`) únicamente las flags declaradas en su manifiesto.
+* **Archivos Modificados:**
+  - [`Plantillas Core/App Ventas/core-manifest.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/core-manifest.json) [NEW]
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx) [MODIFY]
+
+---
+
+### [2026-06-29] - CORE-137: Botón de Inyección, Limpieza de Datos Demo, Borrado de Sesiones y Exportación por Cliente en Briefing Studio
+
+* **Tipo:** UX / Testing / Productividad / Wizard / Backend
+* **Firma de auditoría:** CORE-137-BRIEFING-INJECT-CLEAR-DELETE-DEMO
+* **Descripción de Cambios:**
+  - **Función de Inyección en `BriefingStudioView.jsx`:** Añadida la función `injectDemoData` que carga un objeto completo de datos demo realistas representando a una ferretería física local ("Ferretería El Tornillo Feliz"). Rellena de forma íntegra los 20 pasos de la entrevista, incluyendo datos generales de la empresa, contacto, contexto con sucursales, canales de venta, flujos de captación, roles de negocio en mostrador, dolores en inventario y caja, horas perdidas, software en uso, variables de branding (color naranja amber `#f59e0b`), requerimientos del sistema, diagnósticos preliminares y feature flags recomendadas.
+  - **Función de Limpieza de Datos:** Implementada la función `clearFormData` que resetee por completo el formulario `form` a su estado inicial vacío y limpie la sesión activa (`selectedSessionId = ''`), notificando mediante un toast.
+  - **Función de Borrado de Sesiones (Firestore):** Implementada la función `handleDeleteSession` para eliminar físicamente de la base de datos Firestore la sesión de levantamiento seleccionada (`deleteDoc`), solicitando confirmación del usuario mediante un diálogo estándar, limpiando el estado del formulario local (`clearFormData`) y recargando el listado actual (`loadSessions`).
+  - **Exportación Separada por Cliente (Backend):** Modificado el endpoint de exportación `/api/briefing/export` en `Prototipe-CLI/server.js` para que cree una subcarpeta dedicada para cada cliente en base al nombre comercial sanitizado (`cleanEmpresa`) y guarde los archivos `.md` de briefing y análisis allí adentro. Se actualizaron los enlaces del mapa de documentación `mapa_documentacion_ia.md` para incluir el segmento de la subcarpeta en las URLs relativas del GPS.
+  - **Integración de Botones Premium en el Header:**
+    - Agregado el botón "Cargar Demo" de estilo traslúcido índigo con icono `<Sparkles size={12} />`.
+    - Agregado el botón "Limpiar Datos" de estilo traslúcido rojo con icono `<Trash2 size={12} />` para vaciar los datos del formulario local.
+    - Agregado un botón condicional de borrado de sesión (al lado del selector dropdown de "Retomar sesión") de color rojo con icono `<Trash2 size={12} />` que aparece únicamente cuando se selecciona una sesión guardada.
+  - **Mensaje de Confirmación:** Integrada la llamada al helper `showToast` tras inyectar, limpiar o eliminar sesiones.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx) [MODIFY]
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+---
+
+### [2026-06-28] - HOTFIX: Restauración de Integración CORE-133 en App.jsx tras git restore accidental
+
+* **Tipo:** Hotfix / Restauración de Emergencia
+* **Firma de auditoría:** HOTFIX-RESTORE-CORE133-INTEGRATION
+* **Causa:** Un `git restore src/App.jsx` ejecutado accidentalmente por la IA durante la sesión de trabajo revirtió `App.jsx` al último commit (`d97de56`), borrando todos los cambios no commiteados de CORE-133, CORE-134, CORE-135 y CORE-136. El repositorio fue sincronizado desde `origin/develop` con `git reset --hard`.
+* **Descripción de Cambios Restaurados:**
+  - **Imports reintegrados en `App.jsx`:** `BriefingStudioView`, `CotizadorView`, `FeatureFlagManager`, `HealthMonitorView`, más iconos `ClipboardList`, `ToggleLeft`, `HeartPulse`.
+  - **NAV_TABS restaurado:** Reintegradas las 4 entradas de tabs `briefing`, `cotizador`, `flags` y `health` al array `NAV_TABS`.
+  - **Renderizado condicional restaurado:** Reintegrados los 4 bloques `activeTab === '...'` en el área de renderizado de tabs del JSX.
+  - **`exportProposalPDF` reimplementada en `pdfService.js`:** Función perdida (parte de CORE-133) reimplementada con el mismo patrón de jsPDF + autoTable del resto del servicio. Genera propuesta PDF con encabezado de marca, tabla de inversión y listado de módulos evaluados.
+  - **Build de Control:** `npm run build` → ✅ 2998 módulos, built in 1.10s. Integridad de biblioteca 100% OK.
+* **Pendiente de restaurar (CORE-134, CORE-135, CORE-136):** Los cambios de erradicación de `<select>` nativos, `padPeriodData` y el zoom interactivo de gráficos por scroll aún no han sido re-aplicados.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/services/pdfService.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/services/pdfService.js) [MODIFY]
+
+---
+
+### [2026-06-29] - CORE-136: Ajuste de Granularidad del Eje X en Gráficos por Scroll del Mouse (Zoom de Tiempo)
+
+* **Tipo:** UX / Interactividad Avanzada / Visualización de Datos
+* **Firma de auditoría:** CORE-136-CHARTS-MOUSEWHEEL-ZOOM
+* **Descripción de Cambios:**
+  - **Estados de Resolución del Gráfico en `App.jsx`:** Declarados los estados React `chartViewMode` (por defecto `'months'`) y `daysBasePeriod` (por defecto `'2026-06'`), junto con un `ref` de referencia `chartContainerRef` para capturar la interacción de scroll sobre la gráfica consolidada.
+  - **Listener del Rueda de Scroll (Mousewheel) no pasivo:** Implementado un event listener en un `useEffect` (ubicado a nivel seguro después de inicializar `addLog`) para capturar eventos `wheel`. El listener intercepta y previene el scroll vertical por defecto del navegador (`e.preventDefault()`) únicamente cuando el cursor se sitúa dentro de la gráfica, y escala incrementalmente el modo de visualización: Scroll arriba disminuye la granularidad (Zoom-in: Años -> Meses -> Días) y Scroll abajo la incrementa (Zoom-out: Días -> Meses -> Años).
+  - **Redistribución Dinámica de Granularidad en `useMemo` y Helpers:**
+    - **Modo Días (Zoom Máximo):** Genera la progresión de los días correspondientes al periodo base seleccionado (ej. los 30 días de junio con su respectiva curva de fluctuación sinusoidal coherente y estable, mapeando comisiones y ventas totales consolidadas).
+    - **Modo Meses (Vista Estándar):** Muestra los últimos 6 meses continuos rellenados por el padding.
+    - **Modo Años (Zoom Mínimo):** Agrupa todos los periodos históricos por año de forma consolidada, mostrando progresión interanual.
+  - **Componentes de Control Inline UI:** Renderizado un grupo de pastillas de control inline en la cabecera de la sección "Comisiones Generales" que indica la resolución activa y permite alternar los modos con un clic además de mediante el gesto del mousewheel/trackpad.
+  - **Build y Validación de Sintaxis:** Validada la consistencia sintáctica y de imports a través de `npm run build` en el workspace de `dev-dashboard` con un resultado exitoso de 100% OK.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-29] - CORE-135: Autocompletado y Relleno Temporal de Gráficos de Tendencias
+
+* **Tipo:** UX / Visualización de Datos / Robustez Frontend
+* **Firma de auditoría:** CORE-135-CHARTS-TEMPORAL-PADDING
+* **Descripción de Cambios:**
+  - **Función Auxiliar `padPeriodData` en `App.jsx`:** Implementado un algoritmo dinámico de relleno temporal para series de tiempo de Recharts. En caso de que la data cargada de Firestore contenga pocos meses o un único período (como ocurre con el inicio de operaciones del cliente en `2026-06`), la función autocompleta consecutivamente los últimos 6 meses proyectando registros en `$0` para comisiones y ventas de los meses anteriores.
+  - **Gráfico General Consolidado:** Integrado `padPeriodData` en el `useMemo` de `generalChartData`, logrando que la gráfica principal muestre una progresión mensual esmerilada de tendencia continua en lugar de un punto flotante.
+  - **Gráficos de Acordeón de Clientes:** Vinculado el relleno de datos a la función `getClientHistoryData` en el desglose de clientes, resolviendo el problema de tendencia del visor individual del cliente `ventas-smartfix`.
+  - **Build de Control:** `npm run build` en dev-dashboard ejecutado con éxito rotundo.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-29] - CORE-134: Erradicación Completa de Selectores Nativos y Resolución de Errores de Renderizado
+
+* **Tipo:** UX / Refactor UI / Corrección de Bugs / Robustez
+* **Firma de auditoría:** CORE-134-SELECTORS-ERRADICATION
+* **Descripción de Cambios:**
+  - **Erradicación de Selectores Nativos en `App.jsx`:** Reemplazados los 3 selectores nativos `<select>` remanentes en el dashboard principal por el componente premium animado `<CustomSelect>`. Específicamente:
+    1. Selector de redondeado de bordes (Radius) en el editor de HSL/branding.
+    2. Selector de cliente de destino CRM en el modal de simulación de incidentes/telemetría.
+    3. Selector de plantilla/tipo de error en el modal de simulación de incidentes/telemetría.
+  - **Verificación de Selectores:** Realizada búsqueda en toda la carpeta `src/` del `dev-dashboard`, confirmando que el 100% de los elementos selectores han sido migrados al componente premium `CustomSelect`, cumpliendo el Estándar de Layout de la Biblioteca.
+  - **Resolución de Fallos de Renderizado de Instancias:** Diagnosticado el bug `Uncaught ReferenceError: Sliders is not defined` reportado por el usuario en `ComponentLibraryView.jsx` que colapsaba el renderizado del componente. Al haberse sustituido el uso de la variable inexistente `Sliders` por `Layers` (ya importado de lucide-react), la interfaz del dashboard y del panel de inyección renderiza de forma óptima y las instancias de Git locales (como `ventas/ventas-moni-app`) se cargan y visualizan correctamente en el selector interactivo.
+  - **Build de Control:** `npm run build` en dev-dashboard ejecutado con éxito total, verificando la integridad del catálogo de la biblioteca al 100% OK.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+### [2026-06-28] - CORE-133: Suite Comercial y de Control de Instancias (Briefing, Cotizador, Flags y Health Monitor)
+
+* **Tipo:** Feature / UX Dashboard / Robustez / Integración
+* **Firma de auditoría:** CORE-133-BRIEFING-COTIZADOR-FLAGS-HEALTH-INTEGRATION
+* **Descripción de Cambios:**
+  - **Módulo `BriefingStudioView.jsx` (Levantamiento interactivo):** Creado wizard premium de 20 secciones basado en el manual de preventa. Incluye auto-guardado en la colección `briefings` de Firestore y Modo 2 de análisis cognitivo (API REST `/api/briefing/analyze` y `/api/briefing/export`) que clasifica el negocio y genera diagnósticos semánticos. Refactorizados todos los selectores nativos por el componente premium `CustomSelect` para retomar sesión y responder preguntas del wizard.
+  - **Módulo `CotizadorView.jsx` (Calculadora interactiva):** Implementada la calculadora oficial de 5 pasos con scoring sobre 108 pts. Incluye visor y editor interactivo de la Matriz de Precios oficial persistida en la colección `dashboard_config/pricing_matrix` de Firestore y descarga en 1-clic del PDF de propuesta de negocio premium.
+  - **Módulo `FeatureFlagManager.jsx` (Control de Core en caliente):** Creado panel de control de 10 flags operativas (`creditsEnabled`, `enableDianBilling`, etc.) vinculadas a Firestore, con timeline de auditoría de cambios y confirmación modal de seguridad.
+  - **Módulo `HealthMonitorView.jsx` (Semáforo de telemetría física):** Creado monitor HTTP y PWA manifest para las URL activas de CRM conectadas al CLI `/api/health/check` con refresco automático de 30 min y gráficos de tiempos históricos de respuesta.
+  - **Pulido Visual y Estandarización de Estilos:** Erradicados todos los bordes rígidos y fondos oscuros hardcodeados (`slate-900`, `slate-950`, `border-slate-800`) en los 4 componentes mediante la aplicación de variables globales del tema CSS del dashboard (`bg-[var(--color-surface)]`, `border-[var(--color-border)]`), logrando consistencia glassmorphic absoluta. Removidos outlines y focus rings del navegador agregando `focus:outline-none focus:ring-0` a los botones del sidebar y menús de navegación.
+  - **Suite de 4 Skills de Preventa e IA:** Creadas y documentadas las 4 nuevas skills (`briefing-analizador`, `cotizador-rapido`, `post-discovery-analyzer` y `objection-handler`) bajo el directorio `.agents/skills/` y registradas en el mapa semántico de documentación.
+  - **Integración de Onboarding:** Implementado el callback `handleImportFromBriefing` en `App.jsx` que hereda automáticamente y sin intervención manual el nombre de la empresa, requerimientos técnicos, branding (HSL y tipografía) y flags recomendadas del briefing directamente al formulario de Onboarding.
+  - **Despliegue y Corrección de Reglas de Firestore:** Corregido el bug de permisos `Missing or insufficient permissions` mediante la actualización de `firestore.rules` locales agregando soporte para las colecciones `historial_respaldos`, `briefings`, `cotizaciones`, `health_checks` y `dashboard_config`. Se desplegaron con éxito al proyecto central `prototipe-ecosistema-control`.
+  - **Corrección de Bug en `sync_rules.js`:** Corregido el bug de escaneo recursivo de reglas que colocaba `GEMINI.md` en la raíz de `Instancias Clientes` debido a la existencia de un `.git` contenedor. El script ahora excluye la raíz de `Instancias Clientes` y escanea recursivamente 2 niveles en busca de proyectos cliente reales.
+  - **Build de Control:** `npm run build` en dev-dashboard → ✅ Completado con éxito e integridad de biblioteca 100% OK.
+  - **Corrección en Limpiador de Caché:** Corregido el bug en la pestaña de Limpiador Seguro de Temporales del panel de Salud/Roadmap (`SkillsRoadmapPanel.jsx`). Éste llamaba a un endpoint inexistente (`/api/instancias/list`), lo cual provocaba que el listado de instancias locales apareciera vacío. Se actualizó la llamada para consumir de `/api/git/targets`, extrayendo dinámicamente las carpetas de instancias físicas locales instaladas. Adicionalmente se reemplazó el selector nativo por el componente premium `CustomSelect` para alineación de UI.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/firestore.rules`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firestore.rules) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/services/pdfService.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/services/pdfService.js) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/sync_rules.js`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/sync_rules.js) [MODIFY]
+* **Archivos Creados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CotizadorView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CotizadorView.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx) [NEW]
+
+---
+
 ### [2026-06-28] - CORE-132: Suite de 5 Nuevas Habilidades y Salud Extendida del Ecosistema
 
 * **Tipo:** Feature / Infraestructura / Automatización / UX Dashboard

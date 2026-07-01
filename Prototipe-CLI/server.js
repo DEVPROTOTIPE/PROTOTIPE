@@ -3464,6 +3464,46 @@ app.get('/api/cores', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GET /api/cores/metadata
+// Carga y consolida los manifiestos core-manifest.json de todas las plantillas cores
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/cores/metadata', async (req, res) => {
+  const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+  try {
+    const registro = await fs.readJson(registroPath);
+    const metadata = {};
+
+    for (const [clave, data] of Object.entries(registro.plantillas)) {
+      const manifestPath = path.join(data.fuente, 'core-manifest.json');
+      if (await fs.pathExists(manifestPath)) {
+        try {
+          const manifest = await fs.readJson(manifestPath);
+          metadata[clave] = {
+            ...data,
+            manifest
+          };
+        } catch (jsonErr) {
+          metadata[clave] = {
+            ...data,
+            manifest: null,
+            error: `Error al parsear core-manifest.json: ${jsonErr.message}`
+          };
+        }
+      } else {
+        metadata[clave] = {
+          ...data,
+          manifest: null
+        };
+      }
+    }
+
+    res.json({ success: true, metadata });
+  } catch (err) {
+    res.status(500).json({ error: `Error al cargar metadatos de cores: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // POST /api/cores/:clave/scaffold
 // Copia la estructura de código de un core existente como punto de partida.
 // Reemplaza referencias del nombre base por el nombre del nuevo core.
@@ -8585,6 +8625,473 @@ app.post('/api/project/cleanup', async (req, res) => {
     console.error('Error durante la purga de temporales:', err.message);
     res.status(500).json({ error: `Fallo en el limpiador seguro: ${err.message}` });
   }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// METRICAS COMERCIALES Y OPERATIVAS (Briefing, Cotización, Flags, Health Monitor)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Helper para sanitizar nombres de archivos
+function sanitizeFileName(name) {
+  if (typeof name !== 'string') return '';
+  return name.toLowerCase().replace(/[^a-z0-9_-]/g, '_').substring(0, 50);
+}
+
+// POST /api/briefing/analyze
+app.post('/api/briefing/analyze', async (req, res) => {
+  const briefing = req.body;
+  if (!briefing) {
+    return res.status(400).json({ error: 'Faltan datos del briefing.' });
+  }
+
+  const coreKey = briefing.coreKey || 'ventas';
+
+  try {
+    let manifest = null;
+    const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+    if (await fs.pathExists(registroPath)) {
+      const registro = await fs.readJson(registroPath);
+      const coreConfig = registro.plantillas[coreKey];
+      if (coreConfig) {
+        const manifestPath = path.join(coreConfig.fuente.replace(/\//g, path.sep), 'core-manifest.json');
+        if (await fs.pathExists(manifestPath)) {
+          manifest = await fs.readJson(manifestPath);
+        }
+      }
+    }
+
+    // 1. Calcular score de 5 pasos de cotización
+    // Paso 1: Complejidad Funcional
+    let scoreFuncional = 0;
+    const reqFuncionales = briefing.seccion15?.obligatorios || [];
+    if (manifest && manifest.scoringRules?.modules) {
+      for (const req of reqFuncionales) {
+        if (manifest.scoringRules.modules[req] !== undefined) {
+          scoreFuncional += manifest.scoringRules.modules[req];
+        }
+      }
+    } else {
+      if (reqFuncionales.includes('pos')) scoreFuncional += 8;
+      if (reqFuncionales.includes('inventario')) scoreFuncional += 6;
+      if (reqFuncionales.includes('credito')) scoreFuncional += 5;
+      if (reqFuncionales.includes('agenda')) scoreFuncional += 5;
+      if (reqFuncionales.includes('dian')) scoreFuncional += 8;
+    }
+
+    // Paso 2: Complejidad Técnica
+    let scoreTecnico = 0;
+    const integraciones = briefing.seccion13?.integraciones || [];
+    if (manifest && manifest.scoringRules?.integrations) {
+      for (const integration of integraciones) {
+        if (manifest.scoringRules.integrations[integration] !== undefined) {
+          scoreTecnico += manifest.scoringRules.integrations[integration];
+        }
+      }
+      if (briefing.seccion11?.offline === 'si' && manifest.scoringRules.offlinePoints !== undefined) {
+        scoreTecnico += manifest.scoringRules.offlinePoints;
+      }
+    } else {
+      if (integraciones.includes('whatsapp')) scoreTecnico += 3;
+      if (integraciones.includes('pasarela')) scoreTecnico += 5;
+      if (integraciones.includes('dian')) scoreTecnico += 6;
+      if (integraciones.includes('impresora')) scoreTecnico += 3;
+      if (briefing.seccion11?.offline === 'si') scoreTecnico += 5;
+    }
+
+    // Paso 3: Personalización
+    let scorePersonalizacion = 0;
+    const personalizacion = briefing.seccion18?.personalizacion || 'baja';
+    if (personalizacion === 'media') scorePersonalizacion += 6;
+    if (personalizacion === 'alta') scorePersonalizacion += 12;
+
+    // Paso 4: Riesgos
+    let scoreRiesgo = 0;
+    const madurezTech = briefing.seccion18?.madurezTech || 'media';
+    if (madurezTech === 'baja') scoreRiesgo += 8;
+    if (briefing.seccion7?.doloresAdmin || briefing.seccion7?.doloresCaja || briefing.seccion7?.doloresInventario) {
+      scoreRiesgo += 4;
+    }
+
+    // Paso 5: Valor Empresarial
+    let scoreValor = 0;
+    const horasPerdidas = parseInt(briefing.seccion8?.horasPerdidas || '0', 10);
+    if (horasPerdidas > 20) scoreValor += 8;
+    else if (horasPerdidas > 10) scoreValor += 5;
+    if (briefing.seccion8?.dineroPerdido) scoreValor += 8;
+
+    const totalScore = scoreFuncional + scoreTecnico + scorePersonalizacion + scoreRiesgo + scoreValor;
+
+    // 2. Clasificación por nivel
+    let nivel = '🔴 Micro';
+    let minSetup = 500000;
+    let maxSetup = 1500000;
+    let mensualidad = 50000;
+    let comision = 1.0;
+
+    if (totalScore > 80) {
+      nivel = '⭐ Estratégico';
+      minSetup = 10000000;
+      maxSetup = 25000000;
+      mensualidad = 500000;
+      comision = 3.5;
+    } else if (totalScore > 60) {
+      nivel = '🔵 Grande';
+      minSetup = 6000000;
+      maxSetup = 12000000;
+      mensualidad = 300000;
+      comision = 2.5;
+    } else if (totalScore > 40) {
+      nivel = '🟢 Medio';
+      minSetup = 3500000;
+      maxSetup = 7000000;
+      mensualidad = 180000;
+      comision = 2.0;
+    } else if (totalScore > 20) {
+      nivel = '🟡 Pequeño';
+      minSetup = 1500000;
+      maxSetup = 4000000;
+      mensualidad = 100000;
+      comision = 1.5;
+    }
+
+    // 3. Recomendar Feature Flags
+    const recommendedFlags = {};
+    if (manifest && manifest.featureFlags) {
+      for (const flag of manifest.featureFlags) {
+        recommendedFlags[flag.id] = false;
+      }
+
+      if (manifest.flagRecommendationRules) {
+        for (const rule of manifest.flagRecommendationRules) {
+          let match = false;
+          if (rule.field === 'seccion15.obligatorios') {
+            if (Array.isArray(rule.includes)) {
+              match = rule.includes.some(inc => reqFuncionales.includes(inc));
+            } else {
+              match = reqFuncionales.includes(rule.includes);
+            }
+          } else if (rule.field === 'seccion4.canales') {
+            const canales = briefing.seccion4?.canales || [];
+            if (Array.isArray(rule.includes)) {
+              match = rule.includes.some(inc => canales.includes(inc));
+            } else {
+              match = canales.includes(rule.includes);
+            }
+          } else if (rule.field === 'seccion6.roles.rol') {
+            const roles = briefing.seccion6?.roles || [];
+            match = roles.some(r => r.rol?.toLowerCase().includes(rule.matchSub));
+          } else if (rule.field === 'seccion3.sector') {
+            const sectorVal = briefing.seccion3?.sector || '';
+            match = sectorVal.toLowerCase().includes(rule.matchSub);
+          }
+
+          if (match && rule.andIntegration) {
+            match = integraciones.includes(rule.andIntegration);
+          }
+
+          if (match) {
+            recommendedFlags[rule.flag] = true;
+          }
+        }
+      }
+    } else {
+      recommendedFlags.creditsEnabled = reqFuncionales.includes('credito');
+      recommendedFlags.couponsEnabled = reqFuncionales.includes('cupones') || reqFuncionales.includes('fidelizacion');
+      recommendedFlags.claimsEnabled = reqFuncionales.includes('garantias') || reqFuncionales.includes('reclamaciones');
+      recommendedFlags.wholesaleEnabled = reqFuncionales.includes('mayoreo') || briefing.seccion4?.canales?.includes('b2b');
+      recommendedFlags.deliveryEnabled = reqFuncionales.includes('domicilio') || reqFuncionales.includes('delivery');
+      recommendedFlags.commissionsEnabled = reqFuncionales.includes('comisiones') || briefing.seccion6?.roles?.some(r => r.rol?.toLowerCase().includes('vendedor'));
+      recommendedFlags.enableDianBilling = reqFuncionales.includes('dian');
+      recommendedFlags.reservasEnabled = reqFuncionales.includes('agenda') || reqFuncionales.includes('citas');
+      recommendedFlags.posExpressScanner = reqFuncionales.includes('pos') && integraciones.includes('impresora');
+      recommendedFlags.ordenesTrabajo = reqFuncionales.includes('ordenes') || briefing.seccion3?.sector?.toLowerCase().includes('servicio tecnico');
+    }
+
+    // 4. Recomendar Componentes de la biblioteca
+    const suggestedComponents = [];
+    if (manifest && manifest.componentMappings) {
+      for (const mapping of manifest.componentMappings) {
+        if (recommendedFlags[mapping.flag]) {
+          suggestedComponents.push(...mapping.components);
+        }
+      }
+    } else {
+      if (recommendedFlags.creditsEnabled) {
+        suggestedComponents.push({ name: 'Tarjeta de Pedido Admin', technicalName: 'OrderCard', link: 'Pedidos_y_Gestion/Tarjeta_Pedido_Admin/tarjeta_pedido_admin.md' });
+        suggestedComponents.push({ name: 'Sistema de Transacciones Atómicas', technicalName: 'InventoryTransactionService', link: 'Servicios_y_Firebase/Transacciones_Atomicas_Inventario/transacciones_atomicas_inventario.md' });
+      }
+      if (recommendedFlags.couponsEnabled) {
+        suggestedComponents.push({ name: 'Aplicador Animado de Cupones', technicalName: 'InteractiveCouponBadge', link: 'Formularios_y_UI/Interactive_Coupon_Badge/interactive_coupon_badge.md' });
+        suggestedComponents.push({ name: 'Motor Dinámico de Cupones', technicalName: 'couponService', link: 'Servicios_y_Firebase/Motor_Cupones/motor_cupones.md' });
+      }
+      if (recommendedFlags.deliveryEnabled) {
+        suggestedComponents.push({ name: 'Servicio de Gestión de Domicilios', technicalName: 'deliveryService', link: 'Servicios_y_Firebase/Gestion_Domicilios/gestion_domicilios.md' });
+        suggestedComponents.push({ name: 'Panel de Reparto de Domicilios', technicalName: 'DeliveryPanel', link: 'Paginas/Panel_Domicilio/panel_domicilio.md' });
+      }
+      if (recommendedFlags.reservasEnabled) {
+        suggestedComponents.push({ name: 'Selector de Fecha y Rangos', technicalName: 'DatePickerPremium', link: 'Formularios_y_UI/Calendario_Premium/calendario_premium.md' });
+      }
+      if (recommendedFlags.posExpressScanner) {
+        suggestedComponents.push({ name: 'POS Express Scanner', technicalName: 'posExpressScanner', link: 'Pedidos_y_Gestion/pos_express_scanner.md' });
+      }
+    }
+
+    if (briefing.seccion14?.colorPrimario) {
+      suggestedComponents.push({ name: 'Sistema de Temas Dinámicos', technicalName: 'ThemeManager', link: 'Utilidades/Sistema_Temas_Dinamicos/sistema_temas.md' });
+    }
+
+    // 5. Generar Resumen Ejecutivo
+    const sector = briefing.seccion3?.sector || 'comercial';
+    const nombreNegocio = briefing.seccion1?.nombre || 'la empresa';
+    const dolores = briefing.seccion7?.doloresPrincipales || 'falta de control';
+    const resumen = `El cliente opera en el sector ${sector} bajo la marca ${nombreNegocio}. Su principal dolor consiste en ${dolores}, lo cual impacta la eficiencia administrativa perdiendo aproximadamente ${horasPerdidas} horas semanales. Se recomienda implementar una solución de marca blanca nivel ${nivel} con el core base habilitando las feature flags de ${Object.entries(recommendedFlags).filter(([_, v]) => v).map(([k]) => k).join(', ') || 'ninguna en particular'}.`;
+
+    res.json({
+      score: {
+        funcional: scoreFuncional,
+        tecnico: scoreTecnico,
+        personalizacion: scorePersonalizacion,
+        riesgo: scoreRiesgo,
+        valor: scoreValor,
+        total: totalScore,
+        nivel
+      },
+      pricing: {
+        minSetup,
+        maxSetup,
+        mensualidad,
+        comision
+      },
+      recommendedFlags,
+      suggestedComponents,
+      resumenEjecutivo: resumen
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Fallo al procesar análisis cognitivo del briefing: ${err.message}` });
+  }
+});
+
+// POST /api/briefing/export
+app.post('/api/briefing/export', async (req, res) => {
+  const { empresa, contacto, fecha, briefingData, analisisData, coreKey } = req.body;
+
+  if (!empresa || !contacto || !fecha || !briefingData || !analisisData) {
+    return res.status(400).json({ error: 'Faltan parámetros requeridos: empresa, contacto, fecha, briefingData, analisisData.' });
+  }
+
+  const cleanEmpresa = sanitizeFileName(empresa);
+  const cleanContacto = sanitizeFileName(contacto);
+  const cleanFecha = sanitizeFileName(fecha);
+  const targetCoreKey = coreKey || 'ventas';
+
+  try {
+    // Intentar leer la sección del mapa del manifiesto del core
+    let docSectionHeader = '## 📂 Sección 5 — Estrategia Comercial y Levantamiento';
+    const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+    if (await fs.pathExists(registroPath)) {
+      const registro = await fs.readJson(registroPath);
+      const coreConfig = registro.plantillas[targetCoreKey];
+      if (coreConfig) {
+        const manifestPath = path.join(coreConfig.fuente.replace(/\//g, path.sep), 'core-manifest.json');
+        if (await fs.pathExists(manifestPath)) {
+          const manifest = await fs.readJson(manifestPath);
+          if (manifest.categoryDocSection) {
+            docSectionHeader = manifest.categoryDocSection;
+          }
+        }
+      }
+    }
+
+    const docRoot = getDocumentationRoot();
+    const levantamientoDir = path.join(docRoot, '05_Estrategia_Comercial_Ecosistema', 'Plantillas_de_Levantamiento');
+    const clienteDir = path.join(levantamientoDir, cleanContacto);
+    await fs.ensureDir(clienteDir);
+
+    const briefingFileName = `briefing_${cleanEmpresa}_${cleanFecha}.md`;
+    const analisisFileName = `analisis_${cleanEmpresa}_${cleanFecha}.md`;
+
+    const briefingFilePath = path.join(clienteDir, briefingFileName);
+    const analisisFilePath = path.join(clienteDir, analisisFileName);
+
+    // Escribir archivos a disco
+    await fs.writeFile(briefingFilePath, briefingData, 'utf-8');
+    await fs.writeFile(analisisFilePath, analisisData, 'utf-8');
+
+    // Sincronizar en el mapa de documentación
+    const mapaPath = path.join(docRoot, '04_Estandares_y_Skills', 'mapa_documentacion_ia.md');
+    if (await fs.pathExists(mapaPath)) {
+      let mapaContent = await fs.readFile(mapaPath, 'utf-8');
+      
+      const newBriefingRow = `| **${briefingFileName}** | Levantamiento de Requerimientos | Registro detallado de la entrevista de descubrimiento comercial para ${empresa} realizada el ${fecha}. | [Ver Briefing](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/Plantillas_de_Levantamiento/${cleanContacto}/${briefingFileName}) |\n`;
+      const newAnalisisRow = `| **${analisisFileName}** | Análisis Post-Descubrimiento | Diagnóstico técnico, estimación de complejidad y roadmap comercial para ${empresa}. | [Ver Análisis](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/Plantillas_de_Levantamiento/${cleanContacto}/${analisisFileName}) |\n`;
+
+      const sectionIndex = mapaContent.indexOf(docSectionHeader);
+      
+      if (sectionIndex !== -1) {
+        const endTableIndex = mapaContent.indexOf('---', sectionIndex + docSectionHeader.length);
+        if (endTableIndex !== -1) {
+          mapaContent = mapaContent.substring(0, endTableIndex - 1) + '\n' + newBriefingRow + newAnalisisRow + mapaContent.substring(endTableIndex);
+          await fs.writeFile(mapaPath, mapaContent, 'utf-8');
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Briefing y Análisis exportados correctamente en la subcarpeta del contacto del cliente y mapa de documentación actualizado.',
+      briefingPath: briefingFilePath,
+      analisisPath: analisisFilePath
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Fallo al exportar briefing a Markdown: ${err.message}` });
+  }
+});
+
+// GET /api/health/check
+app.get('/api/health/check', async (req, res) => {
+  const { clients } = req.query; // Espera CSV de URLS en formato: client1,url1;client2,url2;...
+  if (!clients) {
+    return res.status(400).json({ error: 'Falta el parámetro "clients". Formato esperado: id1,url1;id2,url2;...' });
+  }
+
+  const clientList = clients.split(';').map(c => {
+    const [id, url] = c.split(',');
+    return { id: id?.trim(), url: url?.trim() };
+  }).filter(c => c.id && c.url);
+
+  try {
+    const results = await Promise.allSettled(
+      clientList.map(async (client) => {
+        const startTime = Date.now();
+        let httpStatus = 0;
+        let hasPwa = false;
+        let responseTimeMs = 0;
+        let status = 'red';
+
+        try {
+          // Realizar fetch al sitio web del cliente con timeout de 5 segundos
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          
+          const response = await fetch(client.url, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          
+          httpStatus = response.status;
+          responseTimeMs = Date.now() - startTime;
+
+          if (response.ok) {
+            status = responseTimeMs < 2000 ? 'green' : 'yellow';
+
+            // Intentar verificar PWA manifest
+            const pwaController = new AbortController();
+            const pwaTimeoutId = setTimeout(() => pwaController.abort(), 2000);
+            
+            // Intenta leer manifest.json o manifest.webmanifest en la raíz
+            const manifestUrl = client.url.endsWith('/') ? `${client.url}manifest.webmanifest` : `${client.url}/manifest.webmanifest`;
+            const pwaResponse = await fetch(manifestUrl, { signal: pwaController.signal });
+            clearTimeout(pwaTimeoutId);
+
+            if (pwaResponse.ok) {
+              hasPwa = true;
+            } else {
+              // Intenta alternativo manifest.json
+              const altManifestUrl = client.url.endsWith('/') ? `${client.url}manifest.json` : `${client.url}/manifest.json`;
+              const altPwaController = new AbortController();
+              const altPwaTimeoutId = setTimeout(() => altPwaController.abort(), 2000);
+              const altPwaResponse = await fetch(altManifestUrl, { signal: altPwaController.signal });
+              clearTimeout(altPwaTimeoutId);
+              if (altPwaResponse.ok) {
+                hasPwa = true;
+              }
+            }
+          }
+        } catch (fetchErr) {
+          // Si falla, se queda en status 'red'
+          responseTimeMs = Date.now() - startTime;
+        }
+
+        return {
+          id: client.id,
+          url: client.url,
+          status,
+          httpStatus,
+          responseTimeMs,
+          hasPwa,
+          lastCheck: new Date().toISOString()
+        };
+      })
+    );
+
+    const formattedResults = results.map((r, i) => {
+      if (r.status === 'fulfilled') return r.value;
+      return {
+        id: clientList[i].id,
+        url: clientList[i].url,
+        status: 'red',
+        httpStatus: 0,
+        responseTimeMs: 0,
+        hasPwa: false,
+        lastCheck: new Date().toISOString(),
+        error: r.reason?.message
+      };
+    });
+
+    res.json(formattedResults);
+  } catch (err) {
+    res.status(500).json({ error: `Fallo en el Health Monitor global: ${err.message}` });
+  }
+});
+
+// GET /api/health/:clientId
+app.get('/api/health/:clientId', async (req, res) => {
+  const { clientId } = req.params;
+  const { url } = req.query;
+
+  if (!url) {
+    return res.status(400).json({ error: 'Falta el parámetro "url".' });
+  }
+
+  const startTime = Date.now();
+  let httpStatus = 0;
+  let hasPwa = false;
+  let responseTimeMs = 0;
+  let status = 'red';
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    httpStatus = response.status;
+    responseTimeMs = Date.now() - startTime;
+
+    if (response.ok) {
+      status = responseTimeMs < 2000 ? 'green' : 'yellow';
+
+      const pwaController = new AbortController();
+      const pwaTimeoutId = setTimeout(() => pwaController.abort(), 2000);
+      const manifestUrl = url.endsWith('/') ? `${url}manifest.webmanifest` : `${url}/manifest.webmanifest`;
+      const pwaResponse = await fetch(manifestUrl, { signal: pwaController.signal });
+      clearTimeout(pwaTimeoutId);
+
+      if (pwaResponse.ok) {
+        hasPwa = true;
+      }
+    }
+  } catch (fetchErr) {
+    responseTimeMs = Date.now() - startTime;
+  }
+
+  res.json({
+    id: clientId,
+    url,
+    status,
+    httpStatus,
+    responseTimeMs,
+    hasPwa,
+    lastCheck: new Date().toISOString()
+  });
 });
 
 async function startServer(port) {

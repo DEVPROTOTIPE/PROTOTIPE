@@ -4,6 +4,48 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-138: Desacoplamiento Multi-Core basado en Metadatos (Briefing & Flags)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-30
+  - Fecha de finalización: 2026-06-30
+  - Descripción: Implementar arquitectura guiada por metadatos (core-manifest.json) para que el Wizard del Briefing Studio y el Feature Flag Manager se autoconfiguren dinámicamente según el Core seleccionado.
+  - Archivos: [`Plantillas Core/App Ventas/core-manifest.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/core-manifest.json) [NEW], [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-137: Inyección, Limpieza de Datos Demo, Borrado y Exportación por Cliente en Briefing Studio~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-29
+  - Fecha de finalización: 2026-06-29
+  - Descripción: Agregar botones interactivos premium para la inyección y limpieza rápida de datos de prueba, la eliminación de sesiones guardadas en Firestore, y refactorizar el endpoint de exportación en el backend para almacenar briefings por subcarpeta de cliente.
+  - Archivos: [`Central PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx) [MODIFY], [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-136: Ajuste de Granularidad del Eje X en Gráficos por Scroll del Mouse (Zoom de Tiempo)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-29
+  - Fecha de finalización: 2026-06-29
+  - Descripción: Implementado soporte interactivo de mousewheel/trackpad scroll sobre el gráfico consolidado general de comisiones en `App.jsx`. El listener no pasivo previene el scroll vertical de página cuando el cursor está en el gráfico y ajusta dinámicamente `chartViewMode` (Zoom-in: Años -> Meses -> Días; Zoom-out: Días -> Meses -> Años). Adicionalmente, se renderizaron controles de botones inline premium en la cabecera del gráfico para alternar granularidades con un clic y se resolvió el bug de inicialización de `addLog` en `App.jsx`.
+  - Archivos: [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-135: Autocompletado y Relleno Temporal de Gráficos de Tendencias~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-29
+  - Fecha de finalización: 2026-06-29
+  - Descripción: Creado helper `padPeriodData` en `App.jsx` para autocompletar consecutivamente los últimos 6 meses proyectando registros en `$0` para comisiones y ventas de meses anteriores. Esto evita puntos flotantes sin tendencia en series temporales cortas (como en el inicio de `2026-06`).
+  - Archivos: [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-134: Erradicación Completa de Selectores Nativos y Resolución de Errores de Renderizado~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-29
+  - Fecha de finalización: 2026-06-29
+  - Descripción: Reemplazados todos los selectores nativos `<select>` remanentes en `App.jsx` por el componente premium animado `<CustomSelect>`. Corregido el error crítico de Lucide icons `Sliders` reemplazado por `Layers` en `ComponentLibraryView.jsx` que bloqueaba el renderizado de la UI de inyección y la carga de clientes Git.
+  - Archivos: [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [`ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-133: Suite Comercial y de Control de Instancias (Briefing, Cotizador, Flags y Health Monitor)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-06-28
+  - Fecha de finalización: 2026-06-28
+  - Descripción: Implementación e integración de los 4 nuevos módulos comerciales y de control en el dashboard central (`App.jsx`). **Briefing Studio:** Wizard interactivo de 20 pasos de preventa con auto-guardado en Firestore y Modo 2 cognitivo con el CLI. **Cotizador:** Calculadora de 5 pasos basada en matriz de precios persistida en Firestore y generación/descarga de PDF de propuesta formal. **Feature Flags:** Panel de 10 variables del Core vinculadas en tiempo real. **Health Monitor:** Grid semafórico de disponibilidad HTTP y manifests de las instancias con gráficos históricos de respuesta. **Onboarding:** callback de inyección rápida de datos de preventa en el formulario de creación. Sincronización y despliegue de reglas de seguridad de Firestore (`firestore.rules`) locales e inyección en caliente. Corrección del bug de escaneo recursivo en `sync_rules.js` para excluir la carpeta contenedor `Instancias Clientes`.
+  - Archivos: [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [`Central PROTOTIPE/dev-dashboard/firestore.rules`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firestore.rules) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/services/pdfService.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/services/pdfService.js) [MODIFY], [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/sync_rules.js`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/sync_rules.js) [MODIFY], y 4 componentes React creados en `components/admin/`.
+
 * **[x] ~~Tarea CORE-132: Suite de 5 Nuevas Habilidades y Salud Extendida del Ecosistema~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-28

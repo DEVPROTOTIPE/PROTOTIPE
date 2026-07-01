@@ -74,10 +74,11 @@ function scanDirectory(baseDir) {
     fs.readdirSync(baseDir, { withFileTypes: true }).forEach(dirent => {
       if (!dirent.isDirectory()) return;
       const dirPath = path.join(baseDir, dirent.name);
-      // Subproyectos válidos: tienen .git o package.json pero no son la carpeta de documentación
+      // Subproyectos válidos: tienen .git o package.json pero no son la carpeta de documentación o contenedores
       if (
         dirent.name !== 'Documentacion PROTOTIPE' &&
         dirent.name !== 'node_modules' &&
+        dirent.name !== 'Instancias Clientes' &&
         (fs.existsSync(path.join(dirPath, '.git')) ||
          fs.existsSync(path.join(dirPath, 'package.json')))
       ) {
@@ -95,6 +96,31 @@ scanDirectory(WORKSPACE_DIR);
 // Escanear subcarpetas clave
 scanDirectory(path.join(WORKSPACE_DIR, 'Plantillas Core'));
 scanDirectory(path.join(WORKSPACE_DIR, 'Central PROTOTIPE'));
+
+// Escanear subproyectos reales dentro de Instancias Clientes (2 niveles)
+const instanciasClientesDir = path.join(WORKSPACE_DIR, 'Instancias Clientes');
+if (fs.existsSync(instanciasClientesDir)) {
+  try {
+    fs.readdirSync(instanciasClientesDir, { withFileTypes: true }).forEach(catDirent => {
+      if (!catDirent.isDirectory() || catDirent.name.startsWith('.')) return;
+      const catPath = path.join(instanciasClientesDir, catDirent.name);
+      
+      fs.readdirSync(catPath, { withFileTypes: true }).forEach(clientDirent => {
+        if (!clientDirent.isDirectory()) return;
+        const clientPath = path.join(catPath, clientDirent.name);
+        
+        if (
+          fs.existsSync(path.join(clientPath, '.git')) ||
+          fs.existsSync(path.join(clientPath, 'package.json'))
+        ) {
+          targets.push(path.join(clientPath, 'GEMINI.md'));
+        }
+      });
+    });
+  } catch (err) {
+    console.error('⚠️  Advertencia al escanear Instancias Clientes:', err.message);
+  }
+}
 
 // Escanear templates del CLI
 if (fs.existsSync(CLI_TEMPLATES_DIR)) {
