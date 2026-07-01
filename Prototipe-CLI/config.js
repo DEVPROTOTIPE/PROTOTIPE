@@ -10,6 +10,40 @@ const CLI_ROOT = __dirname;
 const GIT_ROOT_CFG = path.resolve(CLI_ROOT, '..');
 const REGISTRO_PATH = path.join(CLI_ROOT, 'plantillas_registro.json');
 
+// Auto-healer: Corrige las rutas absolutas a la unidad de disco actual (D:/PROTOTIPE -> C:/PROTOTIPE, etc.)
+if (fs.existsSync(REGISTRO_PATH)) {
+  try {
+    const data = fs.readJsonSync(REGISTRO_PATH);
+    let changed = false;
+    if (data && data.plantillas) {
+      const gitRootNormalized = GIT_ROOT_CFG.replace(/\\/g, '/');
+      for (const key of Object.keys(data.plantillas)) {
+        const item = data.plantillas[key];
+        if (item.fuente) {
+          const normalizedFuente = item.fuente.replace(/^[a-zA-Z]:\/PROTOTIPE/i, gitRootNormalized);
+          if (normalizedFuente !== item.fuente) {
+            item.fuente = normalizedFuente;
+            changed = true;
+          }
+        }
+        if (item.destino) {
+          const normalizedDestino = item.destino.replace(/^[a-zA-Z]:\/PROTOTIPE/i, gitRootNormalized);
+          if (normalizedDestino !== item.destino) {
+            item.destino = normalizedDestino;
+            changed = true;
+          }
+        }
+      }
+    }
+    if (changed) {
+      fs.writeJsonSync(REGISTRO_PATH, data, { spaces: 2 });
+      console.log(`[Auto-Heal] Sincronizadas las rutas de plantillas_registro.json a la unidad local: ${GIT_ROOT_CFG}`);
+    }
+  } catch (err) {
+    console.error(`[Auto-Heal Error] No se pudo auto-corregir plantillas_registro.json: ${err.message}`);
+  }
+}
+
 // Cargar variables de entorno del archivo .env local si existe
 const envPath = path.join(CLI_ROOT, '.env');
 if (fs.existsSync(envPath)) {

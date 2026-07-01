@@ -22,11 +22,10 @@
     "firebase": "^12.14.0",
     "fs-extra": "^11.2.0",
     "inquirer": "^9.2.12",
+    "jimp": "^1.6.1",
     "ora": "^9.4.0",
     "picocolors": "^1.0.0",
     "web-push": "^3.6.7"
   },
-  "devDependencies": {
-    "jimp": "^1.6.1"
-  }
+  "devDependencies": {}
 }

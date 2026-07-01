@@ -5,8 +5,8 @@
 * **Tipo:** Optimización / Estándar de Desarrollo / Conectividad Híbrida / Tolerancia a fallos
 * **Firma de auditoría:** CORE-143-TELEMETRY-DUALCHANNEL-FIRESTORESINK
 * **Descripción de Cambios:**
-  - **Canal Dual en Telemetría (`telemetryService.js`):** Modificado el servicio de telemetría de la app cliente para soportar conectividad híbrida. Ahora, al emitir reportes de facturación mensual comisional (`reportesBilling`) o reportar fallos (`app_failures`), el servicio intenta primero escribir directamente en la base de datos de Firestore Central utilizando el SDK y el singleton secundario `getCentralFirestore()`.
-  - **HTTPS Fallback:** Si la escritura directa por el SDK de Firebase es rechazada o falla por cualquier causa, el servicio intercepta el error y de forma elástica utiliza la llamada REST HTTPS tradicional (`postTelemetry`) hacia la Cloud Function de Firebase.
+  - **Canal de Escritura Directa (`telemetryService.js`):** Modificado el servicio de telemetría de la app cliente para eliminar el uso de Cloud Functions (`postTelemetry`) e interactuar directamente mediante el SDK web de Firebase a través del singleton secundario `getCentralFirestore()`.
+  - **Inclusión del Token de Telemetría:** Se corrigió un error de permisos (`FirebaseError: Missing or insufficient permissions`) al incluir explícitamente la propiedad `token` (`DEV_TOKEN`) en el payload de escritura para `reportesBilling` y `app_failures`. Esto satisface la validación de seguridad de las reglas de Firestore Central (`tokenValido(...)`) sin exponer privilegios elevados.
   - **Propagación Completa:** Se sincronizó este cambio en el Core de Oro `App Ventas`, en la carpeta del CLI `template-ventas` y en la instancia activa cliente `ventas-moni-app`.
 * **Archivos Modificados:**
   - [`Plantillas Core/App Ventas/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/telemetryService.js) [MODIFY]

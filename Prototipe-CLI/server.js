@@ -165,7 +165,7 @@ const WORKER_TIMEOUT_MS = 10 * 60 * 1000;
 // Carga del .env centralizada en config.js — no se duplica aquí.
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -410,6 +410,7 @@ app.post('/api/upload-logo', async (req, res) => {
 
 // Endpoint para crear el proyecto físicamente
 app.post('/api/create-project', async (req, res) => {
+  projectDirCache.clear();
   const answers = req.body;
   if (answers.projectName) {
     answers.projectName = sanitizeShellArgument(answers.projectName);
@@ -4424,13 +4425,61 @@ async function resolveFirebaseProjectId(projectDir, clientId) {
 // Helper para buscar el directorio del proyecto del cliente.
 // Fuente de verdad: .prototipe.json (clientId / projectName).
 // Soporta 3 niveles: directo, nicho/instancia, fallback por nombre de carpeta y package.json.
+const projectDirCache = new Map();
+const CACHE_TTL_MS = 10000; // 10 segundos
+
 async function findProjectDir(clientId) {
   if (!clientId) return null;
-  const baseAppsDir = getWorkspaceRoot(); // D:\PROTOTIPE\Instancias Clientes
-  const lowerClientId = clientId.toLowerCase();
 
-  // Helper interno: decide si un directorio corresponde al clientId buscado
+  // Sanitización de seguridad temprana contra Path Traversal
+  const sanitizedId = clientId.replace(/\\/g, '/');
+  if (sanitizedId.includes('..') || sanitizedId.includes('/') || sanitizedId.includes(':')) {
+    return null;
+  }
+
+  const baseAppsDir = getWorkspaceRoot(); // D:\PROTOTIPE\Instancias Clientes
+  const lowerClientId = sanitizedId.toLowerCase();
+
+  // 1. Intentar recuperación desde el caché en memoria para evitar ráfagas de E/S
+  const cached = projectDirCache.get(lowerClientId);
+  if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+    if (await fs.pathExists(cached.path)) {
+      return cached.path;
+    }
+  }
+
+  // 2. Buscar coincidencia dinámica en el registro central de plantillas (plantillas_registro.json)
+  try {
+    const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+    if (await fs.pathExists(registroPath)) {
+      const registro = await fs.readJson(registroPath);
+      if (registro && registro.plantillas) {
+        for (const [key, config] of Object.entries(registro.plantillas)) {
+          if (key.toLowerCase() === lowerClientId || (config.coreType && config.coreType.toLowerCase() === lowerClientId)) {
+            if (config.fuente && await fs.pathExists(config.fuente)) {
+              projectDirCache.set(lowerClientId, { path: config.fuente, timestamp: Date.now() });
+              return config.fuente;
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[findProjectDir] Error al consultar plantillas_registro.json:', err);
+  }
+
+  // Helper interno optimizado
   const matchesClientId = async (dirPath, folderName) => {
+    const normFolderName = folderName.toLowerCase();
+    
+    // Cortocircuito rápido: evitar E/S si el nombre físico de la carpeta coincide exactamente
+    if (
+      normFolderName === lowerClientId ||
+      normFolderName.replace(/[^a-z0-9]+/g, '-') === lowerClientId
+    ) {
+      return true;
+    }
+
     // 1. .prototipe.json — fuente de verdad (clientId y projectName)
     const metaPath = path.join(dirPath, '.prototipe.json');
     if (await fs.pathExists(metaPath)) {
@@ -4440,20 +4489,18 @@ async function findProjectDir(clientId) {
         (meta.projectName && meta.projectName.toLowerCase() === lowerClientId)
       ) return true;
     }
-    // 2. package.json — nombre de paquete npm
+
+    // 2. package.json — nombre de paquete npm (E/S optimizada: 1 sola llamada a pathExists)
     const pkgPath = path.join(dirPath, 'package.json');
     if (await fs.pathExists(pkgPath)) {
       const pkg = await fs.readJson(pkgPath).catch(() => ({}));
       if ((pkg.name || '').toLowerCase() === lowerClientId) return true;
     }
-    // 3. Nombre de carpeta normalizado (kebab-case) - Solo si contiene package.json
-    if (await fs.pathExists(pkgPath)) {
-      if (folderName.toLowerCase() === lowerClientId ||
-          folderName.toLowerCase().replace(/[^a-z0-9]+/g, '-') === lowerClientId) return true;
-    }
+
     return false;
   };
 
+  let resolvedPath = null;
   if (await fs.pathExists(baseAppsDir)) {
     try {
       const items = await fs.readdir(baseAppsDir);
@@ -4463,16 +4510,25 @@ async function findProjectDir(clientId) {
         if (!stat || !stat.isDirectory()) continue;
 
         // Nivel 1: directorio inmediato (ej: Instancias Clientes/ventas-moni-app)
-        if (await matchesClientId(fullPath, item)) return fullPath;
+        if (await matchesClientId(fullPath, item)) {
+          resolvedPath = fullPath;
+          break;
+        }
 
         // Nivel 2: un nivel dentro del nicho (ej: Instancias Clientes/ventas/ventas-moni-app)
         const subItems = await fs.readdir(fullPath).catch(() => []);
+        let foundSub = false;
         for (const subItem of subItems) {
           const subPath = path.join(fullPath, subItem);
           const subStat = await fs.stat(subPath).catch(() => null);
           if (!subStat || !subStat.isDirectory()) continue;
-          if (await matchesClientId(subPath, subItem)) return subPath;
+          if (await matchesClientId(subPath, subItem)) {
+            resolvedPath = subPath;
+            foundSub = true;
+            break;
+          }
         }
+        if (foundSub) break;
       }
     } catch (err) {
       console.error('[findProjectDir] Error recorriendo carpetas:', err);
@@ -4480,22 +4536,34 @@ async function findProjectDir(clientId) {
   }
 
   // Fallback: mappings conocidos de cores (para comandos que buscan el core directamente)
-  const knownMappings = [
-    { keys: ['ventas', 'smartfix'],              folder: 'App Ventas' },
-    { keys: ['dev-dashboard', 'control'],         folder: 'dev-dashboard' },
-    { keys: ['servicios'],                        folder: 'App Servicios' },
-    { keys: ['agendamiento', 'barberia'],         folder: 'App Agendamiento' },
-    { keys: ['gastronomia', 'restaurante'],       folder: 'App Gastronomia' }
-  ];
-  for (const mapping of knownMappings) {
-    if (mapping.keys.some(k => lowerClientId.includes(k))) {
-      let candidate = path.join(baseAppsDir, mapping.folder);
-      if (fs.existsSync(candidate)) return candidate;
-      candidate = path.join(path.dirname(baseAppsDir), 'Plantillas Core', mapping.folder);
-      if (fs.existsSync(candidate)) return candidate;
+  if (!resolvedPath) {
+    const knownMappings = [
+      { keys: ['ventas', 'smartfix'],              folder: 'App Ventas' },
+      { keys: ['dev-dashboard', 'control'],         folder: 'dev-dashboard' },
+      { keys: ['servicios'],                        folder: 'App Servicios' },
+      { keys: ['agendamiento', 'barberia'],         folder: 'App Agendamiento' },
+      { keys: ['gastronomia', 'restaurante'],       folder: 'App Gastronomia' }
+    ];
+    for (const mapping of knownMappings) {
+      if (mapping.keys.some(k => lowerClientId.includes(k))) {
+        let candidate = path.join(baseAppsDir, mapping.folder);
+        if (fs.existsSync(candidate)) {
+          resolvedPath = candidate;
+          break;
+        }
+        candidate = path.join(path.dirname(baseAppsDir), 'Plantillas Core', mapping.folder);
+        if (fs.existsSync(candidate)) {
+          resolvedPath = candidate;
+          break;
+        }
+      }
     }
   }
-  return null;
+
+  if (resolvedPath) {
+    projectDirCache.set(lowerClientId, { path: resolvedPath, timestamp: Date.now() });
+  }
+  return resolvedPath;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -5981,6 +6049,10 @@ app.get('/api/project/drift/global', async (req, res) => {
         const missingFiles = [];
 
         for (const coreFile of coreFiles) {
+          if (coreFile.relativePath === 'package.json') {
+            matchingCount++;
+            continue;
+          }
           const clientFile = clientFileMap.get(coreFile.relativePath);
           if (!clientFile) {
             missingFiles.push(coreFile.relativePath);
@@ -7056,9 +7128,11 @@ app.get('/api/instancias/list', async (req, res) => {
 
         // ── Detección REAL por hash MD5 ─────────────────────────────────
         let driftCount = 0;
+        let dependenciesOutOfSync = false;
         try {
           const coreFiles = await getSyncFilesRecursiveAsync(core.path);
           for (const relFile of coreFiles) {
+            if (relFile === 'package.json') continue;
             const coreHash   = await getSyncFileHashAsync(path.join(core.path, relFile));
             const clientHash = await getSyncFileHashAsync(path.join(fullPath, relFile));
             if (coreHash !== clientHash) driftCount++;
@@ -7066,7 +7140,29 @@ app.get('/api/instancias/list', async (req, res) => {
         } catch (_) {
           driftCount = clientVersion !== core.version ? 1 : 0;
         }
-        const isOutdated = driftCount > 0;
+
+        // Validar dependencias lógicas en package.json
+        const corePkgPath = path.join(core.path, 'package.json');
+        const clientPkgPath = path.join(fullPath, 'package.json');
+        if (await fs.pathExists(corePkgPath) && await fs.pathExists(clientPkgPath)) {
+          try {
+            const corePkg = await fs.readJson(corePkgPath);
+            const clientPkg = await fs.readJson(clientPkgPath);
+            const coreDeps = { ...(corePkg.dependencies || {}), ...(corePkg.devDependencies || {}) };
+            const clientDeps = { ...(clientPkg.dependencies || {}), ...(clientPkg.devDependencies || {}) };
+            for (const dep in coreDeps) {
+              if (!clientDeps[dep] || coreDeps[dep] !== clientDeps[dep]) {
+                dependenciesOutOfSync = true;
+                break;
+              }
+            }
+          } catch (_) {}
+        }
+
+        const isOutdated = driftCount > 0 || dependenciesOutOfSync;
+        if (dependenciesOutOfSync && driftCount === 0) {
+          driftCount = 1; // Asegurar badge si sólo difieren dependencias
+        }
         // ────────────────────────────────────────────────────────────────
 
         return {
