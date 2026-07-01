@@ -16,6 +16,9 @@ import { logger } from './logger.js';
 
 const execAsync = promisify(exec);
 
+// Diccionario global en memoria para rastrear tareas asíncronas de creación de proyectos (Mejora 1 - Aprovisionamiento Asíncrono)
+const activeCreationTasks = {};
+
 // Helper de sanitización extrema para evitar inyecciones de comandos en cadenas pasadas a consolas
 function sanitizeShellArgument(arg) {
   if (typeof arg !== 'string') return '';
@@ -329,23 +332,32 @@ app.post('/api/firebase/validate', async (req, res) => {
     return res.status(400).json({ valid: false, error: 'apiKey y projectId son requeridos.' });
   }
   try {
-    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ returnSecureToken: true })
-    });
-    const data = await response.json();
-    if (data.error) {
-      const msg = data.error.message || '';
-      if (msg === 'ADMIN_ONLY_OPERATION') {
-        return res.json({ valid: true, warning: 'Credenciales de Firebase válidas (operación restringida de registro de usuarios).' });
-      }
-      const friendlyError = msg.includes('API key not valid') || msg.includes('INVALID_API_KEY')
-        ? 'La Firebase API Key suministrada no es válida.'
-        : msg;
-      return res.json({ valid: false, error: friendlyError });
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/config?key=${apiKey}`;
+    const response = await fetch(url, { method: 'GET' });
+    const text = await response.text();
+    
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (_) {
+      return res.json({ valid: false, error: `Respuesta no válida de Google Cloud. Verifica el Project ID: "${projectId}".` });
     }
+
+    if (response.status === 400 && data.error && (data.error.message.includes('API key') || data.error.message.includes('INVALID'))) {
+      return res.json({ valid: false, error: 'La Firebase API Key suministrada no es válida.' });
+    }
+    
+    if (response.status === 403 && data.error) {
+      const msg = data.error.message || '';
+      if (msg.includes('Permission denied on resource project') || (data.error.status === 'PERMISSION_DENIED' && msg.includes(projectId))) {
+        return res.json({ valid: false, error: `El Project ID "${projectId}" no existe, no está autorizado o no tiene Firestore activo.` });
+      }
+    }
+
+    if (response.status === 404 && data.error && data.error.message.includes('not found')) {
+      return res.json({ valid: false, error: `El Project ID "${projectId}" no existe o no tiene Firestore activo.` });
+    }
+
     res.json({ valid: true });
   } catch (err) {
     res.json({ valid: false, error: `Error de red al validar credenciales: ${err.message}` });
@@ -409,7 +421,122 @@ app.post('/api/upload-logo', async (req, res) => {
   }
 });
 
-// Endpoint para crear el proyecto físicamente
+// Clean up task after 30 minutes
+function registerTaskCleanup(taskId) {
+  setTimeout(() => {
+    delete activeCreationTasks[taskId];
+    console.log(`[Task Monitor] Tarea de aprovisionamiento '${taskId}' purgada de memoria.`);
+  }, 1800000);
+}
+
+// Lógica de ejecución en segundo plano para el aprovisionamiento
+async function executeCreationTaskInBackground(taskId, answers) {
+  const task = activeCreationTasks[taskId];
+  if (!task) return;
+  
+  const log = (line) => {
+    console.log(`[Creation Task ${taskId}] ${line}`);
+    task.logs.push(line);
+    task.listeners.forEach(res => {
+      res.write(`data: ${JSON.stringify({ type: 'log', line })}\n\n`);
+    });
+  };
+  
+  try {
+    const finalProjectId = answers.firebaseProjectId;
+    
+    // Flujo de Aprovisionamiento Automático en Firebase Cloud
+    if (answers.autoProvisionFirebase) {
+      log(`[Firebase Automate] Iniciando automatización Firebase para: ${finalProjectId}`);
+      
+      // 1. Crear el proyecto Firebase si no existe
+      try {
+        log(`[Firebase Automate] Creando proyecto Firebase "${answers.projectName}" con ID "${finalProjectId}"...`);
+        await execAsync(`firebase projects:create ${finalProjectId} --display-name "${answers.projectName}"`, { timeout: 180000 });
+        log(`[Firebase Automate] Proyecto Firebase creado exitosamente.`);
+      } catch (createErr) {
+        if (createErr.message.includes('already exists') || createErr.stderr?.includes('already exists')) {
+          log(`[Firebase Automate] El proyecto "${finalProjectId}" ya existe. Continuando con recursos...`);
+        } else {
+          throw createErr;
+        }
+      }
+
+      // 2. Crear base de datos Firestore default (nam5)
+      try {
+        log(`[Firebase Automate] Inicializando Firestore (default) en nam5...`);
+        await execAsync(`firebase firestore:databases:create "(default)" --project ${finalProjectId} --location nam5`, { timeout: 120000 });
+        log(`[Firebase Automate] Firestore (default) creado con éxito.`);
+      } catch (dbErr) {
+        const errorText = (dbErr.message || '') + (dbErr.stderr || '');
+        if (
+          errorText.includes('already exists') ||
+          errorText.includes('Conflict') ||
+          errorText.includes('409') ||
+          errorText.includes('ALREADY_EXISTS')
+        ) {
+          log(`[Firebase Automate] Firestore ya está inicializado o en proceso de aprovisionamiento.`);
+        } else {
+          log(`[Firebase Automate Warning] No se pudo inicializar la BD default: ${dbErr.message}`);
+        }
+      }
+
+      // 3. Crear aplicación Web
+      try {
+        log(`[Firebase Automate] Registrando Web App "${answers.projectName}"...`);
+        await execAsync(`firebase apps:create web "${answers.projectName}" --project ${finalProjectId}`, { timeout: 90000 });
+      } catch (appErr) {
+        if (appErr.message.includes('already exists') || appErr.stderr?.includes('already exists')) {
+          log(`[Firebase Automate] La Web App ya está registrada.`);
+        } else {
+          throw appErr;
+        }
+      }
+
+      // 4. Extraer credenciales SDK
+      log(`[Firebase Automate] Extrayendo SDK Config...`);
+      const { stdout } = await execAsync(`firebase apps:sdkconfig web --project ${finalProjectId} --json`, { timeout: 60000 });
+      const jsonMatch = stdout.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('Respuesta inesperada al obtener sdkconfig.');
+      const sdkData = JSON.parse(jsonMatch[0]);
+      const config = sdkData?.result?.sdkConfig || sdkData?.sdkConfig || sdkData;
+
+      // Asignar parámetros detectados al payload answers
+      answers.firebaseApiKey = config.apiKey;
+      answers.firebaseAuthDomain = config.authDomain;
+      answers.firebaseStorageBucket = config.storageBucket;
+      answers.firebaseAppId = config.appId;
+
+      log(`[Firebase Automate] Credenciales de Firebase integradas con éxito.`);
+    }
+
+    log(`[API Bridge] Iniciando creación física del proyecto con plantilla: ${answers.template}`);
+    const result = await runCreateProjectWorker(answers, (line) => {
+      log(`[Worker] ${line}`);
+    });
+    
+    log(`[API Bridge] Proyecto '${answers.projectName}' creado con éxito en: ${result.targetDir}`);
+    
+    task.status = 'success';
+    task.data = result;
+    task.listeners.forEach(res => {
+      res.write(`data: ${JSON.stringify({ type: 'success', data: result })}\n\n`);
+      res.end();
+    });
+    task.listeners = [];
+  } catch (err) {
+    console.error(`[API Bridge] Error durante la creación en segundo plano: ${err.message}`);
+    task.status = 'error';
+    task.error = err.message;
+    task.listeners.forEach(res => {
+      res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`);
+      res.end();
+    });
+    task.listeners = [];
+  }
+}
+
+// Endpoint para iniciar el aprovisionamiento de manera asíncrona
 app.post('/api/create-project', async (req, res) => {
   projectDirCache.clear();
   const answers = req.body;
@@ -440,7 +567,7 @@ app.post('/api/create-project', async (req, res) => {
     if (primaryColor) {
       const validation = validateHSLColors(primaryColor, bgColor);
       if (!validation.valid) {
-        console.warn(`[API Bridge] Aprovisionamiento cancelado: ${validation.error}`);
+        console.warn(`[API Bridge] Aprovisionamiento cancelado por contraste inválido: ${validation.error}`);
         return res.status(400).json({ error: validation.error });
       }
     }
@@ -450,79 +577,7 @@ app.post('/api/create-project', async (req, res) => {
   const finalProjectId = answers.firebaseProjectId ? answers.firebaseProjectId.trim() : clientId;
   answers.firebaseProjectId = finalProjectId;
 
-  console.log(`\n[API Bridge] Petición de creación recibida para el proyecto: ${answers.projectName}`);
-
-  // Flujo de Aprovisionamiento Automático en Firebase Cloud
-  if (answers.autoProvisionFirebase) {
-    try {
-      console.log(`[Firebase Automate] Iniciando automatización Firebase para: ${finalProjectId}`);
-      
-      // 1. Crear el proyecto Firebase si no existe
-      try {
-        console.log(`[Firebase Automate] Creando proyecto Firebase "${answers.projectName}" con ID "${finalProjectId}"...`);
-        await execAsync(`firebase projects:create ${finalProjectId} --display-name "${answers.projectName}"`, { timeout: 180000 });
-        console.log(`[Firebase Automate] Proyecto Firebase creado exitosamente.`);
-      } catch (createErr) {
-        if (createErr.message.includes('already exists') || createErr.stderr?.includes('already exists')) {
-          console.log(`[Firebase Automate] El proyecto "${finalProjectId}" ya existe. Continuando con recursos...`);
-        } else {
-          throw createErr;
-        }
-      }
-
-      // 2. Crear base de datos Firestore default (nam5)
-      try {
-        console.log(`[Firebase Automate] Inicializando Firestore (default) en nam5...`);
-        await execAsync(`firebase firestore:databases:create "(default)" --project ${finalProjectId} --location nam5`, { timeout: 120000 });
-        console.log(`[Firebase Automate] Firestore (default) creado con éxito.`);
-      } catch (dbErr) {
-        const errorText = (dbErr.message || '') + (dbErr.stderr || '');
-        if (
-          errorText.includes('already exists') ||
-          errorText.includes('Conflict') ||
-          errorText.includes('409') ||
-          errorText.includes('ALREADY_EXISTS')
-        ) {
-          console.log(`[Firebase Automate] Firestore ya está inicializado o en proceso de aprovisionamiento.`);
-        } else {
-          console.warn(`[Firebase Automate Warning] No se pudo inicializar la BD default: ${dbErr.message}`);
-        }
-      }
-
-      // 3. Crear aplicación Web
-      try {
-        console.log(`[Firebase Automate] Registrando Web App "${answers.projectName}"...`);
-        await execAsync(`firebase apps:create web "${answers.projectName}" --project ${finalProjectId}`, { timeout: 90000 });
-      } catch (appErr) {
-        if (appErr.message.includes('already exists') || appErr.stderr?.includes('already exists')) {
-          console.log(`[Firebase Automate] La Web App ya está registrada.`);
-        } else {
-          throw appErr;
-        }
-      }
-
-      // 4. Extraer credenciales SDK
-      console.log(`[Firebase Automate] Extrayendo SDK Config...`);
-      const { stdout } = await execAsync(`firebase apps:sdkconfig web --project ${finalProjectId} --json`, { timeout: 60000 });
-      const jsonMatch = stdout.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('Respuesta inesperada al obtener sdkconfig.');
-      const sdkData = JSON.parse(jsonMatch[0]);
-      const config = sdkData?.result?.sdkConfig || sdkData?.sdkConfig || sdkData;
-
-      // Asignar parámetros detectados al payload answers
-      answers.firebaseApiKey = config.apiKey;
-      answers.firebaseAuthDomain = config.authDomain;
-      answers.firebaseStorageBucket = config.storageBucket;
-      answers.firebaseAppId = config.appId;
-
-      console.log(`[Firebase Automate] Credenciales integradas con éxito para ${finalProjectId}.`);
-    } catch (fbAutomateErr) {
-      console.error(`[Firebase Automate Error] Falló el aprovisionamiento automatizado: ${fbAutomateErr.message}`);
-      return res.status(500).json({ 
-        error: `Fallo en automatización de Firebase: ${fbAutomateErr.message}. Verifica que estás logueado en firebase CLI y que el ID del proyecto está disponible.` 
-      });
-    }
-  } else {
+  if (!answers.autoProvisionFirebase) {
     // Si no es automático, validamos que existan las credenciales manuales
     const manualFields = [
       'firebaseApiKey',
@@ -537,29 +592,65 @@ app.post('/api/create-project', async (req, res) => {
       }
     }
   }
+
+  // Generamos un ID de tarea único
+  const taskId = `task-create-${clientId}-${Date.now()}`;
   
+  activeCreationTasks[taskId] = {
+    status: 'running',
+    logs: [],
+    listeners: [],
+    data: null,
+    error: null
+  };
 
-  // ─── Aprovisionamiento en proceso hijo (con Respuesta JSON) ───────────────────
-  console.log(`[API Bridge] Iniciando creación de proyecto: ${answers.projectName}`);
+  // Disparar en background
+  executeCreationTaskInBackground(taskId, answers);
+  registerTaskCleanup(taskId);
 
-  try {
-    const result = await runCreateProjectWorker(answers, (line) => {
-      console.log(`[Worker] ${line}`);
-    });
-    console.log(`[API Bridge] Proyecto '${answers.projectName}' creado con éxito en: ${result.targetDir}\n`);
-    res.json({
-      success: true,
-      message: 'Proyecto creado físicamente con éxito.',
-      prompt: result.prompt || '',
-      data: result
-    });
-  } catch (err) {
-    console.error(`[API Bridge] Error durante la creación: ${err.message}`);
-    res.status(500).json({
-      success: false,
-      error: `Error en el aprovisionamiento local: ${err.message}`
-    });
+  res.json({
+    success: true,
+    message: 'Aprovisionamiento iniciado en segundo plano.',
+    taskId
+  });
+});
+
+// Endpoint SSE para el streaming de logs de creación en vivo
+app.get('/api/create-project/stream', (req, res) => {
+  const { taskId } = req.query;
+  if (!taskId || !activeCreationTasks[taskId]) {
+    return res.status(404).json({ error: 'ID de tarea de creación no encontrado o expirado.' });
   }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders();
+
+  const task = activeCreationTasks[taskId];
+
+  // Enviar historial acumulado
+  task.logs.forEach(line => {
+    res.write(`data: ${JSON.stringify({ type: 'log', line })}\n\n`);
+  });
+
+  if (task.status === 'success') {
+    res.write(`data: ${JSON.stringify({ type: 'success', data: task.data })}\n\n`);
+    return res.end();
+  }
+
+  if (task.status === 'error') {
+    res.write(`data: ${JSON.stringify({ type: 'error', message: task.error })}\n\n`);
+    return res.end();
+  }
+
+  // Registrar respuesta activa en listeners
+  task.listeners.push(res);
+
+  req.on('close', () => {
+    task.listeners = task.listeners.filter(l => l !== res);
+  });
 });
 
 /**

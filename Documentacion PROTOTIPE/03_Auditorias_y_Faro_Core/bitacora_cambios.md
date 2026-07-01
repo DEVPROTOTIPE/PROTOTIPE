@@ -1,5 +1,37 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-01] - CORE-147: Implementación Asíncrona SSE y Saneamiento del Asistente de Aprovisionamiento
+
+* **Tipo:** UI/UX / Optimización / Scaffolding Asíncrono / Inyección en lote / Saneamiento Visual
+* **Firma de auditoría:** CORE-147-ASYNC-PROVISIONING-SSE-BATCH-INJECT
+* **Descripción de Cambios:**
+  - **Validación Robusta de Firebase:** Se re-arquitecturó el endpoint `/api/firebase/validate` en `server.js` utilizando la REST API directa de Firestore para comprobar simultáneamente la validez del `projectId` y la API Key, evitando typos que rompan las llamadas de base de datos.
+  - **Scaffolding Asíncrono en CLI (SSE):** Se implementó una cola de tareas en memoria (`activeCreationTasks`) en `server.js` y el endpoint `/api/create-project/stream` que transmite logs mediante Server-Sent Events (SSE) en tiempo real para procesos de larga duración, previniendo timeouts HTTP 504.
+  - **Consola de Logs en el Wizard:** Se inyectó una consola de terminal retro-futurista de tiempo real en `App.jsx` que se muestra durante el aprovisionamiento físico del proyecto. Muestra de forma glassmórfica los logs de stdout emitidos por el worker asíncrono.
+  - **Saneamiento del Layout de Branding:** Se eliminó la grilla anidada redundante y el smartphone mockup pequeño duplicado en la pestaña Branding de `App.jsx`, haciendo que el formulario ocupe todo el ancho de la columna izquierda y reubicando las métricas de accesibilidad de color WCAG 2.1 debajo del smartphone interactivo central de forma condicional.
+  - **Inyección Física Pos-Creación en Lote:** Se agregó un bucle iterativo que al finalizar con éxito la creación del proyecto, llama secuencialmente al endpoint `/api/library/inject` para inyectar físicamente en el proyecto creado todos los componentes y módulos de la biblioteca previamente seleccionados por el usuario.
+  - **Soporte Unitario DIAN:** Se enlazó el input del costo unitario DIAN (`costoPorFacturaDian`) directamente al formulario de Módulos anidado condicionalmente bajo el switch principal de Facturación en `App.jsx`.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+### [2026-07-01] - CORE-146: Auditoría Detallada del Asistente de Aprovisionamiento
+
+* **Tipo:** Auditoría / Documentación / Plan de Evolución
+* **Firma de auditoría:** CORE-146-PROVISIONING-WIZARD-AUDIT
+* **Descripción de Cambios:**
+  - **Auditoría de Pestañas del Wizard:** Análisis detallado de las pestañas Servidor, Branding y Módulos en `App.jsx`, `server.js` y `generator.js`.
+  - **Identificación de Bugs:**
+    1. Falsa validación de credenciales Firebase (bypassea el `projectId`).
+    2. Doble renderizado del smartphone mockup en la pestaña Branding.
+    3. Omisión del input de costo unitario DIAN (`costoPorFacturaDian`) en el formulario de Módulos.
+  - **Identificación de Cuellos de Botella:**
+    1. Bloqueo síncrono del fetch `/api/create-project` (riesgo de timeout HTTP por ejecuciones de larga duración de npm install y deploys).
+    2. Inactividad de auto-inyección física de componentes seleccionados de la biblioteca (solo se listaban en el bootstrap prompt).
+  - **Plan de Evolución:** Se propuso re-arquitecturar el endpoint a asíncrono con SSE, inyección automatizada pos-creación en lote, validación real del Firestore REST API y saneamiento del layout visual.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_asistente_aprovisionamiento.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_asistente_aprovisionamiento.md) [MODIFY]
+
 ### [2026-07-01] - CORE-145: Blindaje de Seguridad en Sincronización, Concurrencia y Purgado del CLI
 
 * **Tipo:** Seguridad / Concurrencia / Robustez / Failsafes de Poda / Directory Traversal

@@ -4,6 +4,27 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-147: Implementación Asíncrona SSE y Saneamiento del Asistente de Aprovisionamiento~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Saneamiento del layout visual de Branding (remoción del mockup redundante e integración de métricas WCAG 2.1 debajo del smartphone interactivo principal de forma condicional). Integración de Server-Sent Events (SSE) para logs de stdout asíncronos y consola retro-futurista de tiempo real dentro del panel del asistente en `App.jsx`. Adición del input del costo unitario DIAN (`costoPorFacturaDian`) en la pestaña de Módulos, y bucle de auto-inyección física en lote de componentes y módulos de biblioteca pos-creación.
+  - Archivos: [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-146: Auditoría Detallada del Asistente de Aprovisionamiento~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Auditoría integral de las pestañas Servidor, Branding y Módulos del Asistente de Aprovisionamiento. Se identificaron bugs de lógica en la comprobación de conexión de Firebase (bypasseo del projectId), doble mockup renderizado, omisión del input para costo DIAN y cuellos de botella por peticiones HTTP síncronas de larga duración.
+  - Archivos: [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_asistente_aprovisionamiento.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_asistente_aprovisionamiento.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-145: Blindaje de Seguridad en Sincronización, Concurrencia y Purgado del CLI~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Incorporación de locks de concurrencia para evitar race conditions, validaciones de contención de ruta (isPathContained) para mitigar Directory Traversal en borrado/copiado, saneamiento de case-sensitivity en Windows y uso de React Portals en modales para corregir posición vertical.
+  - Archivos: [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-144: Poda de Archivos Obsoletos de Documentación en performCoreSync~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-07-01

@@ -1,62 +1,84 @@
-# Auditoría y Plan de Evolución: Asistente de Aprovisionamiento Ecosistema PROTOTIPE
+# 🔍 Auditoría y Plan de Evolución: Asistente de Aprovisionamiento
+## Ecosistema PROTOTIPE
 
-Este reporte analiza el Asistente de Aprovisionamiento (Onboarding Wizard en `dev-dashboard` y Motor Generador en `Prototipe-CLI`) identificando fricciones lógicas, riesgos operacionales y proponiendo módulos avanzados para garantizar que los shards cliente se construyan de forma 100% exacta a sus especificaciones de negocio.
-
----
-
-## 1. Diagnóstico y Correcciones de Robustez (Bug Prevention)
-
-### [MEDIO] Falta de Preflight Checks en el Wizard
-* **Causa Raíz:** El dashboard confía en que el CLI local tiene todas las dependencias instaladas y sesiones activas. Si el CLI de Firebase no está autenticado o `git` no está configurado, el proceso asíncrono avanza y falla en pasos avanzados (pasos 9-11), forzando un reintento manual total.
-* **Solución Concreta:** Implementar un endpoint `/api/cli/preflight` que valide:
-  1. Login activo en Firebase (`firebase login:list`).
-  2. Autenticación en GitHub CLI (`gh auth status`).
-  3. Presencia de utilidades del sistema (`npm`, `git`).
-  Mostrar los checks con semáforos verde/rojo en la pestaña "Servidor" antes de permitir el avance.
-
-### [MEDIO] Riesgo de Colisión de Nombres en Producción
-* **Causa Raíz:** Si el `projectId` se configura como `auto-detect` pero el ID de proyecto único derivado del nombre del cliente ya existe en el namespace global de Firebase, la creación falla de forma abrupta.
-* **Solución Concreta:** Añadir una llamada reactiva síncrona en el frontend (`blur` del input de nombre de cliente) hacia el CLI para verificar la disponibilidad del ID usando la API de Firebase antes de proceder.
-
-### [BAJO] Gestión de Timeout Límite en Redes Lentas
-* **Causa Raíz:** En `server.js`, la promesa de creación tiene un límite rígido de 10 minutos (`WORKER_TIMEOUT_MS`). En despliegues lentos de hosting o compilaciones NPM complejas, este tiempo puede verse rebasado, abortando el proceso a la mitad.
-* **Solución Concreta:** Aumentar el límite dinámicamente si el canal SSE detecta que el proceso está realizando activamente `npm install` o subiendo assets de Hosting, y registrar alertas auditables en la consola de telemetría.
+Este reporte contiene un diagnóstico exhaustivo basado en la realidad física del código del **Asistente de Aprovisionamiento** (Onboarding Wizard en `Central PROTOTIPE/dev-dashboard/src/App.jsx` y Motor de Aprovisionamiento en `Prototipe-CLI/server.js` y `Prototipe-CLI/generator.js`). Se identifican bugs lógicos, cuellos de botella de E/S de red y oportunidades de mejora para garantizar un flujo de creación de instancias exacto, robusto y automatizado.
 
 ---
 
-## 2. Mejoras de UX y Control del Desarrollador
-
-* **Visualizador de Estructura de Core (Lienzo Semántico):** Previsualizar en tiempo real el mapa de directorios (`src/pages`, `src/services`) que se creará según el core elegido (ej: `template-ventas` vs `template-core-seed`), para que el desarrollador comprenda el punto de partida estructural de la aplicación.
-* **Cálculo Dinámico de Contraste para Modos Light/Dark:** El simulador actual estima los HSL base, pero no recalcula las relaciones de conformidad WCAG si el usuario alterna la previsualización del Mockup en modo claro. Agregar un toggle claro/oscuro en el simulador para contrastar la accesibilidad en ambos escenarios.
+## 1. Inventario Técnico de Archivos Clave
+- **Frontend Interfaz:** [App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx#L4420-L5970) - Renderiza el formulario del asistente en 3 pestañas ("Servidor", "Branding", "Módulos") y controla el Mockup interactivo lateral derecho.
+- **Backend Bridge API:** [server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js#L326-L600) - Expone los endpoints de validación, carga de logos y arranque del worker de creación.
+- **Worker de Creación:** [worker_create_project.js](file:///d:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) - Script secundario (fork) que corre en segundo plano para realizar el test de humo de Playwright y el scaffolding.
+- **Motor Generador:** [generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) - Lógica dura de copia física, inyección HSL en index.css, creación de manifest, SEO, `.env.local` y auto-registro en la Consola Central.
 
 ---
 
-## 3. Funcionalidades Avanzadas para Construcción Exacta (Exact-Fit Engine)
+## 2. Diagnóstico de Pestañas (Bugs y Limitaciones Reales)
 
-Para lograr que los clientes reciban un producto terminado a la medida sin necesidad de refactorizaciones manuales de código extensas, se propone integrar los siguientes tres motores al flujo de aprovisionamiento:
+### A. Pestaña: Servidor (Server)
+1. **Falsa Validación de Credenciales Firebase (Bug de Lógica y Seguridad):**
+   - **Ubicación:** [server.js:L326-353](file:///d:/PROTOTIPE/Prototipe-CLI/server.js#L326-L353) en `/api/firebase/validate`.
+   - **El Error:** El endpoint recibe `apiKey` y `projectId`, pero solo valida la `apiKey` intentando crear un usuario ficticio en Google Auth REST API (`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`). **El parámetro `projectId` es ignorado por completo.**
+   - **Consecuencia:** Si el desarrollador escribe mal el `projectId` (ej: un typo como `ventas-smrtfix` en lugar de `ventas-smartfix`) pero provee una API Key válida de *cualquier* proyecto Firebase, el botón **"Comprobar Conexión"** retornará éxito (`valid: true`). Sin embargo, minutos después, al procesar la creación, la inicialización física del proyecto fallará catastróficamente al intentar desplegar reglas o reglas de Firestore.
+2. **Cuello de Botella Crítico de Timeouts HTTP (Arquitectura Síncrona):**
+   - **Ubicación:** [App.jsx:L5894-5929](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx#L5894-L5929) y [server.js:L545-563](file:///d:/PROTOTIPE/Prototipe-CLI/server.js#L545-L563).
+   - **El Error:** La petición de creación se hace mediante un único `fetch` POST a `/api/create-project` que bloquea la conexión HTTP hasta que el worker termina. Este proceso incluye preflights, creación en la nube de Firebase, copia de archivos, `npm install` (operación pesada en disco de minutos), compilación de producción (`npm run build`), y despliegue a hosting.
+   - **Consecuencia:** La cadena tarda entre **3 y 8 minutos** dependiendo de la red. Los navegadores y proxies locales cancelan peticiones HTTP tras 2 minutos de inactividad (Gateway Timeout). El frontend reportará error de red y se desbloqueará, incitando al usuario a hacer click en "Registrar" de nuevo, mientras en segundo plano el worker sigue escribiendo y corrupting carpetas concurrentemente.
 
-### A. Motor de Esquemas y Datos Dinámicos (Data Schema Builder)
-* **Objetivo:** Permitir al desarrollador modelar la base de datos del cliente desde el wizard.
-* **Flujo UI/UX:**
-  - Añadir una pestaña en el Onboarding llamada **"Modelo de Datos"**.
-  - Permitir declarar colecciones (ej: `mascotas`, `historial_clinico`, `repuestos`) con campos tipados (text, number, select, boolean, date) y relaciones básicas.
-* **Generación (generator.js):**
-  - El motor compilará estas especificaciones y autogenerará en el shard cliente:
-    1. Esquemas Zod en `/src/schemas/[coleccion].js`.
-    2. Hooks de consulta TanStack Query en `/src/hooks/use[Coleccion].js` enlazados a Firestore.
-    3. Interfaces CRUD 100% funcionales (formularios y tablas responsivas) basadas en dichos esquemas.
+### B. Pestaña: Branding
+1. **Doble Renderizado del Smartphone Mockup (Glitch de UI/UX):**
+   - **Ubicación:** [App.jsx:L4748-5430](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx#L4748-L5430) y [App.jsx:L5974-6370](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx#L5974-L6370).
+   - **El Error:** La página de Onboarding está diseñada en dos columnas (cols 1-7: formulario, cols 8-12: Mockup interactivo). Sin embargo, dentro de la pestaña `branding` (columna izquierda), se declara un sub-grid de 12 columnas que introduce *otro* smartphone mockup en su columna derecha (cols 8-12 internas).
+   - **Consecuencia:** Cuando el usuario entra a "Branding", la pantalla muestra **dos smartphones idénticos lado a lado** (uno pequeño interno a la izquierda, y otro grande interactivo a la derecha). Esto reduce el área de trabajo y deteriora el aspecto visual premium de la aplicación.
+2. **Falta de Previsualización Real de Favicon y PWA Icons:**
+   - La subida del logo base64 se optimiza con Jimp y se guarda en temporal, pero el simulador de teléfono solo muestra el logo SVG por defecto o las iniciales del nombre del cliente, sin dar una vista previa de cómo se verán los iconos de la app (192x192 / 512x512) tras la optimización.
 
-### B. Inyector de Componentes de la Biblioteca (Component Injection)
-* **Objetivo:** Portar código portable y validado del catálogo directamente en el bootstrapping.
-* **Flujo UI/UX:**
-  - Pestaña **"Módulos de Biblioteca"** donde se despliega el catálogo de `/06_Biblioteca_Componentes/` (ej: `Calendario_Premium`, `Otp_Input`, `Caja_Diaria_POS`).
-  - El desarrollador marca checkboxes con los componentes que el cliente requiere.
-* **Generación (generator.js):**
-  - El CLI copiará los archivos físicos del componente desde la biblioteca (`d:/PROTOTIPE/Documentacion PROTOTIPE/06_Biblioteca_Componentes/`) hacia `/src/components/ui/` o `/src/components/common/` en la estructura destino y resolverá automáticamente las rutas relativas de imports.
+### C. Pestaña: Módulos (Modules)
+1. **Omisión de Entrada de Costo por Factura DIAN:**
+   - **Ubicación:** [App.jsx:L5521-5532](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx#L5521-L5532).
+   - **El Error:** Existe el flag `enableDianBilling` y se pasa al payload como `costoPorFacturaDian` (con un default de 150 COP en el state inicial). Sin embargo, en el formulario no hay ningún input numérico para cambiar este costo. El desarrollador no puede configurar el costo unitario DIAN del cliente durante el aprovisionamiento, y debe ir obligatoriamente al modal de ajustes del cliente posterior a la creación.
+2. **Recomendaciones de Biblioteca Inactivas (No Funcionales):**
+   - **Ubicación:** [generator.js:L1463-1467](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js#L1463-L1467).
+   - **El Error:** Las recomendaciones que el usuario selecciona en la biblioteca (ej: `Formulario_Pago`, `OTP_Verification`) **no se copian ni se inyectan en el código del nuevo proyecto**. Solo se listan en formato de texto dentro del archivo `antigravity_bootstrap_prompt.md`. El desarrollador debe pedirle manualmente a la IA portar cada componente después.
 
-### C. Semillado Dinámico por IA (AI Context Seeder)
-* **Objetivo:** Poblar la app con datos realistas basados en el brief del cliente en lugar de mocks genéricos.
-* **Flujo UI/UX:**
-  - Al procesar los requerimientos especiales en `expandRequirementsWithAI`, Gemini generará un JSON estructurado con 10-15 registros de negocio contextualizados (ej: si el cliente es una tornería, inyectará piezas mecánicas pendientes de maquinado, clientes industriales y cotizaciones realistas).
-* **Generación (generator.js):**
-  - Al inicializar Firestore (paso 6 del CLI), el motor sembrará de forma directa estas colecciones en la base de datos de desarrollo del cliente, asegurando que la primera vez que el cliente abra la app la encuentre completamente contextualizada.
+---
+
+## 3. Plan de Evolución y Propuestas de Mejora
+
+### Propuesta 1: Servidor de Aprovisionamiento Asíncrono (SSE)
+- **Implementación:** Cambiar la petición POST `/api/create-project` para que inicialice el proceso asíncronamente con un UUID de tarea y retorne de inmediato `{ success: true, taskId }`.
+- **UX:** El frontend abre una conexión SSE a `/api/create-project/stream?taskId=...`. Se elimina el bloqueo HTTP y se muestra una barra de progreso real y una consola de logs de fondo en vivo de lo que el worker CLI está ejecutando (checks, git init, npm install, build, deploy).
+
+### Propuesta 2: Validación Completa de Firebase (REST API Audit)
+- **Implementación:** Corregir el endpoint `/api/firebase/validate` para que realice un fetch a:
+  ```javascript
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/config?key=${apiKey}`;
+  ```
+  Esto valida tanto la validez de la API Key como la existencia y activación del proyecto en Firestore.
+
+### Propuesta 3: Fusión y Saneamiento del Layout del Simulador
+- **Implementación:** Remover el smartphone mockup interno del tab `branding`.
+- **Layout:** Mantener el panel lateral izquierdo exclusivamente para los selectores de color, fuentes, e inputs HSL. Ubicar los paneles de **Estudio de Accesibilidad WCAG 2.1** de forma ordenada en el panel derecho, justo debajo del gran smartphone mockup unificado.
+
+### Propuesta 4: Entrada Dinámica de Costo DIAN
+- **Implementación:** Agregar un input de número atenuado que aparezca condicionalmente al marcar "Facturación Electrónica DIAN Directa":
+  ```jsx
+  {enableDianBilling && (
+    <div className="space-y-1 mt-2 animate-fade-in">
+      <label className="text-[10px] font-bold text-[var(--color-text-muted)] block">Costo por Factura DIAN ($ COP)</label>
+      <input 
+        type="number" 
+        value={costoPorFacturaDian} 
+        onChange={(e) => setCostoPorFacturaDian(Number(e.target.value) || 0)}
+        className="..."
+      />
+    </div>
+  )}
+  ```
+
+### Propuesta 5: Auto-Inyección de Biblioteca en Lote (Post-Onboarding)
+- **Implementación:** Tras finalizar el scaffolding exitoso en el backend (o en el paso de post-creación en el frontend), el sistema debe ir iterando sobre el array `selectedRecomendations` y mandar peticiones automáticas al endpoint `/api/library/inject` (o `/api/library/inject/stream`) para copiar el código, resolver sus imports y ejecutar la instalación NPM de librerías en cascada para cada uno de los componentes de la biblioteca elegidos. El nuevo cliente estará 100% listo para programarse y compilar con sus componentes integrados.
+
+### Propuesta 6: Visualización de Puerto Local y Cuotas Firebase
+- **Implementación:** Mostrar en la pestaña "Servidor" el puerto local que el CLI le asignará dinámicamente al proyecto (ej: `http://localhost:5124`) y una advertencia sobre la cuota máxima del plan Spark de Firebase.
+
