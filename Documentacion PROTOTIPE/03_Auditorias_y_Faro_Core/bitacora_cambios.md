@@ -1,5 +1,15 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-01] - CORE-144: Poda de Archivos Obsoletos de Documentación en performCoreSync
+
+* **Tipo:** Corrección de Bug / Motor de Sincronización del CLI
+* **Firma de auditoría:** CORE-144-SYNC-PRUNE-DOCUMENTATION-DRIFTFIX
+* **Descripción de Cambios:**
+  - **Poda de Documentación en Sincronización:** Se corrigió un fallo por el cual los archivos de la carpeta de documentación (`Documentacion App [NombreCore]`) que eran eliminados en el Core de desarrollo, persistían de forma huérfana en la carpeta de plantillas del CLI (`templates/template-[Core]`), produciendo diferencias de drift permanentes tras hacer click en sincronizar.
+  - **Colecta en performCoreSync:** Se añadió la colecta y mapeo dinámico de los archivos de documentación dentro del bloque condicional `if (prune)` en `performCoreSync` (`Prototipe-CLI/server.js`), alineando el motor de sincronización física con la API de cálculo de drift.
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
 ### [2026-07-01] - CORE-143: Sincronización del Canal de Telemetría de Facturación (Dual-Channel Telemetry)
 
 * **Tipo:** Optimización / Estándar de Desarrollo / Conectividad Híbrida / Tolerancia a fallos

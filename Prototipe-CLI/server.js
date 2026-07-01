@@ -3728,6 +3728,18 @@ async function performCoreSync(clave, CLI_ROOT, options = {}) {
     await Promise.all(SYNC_PATHS.map(p => collectFilesLocal(corePath, p, coreFiles)));
     await Promise.all(SYNC_PATHS.map(p => collectFilesLocal(templatePath, p, templateFiles)));
 
+    // Sincronizar también la purga en la carpeta Documentacion del Core/Template
+    const filesInCore = await fs.readdir(corePath).catch(() => []);
+    const docDirInCore = filesInCore.find(f => f.startsWith('Documentacion'));
+    if (docDirInCore && await fs.pathExists(path.join(corePath, docDirInCore))) {
+      await collectFilesLocal(corePath, docDirInCore, coreFiles);
+    }
+    const filesInTemplate = await fs.readdir(templatePath).catch(() => []);
+    const docDirInTemplate = filesInTemplate.find(f => f.startsWith('Documentacion'));
+    if (docDirInTemplate && await fs.pathExists(path.join(templatePath, docDirInTemplate))) {
+      await collectFilesLocal(templatePath, docDirInTemplate, templateFiles);
+    }
+
     const coreFilesSet = new Set(coreFiles);
     for (const tempFile of templateFiles) {
       if (!coreFilesSet.has(tempFile)) {

@@ -4,6 +4,13 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-144: Poda de Archivos Obsoletos de Documentación en performCoreSync~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Corrección de un fallo en el motor de sincronización de plantillas del CLI (`Prototipe-CLI/server.js`) por el cual los archivos obsoletos/eliminados en la carpeta de documentación del Core de desarrollo (`Documentacion App [NombreCore]`) no eran podados (`pruned`) en la carpeta del CLI. Se añadió la recolección de estos archivos en la función `performCoreSync` para emparejar la lógica con la API de cálculo de drift.
+  - Archivos: [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
 * **[x] ~~Tarea CORE-143: Sincronización del Canal de Telemetría de Facturación (Dual-Channel Telemetry)~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-07-01
