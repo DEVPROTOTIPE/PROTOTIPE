@@ -1,5 +1,79 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-01] - CORE-141: Módulo de Historial de Cobros y Cuentas Liquidadas (CobrosPanel)
+
+* **Tipo:** UI/UX / Optimización / Estándar de Modularización / Desacoplamiento de App.jsx
+* **Firma de auditoría:** CORE-141-COBROS-MODULAR-HISTORICO-DRAWER-REVERSION
+* **Descripción de Cambios:**
+  - **Módulo de Historial de Cobros (`CobrosPanel.jsx`):** Creado un componente de React independiente y premium en `src/components/admin/CobrosPanel.jsx` que hereda y repotencia el historial de comisiones cobradas.
+  - **KPIs Premium y Métricas:** Implementado un panel de indicadores clave (KPI) que visualiza de forma elegante el total recaudado, los periodos/meses cobrados, el promedio mensual recaudado y un indicador interactivo de efectividad de cobro global.
+  - **Consolidación por Cliente:** Añadido un conmutador ("Detalle Periodos" vs "Consolidar Cliente") para agrupar el total recaudado acumulado de cada cliente, proporcionando un desglose por periodos dentro de un Side Drawer interactivo de fácil lectura.
+  - **Acciones y Reversión de Pagos:** Implementada la descarga/simulación de comprobantes de cobro en PDF y un botón interactivo de reversión de cobro a pendiente con estados visuales de carga ("updatingState").
+  - **Integración y Desacoplamiento:** Modificado `App.jsx` para importar el nuevo panel, registrar la pestaña `cobros` en `NAV_TABS` con ícono `CheckCircle`, redirigir clics desde la tarjeta KPI de comisiones "Cobrado" a la vista, e inyectar el componente condicionalmente. Se eliminaron físicamente de `App.jsx` más de 160 líneas de código obsoletas pertenecientes a los modales de detalle de cobros.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CobrosPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CobrosPanel.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
+### [2026-07-01] - CORE-140: Módulo de Recaudaciones y Cuentas por Cobrar (RecaudoPanel)
+
+* **Tipo:** UI/UX / Optimización / Estándar de Modularización / Escalabilidad
+* **Firma de auditoría:** CORE-140-RECAUDO-MODULAR-TAB-WHATSAPP-BILLING
+* **Descripción de Cambios:**
+  - **Módulo de Recaudación Modular (`RecaudoPanel.jsx`):** Creado un componente de React independiente y premium en `src/components/admin/RecaudoPanel.jsx` que hereda y repotencia las comisiones pendientes.
+  - **Adaptabilidad y Escalabilidad de Clientes:** Implementado un sistema de **Toggle de Agrupación** que permite consolidar y colapsar la deuda acumulada por cliente o desglosarla por periodos individuales de forma paginada (de 10 en 10 registros), previniendo desbordamientos visuales si el ecosistema escala a cientos de clientes.
+  - **Herramienta de Cobranza (WhatsApp Reminder):** Creado un generador dinámico de plantillas de WhatsApp (recordatorios corteses, formales o alertas urgentes) con inyección automática de periodos adeudados, ventas y comisiones, e integración de copiado rápido al portapapeles y enlace de envío nativo.
+  - **Integración y Redireccionamiento:** Importado en `App.jsx`, registrado como la pestaña `recaudo` en `NAV_TABS` y enrutado el trigger de la tarjeta métrica "Por Recaudar" para redireccionar al usuario a esta nueva página a pantalla completa, eliminando el modal anterior.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/RecaudoPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/RecaudoPanel.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
+### [2026-07-01] - CORE-139: Saneamiento, Seguridad y Escalabilidad del Ecosistema
+
+* **Tipo:** Seguridad / Dependencias / Portabilidad / Saneamiento / Backend / Frontend
+* **Firma de auditoría:** CORE-139-SECURITY-DEPENDENCIES-PORTABILITY-CLEANUP
+* **Descripción de Cambios:**
+  - **Seguridad en Firestore (`firestore.rules`):** Restringido el acceso de lectura de la colección `/clientes_control/{clientId}`. Se cambió `allow read: if true` por `allow get: if true` (para permitir lecturas de clientes específicos sin romper la sincronización del hook cliente `useAppConfigSync.js`) y `allow list: if request.auth != null` (para evitar listados masivos anónimos de variables de comisión y alertas).
+  - **Saneamiento de Dependencias (`package.json`):** Añadido `"html2canvas": "^1.4.1"` al package.json de `dev-dashboard` para asegurar compilación en limpio. Movido `"jimp": "^1.6.1"` de `devDependencies` a `dependencies` en `Prototipe-CLI/package.json` ya que es requerido en `server.js` para manipulación de imágenes y logos.
+  - **Centralización de la API del CLI (`src/config.js`):** Creado el archivo central de configuración `src/config.js` en `dev-dashboard` y reemplazadas las URLs hardcodeadas `'http://localhost:3001'` y `'http://127.0.0.1:3001'` en los 12 archivos frontend por la importación de `CLI_URL` con soporte para variables de entorno (`VITE_CLI_URL`).
+  - **Puerto Configurable en CLI Bridge (`server.js`):** Modificado el puerto de Express para admitir variables de entorno (`process.env.PORT || 3001`), evitando colisiones de red.
+  - **Portabilidad del Validador de Prebuild (`verify_library_integrity.cjs`):** Refactorizado el escaneo de broken links para admitir enlaces locales con cualquier letra de unidad de disco (regex `/file:\/\/\/[a-zA-Z]:\/PROTOTIPE/`), facilitando que el validador corra sin fallos en discos `C:`, `D:`, `E:` o superiores.
+  - **Mecanismo de Auto-Heal en CLI (`config.js`):** Implementada una rutina auto-correctora en la inicialización del CLI (`Prototipe-CLI/config.js`). Al arrancar, el servidor CLI verifica si los paths fuente y destino en `plantillas_registro.json` apuntan a una unidad de disco distinta a la actual, y los actualiza de forma automática en caliente para garantizar la portabilidad instantánea.
+  - **Corrección de Inconsistencia de Drift (`server.js`):** Corregida la discrepancia entre el listado de instancias (`/api/instancias/list`), el drift global (`/api/project/drift/global`) y el visor del CRM (`/api/project/drift`). Anteriormente, `package.json` difería físicamente debido a metadatos de desarrollo (como el nombre kebab-case específico de la instancia de cliente) inflando el contador de drift físico, a pesar de que la estructura de dependencias lógicas estaba alineada. Se omitió la comparación física de hash en `package.json` para enfocar la detección de obsolescencia exclusivamente en dependencias lógicas y código fuente, eliminando falsos positivos en el dashboard.
+  - **Dinamización de Resolución de Cores (`server.js`):** Modificada la función `findProjectDir` en el Bridge para resolver dinámicamente las rutas físicas de cualquier plantilla core consultando el registro central `plantillas_registro.json` en primer lugar. Esto elimina la lista hardcodeada de mapeos estáticos (`knownMappings`), permitiendo que el Drift Detector, el Wizard, los backups y los sincronizadores den soporte automático a futuros cores agregados al ecosistema sin necesidad de modificar el código del backend.
+  - **Optimización de UI de Sincronización Masiva (`CoreSyncPanel.jsx`):** Rediseñada la interfaz de la pestaña de Sincronización Masiva añadiendo un buscador de texto interactivo por nombre de cliente/carpeta, botones selectores de filtro por estado ("Todos", "Desactualizados", "Sin Registrar") y acciones de selección masiva avanzada ("Filtrados", "Desactualizados", "Limpiar") para agilizar el despliegue cuando el ecosistema escale a decenas de instancias.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/firestore.rules`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firestore.rules) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/package.json`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/package.json) [MODIFY]
+  - [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/config.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/config.js) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/E2EPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/E2EPanel.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [MODIFY]
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Prototipe-CLI/config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/config.js) [MODIFY]
+
+---
+
 ### [2026-06-30] - CORE-138: Desacoplamiento Multi-Core basado en Metadatos (Briefing & Flags)
 
 * **Tipo:** Arquitectura / Escalabilidad / Backend / Frontend / Metadata-Driven

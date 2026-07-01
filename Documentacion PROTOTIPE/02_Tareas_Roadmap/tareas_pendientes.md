@@ -4,6 +4,27 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-141: Módulo de Historial de Cobros y Cuentas Liquidadas (CobrosPanel)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Conversión del antiguo modal simple de comisiones cobradas en una pestaña/página interactiva completa a pantalla completa (CobrosPanel.jsx). Se implementaron KPI cards con comisiones totales cobradas, promedio y collection rate, toggle de agrupación para consolidar el historial por cliente o detallado por periodo, buscador reactivo, filtros por año, paginación e interacción de reversión de pagos con animaciones de carga.
+  - Archivos: [`Central PROTOTIPE/dev-dashboard/src/components/admin/CobrosPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CobrosPanel.jsx) [NEW], [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-140: Módulo de Recaudaciones y Cuentas por Cobrar (RecaudoPanel)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Conversión del antiguo modal simple de comisiones pendientes en una pestaña/página interactiva completa a pantalla completa (RecaudoPanel.jsx). Se implementaron KPI cards con comisiones totales, deudas y efectividad de cobro, toggle de agrupación para consolidar la deuda por cliente (evitando overflows visuales) o por periodos individuales, paginación, filtros de vencimiento, Side Drawer de detalle del cliente con HSL dinámico, generador dinámico de plantillas de WhatsApp para cobranza rápida y registro de pagos.
+  - Archivos: [`Central PROTOTIPE/dev-dashboard/src/components/admin/RecaudoPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/RecaudoPanel.jsx) [NEW], [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-139: Saneamiento, Seguridad y Escalabilidad del Ecosistema~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Corregir vulnerabilidad de lectura en firestore.rules (get/list), instalar html2canvas en package.json, reubicar jimp a dependencias en CLI, centralizar dinámicamente CLI_URL con variables de entorno, admitir puerto de entorno en CLI, habilitar auto-corrección de rutas y portabilidad de disco para el validador de consistencia y registro de plantillas, e integrar el panel CoreSyncPanel para la Sincronización Masiva en Lote. Corregir falsos positivos del Drift Detector en el CLI ignorando diferencias de formato y nombres específicos de package.json y enfocándose en cambios estructurales y dependencias lógicas. Se rediseñó la UI del Sincronizador Masiva implementando buscador de texto interactivo por cliente/carpeta, filtros por estado ("Todos", "Desactualizados", "Sin Registrar") y controles de selección avanzada.
+  - Archivos: [`Central PROTOTIPE/dev-dashboard/firestore.rules`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firestore.rules) [MODIFY], [`Central PROTOTIPE/dev-dashboard/package.json`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/package.json) [MODIFY], [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/config.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/config.js) [NEW], [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`Prototipe-CLI/config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/config.js) [MODIFY], [`Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-138: Desacoplamiento Multi-Core basado en Metadatos (Briefing & Flags)~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-06-30
