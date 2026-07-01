@@ -4,6 +4,13 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-142: Rediseño Interactivo y Modular del Radar de Salud (HealthRadar)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Reconstrucción del antiguo widget estático de salud en un componente independiente interactivo tipo sonar (HealthRadar.jsx). Implementa retícula circular con círculos concéntricos y cuadrantes, barrido giratorio conic-gradient (con animación GPU), graficación de instancias como blips mediante coordenadas polares deterministas, filtrado dinámico por Core, ficha de telemetría individual de pings e incidentes, y atajo de navegación a la Consola de Errores.
+  - Archivos: [`Central PROTOTIPE/dev-dashboard/src/components/admin/HealthRadar.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/HealthRadar.jsx) [NEW], [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/index.css`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/index.css) [MODIFY]
+
 * **[x] ~~Tarea CORE-141: Módulo de Historial de Cobros y Cuentas Liquidadas (CobrosPanel)~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-07-01

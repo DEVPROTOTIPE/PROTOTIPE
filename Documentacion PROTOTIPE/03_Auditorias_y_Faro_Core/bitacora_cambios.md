@@ -1,5 +1,26 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-01] - CORE-142: Rediseño Interactivo y Modular del Radar de Salud de Instancias (HealthRadar)
+
+* **Tipo:** UI/UX / Optimización / Estándar de Desarrollo / Escalabilidad Multi-Core
+* **Firma de auditoría:** CORE-142-HEALTHRADOR-SONAR-MODULAR-MULTIPLETEMPLATES
+* **Descripción de Cambios:**
+  - **Componente Modular (`HealthRadar.jsx`):** Rediseñado el antiguo widget estático de salud en un componente independiente interactivo en `src/components/admin/HealthRadar.jsx` para descentralizar la lógica de `App.jsx`.
+  - **Lienzo de Radar (Sonar Canvas):** Implementado un visor gráfico circular con círculos concéntricos y líneas de retícula militar/médica, y un barrido de sonar giratorio continuo (`conic-gradient` de 360 grados).
+  - **Ubicación Determinista de Blips:** Los clientes se representan como "blips" en el radar colocados en coordenadas polares `(R, Angle)` determinadas a partir de su ID para una distribución balanceada.
+  - **Filtro Multi-Core:** Agregado un selector de píldoras en la cabecera del radar que filtra por tipo de Core (Ventas, POS, etc.), preparando al sistema para la escala futura con nuevos Cores.
+  - **Ficha Técnica e Historial:** Añadida una tarjeta de telemetría inferior que desglosa latencias, pings, HSL, tipo de core e incidentes con redireccionamiento interactivo a la consola de incidentes en caso de caídas.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/HealthRadar.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/HealthRadar.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/index.css`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/index.css) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
 ### [2026-07-01] - CORE-141: Módulo de Historial de Cobros y Cuentas Liquidadas (CobrosPanel)
 
 * **Tipo:** UI/UX / Optimización / Estándar de Modularización / Desacoplamiento de App.jsx

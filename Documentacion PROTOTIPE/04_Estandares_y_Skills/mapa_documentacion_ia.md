@@ -71,6 +71,7 @@
 
 | **ComponentLibraryView.jsx** | Visor de Biblioteca | Pestaña en dev-dashboard para listar componentes y ver el Markdown/código de la biblioteca. | [Ver Visor Biblioteca](file:///D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) |
 | **ComponentSandbox.jsx** | Playground Interactivo | Componente que provee simulación y previsualización interactiva con controles HSL en dev-dashboard. | [Ver Sandbox Interactivo](file:///D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) |
+| **HealthRadar.jsx** | Radar de Salud Interactivo | Componente sonar en dev-dashboard para monitorear la salud y latencia en vivo de clientes Saas. | [Ver HealthRadar](file:///D:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/HealthRadar.jsx) |
 | **Prototipe-CLI** | Generador e Inicializador de Proyectos | **Para crear un nuevo proyecto/marca/plantilla:** Inicializa de forma interactiva copias del core, configura HSL, variables de entorno Firebase e instala dependencias de npm automáticamente. | [Ir al CLI](file:///D:/PROTOTIPE/Prototipe-CLI/) |
 | **seed_brand.js (Ventas)** | Sembrador Modular REST de Plantilla | **Para sembrar una base de datos Firebase vacía:** Se ejecuta localmente en la app generada y consume `src/config/niche.json` para inyectar datos realistas acordes al nicho seleccionado. | [Ver Sembrador REST Ventas](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/scratch/seed_brand.js) |
 
