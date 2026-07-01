@@ -1,19 +1,24 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
-### [2026-07-01] - CORE-148: Corrección de Vulnerabilidad Crítica de Autenticación de Administrador (Bypass de Registro)
+### [2026-07-01] - CORE-148: Corrección de Vulnerabilidad Crítica de Autenticación de Administrador y Solución de Bloqueo de Login
 
-* **Tipo:** Seguridad / Autenticación / Failsafe
-* **Firma de auditoría:** CORE-148-AUTH-BYPASS-EXPLOIT-FIX
+* **Tipo:** Seguridad / Autenticación / Failsafe / Mitigación de Desincronización de Cache / UI-Spinner-Fix
+* **Firma de auditoría:** CORE-148-AUTH-BYPASS-EXPLOIT-AND-CACHE-DESYNC-FIX
 * **Descripción de Cambios:**
   - **Corrección de Condición en LoginPage:** Se detectó una vulnerabilidad de escalación de privilegios en `LoginPage.jsx` donde cualquier usuario sin credenciales válidas en Firebase Auth podía autoconfigurarse como administrador. La condición original `if (isUserNotFound || !adminRegistered)` autodeclaraba y creaba el usuario en Firebase Auth y Firestore como administrador al no encontrar el correo, sin verificar si ya existía un administrador. Se cambió el operador lógico a `if (isUserNotFound && !adminRegistered)`, restringiendo el registro de administrador exclusivamente al primer inicio/arranque del sistema cuando la base de datos está vacía.
   - **Corrección de Auto-Promoción en useAuthInit:** Se corrigió un backdoor implícito en el hook `useAuthInit.js` que se ejecuta al arrancar la aplicación. La lógica previa, al detectar cualquier sesión activa en Firebase Auth, la auto-recreaba en Firestore como `role: 'admin'` si el documento de usuario no existía. Se refactorizó para que al detectar un `firebaseUser`, se verifique estrictamente en Firestore si tiene el rol de administrador. Si el documento no existe o no tiene dicho rol, se fuerza el cierre de sesión (`auth.signOut()`) y se limpia el store local (`logout()`), eliminando la persistencia de sesiones no autorizadas.
+  - **Soporte para Consulta Directa al Servidor (getDocFromServer):** Para mitigar desincronizaciones en hilos asíncronos cuando el navegador lee la configuración de la tienda desde la cache de Firestore (`localCache` persistente) y asume un falso negativo de `adminRegistered = false`, se implementó una llamada directa a `getDocFromServer(settingsRef)`. Esto garantiza la confirmación de existencia del administrador en el servidor antes de permitir flujos de setup del primer arranque.
+  - **Canal de Error de Autenticación Global:** Se extendió el hook `useAuthInit.js` y el store global `authStore.js` para propagar el mensaje de error de acceso denegado a la página de login, permitiendo apagar el spinner de carga (`setIsLoading(false)`) y mostrando el error correspondiente ("Acceso denegado. Este usuario no tiene permisos de administrador.") en pantalla en lugar de quedar colgado en bucle infinito.
 * **Archivos Modificados:**
   - [`Plantillas Core/App Ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/LoginPage.jsx) [MODIFY]
   - [`Plantillas Core/App Ventas/src/hooks/useAuthInit.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAuthInit.js) [MODIFY]
+  - [`Plantillas Core/App Ventas/src/store/authStore.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/authStore.js) [MODIFY]
   - [`Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx) [MODIFY]
   - [`Prototipe-CLI/templates/template-ventas/src/hooks/useAuthInit.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAuthInit.js) [MODIFY]
+  - [`Prototipe-CLI/templates/template-ventas/src/store/authStore.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/authStore.js) [MODIFY]
   - [`Instancias Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx) [MODIFY]
   - [`Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAuthInit.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAuthInit.js) [MODIFY]
+  - [`Instancias Clientes/ventas/ventas-moni-app/src/store/authStore.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/store/authStore.js) [MODIFY]
 
 ### [2026-07-01] - CORE-147: Implementación Asíncrona SSE y Saneamiento del Asistente de Aprovisionamiento
 
