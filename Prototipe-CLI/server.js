@@ -2414,7 +2414,17 @@ app.post('/api/library/inject/stream', async (req, res) => {
   res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
 
+  let isAborted = false;
+  req.on('close', () => {
+    if (!isAborted) {
+      isAborted = true;
+      delete projectSyncLocks[clientId];
+      console.warn(`[API /api/library/inject/stream] Cliente ${clientId} cerró la conexión SSE de forma repentina.`);
+    }
+  });
+
   const emit = (event, data) => {
+    if (isAborted) return;
     res.write(`data: ${JSON.stringify({ event, ...data })}\n\n`);
   };
 
@@ -2438,6 +2448,7 @@ app.post('/api/library/inject/stream', async (req, res) => {
     const sessionTs = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 
     async function recurseInjectSSE(currentLink, isPrimary = false, destRelPath = null) {
+      if (isAborted) throw new Error('Inyección abortada por desconexión del cliente.');
       if (visited.has(currentLink)) return;
       visited.add(currentLink);
 
@@ -7194,8 +7205,26 @@ app.get('/api/git/sync-core-to-clients-stream', async (req, res) => {
     originalBranch = await getGitBranch(corePath) || 'main';
   } catch (_) {}
 
+  let isAborted = false;
+  let activeChild = null;
+
+  req.on('close', () => {
+    if (!isAborted) {
+      isAborted = true;
+      if (activeChild) {
+        try {
+          activeChild.kill();
+        } catch (_) {}
+      }
+      console.warn('[API /api/git/sync-core-to-clients-stream] Cliente cerró conexión SSE de forma repentina.');
+    }
+  });
+
   const runCommandStream = (cmdStr, args, cwd) => {
     return new Promise((resolve, reject) => {
+      if (isAborted) {
+        return reject(new Error('Sincronización abortada por desconexión del cliente.'));
+      }
       send('log', { text: `👉 Ejecutando: ${cmdStr} ${args.join(' ')}`, type: 'command' });
       
       const child = spawn(cmdStr, args, {
@@ -7203,6 +7232,7 @@ app.get('/api/git/sync-core-to-clients-stream', async (req, res) => {
         shell: true,
         env: { ...process.env, FORCE_COLOR: '0' }
       });
+      activeChild = child;
 
       child.stdout.on('data', (data) => {
         const lines = data.toString('utf8').split(/\r?\n/).filter(l => l.trim());
@@ -7215,6 +7245,7 @@ app.get('/api/git/sync-core-to-clients-stream', async (req, res) => {
       });
 
       child.on('close', (code) => {
+        activeChild = null;
         if (code === 0) {
           resolve();
         } else {
@@ -7223,6 +7254,7 @@ app.get('/api/git/sync-core-to-clients-stream', async (req, res) => {
       });
 
       child.on('error', (err) => {
+        activeChild = null;
         reject(err);
       });
     });
@@ -7235,6 +7267,9 @@ app.get('/api/git/sync-core-to-clients-stream', async (req, res) => {
     } catch (_) {}
 
     for (const clientBranch of branchesToSync) {
+      if (isAborted) {
+        throw new Error('Sincronización abortada por desconexión del cliente.');
+      }
       const clientName = clientBranch.replace(/^cliente\//, '');
       send('client-status', { client: clientName, status: 'running' });
       send('log', { text: `\n🔄 [Cliente: ${clientName}] Iniciando actualización...`, type: 'header' });
@@ -7315,6 +7350,11 @@ app.get('/api/git/sync-core-to-clients-stream', async (req, res) => {
   } catch (err) {
     send('log', { text: `❌ Error global durante la sincronización: ${err.message}`, type: 'error' });
     send('complete', { success: false, error: err.message });
+    // Si falló a mitad de camino o se canceló, restaurar la rama original del Core
+    try {
+      await execGitCommand(`git checkout ${originalBranch}`, corePath);
+      await execGitCommand('git stash pop', corePath);
+    } catch (_) {}
   } finally {
     try {
       if (!res.writableEnded && !res.finished) res.end();
@@ -8683,6 +8723,157 @@ app.post('/api/roadmap/toggle', (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GET /api/niches
+// Retorna la configuración dinámica de nichos unificada con sus metadatos (con caché)
+// ─────────────────────────────────────────────────────────────────────────────
+let cachedNiches = null;
+
+app.get('/api/niches', async (req, res) => {
+  try {
+    if (cachedNiches !== null) {
+      return res.json(cachedNiches);
+    }
+
+    const nichesPath = path.join(__dirname, 'config', 'niches.json');
+    const metaPath = path.join(__dirname, 'config', 'niches_metadata.json');
+    
+    if (await fs.pathExists(nichesPath)) {
+      const nichesConfig = await fs.readJson(nichesPath);
+      let metaConfig = {};
+      if (await fs.pathExists(metaPath)) {
+        metaConfig = await fs.readJson(metaPath);
+      }
+      
+      const combined = {};
+      for (const key of Object.keys(nichesConfig)) {
+        combined[key] = {
+          attributes: nichesConfig[key] || [],
+          name: metaConfig[key]?.name || key.split(/[_-]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+          emoji: metaConfig[key]?.emoji || '💼'
+        };
+      }
+      cachedNiches = combined;
+      res.json(combined);
+    } else {
+      res.status(404).json({ error: 'No se encontró el archivo de configuración de nichos.' });
+    }
+  } catch (err) {
+    console.error('Error al leer niches.json:', err.message);
+    res.status(500).json({ error: `Fallo al leer configuración de nichos: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/niches
+// Crea un nuevo nicho de negocio con sus atributos y metadatos
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/niches', async (req, res) => {
+  try {
+    const { id, name, emoji, attributes } = req.body;
+    if (!id || !name) {
+      return res.status(400).json({ error: 'ID y Nombre son obligatorios.' });
+    }
+    const cleanId = id.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    
+    const nichesPath = path.join(__dirname, 'config', 'niches.json');
+    const metaPath = path.join(__dirname, 'config', 'niches_metadata.json');
+    
+    const nichesConfig = (await fs.pathExists(nichesPath)) ? await fs.readJson(nichesPath) : {};
+    const metaConfig = (await fs.pathExists(metaPath)) ? await fs.readJson(metaPath) : {};
+    
+    nichesConfig[cleanId] = attributes || [];
+    metaConfig[cleanId] = { name, emoji: emoji || '💼' };
+    
+    await fs.writeJson(nichesPath, nichesConfig, { spaces: 2 });
+    await fs.writeJson(metaPath, metaConfig, { spaces: 2 });
+    
+    cachedNiches = null; // Invalidar caché
+    res.json({ success: true, id: cleanId });
+  } catch (err) {
+    console.error('Error al crear el nicho:', err.message);
+    res.status(500).json({ error: `Error al crear el nicho: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PUT /api/niches/:id
+// Actualiza la configuración, nombre, emoji o atributos de un nicho existente
+// ─────────────────────────────────────────────────────────────────────────────
+app.put('/api/niches/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, emoji, attributes } = req.body;
+    
+    const nichesPath = path.join(__dirname, 'config', 'niches.json');
+    const metaPath = path.join(__dirname, 'config', 'niches_metadata.json');
+    
+    if (!await fs.pathExists(nichesPath)) {
+      return res.status(404).json({ error: 'No se encontró la configuración de nichos.' });
+    }
+    
+    const nichesConfig = await fs.readJson(nichesPath);
+    const metaConfig = (await fs.pathExists(metaPath)) ? await fs.readJson(metaPath) : {};
+    
+    if (!nichesConfig[id]) {
+      return res.status(404).json({ error: 'El nicho especificado no existe.' });
+    }
+    
+    if (attributes !== undefined) nichesConfig[id] = attributes;
+    if (name || emoji) {
+      metaConfig[id] = {
+        name: name || metaConfig[id]?.name || id,
+        emoji: emoji || metaConfig[id]?.emoji || '💼'
+      };
+    }
+    
+    await fs.writeJson(nichesPath, nichesConfig, { spaces: 2 });
+    await fs.writeJson(metaPath, metaConfig, { spaces: 2 });
+    
+    cachedNiches = null; // Invalidar caché
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error al actualizar el nicho:', err.message);
+    res.status(500).json({ error: `Error al actualizar el nicho: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DELETE /api/niches/:id
+// Elimina un nicho de la configuración y metadatos
+// ─────────────────────────────────────────────────────────────────────────────
+app.delete('/api/niches/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const nichesPath = path.join(__dirname, 'config', 'niches.json');
+    const metaPath = path.join(__dirname, 'config', 'niches_metadata.json');
+    
+    if (!await fs.pathExists(nichesPath)) {
+      return res.status(404).json({ error: 'No se encontró la configuración de nichos.' });
+    }
+    
+    const nichesConfig = await fs.readJson(nichesPath);
+    const metaConfig = (await fs.pathExists(metaPath)) ? await fs.readJson(metaPath) : {};
+    
+    if (!nichesConfig[id]) {
+      return res.status(404).json({ error: 'El nicho especificado no existe.' });
+    }
+    
+    delete nichesConfig[id];
+    delete metaConfig[id];
+    
+    await fs.writeJson(nichesPath, nichesConfig, { spaces: 2 });
+    await fs.writeJson(metaPath, metaConfig, { spaces: 2 });
+    
+    cachedNiches = null; // Invalidar caché
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error al eliminar el nicho:', err.message);
+    res.status(500).json({ error: `Error al eliminar el nicho: ${err.message}` });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // GET /api/integrity/status
 // Ejecuta el validador físico en un subproceso hijo para no tirar el CLI
 // ─────────────────────────────────────────────────────────────────────────────
@@ -9621,32 +9812,229 @@ app.post('/api/project/firebase/cors-setup', async (req, res) => {
 
 async function startServer(port) {
   const server = app.listen(port, '127.0.0.1', () => {
-    console.log(`\n🚀 [Prototipe CLI Bridge] Servidor local escuchando en: http://127.0.0.1:${port}`);
-    console.log(`Endpoints activos:`);
-    console.log(` - GET  http://localhost:${port}/api/templates`);
-    console.log(` - GET  http://localhost:${port}/api/firebase-config?projectId=[id]&projectName=[name]`);
-    console.log(` - POST http://localhost:${port}/api/create-project                 → Aprovisionamiento (SSE Logs)`);
-    console.log(` - GET  http://localhost:${port}/api/library`);
-    console.log(` - POST http://localhost:${port}/api/library/extract                 → Extracción de componentes`);
-    console.log(` - GET  http://localhost:${port}/api/project/file`);
-    console.log(` - POST http://localhost:${port}/api/project/deploy                  → Compilar y desplegar (SSE Logs)`);
-    console.log(` - GET  http://localhost:${port}/api/project/env                     → Leer variables .env.local`);
-    console.log(` - POST http://localhost:${port}/api/project/env                     → Escribir variables .env.local`);
-    console.log(` - GET  http://localhost:${port}/api/project/audit                   → Auditoría física y PWA`);
-    console.log(` - POST http://localhost:${port}/api/e2e/run                         → Ejecutar tests (SSE Logs)`);
-    console.log(` - GET  http://localhost:${port}/api/e2e/last-result?projectId=[id]`);
-    console.log(` `);
-    console.log(` 🔒 Control de Versiones Git:`);
-    console.log(` - GET  http://localhost:${port}/api/git/targets                     → Auto-detectar repositorios`);
-    console.log(` - GET  http://localhost:${port}/api/git/status?path=[ruta]          → Estado de cambios`);
-    console.log(` - GET  http://localhost:${port}/api/git/backup-stream?path=[ruta]   → Backup SSE en vivo`);
-    console.log(` `);
-    console.log(` 🏗️  Gestión de Plantillas Core:`);
-    console.log(` - POST http://localhost:${port}/api/register-core              → Registrar nueva plantilla`);
-    console.log(` - GET  http://localhost:${port}/api/cores                      → Listar todas las plantillas`);
-    console.log(` - POST http://localhost:${port}/api/cores/:clave/scaffold      → Copiar código base de otro core`);
-    console.log(` - POST http://localhost:${port}/api/cores/:clave/activate      → Sincronizar y activar en wizard`);
-    console.log(` - POST http://localhost:${port}/api/cores/:clave/deactivate    → Retirar del wizard\n`);
+    // Paleta de colores ANSI
+    const c = {
+      cyan: '\x1b[36m',
+      green: '\x1b[32m',
+      yellow: '\x1b[33m',
+      magenta: '\x1b[35m',
+      red: '\x1b[31m',
+      white: '\x1b[37m',
+      blue: '\x1b[34m',
+      bold: '\x1b[1m',
+      dim: '\x1b[2m',
+      reset: '\x1b[0m'
+    };
+
+    // Diccionario estructurado de descripciones funcionales de la API (79 endpoints)
+    const routeDescriptions = {
+      'GET:/api/templates': 'Obtener plantillas registradas',
+      'GET:/api/firebase-config': 'Obtener configuración de Firebase',
+      'POST:/api/firebase/validate': 'Validar credenciales de Firebase',
+      'GET:/api/vapid/generate': 'Generar claves VAPID para notificaciones',
+      'POST:/api/upload-logo': 'Cargar logo de la instancia',
+      'POST:/api/create-project': 'Aprovisionar nuevo proyecto cliente',
+      'GET:/api/create-project/stream': 'SSE Stream logs de aprovisionamiento',
+      'GET:/api/library': 'Listar componentes de la biblioteca',
+      'GET:/api/library/file': 'Leer contenido markdown de componente',
+      'POST:/api/library/extract': 'Extraer componente de código a biblioteca',
+      'POST:/api/library/inject/preflight': 'Pre-verificación de dependencias y conflictos',
+      'POST:/api/library/inject/css-doctor': 'Diagnosticar y parchar estilos CSS',
+      'POST:/api/library/sandbox/scaffold': 'Crear playground Sandbox para componente',
+      'POST:/api/library/inject/diagnose': 'Verificación de compilación de componente',
+      'POST:/api/library/inject': 'Inyectar componente en instancia',
+      'POST:/api/library/inject/stream': 'SSE Stream logs de inyección',
+      'GET:/api/library/inject/registry': 'Listar componentes inyectados',
+      'POST:/api/library/inject/rollback': 'Reversión y desinstalación de componente',
+      'GET:/api/library/inject/audit-trail': 'Historial de inyecciones',
+      'GET:/api/library/inject/audit-diff': 'Diff del estado del código',
+      'GET:/api/project/file': 'Leer archivo físico de instancia',
+      'GET:/api/e2e/projects': 'Listar casos de prueba',
+      'POST:/api/e2e/run': 'Ejecutar suite de pruebas E2E',
+      'GET:/api/e2e/last-result': 'Obtener reportes de la última prueba',
+      'POST:/api/register-core': 'Registrar nuevo Core',
+      'GET:/api/cores': 'Listar cores registrados en disco',
+      'GET:/api/cores/metadata': 'Metadatos consolidados de cores',
+      'POST:/api/cores/:clave/scaffold': 'Generar estructura base de otro core',
+      'POST:/api/cores/:clave/activate': 'Activar core en el wizard',
+      'POST:/api/cores/:clave/sync': 'Sincronizar core manualmente',
+      'GET:/api/cores/:clave/drift': 'Analizar desviación de core',
+      'GET:/api/cores/:clave/diff': 'Ver diferencias de archivos',
+      'POST:/api/project/sync-database': 'Forzar sincronización de esquemas',
+      'POST:/api/cores/:clave/deactivate': 'Retirar core del wizard',
+      'DELETE:/api/cores/:clave': 'Eliminar permanentemente plantilla',
+      'GET:/api/project/env': 'Consultar variables .env.local',
+      'POST:/api/project/env': 'Guardar variables .env.local',
+      'GET:/api/project/audit': 'Diagnósticos PWA, SEO y rendimiento',
+      'POST:/api/project/fix/chunks': 'Corregir empaquetado de assets',
+      'POST:/api/project/fix/pwa': 'Regenerar manifest/iconos PWA',
+      'POST:/api/project/fix/rules': 'Desplegar reglas de Firestore',
+      'GET:/api/project/drift': 'Analizar desalineación NPM y archivos',
+      'POST:/api/project/sync-file': 'Sincronizar archivo individual',
+      'POST:/api/project/sync-files': 'Sincronizar lote de archivos',
+      'GET:/api/project/dev/status': 'Estado del servidor local',
+      'GET:/api/project/dev/logs-stream': 'SSE Stream logs de consola de Vite',
+      'POST:/api/project/dev/start': 'Iniciar servidor local',
+      'POST:/api/project/dev/stop': 'Detener servidor local',
+      'GET:/api/project/drift/global': 'Paridad global de marcas',
+      'POST:/api/git/discard': 'Descarte de cambios locales',
+      'GET:/api/git/diff-file': 'Diff visual HTML de archivos',
+      'GET:/api/project/dependencies/install': 'SSE Stream de npm install',
+      'GET:/api/git/targets': 'Obtener repositorios activos',
+      'GET:/api/git/status': 'Estado de cambios Git',
+      'GET:/api/git/log': 'Historial de commits',
+      'GET:/api/git/backup-stream': 'SSE Stream de backup en vivo',
+      'GET:/api/git/cores-and-clients': 'Listar repositorios de cores e instancias',
+      'GET:/api/git/sync-core-to-clients-stream': 'SSE Stream de propagación Git',
+      'GET:/api/instancias/list': 'Listar carpetas físicas de clientes',
+      'GET:/api/instancias/sync-and-deploy-stream': 'SSE Stream de despliegue en lote',
+      'GET:/api/project/firebase-rules/drift-global': 'Comprobar desviación de reglas',
+      'POST:/api/project/firebase-rules/deploy': 'Desplegar reglas en lote',
+      'GET:/api/roadmap': 'Consultar roadmap del Bridge',
+      'POST:/api/roadmap/toggle': 'Marcar estado de tarea',
+      'GET:/api/niches': 'Listar todos los nichos y esquemas dinámicos',
+      'POST:/api/niches': 'Registrar nueva vertical de negocio',
+      'PUT:/api/niches/:id': 'Actualizar vertical de negocio',
+      'DELETE:/api/niches/:id': 'Eliminar vertical de negocio',
+      'GET:/api/integrity/status': 'Consistencia de base de datos local',
+      'GET:/api/cli/logs/stream': 'SSE Stream de logs internos del Bridge',
+      'POST:/api/project/db/seed': 'Sembrado de datos dinámicos (Smart Seeding)',
+      'POST:/api/git/sync-rules': 'Propagar reglas del workspace',
+      'POST:/api/library/manual': 'Registrar componente manual',
+      'POST:/api/project/cleanup': 'Limpiar caché y temporales',
+      'POST:/api/briefing/analyze': 'Analizar cuestionario de briefing',
+      'POST:/api/briefing/export': 'Exportar propuesta de negocio',
+      'GET:/api/health/check': 'Estado de salud del Bridge',
+      'GET:/api/health/:clientId': 'Métricas de ping de cliente',
+      'POST:/api/project/firebase/cors-setup': 'Configurar CORS en Firebase Storage'
+    };
+
+    // 1. Obtener todas las rutas registradas en Express dinámicamente
+    const registeredRoutes = [];
+    if (app._router && app._router.stack) {
+      app._router.stack.forEach(layer => {
+        if (layer.route) {
+          const path = layer.route.path;
+          const methods = Object.keys(layer.route.methods).map(m => m.toUpperCase());
+          methods.forEach(method => {
+            registeredRoutes.push({ method, path });
+          });
+        }
+      });
+    }
+
+    // 2. Definir categorías de ordenamiento
+    const categories = [
+      {
+        id: 'niches',
+        title: '🛍️  GESTIÓN DE NICHOS / VERTICALES DE NEGOCIO',
+        pattern: /^\/api\/niches/i,
+        items: []
+      },
+      {
+        id: 'cores',
+        title: '🏗️  GESTIÓN DE CORES Y PLANTILLAS BASE',
+        pattern: /^\/api\/(templates|cores|register-core|project\/sync-database)/i,
+        items: []
+      },
+      {
+        id: 'instances',
+        title: '⚙️  APROVISIONAMIENTO Y CONTROL DE INSTANCIAS (FIREBASE / PROYECTOS)',
+        pattern: /^\/api\/(firebase|create-project|project\/file|project\/env|project\/audit|project\/fix|project\/drift|project\/sync-file|project\/sync-files|project\/db\/seed|project\/cleanup)/i,
+        items: []
+      },
+      {
+        id: 'library',
+        title: '📦  INYECTOR DE COMPONENTES (LIBRARY INJECTOR)',
+        pattern: /^\/api\/library/i,
+        items: []
+      },
+      {
+        id: 'dev_server',
+        title: '📡  SERVIDORES DE DESARROLLO (VITE DAEMON)',
+        pattern: /^\/api\/project\/(dev|dependencies)/i,
+        items: []
+      },
+      {
+        id: 'git',
+        title: '🔒  CONTROL DE VERSIONES GIT & BACKUPS',
+        pattern: /^\/api\/git/i,
+        items: []
+      },
+      {
+        id: 'testing',
+        title: '🧪  TESTING AUTOMATIZADO (PLAYWRIGHT)',
+        pattern: /^\/api\/e2e/i,
+        items: []
+      },
+      {
+        id: 'health_utils',
+        title: '🩺  SALUD, DIAGNÓSTICOS, BRIEFING & UTILS',
+        pattern: /^\/api\/(health|integrity|cli\/logs\/stream|roadmap|briefing|vapid|upload-logo|instancias)/i,
+        items: []
+      },
+      {
+        id: 'others',
+        title: '⚡  OTROS ENDPOINTS DETECTADOS (AUTODETECT)',
+        pattern: /.*/,
+        items: []
+      }
+    ];
+
+    // 3. Clasificar cada ruta
+    registeredRoutes.forEach(r => {
+      // Solo procesamos métodos HTTP estándar relevantes para la API REST
+      const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE'];
+      if (!allowedMethods.includes(r.method)) return;
+
+      // Ignorar wildcards globales de express, archivos estáticos o middlewares auxiliares
+      if (r.path === '*' || r.path === '/*' || r.path.includes(':file') || !r.path.startsWith('/api')) return;
+
+      const key = `${r.method}:${r.path}`;
+      const desc = routeDescriptions[key] || 'Nueva ruta activa (autodetectada, sin descripción)';
+      
+      let matched = false;
+      for (let i = 0; i < categories.length - 1; i++) {
+        if (categories[i].pattern.test(r.path)) {
+          categories[i].items.push({ method: r.method, route: r.path, desc });
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
+        categories[categories.length - 1].items.push({ method: r.method, route: r.path, desc });
+      }
+    });
+
+    // 4. Calcular total de rutas válidas mostradas
+    const totalValidRoutes = categories.reduce((sum, cat) => sum + cat.items.length, 0);
+
+    // 5. Imprimir la cabecera
+    console.log(`\n${c.cyan}${c.bold}====================================================================================================${c.reset}`);
+    console.log(`${c.cyan}${c.bold}  🚀  [Prototype CLI Bridge Server] Escuchando en: http://127.0.0.1:${port}${c.reset}`);
+    console.log(`${c.cyan}${c.bold}  📡  Rutas REST detectadas: ${totalValidRoutes} endpoints activos y blindados.${c.reset}`);
+    console.log(`${c.cyan}${c.bold}====================================================================================================${c.reset}`);
+
+    // 6. Imprimir las categorías con items
+    categories.forEach(cat => {
+      if (cat.items.length === 0) return;
+      
+      console.log(`\n  ${c.bold}${c.white}─── ${cat.title} ───${c.reset}`);
+      cat.items.forEach(item => {
+        let methodStr = '';
+        if (item.method === 'GET') methodStr = `${c.green}${c.bold}GET   ${c.reset}`;
+        else if (item.method === 'POST') methodStr = `${c.yellow}${c.bold}POST  ${c.reset}`;
+        else if (item.method === 'PUT') methodStr = `${c.magenta}${c.bold}PUT   ${c.reset}`;
+        else if (item.method === 'DELETE') methodStr = `${c.red}${c.bold}DELETE${c.reset}`;
+        else methodStr = `${c.blue}${c.bold}${item.method.padEnd(6)}${c.reset}`;
+
+        const fullUrl = `http://localhost:${port}${item.route}`;
+        const padding = ' '.repeat(Math.max(1, 65 - fullUrl.length));
+        console.log(`   ${methodStr}  ${c.cyan}${fullUrl}${c.reset}${padding}${c.dim}→ ${item.desc}${c.reset}`);
+      });
+    });
+
+    console.log(`\n${c.cyan}${c.bold}====================================================================================================${c.reset}\n`);
   });
 
   server.on('error', async (err) => {

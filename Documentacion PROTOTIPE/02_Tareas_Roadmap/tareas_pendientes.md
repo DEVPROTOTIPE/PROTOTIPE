@@ -4,6 +4,20 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-166: Robustecimiento y Gestión del Ciclo de Vida del Servidor CLI~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se implementó un sistema de almacenamiento en caché en memoria (`cachedNiches`) con invalidación reactiva para el catálogo de nichos comerciales en `server.js` (`/api/niches`), eliminando lecturas repetitivas al disco. Se inyectó control de aborto ante desconexión de sockets SSE (`req.on('close')`) en el endpoint de sincronización y despliegue global de cores (`/api/git/sync-core-to-clients-stream`), deteniendo subprocesos en curso y revirtiendo de forma segura el estado físico del repositorio git a su rama de origen y stashes correspondientes. De igual modo, se integró el control de abortos y liberación de locks concurrentes en el inyector de componentes (`/api/library/inject/stream`) y se blindó el listado dinámico coloreado de endpoints de Express a la inicialización del servidor.
+  - Archivos: [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-165: Sistema de Administración y Gestión Dinámica de Nichos Comerciales~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se diseñó e implementó un sistema completo (Full Stack) para la gestión, modificación y creación de verticales de negocio (nichos). En el backend, se creó `config/niches_metadata.json` para almacenar metadatos visuales (emojis y nombres formateados) de forma segura y se expandieron los endpoints de `server.js` con un juego CRUD completo (GET, POST, PUT, DELETE). En el frontend del `dev-dashboard`, se creó el componente modular e independiente `NichesManagerPanel.jsx` que permite buscar, ver, crear, editar y eliminar nichos con atributos dinámicos (de tipo texto o dropdown con opciones delimitadas por comas) y confirmación de borrado asíncrona segura.
+  - Archivos: [`Prototipe-CLI/config/niches_metadata.json`](file:///d:/PROTOTIPE/Prototipe-CLI/config/niches_metadata.json) [NEW], [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/components/admin/NichesManagerPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/NichesManagerPanel.jsx) [NEW], [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-164: Rediseño Unificado de Logos y Nombres en Marquesina de Marcas Infinita~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-07-02

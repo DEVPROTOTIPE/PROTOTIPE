@@ -1,5 +1,34 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-02] - CORE-166: Robustecimiento y Gestión del Ciclo de Vida del Servidor CLI
+
+* **Tipo:** Refactor / Backend / Security / Concurrency / SSE Abort Handling
+* **Firma de auditoría:** CORE-166-CLI-ROBUSTNESS-AND-SSE-ABORT-MANAGEMENT
+* **Descripción de Cambios:**
+  - **Saneamiento y Caché en /api/niches:** Se re-crearon las rutas CRUD de gestión dinámica de nichos comerciales en `server.js` implementando una caché en memoria simple (`cachedNiches`) que se sirve de forma no bloqueante a través de `GET /api/niches`, y se invalida reactivamente ante mutaciones de escritura (`POST /api/niches`, `PUT /api/niches/:id`, `DELETE /api/niches/:id`) para evitar accesos repetitivos a disco.
+  - **Manejo de Desconexiones SSE en Sincronización:** Se implementó una bandera de interrupción (`isAborted`) y un listener de socket cerrado (`req.on('close')`) en el endpoint `/api/git/sync-core-to-clients-stream`. Si la conexión se cierra de manera repentina, se abortan automáticamente los subprocesos de compilación/despliegue en ejecución (`activeChild.kill()`) y se revierte el estado físico del monorepo a la rama original y stash resguardado (`git checkout originalBranch` / `git stash pop`), evitando que queden bloqueos de git o ramas huérfanas en el sistema local.
+  - **Control de Aborto en Inyector de Componentes:** Se inyectó control de aborto basado en la bandera `isAborted` en `/api/library/inject/stream`. Al desconectarse el frontend, se detiene la secuencia de recursión de inyección y se libera el lock de sincronización del cliente (`delete projectSyncLocks[clientId]`), evitando que las APIs del Saas queden congeladas por bloqueos huérfanos.
+  - **Blindaje del Escáner de Endpoints:** Se restauró y blindó el escáner dinámico coloreado de la consola en `startServer`, aislando con un filtro robusto únicamente los métodos HTTP estándar REST (`GET`, `POST`, `PUT`, `DELETE`) de la API `/api` y omitiendo wildcards y wildcards estáticos de Express, previniendo el flooding de consola por rutas HEAD o de infraestructura de red autogeneradas.
+* **Build:** ✓ Exitoso (Vite build completado, integridad de biblioteca al 100% OK, consistencia sintáctica validada por Node).
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+### [2026-07-02] - CORE-165: Sistema de Administración y Gestión Dinámica de Nichos Comerciales
+
+* **Tipo:** Feature / Full Stack / Admin Panels / Backend CRUD
+* **Firma de auditoría:** CORE-165-NICHES-ADMINISTRATION-SYSTEM
+* **Descripción de Cambios:**
+  - **Estructuración de Metadatos de Nichos:** Se creó `config/niches_metadata.json` para desacoplar el ID técnico de las verticales del emoji y nombre descriptivo a nivel visual (soportando los 23 nichos del ecosistema por defecto), previniendo roturas o inyecciones indeseadas en el motor del generador.
+  - **Endpoints CRUD del Servidor CLI:** Se expandió `server.js` reemplazando el endpoint simple por un CRUD robusto (`GET`, `POST`, `PUT`, `DELETE` en `/api/niches`), que lee, actualiza, crea y elimina verticalidades coordinadamente entre `config/niches.json` (esquema de atributos) y `config/niches_metadata.json` (metadatos visuales). Asimismo, se rediseñó la función `startServer` implementando un escáner dinámico en runtime que lee automáticamente la pila de Express (`app._router.stack`) pero filtra la salida contrastándola contra el mapa de descripciones conocidas, logrando listar dinámicamente la totalidad de los 79 endpoints activos clasificados en 8 bloques premium de colores ANSI sin mostrar métodos de red redundantes (HEAD, LINK, OPTIONS, etc.) ni wildcards.
+  - **Componente Modular NichesManagerPanel:** Se implementó `NichesManagerPanel.jsx` en `src/components/admin/` como una vista modular premium de administración a pantalla completa. Permite buscar nichos, añadir nuevos atributos dinámicos (de tipo texto o dropdown con opciones delimitadas por comas), editar propiedades y borrar nichos mediante ventana de confirmación segura.
+  - **Integración y Sincronización en App.jsx:** Se importó e integró la vista en `App.jsx` bajo el nuevo tab de menú `niches` ("Gestión de Nichos") en la sección de "Ecosistema Core", utilizando el ícono `Store` y exponiendo un callback `onNichesUpdated` para sincronizar en tiempo real el catálogo de nichos del dashboard con la base del backend CLI.
+* **Build:** ✓ Exitoso (Vite build completado, integridad de biblioteca al 100% OK).
+* **Archivos Modificados/Creados:**
+  - [`Prototipe-CLI/config/niches_metadata.json`](file:///d:/PROTOTIPE/Prototipe-CLI/config/niches_metadata.json) [NEW]
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/NichesManagerPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/NichesManagerPanel.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
 ### [2026-07-02] - CORE-164: Rediseño Unificado de Logos y Nombres en Marquesina de Marcas Infinita
 
 * **Tipo:** UI Component / Playground Sandbox / Refactor

@@ -16,7 +16,9 @@ La función `buildTags` usa un `Set` internamente para garantizar unicidad. No s
 
 ### Regla 3: Al registrar un nuevo componente en el README, usar descripciones ricas en keywords
 
-La descripción de cada componente en el `README.md` es la fuente primaria para la inferencia de tags. Deben incluir keywords funcionales que correspondan a los nichos de negocio de PROTOTIPE:
+La descripción de cada componente en el `README.md` es la fuente primaria para la inferencia de tags. Deben incluir keywords funcionales que correspondan a los dominios y a las verticales de negocio de PROTOTIPE:
+
+#### Dominios Técnicos (Categorías Funcionales de Componentes)
 
 | Dominio | Keywords recomendadas en descripción |
 |---|---|
@@ -38,13 +40,41 @@ La descripción de cada componente en el `README.md` es la fuente primaria para 
 | KDS Cocina | `cocina`, `kds`, `kitchen` |
 | Gamificación | `ruleta`, `rifa`, `boleta`, `cupón`, `descuento`, `suerte` |
 
+#### Verticales de Negocio Oficiales (Nichos de Clientes - `niches.json`)
+
+Toda instancia de cliente en el ecosistema debe configurarse bajo una de las siguientes 23 verticales de negocio oficiales definidas en `niches.json`:
+
+1. **🛍️ Ropa y Retail Tradicional (`retail_clothing`)**
+2. **⚙️ Tornerías y Mecanizado de Precisión (`technical_services`)**
+3. **❄️ Refrigeración y Climatización (`refrigeration_ac`)**
+4. **📐 Contratistas y Construcción (`contractors`)**
+5. **🚜 Alquiler de Maquinaria y Equipos (`machinery_rental`)**
+6. **🪚 Carpinterías y Muebles (`carpentry`)**
+7. **🧺 Lavanderías y Tintorerías (`laundry`)**
+8. **🛋️ Restauración y Tapicería de Muebles (`furniture_repair`)**
+9. **💆 Estética, Podología y Bienestar (`wellness_podology`)**
+10. **🍎 Minimarkets y Alimentos (`grocery_food`)**
+11. **🚜 Insumos y Repuestos Agrícolas (`insumos-agricolas`)**
+12. **🎂 Alimentos Artesanales y Repostería (`alimentos-artesanales`)**
+13. **🛠️ Ferretería y Construcción Rural (`ferreteria-rural`)**
+14. **🏍️ Repuestos y Accesorios de Motos (`repuestos-motos`)**
+15. **💅 Suministros de Belleza Profesional (`distribuidoras-beauty`)**
+16. **🐶 Alimentos y Accesorios para Mascotas (`petshops-locales`)**
+17. **⚙️ Repuestos de Electrodomésticos (`repuestos-lineablanca`)**
+18. **👞 Calzado y Confección Local (`moda-local-calzado`)**
+19. **🥗 Alimentación Orgánica y Saludable (`alimentacion-saludable`)**
+20. **💻 Equipamiento Home Office (`home-office-ergonomia`)**
+21. **🍹 Bodega de Licores y Coctelería (`licores-cocteleria`)**
+22. **🧸 Artículos Geek y Coleccionismo (`coleccionismo-geek`)**
+23. **📦 Insumos Horeca B2B (`distribucion-horeca`)**
+
 ### Regla 4: El buscador del dashboard indexa nombres + descripción + categoría + tags
 
 El filtrado textual en `ComponentLibraryView.jsx` busca en los campos: `name`, `technicalName`, `description`, `category` y `tags` concatenados. Un componente es filtrable si aparece en cualquiera de esos campos.
 
 ### Regla 5: Al añadir nuevos keywords de nicho al CLI, documentar aquí
 
-Si se detecta un nuevo nicho comercial no cubierto por `buildTags`, se debe:
+Si se decteta un nuevo nicho comercial no cubierto por `buildTags`, se debe:
 1. Añadir el bloque `if (text.includes(...)) tags.add('...')` en `server.js`
 2. Agregar el caso en la tabla de la Regla 3 de este archivo
 3. Registrar en `bitacora_cambios.md`
