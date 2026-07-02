@@ -203,7 +203,7 @@ Registrar el cambio en:
    - Bordes: `border-[var(--color-border)]`
    - Textos: `text-[var(--color-text)]` / `text-[var(--color-text-muted)]`
    - Marca: `text-[var(--color-primary)]` / `bg-[var(--color-primary)]`
- 3. **Control de Desbordamiento:** El contenedor directo del componente **no** debe tener `overflow-hidden` si hay animaciones de escala. Usar `py-4` exterior para dar holgura.
+ 3. **Prevención de Truncamiento en Scroll y Animación (Crítico):** En todo componente o sandbox que emplee desplazamiento horizontal (`overflow-x-auto`) o vertical (`overflow-y-auto`) combinado con elementos interactivos que tengan animaciones de traslación (`translate-y`, `hover:-translate-y-1`), escalas (`scale-105`) o sombras de elevación (`shadow-xl`), es **obligatorio** aplicar un padding de holgura vertical u horizontal (mínimo `py-4` o `px-4`) dentro del contenedor de scroll. Esto garantiza que los bordes activos, tarjetas y efectos resplandecientes no sean recortados/cortados por los límites de caja del contenedor con scroll.
  4. **Interactividad:** Siempre incluir microinteracciones, estados de carga y estados de error/vacío elegantes.
  5. **Estándar de Controles:** Prohibido usar selectores `<select>` nativos del navegador; usar obligatoriamente `CustomSelect` (de `src/components/ui/CustomSelect.jsx`) configurado con las variables HSL correspondientes.
  6. **Estándar de Confirmación:** En todo flujo de eliminación, limpieza o acción destructiva del componente, es obligatorio requerir confirmación asíncrona mediante el hook `useAlertConfirm` con `variant: 'error'` o `variant: 'warning'`.

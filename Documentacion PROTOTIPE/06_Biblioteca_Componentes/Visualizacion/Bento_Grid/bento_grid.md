@@ -5,7 +5,9 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": []
 }
 -->
 
@@ -24,7 +26,7 @@ El componente `BentoGrid` proporciona un layout responsivo basado en celdas de m
 
 ---
 
-## Código React Completo y 100% Funcional
+## 3. Código React Completo
 
 ```jsx
 import React from 'react';

@@ -36,7 +36,7 @@ export function ModalBase({ isOpen, onClose, title, children }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+          className="absolute inset-0 bg-[var(--color-surface)]/60 backdrop-blur-sm"
         />
 
         {/* Caja de contenido del modal */}

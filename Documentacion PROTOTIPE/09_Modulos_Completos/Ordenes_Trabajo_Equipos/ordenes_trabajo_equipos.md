@@ -88,7 +88,7 @@ export default function WorkOrderManager({ onSave }) {
   const grandTotal = totalParts + parseFloat(labor || 0);
 
   return (
-    <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-4 max-w-lg mx-auto text-slate-200">
+    <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl p-4 space-y-4 max-w-lg mx-auto text-slate-200">
       <h3 className="text-xs font-black uppercase tracking-wider text-indigo-400">Ficha de Recepción de Equipo</h3>
 
       {/* Datos del equipo */}
@@ -98,27 +98,27 @@ export default function WorkOrderManager({ onSave }) {
           placeholder="Marca..."
           value={equipment.brand}
           onChange={e => setEquipment(prev => ({ ...prev, brand: e.target.value }))}
-          className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none"
+          className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3 py-2 text-slate-200 focus:outline-none"
         />
         <input
           type="text"
           placeholder="Modelo..."
           value={equipment.model}
           onChange={e => setEquipment(prev => ({ ...prev, model: e.target.value }))}
-          className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none"
+          className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3 py-2 text-slate-200 focus:outline-none"
         />
         <input
           type="text"
           placeholder="Serial..."
           value={equipment.serial}
           onChange={e => setEquipment(prev => ({ ...prev, serial: e.target.value }))}
-          className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 col-span-2 focus:outline-none"
+          className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3 py-2 text-slate-200 col-span-2 focus:outline-none"
         />
         <textarea
           placeholder="Descripción del fallo o servicio..."
           value={equipment.description}
           onChange={e => setEquipment(prev => ({ ...prev, description: e.target.value }))}
-          className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 col-span-2 focus:outline-none h-16 resize-none"
+          className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3 py-2 text-slate-200 col-span-2 focus:outline-none h-16 resize-none"
         />
       </div>
 
@@ -131,20 +131,20 @@ export default function WorkOrderManager({ onSave }) {
             placeholder="Repuesto..."
             value={partInput.name}
             onChange={e => setPartInput(prev => ({ ...prev, name: e.target.value }))}
-            className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 focus:outline-none"
+            className="flex-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3 py-1.5 focus:outline-none"
           />
           <input
             type="number"
             placeholder="Precio..."
             value={partInput.price}
             onChange={e => setPartInput(prev => ({ ...prev, price: e.target.value }))}
-            className="w-20 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 focus:outline-none"
+            className="w-20 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3 py-1.5 focus:outline-none"
           />
           <button onClick={addPart} className="px-3 bg-indigo-600 rounded-xl font-bold cursor-pointer hover:bg-indigo-500">+</button>
         </div>
 
         {parts.length > 0 && (
-          <div className="space-y-1 bg-slate-900/40 p-2 border border-slate-800 rounded-xl">
+          <div className="space-y-1 bg-[var(--color-surface)]/40 p-2 border border-[var(--color-border)] rounded-xl">
             {parts.map((part, idx) => (
               <div key={idx} className="flex justify-between items-center text-[10px]">
                 <span>{part.name}</span>
@@ -163,7 +163,7 @@ export default function WorkOrderManager({ onSave }) {
           placeholder="Mano de obra..."
           value={labor}
           onChange={e => setLabor(e.target.value)}
-          className="w-24 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-right font-mono text-xs focus:outline-none"
+          className="w-24 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl px-3 py-1.5 text-right font-mono text-xs focus:outline-none"
         />
       </div>
 
@@ -184,12 +184,12 @@ export default function WorkOrderManager({ onSave }) {
           onTouchStart={startDrawing}
           onTouchMove={draw}
           onTouchEnd={stopDrawing}
-          className="w-full bg-slate-900 border border-dashed border-slate-800 rounded-xl cursor-crosshair h-24"
+          className="w-full bg-[var(--color-surface)] border border-dashed border-[var(--color-border)] rounded-xl cursor-crosshair h-24"
         />
       </div>
 
       {/* Totales y Envío */}
-      <div className="pt-3 border-t border-slate-900 space-y-3">
+      <div className="pt-3 border-t border-[var(--color-border)] space-y-3">
         <div className="flex justify-between text-xs font-black">
           <span>Total Orden:</span>
           <span className="font-mono text-indigo-400">${grandTotal.toLocaleString('es-CO')}</span>

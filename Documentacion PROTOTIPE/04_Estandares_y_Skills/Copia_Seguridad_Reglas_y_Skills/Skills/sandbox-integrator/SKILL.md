@@ -165,6 +165,11 @@ El playground debe verse y comportarse como el componente real. Si el `.md` incl
 ### Estándar de Controles y Confirmación en Sandbox
 Al implementar filtros, opciones o controles interactivos en la interfaz del sandbox (fuera del panel de controles estándar de SandboxLayout), queda terminantemente prohibido usar selectores `<select>` nativos o confirmaciones directas. Debes emplear `CustomSelect` y `useAlertConfirm` del ecosistema para mantener la estética y el flujo de confirmación premium.
 
+### Alineación Estética y Prevención de Truncamiento (Crítico)
+Al implementar y recrear el componente en el sandbox, asegúrate de:
+1. Usar únicamente variables HSL adaptativas del tema (`bg-[var(--color-bg)]`, `border-[var(--color-border)]`, etc.) y evitar colores fijos oscuros de Tailwind.
+2. Si el componente o sandbox contiene un contenedor de scroll horizontal/vertical (`overflow-x-auto`, `overflow-y-auto`) con animaciones de traslación (`translate-y`, `hover:-translate-y-1`) o escalas (`scale-105`), es **obligatorio** aplicar un padding de holgura vertical u horizontal (mínimo `py-4` o `px-4` internos) dentro del contenedor de scroll. Esto garantiza que las tarjetas e iluminaciones no se recorten en los bordes del área del scroll.
+
 ---
 
 ## Common Mistakes

@@ -5,7 +5,9 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": []
 }
 -->
 
@@ -22,8 +24,8 @@ El `InteractiveTutorialTour` es un componente de guiado interactivo que ayuda a 
 ---
 
 ## 2. Especificación Visual y Estilos
-* **Máscara de Enfoque (Highlighter Overlay):** Superposición oscura semi-transparente que cubre la pantalla excepto el elemento DOM enfocado (`bg-slate-950/60 transition-all duration-300`).
-* **Caja de Explicación (Tooltip Card):** Tarjeta flotante con fondo sólido (`bg-slate-900 border border-slate-800`), sombra profunda, indicador de pasos numérico y botones de navegación ("Atrás", "Siguiente", "Finalizar").
+* **Máscara de Enfoque (Highlighter Overlay):** Superposición oscura semi-transparente que cubre la pantalla excepto el elemento DOM enfocado (`bg-[var(--color-bg)]/60 transition-all duration-300`).
+* **Caja de Explicación (Tooltip Card):** Tarjeta flotante con fondo sólido (`bg-[var(--color-surface)] border border-[var(--color-border)]`), sombra profunda, indicador de pasos numérico y botones de navegación ("Atrás", "Siguiente", "Finalizar").
 * **Animaciones:** Transición fluida del recorte de foco y el tooltip al cambiar de paso operativo.
 
 ---
@@ -154,7 +156,7 @@ export default function InteractiveTutorialTour({
           pointerEvents: 'auto',
           ...tooltipStyle
         }}
-        className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 text-slate-100 animate-fade-in"
+        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-3xl p-5 shadow-2xl flex flex-col gap-4 text-slate-100 animate-fade-in"
       >
         <div className="flex justify-between items-start">
           <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400">
@@ -172,7 +174,7 @@ export default function InteractiveTutorialTour({
           <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">{steps[currentStep]?.content}</p>
         </div>
 
-        <div className="flex justify-between items-center gap-2 border-t border-slate-800/80 pt-3">
+        <div className="flex justify-between items-center gap-2 border-t border-[var(--color-border)]/80 pt-3">
           <button
             onClick={onComplete}
             className="text-[9px] font-black uppercase tracking-wider text-slate-500 hover:text-slate-400 cursor-pointer"

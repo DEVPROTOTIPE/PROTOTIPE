@@ -52,7 +52,13 @@ aliases:
 ### 2. Refactorización para Reusabilidad
 - **Props claras y tipadas** con valores default.
 - **Cero hardcoding** de rutas de Firestore, variables HSL de color, o textos.
-- **Cero dependencias rígidas de librerías externas:** Si usa iconos o librerías específicas, debe diseñarse con fallbacks seguros.
+- **Uso estricto de variables HSL de marca blanca:**
+  - Fondo: `bg-[var(--color-bg)]`
+  - Superficies: `bg-[var(--color-surface)]` / `bg-[var(--color-surface-2)]`
+  - Bordes: `border-[var(--color-border)]`
+  - Textos: `text-[var(--color-text)]` / `text-[var(--color-text-muted)]`
+  - Marca: `text-[var(--color-primary)]` / `bg-[var(--color-primary)]`
+- **Prevención de Truncamiento en Scroll y Animación (Crítico):** En todo componente o sandbox extraído que emplee desplazamiento horizontal (`overflow-x-auto`) o vertical (`overflow-y-auto`) combinado con elementos interactivos que tengan animaciones de traslación (`translate-y`, `hover:-translate-y-1`), escalas (`scale-105`) o sombras de elevación (`shadow-xl`), es **obligatorio** aplicar un padding de holgura vertical u horizontal (mínimo `py-4` o `px-4`) dentro del contenedor de scroll. Esto garantiza que los bordes activos, tarjetas y efectos resplandecientes no sean recortados/cortados por los límites de caja del contenedor con scroll.
 - **Saneamiento de Controles y Confirmación:** Reemplaza selectores `<select>` nativos por el componente `CustomSelect`, e intercepta toda eliminación o borrado destructivo mediante la ventana modal de confirmación `useAlertConfirm`.
 - **Registro en Manifiesto:** Declara explícitamente `CustomSelect` y `useAlertConfirm` en el array `dependencies.internal` del manifiesto JSON del archivo `.md` de documentación para asegurar que se porten en cascada.
 

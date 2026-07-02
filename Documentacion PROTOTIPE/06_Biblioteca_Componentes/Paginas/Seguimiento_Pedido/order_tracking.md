@@ -5,7 +5,15 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": [
+    "retail_clothing",
+    "grocery_food",
+    "alimentos-artesanales",
+    "laundry",
+    "distribucion-horeca"
+  ]
 }
 -->
 

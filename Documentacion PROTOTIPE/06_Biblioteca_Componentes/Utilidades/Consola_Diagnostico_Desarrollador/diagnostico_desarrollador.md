@@ -5,7 +5,9 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": []
 }
 -->
 
@@ -28,7 +30,7 @@ El componente `DeveloperDiagnosticsModal` proporciona un panel en tiempo real de
 La consola utiliza la paleta basada en HSL y variables dinámicas de la aplicación para mimetizarse con el diseño del cliente:
 * **Estructura Tabular Limpia:** Pestañas superiores estilizadas para alternar entre "Diagnóstico General", "Pings de Conectividad" y "Notificaciones (VAPID)".
 * **Modo Oscuro Integrado:** El fondo usa `var(--color-surface)` y los textos `var(--color-text-muted)` y `var(--color-text)`.
-* **Consola de Resultados Monocromática:** Una caja terminal oscura (`bg-slate-950 font-mono text-xs text-emerald-400 p-4 rounded-xl`) para simular la salida de logs en tiempo real.
+* **Consola de Resultados Monocromática:** Una caja terminal oscura (`bg-[var(--color-bg)] font-mono text-xs text-emerald-400 p-4 rounded-xl`) para simular la salida de logs en tiempo real.
 * **Estados Interactivos:** Botones con feedback inmediato (`hover:opacity-90 active:scale-95 transition-all`) e indicadores luminosos intermitentes para simular conexiones en curso.
 
 ---
@@ -333,7 +335,7 @@ export default function DeveloperDiagnosticsModal({ isOpen, onClose }) {
                   Limpiar logs
                 </button>
               </div>
-              <div className="bg-slate-950 rounded-2xl p-4 font-mono text-xs overflow-y-auto max-h-[200px] border border-slate-900 space-y-1">
+              <div className="bg-[var(--color-bg)] rounded-2xl p-4 font-mono text-xs overflow-y-auto max-h-[200px] border border-[var(--color-border)] space-y-1">
                 {logs.map((log, index) => (
                   <div 
                     key={index}

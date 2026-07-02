@@ -5,7 +5,16 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": [
+    "retail_clothing",
+    "grocery_food",
+    "alimentos-artesanales",
+    "distribuidoras-beauty",
+    "moda-local-calzado",
+    "coleccionismo-geek"
+  ]
 }
 -->
 
@@ -21,7 +30,7 @@ El `InteractiveCouponBadge` es un campo de validación de cupones de descuento i
 ---
 
 ## 2. Especificación Visual y Estilos
-* **Input de Captura:** Entrada HSL redondeada (`rounded-2xl`) con borde discreto (`border-slate-800 focus-within:border-indigo-500/40`).
+* **Input de Captura:** Entrada HSL redondeada (`rounded-2xl`) con borde discreto (`border-[var(--color-border)] focus-within:border-indigo-500/40`).
 * **Botón de Acción:** Botón atómico (`px-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl`).
 * **Estados Visuales:**
   - **Éxito (Verde):** Al aplicarse, el borde se tiñe de esmeralda (`border-emerald-500/30 bg-emerald-500/5`), mostrando un check y disparando confeti.
@@ -122,7 +131,7 @@ export default function InteractiveCouponBadge({
           </div>
           <button
             onClick={handleRemove}
-            className="px-2.5 py-1.5 bg-slate-900 border border-slate-800 text-[10px] font-bold text-red-400 rounded-xl hover:bg-slate-800 transition-all cursor-pointer"
+            className="px-2.5 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] text-[10px] font-bold text-red-400 rounded-xl hover:bg-slate-800 transition-all cursor-pointer"
           >
             Eliminar
           </button>
@@ -131,10 +140,10 @@ export default function InteractiveCouponBadge({
         // Estado: Input para escribir cupón
         <div className="space-y-1.5">
           <div
-            className={`flex items-center bg-slate-950 border rounded-2xl p-1.5 gap-2 transition-all ${
+            className={`flex items-center bg-[var(--color-bg)] border rounded-2xl p-1.5 gap-2 transition-all ${
               status === 'error' ? 'border-red-500/50 ring-2 ring-red-500/10' :
               status === 'validating' ? 'border-indigo-500/30' :
-              'border-slate-800 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/10'
+              'border-[var(--color-border)] focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/10'
             } ${isShaking ? 'animate-shake' : ''}`}
           >
             <input

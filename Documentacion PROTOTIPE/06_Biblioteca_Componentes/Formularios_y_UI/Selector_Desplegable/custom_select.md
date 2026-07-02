@@ -5,7 +5,9 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": []
 }
 -->
 
@@ -38,7 +40,7 @@ El componente hereda la identidad visual dinámica del tema corporativo inyectad
 
 ---
 
-## 💻 Código React Completo y 100% Funcional (Agnóstico e Independiente)
+## 3. Código React Completo
 
 ```jsx
 import { useState } from 'react'

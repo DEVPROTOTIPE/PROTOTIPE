@@ -7,7 +7,14 @@
       "lucide-react": "^0.300.0"
     },
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": [
+    "grocery_food",
+    "alimentos-artesanales",
+    "licores-cocteleria",
+    "distribucion-horeca"
+  ]
 }
 -->
 

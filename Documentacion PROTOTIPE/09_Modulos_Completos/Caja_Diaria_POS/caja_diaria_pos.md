@@ -509,7 +509,7 @@ export default function CajaDiariaPOS({
           {reporteCierre.firma && (
             <div className="space-y-1.5 text-center">
               <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider block">Firma del Responsable</span>
-              <div className="border border-[var(--color-border)] rounded-xl bg-slate-900 inline-block p-1">
+              <div className="border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)] inline-block p-1">
                 <img src={reporteCierre.firma} alt="Firma Cierre" className="h-24 max-w-full" />
               </div>
             </div>
@@ -658,7 +658,7 @@ export default function CajaDiariaPOS({
                   </button>
                 </div>
                 
-                <div className="border border-[var(--color-border)] rounded-xl overflow-hidden bg-slate-900">
+                <div className="border border-[var(--color-border)] rounded-xl overflow-hidden bg-[var(--color-surface)]">
                   <canvas
                     ref={canvasRef}
                     width={480}
@@ -777,7 +777,7 @@ function App() {
   };
 
   return (
-    <div className="bg-slate-950 min-h-screen py-10">
+    <div className="bg-[var(--color-bg)] min-h-screen py-10">
       <CajaDiariaPOS
         userName="Sergio Agudelo"
         currencySymbol="COP"

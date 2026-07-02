@@ -5,7 +5,11 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "module",
+  "niches": [
+    "wellness_podology"
+  ]
 }
 -->
 

@@ -762,6 +762,30 @@ function runCreateProjectWorker(answers, onLog) {
   });
 }
 
+// Caché en memoria para metadatos de manifiestos de componentes
+let componentManifestsCache = {};
+
+// Función auxiliar para extraer el manifiesto JSON de un archivo markdown
+async function getComponentManifest(link) {
+  try {
+    let filePath = link;
+    if (filePath.startsWith('file://')) {
+      filePath = fileURLToPath(filePath);
+    }
+    
+    if (await fs.pathExists(filePath)) {
+      const content = await fs.readFile(filePath, 'utf-8');
+      const match = content.match(/<!--\s*(\{[\s\S]*?\})\s*-->/);
+      if (match) {
+        return JSON.parse(match[1]);
+      }
+    }
+  } catch (e) {
+    console.warn(`[getComponentManifest] Error parseando manifiesto de ${link}:`, e.message);
+  }
+  return null;
+}
+
 // Endpoint para exponer el catálogo de la Biblioteca de Componentes
 app.get('/api/library', async (req, res) => {
   const LIBRARY_README = path.join(getDocumentationRoot(), '06_Biblioteca_Componentes', 'README.md');
@@ -778,9 +802,11 @@ app.get('/api/library', async (req, res) => {
     let currentCategory = null;
 
     const lines = content.split('\n');
+    const componentPromises = [];
+
     for (const line of lines) {
       // Detectar categoría: ### 0. 📂 Nombre...
-      const catMatch = line.match(/^###\s+\d+\.\s+[📂📦]\s+(.+?)\s+\(`([^)]+)`\)/u);
+      const catMatch = line.match(/^###\s+\d+\.\s+\S+\s+(.+?)\s+\(`([^)]+)`\)/u);
       if (catMatch) {
         const catName = catMatch[1].trim();
         const folder = catMatch[2].trim();
@@ -791,7 +817,7 @@ app.get('/api/library', async (req, res) => {
       }
 
       // Detectar categoría sin paréntesis: ### 0. 📂 Nombre
-      const catMatchSimple = line.match(/^###\s+\d+\.\s+[📂📦]\s+(.+)/u);
+      const catMatchSimple = line.match(/^###\s+\d+\.\s+\S+\s+(.+)/u);
       if (catMatchSimple && !catMatch) {
         // Extraer la parte antes del `(`
         const cleanName = catMatchSimple[1].replace(/\s*\(.*/, '').trim();
@@ -813,15 +839,55 @@ app.get('/api/library', async (req, res) => {
         const displayName = techMatch ? techMatch[1].trim() : fullName;
         const technicalName = techMatch ? techMatch[2].trim() : '';
 
-        currentCategory.components.push({
+        const componentObj = {
           name: displayName,
           technicalName,
           description,
           link,
           category: currentCategory.name,
           resourceType: currentCategory.isModule ? 'module' : 'component',
-          tags: buildTags(displayName, technicalName, description, currentCategory.name)
-        });
+          tags: []
+        };
+        currentCategory.components.push(componentObj);
+
+        componentPromises.push((async () => {
+          let manifest = null;
+          try {
+            let filePath = link;
+            if (filePath.startsWith('file://')) {
+              filePath = fileURLToPath(filePath);
+            }
+            if (await fs.pathExists(filePath)) {
+              const stats = await fs.stat(filePath);
+              const mtime = stats.mtimeMs;
+              const cached = componentManifestsCache[link];
+              if (cached && cached.mtime === mtime) {
+                manifest = cached.manifest;
+              } else {
+                manifest = await getComponentManifest(link);
+                componentManifestsCache[link] = { manifest, mtime };
+              }
+            }
+          } catch (e) {
+            console.warn(`[API /library] Error leyendo mtime de ${link}:`, e.message);
+          }
+
+          if (manifest) {
+            if (Array.isArray(manifest.niches)) {
+              componentObj.niches = manifest.niches;
+              manifest.niches.forEach(n => {
+                if (n) componentObj.tags.push(n);
+              });
+            }
+            if (manifest.type) {
+              componentObj.resourceType = manifest.type;
+              componentObj.tags.push(manifest.type);
+            }
+          }
+
+          const baseTags = buildTags(displayName, technicalName, description, componentObj.category);
+          componentObj.tags = [...new Set([...componentObj.tags, ...baseTags])];
+        })());
         continue;
       }
 
@@ -833,6 +899,8 @@ app.get('/api/library', async (req, res) => {
         }
       }
     }
+
+    await Promise.all(componentPromises);
 
     const totalComponents = categories.reduce((sum, c) => sum + c.components.length, 0);
 
@@ -970,7 +1038,7 @@ graph TD
       
       // Encontrar la categoría correspondiente e insertar buscando por el nombre técnico de la carpeta entre paréntesis
       const escapedFolder = cleanCategory.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-      const categoryRegex = new RegExp(`(###\\s+\\d+\\.\\s+[📂📦].*?\\(\`?\\/?${escapedFolder}\`?\\).*?\\n)([\\s\\S]*?)(?=\\n###\\s+\\d+\\.\\s+[📂📦]|\\n---|\\n$)`, 'i');
+      const categoryRegex = new RegExp(`(###\\s+\\d+\\.\\s+\\S+.*?\\(\`?\\/?${escapedFolder}\`?\\).*?\\n)([\\s\\S]*?)(?=\\n###\\s+\\d+\\.\\s+\\S+|\\n---|\\n$)`, 'i');
       
       const match = readme.match(categoryRegex);
       if (match) {

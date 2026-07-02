@@ -9,7 +9,20 @@
       "framer-motion": "^11.0.0"
     },
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": [
+    "retail_clothing",
+    "grocery_food",
+    "alimentos-artesanales",
+    "distribuidoras-beauty",
+    "petshops-locales",
+    "moda-local-calzado",
+    "alimentacion-saludable",
+    "home-office-ergonomia",
+    "licores-cocteleria",
+    "coleccionismo-geek"
+  ]
 }
 -->
 
@@ -215,7 +228,7 @@ export default function CarrucelProductos({
               style={{ scrollSnapAlign: 'start' }}
             >
               {/* Imagen y Descuento */}
-              <div className="relative aspect-square w-full rounded-[20px] overflow-hidden bg-slate-900/10 dark:bg-slate-950/20 border border-[var(--color-border)]/30 mb-3 flex items-center justify-center group/img">
+              <div className="relative aspect-square w-full rounded-[20px] overflow-hidden bg-[var(--color-surface)]/10 dark:bg-[var(--color-bg)]/20 border border-[var(--color-border)]/30 mb-3 flex items-center justify-center group/img">
                 {hasImage ? (
                   <img
                     src={prod.image}

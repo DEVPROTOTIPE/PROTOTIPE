@@ -5,7 +5,17 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "module",
+  "niches": [
+    "wellness_podology",
+    "technical_services",
+    "refrigeration_ac",
+    "contractors",
+    "carpentry",
+    "laundry",
+    "furniture_repair"
+  ]
 }
 -->
 
@@ -50,21 +60,21 @@ export default function AgendaReservationCalendar({ professionals = [], initialR
   };
 
   return (
-    <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-4 max-w-xl mx-auto">
+    <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl p-4 space-y-4 max-w-xl mx-auto">
       {/* Selector de Profesional */}
       <div className="flex items-center justify-between gap-3">
         <label className="text-[10px] font-black uppercase text-indigo-400">Profesional / Recurso:</label>
         <select
           value={selectedProf}
           onChange={e => setSelectedProf(e.target.value)}
-          className="bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-1 focus:ring-1 focus:ring-indigo-500"
+          className="bg-[var(--color-surface)] border border-[var(--color-border)] text-slate-200 text-xs rounded-xl px-2.5 py-1 focus:ring-1 focus:ring-indigo-500"
         >
           {professionals.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </div>
 
       {/* Control de Navegación de Fecha */}
-      <div className="flex items-center justify-between bg-slate-900/60 p-2 border border-slate-800/80 rounded-xl">
+      <div className="flex items-center justify-between bg-[var(--color-surface)]/60 p-2 border border-[var(--color-border)]/80 rounded-xl">
         <button onClick={() => changeDay(-1)} className="p-1 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg cursor-pointer">
           <ChevronLeft size={16} />
         </button>

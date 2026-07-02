@@ -5,7 +5,15 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": [
+    "retail_clothing",
+    "grocery_food",
+    "coleccionismo-geek",
+    "distribuidoras-beauty",
+    "moda-local-calzado"
+  ]
 }
 -->
 
@@ -177,7 +185,7 @@ export default function RaffleNumberSelector({
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto bg-slate-900/60 backdrop-blur-xl border border-white/10 p-5 rounded-3xl text-white shadow-2xl relative overflow-hidden">
+    <div className="w-full max-w-xl mx-auto bg-[var(--color-surface)]/60 backdrop-blur-xl border border-white/10 p-5 rounded-3xl text-white shadow-2xl relative overflow-hidden">
       {/* Cabecera */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
@@ -203,7 +211,7 @@ export default function RaffleNumberSelector({
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleManualSelect();
                 }}
-                className="w-10 px-1.5 py-1 text-center text-xs font-bold bg-slate-950/60 border border-white/10 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition"
+                className="w-10 px-1.5 py-1 text-center text-xs font-bold bg-[var(--color-bg)]/60 border border-white/10 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition"
               />
               <button
                 onClick={handleManualSelect}
@@ -222,7 +230,7 @@ export default function RaffleNumberSelector({
                   key={qty}
                   onClick={() => triggerLuckyDraw(qty)}
                   disabled={luckySpinning}
-                  className="px-2.5 py-1 text-[10px] font-black rounded-lg border border-white/5 bg-slate-950/40 hover:bg-slate-950 hover:border-white/10 transition duration-300 disabled:opacity-40"
+                  className="px-2.5 py-1 text-[10px] font-black rounded-lg border border-white/5 bg-[var(--color-bg)]/40 hover:bg-[var(--color-bg)] hover:border-white/10 transition duration-300 disabled:opacity-40"
                 >
                   +{qty}
                 </button>
@@ -235,7 +243,7 @@ export default function RaffleNumberSelector({
       {/* Grid 10x10 */}
       <div
         ref={containerRef}
-        className="grid grid-cols-10 gap-1.5 touch-none select-none p-1.5 bg-slate-950/50 border border-white/5 rounded-2xl"
+        className="grid grid-cols-10 gap-1.5 touch-none select-none p-1.5 bg-[var(--color-bg)]/50 border border-white/5 rounded-2xl"
       >
         {numbersList.map((num) => {
           const status = getStatus(num);
@@ -245,7 +253,7 @@ export default function RaffleNumberSelector({
           let cellStyle = {};
 
           if (status === 'sold') {
-            cellClass = "bg-slate-800/40 border-slate-800 text-slate-600 cursor-pointer opacity-50";
+            cellClass = "bg-slate-800/40 border-[var(--color-border)] text-slate-600 cursor-pointer opacity-50";
           } else if (status === 'reserved') {
             cellClass = "bg-amber-500/10 border-amber-500/30 text-amber-400 animate-pulse cursor-pointer";
           } else if (status === 'selected') {
@@ -262,7 +270,7 @@ export default function RaffleNumberSelector({
               animation: 'elasticPop 150ms infinite'
             };
           } else {
-            cellClass = "bg-slate-900/40 border-white/5 text-slate-300 hover:border-white/20 hover:scale-105 transition-all duration-200 cursor-pointer";
+            cellClass = "bg-[var(--color-surface)]/40 border-white/5 text-slate-300 hover:border-white/20 hover:scale-105 transition-all duration-200 cursor-pointer";
           }
 
           return (
@@ -291,7 +299,7 @@ export default function RaffleNumberSelector({
       {/* Leyenda */}
       <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mt-5 text-[10px] font-medium text-slate-400 border-t border-white/5 pt-4">
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded bg-slate-900/40 border border-white/10" />
+          <div className="w-2.5 h-2.5 rounded bg-[var(--color-surface)]/40 border border-white/10" />
           <span>Disponible</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -303,7 +311,7 @@ export default function RaffleNumberSelector({
           <span>Reservado</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded bg-slate-800/40 border border-slate-800 opacity-50 relative overflow-hidden">
+          <div className="w-2.5 h-2.5 rounded bg-slate-800/40 border border-[var(--color-border)] opacity-50 relative overflow-hidden">
             <div className="absolute inset-0 flex items-center justify-center text-slate-700"><span className="text-[6px]">/</span></div>
           </div>
           <span>Vendido</span>
@@ -365,7 +373,7 @@ export default function RafflePurchaseFlow() {
   };
 
   return (
-    <div className="w-full p-4 bg-slate-900 min-h-screen">
+    <div className="w-full p-4 bg-[var(--color-surface)] min-h-screen">
       <RaffleNumberSelector
         selectedNumbers={selectedNumbers}
         onNumberToggle={handleNumberToggle}
@@ -374,7 +382,7 @@ export default function RafflePurchaseFlow() {
       />
 
       {selectedNumbers.length > 0 && (
-        <div className="mt-4 p-4 max-w-xl mx-auto bg-slate-950/50 border border-white/5 rounded-2xl flex items-center justify-between animate-fade-in">
+        <div className="mt-4 p-4 max-w-xl mx-auto bg-[var(--color-bg)]/50 border border-white/5 rounded-2xl flex items-center justify-between animate-fade-in">
           <div>
             <h5 className="text-xs font-bold text-white uppercase tracking-wider">Boletas Seleccionadas</h5>
             <p className="text-lg font-black text-indigo-400 mt-1.5 flex gap-1.5 flex-wrap">
@@ -400,7 +408,7 @@ export default function RafflePurchaseFlow() {
             </button>
             <button
               onClick={() => setSelectedNumbers([])}
-              className="px-3 py-1.5 bg-slate-950/40 hover:bg-red-500/10 border border-white/5 hover:border-red-500/20 rounded-lg text-[10px] font-bold text-slate-400 hover:text-red-400 tracking-wider uppercase transition-all duration-200 cursor-pointer text-center"
+              className="px-3 py-1.5 bg-[var(--color-bg)]/40 hover:bg-red-500/10 border border-white/5 hover:border-red-500/20 rounded-lg text-[10px] font-bold text-slate-400 hover:text-red-400 tracking-wider uppercase transition-all duration-200 cursor-pointer text-center"
             >
               Limpiar Selección
             </button>

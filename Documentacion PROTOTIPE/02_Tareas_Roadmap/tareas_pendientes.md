@@ -4,6 +4,136 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-179: Blindaje de Sandboxes y Sincronización de Metadatos de Nicho~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se corrigió la clasificación de nicho de los 10 componentes de Contratistas y Construcción agregando las propiedades "type" y "niches" en sus manifiestos markdown para garantizar el filtrado por vertical. Se realizó una auditoría completa del monorepo eliminando los últimos rastros de alerts, prompts y confirms nativos del navegador en los playgrounds, reemplazándolos con el hook de confirmación context-promesificado unificado (`useAlertConfirm`). Se optimizó el backend del proveedor de alertas para permitir llamadas directas (`confirm(...)`) mediante patrón de objeto ejecutable. Adicionalmente, se eliminó la definición local obsoleta e inconsistente de `CustomSelect` de `App.jsx`, reemplazándola con la importación oficial del componente premium reusable `CustomSelect.jsx`.
+  - Archivos:
+    - [App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [CalculadoraPresupuestoObra](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Contractors/Calculadora_Presupuesto_Obra/calculadora_presupuesto_obra.md) [MODIFY]
+    - [SelectorEspecialidadContratistas](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Contractors/Selector_Especialidad_Contratistas/selector_especialidad_contratistas.md) [MODIFY]
+    - [BitacoraDiariaObra](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Contractors/Bitacora_Diaria_Obra/bitacora_diaria_obra.md) [MODIFY]
+    - [CalculadoraDosificacionConcreto](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Contractors/Calculadora_Dosificacion_Concreto/calculadora_dosificacion_concreto.md) [MODIFY]
+    - [CronogramaHitosProyecto](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Contractors/Cronograma_Hitos_Proyecto/cronograma_hitos_proyecto.md) [MODIFY]
+    - [SelectorAlquilerAndamios](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Contractors/Selector_Alquiler_Andamios/selector_alquiler_andamios.md) [MODIFY]
+    - [VisorPlanosDiseno](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Contractors/Visor_Planos_Diseno/visor_planos_diseno.md) [MODIFY]
+    - [SolicitudPedidoMateriales](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Contractors/Solicitud_Pedido_Materiales/solicitud_pedido_materiales.md) [MODIFY]
+    - [GraficoPresupuestoVsGasto](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Contractors/Grafico_Presupuesto_Vs_Gasto/grafico_presupuesto_vs_gasto.md) [MODIFY]
+    - [ChecklistSeguridadEPP](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Contractors/Checklist_Seguridad_EPP/checklist_seguridad_epp.md) [MODIFY]
+    - [AlertConfirmContext.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/AlertConfirmContext.jsx) [MODIFY]
+    - [ReservasAgendaCitasSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ReservasAgendaCitasSandbox.jsx) [MODIFY]
+    - [SelectorBoletasRifasSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/SelectorBoletasRifasSandbox.jsx) [MODIFY]
+    - [CajaDiariaPOSSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CajaDiariaPOSSandbox.jsx) [MODIFY]
+    - [CreditosSaldosSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CreditosSaldosSandbox.jsx) [MODIFY]
+    - [FacturacionComisionalSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/FacturacionComisionalSandbox.jsx) [MODIFY]
+    - [OmnicanalidadWhatsAppSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/OmnicanalidadWhatsAppSandbox.jsx) [MODIFY]
+    - [OrdenesTrabajoEquiposSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/OrdenesTrabajoEquiposSandbox.jsx) [MODIFY]
+    - [POSExpressScannerSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/POSExpressScannerSandbox.jsx) [MODIFY]
+    - [ReservasAgendaSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ReservasAgendaSandbox.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-178: Inyección y Registro de los 10 Componentes de Contratistas y Construcción (Vertical 4)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se diseñaron, implementaron, catalogaron y documentaron los 10 componentes de la vertical `contractors` en una subcarpeta dedicada física `Contractors` para mantener organizada la biblioteca de componentes. Los componentes son: `CalculadoraPresupuestoObra`, `SelectorEspecialidadContratistas`, `BitacoraDiariaObra`, `CalculadoraDosificacionConcreto`, `CronogramaHitosProyecto`, `SelectorAlquilerAndamios`, `VisorPlanosDiseno`, `SolicitudPedidoMateriales`, `GraficoPresupuestoVsGasto` y `ChecklistSeguridadEPP`. Todos los componentes cumplen con los estándares de HSL adaptativo, exclusión de selectores nativos, confirmación con `useAlertConfirm` en acciones críticas, y sandboxes interactivos individuales en el dashboard.
+  - Archivos: 
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\Contractors\`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Contractors/) [NEW 10 subfolders & files]
+    - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/) [NEW 10 files]
+    - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\02_Tareas_Roadmap\control_creacion_componentes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/control_creacion_componentes.md) [MODIFY]
+
+
+* **[x] ~~Tarea CORE-176: Inyección y Registro de los 10 Componentes de Climatización e HVAC (Refrigeración y Climatización)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se diseñaron, implementaron, catalogaron y documentaron los 10 componentes de la vertical `refrigeration_ac` en una subcarpeta dedicada física `Refrigeration_AC` para mantener organizada la biblioteca de componentes. Los componentes son: `CalculadoraCargaBTU`, `SelectorTipoAireAcondicionado`, `ProgramadorMantenimientoPreventivo`, `EstimadorAhorroEnergetico`, `SelectorRefrigeranteRepuestos`, `ListaDiagnosticoFallas`, `TablaEspecificacionesHVAC`, `SelectorTramosTuberia`, `TarjetaGarantiaContratos` y `SelectorTermostatosSensores`. Todos los componentes cumplen con los estándares de HSL adaptativo, uso de `CustomSelect` para dropdowns, `useAlertConfirm` en acciones críticas, y protección de clipping visual (py-4 inyectado en el carrusel horizontal). Se crearon sus 10 sandboxes interactivos correspondientes en el dashboard.
+  - Archivos: 
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\Refrigeration_AC\`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Refrigeration_AC/) [NEW 10 subfolders & files]
+    - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/) [NEW 5 files + 5 files previously created]
+    - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\02_Tareas_Roadmap\control_creacion_componentes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/control_creacion_componentes.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-175: Inyección y Registro de los 5 Componentes Restantes de Mecanizado (Servicios Técnicos)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se diseñaron, implementaron, catalogaron y documentaron los 5 componentes restantes de la vertical `technical_services`: `SelectorEspecificacionRosca`, `SeguimientoOrdenesProduccion`, `CalculadoraPesoMateriales`, `SelectorLotesVolumen` y `FormularioSolicitudRectificacion`. Los componentes implementan el linter estético al 100% sin selectores HTML nativos y con confirmaciones mediante `useAlertConfirm` en el formulario. Se inyectaron sus playgrounds sandboxes correspondientes en el dashboard.
+  - Archivos: 
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\Technical_Services\`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Technical_Services/) [NEW 5 files]
+    - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/) [NEW 5 files]
+    - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\02_Tareas_Roadmap\control_creacion_componentes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/control_creacion_componentes.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-174: Inyección y Registro de 5 Componentes de Mecanizado de Precisión (Servicios Técnicos)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se diseñaron, implementaron, catalogaron y documentaron los primeros 5 componentes de la vertical `technical_services`: `CargadorPlanosCAD`, `CalculadoraCotizacionMecanizado`, `SelectorProcesosMecanizado`, `SelectorTratamientoAcabado` y `ReporteControlCalidad`. Todos los componentes cumplen con los estándares de HSL adaptativo, exclusión de selectores nativos (uso de CustomSelect) y prevención de clipping en scroll (py-4 inyectado en el carrusel horizontal). Asimismo, se crearon sus respectivos sandboxes interactivos y se indexaron en el dashboard.
+  - Archivos: 
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\Technical_Services\`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Technical_Services/) [NEW 5 files]
+    - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/) [NEW 5 files]
+    - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [`d:\PROTOTIPE\Documentacion PROTOTIPE\02_Tareas_Roadmap\control_creacion_componentes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/control_creacion_componentes.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-173: Alineación de Meta-Skill de Creación de Automatizaciones (crear-skill-prototipe)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se actualizó la meta-skill `crear-skill-prototipe` inyectando las directivas obligatorias de calidad premium (ausencia de placeholders, HSL adaptativo de marca blanca, anti-clipping en contenedores de scroll, y nomenclatura estructurada). Esto garantiza que cualquier nueva automatización creada en el futuro obligue a la IA a seguir las mismas pautas de calidad de interfaz y robustez técnica.
+  - Archivos: [`d:\PROTOTIPE\.agents\skills\crear-skill-prototipe\SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/crear-skill-prototipe/SKILL.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-172: Integración de Linter Visual, Estético y de Robustez Automatizado en Prebuild~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se expandió el script de prebuild `verify_library_integrity.cjs` para actuar como un linter automatizado. Analiza de forma estricta los archivos markdown de biblioteca y los playgrounds sandboxes `.jsx` del dashboard buscando: colores estáticos oscuros quemados (`bg-slate-900`/`950`, `border-slate-800`/`850`/`900`), contenedores con scroll (`overflow-x-auto`/`overflow-y-auto`) carentes de paddings de holgura, selectores nativos `<select>`, placeholders en código (`// ...`) y títulos de código incompatibles con el parseador del dashboard.
+  - Archivos: [`Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [MODIFY]
+
+* **[x] ~~Tarea CORE-171: Sincronización y Blindaje de Skills de Componentes y Sandboxes~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se actualizaron y alinearon las 4 skills centrales del ecosistema de componentes (`component-creator`, `component-extractor`, `portar-componente` y `sandbox-integrator`) inyectando las directivas estrictas de adaptación de color con variables HSL de marca blanca y prevención de truncamiento/clipping visual de elementos y sombras de elevación en contenedores y carruseles con scroll.
+  - Archivos: [`d:\PROTOTIPE\.agents\skills\component-creator\SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/component-creator/SKILL.md) [MODIFY], [`d:\PROTOTIPE\.agents\skills\component-extractor\SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/component-extractor/SKILL.md) [MODIFY], [`d:\PROTOTIPE\.agents\skills\portar-componente\SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/portar-componente/SKILL.md) [MODIFY], [`d:\PROTOTIPE\.agents\skills\sandbox-integrator\SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/sandbox-integrator/SKILL.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-170: Creación e Inyección de los 4 Componentes Restantes de Retail de Moda y Sandboxes~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se diseñaron, implementaron, catalogaron y documentaron los 4 componentes restantes del nicho `retail_clothing`: `DeslizadorProductosSimilares`, `IconosCuidadoPrendas`, `PestanasFiltroTemporada` e `InsigniasDescuentoVolumen` utilizando variables de diseño adaptativo HSL de marca blanca. Asimismo, se inyectaron sus respectivos playgrounds interactivos en el dashboard de desarrollo central y se registraron en el mapa de componentes y el GPS de documentación semántica.
+  - Archivos: [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/) [NEW 4 files], [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/) [NEW 4 files], [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-169: Creación del Componente SelectorTallasColores y Sandbox en Dashboard~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se diseñó, implementó y catalogó el componente `SelectorTallasColores` para selección de variantes premium con validación de stock en tiempo real. Se inyectó su sandbox interactivo `SelectorTallasColoresSandbox.jsx` en el dashboard y se mapearon los alias y documentación correspondientes.
+  - Archivos: [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Selector_Tallas_Colores/selector_tallas_colores.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Selector_Tallas_Colores/selector_tallas_colores.md) [NEW], [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/SelectorTallasColoresSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/SelectorTallasColoresSandbox.jsx) [NEW], [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-168: Clasificación y Reorganización de Manifiestos de Componentes por Nicho~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se creó y ejecutó el script `classify_existing_library.js` para inyectar en lote las propiedades de metadatos `"niches"` y `"type"` en los manifiestos JSON embebidos de las fichas markdown de los 51 componentes interactivos existentes en el monorepo. Se garantizó la consistencia de los manifiestos a través del linter de integridad y compilaciones del dashboard exitosas.
+  - Archivos: [`Prototipe-CLI/scripts/classify_existing_library.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/classify_existing_library.js) [NEW], Fichas `.md` de componentes en [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/) y [`Documentacion PROTOTIPE/09_Modulos_Completos/`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/) [MODIFY 51 files]
+
+* **[x] ~~Tarea CORE-167: Dashboard de Biblioteca Multi-Dimensional Blindado y Futuro-Proof~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se refactorizó la carga de la biblioteca de componentes en `server.js` (`/api/library`) para extraer y parsear en tiempo real los manifiestos JSON de las fichas markdown. Para garantizar la eficiencia, se implementó una caché en memoria basada en la fecha de modificación física de cada archivo (`mtime`). En el frontend (`ComponentLibraryView.jsx`), se integró el filtrado dinámico multi-dimensional conectando el selector dropdown de nicho comercial con la API `/api/niches` (blindando la biblioteca ante futuras adiciones) y expandiendo los tabs de filtrado por tipo a 5 segmentos: Todos, UI, Módulos, Hooks y Servicios.
+  - Archivos: [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-166: Robustecimiento y Gestión del Ciclo de Vida del Servidor CLI~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-07-02

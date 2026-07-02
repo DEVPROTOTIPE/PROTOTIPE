@@ -53,6 +53,13 @@ Todo `fs.writeFile` en endpoints de servidor debe usar `writeFileWithRetry()` (d
 ### ✅ OBLIGATORIO: Sin `require()` en endpoints
 `server.js` usa módulos ES. Usar exclusivamente los imports declarados al inicio del archivo (`exec`, `spawn`, `fs`, `path`, etc.).
 
+### ✅ OBLIGATORIO: Alineación de Calidad Premium y Completitud Lógica
+Cualquier skill creada o modificada que genere, extraiga, migre o integre código (sea React, HTML, JS o CSS) debe obligar de forma explícita al agente a cumplir con:
+1. **Cero Placeholders:** El código de componentes y lógica debe ser 100% completo, portable y funcional. Queda prohibida la elipsis (`// ...`).
+2. **Estética HSL y Cero select nativos:** Todo el color debe consumirse de las variables HSL (`var(--color-bg)`, `var(--color-border)`). Se prohíbe el uso de selectores nativos `<select>` (se debe guiar al uso de `CustomSelect`) y eliminaciones directas sin `useAlertConfirm`.
+3. **Paddings de Holgura en Scroll (Anti-Clipping):** Todo contenedor deslizable (`overflow-x-auto`, `overflow-y-auto`) con animaciones de escala/traslación debe llevar paddings internos (ej. `py-4`) para evitar truncamientos de render.
+4. **Nomenclatura Estructurada:** Las secciones de código React en documentación markdown deben titularse estrictamente como `## [Número]. Código React Completo` para que el parser del dashboard los indexe sin errores.
+
 ---
 
 ## Proceso de Creación — Pasos en Orden

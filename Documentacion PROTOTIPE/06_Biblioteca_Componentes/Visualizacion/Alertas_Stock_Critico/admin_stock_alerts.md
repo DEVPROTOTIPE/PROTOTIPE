@@ -5,7 +5,19 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": [
+    "retail_clothing",
+    "grocery_food",
+    "distribuidoras-beauty",
+    "petshops-locales",
+    "moda-local-calzado",
+    "repuestos-motos",
+    "repuestos-lineablanca",
+    "ferreteria-rural",
+    "insumos-agricolas"
+  ]
 }
 -->
 
@@ -139,7 +151,7 @@ export default function AdminStockAlerts({
         <div className="flex items-center gap-3">
           <button
             onClick={() => onBack()}
-            className="p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-[var(--text-primary)] hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+            className="p-2.5 rounded-2xl border border-slate-200 dark:border-[var(--color-border)] text-[var(--text-primary)] hover:bg-slate-50 dark:hover:bg-[var(--color-surface)] transition-all"
             aria-label="Volver"
           >
             <I.ArrowLeft />
@@ -156,7 +168,7 @@ export default function AdminStockAlerts({
       </div>
 
       {/* Buscador de Alertas */}
-      <div className="bg-[var(--card-bg)] rounded-3xl p-4 border border-slate-100 dark:border-slate-800/80 shadow-sm">
+      <div className="bg-[var(--card-bg)] rounded-3xl p-4 border border-slate-100 dark:border-[var(--color-border)]/80 shadow-sm">
         <div className="relative">
           <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">
             <I.Search />
@@ -166,19 +178,19 @@ export default function AdminStockAlerts({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar por nombre de producto, variante o color..."
-            className="w-full h-11 pl-10 pr-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm text-[var(--text-primary)] focus:outline-none focus:border-primary transition-colors"
+            className="w-full h-11 pl-10 pr-4 rounded-2xl bg-slate-50 dark:bg-[var(--color-surface)] border border-slate-200 dark:border-[var(--color-border)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-primary transition-colors"
           />
         </div>
       </div>
 
       {/* Listado de Alertas */}
       {loading ? (
-        <div className="bg-[var(--card-bg)] rounded-3xl p-12 border border-slate-100 dark:border-slate-800/80 text-center">
+        <div className="bg-[var(--card-bg)] rounded-3xl p-12 border border-slate-100 dark:border-[var(--color-border)]/80 text-center">
           <I.Spinner />
           <p className="text-sm text-[var(--text-secondary)] mt-3">Consultando base de datos de inventario...</p>
         </div>
       ) : filteredAlerts.length === 0 ? (
-        <div className="bg-[var(--card-bg)] rounded-3xl p-12 border border-slate-100 dark:border-slate-800/80 text-center flex flex-col items-center justify-center">
+        <div className="bg-[var(--card-bg)] rounded-3xl p-12 border border-slate-100 dark:border-[var(--color-border)]/80 text-center flex flex-col items-center justify-center">
           <div className="text-emerald-500 mb-3 animate-bounce">
             <I.Package />
           </div>
@@ -196,11 +208,11 @@ export default function AdminStockAlerts({
             return (
               <div
                 key={key}
-                className="bg-[var(--card-bg)] rounded-3xl p-4 md:p-5 border border-slate-100 dark:border-slate-800/80 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                className="bg-[var(--card-bg)] rounded-3xl p-4 md:p-5 border border-slate-100 dark:border-[var(--color-border)]/80 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
               >
                 {/* Info del Producto */}
                 <div className="flex items-center gap-4 min-w-0 flex-1">
-                  <div className="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-[var(--color-surface)] border border-slate-200 dark:border-[var(--color-border)] overflow-hidden flex-shrink-0 flex items-center justify-center">
                     {alertItem.imageUrl ? (
                       <img src={alertItem.imageUrl} alt={alertItem.productName} className="w-full h-full object-cover" />
                     ) : (
@@ -230,7 +242,7 @@ export default function AdminStockAlerts({
                     value={loadVal}
                     onChange={(e) => handleQtyChange(key, e.target.value)}
                     placeholder="Cantidad"
-                    className="w-24 h-11 text-center rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-bold focus:outline-none focus:border-primary"
+                    className="w-24 h-11 text-center rounded-2xl bg-slate-50 dark:bg-[var(--color-surface)] border border-slate-200 dark:border-[var(--color-border)] text-sm font-bold focus:outline-none focus:border-primary"
                   />
 
                   <button

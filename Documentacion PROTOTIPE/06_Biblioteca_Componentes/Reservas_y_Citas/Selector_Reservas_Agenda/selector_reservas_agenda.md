@@ -5,7 +5,17 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": [
+    "wellness_podology",
+    "technical_services",
+    "refrigeration_ac",
+    "contractors",
+    "carpentry",
+    "laundry",
+    "furniture_repair"
+  ]
 }
 -->
 
@@ -153,7 +163,7 @@ export default function AgendaReservationCalendar({
                 className={`flex flex-col items-center justify-center min-w-[54px] p-2.5 rounded-xl border transition-all duration-300 cursor-pointer ${
                   isActive
                     ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-indigo-400 text-white shadow-lg shadow-indigo-500/10'
-                    : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/10 hover:text-white'
+                    : 'bg-[var(--color-bg)]/40 border-white/5 text-slate-400 hover:border-white/10 hover:text-white'
                 }`}
               >
                 <span className="text-[9px] uppercase font-bold tracking-wider opacity-60">{day.dayName}</span>
@@ -175,11 +185,11 @@ export default function AgendaReservationCalendar({
             
             let btnClass = "";
             if (isOccupied) {
-              btnClass = "bg-slate-800/40 border-slate-800 text-slate-600 opacity-40 cursor-not-allowed";
+              btnClass = "bg-slate-800/40 border-[var(--color-border)] text-slate-600 opacity-40 cursor-not-allowed";
             } else if (isSelected) {
               btnClass = "bg-purple-500/20 border-purple-500/60 text-purple-400 font-black scale-105 shadow-md shadow-purple-500/5";
             } else {
-              btnClass = "bg-slate-950/50 border-white/5 text-slate-300 hover:border-white/20 hover:scale-[1.02] cursor-pointer";
+              btnClass = "bg-[var(--color-bg)]/50 border-white/5 text-slate-300 hover:border-white/20 hover:scale-[1.02] cursor-pointer";
             }
 
             return (
@@ -198,7 +208,7 @@ export default function AgendaReservationCalendar({
 
       {/* Formulario e Info de Reserva */}
       {selectedSlot && (
-        <div className="p-3 bg-slate-950/60 border border-white/10 rounded-2xl space-y-3 animate-fade-in">
+        <div className="p-3 bg-[var(--color-bg)]/60 border border-white/10 rounded-2xl space-y-3 animate-fade-in">
           <div>
             <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Resumen de Cita:</span>
             <p className="text-xs font-bold text-indigo-400 mt-1 uppercase">
@@ -212,7 +222,7 @@ export default function AgendaReservationCalendar({
               placeholder="Tu Nombre"
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
-              className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition placeholder-slate-600"
+              className="w-full bg-[var(--color-surface)] border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition placeholder-slate-600"
             />
 
             {/* Custom Dropdown Selector */}
@@ -220,7 +230,7 @@ export default function AgendaReservationCalendar({
               <button
                 type="button"
                 onClick={() => setIsSelectOpen(!isSelectOpen)}
-                className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-white flex items-center justify-between transition cursor-pointer hover:border-indigo-500/50"
+                className="w-full bg-[var(--color-surface)] border border-white/10 rounded-xl px-3 py-2 text-xs text-white flex items-center justify-between transition cursor-pointer hover:border-indigo-500/50"
               >
                 <span>{clientService}</span>
                 <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${isSelectOpen ? 'rotate-180' : ''}`} />
@@ -235,7 +245,7 @@ export default function AgendaReservationCalendar({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute left-0 right-0 mt-1.5 bg-slate-950 border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 divide-y divide-white/5"
+                      className="absolute left-0 right-0 mt-1.5 bg-[var(--color-bg)] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 divide-y divide-white/5"
                     >
                       {[
                         "Corte de Cabello 💈",
@@ -250,7 +260,7 @@ export default function AgendaReservationCalendar({
                             setClientService(service);
                             setIsSelectOpen(false);
                           }}
-                          className={`w-full px-3 py-2.5 text-xs text-left transition-colors flex items-center justify-between hover:bg-slate-900 cursor-pointer ${
+                          className={`w-full px-3 py-2.5 text-xs text-left transition-colors flex items-center justify-between hover:bg-[var(--color-surface)] cursor-pointer ${
                             clientService === service ? 'text-indigo-400 font-bold bg-indigo-500/5' : 'text-white'
                           }`}
                         >

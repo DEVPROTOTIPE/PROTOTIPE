@@ -22,8 +22,8 @@ El `CommandPaletteKBar` es una barra de búsqueda modal flotante que actúa como
 ---
 
 ## 2. Especificación Visual y Estilos
-* **Overlay Fondo:** Filtro de desenfoque y opacidad para concentrar la atención (`bg-slate-950/70 backdrop-blur-sm`).
-* **Contenedor Flotante:** Posicionado en la parte superior-centro (`mt-[10vh]`), bordes redondeados (`rounded-3xl`), sombra profunda (`shadow-2xl`) y fondo de cristal (`bg-slate-900/95 border border-slate-800`).
+* **Overlay Fondo:** Filtro de desenfoque y opacidad para concentrar la atención (`bg-[var(--color-bg)]/70 backdrop-blur-sm`).
+* **Contenedor Flotante:** Posicionado en la parte superior-centro (`mt-[10vh]`), bordes redondeados (`rounded-3xl`), sombra profunda (`shadow-2xl`) y fondo de cristal (`bg-[var(--color-surface)]/95 border border-[var(--color-border)]`).
 * **Input de Búsqueda:** Campo de texto sin bordes con un icono de lupa inline a la izquierda y un atajo `ESC` de cierre a la derecha.
 * **Lista de Resultados:** Altura máxima limitada con scroll suave, separadores por categoría de acción, y resaltado del elemento enfocado (`bg-indigo-600/10 text-indigo-400`).
 
@@ -125,12 +125,12 @@ export default function CommandPaletteKBar({
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-[99999] flex justify-center p-4">
       {/* Backdrop de Cristal */}
-      <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+      <div className="absolute inset-0 bg-[var(--color-bg)]/75 backdrop-blur-sm animate-fade-in" onClick={onClose} />
 
       {/* Caja de la Paleta */}
-      <div className="relative w-full max-w-lg bg-slate-900/95 border border-slate-800 rounded-3xl shadow-2xl flex flex-col h-[400px] mt-[10vh] overflow-hidden z-10 animate-fade-in-up">
+      <div className="relative w-full max-w-lg bg-[var(--color-surface)]/95 border border-[var(--color-border)] rounded-3xl shadow-2xl flex flex-col h-[400px] mt-[10vh] overflow-hidden z-10 animate-fade-in-up">
         {/* Campo de búsqueda */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-800 shrink-0">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--color-border)] shrink-0">
           <svg className="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
@@ -173,7 +173,7 @@ export default function CommandPaletteKBar({
                       <span className="text-xs">{cmd.title}</span>
                     </div>
                     {cmd.shortcut && (
-                      <span className="font-mono text-[9px] text-slate-500 bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800">
+                      <span className="font-mono text-[9px] text-slate-500 bg-[var(--color-bg)] px-2 py-0.5 rounded-lg border border-[var(--color-border)]">
                         {cmd.shortcut}
                       </span>
                     )}

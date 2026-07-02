@@ -161,7 +161,7 @@ export default function OrderTracking({
 
         {/* Buscador Manual si no hay pedido seleccionado */}
         {!order && (
-          <div className="bg-[var(--card-bg)] border border-slate-100 dark:border-slate-800/80 rounded-3xl p-6 shadow-xl text-center">
+          <div className="bg-[var(--card-bg)] border border-slate-100 dark:border-[var(--color-border)]/80 rounded-3xl p-6 shadow-xl text-center">
             <h3 className="text-sm font-bold mb-4">Ingresa tu código o ID de seguimiento</h3>
             <form onSubmit={handleSearchSubmit} className="flex gap-2">
               <input
@@ -169,7 +169,7 @@ export default function OrderTracking({
                 placeholder="Código del Pedido (ej. SF-8374)"
                 value={searchToken}
                 onChange={(e) => setSearchToken(e.target.value)}
-                className="flex-1 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:border-primary"
+                className="flex-1 px-4 py-3 rounded-2xl bg-slate-50 dark:bg-[var(--color-surface)] border border-slate-200 dark:border-[var(--color-border)] text-sm focus:outline-none focus:border-primary"
               />
               <button
                 type="submit"
@@ -186,7 +186,7 @@ export default function OrderTracking({
 
         {/* Tarjeta de Detalles del Pedido */}
         {order && (
-          <div className="bg-[var(--card-bg)] border border-slate-100 dark:border-slate-800/80 rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+          <div className="bg-[var(--card-bg)] border border-slate-100 dark:border-[var(--color-border)]/80 rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-b-slate-800/40 pb-6">
               <div>
                 <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">ID del Pedido</p>
@@ -205,7 +205,7 @@ export default function OrderTracking({
                   return (
                     <div key={idx} className="flex md:flex-col items-center gap-4 md:text-center w-full">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center border text-xs font-bold transition-all ${
-                        isCompleted ? 'bg-primary border-primary text-white shadow-md' : 'border-slate-200 dark:border-slate-800 text-[var(--text-secondary)]'
+                        isCompleted ? 'bg-primary border-primary text-white shadow-md' : 'border-slate-200 dark:border-[var(--color-border)] text-[var(--text-secondary)]'
                       }`}>
                         {isCompleted ? <I.Check /> : idx + 1}
                       </div>
@@ -220,9 +220,9 @@ export default function OrderTracking({
             )}
 
             {/* Listado de Productos */}
-            <div className="border-t border-slate-100 dark:border-slate-800/40 pt-4">
+            <div className="border-t border-slate-100 dark:border-[var(--color-border)]/40 pt-4">
               <h4 className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-3">Detalle de Compra</h4>
-              <div className="divide-y divide-slate-100 dark:divide-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800/40 overflow-hidden bg-slate-50/10">
+              <div className="divide-y divide-slate-100 dark:divide-slate-800/40 rounded-2xl border border-slate-100 dark:border-[var(--color-border)]/40 overflow-hidden bg-slate-50/10">
                 {order.productos?.map((prod, idx) => (
                   <div key={idx} className="flex justify-between items-center p-3.5 text-sm">
                     <div className="flex flex-col">
@@ -236,7 +236,7 @@ export default function OrderTracking({
             </div>
 
             {/* Totales */}
-            <div className="flex justify-between font-bold text-sm pt-4 border-t border-slate-100 dark:border-slate-800/40">
+            <div className="flex justify-between font-bold text-sm pt-4 border-t border-slate-100 dark:border-[var(--color-border)]/40">
               <span>Total del Pedido:</span>
               <span className="text-primary font-extrabold text-base">{formatCurrency(order.total || 0)}</span>
             </div>
@@ -245,7 +245,7 @@ export default function OrderTracking({
             <div className="flex flex-col sm:flex-row gap-2 pt-2">
               <button
                 onClick={() => onNavigateHome()}
-                className="flex-1 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 text-[var(--text-primary)] text-sm font-bold"
+                className="flex-1 py-3 rounded-2xl border border-slate-200 dark:border-[var(--color-border)] text-[var(--text-primary)] text-sm font-bold"
               >
                 Volver a la Tienda
               </button>

@@ -5,7 +5,9 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": []
 }
 -->
 
@@ -22,7 +24,7 @@ Fondo decorativo animado de alto impacto visual. Combina esferas fluidas de grad
 ---
 
 ## 2. Especificación Visual y Estilos (Tailwind CSS)
-- **Efecto de Cristal Esmerilado (Glassmorphism):** Superposición de una capa translúcida con desenfoque de fondo profundo (`backdrop-blur-[100px] bg-slate-950/20` o `bg-white/10`).
+- **Efecto de Cristal Esmerilado (Glassmorphism):** Superposición de una capa translúcida con desenfoque de fondo profundo (`backdrop-blur-[100px] bg-[var(--color-bg)]/20` o `bg-white/10`).
 - **Blobs Animados:** Elementos vectoriales de gran tamaño con bordes difuminados y opacidad controlada (`opacity-30` a `opacity-50`) que oscilan de forma asincrónica.
 - **Interactividad Reactiva:** Desplazamiento elástico amortiguado de las luces según la posición del cursor, evitando saltos bruscos mediante interpolación suave en JS.
 

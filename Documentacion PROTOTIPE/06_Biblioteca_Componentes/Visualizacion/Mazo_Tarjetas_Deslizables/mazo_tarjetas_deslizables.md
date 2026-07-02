@@ -5,7 +5,13 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": [
+    "retail_clothing",
+    "moda-local-calzado",
+    "coleccionismo-geek"
+  ]
 }
 -->
 

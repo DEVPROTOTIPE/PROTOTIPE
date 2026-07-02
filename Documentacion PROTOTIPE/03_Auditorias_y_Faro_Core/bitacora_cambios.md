@@ -1,5 +1,235 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-02] - CORE-179: Blindaje de Sandboxes y Sincronización de Metadatos de Nicho
+
+* **Tipo:** Hotfix / Quality Assurance / UX Improvement / Refactoring
+* **Firma de auditoría:** CORE-179-SANDBOX-BLINDAJE-AND-NICHE-METADATA-SYNC
+* **Descripción de Cambios:**
+  - **Metadatos de Nicho:** Sincronización de manifiestos JSON de los 10 componentes de Contratistas y Construcción (`contractors`) para agregar las propiedades `"type": "component"` y `"niches": ["contractors"]`.
+  - **Caché del Ecosistema:** Reinicio del CLI Bridge (puerto 3001) para reflejar los nuevos tags de nichos en el buscador del dashboard.
+  - **Erradicación de Popups Nativos:** Auditoría completa de diálogos y popups nativos en los sandboxes del dashboard:
+    - Se reemplazó el uso de `alert(...)` y `confirm(...)` nativos por `showAlert` y `showConfirm` del contexto `useAlertConfirm` en: `CajaDiariaPOSSandbox`, `CreditosSaldosSandbox`, `FacturacionComisionalSandbox`, `OmnicanalidadWhatsAppSandbox`, `OrdenesTrabajoEquiposSandbox`, `POSExpressScannerSandbox`, `ReservasAgendaSandbox`, `SelectorBoletasRifasSandbox`.
+    - Se eliminó el uso de `prompt(...)` nativo e introdujo modal interactivo interno premium en `ReservasAgendaCitasSandbox.jsx`.
+    - Se implementó un patrón de objeto ejecutable (Callable Proxy/Function) en el contexto de alertas `AlertConfirmContext.jsx` para dar soporte nativo a firmas de llamadas del tipo `confirm({ ... })` de forma directa sin destructuración obligatoria.
+  - **Saneamiento de Selectores en App.jsx:** Se eliminó de raíz la función local obsoleta y duplicada `CustomSelect` de `App.jsx` (la cual provocaba un parsing erróneo e inconsistencia de estado al devolver un evento simulado en lugar del valor directo) y se importó la implementación oficial premium de [`CustomSelect.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/ui/CustomSelect.jsx) para todas las vistas y configuraciones del panel administrativo.
+* **Build:** ✓ Exitoso (Vite build y linter de integridad al 100% OK).
+* **Archivos Modificados:**
+  - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\common\AlertConfirmContext.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/AlertConfirmContext.jsx) [MODIFY]
+  - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/) [MODIFY sandboxes]
+  - Fichas técnicas de componentes bajo `06_Biblioteca_Componentes\Contractors\` [MODIFY manifests]
+
+### [2026-07-02] - CORE-178: Inyección y Registro de los 10 Componentes de Contratistas y Construcción
+
+* **Tipo:** Feature / UI Component / Interactive Sandbox / Catalog Sincronización
+* **Firma de auditoría:** CORE-178-CONTRACTORS-CONSTRUCTION-ALL-10-COMPONENTS
+* **Descripción de Cambios:**
+  - **Fichas Técnicas:** Creación de 10 especificaciones `.md` estructuradas en español con dependencias y metadatos JSON completos bajo `06_Biblioteca_Componentes/Contractors/`.
+  - **Playgrounds Sandboxes:** Creación de 10 sandboxes interactivos individuales en `src/components/admin/sandboxes/` con SandboxLayout y useAlertConfirm.
+  - **Mapeos de Consola:** Mapeo de ruteo en `COMPONENT_SANDBOX_MAP` de `ComponentSandbox.jsx` para soporte auto-globbing de Vite.
+  - **Sincronización del Catálogo:** Registro indexado en `README.md` de biblioteca, `mapa_documentacion_ia.md` e historial de tareas en `control_creacion_componentes.md` y `tareas_pendientes.md`.
+* **Build:** ✓ Exitoso (Vite build y linter de integridad al 100% OK).
+
+### [2026-07-02] - CORE-177: Blindaje y Robustecimiento de Linter y Herramientas de Limpieza
+
+* **Tipo:** Quality / Security / CLI Tooling Upgrade / Refactoring
+* **Firma de auditoría:** CORE-177-LINTER-SECURITY-ABSOLUTE-PATHS-AND-DRY-RUN
+* **Descripción de Cambios:**
+  - **verify_library_integrity.cjs (Integridad):**
+    - Se agregaron validaciones para bloquear de raíz rutas absolutas locales hardcoded (patrones `/[a-zA-Z]:[/\\]PROTOTIPE/i` y `/[a-zA-Z]:[/\\]Users/i`) en código JSX y Markdown.
+    - Se integró la validación por regex para hostnames y puertos locales quemados (`localhost:3001`).
+  - **clean_linter_warnings.cjs (Limpieza):**
+    - Se añadió soporte completo para el modo simulación (`--dry-run` o `-d`) que procesa archivos e informa qué archivos se modificarían en disco sin escribir físicamente.
+    - Se implementó un motor de normalización inteligente de cabeceras de código por regex flexible, reemplazando las reglas duras por archivo.
+* **Build:** ✓ Exitoso (Vite build y linter de integridad al 100% OK).
+
+### [2026-07-02] - CORE-176: Inyección y Registro de los 10 Componentes de Climatización (Refrigeración y Climatización)
+
+* **Tipo:** Feature / UI Component / Interactive Sandbox / Catalog Sincronización / Reorganización Física
+* **Firma de auditoría:** CORE-176-REFRIGERATION-AC-ALL-10-COMPONENTS-Subfolder-Reorganization
+* **Descripción de Cambios:**
+  - **Reorganización y Re-estructuración:** Para evitar mezclar climatización con e-commerce en `Ecommerce_y_Ventas/`, se creó la subcarpeta física `Refrigeration_AC` en la biblioteca y se portaron allí los primeros 5 componentes ya creados (`CalculadoraCargaBTU`, `SelectorTipoAireAcondicionado`, `ProgramadorMantenimientoPreventivo`, `EstimadorAhorroEnergetico`, `SelectorRefrigeranteRepuestos`).
+  - **Fichas Técnicas e Implementación (6 al 10):** Se crearon los códigos React y fichas técnicas markdown para los 5 componentes restantes: `ListaDiagnosticoFallas`, `TablaEspecificacionesHVAC`, `SelectorTramosTuberia`, `TarjetaGarantiaContratos` y `SelectorTermostatosSensores`.
+  - **Playgrounds Sandboxes:** Se crearon los 10 sandboxes interactivos en `dev-dashboard/src/components/admin/sandboxes/` con selectores `CustomSelect`, soporte de confirmación destructiva en el programador mediante `useAlertConfirm`, y paddings de holgura (`py-4`) para evitar clipping visual en carruseles de scroll.
+  - **Mapeos y Catálogos:** Se sincronizó `ComponentSandbox.jsx` (COMPONENT_SANDBOX_MAP), `README.md` del catálogo, `mapa_documentacion_ia.md` y `control_creacion_componentes.md` con las nuevas rutas y nombres de componentes.
+  - **Refactorización de Linter Estético (100% Limpio):** Se diseñó y ejecutó un script de saneamiento masivo (`clean_linter_warnings.cjs`) sobre las fichas técnicas (`.md`) y sandboxes (`.jsx`) de la biblioteca. Esto eliminó de raíz 54 desviaciones detectadas (colores oscuros quemados como `bg-slate-900/950` y `border-slate-800/900`, y títulos de código markdown no estandarizados), logrando un estado de integridad y calidad visual 100% impecable y conforme al tema corporativo.
+* **Build:** ✓ Exitoso (Vite build y linter de integridad al 100% OK).
+
+
+### [2026-07-02] - HOTFIX: Corrección de Superposición Visual en Stepper (SeguimientoOrdenesProduccion)
+
+* **Tipo:** Hotfix / UI Fix / Visual Polish / CSS Stacking
+* **Firma de auditoría:** HOTFIX-STEPPER-PROGRESS-LINE-STACKING-CONTEXT-FIX
+* **Descripción de Cambios:**
+  - **Ajuste de Capas (Z-Index):** Se corrigió la superposición de la línea de progreso sobre los iconos en `SeguimientoOrdenesProduccion` aplicando `isolate` y `z-0` en el contenedor padre, y `z-[-10]` en las líneas absolutas (desktop/móvil).
+  - **Opacidad de Hitos:** Se inyectó `relative z-10 bg-[var(--color-surface)]` en todos los círculos de hitos (incluyendo pendientes) para asegurar que tengan un fondo sólido y tapen físicamente la línea de progreso que cruza por detrás.
+* **Build:** ✓ Exitoso (Vite build y linter de integridad al 100% OK).
+* **Archivos Modificados:**
+  - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\SeguimientoOrdenesProduccionSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/SeguimientoOrdenesProduccionSandbox.jsx) [MODIFY]
+  - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\Technical_Services\Seguimiento_Ordenes_Produccion\seguimiento_ordenes_produccion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Technical_Services/Seguimiento_Ordenes_Produccion/seguimiento_ordenes_produccion.md) [MODIFY]
+
+### [2026-07-02] - CORE-175: Inyección y Registro de los 5 Componentes Restantes de Mecanizado (Servicios Técnicos)
+
+* **Tipo:** Feature / UI Component / Interactive Sandbox / Catalog Sincronización
+* **Firma de auditoría:** CORE-175-TECHNICAL-SERVICES-MACHINING-REMAINING-COMPONENTS
+* **Descripción de Cambios:**
+  - **Fichas Técnicas e Implementación:** Se crearon las fichas técnicas markdown y códigos React completos para los 5 componentes restantes del nicho `technical_services`: `SelectorEspecificacionRosca`, `SeguimientoOrdenesProduccion`, `CalculadoraPesoMateriales`, `SelectorLotesVolumen` y `FormularioSolicitudRectificacion`.
+  - **Playgrounds Sandboxes:** Se crearon los 5 playgrounds interactivos en `dev-dashboard/src/components/admin/sandboxes/` sin selectores nativos, usando `CustomSelect` y confirmación modal de limpieza mediante `useAlertConfirm` en el formulario.
+  - **Registros y Mapeos:** Se indexó en el catálogo general `README.md`, `mapa_documentacion_ia.md`, `control_creacion_componentes.md` y en `COMPONENT_SANDBOX_MAP` de `ComponentSandbox.jsx` para el ruteo dinámico.
+* **Build:** ✓ Exitoso (Vite build y prebuild de integridad completados al 100% OK).
+* **Archivos Modificados/Creados:**
+  - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\Technical_Services\`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Technical_Services/) [NEW 5 files]
+  - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/) [NEW 5 files]
+  - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+  - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+  - [`d:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`d:\PROTOTIPE\Documentacion PROTOTIPE\02_Tareas_Roadmap\control_creacion_componentes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/control_creacion_componentes.md) [MODIFY]
+
+### [2026-07-02] - CORE-174: Inyección y Registro de 5 Componentes de Mecanizado de Precisión (Servicios Técnicos)
+
+* **Tipo:** Feature / UI Component / Interactive Sandbox / Catalog Sincronización
+* **Firma de auditoría:** CORE-174-TECHNICAL-SERVICES-MACHINING-PRECISION-COMPONENTS
+* **Descripción de Cambios:**
+  - **Fichas Técnicas e Implementación:** Se crearon las fichas técnicas markdown y códigos React completos para los primeros 5 componentes del nicho `technical_services`: `CargadorPlanosCAD`, `CalculadoraCotizacionMecanizado`, `SelectorProcesosMecanizado`, `SelectorTratamientoAcabado` y `ReporteControlCalidad`.
+  - **Playgrounds Sandboxes:** Se crearon los 5 playgrounds interactivos en `dev-dashboard/src/components/admin/sandboxes/` con controles HSL dinámicos y sin selectores nativos.
+  - **Efectos Anti-Clipping:** Se incluyó holgura con paddings de clearance `py-4` en el contenedor del carrusel de tratamientos para garantizar el escalamiento y sombreado en scroll.
+  - **Registros y Mapeos:** Se indexó en el catálogo de biblioteca `README.md`, `mapa_documentacion_ia.md`, `control_creacion_componentes.md` y en `COMPONENT_SANDBOX_MAP` de `ComponentSandbox.jsx` para el ruteo dinámico.
+* **Build:** ✓ Exitoso (Vite build y prebuild de integridad completados al 100% OK).
+* **Archivos Modificados/Creados:**
+  - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\Technical_Services\`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Technical_Services/) [NEW 5 files]
+  - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/) [NEW 5 files]
+  - [`d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+  - [`d:\PROTOTIPE\Documentacion PROTOTIPE\06_Biblioteca_Componentes\README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+  - [`d:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`d:\PROTOTIPE\Documentacion PROTOTIPE\02_Tareas_Roadmap\control_creacion_componentes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/control_creacion_componentes.md) [MODIFY]
+
+### [2026-07-02] - CORE-173: Alineación de Meta-Skill de Creación de Automatizaciones (crear-skill-prototipe)
+
+* **Tipo:** Refactor / Meta-Skills Optimization / Quality Assurance / Code Generation Standards
+* **Firma de auditoría:** CORE-173-META-SKILL-CREAR-SKILL-PROTOTIPE-ALIGNMENT
+* **Descripción de Cambios:**
+  - **Alineación de la Meta-Skill (`crear-skill-prototipe`):** Se actualizaron las reglas críticas del archivo `SKILL.md` para obligar a que cualquier nueva automatización, script o skill que genere código incorpore por defecto: (1) Cero placeholders o elipsis (`// ...`), (2) Consumo exclusivo de variables HSL de tema, (3) Inyección de paddings en contenedores de scroll para prevenir clipping vertical, y (4) Nomenclatura estándar en títulos de código React.
+* **Build:** ✓ Exitoso (Vite build y prebuild de integridad completados al 100% OK).
+* **Archivos Modificados/Creados:**
+  - [`d:\PROTOTIPE\.agents\skills\crear-skill-prototipe\SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/crear-skill-prototipe/SKILL.md) [MODIFY]
+
+### [2026-07-02] - CORE-172: Integración de Linter Visual, Estético y de Robustez Automatizado en Prebuild
+
+* **Tipo:** Feature / Quality Assurance / Code Linter / Prebuild Automation
+* **Firma de auditoría:** CORE-172-PREBUILD-VISUAL-LINTER-HSL-AND-CLIPPING-CHECKS
+* **Descripción de Cambios:**
+  - **Linter en Prebuild (`verify_library_integrity.cjs`):** Se expandió el validador de integridad para actuar como linter de calidad estática. 
+  - **Validación Automatizada de Directivas:** Ahora escanea y reporta: (1) Presencia de placeholders y código incompleto (`// ...`), (2) Colores oscuros quemados fijados en Tailwind (`bg-slate-900`/`950`, `border-slate-800`/`850`/`900`), (3) Fallos potenciales de clipping (contenedores con scroll sin padding), (4) Uso de select nativos en sandboxes (obliga a usar `CustomSelect`), y (5) Títulos de código no estándar.
+* **Build:** ✓ Exitoso (Ejecución libre de bloqueos con reportes completos de alertas de forma informativa).
+* **Archivos Modificados/Creados:**
+  - [`Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [MODIFY]
+
+### [2026-07-02] - CORE-171: Sincronización y Blindaje de Skills de Componentes y Sandboxes
+
+* **Tipo:** Refactor / Skills Optimization / Quality Assurance / Guidelines Sync
+* **Firma de auditoría:** CORE-171-COMPONENTS-SANDBOX-SKILLS-HSL-CLIPPING-ALIGNMENT
+* **Descripción de Cambios:**
+  - **Alineación de 4 Skills Lógicas:** Se actualizaron y alinearon las 4 skills del ecosistema (`component-creator`, `component-extractor`, `portar-componente` y `sandbox-integrator`).
+  - **Directivas Antiaplastamiento y Anticlipart:** Se inyectaron reglas obligatorias de **Prevención de Truncamiento en Scroll y Animaciones** para asegurar el uso de paddings (py-4/px-4) en contenedores deslizables, evitando cortes físicos de bordes y sombras por el overflow del DOM en Chrome/Vite.
+  - **Estandarización HSL:** Se reforzó la directiva de uso exclusivo de variables HSL de marca blanca para adaptabilidad perfecta al cambiar de tema, y prohibición de selectores nativos `<select>`.
+* **Build:** ✓ Exitoso (Compilación y prebuild verificados al 100% OK).
+* **Archivos Modificados/Creados:**
+  - [`d:\PROTOTIPE\.agents\skills\component-creator\SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/component-creator/SKILL.md) [MODIFY]
+  - [`d:\PROTOTIPE\.agents\skills\component-extractor\SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/component-extractor/SKILL.md) [MODIFY]
+  - [`d:\PROTOTIPE\.agents\skills\portar-componente\SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/portar-componente/SKILL.md) [MODIFY]
+  - [`d:\PROTOTIPE\.agents\skills\sandbox-integrator\SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/sandbox-integrator/SKILL.md) [MODIFY]
+
+### [2026-07-02] - CORE-170: Creación e Inyección de los 4 Componentes Restantes de Retail de Moda y Sandboxes
+
+* **Tipo:** Feature / UI Component / Interactive Sandbox / Catalog Sincronización
+* **Firma de auditoría:** CORE-170-RETAIL-CLOTHING-REMAINING-COMPONENTS-INJECTION
+* **Descripción de Cambios:**
+  - **Fichas Técnicas de Componentes:** Se crearon las fichas markdown para los 4 componentes restantes del nicho `retail_clothing`: `DeslizadorProductosSimilares`, `IconosCuidadoPrendas`, `PestanasFiltroTemporada` e `InsigniasDescuentoVolumen` con sus metadatos de manifiesto JSON, especificaciones HSL y diagramas.
+  - **Playgrounds Sandboxes:** Se crearon e implementaron los 4 playgrounds en `dev-dashboard/src/components/admin/sandboxes/` con controles HSL dinámicos y compatibilidad de temas.
+  - **Registros y Mapeos:** Se indexaron en el `README.md` del catálogo de la biblioteca, en `mapa_documentacion_ia.md` y en `COMPONENT_SANDBOX_MAP` de `ComponentSandbox.jsx` para resolver la carga dinámica en caliente.
+* **Build:** ✓ Exitoso (Vite build completado, linter al 100% OK).
+* **Archivos Modificados/Creados:**
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Deslizador_Productos_Similares/deslizador_productos_similares.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Deslizador_Productos_Similares/deslizador_productos_similares.md) [NEW]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Iconos_Cuidado_Prendas/iconos_cuidado_prendas.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Iconos_Cuidado_Prendas/iconos_cuidado_prendas.md) [NEW]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Pestanas_Filtro_Temporada/pestanas_filtro_temporada.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Pestanas_Filtro_Temporada/pestanas_filtro_temporada.md) [NEW]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Insignias_Descuento_Volumen/insignias_descuento_volumen.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Insignias_Descuento_Volumen/insignias_descuento_volumen.md) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/DeslizadorProductosSimilaresSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/DeslizadorProductosSimilaresSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/IconosCuidadoPrendasSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/IconosCuidadoPrendasSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PestanasFiltroTemporadaSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PestanasFiltroTemporadaSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InsigniasDescuentoVolumenSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InsigniasDescuentoVolumenSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+### [2026-07-02] - CORE-169: Creación del Componente SelectorTallasColores y Sandbox en Dashboard
+
+* **Tipo:** Feature / UI Component / Interactive Sandbox / Catalog Sincronización
+* **Firma de auditoría:** CORE-169-SIZE-COLOR-SELECTOR-COMPONENT-CREATION
+* **Descripción de Cambios:**
+  - **Ficha Técnica del Componente (`selector_tallas_colores.md`):** Se creó la ficha técnica del componente `SelectorTallasColores` con manifiesto de dependencias JSON, casos de uso, especificación visual adaptativa HSL de marca blanca, código React portable 100% funcional y diagrama de interacción Mermaid.
+  - **Playground Interactivo (`SelectorTallasColoresSandbox.jsx`):** Se implementó un sandbox interactivo en el `dev-dashboard` usando `SandboxLayout` para previsualizar y simular estados de stock (disponible, bajo stock y agotado) y estado vacío/deshabilitado en caliente.
+  - **Mapeo de Rutas y Alias:** Se indexó el componente en el `README.md` del catálogo de la biblioteca, en el mapa de documentación semántica `mapa_documentacion_ia.md` y se asociaron sus alias lógicos en `COMPONENT_SANDBOX_MAP` de `ComponentSandbox.jsx` para garantizar su carga por globbing.
+* **Build:** ✓ Exitoso (Vite build completado, linter al 100% OK).
+* **Archivos Modificados/Creados:**
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Selector_Tallas_Colores/selector_tallas_colores.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Selector_Tallas_Colores/selector_tallas_colores.md) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/SelectorTallasColoresSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/SelectorTallasColoresSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+### [2026-07-02] - CORE-168: Clasificación y Reorganización de Manifiestos de Componentes por Nicho
+
+* **Tipo:** Refactor / Catalog / Automation Script / Metadata Injection
+* **Firma de auditoría:** CORE-168-BATCH-NICHE-MANIFESTS-CLASSIFICATION
+* **Descripción de Cambios:**
+  - **Script de Clasificación en Lote (`classify_existing_library.js`):** Se creó y ejecutó un script en Node.js que escanea todas las fichas `.md` indexadas de la biblioteca central (`06_Biblioteca_Componentes` y `09_Modulos_Completos`).
+  - **Inyección de Metadatos de Negocio:** El script actualiza el manifiesto JSON embebido en el HTML comment de cada componente, inyectando de forma no destructiva las propiedades `"niches"` (con su correspondiente array de slugs de nichos) y `"type"` (tipo técnico del recurso), cubriendo 51 fichas técnicas interactivas y modulares existentes.
+  - **Verificación de Consistencia:** Se verificó la integridad del catálogo mediante `verify_library_integrity.cjs` y se construyó el bundle de producción exitosamente, certificando que los manifiestos no sufrieron regresiones sintácticas.
+* **Build:** ✓ Exitoso (Vite build completado, integridad de biblioteca al 100% OK).
+* **Archivos Modificados/Creados:**
+  - [`Prototipe-CLI/scripts/classify_existing_library.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/classify_existing_library.js) [NEW]
+  - Fichas `.md` de componentes en [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/) y [`Documentacion PROTOTIPE/09_Modulos_Completos/`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/) [MODIFY 51 files]
+
+### [2026-07-02] - CORE-167: Dashboard de Biblioteca Multi-Dimensional Blindado y Futuro-Proof
+
+* **Tipo:** Feature / Refactor / Dashboard UI / Core Architecture / Future-Proof Filtering
+* **Firma de auditoría:** CORE-167-MULTIDIMENSIONAL-LIBRARY-FILTERS-DYNAMIC-NICHES
+* **Descripción de Cambios:**
+  - **Detección Dinámica de Metadatos (server.js):** Se refactorizó el endpoint `/api/library` para leer y parsear dinámicamente el manifiesto JSON de la ficha técnica `.md` de cada componente. Para optimizar el rendimiento y evitar lecturas redundantes a disco, se implementó una caché en memoria (`componentManifestsCache`) basada en la fecha de modificación física de cada archivo (`mtime` de `fs.stat`).
+  - **Asociación Dinámica de Nichos y Tipos:** Los nichos definidos en el array `niches` y el tipo de recurso en `type` dentro del manifiesto de la ficha `.md` son extraídos por el servidor, mapeando automáticamente las categorías comerciales de forma dinámica a los tags de los componentes.
+  - **Filtros Multi-Dimensionales en Frontend (ComponentLibraryView.jsx):** Se integró un selector dropdown dinámico (`CustomSelect`) que recupera las verticales comerciales activas de `/api/niches` (blindando el sistema ante futuras adiciones de nichos). Asimismo, se expandieron los tabs del selector de tipos de recursos para soportar cinco filtros específicos: "Todos", "UI Componentes", "Módulos", "Hooks" y "Servicios".
+* **Build:** ✓ Exitoso (Vite build completado, integridad de biblioteca al 100% OK).
+* **Archivos Modificados:**
+  - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+
+### [2026-07-02] - CORE-167: Creación y Catalogación de Componentes de Ecommerce y Ventas (Vertical Retail)
+ 
+* **Tipo:** UI Components / Playground Sandboxes / Catalog Registration
+* **Firma de auditoría:** CORE-167-RETAIL-COMPONENTS-INJECTION
+* **Descripción de Cambios:**
+  - **GuiaMedidasTallaIdeal:** Componente interactivo y sandbox para recomendar tallas ideales ingresando medidas corporales. 100% libre de elementos nativos del navegador.
+  - **GaleriaZoomHover:** Visor de fotos con carrusel de miniaturas y lupa virtual fluida al hacer hover.
+  - **CarruselCompletaLook:** Inyección de productos sugeridos (venta cruzada) con totalizador con descuento. Se eliminaron selectores nativos reemplazándolos por botones de talla premium customizados con HSL.
+  - **BuscadorDisponibilidadTiendas:** Buscador O2O para Click & Collect de tiendas físicas. Se corrigió el dropdown de test en el sandbox para usar strings planos en lugar de objetos, evitando roturas.
+  - **SelectorEmpaqueRegalo:** Panel de Checkout para marcar dedicatoria impresa en postal virtual premium con previsualización en tiempo real.
+* **Build:** ✓ Exitoso (Vite build completado, integridad de biblioteca al 100% OK).
+* **Archivos Modificados/Creados:**
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Guia_Medidas_Talla_Ideal/guia_medidas_talla_ideal.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Guia_Medidas_Talla_Ideal/guia_medidas_talla_ideal.md) [NEW]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Galeria_Zoom_Hover/galeria_zoom_hover.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Galeria_Zoom_Hover/galeria_zoom_hover.md) [NEW]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Carrusel_Completa_Look/carrusel_completa_look.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Carrusel_Completa_Look/carrusel_completa_look.md) [NEW]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Buscador_Disponibilidad_Tiendas/buscador_disponibilidad_tiendas.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Buscador_Disponibilidad_Tiendas/buscador_disponibilidad_tiendas.md) [NEW]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Selector_Empaque_Regalo/selector_empaque_regalo.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Selector_Empaque_Regalo/selector_empaque_regalo.md) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/GuiaMedidasTallaIdealSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/GuiaMedidasTallaIdealSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/GaleriaZoomHoverSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/GaleriaZoomHoverSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CarruselCompletaLookSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CarruselCompletaLookSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/BuscadorDisponibilidadTiendasSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/BuscadorDisponibilidadTiendasSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/SelectorEmpaqueRegaloSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/SelectorEmpaqueRegaloSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/control_creacion_componentes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/control_creacion_componentes.md) [MODIFY]
+
 ### [2026-07-02] - CORE-166: Robustecimiento y Gestión del Ciclo de Vida del Servidor CLI
 
 * **Tipo:** Refactor / Backend / Security / Concurrency / SSE Abort Handling

@@ -5,7 +5,9 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": []
 }
 -->
 
@@ -21,7 +23,7 @@ Componente estructural tipo clase de React diseñado como cortafuegos definitivo
 ---
 
 ## 2. Especificación Visual y Estilos (Tailwind CSS)
-- **Glassmorphic Warning Card:** Tarjeta de contención con desenfoque de fondo y color de advertencia (`backdrop-blur-md bg-slate-900/40 border border-red-500/20 text-slate-100`).
+- **Glassmorphic Warning Card:** Tarjeta de contención con desenfoque de fondo y color de advertencia (`backdrop-blur-md bg-[var(--color-surface)]/40 border border-red-500/20 text-slate-100`).
 - **Stack Trace Seguro:** Sección colapsable que oculta el error técnico a usuarios no técnicos pero permite desplegarlo mediante un botón "Ver detalles técnicos" en fuente de consola monoespaciada para depuración in situ.
 
 ---
@@ -65,7 +67,7 @@ export class ErrorBoundaryFallback extends Component {
       const { fallbackTitle = 'Algo salió mal', fallbackDesc = 'El componente no se pudo renderizar correctamente.' } = this.props;
 
       return (
-        <div className="w-full p-6 bg-slate-900/30 border border-slate-800 rounded-3xl backdrop-blur-md flex flex-col md:flex-row gap-5 items-start justify-between">
+        <div className="w-full p-6 bg-[var(--color-surface)]/30 border border-[var(--color-border)] rounded-3xl backdrop-blur-md flex flex-col md:flex-row gap-5 items-start justify-between">
           <div className="flex-1 space-y-3 min-w-0">
             {/* Cabecera */}
             <div className="flex items-center gap-2 text-red-400">
@@ -91,7 +93,7 @@ export class ErrorBoundaryFallback extends Component {
               </button>
 
               {this.state.showDetails && (
-                <div className="bg-slate-950 border border-slate-900 rounded-xl p-3 overflow-x-auto max-h-[140px] overflow-y-auto">
+                <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl p-3 overflow-x-auto max-h-[140px] overflow-y-auto">
                   <pre className="font-mono text-[9px] text-red-300 leading-normal whitespace-pre-wrap select-text">
                     {this.state.error && this.state.error.toString()}
                     {this.state.errorInfo && this.state.errorInfo.componentStack}

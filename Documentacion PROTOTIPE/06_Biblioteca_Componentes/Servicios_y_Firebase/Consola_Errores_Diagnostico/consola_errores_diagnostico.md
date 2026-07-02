@@ -273,7 +273,7 @@ export default function ErrorDiagnosticConsole({
         <div className="fixed inset-0 z-[80] overflow-hidden select-none">
           {/* Backdrop */}
           <div 
-            className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity duration-300"
+            className="absolute inset-0 bg-[var(--color-bg)]/70 backdrop-blur-sm transition-opacity duration-300"
             onClick={() => setSelectedDiagnosticError(null)}
           />
 

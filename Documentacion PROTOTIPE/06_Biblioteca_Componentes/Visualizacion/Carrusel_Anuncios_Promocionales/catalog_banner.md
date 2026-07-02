@@ -5,7 +5,20 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": [
+    "retail_clothing",
+    "grocery_food",
+    "alimentos-artesanales",
+    "distribuidoras-beauty",
+    "petshops-locales",
+    "moda-local-calzado",
+    "alimentacion-saludable",
+    "home-office-ergonomia",
+    "licores-cocteleria",
+    "coleccionismo-geek"
+  ]
 }
 -->
 

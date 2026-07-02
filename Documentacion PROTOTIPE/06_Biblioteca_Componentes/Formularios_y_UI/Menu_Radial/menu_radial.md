@@ -5,7 +5,9 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": []
 }
 -->
 
@@ -93,7 +95,7 @@ export default function RadialInteractiveMenu({
       {isOpen && (
         <div 
           onClick={() => setIsOpen(false)}
-          className="fixed inset-0 bg-slate-950/30 backdrop-blur-[2px] z-[990] transition-opacity duration-300 animate-fade-in"
+          className="fixed inset-0 bg-[var(--color-bg)]/30 backdrop-blur-[2px] z-[990] transition-opacity duration-300 animate-fade-in"
         />
       )}
 
@@ -132,7 +134,7 @@ export default function RadialInteractiveMenu({
               {item.icon || <HelpIcon />}
 
               {/* Tooltip flotante */}
-              <span className="absolute scale-0 group-hover:scale-100 transition-all duration-200 bg-slate-900 border border-slate-800 text-[8px] font-black uppercase text-slate-100 rounded-lg px-2 py-1 -top-8 whitespace-nowrap shadow z-20 pointer-events-none">
+              <span className="absolute scale-0 group-hover:scale-100 transition-all duration-200 bg-[var(--color-surface)] border border-[var(--color-border)] text-[8px] font-black uppercase text-slate-100 rounded-lg px-2 py-1 -top-8 whitespace-nowrap shadow z-20 pointer-events-none">
                 {item.label}
               </span>
             </button>

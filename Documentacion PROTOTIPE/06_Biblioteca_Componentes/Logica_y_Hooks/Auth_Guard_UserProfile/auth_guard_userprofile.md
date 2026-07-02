@@ -21,7 +21,7 @@ Componente lógico y visual de marca blanca diseñado para orquestar la segurida
 ---
 
 ## 2. Especificación Visual y Estilos (Tailwind CSS)
-- **Glassmorphism Dropdown:** Panel del perfil flotante utilizando fondo translúcido con desenfoque de fondo (`backdrop-blur-md bg-slate-900/80 border border-slate-800`).
+- **Glassmorphism Dropdown:** Panel del perfil flotante utilizando fondo translúcido con desenfoque de fondo (`backdrop-blur-md bg-[var(--color-surface)]/80 border border-[var(--color-border)]`).
 - **Badge de Roles:** Chip semántico que resalta con color el nivel de acceso del usuario:
   * `admin` -> `bg-red-500/10 text-red-400 border-red-500/20`
   * `vendedor` -> `bg-amber-500/10 text-amber-400 border-amber-500/20`
@@ -219,9 +219,9 @@ export function UserProfile() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-slate-800/80 bg-slate-950/90 backdrop-blur-md shadow-2xl p-2 z-[999] overflow-hidden">
+        <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-[var(--color-border)]/80 bg-[var(--color-bg)]/90 backdrop-blur-md shadow-2xl p-2 z-[999] overflow-hidden">
           {/* Header Info */}
-          <div className="px-3 py-2 border-b border-slate-900 pb-2 mb-1">
+          <div className="px-3 py-2 border-b border-[var(--color-border)] pb-2 mb-1">
             <p className="text-[10px] font-black text-slate-100 truncate">{user.displayName || 'Vendedor'}</p>
             <p className="text-[9px] text-slate-400 truncate mt-0.5">{user.email}</p>
             <span className={`inline-block mt-2 px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase border ${roleColors}`}>
@@ -233,14 +233,14 @@ export function UserProfile() {
           <div className="space-y-0.5">
             <button
               onClick={() => { setIsOpen(false); }}
-              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-slate-300 hover:bg-slate-900 hover:text-white transition-all text-left cursor-pointer"
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-slate-300 hover:bg-[var(--color-surface)] hover:text-white transition-all text-left cursor-pointer"
             >
               <User size={12} />
               Mi Perfil
             </button>
             <button
               onClick={() => { setIsOpen(false); }}
-              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-slate-300 hover:bg-slate-900 hover:text-white transition-all text-left cursor-pointer"
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-slate-300 hover:bg-[var(--color-surface)] hover:text-white transition-all text-left cursor-pointer"
             >
               <Shield size={12} />
               Permisos

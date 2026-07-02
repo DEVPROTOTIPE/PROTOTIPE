@@ -197,7 +197,7 @@ import CustomCursor from './components/ui/CustomCursor';
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-slate-900 text-white md:cursor-none">
+    <div className="min-h-screen bg-[var(--color-surface)] text-white md:cursor-none">
       {/* Opcional: ocultar cursor nativo con la clase md:cursor-none */}
       <CustomCursor color="#06b6d4" size={40} />
       

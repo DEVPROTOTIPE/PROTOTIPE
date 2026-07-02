@@ -89,7 +89,7 @@ export default function BarcodeScannerPOS({ products = [], onCheckout }) {
   const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
   return (
-    <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-4 max-w-md mx-auto">
+    <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-2xl p-4 space-y-4 max-w-md mx-auto">
       {/* Campo de escaneo */}
       <div className="flex gap-2">
         <div className="relative flex-1">
@@ -101,7 +101,7 @@ export default function BarcodeScannerPOS({ products = [], onCheckout }) {
             value={barcodeInput}
             onChange={e => setBarcodeInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full bg-slate-900 border border-slate-800 text-xs rounded-xl pl-9 pr-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] text-xs rounded-xl pl-9 pr-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500"
           />
         </div>
         <button
@@ -130,7 +130,7 @@ export default function BarcodeScannerPOS({ products = [], onCheckout }) {
           </div>
         ) : (
           cart.map(item => (
-            <div key={item.id} className="flex items-center justify-between bg-slate-900/50 p-2.5 rounded-xl border border-slate-800/80 text-xs text-slate-300">
+            <div key={item.id} className="flex items-center justify-between bg-[var(--color-surface)]/50 p-2.5 rounded-xl border border-[var(--color-border)]/80 text-xs text-slate-300">
               <div className="space-y-0.5">
                 <span className="font-bold text-slate-200">{item.name}</span>
                 <div className="flex items-center gap-2 text-[10px] text-slate-500">
@@ -153,7 +153,7 @@ export default function BarcodeScannerPOS({ products = [], onCheckout }) {
 
       {/* Resumen */}
       {cart.length > 0 && (
-        <div className="pt-3 border-t border-slate-900 space-y-3">
+        <div className="pt-3 border-t border-[var(--color-border)] space-y-3">
           <div className="flex justify-between items-center text-sm font-black text-slate-200">
             <span>Total POS:</span>
             <span className="font-mono text-indigo-400">${total.toLocaleString('es-CO')}</span>

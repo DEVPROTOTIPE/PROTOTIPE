@@ -81,3 +81,8 @@ Si el componente requiere un store de Zustand (ej. `useCartStore`) que no existe
 
 ### Fidelidad funcional total
 El código portado debe ser 100% funcional. Prohibido usar placeholders o esqueletos. El archivo de código de destino debe estar completo.
+
+### Alineación Estética y Prevención de Truncamiento (Crítico)
+Al portar y adaptar el componente, asegúrate de:
+1. Usar únicamente variables HSL adaptativas (`bg-[var(--color-bg)]`, `border-[var(--color-border)]`) y eliminar cualquier color estático oscuro de Tailwind.
+2. Comprobar si el componente contiene contenedores con scroll horizontal o vertical. Si es así, exige e inyecta paddings de holgura (mínimo `py-4` o `px-4` internos) para evitar que sombras de elevación, bordes activos o efectos de zoom/escala se corten físicamente.

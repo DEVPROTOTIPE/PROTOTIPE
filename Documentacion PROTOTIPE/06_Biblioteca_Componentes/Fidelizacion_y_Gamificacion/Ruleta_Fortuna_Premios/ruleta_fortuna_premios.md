@@ -5,7 +5,15 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": [
+    "retail_clothing",
+    "grocery_food",
+    "coleccionismo-geek",
+    "distribuidoras-beauty",
+    "moda-local-calzado"
+  ]
 }
 -->
 
@@ -222,7 +230,7 @@ export default function RaffleWheelOfFortune({
           disabled={isSpinning}
           className={`absolute z-30 w-14 h-14 rounded-full flex flex-col items-center justify-center text-[10px] font-black uppercase shadow-[0_6px_20px_rgba(217,119,6,0.3)] transition-all duration-300 cursor-pointer ${
             isSpinning
-              ? 'bg-slate-900 text-slate-500 border-slate-800'
+              ? 'bg-[var(--color-surface)] text-slate-500 border-[var(--color-border)]'
               : 'bg-gradient-to-tr from-amber-500 via-rose-500 to-violet-600 text-white hover:scale-105 active:scale-95 hover:shadow-[0_6px_24px_rgba(217,119,6,0.5)] border border-white/20'
           }`}
           style={{ letterSpacing: '0.05em' }}
@@ -232,7 +240,7 @@ export default function RaffleWheelOfFortune({
       </div>
 
       {prizeResult && (
-        <div className="w-full max-w-xs bg-slate-950/60 border border-white/10 rounded-2xl p-3 text-center space-y-2 animate-fade-in shadow-xl">
+        <div className="w-full max-w-xs bg-[var(--color-bg)]/60 border border-white/10 rounded-2xl p-3 text-center space-y-2 animate-fade-in shadow-xl">
           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">¡Felicidades, ganaste!</span>
           <p className="text-sm font-black text-amber-400 uppercase">{prizeResult}</p>
           {couponCode && (

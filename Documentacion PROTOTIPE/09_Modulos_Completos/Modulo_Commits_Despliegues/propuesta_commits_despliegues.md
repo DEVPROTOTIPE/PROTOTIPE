@@ -140,3 +140,10 @@ Si decides aprobar esta propuesta, la ruta de implementación será:
 * **Fase 1 (CLI Bridge):** Desarrollar la API en `server.js` para detección de carpetas, estatus de Git y el stream SSE de PowerShell.
 * **Fase 2 (Frontend React):** Crear la página `Despliegues` y el componente de la Consola Git con el selector de subproyectos y la terminal de logs en vivo.
 * **Fase 3 (Trazabilidad Firestore):** Conectar el registro de éxitos con la base de datos de telemetría e historial en caliente.
+
+
+## 3. Código React Completo
+
+```jsx
+// No aplica para propuesta técnica
+```

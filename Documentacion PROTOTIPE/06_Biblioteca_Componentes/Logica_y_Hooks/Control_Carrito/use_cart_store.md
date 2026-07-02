@@ -5,7 +5,21 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "hook",
+  "niches": [
+    "retail_clothing",
+    "grocery_food",
+    "alimentos-artesanales",
+    "distribuidoras-beauty",
+    "petshops-locales",
+    "moda-local-calzado",
+    "alimentacion-saludable",
+    "home-office-ergonomia",
+    "licores-cocteleria",
+    "coleccionismo-geek",
+    "distribucion-horeca"
+  ]
 }
 -->
 
@@ -155,7 +169,7 @@ export default function CartBadge() {
   const openCart = useCartStore(state => state.openCart());
 
   return (
-    <button onClick={openCart} className="relative p-2 bg-slate-900 rounded-full">
+    <button onClick={openCart} className="relative p-2 bg-[var(--color-surface)] rounded-full">
       🛒 Carrito
       {count > 0 && (
         <span className="absolute -top-1.5 -right-1.5 bg-indigo-500 text-white rounded-full text-[10px] w-5 h-5 flex items-center justify-center font-bold">

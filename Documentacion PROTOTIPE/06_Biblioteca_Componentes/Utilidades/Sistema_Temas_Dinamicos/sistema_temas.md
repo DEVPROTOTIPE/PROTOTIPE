@@ -5,7 +5,9 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "service",
+  "niches": []
 }
 -->
 
@@ -230,7 +232,7 @@ export function useTheme({
 1. **Ciclo de Inyección DOM (`useEffect`):**
    Las variables CSS se inyectan en el elemento raíz `document.documentElement` (`:root`). Esto ocurre inmediatamente al montarse el componente y cada vez que cambia el tema, el estado de modo oscuro o el evento de temporada.
 2. **Coexistencia con Tailwind CSS:**
-   El switch sincroniza la clase `.dark` sobre el tag `<html>` de forma automática. Esto permite mezclar variables CSS tradicionales con selectores `dark:` nativos de Tailwind (`dark:bg-slate-900`) en la misma aplicación de forma totalmente fluida.
+   El switch sincroniza la clase `.dark` sobre el tag `<html>` de forma automática. Esto permite mezclar variables CSS tradicionales con selectores `dark:` nativos de Tailwind (`dark:bg-[var(--color-surface)]`) en la misma aplicación de forma totalmente fluida.
 
 ---
 

@@ -5,7 +5,19 @@
   "dependencies": {
     "npm": {},
     "internal": []
-  }
+  },
+  "type": "component",
+  "niches": [
+    "wellness_podology",
+    "technical_services",
+    "refrigeration_ac",
+    "contractors",
+    "machinery_rental",
+    "carpentry",
+    "laundry",
+    "furniture_repair",
+    "alimentos-artesanales"
+  ]
 }
 -->
 
