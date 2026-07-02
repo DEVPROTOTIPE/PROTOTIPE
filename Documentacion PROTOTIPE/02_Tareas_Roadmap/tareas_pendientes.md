@@ -4,6 +4,42 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-164: Rediseño Unificado de Logos y Nombres en Marquesina de Marcas Infinita~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se rediseñó el componente `InfiniteLogoMarquee` en la biblioteca (`marquesina_marcas.md`) para mostrar únicamente los logos de las marcas, incrementando su tamaño a tarjetas de `w-44 h-20` con logos de `max-w-[110px] max-h-[40px]`. Se implementó una micro-animación interactiva de rebote y destello de sombra resplandeciente (`clickPop`) que se dispara temporalmente al hacer clic o tap sobre cada tarjeta. Se inyectó este comportamiento y las URLs SVG estables de marcas deportivas en `InfiniteLogoMarqueeSandbox.jsx`.
+  - Archivos: [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Visualizacion/Marquesina_Marcas/marquesina_marcas.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Visualizacion/Marquesina_Marcas/marquesina_marcas.md) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InfiniteLogoMarqueeSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InfiniteLogoMarqueeSandbox.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-163: Creación y Catalogación de Componente CarrucelProductos y Sandbox~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se creó la ficha técnica y código JSX portable del componente `CarrucelProductos` en la biblioteca (`carrusel_productos.md`). Se implementó e inyectó un playground de simulación interactivo (`CarrucelProductosSandbox.jsx`) en el dashboard central (`dev-dashboard`) con controles de autoplay, dots y flechas, y un registro de actividad de carrito. Se indexó el componente en el catálogo `README.md` de la biblioteca y en el mapa semántico `mapa_documentacion_ia.md`. Posteriormente se realizó un rediseño estético premium de las tarjetas, dotándolas de esquinas más redondeadas (`rounded-[24px]` y `rounded-[20px]` en imágenes), elevaciones y transiciones hover dinámicas de borde, y soporte dinámico para imágenes reales (poblando el playground con fotos de prueba de alta resolución de Unsplash).
+  - Archivos: [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Carrucel_Productos/carrusel_productos.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Carrucel_Productos/carrusel_productos.md) [NEW], [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CarrucelProductosSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CarrucelProductosSandbox.jsx) [NEW], [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY], [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-162: Auditoría, Saneamiento e Integración de Módulo Agendamiento Barbería en el Sandbox~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se auditó a detalle la documentación del Módulo de Agendamiento de Citas para Barbería (modulo_agendamiento_barberia.md y README.md) para alineación con las directivas de marca blanca. Se implementó e integró un playground de simulación interactivo (`ModuloAgendamientoBarberiaSandbox.jsx`) en el dashboard de desarrollo central (`dev-dashboard`), implementando vistas de día, semana y mes, cronograma lateral, indicador de ocupación en base a slots libres, formulario de citas con validación semántica e inyección de máscara HSL adaptativa. Se registraron los mapeos y metadatos correspondientes en `ComponentSandbox.jsx` y se indexó en el catálogo y mapa semántico.
+  - Archivos: [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ModuloAgendamientoBarberiaSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ModuloAgendamientoBarberiaSandbox.jsx) [NEW], [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY], [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CORE-161: Conversión de Modal de Comisiones Acumuladas a Página Independiente~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se convirtió el antiguo modal de comisiones acumuladas en una página/pestaña completa independiente (`ComisionesPanel.jsx`) registrada en el menú de Finanzas del Dashboard. El nuevo panel integra métricas de efectividad de cobro, desglose de aportes acumulados por cliente (con barras de progreso interactivas), tabla paginada y ordenable de transacciones con buscador por cliente/periodo, filtros de estado, y exportador consolidado a PDF. Adicionalmente, se corrigió el posicionamiento y comportamiento del Side Drawer lateral de clientes, dotándolo de un overlay con backdrop blur y un cierre por clic exterior que se extiende de forma fluida a toda la altura de la pantalla, resolviendo bugs lógicos y de renderizado en `tab-content-enter`.
+  - Archivos: [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComisionesPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComisionesPanel.jsx) [NEW], [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY], [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+
+* **[x] ~~Tarea CORE-160: Aislamiento Lógico de Cores y Telemetría de Desarrollo en el Dashboard~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-02
+  - Fecha de finalización: 2026-07-02
+  - Descripción: Se separaron los Cores de desarrollo de los listados de Clientes SaaS en el CRM y facturación para purificar las vistas del dashboard central. Se implementó en "Plantillas Core" una sección de Monitoreo & Telemetría de Desarrollo en tiempo real asociada al ID del Core en Firestore (`ventas-smartfix`), mostrando estado de pings, última actividad y fallos específicos de desarrollo local sin afectar las bases de datos de producción. Asimismo, se inyectaron controles locales (Desplegar en Local, Detener, Ir a Local) y el modal de gestión/drift directo en la tarjeta, y se implementó un sistema de asignación de puertos dinámicos y deterministas en `server.js` (`5100 + hash(clientId)`) para prevenir colisiones en localhost.
+  - Archivos: [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx) [MODIFY], [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY], [`Plantillas Core/App Ventas/vite.config.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/vite.config.js) [MODIFY], [`Instancias Clientes/ventas/ventas-moni-app/vite.config.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/vite.config.js) [MODIFY]
+
 * **[x] ~~Tarea CORE-159: Creación del Componente Reutilizable CircularDishMenu y Sandbox~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-07-01

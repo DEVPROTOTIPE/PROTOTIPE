@@ -324,6 +324,12 @@ Prohibido crear layouts o interfaces iniciales genéricas, planas o tipo ERP cor
 - Estados interactivos `hover`/`active`/`focus` pulidos.
 - Mock de datos inicial realista e interactivo, emulando la operación del negocio final.
 
+### 13.5 Controles Visuales, Confirmaciones y Dependencias
+
+- **Prohibición de selectores nativos:** Queda terminantemente prohibido utilizar el elemento `<select>` nativo de HTML en cualquier sandbox, módulo, vista o componente del dashboard o plantillas. Se debe emplear obligatoriamente `CustomSelect.jsx` (ubicado en `src/components/ui/CustomSelect.jsx`).
+- **Uso obligatorio de useAlertConfirm:** Todo flujo destructivo, eliminación, limpieza o alteración irreversible de registros (como cancelar/eliminar citas, limpiar base de datos, purgar logs) debe solicitar confirmación asíncrona mediante el hook `useAlertConfirm()` (de `src/components/common/AlertConfirmContext.jsx`) con `variant: 'error'` o `variant: 'warning'`, impidiendo la ejecución directa.
+- **Prohibición de Componentes Inventados y Dependencias Huérfanas:** Queda estrictamente prohibido importar y utilizar componentes o utilidades imaginarias que no existan físicamente en el sistema (ej: no usar clases o componentes de soporte ficticios como `TapShield`). Si el componente depende de otros recursos lógicos de la biblioteca o de utilidades del sistema, estas deben registrarse obligatoriamente en el array `internal` de la sección `dependencies` del manifiesto JSON.
+
 ---
 
 ## SECCIÓN 14 — MATRIZ DE SEVERIDAD (auditor_tecnico)

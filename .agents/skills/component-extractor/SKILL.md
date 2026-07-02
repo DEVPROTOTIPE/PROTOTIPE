@@ -53,6 +53,9 @@ aliases:
 - **Props claras y tipadas** con valores default.
 - **Cero hardcoding** de rutas de Firestore, variables HSL de color, o textos.
 - **Cero dependencias rígidas de librerías externas:** Si usa iconos o librerías específicas, debe diseñarse con fallbacks seguros.
+- **Saneamiento de Controles y Confirmación:** Reemplaza selectores `<select>` nativos por el componente `CustomSelect`, e intercepta toda eliminación o borrado destructivo mediante la ventana modal de confirmación `useAlertConfirm`.
+- **Registro en Manifiesto:** Declara explícitamente `CustomSelect` y `useAlertConfirm` en el array `dependencies.internal` del manifiesto JSON del archivo `.md` de documentación para asegurar que se porten en cascada.
+
 
 ### 3. Auto-Auditoría de Falencias de Portabilidad y Regresión (Fase Crítica)
 - Identificar dependencias implícitas ausentes en un proyecto limpio.

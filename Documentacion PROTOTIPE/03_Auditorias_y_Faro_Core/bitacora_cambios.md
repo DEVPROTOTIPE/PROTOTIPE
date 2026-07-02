@@ -1,5 +1,112 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-02] - CORE-164: Rediseño Unificado de Logos y Nombres en Marquesina de Marcas Infinita
+
+* **Tipo:** UI Component / Playground Sandbox / Refactor
+* **Firma de auditoría:** CORE-164-INFINITE-MARQUEE-REVISITED
+* **Descripción de Cambios:**
+  - **Ficha Técnica InfiniteLogoMarquee:** Se reescribió `marquesina_marcas.md` (removiendo duplicación de contenido previa) y se rediseñó el layout del ticker para mostrar los logos más grandes (`max-w-[110px] max-h-[40px]`) en tarjetas de `w-44 h-20` con esquinas redondeadas premium (`rounded-[24px]`).
+  - **Micro-animación clickPop:** Se implementó una animación local mediante estado React (`activeClickId`) que al hacer clic o tap sobre una marca aplica un efecto de rebote de escala elástica (`animate-click-pop`) y un destello de sombra resplandeciente (`shadow-[0_0_20px_rgba(99,102,241,0.25)]`).
+  - **Sandbox Interactivo:** Se adaptó `InfiniteLogoMarqueeSandbox.jsx` para reflejar el nuevo diseño de tarjeta del ticker. Se poblaron los datos mock (`mockItems`) con URLs de logos vectoriales SVG estables de SimpleIcons en jsDelivr para Nike, Adidas, Puma, Reebok, Under Armour y Fila.
+* **Build:** ✓ Exitoso (Vite build completado, integridad de biblioteca al 100% OK).
+* **Archivos Modificados/Creados:**
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Visualizacion/Marquesina_Marcas/marquesina_marcas.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Visualizacion/Marquesina_Marcas/marquesina_marcas.md) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InfiniteLogoMarqueeSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InfiniteLogoMarqueeSandbox.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+### [2026-07-02] - CORE-163: Creación y Catalogación de Componente CarrucelProductos y Sandbox
+
+* **Tipo:** UI Component / Playground Sandbox / Catalog Registration
+* **Firma de auditoría:** CORE-163-CAROUSEL-PRODUCTS-CREATION
+* **Descripción de Cambios:**
+  - **Ficha Técnica CarrucelProductos:** Se creó la documentación técnica `carrusel_productos.md` en la biblioteca, con especificaciones de responsive (1 slide móvil, 2 tablet, 3-4 desktop), soporte HSL y gestos táctiles.
+  - **Revisión de Estilos Premium:** Se rediseñó la tarjeta de producto para dotarla de un aspecto premium de marca blanca: esquinas redondeadas (`rounded-[24px]` / `rounded-[20px]` en imágenes), transiciones suaves de elevación/borde al pasar el cursor, y soporte dinámico para renderizar imágenes reales (etiquetas `<img>`) con fallback a emojis con fondo degradado.
+  - **Sandbox Interactivo:** Se implementó `CarrucelProductosSandbox.jsx` en `src/components/admin/sandboxes/` con controles interactivos de autoplay, dots, flechas y un log de auditoría. Se poblaron los datos mock (`MOCK_PRODUCTS`) con URLs de fotos de prueba de Unsplash de alta calidad (cremas, aceites, navajas, tijeras) en lugar de emojis planos.
+  - **Soporte de Z-Index en Creador con IA:** Se corrigió un bug visual del Creador con IA donde las tarjetas inferiores se dibujaban sobre el menú desplegable del selector. Se inyectó `z-[60]` en el contenedor padre.
+  - **Solidez en CustomSelect:** Se removió la opacidad `/95` y filtros de desenfoque del dropdown de `CustomSelect` para lograr un fondo 100% sólido y legible.
+  - **Ayudas Prácticas de Categoría:** Se actualizaron los textos de ayuda de las categorías con ejemplos explícitos basados en casos de uso reales de la biblioteca, y se añadió un tooltip flotante explicativo (`z-[70]`) en hover.
+* **Build:** ✓ Exitoso (Vite build completado, integridad de biblioteca al 100% OK).
+* **Archivos Modificados/Creados:**
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Carrucel_Productos/carrusel_productos.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Carrucel_Productos/carrusel_productos.md) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CarrucelProductosSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CarrucelProductosSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/index.css`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/index.css) [MODIFY]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
+### [2026-07-02] - CORE-162: Integración de Módulo Agendamiento Barbería en el Sandbox
+
+* **Tipo:** Feature / Sandbox Integration
+* **Firma de auditoría:** CORE-162-BARBER-SCHEDULING-SANDBOX
+* **Descripción de Cambios:**
+  - **Módulo Agendamiento Barbería:** Se auditó y saneó el módulo de agendamiento de citas para barberías entregado por el equipo colaborador.
+  - **Sandbox Interactivo:** Se creó el archivo `ModuloAgendamientoBarberiaSandbox.jsx` en `src/components/admin/sandboxes/` con vistas de día, semana y mes, cronograma lateral, indicador de ocupación dinámico y simulación de base de datos local persistente con creación de citas y validación de slots libres por barbero.
+  - **Corrección de Modal:** Se reemplazó el import de `TapShield` (componente no existente) por un modal nativo encapsulado para garantizar el aislamiento.
+  - **Saneamiento Estético:** Se reemplazaron las listas desplegables `<select>` nativas del navegador en los filtros del sandbox por instancias de `CustomSelect` para cumplir con las directivas del diseño de marca blanca.
+  - **Confirmación de Borrado:** Se integró la modal de confirmación `showConfirm` del ecosistema mediante `useAlertConfirm` en el botón "Eliminar Cita", y se modificó la lógica para que realice un filtro que remueva la cita del estado de forma definitiva.
+  - **Blindaje y Actualización de Reglas:** Se actualizaron `AGENTS.md` (reglas locales del workspace) y `GEMINI.md` (copia maestra de reglas) para inyectar estándares estrictos de controles (prohibición de selects nativos en favor de `CustomSelect`), confirmaciones asíncronas para flujos destructivos (mediante `useAlertConfirm`) y prohibición de dependencias huérfanas o componentes inventados.
+  - **Actualización de Habilidad:** Se modificó la skill `component-creator/SKILL.md` inyectando estas mismas directivas de calidad frontend para evitar regresiones en futuras autogeneraciones de código.
+  - **Extractor y Portabilidad Blindados:** Se actualizaron las skills `component-extractor/SKILL.md` y `portar-componente/SKILL.md` para exigir la transformación y verificación recursiva de dropdowns y modales de confirmación (`CustomSelect` / `useAlertConfirm`) al empaquetar o inyectar componentes en cascada.
+  - **Conversión de Creador con IA:** Se reemplazó el control `<select>` nativo de la sección "Creador con IA (Comando)" en `ComponentLibraryView.jsx` por una versión de `CustomSelect` que incluye subtítulos explicativos de las categorías (`subLabel`) para guiar al usuario sobre qué categoría elegir en cada caso.
+* **Build:** ✓ Exitoso (Integridad de biblioteca al 100% OK, sincronización de skills completada).
+* **Archivos Modificados/Creados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ModuloAgendamientoBarberiaSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ModuloAgendamientoBarberiaSandbox.jsx) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  - [`d:/PROTOTIPE/.agents/AGENTS.md`](file:///d:/PROTOTIPE/.agents/AGENTS.md) [MODIFY]
+  - [`d:/PROTOTIPE/.agents/skills/component-creator/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/component-creator/SKILL.md) [MODIFY]
+  - [`d:/PROTOTIPE/.agents/skills/component-extractor/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/component-extractor/SKILL.md) [MODIFY]
+  - [`d:/PROTOTIPE/.agents/skills/portar-componente/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/portar-componente/SKILL.md) [MODIFY]
+  - [`d:/PROTOTIPE/.agents/skills/sandbox-integrator/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/sandbox-integrator/SKILL.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md) [MODIFY]
+
+### [2026-07-02] - CORE-161: Mejoras Funcionales ComisionesPanel — A2+A3+B1+B3+C1+C3
+
+* **Tipo:** Feature / UX Enhancement
+* **Firma de auditoría:** CORE-161-COMISIONES-ENHANCED-TOOLS
+* **Descripción de Cambios:**
+  - **A2 — WhatsApp de Cobro Rápido:** Botón en drawer del cliente que genera mensaje dinámico de cobro y abre `wa.me` con número del cliente precargado (`whatsappAdmin` o `telefono` de metadatos).
+  - **A3 — Toggle de Pago Inline:** Botón de estado editable directamente en cada fila de la tabla de historial y en el desglose de periodos del drawer, sin necesidad de abrir un modal adicional. Usa `onTogglePayment` propagado desde `App.jsx` con spinner de loading por fila.
+  - **B1 — Filtro por Año Global:** Selector de año en cabecera que filtra simultáneamente los KPIs, aportes por cliente y la tabla de historial. Detecta dinámicamente los años disponibles del dataset.
+  - **B3 — Resaltado de Deuda Vencida:** Filas con estado pendiente y más de 60 días transcurridos desde el periodo se marcan con fondo ámbar tenue, borde izquierdo y badge "Vencido" con icono `AlertCircle`.
+  - **C1 — Navegación Cruzada a Recaudo:** Botón en el drawer del cliente que cierra el panel y redirige al tab de Recaudación via `onGoToRecaudo` prop desde `App.jsx`.
+  - **C3 — Contador de Registros:** Badge `"X de Y registros"` visible en la cabecera de la tabla de historial y en el panel de aportes, actualizándose dinámicamente con los filtros activos.
+  - **Props adicionales en App.jsx:** Se añadieron `onTogglePayment={handleTogglePayment}` y `onGoToRecaudo` al componente `<ComisionesPanel>` en el tab de comisiones.
+* **Build:** ✓ Exitoso — 3005 módulos, sin errores.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComisionesPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComisionesPanel.jsx) [MODIFY — Rewrite completo]
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY — Props inyectadas]
+
+
+
+* **Tipo:** Refactor / UI/UX / Telemetría
+* **Firma de auditoría:** CORE-160-CORE-ISOLATION-TELEMETRY-ROUTING
+* **Descripción de Cambios:**
+  - **Aislamiento de Clientes SaaS:** Se movió la carga de Firestore `clientes_control` del dashboard de `clientesSaas` a `allClientesControl`. Se creó un `useMemo` filtrado para `clientesSaas` excluyendo cualquier core de desarrollo.
+  - **Limpieza de Datos Mock Iniciales:** Se modificó el constructor del estado inicial de `allClientesControl` a un array vacío `[]`, eliminando por completo la carga accidental de datos de prueba (`tienda-calzado-x`, `restaurante-gourmet`, etc.) al cargar el dashboard.
+  - **Filtro Dinámico en Finanzas:** Se implementó una lógica de mapeo dinámica (`coreIds` Set) en `filteredPeriodReports` obtenida de `allClientesControl`. Esto filtra de forma total y transparente los reportes y registros de cores (incluyendo `ventas-smartfix`) de todas las vistas financieras (Facturación, Recaudación, Cobros Realizados) y del desglose del dashboard.
+  - **Asignación de Puertos Fijos y Dinámicos (Vite):** Se configuraron puertos fijos dedicados en `vite.config.js` y se implementó un algoritmo dinámico y determinista en `server.js` (`5100 + hash(clientId)`) que inyecta automáticamente el puerto vía CLI (`--port`) al iniciar cualquier servidor local. Esto automatiza a futuro que todo core template y toda instancia cliente nueva se ejecuten en su puerto exclusivo sin colisiones.
+  - **Redirección de Telemetría a Cores:** Se actualizaron `App.jsx` y `CoreManagerPanel.jsx` para inyectar el listado completo y sin filtrar a `CoreCard.jsx`, el cual renderiza un panel de monitoreo y telemetría en caliente.
+  - **Corrección de Estilos en Feature Flag Manager:** Se rediseñaron los botones de acción masiva ("Habilitar Todas" y "Desactivar Todas") y las tarjetas de la lista lateral de selección de clientes para usar fondos e iconografías adaptativas a los temas claro y oscuro, eliminando el fondo gris oscuro de bajo contraste en modo claro.
+  - **Conversión de Modal a Página Independiente (Comisiones Acumuladas):** Se removió el modal interno de `App.jsx` y se creó un nuevo panel a pantalla completa en `ComisionesPanel.jsx` registrado como pestaña del menú de finanzas. Este incluye KPIs dinámicos, aportes acumulados del TOP por cliente con barras de progreso relativas, tabla paginada y ordenable de historial de transacciones, y exportación a PDF.
+  - **Corrección de Posicionamiento del Drawer de Clientes:** Se corrigió un bug del drawer lateral en `ComisionesPanel.jsx` (que flotaba de forma incorrecta debido a la animación `tab-content-enter`). Se rediseñó para usar un backdrop overlay completo (`fixed inset-0 bg-slate-950/60 backdrop-blur-sm`), un disparador para cerrar al hacer clic afuera, y animaciones de entrada laterales fluidas (`animate-slide-left h-full`) extendiéndose a toda la altura del viewport.
+* **Archivos Modificados:**
+  - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CotizadorView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CotizadorView.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComisionesPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComisionesPanel.jsx) [NEW]
+  - [`Plantillas Core/App Ventas/vite.config.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/vite.config.js) [MODIFY]
+  - [`Instancias Clientes/ventas/ventas-moni-app/vite.config.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/vite.config.js) [MODIFY]
+
 ### [2026-07-01] - CORE-159: Creación del Componente Reutilizable CircularDishMenu y Sandbox
 
 * **Tipo:** UI Component / Playground Sandbox / Catalog Registration

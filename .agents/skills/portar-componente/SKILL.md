@@ -56,6 +56,7 @@ Lee el bloque de manifiesto JSON del componente en los comentarios HTML.
   2. Si hay fallos de permisos, solicita confirmación al usuario de que instaló la dependencia.
 - **Dependencias Internas:** Si el manifiesto lista componentes o hooks internos requeridos por el componente:
   1. Rastrear sus fichas técnicas e inyectar esas dependencias primero de forma recursiva.
+  2. **Verificación de Controles y Confirmación:** Si el componente a portar utiliza `CustomSelect` o `useAlertConfirm` (ya sea por manifiesto o detectado en su código), asegúrate de que el proyecto destino los tenga en `src/components/ui/` y `src/components/common/` respectivamente. Si faltan en el destino, transpórtalos e inyéctalos en cascada antes de escribir el componente.
 
 ### 5. Adaptar Imports y Rutas del Código
 El código de la biblioteca puede usar paths genéricos o relativos de otro proyecto.

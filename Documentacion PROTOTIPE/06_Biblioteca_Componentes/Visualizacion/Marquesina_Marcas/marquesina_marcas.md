@@ -25,14 +25,15 @@ Componente de marquesina (ticker) infinita horizontal de alto rendimiento. Dise�
 ## 2. Especificación Visual y Estilos (Tailwind CSS)
 - **Filtro de Desvanecimiento Lateral:** Bordes izquierdo y derecho del contenedor con gradiente de máscara lineal (`mask-image: linear-gradient()`) para lograr un efecto de entrada/salida difuminada ("fade edges").
 - **Movimiento Continuo:** Animación por fotogramas clave en CSS (`@keyframes marquee`) que traslada el contenido de `0%` a `-50%` de su anchura.
-- **Ralentización en Hover:** Al pasar el cursor, el contenedor añade una clase que transiciona la velocidad de la animación (`animation-duration` o `animation-play-state: paused` con transición elástica de escala local en el logo enfocado).
+- **Animación Click Pop:** Al hacer tap o click en un logo, se activa un efecto de rebote de escala elástica (`animate-click-pop`) con un destello de sombra resplandeciente.
+- **Logos Grandes:** Tarjetas escaladas a `w-44 h-20` con un área de imagen optimizada de `max-w-[110px] max-h-[40px]`.
 
 ---
 
 ## 3. Código React Completo
 
 ```jsx
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function InfiniteLogoMarquee({
   items = [], // Array de objetos { id, imageUrl, alt, name }
@@ -40,6 +41,8 @@ export default function InfiniteLogoMarquee({
   pauseOnHover = true,
   className = ''
 }) {
+  const [activeClickId, setActiveClickId] = useState(null);
+
   // Configuración de velocidades (duración del ciclo en segundos)
   const speedDuration = {
     slow: '40s',
@@ -49,6 +52,13 @@ export default function InfiniteLogoMarquee({
 
   // Duplicamos los items para garantizar el bucle infinito sin saltos visuales
   const doubleItems = [...items, ...items, ...items];
+
+  const handleItemClick = (id) => {
+    setActiveClickId(id);
+    setTimeout(() => {
+      setActiveClickId(null);
+    }, 300);
+  };
 
   return (
     <div className={`relative w-full overflow-hidden py-4 ${className}`}>
@@ -62,6 +72,12 @@ export default function InfiniteLogoMarquee({
           0% { transform: translateX(0); }
           100% { transform: translateX(-33.333%); }
         }
+        @keyframes clickPop {
+          0% { transform: scale(1); }
+          30% { transform: scale(0.85); }
+          70% { transform: scale(1.08); }
+          100% { transform: scale(1); }
+        }
         .animate-marquee-infinite {
           display: flex;
           width: max-content;
@@ -69,6 +85,9 @@ export default function InfiniteLogoMarquee({
         }
         .marquee-container:hover .animate-marquee-infinite {
           animation-play-state: var(--marquee-hover-state, running);
+        }
+        .animate-click-pop {
+          animation: clickPop 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
         }
       `}} />
 
@@ -81,24 +100,32 @@ export default function InfiniteLogoMarquee({
         }}
       >
         <div className="animate-marquee-infinite gap-6 flex items-center">
-          {doubleItems.map((item, idx) => (
-            <div
-              key={`${item.id}-${idx}`}
-              className="flex-shrink-0 group relative flex items-center justify-center p-5 min-w-[120px] h-16 rounded-2xl bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:border-indigo-500/40 hover:scale-105 active:scale-95 transition-all duration-300 shadow-sm hover:shadow-indigo-500/10 cursor-pointer overflow-hidden"
-            >
-              {item.imageUrl ? (
-                <img 
-                  src={item.imageUrl} 
-                  alt={item.alt || item.name} 
-                  className="max-w-[80px] max-h-[32px] object-contain opacity-60 group-hover:opacity-100 transition-opacity duration-300 select-none pointer-events-none filter grayscale group-hover:grayscale-0"
-                />
-              ) : (
-                <span className="text-xs font-mono font-black text-[var(--color-text-muted)] group-hover:text-indigo-400 transition-colors uppercase tracking-widest">
-                  {item.name}
-                </span>
-              )}
-            </div>
-          ))}
+          {doubleItems.map((item, idx) => {
+            const uniqueId = `${item.id}-${idx}`;
+            const isClicked = activeClickId === uniqueId;
+
+            return (
+              <div
+                key={uniqueId}
+                onClick={() => handleItemClick(uniqueId)}
+                className={`flex-shrink-0 group relative flex items-center justify-center px-6 py-4 w-44 h-20 rounded-[24px] bg-[var(--color-surface-2)] border border-[var(--color-border)] hover:border-indigo-500/40 hover:scale-105 active:scale-95 transition-all duration-300 shadow-sm hover:shadow-indigo-500/10 cursor-pointer overflow-hidden select-none ${
+                  isClicked ? 'animate-click-pop border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.25)] z-20' : ''
+                }`}
+              >
+                {item.imageUrl ? (
+                  <img
+                    src={item.imageUrl}
+                    alt={item.alt || item.name}
+                    className="max-w-[110px] max-h-[40px] object-contain opacity-60 group-hover:opacity-100 transition-opacity duration-300 filter grayscale group-hover:grayscale-0 dark:brightness-0 dark:invert select-none pointer-events-none"
+                  />
+                ) : (
+                  <span className="text-[11px] font-black uppercase tracking-wider text-[var(--color-text-muted)] group-hover:text-indigo-400 transition-colors truncate">
+                    {item.name}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

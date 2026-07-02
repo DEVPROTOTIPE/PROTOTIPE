@@ -83,3 +83,25 @@ Para mantener la mantenibilidad y evitar regresiones en el archivo principal `Ap
   3. Mapear estados compartidos estrictamente obligatorios, delegando el estado y efectos locales al componente hijo.
 
 ---
+
+## ESTÁNDAR DE CONTROLES VISUALES Y LISTAS DESPLEGABLES (DROPDOWNS)
+
+- **Prohibición de selectores nativos:** Queda terminantemente prohibido utilizar el elemento `<select>` nativo de HTML en cualquier sandbox, módulo, vista o componente del dashboard o plantillas.
+- **Uso obligatorio de CustomSelect:** Se debe emplear de manera obligatoria el componente `CustomSelect.jsx` (ubicado en `src/components/ui/CustomSelect.jsx`), pasándole el array de opciones en formato `[{ value, label }]` y capturando los cambios mediante su propiedad `onChange(value)` (la cual devuelve el valor directamente, no un evento sintético de React).
+
+---
+
+## ESTÁNDAR DE CONFIRMACIONES Y ACCIONES DE ELIMINACIÓN
+
+- **Confirmación Obligatoria:** Ningún flujo que realice eliminación, limpieza o alteración irreversible de registros (como cancelar/eliminar citas, limpiar base de datos, purgar logs) puede ejecutarse de forma directa.
+- **Uso obligatorio de useAlertConfirm:** Es obligatorio utilizar la ventana modal de confirmación promesificada de la plataforma mediante el hook `useAlertConfirm()` (de `src/components/common/AlertConfirmContext.jsx`) con `variant: 'error'` o `variant: 'warning'`, impidiendo la ejecución de la acción destructiva si el usuario no hace clic en el botón de confirmación correspondiente.
+
+---
+
+## PROHIBICIÓN DE COMPONENTES INVENTADOS Y DEPENDENCIAS HUÉRFANAS
+
+- **Importaciones Válidas:** Queda estrictamente prohibido importar y utilizar componentes o utilidades imaginarias que no existan en el sistema o no estén declarados en `package.json` (ej: no usar clases o componentes de soporte ficticios como `TapShield` o wrappers ad-hoc externos no pre-aprobados).
+- **Consistencia en Manifiestos:** Si un nuevo componente depende de otros recursos lógicos de la biblioteca o de utilidades del sistema, estas deben registrarse obligatoriamente en el array `internal` de la sección `dependencies` del manifiesto JSON (Frontmatter de metadatos del markdown `.md`), garantizando la trazabilidad durante la inyección.
+
+
+---

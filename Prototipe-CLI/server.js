@@ -6198,7 +6198,10 @@ app.post('/api/project/dev/start', async (req, res) => {
   }
 
   try {
-    const child = spawn('npm', ['run', 'dev'], {
+    // Determinar el puerto único de forma dinámica y determinista para evitar colisiones
+    const forcedPort = 5100 + (clientId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 100);
+
+    const child = spawn('npm', ['run', 'dev', '--', '--port', forcedPort.toString()], {
       cwd: projectDir,
       shell: true,
       env: { ...process.env, FORCE_COLOR: '0' }
@@ -6231,7 +6234,7 @@ app.post('/api/project/dev/start', async (req, res) => {
       const timeout = setTimeout(() => {
         if (!urlResolved) {
           urlResolved = true;
-          resolve('http://localhost:5173'); 
+          resolve(`http://localhost:${forcedPort}`); 
         }
       }, 10000);
 

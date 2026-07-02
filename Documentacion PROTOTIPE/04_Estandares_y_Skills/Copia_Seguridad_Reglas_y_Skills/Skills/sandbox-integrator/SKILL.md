@@ -162,6 +162,9 @@ Incluye como controles solo las props que **cambian visualmente** el componente.
 ### Fidelidad visual
 El playground debe verse y comportarse como el componente real. Si el `.md` incluye capturas, estilos detallados o código de referencia, úsalos para que la recreación sea lo más fiel posible.
 
+### Estándar de Controles y Confirmación en Sandbox
+Al implementar filtros, opciones o controles interactivos en la interfaz del sandbox (fuera del panel de controles estándar de SandboxLayout), queda terminantemente prohibido usar selectores `<select>` nativos o confirmaciones directas. Debes emplear `CustomSelect` y `useAlertConfirm` del ecosistema para mantener la estética y el flujo de confirmación premium.
+
 ---
 
 ## Common Mistakes

@@ -123,8 +123,9 @@ Crear un archivo `.md` de documentación en español bajo el directorio específ
   - Archivo de Sandbox: [NEW] `[GIT_ROOT]/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/[NombreComponente]Sandbox.jsx`
 - **Tareas Obligatorias:**
   1. **Creación del Archivo de Sandbox:** Queda estrictamente PROHIBIDO inyectar la lógica del componente o del playground inline en `ComponentSandbox.jsx`. Se debe crear un archivo independiente `src/components/admin/sandboxes/[NombreComponente]Sandbox.jsx` que exporte por defecto el sandbox interactivo con sus propios controles, imports y componentes de apoyo embebidos.
-  2. **Resolución Automática por Globbing:** La Consola Central resuelve y carga dinámicamente los playgrounds usando `import.meta.glob('./sandboxes/*.jsx')`. No es necesario registrar imports estáticos.
-  3. **Registro de Aliases en `COMPONENT_SANDBOX_MAP`:** Si el nombre de archivo Sandbox difiere del nombre o technicalName del componente, edita `ComponentSandbox.jsx` y agrega el mapeo de alias en `COMPONENT_SANDBOX_MAP`.
+  2. **Importación de SandboxLayout:** Dentro del archivo de Sandbox creado, la importación de `SandboxLayout` **debe ser relativa directa** (`import { SandboxLayout } from './SandboxLayout';`). Queda estrictamente prohibido usar imports absolutos o subir de nivel (`../SandboxLayout`), ya que causaría fallos de compilación en Vite.
+  3. **Resolución Automática por Globbing:** La Consola Central resuelve y carga dinámicamente los playgrounds usando `import.meta.glob('./sandboxes/*.jsx')`. No es necesario registrar imports estáticos en `ComponentSandbox.jsx`.
+  4. **Registro OBLIGATORIO de Mapeo (Evitar Fallo Prebuild):** Para que el script de prebuild `verify_library_integrity.cjs` asocie correctamente la ficha de documentación física con el playground del dashboard, **debes registrar obligatoriamente** el alias y nombre del componente en minúsculas en el mapa `COMPONENT_SANDBOX_MAP` de `ComponentSandbox.jsx` (ej: `'nombre_componente': 'NombreComponente'`). Si el componente no tiene UI (como hooks lógicos o servicios puros), regístralo en la constante `COMPONENT_META` describiendo su tipo y notas.
 
 ---
 
@@ -202,5 +203,8 @@ Registrar el cambio en:
    - Bordes: `border-[var(--color-border)]`
    - Textos: `text-[var(--color-text)]` / `text-[var(--color-text-muted)]`
    - Marca: `text-[var(--color-primary)]` / `bg-[var(--color-primary)]`
-3. **Control de Desbordamiento:** El contenedor directo del componente **no** debe tener `overflow-hidden` si hay animaciones de escala. Usar `py-4` exterior para dar holgura.
-4. **Interactividad:** Siempre incluir microinteracciones, estados de carga y estados de error/vacío elegantes.
+ 3. **Control de Desbordamiento:** El contenedor directo del componente **no** debe tener `overflow-hidden` si hay animaciones de escala. Usar `py-4` exterior para dar holgura.
+ 4. **Interactividad:** Siempre incluir microinteracciones, estados de carga y estados de error/vacío elegantes.
+ 5. **Estándar de Controles:** Prohibido usar selectores `<select>` nativos del navegador; usar obligatoriamente `CustomSelect` (de `src/components/ui/CustomSelect.jsx`) configurado con las variables HSL correspondientes.
+ 6. **Estándar de Confirmación:** En todo flujo de eliminación, limpieza o acción destructiva del componente, es obligatorio requerir confirmación asíncrona mediante el hook `useAlertConfirm` con `variant: 'error'` o `variant: 'warning'`.
+ 7. **Prohibición de Dependencias Huérfanas:** Queda terminantemente prohibido importar componentes o utilidades inexistentes o que no estén declarados en `package.json` (ej: no usar `TapShield`). Registra toda dependencia real del proyecto en la sección `dependencies` de los manifiestos de documentación.
