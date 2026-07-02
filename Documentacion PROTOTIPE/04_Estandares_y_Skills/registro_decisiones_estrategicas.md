@@ -14,6 +14,16 @@ Este archivo consolida las decisiones operativas, técnicas, comerciales y arqui
   2. **Smoke Test Universal**: Desacoplar Playwright del package.json local, permitiendo resolverlo desde `CLI_ROOT/node_modules/playwright` como fallback.
   3. **Registro Central Resiliente**: Escribir registros fallidos en una cola local JSON (`failed_central_registrations.json`) ante desconexiones de red, procesándolo asíncronamente cada 60s en Express.
 
+### DEC-004: Auditoría de Drift Downstream e Integridad de Build
+* **Fecha:** 2026-07-01
+* **Contexto:** Sincronizar clientes exponía el riesgo de propagar cambios rotos si las dependencias locales diferían o el build local fallaba.
+* **Decisión:** Implementar en el CLI bridge la detección de drift NPM (`mismatchDeps`, `missingDeps`, `addedDeps`), el cálculo de un `consistencyScore` de Cores, y obligar a ejecutar un dry-run de compilación de Vite (`buildAudit=true`) sobre la instancia antes de propagar cambios o desplegar a Hosting.
+
+### DEC-005: Auto-setup CORS y caché elástico de Storage
+* **Fecha:** 2026-07-01
+* **Contexto:** Inyectar cabeceras CORS en Firebase Storage de forma manual arrojaba errores recurrentes por buckets del formato `.firebasestorage.app` ausentes.
+* **Decisión:** Desarrollar en el Express backend un resolvedor con fallback que intente configurar el CORS usando `gsutil` en el bucket principal y conmute automáticamente a `.firebasestorage.app` en caso de error 404, implementando una caché en memoria (`storageBucketCache`) para agilizar subsiguientes consultas.
+
 ### DEC-002: Purga Absoluta de Seeding e Inteligencia Artificial
 * **Fecha:** 2026-06-24
 * **Contexto:** Se detectaron advertencias de seguridad y excesiva complejidad por la inyección de Cloud Functions de IA (Gemini/Vertex) y scripts de siembra no requeridos por el modelo de negocio actual.

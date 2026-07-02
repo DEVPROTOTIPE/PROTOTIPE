@@ -20,6 +20,8 @@ La información recopilada servirá como base para:
 - Definición de arquitectura.
 - Parametrización del sistema.
 
+*Este cuestionario y proceso de levantamiento se encuentra digitalizado en el panel interactivo **Briefing Studio** en la consola del desarrollador. Sus 20 pasos alimentan la skill `@briefing-analizador` (`d:\PROTOTIPE\.agents\skills\briefing-analizador\SKILL.md`), la cual evalúa de forma automática la viabilidad técnica contra la biblioteca de componentes y calcula la complejidad estimada para sugerir el Setup óptimo.*
+
 ---
 
 ## 1. INFORMACIÓN GENERAL

@@ -161,27 +161,32 @@ A continuación se detalla el comportamiento lógico, responsabilidades y funcio
   * `auditarDependencias(pkg, name)`: Audita versiones de React, Firebase, Tailwind y Vite en el template contra un listado estático ("versiones de oro") alertando desviaciones.
 
 #### 📄 [server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js)
-* **Comportamiento:** API Express robusta que sirve de puente entre el frontend `dev-dashboard` y las funciones del CLI (creación, deploys, logs SSE, testings, git).
+* **Comportamiento:** API Express robusta que sirve de puente entre el frontend `dev-dashboard` y las funciones del CLI (creación, deploys, logs SSE, testings, git, CORS Storage y auditorías NPM).
 * **Funciones Clave:**
   * `sanitizeShellArgument(arg)`: Filtra caracteres shell peligrosos.
   * `isPathContained(parent, child)`: Valida contención física contra Directory Traversal.
   * `validateHSLColors(primary, bg)`: Comprueba contrastes WCAG de legibilidad (mínimo delta de 30% de luminosidad).
-  * *Endpoints Mapeados:* Exposición de APIs REST y streaming Server-Sent Events (SSE) para tests E2E y despliegues en caliente.
+  * `performCoreSync(coreKey, options)`: Sincroniza y sanitiza plantillas del disco con poda elástica.
+  * `findProjectDir(clientId)`: Resuelve la ruta raíz física de la instancia de cliente de forma concurrente y segura.
+  * *Endpoints Mapeados:* Exposición de APIs REST y streaming Server-Sent Events (SSE) para tests E2E, autoinstalación de dependencias NPM, logs en caliente, `/api/project/firebase/cors-setup` con caché local de buckets, y `/api/project/drift` con `buildAudit=true`.
 
 ---
 
 ### 2.3 Archivos en `Central PROTOTIPE/dev-dashboard/`
 
 #### 📄 [src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx)
-* **Comportamiento:** El core visual del dashboard. Es un monolito masivo de 10.438 líneas que contiene toda la lógica de rutas, inicio de sesión Firebase Auth, wizard de registro, panels de E2E, deploy SSE, gestión de cores, edición de envs y reportes.
+* **Comportamiento:** El core visual del dashboard. Contiene la lógica de enrutamiento multi-tab, inicio de sesión Firebase Auth, wizard de aprovisionamiento SSE, panel de Git Backup y consolas.
 
 #### 📄 Componentes de Administración (`src/components/admin/`)
-* [ComponentLibraryView.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx): Renderiza snippets y Markdown de la biblioteca.
-* [ComponentSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx): Playground interactivo de renderizados cromáticos HSL.
-* [CoreCard.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx): Card UI de plantillas core.
-* [CoreSyncPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx): Panel de activación y push de cores.
+* [ComponentLibraryView.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx): Catálogo a doble columna de componentes con "CSS Doctor" y asistente de inyección SSE de componentes.
+* [ComponentSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx): Playground interactivo de componentes con carga dinámica automática vía `import.meta.glob`.
+* [CoreCard.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx): Card UI de plantillas core con visualizador de paridad física, diffs perezosos y reportes de huérfanos.
+* [CoreManagerPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreManagerPanel.jsx): Panel de control para registrar y clonar plantillas core.
 * [E2EPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/E2EPanel.jsx): Suite visual de tests Playwright con SSE.
-* [GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx): SSE streams de git backup.
+* [GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx): SSE streams de git backup y descarte de cambios en caliente.
+* [RecaudoPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/RecaudoPanel.jsx): Módulo de recaudación de comisiones con agrupación por cliente y recordatorios de WhatsApp.
+* [CobrosPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CobrosPanel.jsx): Historial periodizado de cobros con side drawers y reversión de transacciones.
+* [HealthRadar.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/HealthRadar.jsx): Widget interactivo tipo sonar para monitoreo en vivo de la disponibilidad HTTP de instancias de clientes.
 
 #### 📄 [src/services/pdfService.js](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/services/pdfService.js)
 * **Comportamiento:** Genera exportaciones de PDFs profesionales para los briefings, hojas de ruta de clientes y reportes de comisiones de desarrollo.

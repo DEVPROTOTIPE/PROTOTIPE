@@ -72,10 +72,10 @@ En todos los casos, el acceso será limitado, controlado y justificado.
 
 PROTOTIPE implementa medidas razonables de seguridad para proteger la información del cliente, incluyendo:
 *   Control de accesos.
-*   Separación de bases de datos por cliente.
-*   Respaldo periódico de información.
+*   Separación de bases de datos por cliente (Sharding por Proyecto Firebase), garantizando aislamiento absoluto de datos entre inquilinos.
+*   Respaldo periódico de información y control local offline-first en transacciones críticas.
 *   Protección contra accesos no autorizados.
-*   Monitoreo de integridad del sistema.
+*   Monitoreo de integridad del sistema mediante canales de telemetría de errores (`app_failures`) anonimizados y de transmisión asíncrona dual.
 
 ---
 

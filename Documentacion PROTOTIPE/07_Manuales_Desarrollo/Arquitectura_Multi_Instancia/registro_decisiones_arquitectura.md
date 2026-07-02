@@ -132,3 +132,54 @@ Implementar un **Canal de Telemetría Asíncrono** desacoplado del flujo crític
 
 ### Riesgos y Mitigación
 *   **Drift de Saldos:** Retraso temporal en la actualización de comisiones en el panel del administrador central. *Mitigación:* Se implementó un detector de conectividad en el dashboard (`connectivity_toast.md`) y el visor comisional indica visualmente si hay transacciones pendientes de sincronización local.
+
+---
+
+## ADR-006: Playgrounds dinámicos auto-detectables (Zero-Configuration Sandboxes)
+
+### Estado
+**Aprobado**
+
+### Contexto
+Declarar manualmente cada playground en `ComponentSandbox.jsx` introducía acoplamiento estático y aumentaba el riesgo de regresiones al agregar o modificar componentes en la biblioteca de desarrollo.
+
+### Decisión
+Utilizar `import.meta.glob` de Vite para escanear y cargar de forma dinámica los archivos de sandbox interactivos ubicados en `src/components/admin/sandboxes/` en tiempo de ejecución.
+
+### Ventajas
+* **Mantenimiento Cero**: Crear un archivo de playground bajo el estándar de nomenclatura lo registra de forma automática en la consola.
+* **Aislamiento de Fallos**: El renderizado dinámico se encapsula con un `SandboxErrorBoundary` que evita que caídas en tiempo de ejecución del sandbox afecten a la consola.
+
+---
+
+## ADR-007: Fallback de Storage bucket y caching CORS local
+
+### Estado
+**Aprobado**
+
+### Contexto
+El aprovisionamiento automatizado fallaba o experimentaba demoras críticas al intentar inyectar reglas CORS sobre buckets `.appspot.com` inexistentes en proyectos Firebase nuevos que usan el formato `.firebasestorage.app`.
+
+### Decisión
+Implementar un resolvedor dinámico con fallback elástico en `server.js` (`/api/project/firebase/cors-setup`) que conmuta automáticamente de bucket en caso de error 404, almacenando en caché en memoria (`storageBucketCache` de tipo Map indexado por `clientId`) el bucket exitoso del cliente para evitar repeticiones de red.
+
+### Ventajas
+* **Resiliencia**: Autodetecta el tipo de bucket asignado por la nube al proyecto Firebase del cliente.
+* **Rendimiento**: Elimina latencias y llamadas redundantes del comando `gsutil` en subsiguientes cargas o sincronizaciones.
+
+---
+
+## ADR-008: Canal de telemetría de canal dual (Dual-channel sink)
+
+### Estado
+**Aprobado**
+
+### Contexto
+Las políticas estrictas de CORS y bloqueos de red local impedían al dashboard central recibir reportes de telemetría e incidentes en vivo directamente desde el backend de Express o clientes de desarrollo.
+
+### Decisión
+Implementar una arquitectura de transmisión dual en `telemetryService.js`. Intenta escribir primero directamente a la base de datos de control de Firestore Central a través de la inicialización de una segunda aplicación de Firebase (`centralFirebaseService.js`) con credenciales de lectura y escritura específicas, y ofrece un fallback elástico por HTTPS llamando a una Cloud Function si la conexión de base de datos directa es bloqueada.
+
+### Ventajas
+* **Garantía de Recepción**: Asegura que el dashboard del desarrollador reciba reportes e incidentes aun bajo restricciones severas de CORS o bloqueos de red.
+* **Desacoplamiento**: Mantiene la independencia de base de datos de cada cliente y centraliza el control.

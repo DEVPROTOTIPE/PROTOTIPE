@@ -1,6 +1,6 @@
-# Propuesta de Centralización de Facturación y Comisiones (Multitenancy Ecosistema)
+# Centralización de Facturación y Comisiones (Multitenancy Ecosistema)
 
-Para evitar la necesidad de ingresar individualmente a las bases de datos o paneles de administración de cada cliente a fin de mes, proponemos una arquitectura de **Notificación Distribuida (Push-based Consolidation)**. Esta solución permite a cada aplicación reportar sus métricas de manera autónoma a un único panel de control centralizado propiedad del desarrollador.
+Este documento detalla la arquitectura de **Centralización de Facturación y Comisiones** implementada y operativa a través del Developer Cockpit. La integración permite a cada aplicación de cliente reportar de manera segura y en background sus métricas a la consola centralizada utilizando transmisiones directas y fallbacks HTTPS.
 
 ---
 

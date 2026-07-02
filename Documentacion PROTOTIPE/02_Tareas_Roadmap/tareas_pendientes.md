@@ -4,6 +4,27 @@ Este documento registra de forma dinámica las tareas del motor **Prototype CLI*
 
 ---
 
+* **[x] ~~Tarea CORE-159: Creación del Componente Reutilizable CircularDishMenu y Sandbox~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Se desarrolló el componente gastronómico `CircularDishMenu` e integró su playground de forma consolidada en `CircularDishMenuSandbox.jsx`. Se documentó en la biblioteca (`circular_dish_menu.md`) y se registró en los índices de catálogo y mapas.
+  - Archivos: [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Menus/CircularDishMenu/circular_dish_menu.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Menus/CircularDishMenu/circular_dish_menu.md) [NEW], [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CircularDishMenuSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CircularDishMenuSandbox.jsx) [NEW]
+
+* **[x] ~~Tarea CORE-158: Alineación y Sincronización Completa de la Documentación del Ecosistema~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Se alinearon y sincronizaron los 29 archivos principales de la carpeta `Documentacion PROTOTIPE` (que incluyen guías visuales, manuales, decisiones de arquitectura, glosarios y diagramas Mermaid) con las nuevas capacidades del ecosistema multicore, auto-aprovisionamiento y telemetría de facturación.
+  - Archivos: [`Documentacion PROTOTIPE/`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/) [MODIFY 29 files]
+
+* **[x] ~~Tarea CORE-157: Implementación de Alternador de Modo Oscuro en Perfil de Cliente (App Ventas)~~**
+  - Estatus: Completado.
+  - Fecha de registro: 2026-07-01
+  - Fecha de finalización: 2026-07-01
+  - Descripción: Se agregó una tarjeta interactiva con un switch/toggle animado en Framer Motion dentro de la vista de ajustes del perfil del cliente (`ClientProfile.jsx`) conectada con `useAppConfigStore` para alternar entre el modo claro y oscuro en caliente en toda la aplicación.
+  - Archivos: [`Plantillas Core/App Ventas/src/pages/client/ClientProfile.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientProfile.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-156: Auditoría Técnico Documental y Saneamiento General de los Mapas y Bitácoras~~**
   - Estatus: Completado.
   - Fecha de registro: 2026-07-01

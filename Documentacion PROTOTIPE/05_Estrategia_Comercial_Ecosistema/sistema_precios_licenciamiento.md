@@ -166,11 +166,11 @@ La propiedad intelectual del software seguirá perteneciendo a PROTOTIPE.
 
 ## Suspensión por falta de pago
 
-Proceso recomendado:
+Proceso recomendado (automatizado mediante las banderas de telemetría de facturación `telemetryActive` y `billingSuspended` controladas desde el `RecaudoPanel` en el Dashboard Central):
 
-1.  Notificación de vencimiento.
-2.  Recordatorio de pago.
-3.  Restricción parcial del servicio.
-4.  Suspensión temporal.
-5.  Archivado de datos.
+1.  Notificación de vencimiento (recordatorio interactivo automático vía WhatsApp desde el RecaudoPanel).
+2.  Recordatorio de pago (segundo aviso en pantalla de administración del cliente).
+3.  Restricción parcial del servicio (bloqueo de accesos de administrador).
+4.  Suspensión temporal (bloqueo total de la instancia cliente con cartelera informativa).
+5.  Archivado de datos (exportación de base de datos a Storage Central).
 6.  Eliminación definitiva según plazos establecidos contractualmente.

@@ -63,6 +63,9 @@ flowchart TB
         CGit["GitBackupPanel.jsx<br>(Control Versiones SSE)"]:::ui
         CLibrary["ComponentLibraryView.jsx<br>(Catálogo de Componentes)"]:::ui
         CSandbox["ComponentSandbox.jsx<br>(Playgrounds dinámicos)"]:::ui
+        CRecaudo["RecaudoPanel.jsx<br>(Cartera & WhatsApp Alerts)"]:::ui
+        CCobros["CobrosPanel.jsx<br>(Cobros & Reversiones Drawers)"]:::ui
+        CHealth["HealthRadar.jsx<br>(Live Sonar Monitor)"]:::ui
         
         %% Hooks y Servicios
         HPdf["pdfService.js<br>(Generador PDFs)"]:::ui
@@ -75,6 +78,9 @@ flowchart TB
         AppJSX --> CGit
         AppJSX --> CLibrary
         AppJSX --> CSandbox
+        AppJSX --> CRecaudo
+        AppJSX --> CCobros
+        AppJSX --> CHealth
         CManager --> CCard
         
         AppJSX --> HPdf

@@ -140,3 +140,14 @@ Ten precaución si durante el descubrimiento notas estos patrones:
 > 1. El desorden y fricción operativa de su día a día actual.
 > 2. El costo económico real de mantener esos errores durante un año.
 > 3. La tranquilidad y escalabilidad que experimentará una vez automatizados sus procesos.
+
+---
+
+## 🤖 COGNITIVE SKILL — `@objection-handler`
+
+Esta guía de objeciones comerciales está totalmente digitalizada y cargada en la skill activa de IA `@objection-handler` (`d:\PROTOTIPE\.agents\skills\objection-handler\SKILL.md`). 
+
+Cuando la IA asiste al desarrollador en negociaciones, el operador técnico puede invocar esta skill para:
+1. **Analizar la objeción técnica o comercial**: Clasifica el tipo de objeción (costo, confianza, hosting, tiempo, personalización).
+2. **Generar propuestas de valor personalizadas**: Estructura respuestas empáticas basadas en el dolor real del nicho comercial (ej. inventarios en ferreterías o comisiones en restaurantes).
+3. **Calcular viabilidad comisional**: Determina si es viable proponer esquemas alternativos (ej. disminuir Setup único a cambio de incrementar la comisión de ventas en 1%).

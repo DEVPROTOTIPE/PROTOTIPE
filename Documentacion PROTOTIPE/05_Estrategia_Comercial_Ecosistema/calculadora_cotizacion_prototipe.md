@@ -16,7 +16,7 @@ Establecer una metodología estándar para calcular:
 * Riesgo del proyecto.
 * Rentabilidad esperada.
 
-*Esta calculadora sirve como guía interna de PROTOTIPE y **no debe compartirse directamente con el cliente**.*
+*Esta calculadora sirve como guía interna de PROTOTIPE y **está integrada de forma interactiva en la pestaña del [CotizadorView.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CotizadorView.jsx) del Dashboard central, permitiendo cotizar en 5 pasos y descargar la propuesta comercial formal en PDF.***
 
 ---
 

@@ -1,5 +1,21 @@
 # CHANGELOG GENERAL PROTOTIPE
 
+## 2026-07-01
+
+### Tecnología
+- **Módulos de Cobros y Recaudo**: Implementado `RecaudoPanel.jsx` (cartera agregada, telemetría de facturación y recordatorios automatizados de WhatsApp) y `CobrosPanel.jsx` (cajón lateral de transacciones y reversión de cobros).
+- **Radar de Salud**: Creado `HealthRadar.jsx` en el cockpit con barrido de radar GPU y coordenadas polares para auditar la disponibilidad HTTP de instancias de clientes en tiempo real.
+- **Auditoría de Paridad y Drift de NPM**: Agregado soporte en el CLI bridge para detectar drift de dependencias NPM (`mismatchDeps`, `missingDeps`, `addedDeps`) y calcular de forma matemática el `consistencyScore` de cada Core.
+- **Configurador CORS Automatizado**: Añadido endpoint `/api/project/firebase/cors-setup` que realiza la inyección automática de cabeceras CORS en Google Cloud Storage mediante `gsutil`, soportando fallback resiliente del bucket `.appspot.com` a `.firebasestorage.app` y caching local en memoria (`storageBucketCache`).
+- **Dry-run de Vite en Sincronización**: Integrado parámetro `buildAudit=true` en el endpoint `/api/project/drift` que valida la integridad física compilando localmente la aplicación del cliente antes del deploy.
+- **Playgrounds Dinámicos**: Modificado `ComponentSandbox.jsx` para autodescubrir playgrounds interactivos de componentes en caliente mediante `import.meta.glob` de Vite.
+- **Seguridad Robustecida**: Mitigación de fugas por Directory Traversal usando `isPathContained`, control de concurrencia al leer plantillas, inyección de tokens de telemetría y descarte de cambios en caliente en `GitBackupPanel`.
+
+### Documentación
+- **Alineación del Ecosistema**: Actualizados 29 archivos de documentación oficial para reflejar la infraestructura multicore y el auto-aprovisionamiento.
+
+---
+
 ## 2026-06-25
 
 ### Tecnología

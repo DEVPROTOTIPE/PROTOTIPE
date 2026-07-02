@@ -177,12 +177,14 @@ A continuación se detalla el comportamiento lógico, responsabilidades y funcio
 * **Comportamiento:** El core visual del dashboard. Es un monolito masivo de 10.438 líneas que contiene toda la lógica de rutas, inicio de sesión Firebase Auth, wizard de registro, panels de E2E, deploy SSE, gestión de cores, edición de envs y reportes.
 
 #### 📄 `src/components/admin/`
-* `ComponentLibraryView.jsx`: Renderiza y formatea archivos Markdown de documentación y snippets de la biblioteca de componentes.
-* `ComponentSandbox.jsx`: Playground con inputs interactivos para cambiar dinámicamente colores HSL y previsualizar layouts de componentes portables.
-* `CoreCard.jsx`: Card de UI que muestra el estado de compilación, versión y nicho de las plantillas core.
-* `CoreSyncPanel.jsx`: Interfaz para activar, desactivar y propagar cambios de plantillas core.
-* `E2EPanel.jsx`: Panel que permite disparar ejecuciones de Playwright en servidores locales y muestra logs de testings en tiempo real.
-* `GitBackupPanel.jsx`: Interfaz conectada a SSE que ejecuta los scripts de backup del ecosistema maestro y muestra el progreso de Git línea por línea.
+* `ComponentLibraryView.jsx`: Catálogo a doble columna con "CSS Doctor" y asistente de inyección SSE de componentes.
+* `ComponentSandbox.jsx`: Playground con carga dinámica de sandboxes vía `import.meta.glob`.
+* `CoreCard.jsx`: Card de UI con cálculo perezoso de diffs y detección de huérfanos.
+* `E2EPanel.jsx`: Panel que permite disparar ejecuciones de Playwright y ver logs SSE en tiempo real.
+* `GitBackupPanel.jsx`: Control de Git Backup con descarte de cambios en caliente.
+* `RecaudoPanel.jsx`: Módulo de recaudación de comisiones con agrupación por cliente y recordatorios de WhatsApp.
+* `CobrosPanel.jsx`: Historial periodizado de cobros con side drawers y reversión de transacciones.
+* `HealthRadar.jsx`: Sonar interactivo GPU para monitoreo de disponibilidad HTTP de las instancias.
 
 #### 📄 `src/services/pdfService.js`
 * **Comportamiento:** Genera exportaciones de PDFs profesionales para los briefings, hojas de ruta de clientes y reportes de comisiones de desarrollo.

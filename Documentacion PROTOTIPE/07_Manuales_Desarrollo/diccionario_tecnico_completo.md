@@ -1021,14 +1021,21 @@
         *   `POST /api/project/dev/start`
         *   `POST /api/project/dev/stop`
         *   `GET /api/project/drift/global`
+        *   `GET /api/project/drift` (Auditoría de drift downstream de un cliente con `buildAudit=true`)
+        *   `POST /api/project/firebase/cors-setup` (Configurador automático de reglas CORS con caché de Storage)
         *   `GET /api/project/dev/logs-stream` (SSE)
         *   `GET /api/project/dependencies/install` (SSE)
         *   `POST /api/git/discard`
         *   `GET /api/git/diff-file`
         *   `GET /api/project/file`
     *   Firebase Services (Central de Control):
-        *   Firebase Auth: Para autenticar el acceso de desarrollador.
-        *   Firebase Firestore: Colecciones `clientes_control`, `reportesBilling`, `tokens`, `historial_respaldos`, `fallos_telemetria`, etc., con suscripción en tiempo real (`onSnapshot`) e inyecciones de reportes.
+        *   Firebase Auth: Para autenticar el acceso del desarrollador.
+        *   Firebase Firestore:
+            *   `clientes_control`: Registra el estado de aprovisionamiento, nicho, versión instalada, banderas de suspensión, y métricas de drift (`consistencyScore`, `mismatchDeps`, `missingDeps`, `addedDeps`).
+            *   `reportesBilling` / `cobros`: Consolidado mensual de ventas, comisiones facturadas y estado de pago de cada cliente.
+            *   `app_failures`: Reportes automáticos de excepciones React en producción.
+            *   `briefings`: Respuestas del Briefing Studio de preventa.
+            *   `tokens` y `historial_respaldos`: Claves de comunicación de telemetría y logs de backups del sistema.
 
 
 

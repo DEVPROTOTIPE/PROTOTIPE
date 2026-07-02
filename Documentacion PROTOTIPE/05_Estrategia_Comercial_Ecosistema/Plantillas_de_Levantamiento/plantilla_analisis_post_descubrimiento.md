@@ -11,7 +11,7 @@
 
 Transformar la información obtenida durante el proceso de descubrimiento en un diagnóstico estructurado que permita diseñar una solución tecnológica alineada con las necesidades del cliente.
 
-Este documento debe completarse internamente por PROTOTIPE y **no se entrega al cliente**.
+*Esta evaluación interna está digitalizada y automatizada a través de la skill `@post-discovery-analyzer` (`d:\PROTOTIPE\.agents\skills\post-discovery-analyzer\SKILL.md`), la cual genera el plan de inyección detallado, el mapeo de dependencias físicas del package.json de la plantilla core, y la inyección automatizada de variables de entorno HSL en `.env.local`.*
 
 ---
 

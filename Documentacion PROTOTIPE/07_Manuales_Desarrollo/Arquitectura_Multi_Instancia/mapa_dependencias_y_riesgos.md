@@ -15,6 +15,9 @@ graph TD
         App[App.jsx] --> View[ComponentLibraryView.jsx]
         App --> Sand[ComponentSandbox.jsx]
         App --> PDF[pdfService.js]
+        App --> Recaudo[RecaudoPanel.jsx]
+        App --> Cobros[CobrosPanel.jsx]
+        App --> Health[HealthRadar.jsx]
     end
 
     %% Capa Servidor API

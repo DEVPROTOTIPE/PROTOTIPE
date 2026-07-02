@@ -68,3 +68,12 @@ PROTOTIPE comunicará mediante:
 PROTOTIPE no es solo software.
 
 Es una herramienta de transformación operativa para negocios reales.
+
+---
+
+## 8. Sistema de Marca Blanca para Instancias Clientes
+
+Para los inquilinos (tenants) del ecosistema, la identidad visual se define mediante:
+* **Colores HSL Dinámicos**: Inyección de variables de color (`--color-primary`, `--color-primary-accent`, `--color-background`) nativas de CSS, permitiendo al cliente cambiar cromáticamente toda la aplicación al instante.
+* **Validador de Contraste WCAG 2.1 AAA**: El aprovisionador de marca realiza cálculos matemáticos en caliente para garantizar que la legibilidad de la combinación de colores elegida mantenga una relación de contraste `>= 7.0:1`.
+* **Redimensionador Automático de Logo**: El CLI procesa las imágenes subidas por el cliente usando Jimp, adaptándolas a favicon, splash screens PWA y logos vectoriales sin deformación.

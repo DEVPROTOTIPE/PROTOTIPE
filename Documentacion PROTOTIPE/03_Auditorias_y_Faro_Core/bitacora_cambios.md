@@ -1,5 +1,69 @@
 # Bitácora de Cambios - Prototype CLI & Ecosistema (General)
 
+### [2026-07-01] - CORE-159: Creación del Componente Reutilizable CircularDishMenu y Sandbox
+
+* **Tipo:** UI Component / Playground Sandbox / Catalog Registration
+* **Firma de auditoría:** CORE-159-CIRCULAR-DISH-MENU-CREATION
+* **Descripción de Cambios:**
+  - **Desarrollo de CircularDishMenu**: Creación del componente gastronómico interactivo con snap scrolling horizontal, controles por teclado y soporte de subida de imágenes PNG locales.
+  - **Consolidación en Sandbox**: Implementación inline en `CircularDishMenuSandbox.jsx` para evitar contaminar la carpeta de UI general del dashboard.
+  - **Registro en Biblioteca**: Indexado de la ficha técnica `circular_dish_menu.md` en el catálogo (`README.md`), en el mapa de documentación (`mapa_documentacion_ia.md`) y mapeado en `ComponentSandbox.jsx`.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Menus/CircularDishMenu/circular_dish_menu.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Menus/CircularDishMenu/circular_dish_menu.md) [NEW]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CircularDishMenuSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CircularDishMenuSandbox.jsx) [NEW]
+  - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+
+### [2026-07-01] - CORE-158: Alineación y Sincronización Completa de la Documentación del Ecosistema
+
+* **Tipo:** Documentación / Auditoría / Sincronización
+* **Firma de auditoría:** CORE-158-DOCUMENTATION-PARITY-ALIGNMENT
+* **Descripción de Cambios:**
+  - **Sincronización y Actualización de 29 Archivos:** Se alinearon los archivos oficiales de la carpeta `Documentacion PROTOTIPE` (incluyendo guías visuales, decisiones de arquitectura, contratos, diagramas y glosarios técnicos) con las nuevas capacidades del ecosistema multicore, auto-aprovisionamiento, recordatorios de carteras, y consolas SSE.
+  - **Validación de Compilación e Integridad**: Se corrió el prebuild de integridad de biblioteca de componentes con éxito (87 componentes indexados, 0 enlaces rotos) y se compiló `dev-dashboard` con Vite para garantizar compatibilidad total en producción.
+  - **Sincronización del GPS Semántico**: Se actualizó la versión de sincronización del mapa de documentación `mapa_documentacion_ia.md` a `CORE-158`.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/estado_actual_ecosistema.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/estado_actual_ecosistema.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_arquitectonico_ecosistema.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/estandar_arquitectonico_ecosistema.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/registro_decisiones_arquitectura.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/registro_decisiones_arquitectura.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_final_prototipe.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_final_prototipe.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_completa_maestra_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_completa_maestra_2026.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/calculadora_cotizacion_prototipe.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/calculadora_cotizacion_prototipe.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/manejo_objeciones_cierre_ventas.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/manejo_objeciones_cierre_ventas.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/centralizacion_ganancias_desarrollador.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/centralizacion_ganancias_desarrollador.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/sistema_precios_licenciamiento.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/sistema_precios_licenciamiento.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/modelo_operativo_y_negocio.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/modelo_operativo_y_negocio.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/Plantillas_de_Levantamiento/briefing_maestro_cliente.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/Plantillas_de_Levantamiento/briefing_maestro_cliente.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/Plantillas_de_Levantamiento/plantilla_analisis_post_descubrimiento.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/Plantillas_de_Levantamiento/plantilla_analisis_post_descubrimiento.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/manual_marca.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/manual_marca.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/07_Manuales_Desarrollo/diagrama_flujo_ecosistema.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/diagrama_flujo_ecosistema.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/07_Manuales_Desarrollo/diccionario_tecnico_completo.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/diccionario_tecnico_completo.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/mapa_dependencias_y_riesgos.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/mapa_dependencias_y_riesgos.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/01_Control_Versiones/changelog_general.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/01_Control_Versiones/changelog_general.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/registro_decisiones_estrategicas.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/registro_decisiones_estrategicas.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/politica_proteccion_datos.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/politica_proteccion_datos.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+### [2026-07-01] - CORE-157: Implementación de Alternador de Modo Oscuro en Perfil de Cliente (App Ventas)
+
+* **Tipo:** Feature / UI/UX
+* **Descripción de Cambios:**
+  - **Switch de Modo Oscuro para Clientes:** Se implementó una tarjeta interactiva con un switch/toggle animado en Framer Motion dentro de la vista de ajustes del perfil del cliente (`ClientProfile.jsx`). Esto expone de forma directa la capacidad de cambiar de tema al usuario final (cliente), integrándose de forma limpia con `useAppConfigStore` y actualizando el tema claro/oscuro instantáneamente en toda la aplicación de ventas.
+* **Archivos Modificados:**
+  - [`Plantillas Core/App Ventas/src/pages/client/ClientProfile.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientProfile.jsx) [MODIFY]
+
+### [2026-07-01] - CORE-156: Auditoría Técnico Documental y Saneamiento General de los Mapas y Bitácoras
+
+* **Tipo:** Refactorización / Calidad Documental
+* **Descripción de Cambios:**
+  - **Saneamiento General:** Auditoría y remoción de duplicidades críticas en `mapa_documentacion_ia.md` (remoción de cabeceras redundantes y filas repetidas en sección 5).
+  - **Simplificación y Concisión**: Reestructuración de descripciones narrativas densas de `server.js` y `generator.js` en listas claras y legibles, agregando referencias a endpoints de gsutil CORS, drift, consistencyScore, variables NPM drift y el sonar HealthRadar.
+* **Archivos Modificados:**
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
 ### [2026-07-01] - CORE-155: Implementación de Auditoría de Compilación Vite, Consistencia del Core y Configuración CORS de Storage
 
 * **Tipo:** Feature / Robustez / Seguridad / Expansión de API / UX/DX

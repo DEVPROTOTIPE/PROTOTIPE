@@ -35,7 +35,7 @@ PROTOTIPE opera bajo una estrategia híbrida de **Software de Marca Blanca (Mult
 *   **Monitoreo del Servidor Local:** El bridge API Express registra accesos, consumos y logs SSE de tests de integración de forma persistente en logs de auditoría para revisiones preventivas.
 
 ### 2.5 Flujo de Mantenimiento y Resguardo
-*   **Backups Automatizados:** El operador técnico lanza respaldos rutinarios utilizando el menú de PowerShell. Los scripts encriptan y aíslan secretos locales de los clientes de los commits públicos de Git.
+*   **Backups Automatizados:** El operador técnico lanza respaldos rutinarios utilizando el panel `GitBackupPanel.jsx` en el Dashboard Central o mediante el menú interactivo. Los scripts y la UI controlan los cambios en caliente, descartan modificaciones no deseadas y excluyen variables de entorno privadas de los commits públicos.
 *   **Paridad de Versiones:** El motor de pruebas valida de manera automatizada las versiones de paquetes críticos (React, Firebase, Tailwind) en los templates contra una lista blanca estable para evitar drift de dependencias.
 
 ### 2.6 Flujo de Actualización Downstream (Clientes Activos)
