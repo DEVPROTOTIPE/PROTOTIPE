@@ -10,7 +10,8 @@
     4. **GitBackupPanel.jsx**: Panel Auditor de Commits con editor inline, badge de alerta animado y lógica de estado compartida. Panel Drift Map con selector de ramas cliente dinámico (cargado desde /api/git/cores-and-clients), semáforo visual de riesgo y lista de archivos en colisión.
     5. Whitelist de subcomandos de execGitCommand expandida con 'commit' para habilitar el amend.
     6. Build validado exitosamente: vite 1.48s sin errores de compilación ni de importaciones React.
-  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+    7. **Estabilización de Flujos y Blindaje de Upstream:** Alineación de historiales de producción (`master`/`main`) con desarrollo (`develop`) en los 4 repositorios del ecosistema para resolver los rechazos `non-fast-forward` en backups. Modificación de los scripts `subproject_backup.ps1` y `git_backup.ps1` para usar `git push -u origin` de forma obligatoria, asegurando la restauración automática del tracking upstream y eliminando el estado "Sin upstream".
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY], [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
 
 * **[x] ~~Tarea CORE-267: Sistema de Validación Tridimensional de Desviaciones en Caliente (Drift Analyzer)~~**
   - Estatus: Completado.
