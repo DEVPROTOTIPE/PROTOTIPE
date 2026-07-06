@@ -10,8 +10,8 @@
     4. **GitBackupPanel.jsx**: Panel Auditor de Commits con editor inline, badge de alerta animado y lógica de estado compartida. Panel Drift Map con selector de ramas cliente dinámico (cargado desde /api/git/cores-and-clients), semáforo visual de riesgo y lista de archivos en colisión.
     5. Whitelist de subcomandos de execGitCommand expandida con 'commit' para habilitar el amend.
     6. Build validado exitosamente: vite 1.48s sin errores de compilación ni de importaciones React.
-    7. **Estabilización de Flujos y Blindaje de Upstream:** Alineación de historiales de producción (`master`/`main`) con desarrollo (`develop`) en los 4 repositorios del ecosistema para resolver los rechazos `non-fast-forward` en backups. Modificación de los scripts `subproject_backup.ps1` y `git_backup.ps1` para usar `git push -u origin` de forma obligatoria, asegurando la restauración automática del tracking upstream y eliminando el estado "Sin upstream".
-  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY], [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+    7. **Estabilización de Flujos, Blindaje de Upstream y Alineación de Roadmap:** Alineación de historiales de producción (`master`/`main`) con desarrollo (`develop`) en los 4 repositorios del ecosistema para resolver los rechazos `non-fast-forward` en backups. Modificación de los scripts `subproject_backup.ps1` y `git_backup.ps1` para usar `git push -u origin` de forma obligatoria, asegurando la restauración automática del tracking upstream y eliminando el estado "Sin upstream". Alineación de fechas de 20 tareas históricas en `tareas_pendientes.md` para limpiar los drifts de commits de la sesión activa de 24h.
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY], [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY], [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
 
 * **[x] ~~Tarea CORE-267: Sistema de Validación Tridimensional de Desviaciones en Caliente (Drift Analyzer)~~**
   - Estatus: Completado.
@@ -62,7 +62,7 @@
 
 * **[x] ~~Tarea CORE-263: Automatización de Sembrado en Creación de Clientes y Limpiador con Escaneo Pre-Purgado~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-06
+  - Fecha: 2026-07-04
   - Descripción: Se integró el sembrado de base de datos de forma automática en la creación de instancias locales (`executeCreationTaskInBackground`) y la purga de temporales como paso previo en la compilación de hosting (`/api/project/deploy`). Además, se inyectó el botón de "Escanear Directorios" y visualizador pre-purgado en el panel de limpieza.
   - Archivos:
     - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
@@ -70,7 +70,7 @@
 
 * **[x] ~~Tarea CORE-262: Corrección de Listado de Instancias e Integración de Smart Seeding en el Dashboard~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-06
+  - Fecha: 2026-07-04
   - Descripción: Se corrigió la lectura y parseo de la lista de instancias locales para el Limpiador Caché, integrando un panel de "Smart Seeding" que lee y procesa de forma dinámica el archivo `seed.json` de la plantilla de origen, inyectando colores HSL e inicializando las colecciones requeridas sin lógica rígida.
   - Archivos:
     - [`Central PROTOTIPE/dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx) [MODIFY]
@@ -80,7 +80,7 @@
 
 * **[x] ~~Tarea CORE-261: Auditoría Exhaustiva de Efectos de Fondo y Estabilización de Desplegables~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-06
+  - Fecha: 2026-07-04
   - Descripción: Se realizó una revisión exhaustiva para garantizar estabilidad absoluta y cero regresiones en la personalización de fondos y desplegables. Se blindó el componente CustomSelect contra valores indefinidos y se sincronizó el prop de dirección con la plantilla core, validando todo con builds exitosos.
   - Archivos:
     - [`Central PROTOTIPE/dev-dashboard/src/components/ui/CustomSelect.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/ui/CustomSelect.jsx) [MODIFY]
@@ -88,7 +88,7 @@
 
 * **[x] ~~Tarea CORE-260: Personalización Global de Fondos y Parámetros Escalados del Mesh~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-06
+  - Fecha: 2026-07-04
   - Descripción: Se integró el soporte para controlar y escalar dinámicamente la difuminación, velocidad y tamaño de los orbes del mesh dinámico de fondo, así como un panel de configuración de apariencia global (temas de color, selectores hexadecimales, sliders y cursor spotlight) integrado en el módulo de salud del dashboard.
   - Archivos:
     - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
@@ -96,7 +96,7 @@
 
 * **[x] ~~Tarea CORE-259: Fondo Global Animado e Interacción Spotlight Raíz~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Se globalizó la animación del fondo tecnológico y el cursor tracking (Spotlight) a nivel raíz del dashboard, permitiendo un movimiento continuo sin recortes de borde en cualquier sección y extendiendo la interactividad del puntero a toda la ventana (`window`).
   - Archivos:
     - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
@@ -104,7 +104,7 @@
 
 * **[x] ~~Tarea CORE-258: Consistencia Física y Autocuración Inteligente del Catálogo~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Se actualizó y completó el módulo de integridad del catálogo robusteciendo linters de expresiones regulares (colores HEX con opacidades/hovers, localhost y puertos genéricos, paths multiplataforma), implementando el motor POST `/api/integrity/autofix` con respaldos preventivos (`autocure-backups/`) y embelleciendo semánticamente la consola de diagnóstico en el dashboard.
   - Archivos:
     - [`Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [MODIFY]
@@ -113,7 +113,7 @@
 
 * **[x] ~~Tarea CORE-257: Refinamiento de la Consola de Logs del Bridge en el Dashboard~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Se mejoró la consola de visualización de logs en vivo en el dev-dashboard eliminando ruido y agregando estilos de color interactivos.
     1. **Limpieza de ANSI:** Se agregó la limpieza de todos los códigos de escape ANSI usando expresiones regulares.
     2. **Formateo de Timestamp:** Se convirtió el timestamp ISO del log a la hora local corta (`HH:mm:ss`) para facilitar el escaneo visual.
@@ -123,7 +123,7 @@
 
 * **[x] ~~Tarea CORE-256: Robustecimiento de Sincronización Segura y Paridad de Dependencias~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Se implementaron salvaguardas operativas de respaldos preventivos y paridad semántica de dependencias en el CLI.
     1. **Safe-Sync Backup:** Antes de realizar escrituras en el cliente, se crea una copia de seguridad física fechada en `.prototipe-backup/sync-backups/` para evitar pérdidas accidentales.
     2. **Paridad Semántica de package.json:** Habilitada la comparación lógica de dependencias y scripts, reportando drift únicamente ante elementos core faltantes o desactualizados.
@@ -132,7 +132,7 @@
 
 * **[x] ~~Tarea CORE-255: Regulación Estricta y Prohibición de Descarte de Cambios Físicos~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Se implementó un estricto protocolo de seguridad documental y de configuración para prohibir a la IA el descarte autónomo de cambios y restauraciones de código.
     1. **Edición de AGENTS.md:** Se agregó una regla en la primera sección del archivo de reglas central prohibiendo operaciones destructivas (`git restore`, `git checkout --`, `git reset --hard`) sin consentimiento previo por escrito.
     2. **Propagación en GEMINI.md:** Se integró la misma directiva de seguridad en la cabecera de todos los archivos de configuración e instrucciones de IA (`GEMINI.md`) en el ecosistema (consola central, instancias de clientes, plantillas core y el CLI).
@@ -147,7 +147,7 @@
     - [`Instancias Clientes/ventas/ventas-moni-app/GEMINI.md`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/GEMINI.md) [MODIFY]
 
 * **[x] ~~Tarea CORE-254: Sincronización Defensiva, Blindaje de Empaquetado y Alineación de Instancias~~**
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Se garantizó la estabilidad del empaquetado y se alinearon las dependencias del cliente.
     1. **Auditoría Estática de Vite:** Se incorporó el validador `auditarViteConfig` en `test_templates.js` para asegurar de forma permanente la presencia de manualChunks y el fraccionamiento correcto del SDK de Firebase, bloqueando registros incorrectos.
     2. **Instalador Robusto:** Se añadió la opción `--legacy-peer-deps` al comando `npm install` ejecutado desde el backend en `server.js`.
@@ -161,7 +161,7 @@
 
 * **[x] ~~Tarea CORE-253: Fortalecimiento y Seguridad del Motor de Aprovisionamiento~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Auditoría completa de seguridad, compilación y marca sobre el motor y plantillas core.
     1. **Seguridad en Firestore:** Se parcharon las vulnerabilidades lógicas en `firestore.rules` del template y core (eliminación del bypass `|| true` en notificaciones, bloqueo del get público de PINs de empleados, y restricción de listados en órdenes, reclamos y créditos a celular del token autenticado).
     2. **Seguridad en Storage:** Se configuraron reglas de Storage cruzadas con Firestore para restringir la escritura a usuarios con rol `admin`.
@@ -183,7 +183,7 @@
 
 * **[x] ~~Tarea CORE-252: Sincronización de Matrices de Precios y Conexión Unificada del Ecosistema~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Se resolvió la brecha/drift entre el análisis de cotización del Briefing Studio y la Matriz de Precios Oficial administrada en el CotizadorView.
     1. **Sincronización y Caché en Backend:** Se adaptó el endpoint `/api/briefing/analyze` en `server.js` para leer la matriz directamente de Firestore (`dashboard_config/pricing_matrix`) e implementar fallbacks seguros en local. Se diseñó una caché en memoria de 3 minutos para prevenir consultas Firebase repetitivas. Se alinearon las fórmulas de cálculo de puntos para Personalización, Riesgos y Valor con las de `CotizadorView.jsx` (escala hasta 108 puntos).
     2. **Alineación de Estado y Formularios:** Se inyectaron las variables de estado `setupFee` y `editSetupFee` en `App.jsx`, agregando inputs interactivos en los formularios de Onboarding y Edición de Cliente en el CRM, renderizando el Costo de Setup en la tabla principal y tarjeta expandida de clientes de salud SaaS, y pasándolas en el payload del aprovisionador (`cliPayload`) e insertándolas en `clientes_control` de Firestore.
@@ -194,7 +194,7 @@
 
 * **[x] ~~Tarea CORE-251: Robustecimiento E2E del Flujo de Aprovisionamiento y Protección de Sobreescritura~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Se aplicó una auditoría de robustez al flujo de aprovisionamiento end-to-end.
     1. **Validaciones en UI:** En `App.jsx`, se agregaron validaciones y fallbacks nulos para desestructurar `analysisResult` sin riesgo de `TypeError`, y se limitó la consulta de `loadBriefingSessions` a 50 documentos ordenados descendientemente.
     2. **Protección de Sobreescritura en Inyección:** En `server.js`, se modificó el endpoint `/api/library/inject` para verificar si un archivo de componente ya existe: si es idéntico, reporta `already_present`; si tiene cambios, omite la escritura devolviendo `skipped_exists` para proteger el código personalizado, a menos que se envíe `{ overwrite: true }`. Además, se modificó el endpoint para respetar el path canónico (`manifest.targetPath`) definido por la biblioteca sobre los fallbacks genéricos calculados por el front.
@@ -208,14 +208,14 @@
 
 * **[x] ~~Tarea CORE-250: Corrección de Seguridad y Conversión a Arrays en la API de Git~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Se detectó que las llamadas a la API `/api/git/log` y otros comandos de sincronización de Git usando strings fallaban en el validador de seguridad `execGitCommand` debido a la presencia de comillas (`"`) u otros caracteres restringidos del regex sanitizador. Se convirtieron todas las llamadas inseguras en string a llamadas de array de argumentos estructurados (`['log', '-n', '5', '--pretty=format:...']`, `['checkout', branch]`, `['merge', branch]`, `['push', ...]`, `['stash', 'pop']`), eliminando la posibilidad de inyección de comandos en el shell y permitiendo que spawn/execGitCommand se ejecute sin levantar falsos positivos de seguridad.
   - Archivos:
     - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
 
 * **[x] ~~Tarea CORE-249: Integración Síncrona y Bidireccional de Briefing Studio y Asistente de Aprovisionamiento~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Se implementó una conexión bidireccional y síncrona de datos entre el Briefing Studio y el Asistente de Aprovisionamiento. En `BriefingStudioView.jsx`, la función `handleAnalyzeBriefing` ahora persiste el objeto `analysisResult` completo en Firestore al momento del diagnóstico y el callback de exportación transmite todo el payload de la sesión. En `App.jsx`, se implementó la función de mapeo centralizado `handleImportBriefingData` para cargar: nombre comercial, requerimientos traducidos a notas custom, branding de colores HSL, tipografía, autoselección de feature flags del core y de componentes recomendados de la biblioteca (utilizando normalización tolerante a fallos), tarifas comerciales y detección automática de nichos basada en keywords del sector. Adicionalmente, se integró el botón `"📥 Cargar desde Briefing"` y su correspondiente modal filtrable con buscador de sesiones de Firestore, soportando badges y alertas para sesiones pendientes de análisis.
   - Archivos:
     - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
@@ -224,7 +224,7 @@
 
 * **[x] ~~Tarea CORE-248: Sistema de Sincronización Dinámica del Catálogo de Componentes en el Prompt Maestro~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Se creó un script en Node.js (`sync-discovery-prompt.cjs`) que lee dinámicamente el `README.md` del catálogo de la biblioteca de componentes en `06_Biblioteca_Componentes` y actualiza automáticamente los marcadores de anclaje de comentarios en el `prompt_maestro_descubrimiento.md`. Esto asegura que el prompt de descubrimiento siempre cuente con el catálogo real del disco sin edición manual. Se integró este script como el paso 4.5 en la skill `integrity-compiler` (@postchange) para su ejecución automatizada y transparente.
   - Archivos:
     - [`Prototipe-CLI/scripts/sync-discovery-prompt.cjs`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/sync-discovery-prompt.cjs) [NEW]
@@ -233,21 +233,21 @@
 
 * **[x] ~~Tarea CORE-247: Blindaje del Schema JSON del Prompt Maestro de Descubrimiento~~**
   - Estatus: Completado.
-  - Fecha: 2026-07-05
+  - Fecha: 2026-07-04
   - Descripción: Prueba end-to-end reveló que LLMs externos inventaban campos, tipos y estructuras no reconocidas por el CLI. Se reescribió la sección 6 del prompt como contrato estricto: campos permitidos y sus tipos, nombres válidos de componentes, estructura exacta de customDeltasToBuild y ejemplos de referencia con datos reales. Se añadieron reglas globales de estructura (solo A→M) y de contrato JSON (schema no negociable).
   - Archivos: [`prompt_maestro_descubrimiento.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/prompt_maestro_descubrimiento.md) [MODIFY]
 
 * **[x] ~~Tarea CORE-246: Implementación del Importador de Manifiesto JSON de Aprovisionamiento~~**
   - Estatus: Completado.
-  - Fecha de registro: 2026-07-05
-  - Fecha de finalización: 2026-07-05
+  - Fecha de registro: 2026-07-04
+  - Fecha de finalización: 2026-07-04
   - Descripción: Se implementó un asistente de importación visual de manifiestos de aprovisionamiento JSON (Estrategia B) en el Dashboard Central (`dev-dashboard`). Se añadió un botón de acceso directo "🔌 Importar Manifiesto" que levanta una modal interactiva premium. El sistema parsea el JSON, valida la estructura y auto-configura en un solo clic: el nicho (soporta inyección dinámica de nuevos nichos a la lista local de `niches`), el template de origen, las feature flags lógicas del core (Créditos/Billing y DIAN) y selecciona en lote los componentes correspondientes del catálogo de la biblioteca en `selectedRecomendations`. Adicionalmente, mapea e inyecta en caliente el 100% de las variables estéticas de branding y lienzo visual del cliente (paleta de colores HSL primaria/secundaria/fondo/textos, fuentes Google Fonts, radio de bordes, modo de sombras, velocidad de animación, efectos de border beam/tilt y el bloque completo de personalización del canvas de partículas: tipo, tamaño, cantidad, opacidad, color, dirección y forma), permitiendo que el Design Studio se actualice visualmente en tiempo real. Concatena la especificación detallada de los deltas personalizados a construir (`customDeltasToBuild`) directamente en el campo de texto de requerimientos del cliente en un formato estructurado y legible, y rellena los metadatos SEO sugeridos.
   - Archivos:
     - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
 
 * **[x] ~~Tarea CORE-245: Actualización del Motor de Partículas y Sincronización del Generador CLI~~**
   - Estatus: Completado.
-  - Fecha de registro: 2026-07-05
+  - Fecha de registro: 2026-07-04
   - Fecha de finalización: 2026-  - Descripción: Se actualizó el motor de partículas (`BackgroundCanvas.jsx`) en el dev-dashboard y en la plantilla core del generador, incorporando física de envoltura perimetral continua en 4 direcciones de flujo (arriba, abajo, izquierda, derecha) y soporte de opacidad de partículas, luces glow difusas, chispas de 4 puntas procedimentales y partículas vectoriales SVG personalizadas para las 23 verticales de negocio oficiales. Se estructuró una biblioteca premium de más de 100 iconos vectorizados limpios de Lucide (110 iconos en total) distribuidos en 11 categorías lógicas (Geometría, Cosmos y Clima, E-commerce, Moda y Estilo, Naturaleza, Alimentos, Tecnología, Salud y Bienestar, Deporte y Arte, Educación, Estilo de Vida), encapsulados en un módulo reusable `particlesIcons.js` tanto en la app de simulación como en la plantilla semilla. Se corrigió un fallo crítico en la renderización de la biblioteca de iconos eliminando la llamada a `ctx.fill()` en el bloque de dibujo de iconos (niche) y estableciendo un grosor de trazo (`ctx.stroke()`) unificado de `1.6` con extremos redondeados (`lineCap = 'round'`); esto previene que las siluetas vectoriales diseñadas para contornos de Lucide se rellenen y se muestren como formas toscas, ciegas y deformadas, logrando en su lugar marcas de agua vectoriales de contorno sumamente nítidas, legibles y premium. Asimismo, se corrigió el renderizado de la biblioteca de selección de iconos en la cuadrícula del panel lateral ([`BrandingEffectsPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/BrandingEffectsPanel.jsx)) eliminando el relleno sólido `fill-current` y configurándolo como contorno transparente (`fill="none" stroke="currentColor" strokeWidth="2"`) para que coincidan perfectamente con la apariencia fina y elegante que se renderiza en la vista previa del canvas. Para garantizar la inyección en cualquier plantilla core (multicore), se adaptó [`generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) para que, en la fase de generación del proyecto, copie de forma proactiva `BackgroundCanvas.jsx` y `particlesIcons.js` a la carpeta `src/components/ui/` de la nueva app de destino. Se optimizó la inyección en `src/App.jsx` envolviéndola con comentarios de bloque administrado (`PROTOTIPE_BACKGROUND_CANVAS_START/END`) para lograr una inyección 100% idempotente que previene duplicados en regeneraciones sucesivas, inyectándose bajo 3 niveles de prioridad (slot explícito, BrowserRouter con props/basename y primer tag de apertura JSX tras return). Adicionalmente, se robusteció la inyección de estilos CSS reemplazando de forma selectiva y exclusiva el bloque delimitado por `BRANDING_EFFECTS_START/END` dentro de `:root`, impidiendo la pérdida de variables u overrides manuales del diseñador en el `:root` original de la plantilla. Tras el bucle de peer review con la IA externa, se implementó una optimización avanzada de rasterizado a demanda (`imageCache` con canvas en memoria temporal) para pre-renderizar los vectores complejos de Lucide a 60 FPS sin Garbage Collector overhead, y se garantizó la directriz WCAG 2.2 de contraste 3:1 inyectando un límite mínimo de opacidad en pantalla (`minAlpha` adaptado por luminosidad de fondo) combinada con un grosor de trazo dinámico (`lineWidth = 1.9` en tamaños menores a 14px). Se implementó un panel lateral avanzado de selección en `BrandingEffectsPanel.jsx` que expone un buscador textual en tiempo real y pestañas horizontales de scroll para clasificar y ubicar ágilmente cualquier figura. Se implementó el estado `bgParticlesIcon` (con fallback a `'default'` para respetar el nicho del cliente actual) en `App.jsx`, guardándose dinámicamente en el borrador (draft) del `localStorage` del Design Studio. Asimismo, se adaptó `generator.js` para compilar esta nueva variable y emitirla como `--bg-particles-icon` en el index.css del cliente final, y se sincronizó en el canvas del seed para su lectura en caliente a la primera tras la generación del proyecto. Se rediseñó el panel del Design Studio (`BrandingEffectsPanel.jsx`) integrando CustomSelect para dirección y forma, aumentando el límite de tamaño de partículas hasta 100px. Se corrigió un bug de superposición (apilamiento z-index) de `CustomSelect` inyectando capas dinámicas cuando está abierto y asignando `relative z-20` al contenedor principal del bloque de Lienzo & Fondos para sobreponerse a las transformaciones (`scale-105`) de botones hermanos. Se enlazaron las propiedades de callback faltantes en `App.jsx` para permitir la reactividad y actualización en tiempo real del canvas al interactuar. También se modificó `generator.js` para asegurar que el CLI aprovisione las nuevas variables y las inyecte de manera exacta en el CSS `:root` de la app cliente.
   - Archivos:de manera exacta en el CSS `:root` de la app cliente.
   - Archivos:
