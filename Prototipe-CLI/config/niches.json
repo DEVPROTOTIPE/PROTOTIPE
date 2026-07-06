@@ -1,0 +1,88 @@
+{
+  "retail_clothing": [
+    { "name": "talla", "label": "Talla", "type": "select", "options": ["S", "M", "L", "XL", "38", "39", "40", "41", "42"] },
+    { "name": "color", "label": "Color", "type": "text", "placeholder": "Ej. Negro, Blanco, Azul" }
+  ],
+  "grocery_food": [
+    { "name": "presentacion", "label": "Presentación", "type": "select", "options": ["Libra", "Kilo", "Atado", "Unidad"] }
+  ],
+  "technical_services": [
+    { "name": "material", "label": "Material", "type": "text", "placeholder": "Ej. Bronce SAE 64" },
+    { "name": "especificaciones", "label": "Especificación Técnica", "type": "text", "placeholder": "Ej. Rosca NPT 1/2" }
+  ],
+  "refrigeration_ac": [
+    { "name": "marca_equipo", "label": "Marca del Equipo", "type": "text", "placeholder": "Ej. LG, Carrier" },
+    { "name": "tipo_refrigerante", "label": "Tipo de Refrigerante", "type": "select", "options": ["R-410A", "R-22", "R-134a", "R-404A"] }
+  ],
+  "contractors": [
+    { "name": "unidad_medida", "label": "Unidad de Medida", "type": "select", "options": ["Metro Lineal (m)", "Metro Cuadrado (m2)", "Metro Cúbico (m3)", "Global (glb)", "Día Operario"] }
+  ],
+  "machinery_rental": [
+    { "name": "numero_serial", "label": "Número Serial / Placa", "type": "text", "placeholder": "Ej. CAT-924G-01" },
+    { "name": "tarifa_tiempo", "label": "Modo de Alquiler", "type": "select", "options": ["Por Hora", "Por Día", "Por Semana", "Por Mes"] }
+  ],
+  "carpentry": [
+    { "name": "tipo_madera", "label": "Tipo de Madera", "type": "select", "options": ["Pino", "Cedro", "Roble", "Teca", "MDF / Melamina"] },
+    { "name": "acabado", "label": "Acabado", "type": "select", "options": ["Poliuretano", "Laca Catalizada", "Barniz", "Aceite / Natural", "Pintado"] }
+  ],
+  "laundry": [
+    { "name": "peso_estimado", "label": "Rango de Peso", "type": "select", "options": ["1-5 kg", "6-10 kg", "11-15 kg", "Más de 15 kg"] },
+    { "name": "tipo_prenda", "label": "Tipo de Prenda / Servicio", "type": "text", "placeholder": "Ej. Plumón, Traje, Cortina" }
+  ],
+  "furniture_repair": [
+    { "name": "tipo_tela", "label": "Tipo de Tela / Tapizado", "type": "text", "placeholder": "Ej. Microfibra Antirrasguño, Cuero" },
+    { "name": "estado_ingreso", "label": "Estado del Mueble", "type": "text", "placeholder": "Ej. Estructura rota / Solo espuma" }
+  ],
+  "wellness_podology": [
+    { "name": "duracion", "label": "Duración Estimada", "type": "select", "options": ["30 min", "45 min", "1 hora", "1.5 horas", "2 horas"] },
+    { "name": "profesional", "label": "Profesional / Especialista", "type": "text", "placeholder": "Ej. Podólogo Principal / Esteticista" }
+  ],
+  "insumos-agricolas": [
+    { "name": "marca", "label": "Marca / Fabricante", "type": "text", "placeholder": "Ej. Syngenta, Stihl, Bayer" },
+    { "name": "compatibilidad", "label": "Compatibilidad de Repuesto", "type": "text", "placeholder": "Ej. Motor Stihl FS 160 / Universal" }
+  ],
+  "alimentos-artesanales": [
+    { "name": "presentacion", "label": "Presentación / Porciones", "type": "select", "options": ["Unidad Individual", "Caja x6", "Caja x12", "Media Libra", "Una Libra"] },
+    { "name": "requiere_anticipo", "label": "Anticipación Requerida", "type": "select", "options": ["Entrega Inmediata", "24 Horas de Anticipación", "48 Horas de Anticipación"] }
+  ],
+  "ferreteria-rural": [
+    { "name": "unidad_medida", "label": "Unidad de Venta", "type": "select", "options": ["Unidad", "Bulto / S Saco", "Kilo", "Metro", "Rollo"] }
+  ],
+  "repuestos-motos": [
+    { "name": "marca_moto", "label": "Marca de Moto Compatible", "type": "text", "placeholder": "Ej. Yamaha, Pulsar, Boxer, Suzuki" },
+    { "name": "modelo_anio", "label": "Modelo / Año", "type": "text", "placeholder": "Ej. 2018 - 2022" }
+  ],
+  "distribuidoras-beauty": [
+    { "name": "tipo_presentacion", "label": "Presentación Profesional", "type": "select", "options": ["Unidad Detal", "Caja/Pack Mayorista", "Litro / Galón (Granel)"] }
+  ],
+  "petshops-locales": [
+    { "name": "peso_concentrado", "label": "Peso del Empaque", "type": "select", "options": ["1 kg", "2 kg", "8 kg", "15 kg", "22 kg", "Suelto / Libra"] },
+    { "name": "mascota", "label": "Tipo de Mascota", "type": "select", "options": ["Perro Adulto", "Cachorro", "Gato Adulto", "Gatito", "Otras Mascotas"] }
+  ],
+  "repuestos-lineablanca": [
+    { "name": "marca_electrodomestico", "label": "Marca Compatible", "type": "text", "placeholder": "Ej. Whirlpool, Mabe, Haceb, LG" },
+    { "name": "modelo_exacto", "label": "Modelo o Número de Parte", "type": "text", "placeholder": "Ej. W1023456 / Lavadora Haceb 13kg" }
+  ],
+  "moda-local-calzado": [
+    { "name": "talla", "label": "Talla", "type": "select", "options": ["34", "35", "36", "37", "38", "39", "40", "41", "42", "S", "M", "L", "XL"] },
+    { "name": "material", "label": "Material / Composición", "type": "text", "placeholder": "Ej. Cuero 100% natural, Sintético, Lona" }
+  ],
+  "alimentacion-saludable": [
+    { "name": "alergenos", "label": "Alérgenos / Restricción", "type": "select", "options": ["Libre de Gluten (Gluten Free)", "Sin Azúcar Añadida", "Vegano / Plant-Based", "Keto / Bajo en Carbohidratos", "Sin Restricción / Natural"] },
+    { "name": "presentacion", "label": "Presentación", "type": "text", "placeholder": "Ej. Frasco 250g, Bolsa de 500g, Cápsulas" }
+  ],
+  "home-office-ergonomia": [
+    { "name": "ajustable", "label": "Nivel de Ajuste", "type": "select", "options": ["Totalmente Ajustable (Ergonómico)", "Ajuste de Altura Únicamente", "Fijo / Estático"] }
+  ],
+  "licores-cocteleria": [
+    { "name": "volumen_alcohol", "label": "Contenido / Volumen", "type": "select", "options": ["Lata 330ml", "Botella 375ml (Media)", "Botella 750ml (Estándar)", "Botella 1000ml (Litro)"] }
+  ],
+  "coleccionismo-geek": [
+    { "name": "estado_articulo", "label": "Estado / Edición", "type": "select", "options": ["Nuevo en Caja (Mint in Box)", "Edición Limitada", "Edición Regular", "Segunda Mano (Excelente Estado)"] }
+  ],
+  "distribucion-horeca": [
+    { "name": "empaque_volumen", "label": "Empaque de Venta", "type": "select", "options": ["Paquete x50 Unidades", "Caja x500 Unidades", "Galón / Garrafa", "Bulto Mayorista"] }
+  ],
+  "general_custom": [],
+  "general": []
+}

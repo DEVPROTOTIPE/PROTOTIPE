@@ -1,0 +1,201 @@
+{
+  "main": {
+    "id": "bd90c76329e1ba8b",
+    "type": "split",
+    "children": [
+      {
+        "id": "0a266811bbea3879",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "26b8750634f21695",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Plantillas Core/App Ventas/Documentacion App Ventas/auditoria_seguridad_rendimiento_pwa.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "auditoria_seguridad_rendimiento_pwa"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "19f5db4767dabf8e",
+    "type": "split",
+    "children": [
+      {
+        "id": "b8ee974bc342c527",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d01c92eaed55ba7a",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorador de archivos"
+            }
+          },
+          {
+            "id": "51faeaf34930a65c",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Buscar"
+            }
+          },
+          {
+            "id": "a6e22009bae2d460",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Marcadores"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "29e5d6fcddb2409b",
+    "type": "split",
+    "children": [
+      {
+        "id": "15e91c8f714b56c2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5b12b5ff589d2ecb",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Plantillas Core/App Ventas/Documentacion App Ventas/auditoria_seguridad_rendimiento_pwa.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Enlaces entrantes de auditoria_seguridad_rendimiento_pwa"
+            }
+          },
+          {
+            "id": "8251fa3a5d35139a",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Plantillas Core/App Ventas/Documentacion App Ventas/auditoria_seguridad_rendimiento_pwa.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Enlaces salientes de auditoria_seguridad_rendimiento_pwa"
+            }
+          },
+          {
+            "id": "cb9667490e540d4d",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etiquetas"
+            }
+          },
+          {
+            "id": "c7cf34f583abd6ef",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Todas las propiedades"
+            }
+          },
+          {
+            "id": "19f83a50e53aec30",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Plantillas Core/App Ventas/Documentacion App Ventas/auditoria_seguridad_rendimiento_pwa.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Esquema de auditoria_seguridad_rendimiento_pwa"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Abrir selector rápido": false,
+      "graph:Abrir vista gráfica": false,
+      "canvas:Crear nuevo lienzo": false,
+      "daily-notes:Abrir la nota de hoy": false,
+      "templates:Insertar plantilla": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "bases:Crear nueva base": false
+    }
+  },
+  "active": "26b8750634f21695",
+  "lastOpenFiles": [
+    "Plantillas Core/App Ventas/Documentacion App Ventas/auditoria_panel_administrativo.md",
+    "Plantillas Core/App Ventas/Documentacion App Ventas/auditoria_rendimiento_estabilidad.md",
+    "Plantillas Core/App Ventas/dist/apple-touch-icon.png",
+    "Plantillas Core/App Ventas/dist/favicon.svg",
+    "Plantillas Core/App Ventas/dist/icons.svg",
+    "Plantillas Core/App Ventas/dist/masked-icon.svg",
+    "Plantillas Core/App Ventas/dist/pwa-192x192.png",
+    "Plantillas Core/App Ventas/dist/pwa-512x512.png",
+    "Instancias Clientes/ventas/ventas-moni-app/node_modules/detect-libc/README.md",
+    "scratch/fix_leak_mapping_mostrador.js",
+    "Prototipe-CLI/templates/template-core-seed/node_modules/possible-typed-array-names/README.md",
+    "scratch/implement_advanced_cro.js"
+  ]
+}

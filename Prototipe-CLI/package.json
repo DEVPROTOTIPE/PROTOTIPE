@@ -1,0 +1,31 @@
+{
+  "name": "prototipe-cli",
+  "version": "1.0.0",
+  "description": "Orquestador interactivo para la inicializacion automatica de proyectos del ecosistema de instancias Prototipe",
+  "main": "cli.js",
+  "type": "module",
+  "scripts": {
+    "start": "node cli.js",
+    "server": "node --no-warnings server.js",
+    "sync": "node sync_templates.js",
+    "sync:dry": "node sync_templates.js --dry-run",
+    "sync:full": "node sync_templates.js --yes --run-tests",
+    "sync:clients": "node sync_clients.js",
+    "test": "node test_templates.js",
+    "test:all": "node test_templates.js --all",
+    "test:verbose": "node test_templates.js --verbose"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "diff": "^9.0.0",
+    "express": "^4.19.2",
+    "firebase": "^12.14.0",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^9.2.12",
+    "jimp": "^1.6.1",
+    "ora": "^9.4.0",
+    "picocolors": "^1.0.0",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {}
+}
