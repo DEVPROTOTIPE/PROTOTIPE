@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 #                 PROTOTIPE ECOSISTEMA - BACKUP ENGINE (PREMIUM)
 # ==============================================================================
 # Este script realiza un snapshot fisico y sincronizacion con GitHub.
@@ -301,9 +301,9 @@ try {
             Write-Host "    -> La rama no existe en el servidor remoto. Omitiendo pull preventivo." -ForegroundColor Gray
         }
 
-        Write-Host "    -> Subiendo tus cambios locales a GitHub (git push origin $branchName --no-verify)..." -ForegroundColor DarkGray
+        Write-Host "    -> Subiendo tus cambios locales a GitHub (git push -u origin $branchName --no-verify)..." -ForegroundColor DarkGray
         Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
-        git push origin $branchName --no-verify
+        git push -u origin $branchName --no-verify
         $pushExitCode = $LASTEXITCODE
         Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
         
@@ -340,9 +340,9 @@ try {
                 # Actualizar la rama local master/main para apuntar a develop/branchName sin realizar checkout
                 git branch -f $mainBranch $branchName 2>&1 | Out-Null
                 
-                Write-Host " [Merge] Subiendo consolidacion a GitHub (git push origin $mainBranch --no-verify)..." -ForegroundColor Cyan
+                Write-Host " [Merge] Subiendo consolidacion a GitHub (git push -u origin $mainBranch --no-verify)..." -ForegroundColor Cyan
                 Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
-                git push origin $mainBranch --no-verify
+                git push -u origin $mainBranch --no-verify
                 $mergePushExitCode = $LASTEXITCODE
                 Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
                 
