@@ -25,6 +25,23 @@ root_dir = r"d:\PROTOTIPE\Documentacion PROTOTIPE"
 desktop_dir = r"C:\Users\Sergio\Desktop\documentacion prototype"
 mapa_consolidacion = os.path.join(desktop_dir, "_MAPA_DE_CONSOLIDACION.md")
 
+# Función helper para extraer de forma eficiente el título principal de un archivo Markdown
+def extract_metadata(filepath, filename):
+    title = filename.replace('.md', '').replace('_', ' ').title()
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            for _ in range(15):  # Leer solo las primeras 15 líneas para mayor rapidez
+                line = f.readline()
+                if not line:
+                    break
+                stripped = line.strip()
+                if stripped.startswith('# '):
+                    title = stripped[2:].replace('📚', '').replace('📦', '').strip()
+                    break
+    except Exception:
+        pass
+    return title
+
 # Cabecera Visual Premium de la Herramienta
 print(f"{C_CYAN}======================================================================{C_RESET}")
 print(f" {C_BOLD}{C_GREEN}📚 [PROTOTIPE DOCUMENTATION CONSOLIDATOR - NOTEBOOKLM]{C_RESET}")
@@ -72,6 +89,12 @@ for root, dirs, files in os.walk(root_dir):
         # Agrupar por carpeta de nivel 1
         parts = rel_path.split(os.sep)
         subfolder = parts[0] if len(parts) > 1 else "Raiz"
+        
+        # Exclusión de históricos de bitácoras de cambios en la carpeta de auditorías
+        if subfolder == "03_Auditorias_y_Faro_Core":
+            file_lower = file.lower()
+            if "historico" in file_lower or "hasta" in file_lower:
+                continue
         
         ext = os.path.splitext(file)[1].lower()
         if ext != '.md':
@@ -130,16 +153,27 @@ for subfolder, file_list in sorted(carpetas_consolidar.items()):
             f_out.write(f'<a name="{anchor}"></a>\n')
             f_out.write(f"# ARCHIVO: {orig_rel}\n\n")
             
-            try:
-                content = ""
-                with open(f_item['ruta_completa'], 'r', encoding='utf-8') as f_in:
-                    content = f_in.read()
-            except UnicodeDecodeError:
+            # Procesamiento diferencial inteligente por sección
+            if subfolder in ["06_Biblioteca_Componentes", "09_Modulos_Completos"]:
+                # Generar inventario de existencias conceptual (Nombre, Ruta, Ubicación)
+                title = extract_metadata(f_item['ruta_completa'], f_item['nombre'])
+                content = f"""* **Nombre de Componente/Módulo:** {title}
+* **Ubicación Física:** `{orig_rel}`
+* **Estatus:** Documentado e indexado en el monorepo.
+*(Nota: El código fuente React completo y especificaciones técnicas detalladas de este componente se omiten en el consolidado de NotebookLM para optimizar el límite de caracteres).*
+"""
+            else:
+                # Cargar el contenido completo de forma íntegra sin resumir nada
                 try:
-                    with open(f_item['ruta_completa'], 'r', encoding='latin-1') as f_in:
+                    content = ""
+                    with open(f_item['ruta_completa'], 'r', encoding='utf-8') as f_in:
                         content = f_in.read()
-                except Exception as e:
-                    content = f"\n*Error de lectura crítico*: {str(e)}\n"
+                except UnicodeDecodeError:
+                    try:
+                        with open(f_item['ruta_completa'], 'r', encoding='latin-1') as f_in:
+                            content = f_in.read()
+                    except Exception as e:
+                        content = f"\n*Error de lectura crítico*: {str(e)}\n"
             
             f_out.write(content)
             f_out.write("\n\n---\n\n")
@@ -153,7 +187,7 @@ for subfolder, file_list in sorted(carpetas_consolidar.items()):
             
             # Animar barra de progreso
             render_progress_bar(idx, len(file_list), prefix=prefix_msg, suffix=f"({idx}/{len(file_list)})")
-            time.sleep(0.01) # Pequeña pausa para hacer la animación suave y visible
+            time.sleep(0.005) # Animación ágil
             
     # Salto de línea al terminar la carpeta actual
     print()

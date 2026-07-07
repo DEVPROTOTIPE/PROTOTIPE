@@ -10745,8 +10745,23 @@ app.get('/api/integrity/status', async (req, res) => {
 
     let bitacoraContent = '';
     const bitacoraIds = new Set();
-    if (await fs.pathExists(bitacoraPath)) {
-      bitacoraContent = await fs.readFile(bitacoraPath, 'utf8');
+    const folderAuditorias = path.join(docRoot, '03_Auditorias_y_Faro_Core');
+    if (await fs.pathExists(folderAuditorias)) {
+      const files = await fs.readdir(folderAuditorias);
+      const bitacoraFiles = files.filter(f => f.startsWith('bitacora_cambios') && f.endsWith('.md'));
+      
+      const contents = [];
+      for (const file of bitacoraFiles) {
+        const fullPath = path.join(folderAuditorias, file);
+        try {
+          const txt = await fs.readFile(fullPath, 'utf8');
+          contents.push(txt);
+        } catch (readErr) {
+          console.warn(`[Integrity Multi-bitacora] No se pudo leer ${file}:`, readErr.message);
+        }
+      }
+      bitacoraContent = contents.join('\n\n');
+      
       // Captura IDs en cualquier formato de encabezado: ## ID:, ### [fecha] - ID, #### ID, etc.
       // Acepta cualquier prefijo alfanumérico (CORE, CLI, LINE, DASH, TPL, INST, DOC, etc.)
       const bitacoraRegex = /^#{1,4}\s+(?:\[[^\]]+\]\s*[-–]\s*)?((?:CORE|CLI|DASH|TPL|PLT|INST|DOC|LND|BIZ|HOTFIX|CLIENTE|E2E|LINE)-[A-Z0-9_-]+)/gim;
@@ -11358,6 +11373,64 @@ export default function ${componentName}Sandbox() {
   res.json({ success: true, message: summary, created, skipped, errors });
 });
 
+// Helpers de Auto-archivado e Integridad de Bitácora
+async function syncArchiveInDocsMap(archivePath) {
+  try {
+    const mapPath = path.join(GIT_ROOT, 'Documentacion PROTOTIPE', '04_Estandares_y_Skills', 'mapa_documentacion_ia.md');
+    if (!await fs.pathExists(mapPath)) return;
+    
+    const fileName = path.basename(archivePath);
+    let content = await fs.readFile(mapPath, 'utf8');
+    
+    // Si ya existe la entrada de este archivo en el mapa, no la duplicamos
+    if (content.includes(fileName)) return;
+    
+    const targetLine = "| **bitacora_cambios.md** | Registro de Cambios Activos | **Obligatorio al finalizar:** Registrar cambios de la sesión activa de desarrollo y commits del Roadmap. | [Ver Bitácora Activa](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) |";
+    
+    const newLine = `| **${fileName}** | Histórico de Cambios | Registros históricos acumulados de cambios técnicos anteriores al 2026-07-07 compactados para NotebookLM. | [Ver Histórico](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/${fileName}) |`;
+    
+    if (content.includes(targetLine)) {
+      content = content.replace(targetLine, `${targetLine}\n${newLine}`);
+      await fs.writeFile(mapPath, content, 'utf8');
+      console.log(`[Bitacora Auto-Archive] Registrada la entrada de ${fileName} en el mapa de documentación semántico.`);
+    }
+  } catch (err) {
+    console.error('[Bitacora Auto-Archive] Error al registrar archivo en el mapa semántico:', err.message);
+  }
+}
+
+async function checkAndArchiveBitacora(bitacoraPath) {
+  try {
+    const stats = await fs.stat(bitacoraPath);
+    const sizeKb = stats.size / 1024;
+    // Límite de 150 KB
+    if (sizeKb > 150) {
+      console.log(`[Bitacora Auto-Archive] El archivo activo supera los 150 KB (${sizeKb.toFixed(2)} KB). Iniciando auto-archivado...`);
+      const today = new Date().toISOString().split('T')[0];
+      const folder = path.dirname(bitacoraPath);
+      
+      let archivePath = path.join(folder, `bitacora_cambios_hasta_${today}.md`);
+      let counter = 1;
+      while (await fs.pathExists(archivePath)) {
+        archivePath = path.join(folder, `bitacora_cambios_hasta_${today}_v${counter}.md`);
+        counter++;
+      }
+      
+      // Mover el archivo actual al histórico
+      await fs.move(bitacoraPath, archivePath);
+      
+      // Crear nueva bitácora activa vacía con cabecera estándar
+      const defaultHeader = `# 📝 Bitácora de Cambios e Historial de Commits\n\nEste es el log de cambios técnico activo para la sesión de desarrollo vigente del ecosistema PROTOTIPE. Los registros anteriores a esta fecha han sido auto-archivados en históricos compactos para optimizar la compatibilidad de NotebookLM.\n\n`;
+      await fs.writeFile(bitacoraPath, defaultHeader, 'utf8');
+      console.log(`[Bitacora Auto-Archive] Auto-archivado completado. Histórico en: ${path.basename(archivePath)}`);
+      
+      await syncArchiveInDocsMap(archivePath);
+    }
+  } catch (err) {
+    console.error('[Bitacora Auto-Archive] Error en archivado automático:', err.message);
+  }
+}
+
 // POST /api/integrity/batch-register-bitacora — Auto-registra entradas huérfanas de roadmap en bitacora_cambios.md
 app.post('/api/integrity/batch-register-bitacora', async (req, res) => {
   const { drifts } = req.body; // [{ id, message }] — tareas completadas sin entrada en bitácora
@@ -11418,6 +11491,7 @@ app.post('/api/integrity/batch-register-bitacora', async (req, res) => {
     }
 
     await fs.writeFile(bitacoraPath, updatedBitacora, 'utf8');
+    await checkAndArchiveBitacora(bitacoraPath);
     res.json({ success: true, message: `${registered} entrada(s) registrada(s) en la Bitácora de Cambios con éxito.`, registered });
   } catch (err) {
     console.error('Error al registrar en bitácora en lote:', err.message);
@@ -11468,6 +11542,7 @@ app.post('/api/roadmap/publish', async (req, res) => {
         bitacoraContent = entry + '\n' + bitacoraContent;
       }
       await fs.writeFile(bitacoraPath, bitacoraContent, 'utf8');
+      await checkAndArchiveBitacora(bitacoraPath);
       log.push(`✓ Entrada registrada en Bitácora de Cambios.`);
     } else {
       log.push(`⚠ La tarea ${taskId} ya tenía entrada en la Bitácora.`);
