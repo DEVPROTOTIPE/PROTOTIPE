@@ -769,7 +769,7 @@ Este documento contiene la especificación completa, manuales de operación paso
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/diccionario_tecnico_completo.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/diccionario_tecnico_completo.md) | 103125 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Ecommerce_y_QR/Modulo_Compra_Rapida_QR/manual_compra_qr.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Ecommerce_y_QR/Modulo_Compra_Rapida_QR/manual_compra_qr.md) | 6732 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_efectos_premium.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_efectos_premium.md) | 6506 | Componente o archivo del sistema. |
-| [Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md) | 412243 | Componente o archivo del sistema. |
+| [Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md) | 413374 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Paginas/Seguimiento_Pedido/manual_order_tracking.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Paginas/Seguimiento_Pedido/manual_order_tracking.md) | 3421 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/README.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/README.md) | 6192 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Creditos_y_Saldos/manual_credits_and_balances.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Creditos_y_Saldos/manual_credits_and_balances.md) | 4588 | Componente o archivo del sistema. |
@@ -1813,6 +1813,7 @@ El análisis del frontend revela la siguiente estructura y comportamiento del da
 *   **ComponentSandbox.jsx:** Playground interactivo que carga sandboxes ESM de forma diferida mediante `import.meta.glob`.
 *   **GitBackupPanel.jsx:** Interfaz del Drift Map, Auditor de Commits no pusheados y Enmendador seguro.
 *   **SkillsRoadmapPanel.jsx:** Panel de control de roadmap con validador de consistencia documental y de sandboxes.
+*   **particlesIcons.js:** Contiene definiciones vectoriales e iconos utilizados en las partículas flotantes y animaciones.
 
 ### 4.6. Detalle por Sección del Dashboard (activeTab)
 *   **Dashboard General (`activeTab === 'dashboard'`):** KPIs, gráfico Recharts de ganancias, selector de periodos, exportador PDF y simulador de telemetría.
@@ -1845,7 +1846,12 @@ A continuación se detalla el flujo de cada herramienta de automatización del e
 *   **Propósito:** Consola interactiva PowerShell para gestionar backups del monorepo.
 *   **Flujo:** Escanea y recupera carpetas dañadas en el arranque, cuenta cambios locales de forma silenciosa usando `--git-dir`, y muestra una UI en terminal con navegación por teclado físico (flechas y Enter).
 
-### 5.4. verify_library_integrity.cjs (Validador de Storybook y Consistencia)
+### 5.4. Scripts del CLI-Server (Prototipe-CLI/scripts/)
+*   **classify_existing_library.js:** Script para reclasificar componentes por tags y categorías mediante el API del CLI.
+*   **sync-discovery-prompt.cjs:** Sincronizador de prompts maestros y briefs.
+*   **test_provision.js:** Entorno de pruebas locales y simulador de aprovisionamiento de Node.js.
+
+### 5.5. verify_library_integrity.cjs (Validador de Storybook y Consistencia)
 *   **Propósito:** Asegurar la consistencia técnica de la biblioteca y playgrounds antes de compilar.
 *   **Flujo de Verificaciones:**
     *   Verifica que cada componente tenga su archivo Markdown en el catálogo y su registro en `ComponentSandbox.jsx`.
@@ -1904,11 +1910,71 @@ El análisis del núcleo de la aplicación cliente revela la siguiente arquitect
 *   **AlertConfirmContext.jsx:** Modal de confirmación promesificada de eliminación que permite invocaciones imperativas desde scripts puros JS sin contexto de React.
 *   **NumberInput & CurrencyInput:** Inputs con formateo en tiempo de ejecución, sanitización de caracteres no numéricos y soporte de miles colombianos (`$ 12.000`).
 
-### 7.3. Arquitectura de Dominio (3 Capas)
-*   **UI/Vista:** Consume hooks de negocio, desacoplada por completo del SDK de Firebase.
-*   **Capa de Estado (Hooks & Stores):** Orquestación de red mediante TanStack Query y sincronización en tiempo real abriendo un único listener `onSnapshot` mapeado en la caché del QueryClient para evitar cobros de lectura redundantes.
-*   **Capa de Servicios (Infraestructura):** Conectores físicos al SDK de Firebase y transacciones atómicas (`runTransaction`) para descontar stock e inventario en una única llamada de base de datos.
-*   **Telemetría Offline:** Cola local de Dexie que transmite errores acumulados con políticas de backoff exponencial y reintentos automáticos al recuperar conexión (`online`).
+### 7.3. Capa de Servicios Lógicos (29 Módulos en src/services/)
+*   **accessLogService.js (3.3kB):** Auditoría de inicios de sesión y accesos de operarios.
+*   **adService.js (1.5kB):** Gestión de anuncios y banners interactivos en la PWA.
+*   **alertService.js (1.2kB):** Emisor imperativo para llamadas asíncronas de modales.
+*   **appConfigService.js (6.0kB):** Lector y sincronizador de configuraciones de Firestore.
+*   **authService.js (1.4kB):** Lógica de sesión, PIN de operarios y validación.
+*   **billingService.js (9.8kB):** Reportes de facturación Dian/SaaS y consolidación.
+*   **centralFirebaseService.js (2.6kB):** Conexión paralela y listener del Firebase centralizado.
+*   **claimsService.js (2.6kB):** Devoluciones y reclamos de clientes.
+*   **clientNotificationService.js (2.8kB):** Notificaciones FCM push para navegadores móviles.
+*   **couponService.js (3.1kB):** Validador y motor de cupones de descuento.
+*   **creditService.js (7.4kB):** Transacciones e historial de billetera de créditos.
+*   **deliveryService.js (17.4kB):** Asignación de domicilios, rutas y tarifas.
+*   **employeeService.js (5.2kB):** CRUD de staff y operarios del local.
+*   **favoritesService.js (1.6kB):** Gestión de lista de favoritos en la PWA.
+*   **inventoryService.js (8.1kB):** Ajustes y trazabilidad de stock.
+*   **notificationCenterService.js (22.9kB):** Centro de notificaciones operativas con realtime listeners.
+*   **notificationService.js (1.1kB):** Alertas locales rápidas en UI.
+*   **offlineDB.js (7.9kB):** Inicialización de esquemas e índices IndexedDB de Dexie.
+*   **orderService.js (28.3kB):** Creación transaccional de órdenes con comprobación y descuento atómico de stock.
+*   **pdfService.js (34.3kB):** jsPDF de tickets y facturas.
+*   **qrAnalyticsService.js (1.2kB):** Monitoreo de conversiones por QR.
+*   **stockMovementService.js (2.5kB):** Historial físico de entradas y salidas de bodega.
+*   **telemetryOutboxDb.js (3.5kB):** Outbox IndexedDB para errores locales.
+*   **telemetryService.js (11.2kB):** Transmisor asíncrono de reportes de fallos.
+*   **trackingAnalyticsService.js (3.0kB):** Telemetría de comportamiento y clicks.
+*   **uploadService.js (4.8kB):** Conector con Cloud Storage.
+*   **userService.js (3.6kB):** CRUD de usuarios y roles.
+*   **whatsappService.js (1.0kB):** Formateador de links de WhatsApp.
+*   **wholesaleService.js (4.7kB):** Lógica y tarifas de pedidos mayoristas.
+
+### 7.4. Capa de Estado React (14 Hooks en src/hooks/)
+*   **useAds.js:** Acceso a publicidad en PWA.
+*   **useAppConfigSync.js (10kB):** Sincronizador en tres vías del Core.
+*   **useAuthInit.js:** Inicializador de autenticación y carga.
+*   **useBilling.js:** Lógica reactiva de cobros de facturas.
+*   **useCopyToClipboard.js:** Utilidad UI para copiado rápido.
+*   **useCoupons.js:** Validación y aplicación reactiva de descuentos.
+*   **useCredits.js:** Carga reactiva de billeteras de crédito.
+*   **useInactivityTimer.js:** Temporizador de apagado de sesión por inactividad.
+*   **useInventory.js:** Estado del stock en caliente.
+*   **useNotificationCenter.js:** Suscripción al canal de alertas de Firebase.
+*   **useOrders.js:** Pedidos y estados de preparación.
+*   **usePWAInstall.js:** Manejador de evento afterinstall y prompt.
+*   **useProductVariants.js:** Control de variantes de productos.
+*   **useWholesale.js:** Control de tarifas por volumen.
+
+### 7.5. Gestión de Estado Global (7 Stores Zustand en src/store/)
+*   **appConfigStore.js (9.6kB):** Parámetros visuales HSL, logos y variables de la app.
+*   **authStore.js:** Sesión, token JWT y roles de operarios.
+*   **cartStore.js:** Carrito de compras y acumulados.
+*   **connectivityStore.js:** Monitor de conexión de red (navigator.onLine).
+*   **favoritesStore.js:** Lista de favoritos en cliente.
+*   **guidedStore.js:** Onboarding de la PWA del cliente.
+*   **portalStore.js:** Preferencias del portal del operario.
+
+### 7.6. Utilidades del Core (8 archivos en src/utils/)
+*   **audio.js (5.2kB):** Alertas por voz y sonidos interactivos.
+*   **colors.js:** Utilidades de conversión HSL/RGB/Hex en caliente.
+*   **dynamicManifest.js:** Aprovisionamiento dinámico del manifest de PWA.
+*   **firestoreAuthGuard.js:** Guardas de seguridad asíncronas para el router.
+*   **formatters.js:** Formateadores de moneda y fechas.
+*   **imageCompression.js:** Compresor de imágenes antes de subida a Storage.
+*   **search.js:** Motor de búsqueda rápida.
+*   **swHealthCheck.js:** Chequeador de salud del Service Worker.
 
 ---
 
