@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-274: Creación de Guía de Flujo Completo: De Preventa a Entrega~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Creación de la guía guia_flujo_completo_cliente_entrega.md que detalla todos los pasos de interacción comercial, preventa, aprovisionamiento local/nube, inyección, QA y deploy de un cliente, copiándolo al Escritorio del usuario.
+  - Archivos: [Documentacion PROTOTIPE/07_Manuales_Desarrollo/guia_flujo_completo_cliente_entrega.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/guia_flujo_completo_cliente_entrega.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-273: Creación de Guía de Contribución al Monorepo y Entorno Local~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

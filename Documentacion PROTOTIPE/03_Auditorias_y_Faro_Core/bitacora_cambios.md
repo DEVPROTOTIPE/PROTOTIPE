@@ -1,4 +1,11 @@
 
+## [2026-07-07] - CORE-274: Creación de Guía de Flujo Completo: De Preventa a Entrega
+- **Tipo:** Documentación / Negocios / DevOps / Workflow
+- **Firma:** CORE-CLIENT-DELIVERY-WORKFLOW-2026
+- **Descripcion:**
+  - **Flujo Maestro de Entrega:** Creación de \`guia_flujo_completo_cliente_entrega.md\` que unifica en un solo mapa de ruta todos los pasos: descubrimiento de nicho, viabilidad, cotización, aprovisionamiento en Firebase y local, inyección de branding y componentes, QA responsivo y despliegue hosting final.
+  - **Sincronización:** Copia física exportada al Escritorio del usuario y registrada en el GPS de documentación semántica.
+
 ## [2026-07-07] - CORE-273: Creación de Guía de Contribución al Monorepo y Entorno Local
 - **Tipo:** Documentación / Onboarding / DevOps
 - **Firma:** CORE-DEV-CONTRIBUTION-GUIDE-2026
