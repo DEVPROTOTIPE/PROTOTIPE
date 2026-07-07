@@ -1,4 +1,12 @@
 
+
+## CORE-284: Autodetección Inteligente de Tarea Actual en el Botón Auto del Dashboard (2026-07-07)
+- **Fecha:** 2026-07-07
+- **Tipo:** Hotfix / Usabilidad
+- **Impacto:** Resuelve el ID de tarea vacío al autogenerar mensajes de commit cuando el ecosistema está en sincronía.
+- **Descripción:** Se modificó la función `handleAutoMessage` en `GitBackupPanel.jsx` para hacerla asíncrona. Ahora, si no hay drifts de Git (`recentTaskDrifts` está vacío porque todo está sincronizado), el sistema realiza una llamada fetch rápida a `/api/roadmap` para obtener las tareas y autodetecta la tarea actualmente activa (no completada) o en su defecto la primera del archivo (la más reciente de la sesión), garantizando que el commit siempre conserve el prefijo de ID de tarea correspondiente.
+- **Archivos afectados:** `Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx` [MODIFY]
+
 ## CORE-280: Cierre y Sincronización del Checklist de Componentes (2026-07-07)
 - **Fecha:** 2026-07-07
 - **Tipo:** Funcionalidad / Mejora
