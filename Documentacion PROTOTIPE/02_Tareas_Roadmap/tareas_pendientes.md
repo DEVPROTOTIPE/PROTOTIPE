@@ -46,7 +46,7 @@ rd_interactivo.md) [DELETE]
   - Estatus: Completado.
   - Fecha: 2026-07-07
   - Descripción: Se realizó una auditoría técnica documental exhaustiva del ecosistema PROTOTIPE. Se generaron y/o actualizaron tres documentos maestros de diagnóstico: `auditoria_tecnica_completa_maestra_2026.md` (análisis integral de arquitectura, deuda técnica y estado de módulos), `estado_actual_ecosistema.md` (snapshot del estado operativo actual de todos los sub-proyectos) y `checklist_auditoria_core.md` (lista verificable de componentes, endpoints y configuraciones críticas). Se verificó coherencia entre la documentación y el código fuente real.
-  - Archivos: [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_completa_maestra_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_completa_maestra_2026.md) [MODIFY], [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/estado_actual_ecosistema.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/estado_actual_ecosistema.md) [MODIFY], [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/checklist_auditoria_core.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/checklist_auditoria_core.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - Archivos: [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/estado_actual_ecosistema.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/estado_actual_ecosistema.md) [MODIFY], [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/checklist_auditoria_core.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/checklist_auditoria_core.md) [MODIFY], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
 
 * **[x] ~~Tarea CORE-278: Implementación de Deshidratación de Plantillas y Logo Upload de Marca (2026-07-07)~~**
   - Estatus: Completado.
@@ -1979,7 +1979,6 @@ rd_interactivo.md) [DELETE]
   - Fecha de registro: 2026-06-23
   - Fecha de finalización: 2026-06-23
   - Descripción: Normalización del formato, viñetas de guiones, estructura de cobros y ejemplos de la Matriz de Precios Oficial de PROTOTIPE en alineación exacta con las especificaciones del negocio.
-  - Archivos: [Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/matriz_precios_oficial.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/matriz_precios_oficial.md) [MODIFY]
 
 * **[x] ~~Tarea CORE-046: Integración Documental de Procesos Comerciales y de Escalabilidad~~**
   - Estatus: Completado.
@@ -2049,7 +2048,6 @@ rd_interactivo.md) [DELETE]
   - Fecha de registro: 2026-06-23
   - Fecha de finalización: 2026-06-23
   - Descripción: Se realizó una investigación y lectura secuencial profunda de todos los archivos del CLI (cli.js, config.js, logger.js, worker_create_project.js, generator.js, sync_templates.js, sync_clients.js, test_templates.js, server.js), dev-dashboard y scripts PowerShell del ecosistema. Se redactó y publicó el informe técnico maestro `auditoria_tecnica_completa_maestra_2026.md` bajo `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/`, consolidando la explicación de qué hace el proyecto, flujos de trabajo en diagramas de secuencia/flujo de Mermaid, mapeo de comportamiento y funciones de cada archivo, diagnóstico de bugs críticos de inyección de comandos, vulnerabilidades de reglas Firestore, CORS abierto e I/O bloqueantes con soluciones de código concretas, y un plan de limpieza de archivos basura y hoja de ruta para escalabilidad.
-  - Archivos: [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_completa_maestra_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_completa_maestra_2026.md) [NEW]
 
 * **[x] ~~Tarea CORE-036: Auditoría, Robustecimiento y Blindaje de Seguridad del Servidor CLI Bridge~~**
   - Estatus: Completado.
