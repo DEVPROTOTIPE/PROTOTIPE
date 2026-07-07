@@ -769,7 +769,7 @@ Este documento contiene la especificación completa, manuales de operación paso
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/diccionario_tecnico_completo.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/diccionario_tecnico_completo.md) | 103125 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Ecommerce_y_QR/Modulo_Compra_Rapida_QR/manual_compra_qr.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Ecommerce_y_QR/Modulo_Compra_Rapida_QR/manual_compra_qr.md) | 6732 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_efectos_premium.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_efectos_premium.md) | 6506 | Componente o archivo del sistema. |
-| [Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md) | 417669 | Componente o archivo del sistema. |
+| [Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md) | 417740 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Paginas/Seguimiento_Pedido/manual_order_tracking.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Paginas/Seguimiento_Pedido/manual_order_tracking.md) | 3421 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/README.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/README.md) | 6192 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Creditos_y_Saldos/manual_credits_and_balances.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Creditos_y_Saldos/manual_credits_and_balances.md) | 4588 | Componente o archivo del sistema. |
@@ -1821,12 +1821,9 @@ El análisis del frontend revela la siguiente estructura y comportamiento del da
 *   **.env.local:** Llaves de Firebase para la instancia administrativa del monorepo.
 *   **firestore.rules:** Reglas de base de datos que protegen colecciones como `tokens` y `reportesBilling`.
 
-### 4.7. Cloud Functions del Dashboard (dev-dashboard/functions/index.js)
-*   **reportTelemetry (onRequest - HTTPS):** Función HTTPS en la nube protegida por token Bearer que recibe logs e informes.
-    *   *Autenticación:* Valida la cabecera Authorization contra la colección central `/tokens/{token}`.
-    *   *Acción "billing":* Escribe informes agregados en `/reportesBilling/{clientId}_{periodo}` y actualiza `/clientes_control/{clientId}`.
-    *   *Acción "failure":* Registra los detalles del crash del cliente en la base de datos central de incidentes `/app_failures/`.
-    *   *Acción "ping":* Responde con código HTTP 200 si la clave de autorización es válida.
+### 4.7. Carpeta Legacy: Cloud Functions (`dev-dashboard/functions/`)
+*   **Estado:** **OBSOLETO / NO DESPLEGADO**. 
+*   **Detalle:** Existe una subcarpeta `functions/` con código HTTPS (`reportTelemetry`) para validación de tokens y subida de telemetría a Firestore. Sin embargo, **el proyecto NO utiliza Cloud Functions en su arquitectura activa**. Los comandos de despliegue y scripts de automatización del monorepo ejecutan estrictamente `firebase deploy --only hosting` y despliegues de reglas físicas de base de datos, ignorando por completo la compilación de funciones de Node.js. Toda la comunicación y logs de errores se transmiten directamente cliente-servidor a través de la API REST local del Bridge o consultas directas al SDK de Firebase.
 
 ---
 
@@ -1996,7 +1993,7 @@ El análisis del núcleo de la aplicación cliente revela la siguiente arquitect
 | Onboarding | Iniciar Onboarding | App.jsx | `/api/create-project` | Inicia worker Express y canal SSE de logs | Transmite logs mediante Server-Sent Events |
 | Biblioteca | Sandbox Scaffolder | ComponentSandbox.jsx | `/api/library/sandbox/scaffold` | Crea archivo Sandbox React en la carpeta admin | Evita la creación manual de playgrounds |
 | Consola Errores | Diagnosticar | App.jsx | `/api/project/file` | Abre el visor de código con la línea del crash | Lee los archivos físicos del cliente local |
-| Git | Enmendar Commit | GitBackupPanel.jsx | `/api/git/amend-commit` | Re-escribe commits no pusheados sin conflictos | Llama a `commit-tree` y `rebase` automático |
+| Git | Enmendar Commit | GitBackupPanel.jsx | `/api/git/amend-commit` | Re-escribe commits no pusheados sin conflictos | Llama a `commit-tree` and `rebase` automático |
 | Roadmap | Sincronizar Reglas | SkillsRoadmapPanel.jsx | `/api/git/sync-rules` | Propaga GEMINI.md/AGENTS.md en lote | Sincroniza mediante scripts del CLI |
 
 ---
@@ -2017,3 +2014,8 @@ El análisis del núcleo de la aplicación cliente revela la siguiente arquitect
 *   **Ubicación:** [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1)
 *   **Causa Raíz:** Subidas accidentales de archivos de variables locales `.env` a GitHub.
 *   **Mitigación:** Escaneo estricto de `git status --porcelain` abortando el push si detecta archivos de variables de entorno en staging.
+
+### 4. Carpeta Obsoleta/Legacy de Cloud Functions (Severidad: Baja)
+*   **Ubicación:** `dev-dashboard/functions/`
+*   **Causa Raíz:** Resto de código redundante de intentos de comunicación HTTP en la nube. Dado que el ecosistema solo despliega frontend estático (Hosting) y reglas físicas de base de datos, este directorio representa código muerto no mantenido.
+*   **Mitigación:** Depurar y remover físicamente el directorio `functions/` para evitar fallos de confusión o auditorías de linter innecesarias.
