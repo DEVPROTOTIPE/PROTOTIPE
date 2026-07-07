@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-271: Creación de Manuales y Estándares de Arquitectura Multi-Core General~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Diseño y creación de 5 manuales y estándares de arquitectura multi-core para regular la paridad de dependencias NPM, conectores de bases de datos agnósticas, playgrounds en Storybook, marca blanca y scaffolding del CLI.
+  - Archivos: [Documentacion PROTOTIPE/04_Estandares_y_Skills/especificacion_nuevos_cores_oro.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/especificacion_nuevos_cores_oro.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_repositorios_infraestructura_agnostica.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/estandar_repositorios_infraestructura_agnostica.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_playgrounds_storybook_multicore.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/estandar_playgrounds_storybook_multicore.md) [NEW], [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/gobernanza_dependencias_npm_multicore.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/gobernanza_dependencias_npm_multicore.md) [NEW], [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/contrato_aprovisionamiento_dinamico_assets.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/contrato_aprovisionamiento_dinamico_assets.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-270: Reporte de Comparativa y Alineación de Documentación Heredada~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

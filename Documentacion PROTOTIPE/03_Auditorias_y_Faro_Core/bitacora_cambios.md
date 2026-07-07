@@ -1,4 +1,14 @@
 
+## [2026-07-07] - CORE-271: Creación de Manuales y Estándares de Arquitectura Multi-Core General
+- **Tipo:** Documentación / Arquitectura / Multi-Tenant / Ecosistema
+- **Firma:** CORE-MULTICORE-DOCS-CREATION-2026
+- **Descripcion:**
+  - **Especificación de Nuevos Cores:** Creación del manual `especificacion_nuevos_cores_oro.md` que define la estructura física, configuración del manifiesto de plantilla y reglas de sanitización de secretos.
+  - **Desacoplamiento de Base de Datos:** Creación de `estandar_repositorios_infraestructura_agnostica.md` detallando las interfaces de Repositorios para separar la persistencia de datos (Firebase/SQL) del flujo de UI en React.
+  - **Playgrounds Multi-Core:** Creación de `estandar_playgrounds_storybook_multicore.md` especificando las pautas de Storybook dinámico y metadatos editables (COMPONENT_META).
+  - **Gobernanza de Dependencias NPM:** Creación de `gobernanza_dependencias_npm_multicore.md` definiendo el control de versiones comunes del monorepo y aislamiento de paquetes.
+  - **Marca Blanca y Aprovisionamiento:** Creación de `contrato_aprovisionamiento_dinamico_assets.md` que especifica la inyección HSL, empaquetado de PWAs y generación de entornos locales.
+  - **Sincronización:** Copias físicas de los 5 archivos agregadas a la carpeta de resultados en Escritorio y mapeadas en `mapa_documentacion_ia.md`.
 
 ## [2026-07-07] - CORE-270: Reporte de Comparativa y Alineación de Documentación Heredada
 - **Tipo:** Auditoría / Documentación / Consistencia / Calidad
