@@ -1,4 +1,11 @@
 
+## [2026-07-07] - CORE-272: Creación de Guía Rápida de Estándares e Interfaz (Cheat Sheet)
+- **Tipo:** Documentación / Calidad / UI / UX
+- **Firma:** CORE-DEV-CHEAT-SHEET-CREATION-2026
+- **Descripcion:**
+  - **Cheat Sheet de Desarrollo:** Creación del manual `resumen_reglas_y_estandares_desarrollo.md` que extrae y consolida en español las reglas de contraste HSL, diseño responsivo sin anchos fijos, clamping de altura variacional, estilos deshabilitados correctos y persistencia IndexedDB (Dexie).
+  - **Sincronización:** Copias físicas de la Guía Rápida y de la `guia_maestra_desarrollo.md` exportadas al Escritorio del usuario y registradas en el mapa de documentación semántica.
+
 ## [2026-07-07] - CORE-271: Creación de Manuales y Estándares de Arquitectura Multi-Core General
 - **Tipo:** Documentación / Arquitectura / Multi-Tenant / Ecosistema
 - **Firma:** CORE-MULTICORE-DOCS-CREATION-2026

@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-272: Creación de Guía Rápida de Estándares e Interfaz (Cheat Sheet)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Creación del manual resumen_reglas_y_estandares_desarrollo.md que extrae y consolida en español las reglas de contraste, diseño responsivo y UX de AGENTS.md, copiándolo al Escritorio del usuario junto con la guia_maestra_desarrollo.md.
+  - Archivos: [Documentacion PROTOTIPE/04_Estandares_y_Skills/resumen_reglas_y_estandares_desarrollo.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/resumen_reglas_y_estandares_desarrollo.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-271: Creación de Manuales y Estándares de Arquitectura Multi-Core General~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
