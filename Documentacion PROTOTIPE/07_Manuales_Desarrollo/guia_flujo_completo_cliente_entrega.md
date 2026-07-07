@@ -1,69 +1,60 @@
-# 🗺️ Flujo Maestro de Operación: De la Preventa a la Entrega del Cliente
+# 🗺️ Flujo Maestro de Operación: Ciclo de Vida Automatizado del Cliente
 
-Esta guía unifica el ciclo completo de vida de un proyecto en el ecosistema **PROTOTIPE**, detallando cada paso operativo y técnico desde el primer contacto comercial con el cliente hasta el despliegue a producción y la entrega final de la aplicación.
+Esta guía establece el mapa de ruta definitivo y **100% verificado** para gestionar el ciclo de vida de un cliente en **PROTOTIPE**. A diferencia del desarrollo manual tradicional, todo el flujo de preventa, aprovisionamiento, pruebas y despliegue se gestiona de forma centralizada y automatizada a través del **Dashboard de Desarrollo (dev-dashboard)** y el **Bridge CLI**.
 
 ---
 
-## 📋 Resumen del Ciclo de Vida
+## 📋 Resumen del Flujo en la Consola Central
+
 ```mermaid
 graph TD
-    A[Fase 1: Preventa y Descubrimiento] --> B[Fase 2: Aprovisionamiento Físico]
-    B --> C[Fase 3: Configuración y Reglas]
-    C --> D[Fase 4: Personalización y UI]
-    D --> E[Fase 5: QA e Integridad]
-    E --> F[Fase 6: Despliegue y Entrega]
+    A[1. Briefing Studio: Diagnóstico] -->|Guardar en Firestore| B[2. Cotizador: Propuesta PDF]
+    B -->|Importar Datos| C[3. Onboarding Wizard: Aprovisionamiento]
+    C -->|SSE Logs Terminal| D[4. CRM: Control Local e Inyección]
+    D -->|Vite Server en Un Clic| E[5. QA: Vista Previa y Test de Humo]
+    E -->|Despliegue Hosting / Reglas| F[6. Producción y Entrega]
 ```
 
 ---
 
-## 🏛️ Desglose del Flujo de Trabajo Paso a Paso
+## 🏛️ Desglose del Flujo de Trabajo Real
 
-### 🤝 Fase 1: Preventa, Levantamiento y Cotización (Preventa)
-1.  **Entrevista de Descubrimiento (Briefing Studio):**
-    *   Ingresa al Dashboard central, pestaña **Briefing Studio**.
-    *   Completa el wizard de 20 preguntas junto al cliente para extraer su nicho comercial (de los 23 oficiales en `niches.json`), módulos necesarios, y paleta de branding.
-    *   El asistente analizará la viabilidad contra la biblioteca de componentes existentes.
-2.  **Cotización y Propuesta (Cotizador):**
-    *   Exporta el diagnóstico del Briefing al **Cotizador**.
-    *   Configura setup fee, cargos de suscripción mensual y comisiones.
-    *   Genera el PDF formal de la propuesta comercial directamente en el dashboard y descárgalo para firma.
+### 🤝 1. Descubrimiento y Diagnóstico (Briefing Studio)
+El proceso inicia en la pestaña **Briefing Studio** del Dashboard Central:
+*   **Wizard de 20 Pasos:** Se realiza una sesión de preventa interactiva con el cliente recopilando su modelo de negocio, dolores, metas de escalabilidad y branding básico.
+*   **Auditoría Automática:** El sistema evalúa las respuestas contra el catálogo físico de la biblioteca de componentes y calcula un puntaje de complejidad.
+*   **Guardado y Exportación:** La sesión se almacena en la colección `briefings` de Firestore y se exporta como plantilla de levantamiento Markdown (.md) al monorepo.
 
-### 🔌 Fase 2: Creación de la Infraestructura en Firebase
-Antes de ejecutar el script del CLI Bridge, debes preparar el entorno en la nube del cliente:
-1.  Ingresa a la consola de Firebase del cliente y crea un nuevo proyecto (ej: `ventas-mi-cliente`).
-2.  Habilita **Firebase Authentication** (Correo/Contraseña y Teléfono).
-3.  Habilita **Cloud Firestore** en modo producción y elige la región del servidor.
-4.  Habilita **Firebase Hosting**.
+### 💰 2. Propuesta Comercial (Cotizador)
+*   **Importación:** El desarrollador importa los datos de complejidad de la sesión de Briefing a la pestaña **Cotizador**.
+*   **Simulación de Costos:** Se calcula la propuesta económica (setup fee, mensualidad, comisión de telemetría) usando la matriz de precios oficial.
+*   **Entrega del Contrato:** Se genera y descarga la propuesta formal en PDF para la firma del cliente.
 
-### ⚙️ Fase 3: Aprovisionamiento Automatizado (CLI Bridge)
-1.  **Importación al Onboarding Wizard:**
-    *   En el Dashboard central, haz clic en "Importar a Aprovisionamiento" desde el Cotizador.
-    *   Verifica los campos de variables de entorno, credenciales del administrador inicial, WhatsApp de contacto y puerto Vite asignado.
-2.  **Ejecución del Generador:**
-    *   Al enviar el formulario, el Dashboard se comunicará con el backend `Prototipe-CLI/server.js` (puerto 3001).
-    *   El Bridge clonará la plantilla base (`Plantillas Core/App Ventas`), creará la carpeta física en `Instancias Clientes/[nombre-cliente]`, inyectará la paleta de colores HSL en `index.html`/CSS, renombrará assets, generará el manifest.json de la PWA y configurará los servicios.
+### 🚀 3. Aprovisionamiento Automatizado (Onboarding Wizard)
+Desde el Cotizador, se hace clic en **"Importar a Aprovisionamiento"**, redirigiendo al desarrollador a la pestaña **Nuevo Cliente**:
+1.  **Formulario del Wizard (Tres Secciones):**
+    *   **Servidor:** Nombre del cliente, ID/slug normalizado, y modelo de facturación.
+        *   *Opción Automática (autoProvisionFirebase):* El CLI crea automáticamente el proyecto Firebase en la nube.
+        *   *Opción Manual:* El desarrollador introduce las llaves del proyecto creado previamente en la consola de Firebase.
+    *   **Branding:** Selección de tipografías y HSL de marca blanca. El botón **"Generar Paleta AAA"** calcula iterativamente contrastes que cumplan con la norma WCAG 2.1 (relación >= 7:1) para garantizar legibilidad del color de fondo vs. texto en botones.
+    *   **Módulos:** Activación/desactivación de características (Caja POS, domicilios, KDS, DIAN) e inyección de componentes atómicos.
+2.  **Ejecución y SSE Terminal:**
+    *   Al hacer clic en **"Crear Proyecto"**, se envía el payload al Express Bridge (`/api/create-project`).
+    *   El Bridge levanta un proceso hijo (`worker_create_project.js`) que clona la plantilla core base, inyecta la paleta HSL en index.css/CSS global, genera los 12 archivos estándar de documentación local (`contexto_negocio.md`, `restricciones_tecnicas.md`, etc.) y escribe los archivos de configuración.
+    *   Los logs detallados de la clonación se transmiten en tiempo real mediante un **Stream SSE (`/api/create-project/stream`**), mostrándose en la consola interactiva del Dashboard.
 
-### 🗄️ Fase 4: Sembrado, Reglas de Base de Datos e Integración Local
-1.  **Siembra de Datos de Prueba (Seeding):**
-    *   Ingresa a la carpeta del nuevo cliente y ejecuta el script de siembra local `npm run db:seed`. Esto poblará Firestore con catálogos base, productos de demostración del nicho y perfiles iniciales de personal.
-2.  **Blindaje de Reglas de Seguridad:**
-    *   Configura las reglas locales en `firestore.rules`.
-    *   Agrega los índices compuestos necesarios para las consultas en `firestore.indexes.json`.
-    *   Sube las reglas a producción: `cmd /c firebase deploy --only firestore`.
+### 🛠️ 4. Control Local e Integración (CRM Clientes)
+Una vez aprovisionado, el cliente aparece en la pestaña **CRM Clientes**. Toda la operación de desarrollo se realiza desde su panel expandido en un solo clic:
+*   **Levantar Servidor Local:** El botón "Iniciar Servidor" llama a `/api/project/dev/start`. Levanta una instancia Vite en un puerto dinámico y expone el enlace **"Abrir Vista Previa"** para interactuar con la app del cliente en caliente.
+*   **Administración de Base de Datos:**
+    *   Se ejecuta el sembrado de datos demo para el nicho seleccionado (`/api/project/db/seed`).
+    *   Se compilan y sincronizan las reglas de seguridad físicas y los índices compuestos directamente en Firebase (`/api/project/firebase-rules/deploy`).
 
-### 🎨 Fase 5: Personalización Visual e Inyección de Componentes
-1.  **Portabilidad de Módulos Específicos:**
-    *   Si el cliente requiere vistas adicionales, usa la CLI o la directiva `@portar-componente` para extraer componentes del catálogo global a la carpeta local del cliente.
-2.  **Verificación de Calidad y Estilos:**
-    *   Asegura el contraste AAA (mínimo 7:1) usando la clase `!text-white` en botones con variables de fondo HSL.
-    *   Verifica responsividad móvil (apilamiento vertical, tablas con scroll horizontal scrollbar-thin, prevención de desbordamientos con `truncate`).
+### 🧩 5. Personalización y Auditoría de Drift
+*   **Inyección de Componentes:** Si el cliente requiere características especializadas de la biblioteca, se inyectan en caliente desde la interfaz del CRM mediante el endpoint `/api/library/inject`.
+*   **Detector de Desviación (Drift):** El Dashboard ejecuta auditorías de paridad física contra el Core para detectar modificaciones o archivos desalineados, permitiendo sincronizarlos en lote (`/api/project/sync-files`) o descartar cambios locales en Git (`/api/git/discard`).
 
-### 🚀 Fase 6: QA, Compilación y Despliegue Final
-1.  **Pruebas de Integridad:**
-    *   Ejecuta las pruebas Playwright correspondientes en el entorno de testing.
-    *   Corre la compilación local para validar la ausencia de warnings/errores de React: `npm run build`.
-2.  **Despliegue a Producción:**
-    *   Ejecuta el despliegue del Hosting: `cmd /c firebase deploy --only hosting`.
-3.  **Entrega y Alta en CRM:**
-    *   Descarga y entrega los códigos QR de acceso rápido.
-    *   Registra formalmente al cliente en `clientes_control` de Firestore central para activar la telemetría e inicio automático de monitoreo de comisiones del desarrollador.
+### 📦 6. Despliegue y Entrega de la Instancia
+*   **Tests de Humo E2E:** Ejecución de pruebas de carga y simulación de flujos usando Playwright (integrado en la pestaña **Tests E2E** del Dashboard).
+*   **Despliegue a Producción:** Desde el CRM del Dashboard, se ejecuta el build final de producción y el deploy al Firebase Hosting del cliente en un solo clic.
+*   **Activación de Telemetría:** Se descarga el set de códigos QR de compra rápida o credenciales del administrador, y se activa el monitoreo de comisiones del desarrollador en el CRM central.
