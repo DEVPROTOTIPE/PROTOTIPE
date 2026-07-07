@@ -1,10 +1,17 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-275: Auditoría Técnica Exhaustiva de Plantillas Core~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Análisis detallado de paridad de dependencias, preparación de la semilla, vulnerabilidades críticas de seguridad de Firestore y remoción de código huérfano en las plantillas base. Copia del reporte enviada al Escritorio.
+  - Archivos: [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/reporte_auditoria_plantillas_core.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/reporte_auditoria_plantillas_core.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-274: Creación de Guía de Flujo Completo: De Preventa a Entrega~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
   - Descripción: Creación de la guía guia_flujo_completo_cliente_entrega.md que detalla todos los pasos de interacción comercial, preventa, aprovisionamiento local/nube, inyección, QA y deploy de un cliente, copiándolo al Escritorio del usuario.
   - Archivos: [Documentacion PROTOTIPE/07_Manuales_Desarrollo/guia_flujo_completo_cliente_entrega.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/guia_flujo_completo_cliente_entrega.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 
 * **[x] ~~Tarea CORE-273: Creación de Guía de Contribución al Monorepo y Entorno Local~~**
   - Estatus: Completado.

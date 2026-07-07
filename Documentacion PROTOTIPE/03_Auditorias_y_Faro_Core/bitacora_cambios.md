@@ -1,4 +1,11 @@
 
+## [2026-07-07] - CORE-275: Auditoría Técnica Exhaustiva de Plantillas Core
+- **Tipo:** Auditoría / Seguridad / Calidad / DevOps
+- **Firma:** CORE-TEMPLATES-EXHAUSTIVE-AUDIT-2026
+- **Descripcion:**
+  - **Auditoría de Plantillas:** Análisis profundo de `template-core-seed` y `template-ventas`. Se detectaron riesgos críticos en reglas de Firestore (`allow read, write: if request.auth != null`), referencias a paquetes inexistentes (`jspdf`, `html2canvas`) en el configurador de Vite del seed, y omisión de librerías de testing (Playwright) y componentes obligatorios de borrado (`AlertConfirmContext.jsx`).
+  - **Sincronización:** Registro del informe de auditoría física en el monorepo y actualización del mapa semántico de documentación de la IA. Copia exportada al Escritorio del usuario.
+
 ## [2026-07-07] - CORE-274: Creación de Guía de Flujo Completo: De Preventa a Entrega
 - **Tipo:** Documentación / Negocios / DevOps / Workflow
 - **Firma:** CORE-CLIENT-DELIVERY-WORKFLOW-2026
