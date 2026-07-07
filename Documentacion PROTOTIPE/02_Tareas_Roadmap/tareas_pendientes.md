@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-288: Unificación de Autenticación de Administradores en Auditoría Crítica (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se corrigió la discrepancia de autenticación de roles de administrador en la auditoría crítica, reemplazando la referencia a la colección obsoleta `/admins/` por la validación real en la colección `/users/{uid}` con `role == 'admin'` tal y como establecen las reglas del Core.
+  - Archivos: [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_critica_ecosistema_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_critica_ecosistema_2026.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-287: Unificación de Tasas Comisionales en Informe de Investigación (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

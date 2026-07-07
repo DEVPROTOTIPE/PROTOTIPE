@@ -16,11 +16,12 @@ Este informe presenta un análisis profundo, crítico y funcional de todo el eco
   }
   ```
 * **Impacto:** Si la aplicación habilita registro de clientes (e.g. inicio de sesión de clientes por email/contraseña en `LoginPage.jsx`), **cualquier cliente autenticado es tratado como Administrador** por las reglas de Firestore. Un atacante puede reescribir la configuración del negocio (`/config`), alterar precios de productos (`/products`), borrar categorías, manipular los balances financieros de fiados (`/credits`) y alterar registros de personal (`/employees`).
-* **Propuesta de Solución:** Restringir la verificación de administrador validando un campo de custom claims (`request.auth.token.admin == true`) o mediante una lista blanca de UIDs almacenados en una colección privada `/admins/` en Firestore:
+* **Propuesta de Solución:** Restringir la verificación de administrador validando su registro en la colección de usuarios `/users/{uid}` con el atributo `role == 'admin'` (comportamiento implementado en la plantilla Core):
   ```javascript
   function isAdmin() {
     return request.auth != null && 
-      exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+      get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
   }
   ```
 
