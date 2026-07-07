@@ -1440,8 +1440,8 @@ VITE_DEVELOPER_STORE_ADDRESS=${storeAddress}
 # [SEGURIDAD] PIN único del desarrollador — generado aleatoriamente por instancia
 VITE_DEV_PIN=${generatedDevPin}
 
-# Telemetría de Comisiones del Desarrollador (Centralización Central - HTTPS Blaze)
-VITE_DEVELOPER_TELEMETRY_ENDPOINT=https://reporttelemetry-bkwhzlbhlq-uc.a.run.app
+# Telemetría de Comisiones del Desarrollador (Centralización Central - Bridge Local)
+VITE_DEVELOPER_TELEMETRY_ENDPOINT=http://localhost:3001
 VITE_DEVELOPER_TELEMETRY_TOKEN=${uniqueToken}
 VITE_DEVELOPER_CLIENT_ID=${clientId}
 

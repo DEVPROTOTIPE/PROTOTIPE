@@ -8984,7 +8984,7 @@ async function validateClientIntegrityBeforeSync(corePath, clientPath, folderNam
     VITE_FIREBASE_MESSAGING_SENDER_ID: sdkConfig.messagingSenderId || currentEnv.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
     VITE_FIREBASE_APP_ID: sdkConfig.appId || currentEnv.VITE_FIREBASE_APP_ID || '',
 
-    VITE_DEVELOPER_TELEMETRY_ENDPOINT: 'https://reporttelemetry-bkwhzlbhlq-uc.a.run.app',
+    VITE_DEVELOPER_TELEMETRY_ENDPOINT: 'http://localhost:3001',
     VITE_DEVELOPER_TELEMETRY_TOKEN: telemetryToken || currentEnv.VITE_DEVELOPER_TELEMETRY_TOKEN || '',
     VITE_DEVELOPER_CLIENT_ID: clientId,
 

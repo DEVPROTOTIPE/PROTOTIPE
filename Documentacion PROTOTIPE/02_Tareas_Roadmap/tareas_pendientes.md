@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-289: Remoción de Cloud Function Legacy de Telemetría (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se desvió la variable `VITE_DEVELOPER_TELEMETRY_ENDPOINT` que apuntaba a una Cloud Function externa en producción (`reporttelemetry`) para redirigirla hacia el Bridge local (`http://localhost:3001`), cumpliendo con la prohibición de Cloud Functions en producción (`DEC-006`) sin romper el validador del modal de diagnóstico de los clientes.
+  - Archivos: [Prototipe-CLI/generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY], [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
 * **[x] ~~Tarea CORE-288: Unificación de Autenticación de Administradores en Auditoría Crítica (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
