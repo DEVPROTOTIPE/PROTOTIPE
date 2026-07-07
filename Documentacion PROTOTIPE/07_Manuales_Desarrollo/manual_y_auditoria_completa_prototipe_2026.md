@@ -1911,6 +1911,7 @@ El análisis del núcleo de la aplicación cliente revela la siguiente arquitect
 *   **storage.rules (2.4kB):** Reglas de Cloud Storage para carga de fotos de productos con límites de tamaño por cliente.
 *   **firestore.indexes.json (4.9kB):** Mapeo de índices compuestos requeridos por consultas complejas del histórico de ventas.
 *   **playwright.config.js / run-e2e.ps1:** Configuración y automatización del pipeline local de pruebas integrales Playwright.
+*   **Gestión de Entorno Dual (.env.local):** La infraestructura soporta tanto el modo local aislado (cuando las variables `VITE_DEVELOPER_CENTRAL_*` están vacías) como el modo centralizado. La variable `VITE_DEVELOPER_CENTRAL_API_KEY` contiene la API Key pública del proyecto Firebase de control central, requerida por el SDK de Firebase del cliente (`centralFirebaseService.js`) para inicializar la conexión secundaria y permitir que el token `VITE_DEVELOPER_TELEMETRY_TOKEN` verifique y escriba los reportes comisionales y fallos en caliente directamente en las colecciones Firestore centrales. Si no se especifican variables en el `.env.local` del cliente, el servicio conmutará automáticamente a usar los valores por defecto hardcodeados de la Consola Central para no interrumpir el arranque.
 
 ### 7.3. Capa de Servicios Lógicos (29 Módulos en src/services/)
 *   **accessLogService.js (3.3kB):** Auditoría de inicios de sesión y accesos de operarios.

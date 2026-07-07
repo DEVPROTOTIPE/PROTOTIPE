@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-290: Documentación del Soporte de Entorno Dual en Telemetría del Core
+- **Fecha:** 2026-07-07
+- **Tipo:** Documentación / Consistencia
+- **Descripción:** Se actualizó `manual_y_auditoria_completa_prototipe_2026.md` (Sección 7.2) para documentar el rol de la variable `VITE_DEVELOPER_CENTRAL_API_KEY` y las credenciales centrales. Se aclaró que no se trata de una discrepancia de inyección del generador del CLI, sino de una funcionalidad dual: los servicios de telemetría e informes comisionales del Core toleran variables vacías (modo local standalone) y conmutan a valores públicos por defecto hardcodeados de Firebase para resolver la conexión en producción sin intervenciones manuales del operador.
+- **Archivo modificado:** `Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md`
+
+
 ## CORE-289: Remoción de Cloud Function Legacy de Telemetría (DEC-006 Alignment)
 - **Fecha:** 2026-07-07
 - **Tipo:** Refactorización / Arquitectura

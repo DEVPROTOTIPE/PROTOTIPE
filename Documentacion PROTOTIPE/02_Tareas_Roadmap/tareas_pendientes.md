@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-290: Documentación del Soporte de Entorno Dual en Telemetría del Core (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se actualizó la Sección 7.2 del manual completo para documentar el rol de la variable `VITE_DEVELOPER_CENTRAL_API_KEY` y las credenciales centrales, aclarando el comportamiento del entorno dual de telemetría (soporte local standalone con fallback automático de Firebase SDK) para resolver la discrepancia de inyección del generador.
+  - Archivos: [Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-289: Remoción de Cloud Function Legacy de Telemetría (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
