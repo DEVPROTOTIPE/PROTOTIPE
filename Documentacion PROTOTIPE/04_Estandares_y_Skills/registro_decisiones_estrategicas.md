@@ -24,6 +24,11 @@ Este archivo consolida las decisiones operativas, técnicas, comerciales y arqui
 * **Contexto:** Inyectar cabeceras CORS en Firebase Storage de forma manual arrojaba errores recurrentes por buckets del formato `.firebasestorage.app` ausentes.
 * **Decisión:** Desarrollar en el Express backend un resolvedor con fallback que intente configurar el CORS usando `gsutil` en el bucket principal y conmute automáticamente a `.firebasestorage.app` en caso de error 404, implementando una caché en memoria (`storageBucketCache`) para agilizar subsiguientes consultas.
 
+### DEC-006: Prohibición Absoluta de Cloud Functions en Producción
+* **Fecha:** 2026-07-06
+* **Contexto:** Se requiere simplificar al máximo el mantenimiento y la infraestructura en la nube para clientes finales.
+* **Decisión:** PROTOTIPE operará exclusivamente bajo un modelo Serverless estático (Hosting + Reglas físicas de base de datos). Queda prohibido el despliegue de Cloud Functions en producción. Cualquier lógica de integración se resolverá del lado del cliente o a través de la API REST local del Bridge CLI.
+
 ### DEC-002: Purga Absoluta de Seeding e Inteligencia Artificial
 * **Fecha:** 2026-06-24
 * **Contexto:** Se detectaron advertencias de seguridad y excesiva complejidad por la inyección de Cloud Functions de IA (Gemini/Vertex) y scripts de siembra no requeridos por el modelo de negocio actual.

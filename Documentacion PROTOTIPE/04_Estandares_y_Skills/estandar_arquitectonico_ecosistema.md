@@ -29,6 +29,7 @@ Este documento consolida el estándar de diseño, reglas de desarrollo, segurida
 *   **Librerías de Iconos Pesadas:** Prohibido el uso de `lucide-react` u otras librerías pesadas en componentes genéricos de la biblioteca. Todo icono debe ser inyectado como SVG nativo en línea (`inline`) con soporte para herencia de color.
 *   **APIs Geográficas de Pago:** Prohibido el uso de Google Maps API u otros sistemas comerciales para visualización o selección de pines.
 *   **Procesadores de Imagen en Servidor:** Prohibido el uso de Cloud Functions dedicadas a redimensionar o almacenar imágenes de catálogo. El procesamiento de imágenes debe hacerse en el lado del cliente (Jimp/Canvas) y guardarse en Firebase Storage.
+*   **Cloud Functions / Servidor de Base de Datos:** Queda estrictamente prohibido el empaquetado, compilación o despliegue de Cloud Functions en la arquitectura de producción de PROTOTIPE. El aprovisionamiento de clientes se realiza de forma exclusiva mediante compilación de Hosting estático y reglas físicas. La carpeta `dev-dashboard/functions/` del repositorio representa código legacy obsoleto en desuso.
 
 ### 2.3 Convenciones de Código y Archivos
 *   **Idioma de Documentación:** Todos los manuales, bitácoras, hojas de ruta y archivos de la biblioteca deben nombrarse y redactarse en español claro, utilizando títulos jerárquicos de Markdown.

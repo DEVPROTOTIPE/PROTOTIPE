@@ -173,3 +173,20 @@ PROTOTIPE no vende software.
 PROTOTIPE vende sistemas operativos para negocios reales.
 
 Cada precio refleja impacto, no solo desarrollo.
+
+
+---
+
+## 🔌 ANEXO TÉCNICO: MAPEO DE MODELOS ECONÓMICOS A BASE DE DATOS
+
+Para mantener la integridad con el onboarding wizard y la configuración de Firestore, los modelos económicos calculados arriba deben traducirse a la base de datos mediante las siguientes equivalencias de campos en `billingMode`:
+
+1. **Comisión por Venta (Modalidad Variable / Porcentaje):**
+   * Parámetro técnico: `billingMode: 'percentage'`
+   * Campo a rellenar: `comisionPorcentaje` (ej. `1.5`)
+2. **Comisión por Servicio (Tarifas por Transacción):**
+   * Parámetro técnico: `billingMode: 'fixed_per_service'`
+   * Campo a rellenar: `montoFijoServicio` (ej. `200` COP)
+3. **Suscripción Mensual (Tarifa Plana):**
+   * Parámetro técnico: `billingMode: 'flat_monthly'`
+   * Campo a rellenar: `pagoMensualFijo` (ej. `30000` COP)

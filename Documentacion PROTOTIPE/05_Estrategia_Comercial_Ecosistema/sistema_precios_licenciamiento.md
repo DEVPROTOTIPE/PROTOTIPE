@@ -174,3 +174,20 @@ Proceso recomendado (automatizado mediante las banderas de telemetría de factur
 4.  Suspensión temporal (bloqueo total de la instancia cliente con cartelera informativa).
 5.  Archivado de datos (exportación de base de datos a Storage Central).
 6.  Eliminación definitiva según plazos establecidos contractualmente.
+
+
+---
+
+## 🔌 ANEXO TÉCNICO: MAPEO DE MODELOS ECONÓMICOS A BASE DE DATOS
+
+Para mantener la integridad con el onboarding wizard y la configuración de Firestore, los modelos económicos calculados arriba deben traducirse a la base de datos mediante las siguientes equivalencias de campos en `billingMode`:
+
+1. **Comisión por Venta (Modalidad Variable / Porcentaje):**
+   * Parámetro técnico: `billingMode: 'percentage'`
+   * Campo a rellenar: `comisionPorcentaje` (ej. `1.5`)
+2. **Comisión por Servicio (Tarifas por Transacción):**
+   * Parámetro técnico: `billingMode: 'fixed_per_service'`
+   * Campo a rellenar: `montoFijoServicio` (ej. `200` COP)
+3. **Suscripción Mensual (Tarifa Plana):**
+   * Parámetro técnico: `billingMode: 'flat_monthly'`
+   * Campo a rellenar: `pagoMensualFijo` (ej. `30000` COP)
