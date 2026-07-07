@@ -258,7 +258,23 @@ const WORKER_TIMEOUT_MS = 20 * 60 * 1000;
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// CORS restrictivo: solo permite el dev-dashboard y peticiones server-to-server (sin Origin header)
+// Bloquea cualquier sitio web externo que intente consumir el Bridge desde el browser del usuario
+const CORS_ALLOWED_ORIGINS = [
+  'http://localhost:5174',
+  'http://127.0.0.1:5174',
+  'http://localhost:5173', // puerto fallback de Vite
+  'http://127.0.0.1:5173',
+];
+app.use(cors({
+  origin: function (origin, callback) {
+    // Sin Origin = petición server-to-server (PowerShell, Node, curl) → permitir
+    if (!origin) return callback(null, true);
+    if (CORS_ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`[CORS] Origen no autorizado: ${origin}`));
+  },
+  credentials: true,
+}));
 app.use(express.json());
 
 function hexToHsl(hex) {
