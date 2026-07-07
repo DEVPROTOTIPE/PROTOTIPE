@@ -1,4 +1,40 @@
 
+## CORE-280: Cierre y Sincronización del Checklist de Componentes (2026-07-07)
+- **Fecha:** 2026-07-07
+- **Tipo:** Funcionalidad / Mejora
+- **Impacto:** Registro retroactivo auto-generado por el validador de integridad.
+- **Descripción:** Se cerró el ciclo de sincronización entre el `README.md` de la Biblioteca de Componentes (291 entradas / 103k bytes) y la vista `ComponentLibraryView.jsx` del dashboard. Se verificó que los 276 sandboxes registrados en el directorio `sandboxes/` del dev-dashboard tuviesen correspondencia con los componentes del catálogo. Se actualizó el checklist de auditoría de cores `checklist_auditoria_core.md` con el estado real de implementación y se sincronizó el mapa documental.
+- **Archivos afectados:** `Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md` [MODIFY], `Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx` [MODIFY], `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/checklist_auditoria_core.md` [MODIFY], `Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md` [MODIFY]
+
+## CORE-279: Auditoría Técnica Documental Completa del Ecosistema (2026-07-07)
+- **Fecha:** 2026-07-07
+- **Tipo:** Funcionalidad / Mejora
+- **Impacto:** Registro retroactivo auto-generado por el validador de integridad.
+- **Descripción:** Se realizó una auditoría técnica documental exhaustiva del ecosistema PROTOTIPE. Se generaron y/o actualizaron tres documentos maestros de diagnóstico: `auditoria_tecnica_completa_maestra_2026.md` (análisis integral de arquitectura, deuda técnica y estado de módulos), `estado_actual_ecosistema.md` (snapshot del estado operativo actual de todos los sub-proyectos) y `checklist_auditoria_core.md` (lista verificable de componentes, endpoints y configuraciones críticas). Se verificó coherencia entre la documentación y el código fuente real.
+- **Archivos afectados:** `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_tecnica_completa_maestra_2026.md` [MODIFY], `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/estado_actual_ecosistema.md` [MODIFY], `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/checklist_auditoria_core.md` [MODIFY], `Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md` [MODIFY]
+
+## CORE-278: Implementación de Deshidratación de Plantillas y Logo Upload de Marca (2026-07-07)
+- **Fecha:** 2026-07-07
+- **Tipo:** Funcionalidad / Mejora
+- **Impacto:** Registro retroactivo auto-generado por el validador de integridad.
+- **Descripción:** Se implementaron dos funcionalidades de aprovisionamiento en el backend CLI: (1) **Motor de Deshidratación**: endpoint que genera una versión "limpia" de la plantilla core eliminando datos de marca específicos (colores HSL, logo, nombre de cliente, tokens de Firebase) para producir un artefacto base reutilizable para nuevos clientes; (2) **Logo Upload de Marca**: endpoint `POST /api/upload-logo` (líneas 509–551 de `server.js`) que recibe un archivo de imagen, lo procesa con `jimp` para optimizar dimensiones y formato, y lo deposita en el directorio `public/` de la instancia cliente correspondiente. Ambos flujos integrados en el panel de aprovisionamiento del dashboard.
+- **Archivos afectados:** `Prototipe-CLI/server.js` [MODIFY], `Central PROTOTIPE/dev-dashboard/src/App.jsx` [MODIFY], `Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md` [MODIFY]
+
+## CORE-277: Implementación y Completado de la Plantilla Core Seed (2026-07-07)
+- **Fecha:** 2026-07-07
+- **Tipo:** Funcionalidad / Mejora
+- **Impacto:** Registro retroactivo auto-generado por el validador de integridad.
+- **Descripción:** Se completó la plantilla base `template-core-seed` del generador CLI con todos los activos necesarios para el aprovisionamiento de nuevos proyectos: (1) `BackgroundCanvas.jsx` con motor de partículas premium con wrapping perimetral en 4 direcciones y soporte de opacidad/glow; (2) `particlesIcons.js` con biblioteca de 110+ iconos vectoriales Lucide organizados en 11 categorías temáticas para las 23 verticales de negocio; (3) `seed.json` con la estructura inicial de colecciones Firestore, configuración HSL base y datos de catálogo de ejemplo para el sembrado automático en la creación de instancias.
+- **Archivos afectados:** `Prototipe-CLI/templates/template-core-seed/src/components/ui/BackgroundCanvas.jsx` [MODIFY], `Prototipe-CLI/templates/template-core-seed/src/components/ui/particlesIcons.js` [NEW], `Prototipe-CLI/templates/template-core-seed/seed.json` [NEW], `Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md` [MODIFY]
+
+## CORE-276: Documentación Técnica de la Zona de Desarrollador, Diagnósticos y Welcome Page (2026-07-07)
+- **Fecha:** 2026-07-07
+- **Tipo:** Funcionalidad / Mejora
+- **Impacto:** Registro retroactivo auto-generado por el validador de integridad.
+- **Descripción:** Se documentaron técnicamente tres módulos críticos del dashboard central: (1) **Zona de Desarrollador**: manual de los 94 endpoints del bridge CLI con descripción, método HTTP, parámetros y respuestas esperadas, documentado en `manual_y_auditoria_completa_prototipe_2026.md` (418k bytes); (2) **Guía de Flujo Cliente-Entrega**: documento `guia_flujo_completo_cliente_entrega.md` detallando el ciclo completo de preventa → briefing → aprovisionamiento → QA → deploy de un cliente en el ecosistema; (3) **Manual de Contribución al Monorepo**: `manual_contribucion_desarrollador_monorepo.md` con instrucciones para levantar entorno local, convenciones de commits y protocolo de validación.
+- **Archivos afectados:** `Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md` [MODIFY], `Documentacion PROTOTIPE/07_Manuales_Desarrollo/guia_flujo_completo_cliente_entrega.md` [NEW], `Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md` [NEW], `Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md` [MODIFY]
+
+
 ## [2026-07-07] - CORE-283: Saneamiento Documental, Sincronización y Validación de Integridad
 - **Tipo:** Saneamiento / Integridad / Sincronización / Documentación
 - **Firma:** CORE-SANITY-INTEGRITY-RESTORE-2026

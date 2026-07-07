@@ -3,6 +3,19 @@
 Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e integraciones con Firebase de **App Ventas**. Debe mantenerse actualizado ante cualquier creación, eliminación o refactorización de archivos.
 
 ## 📂 Estructura de Documentación y Negocio
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/comparativa_y_alineacion_documental_2026.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-270).
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/contrato_aprovisionamiento_dinamico_assets.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-271).
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/gobernanza_dependencias_npm_multicore.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-271).
+* **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_playgrounds_storybook_multicore.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-271).
+* **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_repositorios_infraestructura_agnostica.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-271).
+* **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/especificacion_nuevos_cores_oro.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-271).
+* **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/resumen_reglas_y_estandares_desarrollo.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-272).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_sincronizacion_plantillas_2026.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-275).
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-276).
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/guia_flujo_completo_cliente_entrega.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-276).
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-276).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/estado_actual_ecosistema.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-279).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/Scripts_Auxiliares/consolidar_para_notebook.py`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-281).
 * **`/Documentacion PROTOTIPE/08_Plan_Escalabilidad_Negocio/resumen_ejecutivo_proyecto.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-013).
 * **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/Estilos/catalogo_estilos_ui.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-008).
 * **`/Documentacion PROTOTIPE/10_Historial_Inyecciones/INDEX.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-127).
@@ -232,6 +245,7 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 ---
 
 ## 📂 Estructura de Módulos y Archivos Clave
+* **`/consolidar_notebook.bat`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-281).
 * **`/Plantillas Core/App Ventas/src/pages/portal/PortalMensajero.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-006).
 * **`/Plantillas Core/App Ventas/src/pages/admin/settings/sections/AppearanceSettings.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-008).
 * **`/Plantillas Core/App Ventas/src/services/orderService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-010).

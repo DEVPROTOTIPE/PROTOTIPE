@@ -230,7 +230,6 @@
     - [`.agents/AGENTS.md`](file:///d:/PROTOTIPE/.agents/AGENTS.md) [MODIFY]
     - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md) [MODIFY]
     - [`Central PROTOTIPE/dev-dashboard/GEMINI.md`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/GEMINI.md) [MODIFY]
-    - [`Instancias Clientes/GEMINI.md`](file:///d:/PROTOTIPE/Instancias%20Clientes/GEMINI.md) [MODIFY]
     - [`Plantillas Core/App Ventas/GEMINI.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/GEMINI.md) [MODIFY]
     - [`Prototipe-CLI/GEMINI.md`](file:///d:/PROTOTIPE/Prototipe-CLI/GEMINI.md) [MODIFY]
     - [`Prototipe-CLI/templates/template-core-seed/GEMINI.md`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/GEMINI.md) [MODIFY]
