@@ -769,7 +769,7 @@ Este documento contiene la especificación completa, manuales de operación paso
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/diccionario_tecnico_completo.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/diccionario_tecnico_completo.md) | 103125 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Ecommerce_y_QR/Modulo_Compra_Rapida_QR/manual_compra_qr.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Ecommerce_y_QR/Modulo_Compra_Rapida_QR/manual_compra_qr.md) | 6732 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_efectos_premium.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_efectos_premium.md) | 6506 | Componente o archivo del sistema. |
-| [Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md) | 413374 | Componente o archivo del sistema. |
+| [Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md) | 417669 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Paginas/Seguimiento_Pedido/manual_order_tracking.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Paginas/Seguimiento_Pedido/manual_order_tracking.md) | 3421 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/README.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/README.md) | 6192 | Componente o archivo del sistema. |
 | [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Creditos_y_Saldos/manual_credits_and_balances.md](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Creditos_y_Saldos/manual_credits_and_balances.md) | 4588 | Componente o archivo del sistema. |
@@ -1809,17 +1809,24 @@ El análisis del frontend revela la siguiente estructura y comportamiento del da
 *   **BriefingStudioView.jsx:** Formulario interactivo del briefing de preventa con exportación en Markdown.
 *   **CobrosPanel.jsx:** Conciliación de comisiones cobradas y marcadas como pagadas.
 *   **ComisionesPanel.jsx:** Generador de gráficos de ingresos y exportación de reportes PDF.
-*   **ComponentLibraryView.jsx:** Visor de biblioteca de 2 columnas con buscador Levenshtein tolerante a errores de escritura.
-*   **ComponentSandbox.jsx:** Playground interactivo que carga sandboxes ESM de forma diferida mediante `import.meta.glob`.
-*   **GitBackupPanel.jsx:** Interfaz del Drift Map, Auditor de Commits no pusheados y Enmendador seguro.
-*   **SkillsRoadmapPanel.jsx:** Panel de control de roadmap con validador de consistencia documental y de sandboxes.
+*   **ComponentLibraryView.jsx:** Visor de biblioteca de 2 columnas con buscador Levenshtein de componentes.
+*   **ComponentSandbox.jsx:** Playground Storybook interactivo para simulación de componentes.
+*   **GitBackupPanel.jsx:** Panel de control de Git, commits no integrados y Drift Map.
+*   **SkillsRoadmapPanel.jsx:** Panel de Roadmap con autoverificación de consistencia y linter.
 *   **particlesIcons.js:** Contiene definiciones vectoriales e iconos utilizados en las partículas flotantes y animaciones.
 
-### 4.6. Detalle por Sección del Dashboard (activeTab)
-*   **Dashboard General (`activeTab === 'dashboard'`):** KPIs, gráfico Recharts de ganancias, selector de periodos, exportador PDF y simulador de telemetría.
-*   **CRM Clientes (`activeTab === 'crm'`):** Detalles de clientes, sub-paneles de reglas de seguridad Firebase y paridad de código, inicio/parada de servidores locales Vite y deploys locales en un clic.
-*   **Onboarding (`activeTab === 'onboarding'`):** Formulario de aprovisionamiento de 11 pasos, generación de VAPID keys, logotipos autogenerados y logs SSE de creación del proyecto.
-*   **Consola de Errores (`activeTab === 'errors'`):** Listado y filtros de la telemetría de fallos (`app_failures`) enlazado al visor de archivos de código en disco.
+### 4.6. Configuraciones Locales
+*   **vite.config.js:** Configura alias de ruta (`@/*`) y optimizaciones de bundling.
+*   **eslint.config.js:** Reglas de linter estrictas para React 19.
+*   **.env.local:** Llaves de Firebase para la instancia administrativa del monorepo.
+*   **firestore.rules:** Reglas de base de datos que protegen colecciones como `tokens` y `reportesBilling`.
+
+### 4.7. Cloud Functions del Dashboard (dev-dashboard/functions/index.js)
+*   **reportTelemetry (onRequest - HTTPS):** Función HTTPS en la nube protegida por token Bearer que recibe logs e informes.
+    *   *Autenticación:* Valida la cabecera Authorization contra la colección central `/tokens/{token}`.
+    *   *Acción "billing":* Escribe informes agregados en `/reportesBilling/{clientId}_{periodo}` y actualiza `/clientes_control/{clientId}`.
+    *   *Acción "failure":* Registra los detalles del crash del cliente en la base de datos central de incidentes `/app_failures/`.
+    *   *Acción "ping":* Responde con código HTTP 200 si la clave de autorización es válida.
 
 ---
 
@@ -1851,13 +1858,10 @@ A continuación se detalla el flujo de cada herramienta de automatización del e
 *   **sync-discovery-prompt.cjs:** Sincronizador de prompts maestros y briefs.
 *   **test_provision.js:** Entorno de pruebas locales y simulador de aprovisionamiento de Node.js.
 
-### 5.5. verify_library_integrity.cjs (Validador de Storybook y Consistencia)
-*   **Propósito:** Asegurar la consistencia técnica de la biblioteca y playgrounds antes de compilar.
-*   **Flujo de Verificaciones:**
-    *   Verifica que cada componente tenga su archivo Markdown en el catálogo y su registro en `ComponentSandbox.jsx`.
-    *   Valida el manifiesto JSON exigiendo targetPath con arquitectura desacoplada.
-    *   Falla ante selectores nativos, anchos fijos en px, colores hexadecimales fijos, o rutas absolutas locales en los archivos de código o playgrounds.
-    *   Sincroniza en tres vías las habilidades de IA de `.agents/skills` con `04_Estandares_y_Skills` usando checksums SHA-256 de control.
+### 5.5. Scripts de Compilación y Limpieza (dev-dashboard/scripts/)
+*   **clean_linter_warnings.cjs (4.1kB):** Script que escanea el reporte de linter Vite y purga de forma segura variables no utilizadas e imports huérfanos antes del bundling.
+*   **verify_library_integrity.cjs (29.8kB):** Validador deStorybook y componentes del dev-dashboard.
+*   **validate-core-integrity.js (App Ventas/scripts/):** Script que audita la paridad estructural en el core del cliente.
 
 ---
 
@@ -1905,10 +1909,11 @@ El análisis del núcleo de la aplicación cliente revela la siguiente arquitect
 *   **Dexie (IndexedDB):** Base de datos local para telemetría offline y colas de sincronización asíncrona.
 *   **Vite 6 Optimization:** Fragmentación de Rollup para separar librerías (Firebase, Zustand, Dexie) en chunks independientes. Se excluye jsPDF del bundle inicial para realizar *lazy loading* dinámico únicamente al exportar reportes.
 
-### 7.2. Componentes UI y Comunes
-*   **CustomSelect.jsx:** Selector responsivo con animaciones Framer Motion y overlay transparente para clics externos.
-*   **AlertConfirmContext.jsx:** Modal de confirmación promesificada de eliminación que permite invocaciones imperativas desde scripts puros JS sin contexto de React.
-*   **NumberInput & CurrencyInput:** Inputs con formateo en tiempo de ejecución, sanitización de caracteres no numéricos y soporte de miles colombianos (`$ 12.000`).
+### 7.2. Configuración de Infraestructura de la App Ventas
+*   **firestore.rules (6.6kB):** Reglas de seguridad basadas en roles (dueño/empleado/cliente) que protegen las transacciones de venta e inventario.
+*   **storage.rules (2.4kB):** Reglas de Cloud Storage para carga de fotos de productos con límites de tamaño por cliente.
+*   **firestore.indexes.json (4.9kB):** Mapeo de índices compuestos requeridos por consultas complejas del histórico de ventas.
+*   **playwright.config.js / run-e2e.ps1:** Configuración y automatización del pipeline local de pruebas integrales Playwright.
 
 ### 7.3. Capa de Servicios Lógicos (29 Módulos en src/services/)
 *   **accessLogService.js (3.3kB):** Auditoría de inicios de sesión y accesos de operarios.
@@ -1916,7 +1921,7 @@ El análisis del núcleo de la aplicación cliente revela la siguiente arquitect
 *   **alertService.js (1.2kB):** Emisor imperativo para llamadas asíncronas de modales.
 *   **appConfigService.js (6.0kB):** Lector y sincronizador de configuraciones de Firestore.
 *   **authService.js (1.4kB):** Lógica de sesión, PIN de operarios y validación.
-*   **billingService.js (9.8kB):** Reportes de facturación Dian/SaaS y consolidación.
+*   **billingService.js (9.8kB):** Reportes de facturación Dian/SaaS y comisiones del monorepo.
 *   **centralFirebaseService.js (2.6kB):** Conexión paralela y listener del Firebase centralizado.
 *   **claimsService.js (2.6kB):** Devoluciones y reclamos de clientes.
 *   **clientNotificationService.js (2.8kB):** Notificaciones FCM push para navegadores móviles.
