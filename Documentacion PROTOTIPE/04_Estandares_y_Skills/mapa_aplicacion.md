@@ -16,6 +16,8 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-276).
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/estado_actual_ecosistema.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-279).
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/Scripts_Auxiliares/consolidar_para_notebook.py`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-281).
+* **`/Documentacion PROTOTIPE/01_Control_Versiones/changelog_general.md`**: Bitácora general de cambios operativos del monorepo (Saneamiento CORE-285).
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/Configuracion_Marca/manual_creacion_desde_cero.md`**: Manual técnico para desarrollo sobre Core Seed (renombrado CORE-285).
 * **`/Documentacion PROTOTIPE/08_Plan_Escalabilidad_Negocio/resumen_ejecutivo_proyecto.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-013).
 * **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/Estilos/catalogo_estilos_ui.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-008).
 * **`/Documentacion PROTOTIPE/10_Historial_Inyecciones/INDEX.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-127).
