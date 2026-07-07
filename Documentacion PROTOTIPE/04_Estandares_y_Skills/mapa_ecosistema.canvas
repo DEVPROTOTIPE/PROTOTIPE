@@ -1,0 +1,17 @@
+{
+	"nodes":[
+		{"id":"node-title","type":"text","text":"# 🎯 Ecosistema PROTOTIPE\nMapa interactivo de arquitectura física y lógica.","x":-100,"y":-150,"width":600,"height":100},
+		{"id":"node-negocio","type":"file","file":"04_Estandares_y_Skills/contexto_negocio_aplicaciones_medida.md","x":-100,"y":50,"width":400,"height":400,"color":"4"},
+		{"id":"node-estandares","type":"file","file":"04_Estandares_y_Skills/guia_maestra_desarrollo.md","x":400,"y":50,"width":400,"height":400,"color":"2"},
+		{"id":"node-cli","type":"file","file":"07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/Prototipe_CLI/manual_prototipe_cli.md","x":900,"y":-150,"width":400,"height":350,"color":"1"},
+		{"id":"node-biblioteca","type":"file","file":"06_Biblioteca_Componentes/README.md","x":900,"y":300,"width":400,"height":350,"color":"3"},
+		{"id":"node-roadmap","type":"file","file":"02_Tareas_Roadmap/tareas_pendientes.md","x":1400,"y":75,"width":450,"height":400,"color":"6"}
+	],
+	"edges":[
+		{"id":"edge-neg-est","fromNode":"node-negocio","fromSide":"right","toNode":"node-estandares","toSide":"left","label":"Rige"},
+		{"id":"edge-est-cli","fromNode":"node-estandares","fromSide":"top","toNode":"node-cli","toSide":"bottom","label":"Implementado en"},
+		{"id":"edge-est-bib","fromNode":"node-estandares","fromSide":"bottom","toNode":"node-biblioteca","toSide":"top","label":"Define componentes de"},
+		{"id":"edge-cli-road","fromNode":"node-cli","fromSide":"right","toNode":"node-roadmap","toSide":"top","label":"Tareas de automatización"},
+		{"id":"edge-bib-road","fromNode":"node-biblioteca","fromSide":"right","toNode":"node-roadmap","toSide":"bottom","label":"Tareas de UI/Componentes"}
+	]
+}

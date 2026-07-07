@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "lastSyncAt": "2026-07-07T18:26:05.270Z",
+  "skills": {
+    "briefing-analizador": {
+      "sha256": "37a1a613576f02377beaeb2111340371ee5b16ca05766b721ad98992a57c55dc",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "cli-log-streamer": {
+      "sha256": "fdfd07d709b4ca928758c70244d5a46b4ac53592d4a26cbef19fc011cb3d00e0",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "component-creator": {
+      "sha256": "d0daecf76127cd939434e61588279ef66ecd5c43e364c7a6bbcd635a36aa0f4a",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "component-extractor": {
+      "sha256": "0bdcdaa9bd4d911fd2d91ab0d09f6d73fdbd6c9b6dc378ecdec01fb480457697",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "cotizador-rapido": {
+      "sha256": "6569970290c89572ee9a80d86d9b2c46a94e8191c8a6b7ca20c560db4e962798",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "crear-skill-prototipe": {
+      "sha256": "d8d23d680ae8d50d9eac3f2aff21264b094c87de948f56a28c1fb250a9a6227e",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "database-seeder": {
+      "sha256": "0de63b8d8f64a2f1a6fc1f0f256f2afb0820e0c9916ede5e9b14cc529551b754",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "developer-manual-builder": {
+      "sha256": "2bcf47131793d5051dfa85967a45c20934578828ccfb54374ddd75d31519b441",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "gemini-rules-sync": {
+      "sha256": "46c8cfac1b9ae0aa23734ede7950bfb8d18180b614dfef1ec0f6ddfb152d1319",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "git-strategist": {
+      "sha256": "3d4045ca9705a8bc7355f0fa21e11efc101174c50634a92502ba8ab85c179e23",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "integrity-compiler": {
+      "sha256": "447e20ad5e51c62d2b92acf1b3b1d7999e90cbebd39c64a3304667027f7c7bc1",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "objection-handler": {
+      "sha256": "77f1e4b3d92c2342ca23ab64ad4619abc8b329a458218435901806fc0a90d644",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "onboarder-marcas": {
+      "sha256": "425299e3bc512d43ce554a05cc35a40b90665fa4a0eb7001d57ee161a22d04c2",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "portar-componente": {
+      "sha256": "17050a02cadcd10381a7c8614b3fcf9be9dd0997081b90c714ec441eb14c250f",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "post-discovery-analyzer": {
+      "sha256": "d3b9515fdff1fb468938ca5763d7fc8e5c984dcaf58f2b25c8dfd79a088648a7",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "project-cleanup": {
+      "sha256": "c2944b6ab13d4a67496ff02f9afc5d9e9fa9de9d13cac0e348e29391b68b6de7",
+      "syncedAt": "2026-07-03T19:01:42.014Z"
+    },
+    "sandbox-integrator": {
+      "sha256": "918431e20aa9d1dfa021a0469ed207d0a3689eddb9917668f796b95e0afb77cb",
+      "syncedAt": "2026-07-06T13:09:57.726Z"
+    }
+  }
+}
