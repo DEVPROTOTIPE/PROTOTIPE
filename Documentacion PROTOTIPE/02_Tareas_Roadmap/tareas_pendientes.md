@@ -561,7 +561,6 @@
   - Fecha de registro: 2026-07-03
   - Fecha de finalización: 2026-07-03
   - Descripción: Implementación completa del plan CORE-226: inyección de reglas ESLint arquitectónicas (select nativo, className dinámico, imports profundos, Firestore writes), validador AST por scripts para runTransaction de documentos calientes, blindaje del payload de telemetría de comisiones eliminando comisionValor del navegador, migración de cola offline de localStorage a IndexedDB con Dexie.js incluyendo migración legacy y backoff exponencial, generación y validación de prototipe.lock.json con SHA-256 en generator.js, y el **Design Integrity Guard** que audita anchos fijos, colores hexadecimales y sombras de diseño mediante AST con Babel y añade soporte para fuentes asíncronas, sombras HSL y rejillas responsivas en Tailwind v4.
-  - Archivos:
     - [`Plantillas Core/App Ventas/eslint.config.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/eslint.config.js) [MODIFY]
     - [`Plantillas Core/App Ventas/package.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/package.json) [MODIFY]
     - [`Plantillas Core/App Ventas/scripts/validate-core-integrity.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/scripts/validate-core-integrity.js) [MODIFY]
@@ -578,7 +577,7 @@
     - [`Prototipe-CLI/templates/template-core-seed/src/services/telemetryOutboxDb.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/telemetryOutboxDb.js) [NEW]
     - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
     - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
-    - [`Documentacion PROTOTIPE/09_Modulos_Completos/Telemetria_Centralizada/telemetria_centralizada.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Telemetria_Centralizada/telemetria_centralizada.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/09_Modulos_Completos/Telemetria_Centralizada/telemetria_centralizada.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Telemetria_Centralizada/telemetria_centralizada.md) [DELETE]
     - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
 
 * **[x] ~~Tarea CORE-225: Integración de Estándares de Arquitectura Desacoplada y Alineación de Skills en el Ecosistema~~**
@@ -1678,7 +1677,7 @@
   - Fecha de registro: 2026-06-26
   - Fecha de finalización: 2026-06-26
   - Descripción: Se redactó y estructuró la propuesta de diseño UX y desarrollo técnico para dotar de interactividad directa a las tres sub-tarjetas (Ventas del Mes, Lista de Control, Últimos Pedidos) de la ilustración del Hero SVG. La propuesta define visual cues de descubrimiento (Floating badge "Pruébame 👆", micro-animación onboarding de atracción, cursores e iluminaciones selectivas) y mecánicas de interacción en el DOM del SVG (tooltips dinámicos con hover de puntos en el gráfico, toggle interactivo de checkboxes con tachado de texto en vivo y ciclos de estado con explosión de confeti en el badge de pedidos).
-  - Archivos: [Documentacion PROTOTIPE/09_Modulos_Completos/propuesta_dashboard_interactivo.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/propuesta_dashboard_interactivo.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - Archivos: [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
 
 * **[x] ~~Tarea CORE-085: Expansión de Nichos Comerciales y Consistencia de Configuración Operativa (CORE-085) [Revisión y Refinamiento]~~**
   - Estatus: Completado.

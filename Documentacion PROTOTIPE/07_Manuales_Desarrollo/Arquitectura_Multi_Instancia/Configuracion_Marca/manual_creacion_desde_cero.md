@@ -1,6 +1,6 @@
-# Propuesta Técnica: Modo "Crear desde Cero" (Core Seed Aislado)
+# Manual Técnico: Desarrollo sobre Core Seed (Crear desde Cero)
 
-Esta propuesta técnica detalla cómo habilitar la opción de crear aplicaciones totalmente personalizadas desde cero en el asistente de aprovisionamiento de **Prototipe**, sin perder la automatización de base de datos, branding y Feature Flags.
+Este manual técnico detalla la arquitectura y el flujo de desarrollo para crear aplicaciones personalizadas a partir de un lienzo limpio en **PROTOTIPE**, consumiendo el molde base `template-core-seed` sin perder la automatización de base de datos, branding y Feature Flags.
 
 ---
 
