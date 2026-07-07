@@ -1,4 +1,11 @@
 
+## [2026-07-07] - CORE-273: Creación de Guía de Contribución al Monorepo y Entorno Local
+- **Tipo:** Documentación / Onboarding / DevOps
+- **Firma:** CORE-DEV-CONTRIBUTION-GUIDE-2026
+- **Descripcion:**
+  - **Guía de Contribución:** Creación del manual `manual_contribucion_desarrollador_monorepo.md` que detalla los pasos para levantar el backend bridge CLI (puerto 3001), el central dev-dashboard (puerto 5173), ciclo de validación de compilación, convenciones de Conventional Commits y acoplamiento con tareas físicas.
+  - **Sincronización:** Copia física del manual copiada al Escritorio del usuario y registrada en el GPS de documentación semántica.
+
 ## [2026-07-07] - CORE-272: Creación de Guía Rápida de Estándares e Interfaz (Cheat Sheet)
 - **Tipo:** Documentación / Calidad / UI / UX
 - **Firma:** CORE-DEV-CHEAT-SHEET-CREATION-2026

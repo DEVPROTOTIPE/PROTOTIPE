@@ -181,6 +181,7 @@
 | **diccionario_tecnico_completo.md** | Diccionario Técnico Completo | Para consultar los términos, definiciones de colecciones, campos de base de datos y vocabulario técnico oficial del ecosistema. | [Ver Diccionario Técnico](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/diccionario_tecnico_completo.md) |
 | **manual_efectos_premium.md** | Efectos e Interactividad Premium | Manual que recopila física 3D, border-beam XOR, mesh gradients, aurora background y proximity glows acelerados por hardware. | [Ver Manual Efectos](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_efectos_premium.md) |
 | **manual_y_auditoria_completa_prototipe_2026.md** | Manual de Operación y Auditoría Técnica Absoluta | Documento maestro consolidado con el 100% de la arquitectura, endpoints, manuales de herramientas y control de deuda técnica. | [Ver Manual Absoluto](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md) |
+| **manual_contribucion_desarrollador_monorepo.md** | Guía de Contribución al Monorepo | **Para desarrolladores que modifican el núcleo del ecosistema:** Configuración local del CLI (puerto 3001) y Dashboard (puerto 5173), ciclo de compilación local y reglas de Git. | [Ver Guía de Contribución](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md) |
 
 ---
 

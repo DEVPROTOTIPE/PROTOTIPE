@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-273: Creación de Guía de Contribución al Monorepo y Entorno Local~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Creación del manual manual_contribucion_desarrollador_monorepo.md que detalla los pasos para levantar el backend bridge CLI (puerto 3001), el central dev-dashboard (puerto 5173), ciclo de validación de compilación, convenciones de Conventional Commits y acoplamiento con tareas físicas, copiándolo al Escritorio del usuario.
+  - Archivos: [Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-272: Creación de Guía Rápida de Estándares e Interfaz (Cheat Sheet)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
