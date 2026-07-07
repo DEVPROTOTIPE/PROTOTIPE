@@ -123,7 +123,7 @@ Una auditoría profunda en el mercado de software transaccional y de recaudo dig
 | Dimensión de Análisis | Siigo POS | Alegra POS | Treinta (Pro/Más) | Bold (Pasarela/POS) | PROTOTIPE (Ecosistema) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Costo Fijo Mensual** | $145.000+ COP (Gastrobar) | $69.900 a $279.900 COP | $69.900 a $79.900 COP | $0 COP (Solo hardware) | **Personalizable ($0 COP Base)** |
-| **Comisión por Venta** | No aplica | No aplica | 3.19% (Datáfono) | 2.69% - 3.49% transaccional | **Flexible (0.5% - 2% o flat)** |
+| **Comisión por Venta** | No aplica | No aplica | 3.19% (Datáfono) | 2.69% - 3.49% transaccional | **Flexible (1% - 5% o flat)** |
 | **Estructura de Base de Datos** | Compartida (Multi-tenant) | Compartida (Multi-tenant) | Compartida (Multi-tenant) | Centralizada | **Aislada (1 Shard Firebase por cliente)** |
 | **Branding y Marca Blanca** | Nulo (Marca Siigo) | Nulo (Marca Alegra) | Nulo (Marca Treinta) | Nulo (Marca Bold) | **Total (Variables HSL, dominio propio)** |
 | **Adaptabilidad por Nicho** | Rígida (Retail/Restaurante) | Rígida (Retail/Restaurante) | Rígida (Solo retail plano) | Solo cobros numéricos | **Dinámica (niche.json / Servicios / Talleres)** |
