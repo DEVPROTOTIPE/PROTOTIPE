@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-270: Reporte de Comparativa y Alineación de Documentación Heredada~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Localización y auditoría comparativa de los 29 archivos de documentación heredada frente a la realidad activa de React 19, base de datos local Dexie y la desactivación absoluta de Cloud Functions. Publicación del reporte de paridad.
+  - Archivos: [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/comparativa_y_alineacion_documental_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/comparativa_y_alineacion_documental_2026.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-269: Manual de Operación y Auditoría Técnica Absoluta del Ecosistema~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

@@ -1,4 +1,13 @@
 
+
+## [2026-07-07] - CORE-270: Reporte de Comparativa y Alineación de Documentación Heredada
+- **Tipo:** Auditoría / Documentación / Consistencia / Calidad
+- **Firma:** CORE-DOCS-COMPARATIVE-AUDIT-ALIGNMENT-2026
+- **Descripcion:**
+  - **Mapeo y Localización Física:** Se escanearon y ubicaron en el disco del monorepo los 29 archivos de documentación histórica provistos en la lista del usuario.
+  - **Identificación de Inconsistencias:** Se ejecutó un script de análisis para contrastar el contenido de los archivos contra la configuración activa del monorepo (React 19, base de datos local Dexie y total prohibición de Cloud Functions en producción).
+  - **Acciones Correctivas Documentadas:** Se generó y publicó el informe consolidado `comparativa_y_alineacion_documental_2026.md` detallando las desviaciones comerciales/técnicas y los parches requeridos para alinearlos al estándar de tres capas del ecosistema.
+
 ## [2026-07-07] - CORE-269: Manual de Operación y Auditoría Técnica Absoluta del Ecosistema
 - **Tipo:** Documentación / Auditoría / Ecosistema / DevOps
 - **Firma:** CORE-ECOSYSTEM-ABSOLUTE-AUDIT-MANUAL-2026
