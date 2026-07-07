@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-284: Autodetección Inteligente de Tareas en el Botón Auto de Commits (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se hizo asíncrona la función handleAutoMessage en el dev-dashboard. Si no hay drifts de Git, se realiza una consulta rápida a /api/roadmap para extraer el ID de la tarea activa o en progreso, y en su defecto la primera tarea del Roadmap (la más nueva de la sesión), asegurando que el commit siempre tenga prefijo de tarea.
+  - Archivos: [Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-283: Saneamiento Documental, Sincronización y Validación de Integridad (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
