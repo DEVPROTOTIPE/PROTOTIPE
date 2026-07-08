@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-292: Sincronización del Mapa Semántico de Documentación de la IA (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se actualizó `mapa_documentacion_ia.md` (Sección 5) para reflejar la unificación del sistema de precios con los campos de base de datos de Firestore (`billingMode`), garantizando la alineación semántica en el mapa de documentación.
+  - Archivos: [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-291: Unificación de Terminología de Cobros con Parámetros de Base de Datos (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
