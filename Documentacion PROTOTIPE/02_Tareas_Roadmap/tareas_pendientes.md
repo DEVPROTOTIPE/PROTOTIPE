@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-291: Unificación de Terminología de Cobros con Parámetros de Base de Datos (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se integraron las equivalencias técnicas exactas de Firestore (`billingMode: percentage`, `fixed_per_service` y `flat_monthly`) al lado de cada modalidad comercial de la Fase 2 en la matriz oficial de precios, alineando la terminología del ecosistema.
+  - Archivos: [Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/sistema_precios_licenciamiento.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/sistema_precios_licenciamiento.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-290: Documentación del Soporte de Entorno Dual en Telemetría del Core (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

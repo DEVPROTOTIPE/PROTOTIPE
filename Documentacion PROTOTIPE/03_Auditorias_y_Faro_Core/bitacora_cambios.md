@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-291: Unificación de Terminología de Cobros con Parámetros de Base de Datos
+- **Fecha:** 2026-07-07
+- **Tipo:** Documentación / Consistencia
+- **Descripción:** Se actualizó `sistema_precios_licenciamiento.md` (Sección 2.2) para integrar los valores exactos requeridos por la base de datos de Firestore en el campo `billingMode` (`percentage`, `fixed_per_service` y `flat_monthly`) al lado de cada descripción de modalidad comercial, eliminando la discrepancia semántica y evitando configuraciones de entorno desalineadas.
+- **Archivo modificado:** `Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/sistema_precios_licenciamiento.md`
+
+
 ## CORE-290: Documentación del Soporte de Entorno Dual en Telemetría del Core
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación / Consistencia

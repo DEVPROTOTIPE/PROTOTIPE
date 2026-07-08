@@ -1,4 +1,4 @@
-﻿# 💰 Sistema de Precios y Licenciamiento — PROTOTIPE
+# 💰 Sistema de Precios y Licenciamiento — PROTOTIPE
 
 ## 1. FILOSOFÍA DE PRECIOS Y PRINCIPIO GENERAL
 
@@ -23,9 +23,9 @@ Pago único obligatorio por diseño, análisis del negocio, configuración de in
 
 ### 2.2 Fase 2 — Operación (Recurrente)
 Modalidad de cobro continuo para asegurar el mantenimiento del servidor, hosting y soporte. Se define bajo uno de los siguientes tres esquemas:
-- **Modalidad A (Comisión por ventas):** Aplicable a tiendas, ferreterías, restaurantes o catálogos donde la facturación es medible de forma digital. Rango estimado: **1% al 5%** de las ventas gestionadas en la plataforma.
-- **Modalidad B (Comisión por servicio):** Aplicable a sistemas transaccionales, agendamiento de citas, reservas o turnos. Se cobra un fee fijo por transacción o servicio completado (ej. $100 – $500 COP por ticket emitido).
-- **Modalidad C (Suscripción mensual):** Aplicable a herramientas puramente administrativas de gestión interna, control de inventario o CRM sin pasarela de ventas directa. Se establece una tarifa fija según el alcance.
+- **Modalidad A (Comisión por ventas — Firestore: `billingMode: 'percentage'`):** Aplicable a tiendas, ferreterías, restaurantes o catálogos donde la facturación es medible de forma digital. Rango estimado: **1% al 5%** (registrado en el campo `comisionPorcentaje`).
+- **Modalidad B (Comisión por servicio — Firestore: `billingMode: 'fixed_per_service'`):** Aplicable a sistemas transaccionales, agendamiento de citas, reservas o turnos. Se cobra un fee fijo transaccional (ej. $100 – $500 COP, registrado en el campo `montoFijoServicio`).
+- **Modalidad C (Suscripción mensual — Firestore: `billingMode: 'flat_monthly'`):** Aplicable a herramientas puramente administrativas de gestión interna, control de inventario o CRM sin pasarela de ventas directa. Se establece una tarifa fija mensual (registrada en el campo `pagoMensualFijo`).
 
 ### 2.3 Evolución del Sistema (Opcional)
 - **Incluido en soporte:** Corrección de errores (bugs), soporte operativo diario, actualizaciones de seguridad generales y mejoras globales compartidas en el Core base.
