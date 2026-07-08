@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-295: Saneamiento de Placeholders - Guía de Estilos de UI Reales de App Ventas (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se reemplazó la plantilla vacía autogenerada de `guia_estilos_ui.md` en el Core de App Ventas por las directivas de diseño físico reales (paleta HSL, componentes atómicos y convenciones estéticas).
+  - Archivos: [Plantillas Core/App Ventas/Documentacion App Ventas/guia_estilos_ui.md](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/guia_estilos_ui.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-294: Saneamiento de Placeholders - Restricciones Técnicas Reales de App Ventas (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
