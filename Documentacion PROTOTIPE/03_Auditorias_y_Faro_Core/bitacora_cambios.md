@@ -17,9 +17,10 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
   * Corregido un token de cierre huérfano `)}` por `</div>` en `ClientCredits.jsx` que causaba fallos sintácticos en el build de producción.
   * Corregida la línea truncada del switch de garantías en `DeveloperSettings.jsx` cerrando correctamente las etiquetas HTML para posibilitar compilaciones limpias.
   * Agregado el import faltante de `motion` en `App.jsx` de `template-core-seed` para resolver fallos de linter no-undef.
-- **Automatización CLI:**
-  * Creado el script CLI de soporte `toggle_maintenance.js` para consultar y conmutar el Modo Mantenimiento de cualquier cliente inquilino en 1 segundo mediante llamadas REST a la API de Firestore.
-- **Archivos modificados:** `App.jsx` (App Ventas, template-ventas, template-core-seed), `appConfigService.js` (App Ventas, template-ventas, template-core-seed), `appConfigStore.js` (App Ventas, template-ventas, template-core-seed), `generator.js`, `toggle_maintenance.js` (NEW), `ClientCredits.jsx` (App Ventas, template-ventas), `DeveloperSettings.jsx` (App Ventas, template-ventas), `tareas_pendientes.md`, `bitacora_cambios.md`
+- **Automatización y Dashboard CLI:**
+  * Creado el script CLI de soporte `toggle_maintenance.js` e integrado su endpoint REST (`POST /api/project/maintenance`) en `server.js` del Bridge para posibilitar la consulta y conmutación en caliente del estado en Firestore.
+  * Desarrollado el switch visual interactivo de Modo Mantenimiento con indicador de estado `animate-pulse` dentro de la modal de gestión del CRM en `App.jsx` del Dashboard Central, enlazado directamente al Bridge.
+- **Archivos modificados:** `App.jsx` (App Ventas, template-ventas, template-core-seed, dev-dashboard), `appConfigService.js` (App Ventas, template-ventas, template-core-seed), `appConfigStore.js` (App Ventas, template-ventas, template-core-seed), `generator.js`, `server.js` (CLI), `toggle_maintenance.js` (NEW), `ClientCredits.jsx` (App Ventas, template-ventas), `DeveloperSettings.jsx` (App Ventas, template-ventas), `tareas_pendientes.md`, `bitacora_cambios.md`, `mapa_documentacion_ia.md`
 
 ## CLI-025: Autenticación OAuth2 Unificada en el Dashboard (Google/GitHub)
 - **Fecha:** 2026-07-08

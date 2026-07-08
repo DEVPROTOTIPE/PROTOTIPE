@@ -5660,6 +5660,97 @@ app.get('/api/project/env', async (req, res) => {
   }
 });
 
+// Endpoint para consultar/cambiar Modo Mantenimiento de un cliente inquilino en Firestore
+app.post('/api/project/maintenance', async (req, res) => {
+  const { clientId, status } = req.body;
+  if (!clientId) {
+    return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+  }
+
+  try {
+    const projectDir = await findProjectDir(clientId);
+    if (!projectDir) {
+      return res.status(404).json({ error: `No se encontró el proyecto para: ${clientId}` });
+    }
+
+    const envPath = path.join(projectDir, '.env.local');
+    if (!await fs.pathExists(envPath)) {
+      return res.status(404).json({ error: `No se encontró el archivo de entorno .env.local del cliente.` });
+    }
+
+    const envContent = await fs.readFile(envPath, 'utf-8');
+    const projectIdMatch = envContent.match(/VITE_DEVELOPER_FIREBASE_PROJECT_ID\s*=\s*(.*)/);
+    const projectId = projectIdMatch ? projectIdMatch[1].trim().replace(/['"]/g, '') : null;
+
+    if (!projectId) {
+      return res.status(400).json({ error: 'No se pudo determinar el Firebase Project ID del cliente.' });
+    }
+
+    // Obtener token de Firebase CLI
+    const possiblePaths = [
+      path.join(os.homedir(), '.config', 'configstore', 'firebase-tools.json'),
+      path.join(process.env.APPDATA || '', 'configstore', 'firebase-tools.json')
+    ];
+    let token = null;
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        try {
+          const data = JSON.parse(fs.readFileSync(p, 'utf-8'));
+          if (data.tokens && data.tokens.access_token) {
+            token = data.tokens.access_token;
+            break;
+          }
+        } catch (_) {}
+      }
+    }
+
+    if (!token) {
+      return res.status(401).json({ error: 'Sesión de Firebase CLI no activa en el servidor local. Corre "firebase login" en el servidor.' });
+    }
+
+    const settingsUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/config/settings`;
+
+    if (status === undefined) {
+      // Consultar estado actual
+      const response = await fetch(settingsUrl, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        return res.status(response.status).json({ error: `Error de Firestore: ${response.statusText}` });
+      }
+      const data = await response.json();
+      const currentMode = data.fields?.maintenanceMode?.booleanValue ?? false;
+      return res.json({ success: true, clientId, projectId, maintenanceMode: currentMode });
+    } else {
+      // Actualizar estado
+      const nextStatus = status === 'true' || status === true;
+      const patchUrl = `${settingsUrl}?updateMask.fieldPaths=maintenanceMode`;
+      const payload = {
+        fields: {
+          maintenanceMode: { booleanValue: nextStatus }
+        }
+      };
+      const response = await fetch(patchUrl, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        return res.status(response.status).json({ error: errData.error?.message || `Fallo al actualizar Firestore: ${response.statusText}` });
+      }
+
+      return res.json({ success: true, clientId, projectId, maintenanceMode: nextStatus });
+    }
+  } catch (err) {
+    res.status(500).json({ error: `Error en Modo Mantenimiento: ${err.message}` });
+  }
+});
+
 // Endpoint para actualizar variables de entorno local
 app.post('/api/project/env', async (req, res) => {
   const { clientId, variables } = req.body;
