@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-302: Consistencia Documental — Declaración del Patrón de Core Único Flexible
+- **Fecha:** 2026-07-07
+- **Tipo:** Documentación / Arquitectura
+- **Descripción:** Se modificó `ESTADO_REAL_PROTOTIPE_2.md` (Sección 3) para documentar y justificar la decisión arquitectónica de utilizar una sola plantilla de Core maestro unificado (`template-ventas`) con feature flags (`niche.json`) en lugar de empaquetar plantillas físicas separadas para restaurante, taller y servicios, evitando la duplicidad innecesaria de código (DRY) y facilitando el mantenimiento y despliegue del CLI.
+- **Archivo modificado:** `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/ESTADO_REAL_PROTOTIPE_2.md`
+
+
 ## CORE-301: Habilitación Interactiva de Sandbox de Programador de Rutas (Delivery)
 - **Fecha:** 2026-07-07
 - **Tipo:** Refactorización / Playground

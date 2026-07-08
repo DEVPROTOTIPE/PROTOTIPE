@@ -40,7 +40,7 @@ Este informe presenta un diagnóstico objetivo del estado físico y lógico de l
 ## 3. Módulos Faltantes (Roadmap Q3/Q4)
 
 * **Plantillas de Verticales Específicos**:
-  * **Módulos Faltantes:** No existen las carpetas físicas de `template-restaurante`, `template-taller` ni `template-servicios` dentro de la carpeta `/templates/` del CLI. Todo se hereda del core genérico modificando `niche.json` a nivel lógico.
+  * **Decisión Arquitectónica (Core Único Flexible):** No es necesario crear las carpetas físicas de `template-restaurante`, `template-taller` ni `template-servicios` dentro de `/templates/` del CLI. Para evitar la duplicación innecesaria de código (DRY) y el code drift, el ecosistema utiliza de forma intencional una plantilla maestra unificada (`template-ventas`) y habilita/deshabilita las vistas en caliente según la parametrización de nichos y feature flags del archivo `niche.json` de cada instancia de cliente.
 * **Integración de Pasarelas de Pago**:
   * **Módulos Faltantes:** El flujo de checkout del catálogo carece de procesamiento e integración de checkout con pasarelas locales (Bold, MercadoPago, Wompi).
 * **Portal del Cliente (B2C)**:

@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-302: Consistencia Documental — Declaración del Patrón de Core Único Flexible (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se actualizó `ESTADO_REAL_PROTOTIPE_2.md` para justificar el Core Único Flexible y descartar la brecha de carpetas de plantillas vacías ausentes para restaurante, taller y servicios.
+  - Archivos: [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/ESTADO_REAL_PROTOTIPE_2.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/ESTADO_REAL_PROTOTIPE_2.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-301: Habilitación Interactiva de Sandbox de Programador de Rutas (Delivery) (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
