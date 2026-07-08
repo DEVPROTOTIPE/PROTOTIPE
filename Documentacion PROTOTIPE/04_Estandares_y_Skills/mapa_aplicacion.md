@@ -22,6 +22,17 @@ app_layout:
 Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e integraciones con Firebase de **App Ventas**. Debe mantenerse actualizado ante cualquier creación, eliminación o refactorización de archivos.
 
 ## 📂 Estructura de Documentación y Negocio
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/ESTADO_REAL_PROTOTIPE_2.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-302).
+* **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_rollback_autonomo_ia.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-309).
+* **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/registro_decisiones_estrategicas.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-311).
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/cuestionario_certificacion_desarrollo_2026.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-314).
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_gestion_riesgos_y_disaster_recovery.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-316).
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_onboarding_desarrollador_junior.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-313).
+* **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/seguridad_firestore_ecosistema.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea DOC-003).
+* **`/Documentacion PROTOTIPE/02_Tareas_Roadmap/ideas_y_backlog_futuro.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-025).
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/inventario_maestro.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-025).
+* **`/Documentacion PROTOTIPE/08_Plan_Escalabilidad_Negocio/informe_investigacion_ecosistema_2026.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-287).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_critica_ecosistema_2026.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-288).
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/comparativa_y_alineacion_documental_2026.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-270).
 * **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/contrato_aprovisionamiento_dinamico_assets.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-271).
 * **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/gobernanza_dependencias_npm_multicore.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-271).
@@ -266,6 +277,28 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 ---
 
 ## 📂 Estructura de Módulos y Archivos Clave
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/generacion_pdfSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-299).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LeafletMapPickerSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-300).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ProgramadorRutasDomicilioSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-301).
+* **`/Instancias Clientes/ventas/ventas-moni-app/prototipe.lock.json`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-319).
+* **`/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-319).
+* **`/Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-319).
+* **`/Prototipe-CLI/templates/template-ventas/src/pages/client/ClientCredits.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-319).
+* **`/Plantillas Core/App Ventas/src/pages/client/ClientCredits.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-319).
+* **`/Prototipe-CLI/scripts/toggle_maintenance.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-319).
+* **`/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-319).
+* **`/Prototipe-CLI/templates/template-ventas/src/services/appConfigService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-319).
+* **`/Plantillas Core/App Ventas/src/store/appConfigStore.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-319).
+* **`/Plantillas Core/App Ventas/src/services/appConfigService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-319).
+* **`/Prototipe-CLI/templates/template-core-seed/src/components/common/SparkQuotaBanner.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-316).
+* **`/Prototipe-CLI/templates/template-core-seed/src/services/telemetryService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-316).
+* **`/Prototipe-CLI/templates/template-ventas/src/components/common/SparkQuotaBanner.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-316).
+* **`/Prototipe-CLI/templates/template-ventas/src/services/telemetryService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-316).
+* **`/Plantillas Core/App Ventas/src/components/common/SparkQuotaBanner.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-316).
+* **`/Prototipe-CLI/scripts/offboard_client.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-316).
+* **`/Prototipe-CLI/scripts/backup_db.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-316).
+* **`/Instancias Clientes/ventas/ventas-moni-app/.prototipe.json`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-284).
+* **`/Prototipe-CLI/templates/template-core-seed/src/layouts/MainLayout.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-296).
 * **`/consolidar_notebook.bat`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-281).
 * **`/Plantillas Core/App Ventas/src/pages/portal/PortalMensajero.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-006).
 * **`/Plantillas Core/App Ventas/src/pages/admin/settings/sections/AppearanceSettings.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-008).

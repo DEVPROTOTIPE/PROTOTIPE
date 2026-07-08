@@ -8,6 +8,14 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Tipo:** Sistema
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
+## CORE-286: Sincronización en Caliente de Errores Manuales
+- **Fecha:** 2026-07-08
+- **Tipo:** Telemetría / UX / Código
+- **Descripción:** 
+  * Corregido el retardo en la transmisión de errores de prueba. La función `reportAppFailureToDeveloper` encolaba el error en la IndexedDB local (Dexie), pero no iniciaba inmediatamente el vaciado de la cola hacia Firestore Central.
+  * Se añadió una llamada explícita a `processOfflineQueue().catch(...)` al final de la función en `telemetryService.js` (tanto de la plantilla core como de la instancia `ventas-moni-app`).
+  * Esto fuerza la sincronización en caliente en el instante en que el desarrollador hace clic en "Enviar Error de Prueba", logrando que se registre en tiempo real en el Dashboard de Monitoreo.
+  * **[PROPAGACIÓN DE SEGURIDAD]** Se propagó y aplicó este fix de sincronización en caliente al código base del generador del CLI en `Prototipe-CLI/templates/template-core-seed/` y `Prototipe-CLI/templates/template-ventas/`. Esto blinda a futuro el ecosistema para que cualquier nueva réplica, nuevo core o nueva instancia que se inicialice cuente de fábrica con el reporte y vaciado de cola inmediato.
 
 ## CORE-284: Depuración e Integridad de ID de Cliente en Firestore
 - **Fecha:** 2026-07-08
@@ -17,6 +25,7 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
   * Se identificó un desfase entre el ID del documento en `clientes_control` (`moni-app`) y el identificador que utiliza la instancia local y envía en los reportes de facturación (`ventas-moni-app`).
   * Se procedió a clonar el registro de `moni-app` en un nuevo documento con la clave correcta `ventas-moni-app` y a purgar el registro con la clave desactualizada.
   * Se actualizó el archivo de metadatos de sincronización del CLI (`.prototipe.json`) de la instancia de cliente para apuntar al `clientId` unificado `ventas-moni-app`, logrando que la consola de sincronización muestre la paridad y estado correcto del cliente sin solicitar un re-registro redundante.
+  * **[BLINDAJE DE FUTURO]** Implementado un bloque de **auto-curación en caliente (Auto-Heal)** en el endpoint `/api/instancias/list` de [server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js). Ahora, cada vez que el CLI escanee y liste las instancias locales, contrastará el `clientId` de `.prototipe.json` con el `VITE_DEVELOPER_CLIENT_ID` real de su `.env.local`. Si detecta desalineación (por ejemplo, tras renombrar manualmente directorios), corregirá y sobreescribirá el `.prototipe.json` en caliente de forma autónoma.
 
 ## CORE-283: Saneamiento de PIN de Desarrollo y Clave Maestra
 - **Fecha:** 2026-07-08

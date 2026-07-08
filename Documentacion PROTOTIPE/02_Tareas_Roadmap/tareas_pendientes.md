@@ -1,5 +1,13 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-286: Sincronización en Caliente de Errores Manuales (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Modificado el servicio de telemetría del Core para gatillar la sincronización de la cola local IndexedDB hacia Firestore Central inmediatamente después de reportar un error manual, en lugar de esperar la cola diferida en segundo plano. Esto asegura que la simulación de errores en el panel de desarrollo se refleje al instante en el Dashboard de monitoreo.
+  - Archivos:
+    - [Plantillas Core/App Ventas/src/services/telemetryService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/telemetryService.js) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/services/telemetryService.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/telemetryService.js) [MODIFY]
+
 * **[x] ~~Tarea CORE-285: Estabilidad del Modo Mantenimiento e Inmunidad en Reportes (2026-07-08)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-08
@@ -223,6 +231,11 @@
     - [ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/credits/components/ClientCredits.jsx) [MODIFY]
     - [server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
     - [App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [telemetryService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/telemetryService.js) [MODIFY]
+    - [telemetryService.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/telemetryService.js) [MODIFY]
+    - [telemetryService.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/telemetryService.js) [MODIFY]
+    - [telemetryService.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/telemetryService.js) [MODIFY]
+    - [mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
 
 * **[x] ~~Tarea CORE-311: Saneamiento Documental de Contradicciones (NotebookLM Alignment) (2026-07-07)~~**
   - Estatus: Completado.
