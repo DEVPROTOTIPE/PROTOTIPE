@@ -5679,7 +5679,7 @@ app.post('/api/project/maintenance', async (req, res) => {
     }
 
     const envContent = await fs.readFile(envPath, 'utf-8');
-    const projectIdMatch = envContent.match(/VITE_DEVELOPER_FIREBASE_PROJECT_ID\s*=\s*(.*)/);
+    const projectIdMatch = envContent.match(/VITE_FIREBASE_PROJECT_ID\s*=\s*(.*)/) || envContent.match(/VITE_DEVELOPER_FIREBASE_PROJECT_ID\s*=\s*(.*)/);
     const projectId = projectIdMatch ? projectIdMatch[1].trim().replace(/['"]/g, '') : null;
 
     if (!projectId) {

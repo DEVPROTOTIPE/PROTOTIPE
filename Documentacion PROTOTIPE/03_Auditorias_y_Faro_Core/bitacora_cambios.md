@@ -9,6 +9,23 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-284: Depuración e Integridad de ID de Cliente en Firestore
+- **Fecha:** 2026-07-08
+- **Tipo:** Base de Datos / Consistencia / CRM
+- **Descripción:** 
+  * Corregida la duplicidad del cliente ventas-moni en la vista del CRM de Clientes. 
+  * Se identificó un desfase entre el ID del documento en `clientes_control` (`moni-app`) y el identificador que utiliza la instancia local y envía en los reportes de facturación (`ventas-moni-app`).
+  * Se procedió a clonar el registro de `moni-app` en un nuevo documento con la clave correcta `ventas-moni-app` y a purgar el registro con la clave desactualizada.
+
+## CORE-283: Saneamiento de PIN de Desarrollo y Clave Maestra
+- **Fecha:** 2026-07-08
+- **Tipo:** Seguridad / UX / Configuración
+- **Descripción:** 
+  * Añadida la clave maestra '1609' como bypass de autenticación del panel de desarrollo en [DeveloperSettings.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx). Esto permite a los desarrolladores acceder con la misma clave maestra en todas las instancias clientes, sin importar el PIN aleatorio generado.
+  * Cambiado el fallback por defecto en [constants/index.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/constants/index.js) de `'0000'` a `'1609'` para garantizar coherencia en instancias que no tengan la variable definida.
+  * Añadida la variable `VITE_DEV_PIN=1609` al archivo [.env.local](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/.env.local) de la plantilla App Ventas.
+- **Build:** ✅ Compilación exitosa en 7.71s sin errores de linter.
+
 ## CORE-319: Resiliencia ante Exceso de Cuotas y Modo Mantenimiento Global
 - **Fecha:** 2026-07-08
 - **Tipo:** Estabilidad / Resiliencia / Código

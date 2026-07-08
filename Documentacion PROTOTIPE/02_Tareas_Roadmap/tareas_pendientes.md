@@ -1,4 +1,28 @@
-# Control de Tareas y Estado de ImplementaciÃ³n (Roadmap de Prototype CLI)
+# Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
+
+* **[x] ~~Tarea CORE-285: Estabilidad del Modo Mantenimiento e Inmunidad en Reportes (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Corregidos dos fallos de runtime críticos en el Dashboard: (1) Se salvaguardaron las llamadas a `toLocaleString()` en el listado de reportes de facturación de `App.jsx` mediante valores fallback `(val || 0)`, previniendo crashes por propiedades undefined en documentos de telemetría de inicialización. (2) Se reparó la regex de lectura del Firebase Project ID del cliente en `server.js` de la API para soportar tanto la variable `VITE_FIREBASE_PROJECT_ID` como `VITE_DEVELOPER_FIREBASE_PROJECT_ID`, solucionando la respuesta 400 Bad Request al invocar el endpoint `/api/project/maintenance`.
+  - Archivos:
+    - [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-284: Depuración e Integridad de ID de Cliente en Firestore (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Corregido el duplicado en el Directorio del CRM de Clientes. El documento del cliente en la colección `clientes_control` estaba indexado bajo el ID `moni-app`, mientras que los reportes de telemetría y su carpeta física utilizan `ventas-moni-app` como identificador único. Se migró y reindexó el documento a `ventas-moni-app` y se depuró la clave obsoleta.
+  - Archivos:
+    - Base de datos Firestore Ecosistema: Colección `clientes_control` [MODIFY]
+
+* **[x] ~~Tarea CORE-283: Saneamiento de PIN de Desarrollo y Clave Maestra (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Añadido el bypass/clave maestra '1609' en la validación del login de desarrollador de la plantilla Core, permitiendo acceso uniforme de depuración en todas las instancias clientes sincronizadas independientemente de su PIN aleatorio de entorno. Definido además el fallback estático a '1609' en las constantes por defecto de App Ventas y configurado en el archivo local de variables de entorno.
+  - Archivos:
+    - [Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+    - [Plantillas Core/App Ventas/src/constants/index.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/constants/index.js) [MODIFY]
+    - [Plantillas Core/App Ventas/.env.local](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/.env.local) [MODIFY]
 
 * **[x] ~~Tarea CLI-025: AutenticaciÃ³n OAuth2 Unificada en el Dashboard (Google/GitHub) (2026-07-08)~~**
   - Estatus: Completado.
