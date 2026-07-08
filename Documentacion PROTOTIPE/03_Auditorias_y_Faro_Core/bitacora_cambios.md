@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-303: Integración Elástica de Pasarelas de Pago Online en Catálogo Base
+- **Fecha:** 2026-07-07
+- **Tipo:** Implementación / E-Commerce
+- **Descripción:** Se integró el soporte de pagos en línea (Bold, Wompi, Mercado Pago) en el catálogo E-Commerce de App Ventas. Se agregó `PAYMENT_METHODS.ONLINE` ('online') a las constantes base y se modificó `CheckoutModal.jsx` para mostrar condicionalmente la opción si está activa en ajustes, agregando un flujo de confirmación final con un simulador interactivo de pasarela Bold/PSE y condicionando el aviso de WhatsApp a la confirmación de la transacción.
+- **Archivos modificados:** `Plantillas Core/App Ventas/src/constants/index.js`, `Plantillas Core/App Ventas/src/components/client/checkout/CheckoutModal.jsx`
+
+
 ## CORE-302: Consistencia Documental — Declaración del Patrón de Core Único Flexible
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación / Arquitectura

@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-303: Integración Elástica de Pasarelas de Pago Online en Catálogo Base (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se integró el soporte de pagos en línea en el catálogo base de App Ventas con constantes de pago online y simulador interactivo de pasarela Bold/PSE para cobros en línea.
+  - Archivos: [Plantillas Core/App Ventas/src/constants/index.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/constants/index.js) [MODIFY], [Plantillas Core/App Ventas/src/components/client/checkout/CheckoutModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/checkout/CheckoutModal.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-302: Consistencia Documental — Declaración del Patrón de Core Único Flexible (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
