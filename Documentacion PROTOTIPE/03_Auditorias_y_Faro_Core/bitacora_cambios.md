@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-296: Resolución de Brecha de Autonomía - UI Shell Base en Semilla Base
+- **Fecha:** 2026-07-07
+- **Tipo:** Refactorización / Semilla Base
+- **Descripción:** Se actualizó `MainLayout.jsx` en la plantilla `template-core-seed` para resolver la brecha de UI Shell en blanco. Se estructuró un menú lateral funcional con Dashboard (icono `LayoutDashboard`) y Ajustes (icono `Settings`) y se añadieron comentarios instructivos en el código que guían al desarrollador o IA sobre cómo extender las secciones del menú lateral en cascada con el enrutador reactivo.
+- **Archivo modificado:** `Prototipe-CLI/templates/template-core-seed/src/layouts/MainLayout.jsx`
+
+
 ## CORE-295: Saneamiento de Placeholders - Guía de Estilos de UI Reales de App Ventas
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación / Saneamiento

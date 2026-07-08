@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-296: Resolución de Brecha de Autonomía - UI Shell Base en Semilla Base (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se actualizó `MainLayout.jsx` en la plantilla de creación de proyectos (`template-core-seed`) agregando LayoutDashboard, un enrutador estructurado por defecto con Dashboard y Ajustes, e instrucciones comentadas en el código.
+  - Archivos: [Prototipe-CLI/templates/template-core-seed/src/layouts/MainLayout.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/layouts/MainLayout.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-295: Saneamiento de Placeholders - Guía de Estilos de UI Reales de App Ventas (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
