@@ -8,7 +8,7 @@ docs_roots:
   03_Auditorias_y_Faro_Core: [bitacora_cambios.md, bitacora_cambios_historico_hasta_2026-07-06.md, auditoria_ecosistema_actual.md, registro_errores_bugs.md, reporte_auditoria_ecosistema_completo.md]
   04_Estandares_y_Skills: [mapa_aplicacion.md, mapa_documentacion_ia.md, protocolo_colaboracion_ia.md, protocolo_rollback_autonomo_ia.md, prompt_maestro_descubrimiento.md]
   06_Biblioteca_Componentes: [README.md]
-  07_Manuales_Desarrollo: [manual_contribucion_desarrollador_monorepo.md, manual_onboarding_desarrollador_junior.md, diagrama_flujo_ecosistema.md, diccionario_tecnico_completo.md, manual_y_auditoria_completa_prototipe_2026.md]
+  07_Manuales_Desarrollo: [manual_contribucion_desarrollador_monorepo.md, manual_onboarding_desarrollador_junior.md, cuestionario_certificacion_desarrollo_2026.md, diagrama_flujo_ecosistema.md, diccionario_tecnico_completo.md, manual_y_auditoria_completa_prototipe_2026.md]
 ```
 
 > [!IMPORTANT]
@@ -196,6 +196,7 @@ docs_roots:
 | **manual_y_auditoria_completa_prototipe_2026.md** | Manual de Operación y Auditoría Técnica Absoluta | Documento maestro consolidado con el 100% de la arquitectura, endpoints, manuales de herramientas y control de deuda técnica. | [Ver Manual Absoluto](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md) |
 | **manual_contribucion_desarrollador_monorepo.md** | Guía de Contribución al Monorepo | **Para desarrolladores que modifican el núcleo del ecosistema:** Configuración local del CLI (puerto 3001) y Dashboard (puerto 5173), ciclo de compilación local y reglas de Git. | [Ver Guía de Contribución](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md) |
 | **manual_onboarding_desarrollador_junior.md** | Guía de Onboarding para Desarrolladores Junior | **Para nuevos desarrolladores junior:** Guía estructurada del monorepo, inyección de componentes, levantamiento de puertos locales y pautas visuales de AGENTS.md. | [Ver Guía Onboarding](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_onboarding_desarrollador_junior.md) |
+| **cuestionario_certificacion_desarrollo_2026.md** | Cuestionario de Certificación Técnica | **Para evaluar nuevos desarrolladores/IAs:** Examen interactivo de 20 preguntas con clave de respuestas basado en AGENTS.md y la arquitectura del ecosistema. | [Ver Cuestionario](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/cuestionario_certificacion_desarrollo_2026.md) |
 | **guia_flujo_completo_cliente_entrega.md** | Flujo Maestro de Operación y Entrega | **Para comprender todo el ciclo de vida comercial y técnico de un cliente:** Desde el primer contacto comercial y el Briefing Studio, pasando por el aprovisionamiento local en Firebase y CLI Bridge, hasta el sembrado, QA y despliegue final a producción. | [Ver Flujo Maestro](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/guia_flujo_completo_cliente_entrega.md) |
 
 ---

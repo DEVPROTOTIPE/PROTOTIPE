@@ -8,6 +8,14 @@
     - [manual_onboarding_desarrollador_junior.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_onboarding_desarrollador_junior.md) [NEW]
     - [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
 
+* **[x] ~~Tarea CORE-314: Creación de Cuestionario de Certificación Técnica para Desarrolladores (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se documenta el cuestionario_certificacion_desarrollo_2026.md conteniendo 20 preguntas avanzadas y clave de respuestas estructuradas por módulos para evaluar el entendimiento técnico del ecosistema.
+  - Archivos:
+    - [cuestionario_certificacion_desarrollo_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/cuestionario_certificacion_desarrollo_2026.md) [NEW]
+    - [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[ ] Tarea CORE-312: Integración de Portal B2C - Consolidación de Abonos de Créditos en Firestore (2026-07-07)**
   - Estatus: Pendiente.
   - Fecha: 2026-07-07

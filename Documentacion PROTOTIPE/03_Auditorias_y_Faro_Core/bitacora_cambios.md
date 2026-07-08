@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-314: Creación de Cuestionario de Certificación Técnica para Desarrolladores
+- **Fecha:** 2026-07-07
+- **Tipo:** Documentación / QA y Onboarding
+- **Estatus:** Completado.
+- **Descripción:** Creación e integración del manual cuestionario_certificacion_desarrollo_2026.md conteniendo el examen de certificación de 20 preguntas avanzadas y claves de respuestas correspondiente a las directivas de arquitectura y AGENTS.md.
+- **Archivos modificados:** `cuestionario_certificacion_desarrollo_2026.md`, `mapa_documentacion_ia.md`
+
 ## CORE-313: Creación de Manual de Onboarding para Desarrolladores Junior
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación / Onboarding
