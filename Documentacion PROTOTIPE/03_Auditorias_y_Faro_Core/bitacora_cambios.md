@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-298: Endurecimiento de Reglas de Seguridad en Caliente para Nichos Transaccionales
+- **Fecha:** 2026-07-07
+- **Tipo:** Refactorización / Seguridad
+- **Descripción:** Se implementó la lógica de endurecimiento en caliente de `firestore.rules` al aprovisionar nuevos clientes a partir del generador de CLI. Si el nicho seleccionado es transaccional (POS, E-commerce, Inventario) o el flag `enablePos` está activo, se inyectan dinámicamente las reglas estrictas de seguridad para proteger las colecciones `/products/`, `/cajas/` y la configuración de primer inicio `/config/settings`, restringiéndolas únicamente a usuarios con rol de administrador en `/users/{uid}`.
+- **Archivo modificado:** `Prototipe-CLI/generator.js`
+
+
 ## CORE-297: Inyección de Componentes Atómicos UI en Semilla Base
 - **Fecha:** 2026-07-07
 - **Tipo:** Refactorización / Semilla Base

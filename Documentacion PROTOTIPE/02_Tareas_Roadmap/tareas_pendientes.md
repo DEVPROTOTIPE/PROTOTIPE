@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-298: Endurecimiento de Reglas de Seguridad en Caliente para Nichos Transaccionales (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se implementó la inyección dinámica de reglas de seguridad estrictas en `firestore.rules` al aprovisionar nuevos proyectos con nichos transaccionales, restringiendo el acceso de escritura de `/products/`, `/cajas/` y `/config/settings` a administradores.
+  - Archivos: [Prototipe-CLI/generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
 * **[x] ~~Tarea CORE-297: Inyección de Componentes Atómicos UI en Semilla Base (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

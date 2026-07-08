@@ -1657,6 +1657,51 @@ test-results/
     }
   }
 
+  // Endurecimiento de reglas en caliente para nichos transaccionales (POS, E-commerce, Inventarios)
+  const transactionalNiches = [
+    'grocery_food', 'retail_clothing', 'alimentos-artesanales', 
+    'ferreteria-rural', 'repuestos-motos', 'distribuidoras-beauty', 
+    'petshops-locales', 'repuestos-lineablanca', 'moda-local-calzado', 
+    'licores-cocteleria', 'coleccionismo-geek', 'distribucion-horeca'
+  ];
+  const isTransactional = transactionalNiches.includes(answers.niche) || answers.flags?.enablePos === true;
+
+  if (isTransactional && !rulesContent.includes('/products/')) {
+    const transactionalRules = `
+    // Helper de validación de administrador (Inyectado dinámicamente por CLI)
+    function isAdminUser() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Catálogo de Productos (Lectura libre, escritura exclusiva a Administradores)
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdminUser();
+    }
+
+    // Turnos de Caja e Históricos Financieros (Acceso restringido a Administradores)
+    match /cajas/{cajaId} {
+      allow read, write: if isAdminUser();
+    }
+
+    // Configuración de arranque del negocio
+    match /config/settings {
+      allow read: if true;
+      allow write: if isAdminUser() || !exists(/databases/$(database)/documents/config/settings);
+    }
+`;
+    // Encontrar la llave de cierre del bloque de documentos (el penúltimo '}')
+    const firstEnd = rulesContent.lastIndexOf('}');
+    if (firstEnd !== -1) {
+      const secondEnd = rulesContent.lastIndexOf('}', firstEnd - 1);
+      if (secondEnd !== -1) {
+        rulesContent = rulesContent.slice(0, secondEnd) + transactionalRules + rulesContent.slice(secondEnd);
+      }
+    }
+  }
+
   await fs.writeFile(firestoreRulesPath, rulesContent, 'utf-8');
   step5_3.succeed(`Reglas de base de datos (firestore.rules) ${isInherited ? 'heredadas y adaptadas' : 'generadas y adaptadas'} correctamente.`);
 
