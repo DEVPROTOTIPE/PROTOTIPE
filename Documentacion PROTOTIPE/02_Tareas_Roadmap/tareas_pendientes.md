@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-294: Saneamiento de Placeholders - Restricciones Técnicas Reales de App Ventas (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se reemplazó la plantilla vacía autogenerada de `restricciones_tecnicas.md` en el Core de App Ventas por las limitaciones reales de Firestore y directivas de diseño físico.
+  - Archivos: [Plantillas Core/App Ventas/Documentacion App Ventas/restricciones_tecnicas.md](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/restricciones_tecnicas.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-293: Saneamiento de Placeholders - Contexto de Negocio Real de App Ventas (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
