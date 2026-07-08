@@ -1,5 +1,12 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-310: Indexación de Mapa de Aplicación y Plan de Reducción de Verbosidad (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se inyecta el Header YAML en mapa_aplicacion.md para optimizar la indexación física y se planifica la modularización futura de manual_y_auditoria_completa_prototipe_2026.md.
+  - Archivos:
+    - [mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-309: Protocolo de Rollback para IA e Indexación Semántica (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

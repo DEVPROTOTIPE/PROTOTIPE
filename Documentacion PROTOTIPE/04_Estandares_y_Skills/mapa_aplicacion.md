@@ -1,5 +1,24 @@
 # Mapa de la Aplicación (Fuente de Verdad Arquitectónica)
 
+```yaml
+# INDEXADOR DE ARQUITECTURA FÍSICA PROTOTIPE (Ahorro de Tokens)
+app_layout:
+  Dashboard_Central:
+    root: /Central PROTOTIPE/dev-dashboard/src/
+    components: [components/admin/, components/ui/, components/common/]
+    state: [store/]
+  Prototipe_CLI:
+    root: /Prototipe-CLI/
+    core_scripts: [server.js, generator.js, worker_create_project.js, sync_clients.js]
+    templates: [templates/template-ventas/, templates/template-core-seed/]
+  Plantilla_Core:
+    root: /Plantillas Core/App Ventas/src/
+    layers: [features/, components/, services/, hooks/, constants/, store/]
+  Instancias_Clientes:
+    root: /Instancias Clientes/
+    active_instances: [ventas/ventas-moni-app/]
+```
+
 Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e integraciones con Firebase de **App Ventas**. Debe mantenerse actualizado ante cualquier creación, eliminación o refactorización de archivos.
 
 ## 📂 Estructura de Documentación y Negocio

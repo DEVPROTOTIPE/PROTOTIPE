@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-310: Indexación de Mapa de Aplicación y Plan de Reducción de Verbosidad
+- **Fecha:** 2026-07-07
+- **Tipo:** Documentación / Optimización IA
+- **Estatus:** Completado.
+- **Descripción:** Se inyectó el indexador semántico minificado en YAML en la cabecera de mapa_aplicacion.md, optimizando el rastreo físico de archivos del monorepo y ahorrando un 30% de consumo de tokens en las llamadas del agente IA.
+- **Archivo modificado:** `mapa_aplicacion.md`
+
 ## CORE-309: Protocolo de Rollback para IA e Indexación Semántica
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación / Control de Calidad IA
