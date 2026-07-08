@@ -9,6 +9,21 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-327: Sincronización Paralela en CLI y Robustecimiento de Gitignore
+- **Fecha:** 2026-07-08
+- **Tipo:** Rendimiento de CLI / Seguridad / Git / Automatización
+- **Descripción:** 
+  * **Soporte de Argumentos CLI:** Refactorizado `sync_clients.js` para admitir los flags `--parallel` y `--yes` (o `-y`), facilitando su uso en pipelines automatizados de integración continua y despliegue.
+  * **Comparación en Paralelo:** El análisis de diferencias físicas y hashes MD5 inicial se realiza de forma asíncrona concurrente para todos los clientes seleccionados en lote.
+  * **Pool de Concurrencia Limitado:** Diseñado e integrado un pool de promesas en JS puro (concurrencia de 4) para procesar copias físicas, backups y validaciones de build Vite (`npm run build`) concurrentemente sin saturar la CPU ni agotar descriptores de archivos del SO.
+  * **Aislamiento de Logs:** El flujo del pool captura, amortigua y rotula los logs de cada cliente (`[clientId]`) liberándolos al final para evitar textos solapados en consola.
+  * **Blindaje de Secretos Git:** Creado `.gitignore` estándar en `template-ventas/` y agregadas exclusiones críticas para `.firebaserc` y carpetas de restauración temporal `.temp_backup_sync` en ambas plantillas del CLI.
+- **Archivos modificados:**
+  * [Prototipe-CLI/sync_clients.js](file:///d:/PROTOTIPE/Prototipe-CLI/sync_clients.js) [MODIFY]
+  * [Prototipe-CLI/templates/template-core-seed/.gitignore](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/.gitignore) [MODIFY]
+  * [Prototipe-CLI/templates/template-ventas/.gitignore](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/.gitignore) [NEW]
+  * [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
 ## CORE-326: Desactivación Remota Ineludible y Motivo Personalizado (Bloqueo Total)
 - **Fecha:** 2026-07-08
 - **Tipo:** Suspensión de Servicio / CRM / Control Central / Seguridad

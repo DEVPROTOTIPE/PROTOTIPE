@@ -1,5 +1,14 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-327: Sincronización Paralela en CLI y Robustecimiento de Gitignore (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Refactorizado el actualizador de clientes del CLI (`sync_clients.js`) para soportar ejecución en paralelo con pool de concurrencia de 4 y amortiguación/aislamiento de logs para evitar entrelazado de textos. Añadidos flags `--parallel` y `--yes` para ejecuciones no interactivas de CI/CD. Creado el `.gitignore` en `template-ventas` e inyectado `.firebaserc` y exclusiones de backup en los ignores de las plantillas core.
+  - Archivos:
+    - [Prototipe-CLI/sync_clients.js](file:///d:/PROTOTIPE/Prototipe-CLI/sync_clients.js) [MODIFY]
+    - [Prototipe-CLI/templates/template-core-seed/.gitignore](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/.gitignore) [MODIFY]
+    - [Prototipe-CLI/templates/template-ventas/.gitignore](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/.gitignore) [NEW]
+
 * **[x] ~~Tarea CORE-326: Desactivación Remota Ineludible y Motivo Personalizado (Bloqueo Total) (2026-07-08)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-08

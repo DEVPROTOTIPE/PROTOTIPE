@@ -8,6 +8,10 @@ import { getWorkspaceRoot, getTemplatesDir, getRegistroPath } from './config.js'
 import { logger } from './logger.js';
 import * as Diff from 'diff';
 
+// Argumentos CLI
+const isParallel = process.argv.includes('--parallel');
+const autoAccept = process.argv.includes('--yes') || process.argv.includes('-y');
+
 // Expresión regular para ignorar archivos del cliente al comparar/copiar
 const EXCLUDED_PATHS = [
   '.env.local',
@@ -67,11 +71,30 @@ function getFilesRecursive(dir, baseDir = dir) {
   return results;
 }
 
+// Pool de concurrencia de promesas para limitar ejecuciones paralelas
+async function runWithPool(concurrencyLimit, array, fn) {
+  const executing = new Set();
+  const results = [];
+  for (const item of array) {
+    const p = Promise.resolve().then(() => fn(item));
+    results.push(p);
+    executing.add(p);
+    const clean = () => executing.delete(p);
+    p.then(clean, clean);
+    if (executing.size >= concurrencyLimit) {
+      await Promise.race(executing);
+    }
+  }
+  return Promise.all(results);
+}
+
 /**
  * Función principal
  */
 async function main() {
   logger.info('🚀 Iniciando Sincronizador de Clientes (Downstream Patching)...');
+  if (isParallel) logger.info('⚡ Modo Paralelo Activado (Pool de concurrencia: 4)');
+  if (autoAccept) logger.info('🤖 Auto-Aceptar (Omitiendo prompts interactivos)');
 
   const workspaceRoot = getWorkspaceRoot();
   if (!fs.existsSync(workspaceRoot)) {
@@ -187,28 +210,25 @@ async function main() {
 
   const selected = answers.selectedClients;
 
-  for (const client of selected) {
-    console.log('\n' + pc.cyan(`─────────────────────────────────────────────────────────────────────────────`));
-    logger.info(`Analizando actualizaciones para: ${pc.green(client.meta.projectName)}`);
+  // 4. Comparar archivos en paralelo (comparación ligera de hashes MD5)
+  logger.info(`🔍 Analizando diferencias para ${selected.length} clientes...`);
+  const clientsWithChanges = [];
 
+  for (const client of selected) {
     const templatesDir = getTemplatesDir();
     const templatePath = path.join(templatesDir, `template-${client.meta.template}`);
 
     if (!fs.existsSync(templatePath)) {
-      logger.error(`El template correspondiente no existe: ${templatePath}. Omitiendo cliente.`);
+      logger.error(`El template correspondiente no existe: ${templatePath}. Omitiendo cliente ${client.meta.projectName}.`);
       continue;
     }
 
-    // Leer versión del template desde package.json del template
     let templateVersion = '1.0.0';
     try {
       const templatePkg = fs.readJsonSync(path.join(templatePath, 'package.json'));
       templateVersion = templatePkg.version || '1.0.0';
     } catch (_) {}
 
-    logger.info(`Versión del cliente: v${client.meta.version} | Versión del template: v${templateVersion}`);
-
-    // 4. Comparar archivos
     const templateFiles = getFilesRecursive(templatePath);
     const changes = [];
 
@@ -227,116 +247,184 @@ async function main() {
       }
     });
 
-    if (changes.length === 0) {
-      logger.success(`✨ La instancia ya está al día con la plantilla core.`);
-      continue;
+    if (changes.length > 0) {
+      clientsWithChanges.push({
+        client,
+        templatePath,
+        templateVersion,
+        changes
+      });
     }
+  }
 
-    // Listar cambios detectados
-    console.log(pc.yellow(`\nCambios detectados (excluyendo archivos personalizados de marca):`));
+  if (clientsWithChanges.length === 0) {
+    logger.success(`✨ Todas las instancias seleccionadas están al día con sus plantillas core.`);
+    process.exit(0);
+  }
+
+  // Mostrar resumen de cambios detectados
+  console.log('\n' + pc.cyan('─────────────────────────────────────────────────────────────────────────────'));
+  logger.info(`Resumen de actualizaciones detectadas:`);
+  clientsWithChanges.forEach(({ client, changes }) => {
+    console.log(`\n📦 ${pc.green(client.meta.projectName)} [ID: ${client.meta.clientId}] (${changes.length} cambios):`);
     changes.forEach(c => {
       const color = c.type === 'NUEVO' ? pc.green : pc.yellow;
       console.log(`  ${color(`[${c.type}]`)} ${c.file}`);
     });
+  });
+  console.log('\n' + pc.cyan('─────────────────────────────────────────────────────────────────────────────'));
 
-    // 5. Confirmar sincronización
-    let action = '';
-    while (true) {
-      const { choice } = await inquirer.prompt([
-        {
-          type: 'list',
-          name: 'choice',
-          message: `¿Qué deseas hacer con los cambios detectados en ${client.meta.projectName}?`,
-          choices: [
-            { name: `${pc.green('✅')} Aplicar Cambios (Sincronización Física)`, value: 'aplicar' },
-            { name: `${pc.cyan('🔍')} Ver Diffs de Cambios (Simulación/Dry Run)`, value: 'diff' },
-            { name: `${pc.red('❌')} Omitir Cliente / Siguiente`, value: 'omitir' }
-          ]
-        }
-      ]);
-
-      if (choice === 'omitir') {
-        action = 'omitir';
-        break;
-      } else if (choice === 'aplicar') {
-        action = 'aplicar';
-        break;
-      } else if (choice === 'diff') {
-        await showDiffs(templatePath, client.path, changes);
+  // Confirmación global
+  let shouldProceed = autoAccept;
+  if (!shouldProceed) {
+    const { confirmAll } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'confirmAll',
+        message: isParallel
+          ? `¿Deseas aplicar las actualizaciones en PARALELO para los ${clientsWithChanges.length} clientes?`
+          : `¿Deseas proceder con la actualización de los ${clientsWithChanges.length} clientes secuencialmente?`,
+        default: true
       }
-    }
-
-    if (action === 'omitir') {
-      logger.info('Sincronización omitida para este cliente.');
-      continue;
-    }
-
-    // 6. Hacer copia de seguridad de los archivos antes de escribir (Rollback Seguro)
-    const backupDir = path.join(client.path, '.temp_backup_sync');
-    fs.ensureDirSync(backupDir);
-
-    const stepBackup = logger.info('Creando copia de seguridad temporal...');
-    try {
-      changes.forEach(c => {
-        const clientFilePath = path.join(client.path, c.file);
-        if (fs.existsSync(clientFilePath)) {
-          const backupFilePath = path.join(backupDir, c.file);
-          fs.ensureDirSync(path.dirname(backupFilePath));
-          fs.copySync(clientFilePath, backupFilePath);
-        }
-      });
-      logger.success('Copia de seguridad temporal creada con éxito.');
-    } catch (err) {
-      logger.error(`Fallo al crear backup: ${err.message}. Abortando sincronización.`);
-      fs.removeSync(backupDir);
-      continue;
-    }
-
-    // 7. Copiar archivos genéricos de plantilla a cliente
-    let success = true;
-    try {
-      changes.forEach(c => {
-        const templateFilePath = path.join(templatePath, c.file);
-        const clientFilePath = path.join(client.path, c.file);
-        fs.ensureDirSync(path.dirname(clientFilePath));
-        fs.copySync(templateFilePath, clientFilePath, { overwrite: true });
-      });
-      logger.success('Archivos copiados del template core a la instancia cliente.');
-    } catch (err) {
-      logger.error(`Fallo al aplicar cambios: ${err.message}. Revirtiendo cambios...`);
-      rollbackBackup(client.path, backupDir, changes);
-      success = false;
-    }
-
-    if (!success) continue;
-
-    // 8. Validación de Integridad (Build Vite)
-    logger.info('🛠️ Ejecutando validación de compilación (npm run build) en el cliente...');
-    try {
-      execSync('npm run build', { cwd: client.path, stdio: 'inherit', shell: true });
-      logger.success('🎉 Compilación de integridad aprobada con éxito.');
-
-      // Limpiar backup temporal
-      fs.removeSync(backupDir);
-
-      // Actualizar metadatos
-      client.meta.version = templateVersion;
-      fs.writeJsonSync(path.join(client.path, '.prototipe.json'), client.meta, { spaces: 2 });
-      logger.success(`✅ Versión del cliente actualizada a v${templateVersion} en metadatos.`);
-    } catch (err) {
-      logger.error(`❌ La compilación falló tras actualizar los archivos.`);
-      logger.warn('Iniciando rollback seguro de los archivos del cliente...');
-      rollbackBackup(client.path, backupDir, changes);
-    }
+    ]);
+    shouldProceed = confirmAll;
   }
 
-  logger.info(' Sincronización de clientes completada.');
+  if (!shouldProceed) {
+    logger.info('Operación cancelada por el usuario.');
+    process.exit(0);
+  }
+
+  // 5. Aplicar actualizaciones
+  if (isParallel) {
+    logger.info(`⚡ Iniciando sincronización paralela (Pool de concurrencia: 4)...`);
+    const results = await runWithPool(4, clientsWithChanges, async (clientData) => {
+      return syncClientInstance(clientData, true);
+    });
+
+    const successCount = results.filter(Boolean).length;
+    console.log('\n' + pc.cyan('─────────────────────────────────────────────────────────────────────────────'));
+    if (successCount === clientsWithChanges.length) {
+      logger.success(`🎉 Sincronización masiva paralela completada con éxito (${successCount}/${clientsWithChanges.length} clientes actualizados).`);
+    } else {
+      logger.warn(`⚠️ Sincronización paralela completada con algunas advertencias (${successCount}/${clientsWithChanges.length} aprobados).`);
+    }
+  } else {
+    // Sincronización secuencial estándar
+    logger.info(`⏳ Iniciando sincronización secuencial...`);
+    for (const clientData of clientsWithChanges) {
+      console.log('\n' + pc.cyan(`─────────────────────────────────────────────────────────────────────────────`));
+      await syncClientInstance(clientData, false);
+    }
+    logger.success(' Sincronización secuencial de clientes completada.');
+  }
 }
 
 /**
- * Restaura los archivos originales a partir del backup temporal
+ * Sincroniza una instancia de cliente individual
  */
-function rollbackBackup(clientPath, backupDir, changes) {
+async function syncClientInstance(clientData, isParallelMode) {
+  const { client, templatePath, templateVersion, changes } = clientData;
+  const clientId = client.meta.clientId;
+  const prefix = isParallelMode ? `[${clientId}] ` : '';
+
+  const logBuffer = [];
+  const logInfo = (msg) => {
+    if (isParallelMode) logBuffer.push(pc.cyan(`${prefix}${msg}`));
+    else logger.info(msg);
+  };
+  const logSuccess = (msg) => {
+    if (isParallelMode) logBuffer.push(pc.green(`${prefix}${msg}`));
+    else logger.success(msg);
+  };
+  const logWarn = (msg) => {
+    if (isParallelMode) logBuffer.push(pc.yellow(`${prefix}${msg}`));
+    else logger.warn(msg);
+  };
+  const logError = (msg) => {
+    if (isParallelMode) logBuffer.push(pc.red(`${prefix}${msg}`));
+    else logger.error(msg);
+  };
+  const flushLogs = () => {
+    if (isParallelMode && logBuffer.length > 0) {
+      console.log(logBuffer.join('\n'));
+    }
+  };
+
+  logInfo(`Versión del cliente: v${client.meta.version} | Versión del template: v${templateVersion}`);
+  logInfo(`Aplicando ${changes.length} cambios...`);
+
+  // 1. Crear backup temporal
+  const backupDir = path.join(client.path, '.temp_backup_sync');
+  try {
+    fs.ensureDirSync(backupDir);
+    changes.forEach(c => {
+      const clientFilePath = path.join(client.path, c.file);
+      if (fs.existsSync(clientFilePath)) {
+        const backupFilePath = path.join(backupDir, c.file);
+        fs.ensureDirSync(path.dirname(backupFilePath));
+        fs.copySync(clientFilePath, backupFilePath);
+      }
+    });
+    logSuccess('Copia de seguridad temporal creada.');
+  } catch (err) {
+    logError(`Fallo al crear backup: ${err.message}. Abortando.`);
+    fs.removeSync(backupDir);
+    flushLogs();
+    return false;
+  }
+
+  // 2. Copiar archivos de plantilla a cliente
+  try {
+    changes.forEach(c => {
+      const templateFilePath = path.join(templatePath, c.file);
+      const clientFilePath = path.join(client.path, c.file);
+      fs.ensureDirSync(path.dirname(clientFilePath));
+      fs.copySync(templateFilePath, clientFilePath, { overwrite: true });
+    });
+    logSuccess('Archivos copiados desde la plantilla core.');
+  } catch (err) {
+    logError(`Fallo al copiar archivos: ${err.message}. Iniciando rollback...`);
+    rollbackBackupLocal(client.path, backupDir, changes, logError, logSuccess);
+    flushLogs();
+    return false;
+  }
+
+  // 3. Validación de compilación (npm run build)
+  logInfo(`Ejecutando validación de compilación (npm run build)...`);
+  try {
+    const execOptions = { cwd: client.path, shell: true };
+    if (isParallelMode) {
+      execOptions.stdio = 'pipe';
+    } else {
+      execOptions.stdio = 'inherit';
+    }
+
+    execSync('npm run build', execOptions);
+    logSuccess('🎉 Compilación de integridad aprobada con éxito.');
+
+    // Limpiar backup temporal
+    fs.removeSync(backupDir);
+
+    // Actualizar metadatos
+    client.meta.version = templateVersion;
+    fs.writeJsonSync(path.join(client.path, '.prototipe.json'), client.meta, { spaces: 2 });
+    logSuccess(`✅ Versión actualizada a v${templateVersion} en metadatos.`);
+    flushLogs();
+    return true;
+  } catch (err) {
+    logError(`❌ La compilación falló tras actualizar los archivos.`);
+    if (isParallelMode && err.stdout) {
+      logError(`Detalle del error de build:\n${err.stdout.toString() || ''}\n${err.stderr?.toString() || ''}`);
+    }
+    logWarn('Iniciando rollback seguro de los archivos del cliente...');
+    rollbackBackupLocal(client.path, backupDir, changes, logError, logSuccess);
+    flushLogs();
+    return false;
+  }
+}
+
+function rollbackBackupLocal(clientPath, backupDir, changes, logError, logSuccess) {
   try {
     changes.forEach(c => {
       const backupFilePath = path.join(backupDir, c.file);
@@ -345,14 +433,13 @@ function rollbackBackup(clientPath, backupDir, changes) {
       if (fs.existsSync(backupFilePath)) {
         fs.copySync(backupFilePath, clientFilePath, { overwrite: true });
       } else {
-        // Si era nuevo, se elimina del cliente
         fs.removeSync(clientFilePath);
       }
     });
     fs.removeSync(backupDir);
-    logger.success('🔄 Rollback completado. La instancia del cliente ha sido restaurada a su estado original.');
+    logSuccess('🔄 Rollback completado. La instancia del cliente ha sido restaurada a su estado original.');
   } catch (err) {
-    logger.error(`Fallo crítico durante el rollback: ${err.message}. Los archivos pueden estar en un estado inconsistente.`);
+    logError(`Fallo crítico durante el rollback: ${err.message}. Los archivos pueden estar en un estado inconsistente.`);
   }
 }
 
@@ -391,15 +478,12 @@ async function showDiffs(templatePath, clientPath, changes) {
           
           const lines = part.value.split('\n');
           
-          // Omitir bloques de más de 8 líneas sin cambios para evitar saturar la terminal
           if (!part.added && !part.removed && lines.length > 8) {
             console.log(pc.gray(`  ... (${lines.length - 2} líneas sin cambios omitidas por legibilidad) ...`));
-            // Mostrar al menos un par de líneas como contexto
             if (lines[0]) console.log(pc.gray(`  ${lines[0]}`));
             if (lines[lines.length - 1]) console.log(pc.gray(`  ${lines[lines.length - 1]}`));
           } else {
             lines.forEach(line => {
-              // Si la línea no es vacía o es una línea añadida/removida, mostrarla
               if (line || part.added || part.removed) {
                 console.log(color(`${prefix}${line}`));
               }
