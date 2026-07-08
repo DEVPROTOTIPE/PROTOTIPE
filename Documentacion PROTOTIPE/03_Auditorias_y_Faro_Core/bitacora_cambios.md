@@ -13,8 +13,8 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 - **Fecha:** 2026-07-07
 - **Tipo:** Refactorización / Código / Documentación
 - **Estatus:** Completado.
-- **Descripción:** Implementación de batching asíncrono y rate-limiting en telemetryService.js de la plantilla App Ventas para proteger el Firebase Central de DDoS accidentales. Además, se crea el manual_gestion_riesgos_y_disaster_recovery.md abordando cuotas de Spark, backups de Firestore, offboarding legal/técnico y resolución de stock negativo.
-- **Archivos modificados:** `telemetryService.js`, `manual_gestion_riesgos_y_disaster_recovery.md`, `mapa_documentacion_ia.md`
+- **Descripción:** Implementación de batching asíncrono y rate-limiting en telemetryService.js de la plantilla App Ventas para proteger el Firebase Central de DDoS accidentales. Además, se crearon los scripts físicos backup_db.js y offboard_client.js en el CLI, se inyectó el banner UI de degradación SparkQuotaBanner.jsx en componentes comunes y se actualizó el Dashboard Central (App.jsx, CobrosPanel.jsx) para soportar la deducción de reembolsos en caliente.
+- **Archivos modificados:** `telemetryService.js`, `manual_gestion_riesgos_y_disaster_recovery.md`, `mapa_documentacion_ia.md`, `backup_db.js`, `offboard_client.js`, `SparkQuotaBanner.jsx`, `App.jsx`, `CobrosPanel.jsx`
 
 ## CORE-315: Creación de Buzón de Ideas y Notas del Backlog
 - **Fecha:** 2026-07-07

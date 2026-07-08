@@ -16,6 +16,11 @@
     - [manual_gestion_riesgos_y_disaster_recovery.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_gestion_riesgos_y_disaster_recovery.md) [NEW]
     - [telemetryService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/telemetryService.js) [MODIFY]
     - [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [backup_db.js](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/backup_db.js) [NEW]
+    - [offboard_client.js](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/offboard_client.js) [NEW]
+    - [SparkQuotaBanner.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/common/SparkQuotaBanner.jsx) [NEW]
+    - [App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [CobrosPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CobrosPanel.jsx) [MODIFY]
 
 * **[x] ~~Tarea CORE-315: Creación de Buzón de Ideas y Notas del Backlog (2026-07-07)~~**
   - Estatus: Completado.
