@@ -21,6 +21,12 @@
     - [SparkQuotaBanner.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/common/SparkQuotaBanner.jsx) [NEW]
     - [App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
     - [CobrosPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CobrosPanel.jsx) [MODIFY]
+    - [telemetryService.js (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/telemetryService.js) [MODIFY]
+    - [SparkQuotaBanner.jsx (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/common/SparkQuotaBanner.jsx) [NEW]
+    - [App.jsx (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/App.jsx) [MODIFY]
+    - [telemetryService.js (template-core-seed)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/telemetryService.js) [MODIFY]
+    - [SparkQuotaBanner.jsx (template-core-seed)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/components/common/SparkQuotaBanner.jsx) [NEW]
+    - [App.jsx (template-core-seed)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/App.jsx) [MODIFY]
 
 * **[x] ~~Tarea CORE-315: Creación de Buzón de Ideas y Notas del Backlog (2026-07-07)~~**
   - Estatus: Completado.
