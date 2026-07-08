@@ -9,6 +9,16 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-319: Resiliencia ante Exceso de Cuotas y Modo Mantenimiento Global
+- **Fecha:** 2026-07-08
+- **Tipo:** Estabilidad / Resiliencia / Código
+- **Descripción:** Implementar el bloqueo de Modo Mantenimiento global (bloqueante en App.jsx) e interceptación de excepciones de cuotas de Firestore en tiempo real (`resource-exhausted`) para habilitar el modo de solo lectura local de forma transversal en el monorepo.
+- **Saneamiento Pre-existente:**
+  * Corregido un token de cierre huérfano `)}` por `</div>` en `ClientCredits.jsx` que causaba fallos sintácticos en el build de producción.
+  * Corregida la línea truncada del switch de garantías en `DeveloperSettings.jsx` cerrando correctamente las etiquetas HTML para posibilitar compilaciones limpias.
+  * Agregado el import faltante de `motion` en `App.jsx` de `template-core-seed` para resolver fallos de linter no-undef.
+- **Archivos modificados:** `App.jsx` (App Ventas, template-ventas, template-core-seed), `appConfigService.js` (App Ventas, template-ventas, template-core-seed), `appConfigStore.js` (App Ventas, template-ventas, template-core-seed), `generator.js`, `ClientCredits.jsx` (App Ventas, template-ventas), `DeveloperSettings.jsx` (App Ventas, template-ventas), `tareas_pendientes.md`, `bitacora_cambios.md`
+
 ## CLI-025: Autenticación OAuth2 Unificada en el Dashboard (Google/GitHub)
 - **Fecha:** 2026-07-08
 - **Tipo:** Seguridad / Autenticación / Código

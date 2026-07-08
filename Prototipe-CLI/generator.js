@@ -2517,6 +2517,7 @@ async function run() {
         address: { stringValue: storeAddress },
         whatsappEnabled: { booleanValue: true },
         dianEnabled: { booleanValue: false },
+        maintenanceMode: { booleanValue: false },
         deliverySettings: {
           mapValue: {
             fields: {
