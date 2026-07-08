@@ -2811,10 +2811,10 @@ ${flagsList}
 ### 📝 Requerimientos Especiales del Cliente:
 ${answers.customRequirements || '*(Ninguno especificado)*'}
 
-### 📦 Componentes y Módulos Recomendados de la Biblioteca (Preferentes):
-${Array.isArray(answers.selectedRecomendations) && answers.selectedRecomendations.length > 0 
-  ? answers.selectedRecomendations.map(r => `  - **${r.name}** [${r.technicalName || 'Helper/Servicio'}] (Ficha técnica y código listo en: [Ver Documentación](file:///${r.link.replace(/\\/g, '/')}))`).join('\n')
-  : '  *(Ninguno sugerido preferentemente; utiliza libremente la biblioteca global)*'}
+### 📦 Componentes y Módulos de la Biblioteca Pre-Instalados Físicamente (¡Solo impórtalos!):
+${Array.isArray(answers.injectedComponentsList) && answers.injectedComponentsList.length > 0 
+  ? answers.injectedComponentsList.map(item => `  - **${item.name}** [\`${item.technicalName}\`]: Inyectado físicamente. Importar con:\n    \`import ${item.technicalName} from '${item.importPath}';\``).join('\n')
+  : '  *(Ninguno inyectado previamente; utiliza la biblioteca global si es necesario)*'}
 
 > [!NOTE]
 > **Autonomía Creativa de la IA:** Las recomendaciones anteriores son sugerencias preferentes de reutilización. Si para cumplir con el briefing del negocio requieres interfaces, hooks o bases de datos ausentes en la biblioteca, tienes total autonomía de diseñarlas y programarlas desde cero, garantizando el stack de calidad de la plataforma.
@@ -3400,6 +3400,7 @@ async function injectSelectedComponents(answers, targetDir) {
 
   const stepInj = ora('Inyectar en caliente componentes recomendados de la biblioteca...').start();
   let count = 0;
+  const injectedList = [];
 
   for (const rec of answers.selectedRecomendations) {
     if (!rec.link) continue;
@@ -3448,9 +3449,45 @@ async function injectSelectedComponents(answers, targetDir) {
       // Crear directorio e inyectar JSX
       await fs.ensureDir(path.dirname(destinationPath));
       await fs.writeFile(destinationPath, codeContent, 'utf-8');
+      
+      const techName = meta.technicalName || rec.technicalName || rec.name;
+      // Normalizar importPath a formato de import estándar de Vite
+      const importPath = targetPath.replace('src/', '@/').replace(/\.jsx?$/, '');
+      
+      injectedList.push({
+        name: rec.name,
+        technicalName: techName,
+        importPath: importPath
+      });
       count++;
     } catch (err) {
       console.warn(pc.yellow(`  ⚠️ No se pudo inyectar en caliente el componente "${rec.name}": ${err.message}`));
+    }
+  }
+
+  // Guardar en answers para que el generador de prompts lo use
+  answers.injectedComponentsList = injectedList;
+
+  // Inyectar la sección en guia_estilos_ui.md del cliente para orientar a la IA
+  if (injectedList.length > 0) {
+    try {
+      const docDirName = `Documentacion ${answers.projectName}`;
+      const stylesGuidePath = path.join(targetDir, docDirName, 'guia_estilos_ui.md');
+      
+      if (await fs.pathExists(stylesGuidePath)) {
+        let content = await fs.readFile(stylesGuidePath, 'utf8');
+        content += `\n\n## 📦 Componentes de Biblioteca Pre-Instalados (¡Listos para usar!)\n`;
+        content += `Los siguientes componentes ya existen físicamente en el proyecto. **Queda prohibido volver a crearlos**. Utilízalos directamente importándolos en tus vistas:\n\n`;
+        
+        injectedList.forEach(item => {
+          content += `- **${item.name}** (\`${item.technicalName}\`): Listo para importar desde:\n`;
+          content += `  \`import ${item.technicalName} from '${item.importPath}';\` (o ruta relativa equivalente).\n`;
+        });
+        
+        await fs.writeFile(stylesGuidePath, content, 'utf-8');
+      }
+    } catch (docErr) {
+      console.warn(pc.yellow(`  ⚠️ No se pudo registrar la lista de componentes en la guía de estilos: ${docErr.message}`));
     }
   }
 

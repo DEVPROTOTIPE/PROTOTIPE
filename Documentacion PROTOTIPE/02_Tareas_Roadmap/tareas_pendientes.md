@@ -4,6 +4,7 @@
   - Estatus: Completado.
   - Fecha: 2026-07-07
   - Descripción: Copiar físicamente los archivos JSX de la biblioteca recomendados al Scaffold al finalizar la inicialización del proyecto.
+  - Revisión / Ajuste (2026-07-08): Inyección del listado de componentes pre-instalados con sus sentencias de importación en `guia_estilos_ui.md` y en `antigravity_bootstrap_prompt.md` para proveer contexto cognitivo proactivo a la IA.
   - Archivos:
     - [generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
     - [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]

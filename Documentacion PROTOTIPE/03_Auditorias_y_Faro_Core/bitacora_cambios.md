@@ -14,6 +14,7 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 - **Tipo:** Scaffolding / Automatización / Código
 - **Estatus:** Completado.
 - **Descripción:** Copiar JSX de la biblioteca recomendados directamente al Scaffold al finalizar la inicialización del proyecto.
+- **Revisión / Ajuste (2026-07-08):** Inyectado dinámicamente el listado de componentes pre-instalados con sus sentencias de importación en `guia_estilos_ui.md` y en `antigravity_bootstrap_prompt.md` para dar contexto cognitivo proactivo a la IA e impedir que los vuelva a crear.
 - **Archivos modificados:** `generator.js`, `tareas_pendientes.md`, `bitacora_cambios.md`
 
 ## CLI-024: Automatización de Cuenta de Servicio IAM
