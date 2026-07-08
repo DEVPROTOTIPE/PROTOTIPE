@@ -3404,9 +3404,22 @@ async function injectSelectedComponents(answers, targetDir) {
   for (const rec of answers.selectedRecomendations) {
     if (!rec.link) continue;
     
-    // Normalizar ruta del link en Windows
-    const linkPath = path.resolve(rec.link);
-    if (!fs.existsSync(linkPath)) continue;
+    // Normalizar URL con protocolo file:// en Windows/UNIX
+    let linkPath = rec.link;
+    if (linkPath.startsWith('file://')) {
+      try {
+        linkPath = fileURLToPath(linkPath);
+      } catch (urlErr) {
+        console.warn(pc.yellow(`  ⚠️ No se pudo convertir URL file:// a ruta fisica: ${rec.link}`));
+        continue;
+      }
+    }
+    
+    linkPath = path.resolve(linkPath);
+    if (!fs.existsSync(linkPath)) {
+      console.warn(pc.yellow(`  ⚠️ El archivo de documentacion no existe fisicamente: ${linkPath}`));
+      continue;
+    }
 
     try {
       const mdContent = await fs.readFile(linkPath, 'utf8');
@@ -3419,8 +3432,14 @@ async function injectSelectedComponents(answers, targetDir) {
       const targetPath = meta.targetPath;
       if (!targetPath) continue;
 
-      // 2. Extraer Código React
-      const codeMatch = mdContent.match(/```(?:jsx|javascript)\s*\n([\s\S]*?)\n```/i);
+      // 2. Extraer Código React robusto (Buscar despues del titulo de codigo completo)
+      let searchIndex = mdContent.indexOf('## 3. Código');
+      if (searchIndex === -1) {
+        searchIndex = 0; // Fallback
+      }
+
+      const snippetToParse = mdContent.substring(searchIndex);
+      const codeMatch = snippetToParse.match(/```(?:jsx|javascript|js)\s*\n([\s\S]*?)\n```/i);
       if (!codeMatch) continue;
 
       const codeContent = codeMatch[1];
