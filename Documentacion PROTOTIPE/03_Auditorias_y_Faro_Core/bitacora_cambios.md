@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-297: Inyección de Componentes Atómicos UI en Semilla Base
+- **Fecha:** 2026-07-07
+- **Tipo:** Refactorización / Semilla Base
+- **Descripción:** Se crearon y agregaron los componentes atómicos comunes `Button.jsx` y `Modal.jsx` dentro del directorio `src/components/ui/` de la plantilla de inicio `template-core-seed`. Estos componentes resuelven la brecha de controles básicos parametrizados y están integrados de forma nativa con el sistema de temas (colores HSL y bordes dinámicos `var(--radius-base)`) del cliente, garantizando la homogeneidad del diseño visual premium.
+- **Archivos creados:** `Prototipe-CLI/templates/template-core-seed/src/components/ui/Button.jsx`, `Prototipe-CLI/templates/template-core-seed/src/components/ui/Modal.jsx`
+
+
 ## CORE-296: Resolución de Brecha de Autonomía - UI Shell Base en Semilla Base
 - **Fecha:** 2026-07-07
 - **Tipo:** Refactorización / Semilla Base

@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-297: Inyección de Componentes Atómicos UI en Semilla Base (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se crearon y agregaron los componentes atómicos comunes `Button.jsx` y `Modal.jsx` dentro del directorio `src/components/ui/` de `template-core-seed`, resolviendo la brecha de controles básicos parametrizados adaptados al sistema de diseño HSL.
+  - Archivos: [Prototipe-CLI/templates/template-core-seed/src/components/ui/Button.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/components/ui/Button.jsx) [NEW], [Prototipe-CLI/templates/template-core-seed/src/components/ui/Modal.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/components/ui/Modal.jsx) [NEW]
+
 * **[x] ~~Tarea CORE-296: Resolución de Brecha de Autonomía - UI Shell Base en Semilla Base (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
