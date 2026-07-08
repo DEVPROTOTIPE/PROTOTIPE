@@ -7,7 +7,7 @@ Este documento contiene la especificación completa, manuales de operación paso
 ## 📂 Sección 1 — Reconocimiento General e Inicialización
 
 ### Tecnologías y Frameworks del Ecosistema
-- **Consola Central (dev-dashboard):** React 19, Vite, Tailwind CSS v4 para diseño dinámico, Recharts/ApexCharts para visualización de KPIs y comisiones de desarrollador.
+- **Dashboard Central:** React 19, Vite, Tailwind CSS v4 para diseño dinámico, Recharts/ApexCharts para visualización de KPIs y comisiones de desarrollador.
 - **Motor CLI (Prototipe-CLI):** Node.js (ESM), Express, Server-Sent Events (SSE) para logs en vivo de terminal, y empaquetadores de templates Core.
 - **Plantillas Core (App Ventas):** React 19, Vite 6, Tailwind CSS v4, arquitectura desacoplada en 3 capas de base de datos Firebase (Repository → Service → Hook → UI) y persistencia offline con Zustand / IndexedDB (Dexie).
 - **Scripts de Automatización:** PowerShell Core (versión 7+ compatible) y scripts por lotes (.bat) para empaquetamiento, respaldos Zero-Checkout y balanceadores de upstream.
@@ -77,7 +77,7 @@ Este documento contiene la especificación completa, manuales de operación paso
 | [Central PROTOTIPE/dev-dashboard/scripts/clean_linter_warnings.cjs](file:///d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/scripts/clean_linter_warnings.cjs) | 4169 | Componente o archivo del sistema. |
 | [Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs](file:///d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) | 29826 | Componente o archivo del sistema. |
 | [Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.js](file:///d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.js) | 123 | Componente o archivo del sistema. |
-| [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx) | 932304 | Enrutador y Layout principal de la Consola Central (dev-dashboard). |
+| [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx) | 932304 | Enrutador y Layout principal del Dashboard Central. |
 | [Central PROTOTIPE/dev-dashboard/src/components/admin/BrandingEffectsPanel.jsx](file:///d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/BrandingEffectsPanel.jsx) | 34539 | Componente o archivo del sistema. |
 | [Central PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx](file:///d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/BriefingStudioView.jsx) | 104173 | Componente o archivo del sistema. |
 | [Central PROTOTIPE/dev-dashboard/src/components/admin/CobrosPanel.jsx](file:///d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/CobrosPanel.jsx) | 33285 | Componente o archivo del sistema. |
@@ -863,7 +863,7 @@ Este documento contiene la especificación completa, manuales de operación paso
 | [Instancias Clientes/ventas/ventas-moni-app/run-e2e.ps1](file:///d:/PROTOTIPE/Instancias Clientes/ventas/ventas-moni-app/run-e2e.ps1) | 3241 | Componente o archivo del sistema. |
 | [Instancias Clientes/ventas/ventas-moni-app/scripts/generate_ia_map.js](file:///d:/PROTOTIPE/Instancias Clientes/ventas/ventas-moni-app/scripts/generate_ia_map.js) | 6557 | Componente o archivo del sistema. |
 | [Instancias Clientes/ventas/ventas-moni-app/src/App.css](file:///d:/PROTOTIPE/Instancias Clientes/ventas/ventas-moni-app/src/App.css) | 3075 | Componente o archivo del sistema. |
-| [Instancias Clientes/ventas/ventas-moni-app/src/App.jsx](file:///d:/PROTOTIPE/Instancias Clientes/ventas/ventas-moni-app/src/App.jsx) | 30928 | Enrutador y Layout principal de la Consola Central (dev-dashboard). |
+| [Instancias Clientes/ventas/ventas-moni-app/src/App.jsx](file:///d:/PROTOTIPE/Instancias Clientes/ventas/ventas-moni-app/src/App.jsx) | 30928 | Enrutador y Layout principal de la aplicación. |
 | [Instancias Clientes/ventas/ventas-moni-app/src/assets/hero.png](file:///d:/PROTOTIPE/Instancias Clientes/ventas/ventas-moni-app/src/assets/hero.png) | 13057 | Componente o archivo del sistema. |
 | [Instancias Clientes/ventas/ventas-moni-app/src/assets/react.svg](file:///d:/PROTOTIPE/Instancias Clientes/ventas/ventas-moni-app/src/assets/react.svg) | 4126 | Componente o archivo del sistema. |
 | [Instancias Clientes/ventas/ventas-moni-app/src/assets/vite.svg](file:///d:/PROTOTIPE/Instancias Clientes/ventas/ventas-moni-app/src/assets/vite.svg) | 8710 | Componente o archivo del sistema. |
@@ -1168,7 +1168,7 @@ Este documento contiene la especificación completa, manuales de operación paso
 | [Plantillas Core/App Ventas/scratch/test_telemetry.js](file:///d:/PROTOTIPE/Plantillas Core/App Ventas/scratch/test_telemetry.js) | 1383 | Componente o archivo del sistema. |
 | [Plantillas Core/App Ventas/scripts/validate-core-integrity.js](file:///d:/PROTOTIPE/Plantillas Core/App Ventas/scripts/validate-core-integrity.js) | 9849 | Componente o archivo del sistema. |
 | [Plantillas Core/App Ventas/src/App.css](file:///d:/PROTOTIPE/Plantillas Core/App Ventas/src/App.css) | 3075 | Componente o archivo del sistema. |
-| [Plantillas Core/App Ventas/src/App.jsx](file:///d:/PROTOTIPE/Plantillas Core/App Ventas/src/App.jsx) | 30928 | Enrutador y Layout principal de la Consola Central (dev-dashboard). |
+| [Plantillas Core/App Ventas/src/App.jsx](file:///d:/PROTOTIPE/Plantillas Core/App Ventas/src/App.jsx) | 30928 | Enrutador y Layout principal de la aplicación. |
 | [Plantillas Core/App Ventas/src/assets/hero.png](file:///d:/PROTOTIPE/Plantillas Core/App Ventas/src/assets/hero.png) | 13057 | Componente o archivo del sistema. |
 | [Plantillas Core/App Ventas/src/assets/react.svg](file:///d:/PROTOTIPE/Plantillas Core/App Ventas/src/assets/react.svg) | 4126 | Componente o archivo del sistema. |
 | [Plantillas Core/App Ventas/src/assets/vite.svg](file:///d:/PROTOTIPE/Plantillas Core/App Ventas/src/assets/vite.svg) | 8710 | Componente o archivo del sistema. |
@@ -1385,7 +1385,7 @@ Este documento contiene la especificación completa, manuales de operación paso
 | [Prototipe-CLI/templates/template-core-seed/public/pwa-512x512.png](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/public/pwa-512x512.png) | 501726 | Componente o archivo del sistema. |
 | [Prototipe-CLI/templates/template-core-seed/scripts/validate-core-integrity.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/scripts/validate-core-integrity.js) | 9695 | Componente o archivo del sistema. |
 | [Prototipe-CLI/templates/template-core-seed/seed.json](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/seed.json) | 2842 | Componente o archivo del sistema. |
-| [Prototipe-CLI/templates/template-core-seed/src/App.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/App.jsx) | 16250 | Enrutador y Layout principal de la Consola Central (dev-dashboard). |
+| [Prototipe-CLI/templates/template-core-seed/src/App.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/App.jsx) | 16250 | Enrutador y Layout principal de la aplicación. |
 | [Prototipe-CLI/templates/template-core-seed/src/components/admin/settings/DeveloperDiagnosticsModal.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/components/admin/settings/DeveloperDiagnosticsModal.jsx) | 11723 | Componente o archivo del sistema. |
 | [Prototipe-CLI/templates/template-core-seed/src/components/ui/AppLoader.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/components/ui/AppLoader.jsx) | 594 | Componente o archivo del sistema. |
 | [Prototipe-CLI/templates/template-core-seed/src/components/ui/BackgroundCanvas.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/components/ui/BackgroundCanvas.jsx) | 23834 | Componente o archivo del sistema. |
@@ -1497,7 +1497,7 @@ Este documento contiene la especificación completa, manuales de operación paso
 | [Prototipe-CLI/templates/template-ventas/scripts/generate_ia_map.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/scripts/generate_ia_map.js) | 6557 | Componente o archivo del sistema. |
 | [Prototipe-CLI/templates/template-ventas/seed.json](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/seed.json) | 2842 | Componente o archivo del sistema. |
 | [Prototipe-CLI/templates/template-ventas/src/App.css](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/App.css) | 3075 | Componente o archivo del sistema. |
-| [Prototipe-CLI/templates/template-ventas/src/App.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/App.jsx) | 30928 | Enrutador y Layout principal de la Consola Central (dev-dashboard). |
+| [Prototipe-CLI/templates/template-ventas/src/App.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/App.jsx) | 30928 | Enrutador y Layout principal de la aplicación. |
 | [Prototipe-CLI/templates/template-ventas/src/assets/hero.png](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/assets/hero.png) | 13057 | Componente o archivo del sistema. |
 | [Prototipe-CLI/templates/template-ventas/src/assets/react.svg](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/assets/react.svg) | 4126 | Componente o archivo del sistema. |
 | [Prototipe-CLI/templates/template-ventas/src/assets/vite.svg](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/assets/vite.svg) | 8710 | Componente o archivo del sistema. |
@@ -1773,7 +1773,7 @@ El servidor Bridge local de PROTOTIPE expone de forma activa y blindada un total
 
 ---
 
-## 💻 Sección 4 — Auditoría de la Consola Central (dev-dashboard)
+## 💻 Sección 4 — Auditoría del Dashboard Central
 
 El análisis del frontend revela la siguiente estructura y comportamiento del dashboard de desarrollo:
 

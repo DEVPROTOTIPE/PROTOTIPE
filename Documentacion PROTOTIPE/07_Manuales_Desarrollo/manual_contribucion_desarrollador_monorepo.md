@@ -1,6 +1,6 @@
 # 🛠️ Guía de Contribución y Configuración del Monorepo PROTOTIPE
 
-Esta guía técnica está dirigida a desarrolladores del equipo de PROTOTIPE. Define el proceso obligatorio para levantar el entorno de desarrollo local del Dashboard Central y el Servidor CLI, las convenciones de Git y cómo registrar contribuciones al núcleo de la plataforma.
+Esta guía técnica está dirigida a desarrolladores del equipo de PROTOTIPE. Define el proceso obligatorio para levantar el entorno de desarrollo local del Dashboard Central y la API Bridge, las convenciones de Git y cómo registrar contribuciones al núcleo de la plataforma.
 
 ---
 
@@ -16,18 +16,18 @@ La plataforma de desarrollo de PROTOTIPE opera en dos capas locales comunicadas 
          │
          │ (API REST Local: localhost:3001)
          ▼
-  [ Prototipe-CLI ] (Express Bridge) ───► [ Git / Firebase CLI ] (Herramientas OS)
+  [ Prototipe-CLI ] (API Bridge) ───► [ Git / Firebase CLI ] (Herramientas OS)
 ```
 
 ---
 
 ## 2. Instrucciones para Levantar el Entorno Local
 
-### Paso 1: Levantar el Backend Bridge CLI
-El servidor Bridge expone APIs para clonar repositorios, comparar ramas de Git, inyectar componentes y purgar directorios.
+### Paso 1: Levantar la API Bridge (Servidor Local)
+La API Bridge expone endpoints para clonar repositorios, comparar ramas de Git, inyectar componentes y purgar directorios.
 1. Abre una terminal en `D:\PROTOTIPE\Prototipe-CLI`.
 2. Instala dependencias: `npm install`.
-3. Levanta el servidor Express en el puerto 3001:
+3. Levanta la API Bridge en el puerto 3001:
    `npm start` o `node server.js`
 4. El preflight check verificará la presencia de Git y Firebase CLI en el PATH de Windows.
 
@@ -41,7 +41,7 @@ La consola administrativa permite interactuar de forma visual con las herramient
 ---
 
 ## 3. Flujo de Trabajo y Ciclo de Desarrollo
-Cuando modifiques el código del Dashboard o del CLI Bridge:
+Cuando modifiques el código del Dashboard Central o de la API Bridge:
 
 1.  **Validación de Compilación:** Corre `npm run build` en la carpeta de la interfaz modificada antes de hacer commit. No se permiten commits con fallas de linter o importaciones rotas.
 2.  **Sincronización Física y Documental:**
@@ -52,9 +52,9 @@ Cuando modifiques el código del Dashboard o del CLI Bridge:
 ---
 
 ## 4. Convenciones de Commits y Versionamiento
-Para garantizar la paridad y la legibilidad en el drift detector, usamos **Conventional Commits**:
+Para garantizar la paridad y la legibilidad en el Motor de Paridad, usamos **Conventional Commits**:
 *   `feat(dash):` para nuevas características en el dashboard (ej. nuevos widgets o pestañas).
-*   `feat(cli):` para nuevos endpoints o mejoras en el generador de marca blanca.
+*   `feat(cli):` para nuevos endpoints o mejoras en el Motor de Aprovisionamiento.
 *   `fix(dash/cli):` para corrección de bugs.
 *   `docs:` para actualizaciones de manuales o bitácoras.
 

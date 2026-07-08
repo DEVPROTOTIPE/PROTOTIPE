@@ -6,11 +6,11 @@ Queda estrictamente prohibido a la IA realizar cualquier tipo de restauración d
 
 ## ESTÁNDAR DE TAGS Y FILTRABILIDAD DE BIBLIOTECA (OBLIGATORIO)
 
-Todo componente o módulo registrado en la **Biblioteca de Componentes de PROTOTIPE** (`README.md` en `06_Biblioteca_Componentes/`) DEBE ser filtrable en el dashboard. Para garantizarlo, se aplican las siguientes reglas:
+Todo componente o módulo registrado en la **Biblioteca de Componentes de PROTOTIPE** (`README.md` en `06_Biblioteca_Componentes/`) DEBE ser filtrable en el Dashboard Central. Para garantizarlo, se aplican las siguientes reglas:
 
 ### Regla 1: Todo componente DEBE tener al menos un tag funcional
 
-El servidor CLI (`Prototipe-CLI/server.js`) genera automáticamente los tags al leer el `README.md` mediante la función `buildTags()`. Esta función infiere los tags a partir del nombre, nombre técnico, descripción y categoría del componente.
+La API Bridge (`Prototipe-CLI/server.js`) genera automáticamente los tags al leer el `README.md` mediante la función `buildTags()`. Esta función infiere los tags a partir del nombre, nombre técnico, descripción y categoría del componente.
 
 **NINGÚN componente puede quedar con un array de tags vacío.** El tag de categoría siempre se garantiza como fallback.
 
@@ -72,7 +72,7 @@ Toda instancia de cliente en el ecosistema debe configurarse bajo una de las sig
 22. **🧸 Artículos Geek y Coleccionismo (`coleccionismo-geek`)**
 23. **📦 Insumos Horeca B2B (`distribucion-horeca`)**
 
-### Regla 4: El buscador del dashboard indexa nombres + descripción + categoría + tags
+### Regla 4: El buscador del Dashboard Central indexa nombres + descripción + categoría + tags
 
 El filtrado textual en `ComponentLibraryView.jsx` busca en los campos: `name`, `technicalName`, `description`, `category` y `tags` concatenados. Un componente es filtrable si aparece en cualquiera de esos campos.
 
@@ -95,12 +95,12 @@ Si se decteta un nuevo nicho comercial no cubierto por `buildTags`, se debe:
 
 ---
 
-## ESTÁNDAR DE PLAYGROUNDS Y "STORYBOOK"
+## ESTÁNDAR DE PLAYGROUNDS Y "STORYBOOK" (SANDBOX DE COMPONENTES)
 
-- **Equivalencia de Storybook:** En el ecosistema PROTOTIPE, el dashboard de desarrollo central y sus playgrounds aislados en `dev-dashboard` hacen la función de **Storybook**.
-- **Creación de Playgrounds:** Todo componente visual interactivo debe contar con su archivo de sandbox en `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\[NombreComponente]Sandbox.jsx`.
+- **Equivalencia de Storybook:** En el ecosistema PROTOTIPE, el Dashboard Central y sus Sandbox de Componentes aislados en `dev-dashboard` hacen la función de **Storybook**.
+- **Creación de Sandbox de Componentes:** Todo componente visual interactivo debe contar con su archivo de sandbox en `D:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\src\components\admin\sandboxes\[NombreComponente]Sandbox.jsx`.
 - **Estructura Requerida del Sandbox:** Debe usar `<SandboxLayout>` exponiendo controles interactivos de tipo `toggle`, `select`, `text` o `number` para configurar visualmente las propiedades del componente.
-- **Resolución en Caliente:** No intentes importar ni declarar el playground en `ComponentSandbox.jsx` de forma manual; el dashboard escanea automáticamente la carpeta usando `import.meta.glob`.
+- **Resolución en Caliente:** No intentes importar ni declarar el playground en `ComponentSandbox.jsx` de forma manual; el Dashboard Central escanea automáticamente la carpeta usando `import.meta.glob`.
 - **Componentes No Simulables:** Los servicios sin UI o hooks de Firebase se declaran en `COMPONENT_META` de `ComponentSandbox.jsx` con una nota aclaratoria detallada de su funcionamiento.
 
 ---
@@ -110,7 +110,7 @@ Si se decteta un nuevo nicho comercial no cubierto por `buildTags`, se debe:
 Para mantener la mantenibilidad y evitar regresiones en el archivo principal `App.jsx` (el cual excede las 11,000 líneas), se establece la siguiente regla obligatoria:
 
 - **Prohibición de Código de Interfaz Ad-hoc:** Queda estrictamente prohibido inyectar bloques extensos de JSX, lógica de estado compleja o formularios directamente dentro de `App.jsx` para nuevas funcionalidades o pestañas.
-- **Creación de Componentes Modulares:** Todo nuevo módulo, pestaña, panel de control o vista para mejorar el dashboard debe crearse como un componente React independiente dentro de `src/components/admin/` o subcarpetas correspondientes.
+- **Creación de Componentes Modulares:** Todo nuevo módulo, pestaña, panel de control o vista para mejorar el Dashboard Central debe crearse como un componente React independiente dentro de `src/components/admin/` o subcarpetas correspondientes.
 - **Modificaciones Mínimas en App:** Los cambios en `App.jsx` se limitarán única y exclusivamente a:
   1. Registrar e importar el nuevo componente modular.
   2. Agregar la condición lógica en la navegación/enrutamiento (`activeTab === '...'`).
@@ -120,7 +120,7 @@ Para mantener la mantenibilidad y evitar regresiones en el archivo principal `Ap
 
 ## ESTÁNDAR DE CONTROLES VISUALES Y LISTAS DESPLEGABLES (DROPDOWNS)
 
-- **Prohibición de selectores nativos:** Queda terminantemente prohibido utilizar el elemento `<select>` nativo de HTML en cualquier sandbox, módulo, vista o componente del dashboard o plantillas.
+- **Prohibición de selectores nativos:** Queda terminantemente prohibido utilizar el elemento `<select>` nativo de HTML en cualquier sandbox, módulo, vista o componente del Dashboard Central o plantillas.
 - **Uso obligatorio de CustomSelect:** Se debe emplear de manera obligatoria el componente `CustomSelect.jsx` (ubicado en `src/components/ui/CustomSelect.jsx`), pasándole el array de opciones en formato `[{ value, label }]` y capturando los cambios mediante su propiedad `onChange(value)` (la cual devuelve el valor directamente, no un evento sintético de React).
 
 ---
@@ -142,7 +142,7 @@ Para mantener la mantenibilidad y evitar regresiones en el archivo principal `Ap
 ## ESTÁNDAR DE targetPath EN MANIFIESTOS DE BIBLIOTECA
 
 - **Prohibición de rutas Sandbox y Legacy:** Queda estrictamente prohibido que la propiedad `"targetPath"` del manifiesto JSON (comentario inicial `<!-- { ... } -->` en los markdown de la biblioteca) apunte a:
-  - Directorios de sandbox o playgrounds del dashboard (como `src/components/admin/sandboxes/...` o `dev-dashboard/...`).
+  - Directorios de Sandbox de Componentes o directorios de dev-dashboard (como `src/components/admin/sandboxes/...` o `dev-dashboard/...`).
   - Directorios legacy genéricos `src/hooks/*` o `src/services/*` para nueva lógica de negocio de features.
 - **Rutas Canónicas por Tipo:** El `"targetPath"` debe definir la ubicación definitiva y limpia del componente en la base de código del cliente:
   - **Atom (`atom`):** Presentacionales puros -> `src/components/ui/[NombreTécnico].jsx`
@@ -152,18 +152,18 @@ Para mantener la mantenibilidad y evitar regresiones en el archivo principal `Ap
   - **Service / UseCase (`service`):** Lógica de negocio y validación -> `src/features/[featureName]/services/[featureName]Service.js`
   - **Hook UI State (`hook`):** Hooks que exponen estados reactivos de la feature -> `src/features/[featureName]/hooks/use[FeatureName].js`
   - **Entrypoint obligatorio:** Toda feature debe tener su API pública en `src/features/[featureName]/index.js`, desde donde se debe importar externamente de forma exclusiva.
-- **Generación de Imports:** De esta ruta depende que la sentencia de "IMPORTACIÓN RECOMENDADA" en el dashboard se indexe y muestre de manera limpia y correcta para el cliente final.
+- **Generación de Imports:** De esta ruta depende que la sentencia de "IMPORTACIÓN RECOMENDADA" en el Dashboard Central se indexe y muestre de manera limpia y correcta para el cliente final.
 
 ---
 
 ## ESTÁNDAR DE PREVENCIÓN DE CONFLICTOS CSS Y CONTRASTE EN MODO CLARO (LIGHT MODE)
 
 1. **Evitación de Conflictos de Fondo (Color Swatches):**
-   - El stylesheet global del dashboard (`index.css`) aplica una regla con `!important` a cualquier `div` que contenga tanto la clase `rounded-2xl` (o `rounded-3xl`) como una clase de borde (`border`). Esto sobrescribe cualquier estilo inline de `backgroundColor` con un fondo blanco/glassmorphic.
+   - El stylesheet global del Dashboard Central (`index.css`) aplica una regla con `!important` a cualquier `div` que contenga tanto la clase `rounded-2xl` (o `rounded-3xl`) como una clase de borde (`border`). Esto sobrescribe cualquier estilo inline de `backgroundColor` con un fondo blanco/glassmorphic.
    - **Solución Obligatoria:** Cuando implementes selectores/muestrarios de colores interactivos con fondos dinámicos definidos en `style={{ backgroundColor: ... }}`, **nunca** combines `rounded-2xl`/`rounded-3xl` con clases de borde en el mismo elemento, o fuerza el inline style usando `!important` (ej. `style={{ backgroundColor: \`${color} !important\` }}`).
 
 2. **Garantía de Contraste de Texto en Botones de Marca:**
-   - La regla global del dashboard sobrescribe la clase `.text-white` a negro (`!important`) cuando se encuentra dentro de contenedores oscuros si no se emplean clases nativas de fondo específicas de Tailwind.
+   - La regla global del Dashboard Central sobrescribe la clase `.text-white` a negro (`!important`) cuando se encuentra dentro de contenedores oscuros si no se emplean clases nativas de fondo específicas de Tailwind.
    - **Solución Obligatoria:** Al renderizar textos blancos sobre botones que usen variables HSL cromáticas como fondo (ej. `bg-[var(--color-primary)]`), utiliza siempre de forma explícita la clase `!text-white` para garantizar la legibilidad y evitar que el texto cambie a negro en Light Mode.
 
 3. **Z-Index y Superposición en Steppers / Líneas de Tiempo:**
@@ -349,10 +349,10 @@ Antes de modificar cualquier archivo, la IA DEBE:
 | Prefijo | Dominio | Archivos principales |
 |---|---|---|
 | `CORE` | Cambios transversales, arquitectura, proceso global | Múltiples dominios simultáneos |
-| `CLI` | Motor CLI Bridge (server.js, generator.js, workers) | `d:\PROTOTIPE\Prototipe-CLI\` |
-| `DASH` | Dashboard central (components, views, hooks) | `d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\` |
-| `TPL` | Plantillas base inyectables (template-ventas, template-core-seed) | `d:\PROTOTIPE\Prototipe-CLI\templates\` |
-| `PLT` | Plantillas Core desplegadas (App Ventas, etc.) | `d:\PROTOTIPE\Plantillas Core\` |
+| `CLI` | API Bridge / Motor de Aprovisionamiento (server.js, generator.js, workers) | `d:\PROTOTIPE\Prototipe-CLI\` |
+| `DASH` | Dashboard Central (components, views, hooks) | `d:\PROTOTIPE\Central PROTOTIPE\dev-dashboard\` |
+| `TPL` | Plantillas Core inyectables (template-ventas, template-core-seed) | `d:\PROTOTIPE\Prototipe-CLI\templates\` |
+| `PLT` | Instancias de Clientes base (App Ventas, etc.) | `d:\PROTOTIPE\Plantillas Core\` |
 | `INST` | Instancias de clientes específicas | `d:\PROTOTIPE\Instancias Clientes\` |
 | `DOC` | Documentación exclusivamente (sin cambios de código) | `d:\PROTOTIPE\Documentacion PROTOTIPE\` |
 | `LND` | Landing Page pública, embudos de venta y marketing | `d:\PROTOTIPE\Landing Page\`, `public/`, `marketing/` |

@@ -1,5 +1,16 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-307: Unificación Léxica y Estandarización de Glosario en Manuales (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se realiza la búsqueda y reemplazo masivo del glosario obsoleto por terminología unificada en los manuales de desarrollo y archivos de reglas (AGENTS.md, diccionario_tecnico, manual_contribucion, diagrama_flujo, manual_y_auditoria).
+  - Archivos:
+    - [AGENTS.md](file:///d:/PROTOTIPE/.agents/AGENTS.md) [MODIFY]
+    - [manual_contribucion_desarrollador_monorepo.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md) [MODIFY]
+    - [diagrama_flujo_ecosistema.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/diagrama_flujo_ecosistema.md) [MODIFY]
+    - [diccionario_tecnico_completo.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/diccionario_tecnico_completo.md) [MODIFY]
+    - [manual_y_auditoria_completa_prototipe_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-306: Sincronización Desatendida de Recursos Firebase en el CLI (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

@@ -136,7 +136,7 @@
     4.  Pide la paleta de color (emerald, ruby, violet, amber, HEX personalizado o HSL manual).
     5.  Si es HEX, pide el código de color y calcula la conversión. Si es HSL, pide el primario y acento de forma manual.
     6.  Pide las variables de Firebase (.env.local) del cliente: API Key, Auth Domain, Project ID, Storage Bucket y App ID.
-    7.  Pide las credenciales de Firebase de la consola central (Developer Cockpit).
+    7.  Pide las credenciales de Firebase del Dashboard Central.
     8.  Pregunta si desea desplegar reglas/índices en este paso y si desea sembrar datos iniciales (`seed_brand.js`).
     9.  Llama al generator e imprime en pantalla el token generado y el checklist final.
 *   **Lógica de Funciones:**
@@ -215,7 +215,7 @@
         *   *Retorna:* Objeto con metadata del proyecto (`clientId`, `uniqueToken`, `targetDir`, `themeName`, `primaryColor`, `prompt`).
 *   **Conexiones:**
     *   Llama y ejecuta comandos del sistema mediante `execSync`.
-    *   Realiza peticiones REST directas HTTPS a la API de Firestore de la consola central para guardar el cliente y los tokens de telemetría.
+    *   Realiza peticiones REST directas HTTPS a la API de Firestore del Dashboard Central para guardar el cliente y los tokens de telemetría.
 
 ### 2.6 [sync_templates.js](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js)
 *   **Propósito:** Sincroniza y actualiza los directorios de plantillas base (`Plantillas Core`) a partir de sus proyectos de desarrollo de referencia. Realiza copias físicas selectivas, higieniza (sanitiza) datos sensibles de clientes, y valida el build resultante de la plantilla.
@@ -505,17 +505,21 @@
         *   `Módulos`: Muestra solo módulos de negocio completos.
     3.  **Filtros de Sandbox:** Botones para alternar el filtro `sandboxFilter` entre:
         *   `Todos`: Muestra todos los elementos.
-        *   `Sandbox`: Muestra solo componentes con playground interactivo simulable.
-        *   `Solo Docs`: Muestra solo componentes sin playground interactivo.
+        *   `Sandbox`: Muestra solo componentes con Sandbox de Componentes interactivo simulable.
+        *   `Solo Docs`: Muestra solo componentes sin Sandbox de Componentes interactivo.
+        *   `Ambos`: Muestra todos los componentes de la biblioteca.
+
     4.  **Menú lateral (Árbol de Componentes):**
         *   Hacer clic en una categoría colapsa/expande su lista de componentes mediante transiciones animadas de `framer-motion`.
         *   Hacer clic en un componente lo selecciona (`setSelectedComponent`), lo que a su vez dispara una petición GET para traer su documentación y código Markdown.
-    5.  **Extractor de Componentes:**
+    5.  **Buscador Integrado:** Caja de texto reactiva que filtra en caliente la lista de componentes indexando nombre, nombre técnico, descripción y tags en minúsculas.
+    6.  **Nube de Tags:** Fila scrollable horizontal de tags funcionales que permite filtrar la lista por dominios y verticales de negocio.
+    7.  **Extractor de Componentes:**
         *   El botón `Extraer Componente` muestra u oculta el formulario de extracción.
         *   El botón `Extraer a Biblioteca` valida y envía los datos del formulario (Ruta origen, Nombre, Categoría y Descripción) en un request POST hacia el backend API `/api/library/extract`.
-    6.  **Sincronizar:** El botón `Sincronizar` vuelve a interrogar a la API `/api/library` para reconstruir la lista local y limpia estados de carga.
-    7.  **Pestañas de Detalle:** Alterna entre `Documentación` (renderiza el Markdown parseado) y `Sandbox` (inicializa el playground interactivo cargando el componente `ComponentSandbox`).
-    8.  **Botón Copiar todo el código:** Copia al portapapeles todos los bloques de código JavaScript/React que se encuentren dentro de la ficha de documentación Markdown.
+    8.  **Sincronizar:** El botón `Sincronizar` vuelve a interrogar a la API `/api/library` para reconstruir la lista local y limpia estados de carga.
+    9.  **Pestañas de Detalle:** Alterna entre `Documentación` (renderiza el Markdown parseado) y `Sandbox` (inicializa el Sandbox de Componentes interactivo cargando el componente `ComponentSandbox`).
+    10. **Botón Copiar todo el código:** Copia al portapapeles todos los bloques de código JavaScript/React que se encuentren dentro de la ficha de documentación Markdown.
 *   **Lógica de Funciones:**
     1.  `HighlightText`:
         *   *Parámetros:* `text` (string - texto original), `term` (string - término a buscar).
@@ -557,39 +561,27 @@
         *   `POST http://localhost:3001/api/library/extract`
 
 ### 3.2 [ComponentSandbox.jsx](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx)
-*   **Propósito:** Contenedor de simulación en vivo (Sandbox/Playground) para probar componentes interactivos del Ecosistema de forma aislada. Carga bajo demanda (`React.lazy`) el playground correspondiente al componente seleccionado y expone un panel de controles de parámetros si están habilitados.
-*   **Flujos de Usuario y Acciones (UI):**
-    1.  **Cargador Dinámico:** Al abrirse, detecta el nombre del componente e intenta mapearlo a un playground activo de su lista (`SANDBOXES`). Si existe, carga y renderiza de manera asíncrona la vista interactiva con un spinner de carga (`LoaderSpinner`).
-    2.  **Panel de Controles (ControlPanel):** Si el playground activo expone controles configurables:
-        *   `Toggle`: Permite prender o apagar switches visuales que mutan estados booleanos.
-        *   `Select`: Abre menús desplegables para seleccionar valores de arrays de opciones.
-        *   `Text` / `Number`: Permite escribir textos o ingresar valores numéricos en campos de entrada en tiempo real.
-    3.  **Vista No Aplicable / No Configurada:** Si el componente es puro (ej. hooks o servicios Firestore sin interfaz visual), muestra un panel informativo central indicando el tipo de recurso (Servicio, Hook, Vista Completa, etc.) con una recomendación de cómo integrarlo (importar hook, registrar ruta, instalar librerías externas).
-    4.  **Lista de Playgrounds:** Muestra al final de la vista de error una lista en cuadrícula con los 53 playgrounds interactivos disponibles en el Ecosistema para que el usuario pueda identificarlos rápidamente.
-*   **Lógica de Funciones:**
-    1.  `LoaderSpinner`:
-        *   *Parámetros:* Ninguno.
-        *   *Qué hace:* Componente atómico que dibuja un loader animado de carga para los playgrounds que son cargados con `React.lazy`.
-        *   *Retorna:* Elemento JSX.
-    2.  `ControlPanel`:
-        *   *Parámetros:* `controls` (array de objetos control definidos por cada playground).
-        *   *Qué hace:* Itera sobre los controles y renderiza condicionalmente botones toggle, menús customizados (`CustomSelect`) o inputs numéricos/texto según el tipo (`toggle`, `select`, `text`, `number`).
-        *   *Retorna:* Formulario JSX de controles.
-    3.  `SandboxLayout`:
-        *   *Parámetros:* `title` (string - título), `description` (string - descripción), `controls` (array de controles), `children` (JSX a renderizar).
-        *   *Qué hace:* Maquetación base para playgrounds que agrupa el panel de descripción, el lienzo físico de pruebas y el panel de controles.
-        *   *Retorna:* Layout JSX.
-    4.  `getSandboxKey`:
-        *   *Parámetros:* `name` (string - nombre display), `technicalName` (string - nombre técnico).
-        *   *Qué hace:* Recibe el nombre y nombre técnico de un componente, los normaliza en minúsculas y busca coincidencias exactas en la matriz `COMPONENT_SANDBOX_MAP`. Si no encuentra, realiza búsquedas parciales por subcadenas (`currency`, `modal`, `toast`, `skeleton`, etc.) para deducir de forma reactiva el playground.
-        *   *Retorna:* String con la clave del sandbox o `null`.
-    5.  `ComponentSandbox` (Componente Principal):
+*   **Propósito:** Contenedor de simulación en vivo (Sandbox de Componentes) para probar componentes interactivos del Ecosistema de forma aislada. Carga bajo demanda (`React.lazy`) el sandbox correspondiente al componente seleccionado y expone un panel de controles de parámetros si están habilitados.
+*   **Flujo de Trabajo:**
+    1.  **Cargador Dinámico:** Al abrirse, detecta el nombre del componente e intenta mapearlo a un sandbox activo de su lista (`SANDBOXES`). Si existe, carga y renderiza de manera asíncrona la vista interactiva con un spinner de carga (`LoaderSpinner`).
+    2.  **Panel de Controles (ControlPanel):** Si el sandbox activo expone controles configurables:
+        *   Sincroniza y almacena sus valores en un estado de tipo clave-valor (`values`).
+        *   Dibuja inputs adaptados según el tipo de control (toggle, select, text, number).
+        *   Inyecta dinámicamente los valores en las propiedades del componente inyectado.
+    3.  **Manejador de Excepciones (Error Boundary):** Captura cualquier error o excepción disparada durante la renderización del componente inyectado. En lugar de crashear la consola, detiene el componente, limpia los timers y listeners activos y renderiza una pantalla informativa con el Stack Trace del error.
+    4.  **Lista de Sandbox de Componentes:** Muestra al final de la vista de error una lista en cuadrícula con los 53 Sandbox de Componentes interactivos disponibles en el Ecosistema para que el usuario pueda identificarlos rápidamente.
+*   **Componentes Clave Declarados:**
+    *   `LoaderSpinner` (L12-25):
+        *   *Qué hace:* Componente atómico que dibuja un loader animado de carga para los sandboxes que son cargados con `React.lazy`.
+    *   `ControlPanel` (L30-80):
+        *   *Qué hace:* Dibuja el formulario de configuración dinámico a la izquierda de la pantalla.
+        *   *Parámetros:* `controls` (array de objetos control definidos por cada sandbox).
+    *   `SandboxLayout` (L85-130):
+        *   *Qué hace:* Maquetación base para sandboxes que agrupa el panel de descripción, el lienzo físico de pruebas y el panel de controles.
+    *   `useSandboxResolver` (L140-190):
+        *   *Qué hace:* Recibe el nombre y nombre técnico de un componente, los normaliza en minúsculas y busca coincidencias exactas en la matriz `COMPONENT_SANDBOX_MAP`. Si no encuentra, realiza búsquedas parciales por subcadenas (`currency`, `modal`, `toast`, `skeleton`, etc.) para deducir de forma reactiva el sandbox.
         *   *Parámetros:* `componentName` (string), `technicalName` (string).
-        *   *Qué hace:* Resuelve la clave de sandbox llamando a `getSandboxKey`. Si existe, renderiza el componente envuelto en un tag `<React.Suspense>` y su fallback. Si no existe, consulta los metadatos de `COMPONENT_META` para dibujar la tarjeta informativa de no interactivo.
-        *   *Retorna:* Playground interactivo o tarjeta informativa en JSX.
-*   **Conexiones:**
-    *   Importa dinámicamente (`React.lazy`) subcomponentes desde la carpeta local `/src/components/admin/sandboxes/*`.
-    *   Consume la utilidad global del DOM `navigator.clipboard`.
+        *   *Retorna:* Sandbox de Componentes interactivo o tarjeta informativa en JSX.
 
 ### 3.3 [CoreCard.jsx](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx)
 *   **Propósito:** Componente de interfaz de usuario que representa de forma visual e interactiva una plantilla Core en el dashboard. Ofrece control completo de su ciclo de vida (activación, desactivación, scaffold, borrado total), además de gestionar su compilación/despliegue SSE, variables `.env.local` y auditoría física/PWA.
@@ -797,7 +789,7 @@
     3.  `ChangeBadge`:
         *   *Parámetros:* `hasChanges` (booleano), `count` (entero).
         *   *Qué hace:* Dibuja un tag de estado limpio (verde) o con la cuenta de cambios pendientes (amarillo pulsante).
-        *   *Retorna:* Fragmento JSX.
+        *   *Retorna:* Componente JSX.
     4.  `TargetItem`:
         *   *Parámetros:* `target` (objeto), `isSelected` (booleano), `onClick` (función callback), `categoryLabel` (string).
         *   *Qué hace:* Dibuja el card interactivo en la lista de repositorios con su nombre, ruta resumida, rama y cantidad de cambios.
