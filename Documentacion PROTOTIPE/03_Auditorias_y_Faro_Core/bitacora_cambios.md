@@ -20,6 +20,9 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
     - Se eliminó la clase de borde púrpura rígido (`border-2 border-indigo-500/20`) del overlay de zoom para evitar el efecto de "doble borde" discordante con el contenedor externo.
     - Se suavizó el contorno del contenedor principal reemplazando el borde genérico `border-app` por una línea fina y elegante compatible con temas oscuros y claros: `border-neutral-200/80 dark:border-neutral-800/80`.
     - Se alineó el radio de esquina (`border-radius`) del visor de zoom a `rounded-3xl` en `ProductPublicDetail.jsx` para coincidir exactamente con el contenedor del carrusel, erradicando filtraciones visuales en las esquinas.
+  * **Efectos Premium de Reflexión y Elevación (Glass Parallax & Shadow Elevation):**
+    - Se añadió un gradiente diagonal de luz (`linear-gradient(135deg, ...)`) con mezcla `overlay` (`z-16`) que se desplaza en paralaje en base a las coordenadas del cursor/touch, simulando un cristal protector físico sobre el producto.
+    - Se implementó una elevación de sombra Spring (`hover:shadow-[0_20px_50px_...]`) con transición acelerada por hardware de 500ms en el contenedor externo, transmitiendo volumen tridimensional al hacer zoom.
   * **Leyenda Adaptativa:** Añadido un badge flotante con z-index seguro indicando *"Toca o pasa el cursor para ampliar detalles"* para guiar al usuario móvil.
 - **Archivos modificados:**
   * [Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
