@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-301: Habilitación Interactiva de Sandbox de Programador de Rutas (Delivery)
+- **Fecha:** 2026-07-07
+- **Tipo:** Refactorización / Playground
+- **Descripción:** Se actualizó `ProgramadorRutasDomicilioSandbox.jsx` para alinear su arquitectura con el estándar de sandboxes de PROTOTIPE. Se movieron los controles del formulario al panel lateral izquierdo (distancia en km, repartidor asignado, dirección e inicio de ruta) y se transformó la visualización derecha en un cockpit de despacho con un stepper de progreso (con z-index y máscara corregidos) y un radar de ruta animado en tiempo real.
+- **Archivo modificado:** `Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ProgramadorRutasDomicilioSandbox.jsx`
+
+
 ## CORE-300: Habilitación Interactiva de Sandbox de Selector de Mapa (Leaflet)
 - **Fecha:** 2026-07-07
 - **Tipo:** Refactorización / Playground

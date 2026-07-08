@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-301: Habilitación Interactiva de Sandbox de Programador de Rutas (Delivery) (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se actualizó `ProgramadorRutasDomicilioSandbox.jsx` moviendo los controles interactivos al panel lateral y renderizando a la derecha un stepper de progreso lineal y radar en tránsito para deliveryService.
+  - Archivos: [Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ProgramadorRutasDomicilioSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ProgramadorRutasDomicilioSandbox.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-300: Habilitación Interactiva de Sandbox de Selector de Mapa (Leaflet) (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
