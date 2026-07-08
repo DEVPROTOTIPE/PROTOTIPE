@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-308: Potenciación del Diagrama de Flujo de Arquitectura y Mermaid
+- **Fecha:** 2026-07-07
+- **Tipo:** Documentación / Diseño Visual
+- **Estatus:** Completado.
+- **Descripción:** Se expandió la documentación de arquitectura de diagrama_flujo_ecosistema.md. Se agregaron 6 diagramas de flujo interactivos en formato Mermaid para documentar en detalle el aprovisionamiento de clientes, la sincronización downstream, la inyección dinámica de componentes, la transmisión dual-channel de telemetría, preventa inteligente con briefing e IA y scripts preventivos de Git, alineando la nomenclatura técnica al glosario unificado.
+- **Archivo modificado:** `diagrama_flujo_ecosistema.md`
+
 ## CORE-307: Unificación Léxica y Estandarización de Glosario en Manuales
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación / Consistencia

@@ -1,5 +1,12 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-308: Potenciación del Diagrama de Flujo de Arquitectura y Mermaid (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se actualiza y expande diagrama_flujo_ecosistema.md inyectando 4 diagramas Mermaid interactivos para documentar los nuevos flujos de inyección, telemetría dual-channel, preventa y resiliencia git.
+  - Archivos:
+    - [diagrama_flujo_ecosistema.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/diagrama_flujo_ecosistema.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-307: Unificación Léxica y Estandarización de Glosario en Manuales (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
