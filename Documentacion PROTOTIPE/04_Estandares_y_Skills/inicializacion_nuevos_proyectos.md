@@ -265,6 +265,10 @@ Es una instancia clonada del Core para un cliente real. **SÍ se conecta a la ba
 > 4. Actualizar `firebase-messaging-sw.js` con las credenciales del cliente
 > 5. Actualizar `.firebaserc` con el project ID del cliente
 
+> [!TIP]
+> **Storage Preflight Check (DEC-003):**
+> Al iniciar el aprovisionamiento de un cliente real mediante `Prototipe-CLI` (o el worker asíncrono del Dashboard), el sistema realiza un **Preflight Check** automático consultando REST GET/HEAD a `https://storage.googleapis.com/storage/v1/b/${bucketName}`. Si el bucket no ha sido activado o no existe en la consola de Firebase del cliente, el scaffolding se aborta con error 404 para proteger la integridad del aprovisionamiento y evitar imágenes rotas en la compilación final.
+
 ```env
 # ─── Firebase del cliente real ─────────────────────────────────
 VITE_FIREBASE_API_KEY=[credencial de ventas-moni-app]

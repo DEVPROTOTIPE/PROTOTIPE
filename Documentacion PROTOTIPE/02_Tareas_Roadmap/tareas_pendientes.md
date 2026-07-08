@@ -1,5 +1,15 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea DOC-001: Documentación de Storage Preflight Check (DEC-003) (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Agregar la sección de explicación técnica del Storage Preflight Check automático (DEC-003) en el manual de inicialización de nuevos proyectos.
+  - Archivos:
+    - [inicializacion_nuevos_proyectos.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/inicializacion_nuevos_proyectos.md) [MODIFY]
+    - [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+    - [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[x] ~~Tarea CLI-020: Implementación de Storage Preflight Check (DEC-003) (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
