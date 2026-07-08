@@ -4,13 +4,18 @@
   - Estatus: Completado.
   - Fecha: 2026-07-08
   - Descripción: Desarrollar la Autenticación OAuth2 unificada en el Dashboard para eliminar los logins por consola y transmitir credenciales al Bridge.
+  - Refinamiento / Ajuste (2026-07-08):
+    * Integrado el token de acceso dinámico OAuth2 (`--token`) en la fase de preflight check de `generator.js` (`checkEnvironment`), permitiendo aprovisionamientos no interactivos.
+    * Saneada la biblioteca eliminando referencias huérfanas al componente purgado `Formulario_Producto_IA` en `inventario_maestro.md`.
   - Archivos:
     - [generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
     - [server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
     - [App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
     - [firebase.js](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/firebase.js) [MODIFY]
+    - [inventario_maestro.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/inventario_maestro.md) [MODIFY]
     - [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
     - [bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+    - [ideas_y_backlog_futuro.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/ideas_y_backlog_futuro.md) [MODIFY]
 
 * **[x] ~~Tarea CLI-023: Inyección en Caliente de Componentes (2026-07-07)~~**
   - Estatus: Completado.

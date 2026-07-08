@@ -12,9 +12,11 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 ## CLI-025: Autenticación OAuth2 Unificada en el Dashboard (Google/GitHub)
 - **Fecha:** 2026-07-08
 - **Tipo:** Seguridad / Autenticación / Código
-- **Estatus:** Completado.
 - **Descripción:** Desarrollar la Autenticación OAuth2 unificada en el Dashboard para eliminar los logins por consola y transmitir credenciales al Bridge.
-- **Archivos modificados:** `generator.js`, `server.js`, `App.jsx`, `firebase.js`, `tareas_pendientes.md`, `bitacora_cambios.md`
+- **Refinamiento de Auditoría:**
+  * Integrada la bandera `--token` dinámica en `checkEnvironment` (`generator.js`) para evitar que el preflight check local bloquee el despliegue si no hay sesión iniciada en la consola física.
+  * Purgado el componente obsoleto `Formulario_Producto_IA` de `inventario_maestro.md` tras detectar su remoción histórica en la auditoría.
+- **Archivos modificados:** `generator.js`, `server.js`, `App.jsx`, `firebase.js`, `inventario_maestro.md`, `tareas_pendientes.md`, `bitacora_cambios.md`, `ideas_y_backlog_futuro.md`
 
 ## CLI-023: Inyección en Caliente de Componentes
 - **Fecha:** 2026-07-07

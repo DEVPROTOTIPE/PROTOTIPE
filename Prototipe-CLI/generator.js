@@ -433,18 +433,22 @@ async function checkEnvironment(answers) {
     throw new Error('Firebase CLI no está instalado en el sistema global. Por favor instálalo (npm install -g firebase-tools).');
   }
 
+  // Obtener el token de autenticación (sea el dinámico OAuth2 o el local de consola)
+  const token = getDeveloperAccessToken(answers);
+  const tokenFlag = token ? ` --token "${token}"` : '';
+
   try {
-    execSync('firebase projects:list', { stdio: 'ignore' });
+    execSync('firebase projects:list' + tokenFlag, { stdio: 'ignore' });
   } catch (err) {
     spinner.fail();
-    throw new Error('Firebase CLI no tiene sesión iniciada. Ejecuta: firebase login');
+    throw new Error(token ? 'El token OAuth2 del desarrollador no es válido o ha expirado.' : 'Firebase CLI no tiene sesión iniciada. Ejecuta: firebase login');
   }
 
   // 1.05 Validar que el proyecto ID exista y el usuario tenga acceso a él en Firebase CLI
   if (answers.firebaseProjectId && !answers.autoProvisionFirebase) {
     try {
       const targetProj = String(answers.firebaseProjectId || '').trim();
-      const projListRaw = execSync('firebase projects:list --json', { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
+      const projListRaw = execSync('firebase projects:list --json' + tokenFlag, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
       const projData = JSON.parse(projListRaw);
       const projList = projData.result || [];
       const hasAccess = projList.some(p => String(p.projectId || '').trim() === targetProj);
