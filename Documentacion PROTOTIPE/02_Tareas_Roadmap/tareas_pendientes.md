@@ -1,5 +1,13 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-313: Creación de Manual de Onboarding para Desarrolladores Junior (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se redacta e integra el manual_onboarding_desarrollador_junior.md en la carpeta de manuales para formalizar la inducción técnica rápida al ecosistema y reglas de AGENTS.md.
+  - Archivos:
+    - [manual_onboarding_desarrollador_junior.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_onboarding_desarrollador_junior.md) [NEW]
+    - [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[ ] Tarea CORE-312: Integración de Portal B2C - Consolidación de Abonos de Créditos en Firestore (2026-07-07)**
   - Estatus: Pendiente.
   - Fecha: 2026-07-07

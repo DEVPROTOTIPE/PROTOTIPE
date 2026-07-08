@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-313: Creación de Manual de Onboarding para Desarrolladores Junior
+- **Fecha:** 2026-07-07
+- **Tipo:** Documentación / Onboarding
+- **Estatus:** Completado.
+- **Descripción:** Integración del manual_onboarding_desarrollador_junior.md bajo 07_Manuales_Desarrollo/ para formalizar y automatizar el onboarding de nuevos miembros en el ecosistema, detallando la estructuración de componentes, pautas de diseño responsivo inquebrantables de AGENTS.md y levantar localmente la API Bridge y Dashboard.
+- **Archivos modificados:** `manual_onboarding_desarrollador_junior.md`, `mapa_documentacion_ia.md`
+
 ## CORE-311: Saneamiento Documental de Contradicciones (NotebookLM Alignment)
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación / Consistencia
