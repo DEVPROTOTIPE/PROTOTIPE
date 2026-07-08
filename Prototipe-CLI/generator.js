@@ -2292,7 +2292,7 @@ console.log('✅ Mapa de arquitectura para la IA generado.');
   // 7.0. Aprovisionar Cuenta de Servicio e Inyectar Componentes recomendados en caliente
   const projectId = answers.projectId || answers.config?.projectId;
   if (projectId) {
-    await createServiceAccountIAM(projectId, targetDir);
+    await createServiceAccountIAM(projectId, targetDir, answers);
   }
   await injectSelectedComponents(answers, targetDir);
 
@@ -3298,7 +3298,16 @@ async function generatePrototypeLock(answers, targetDir, clientId) {
 /**
  * Obtener token del Firebase CLI para llamadas REST
  */
-function getDeveloperAccessToken() {
+/**
+ * Obtener token del Firebase CLI para llamadas REST
+ */
+function getDeveloperAccessToken(answers = {}) {
+  // 1. Priorizar el token OAuth2 enviado desde el Dashboard web
+  if (answers.developerGoogleToken) {
+    return answers.developerGoogleToken;
+  }
+
+  // 2. Fallback clásico de consola local
   const possiblePaths = [
     path.join(os.homedir(), '.config', 'configstore', 'firebase-tools.json'),
     path.join(process.env.APPDATA || '', 'configstore', 'firebase-tools.json')
@@ -3319,9 +3328,9 @@ function getDeveloperAccessToken() {
 /**
  * Automatiza la creación de una cuenta de servicio vía API IAM de GCP y guarda su JSON en /scratch
  */
-async function createServiceAccountIAM(projectId, targetDir) {
+async function createServiceAccountIAM(projectId, targetDir, answers = {}) {
   const stepSA = ora('Aprovisionar cuenta de servicio de Google Cloud vía API IAM...').start();
-  const token = getDeveloperAccessToken();
+  const token = getDeveloperAccessToken(answers);
   
   if (!token) {
     stepSA.warn('⚠️ No se pudo obtener el token de sesión de Firebase CLI. Omitiendo creación automática de cuenta de servicio.');

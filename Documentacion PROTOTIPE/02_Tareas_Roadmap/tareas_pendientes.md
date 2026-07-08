@@ -1,5 +1,17 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[/] Tarea CLI-025: Autenticación OAuth2 Unificada en el Dashboard (Google/GitHub) (2026-07-08)**
+  - Estatus: En progreso.
+  - Fecha: 2026-07-08
+  - Descripción: Desarrollar la Autenticación OAuth2 unificada en el Dashboard para eliminar los logins por consola y transmitir credenciales al Bridge.
+  - Archivos:
+    - [generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [firebase.js](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/firebase.js) [MODIFY]
+    - [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
 * **[x] ~~Tarea CLI-023: Inyección en Caliente de Componentes (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

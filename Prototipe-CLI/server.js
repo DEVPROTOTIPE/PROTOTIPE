@@ -764,6 +764,13 @@ async function executeCreationTaskInBackground(taskId, answers) {
 app.post('/api/create-project', async (req, res) => {
   projectDirCache.clear();
   const answers = req.body;
+  
+  // Capturar token OAuth enviado desde la sesión web del dashboard
+  const devToken = req.headers['x-developer-google-token'];
+  if (devToken) {
+    answers.developerGoogleToken = devToken;
+  }
+
   if (answers.projectName) {
     answers.projectName = answers.projectName.trim().replace(/[^a-zA-Z0-9\s\-_]/g, '');
   }
