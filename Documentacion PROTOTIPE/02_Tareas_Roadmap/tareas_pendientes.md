@@ -1,5 +1,13 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-329: Lupa Zoom en Detalle de Producto y QR Público (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Integrada la funcionalidad de lupa interactiva de la biblioteca directamente en la vista de detalle de producto (`ProductDetailPage.jsx`) y en la vista de acceso público por código QR (`ProductPublicDetail.jsx`). Admite interacción hover en escritorio y movimientos táctiles en móvil, respetando el swipe de imágenes.
+  - Archivos:
+    - [Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+    - [Plantillas Core/App Ventas/src/pages/client/ProductPublicDetail.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-328: Cuatro Blindajes de Calidad y Robustez Operativa (2026-07-08)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-08

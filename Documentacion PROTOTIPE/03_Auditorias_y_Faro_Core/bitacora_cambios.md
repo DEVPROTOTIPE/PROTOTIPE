@@ -9,6 +9,18 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-329: Lupa Zoom en Detalle de Producto y QR Público
+- **Fecha:** 2026-07-08
+- **Tipo:** UI/UX / Feature Premium / Mobile Optimization / Gestures
+- **Descripción:** 
+  * **Integración de Zoom Lente Magnificador:** Se inyectó la lógica de la biblioteca `GaleriaZoomHover` directamente en las dos principales vistas de producto: la vista interna del cliente (`ProductDetailPage.jsx`) y la vista pública QR (`ProductPublicDetail.jsx`).
+  * **Interacción Dual Hover & Touch:** El lente calcula las coordenadas porcentuales del evento de movimiento (con `containerRef.current.getBoundingClientRect()`) y actualiza dinámicamente un overlay (`z-15`) con la imagen de fondo de alta definición posicionada en el punto exacto. Soporta hover en computadores y `onTouchMove` en dispositivos móviles sin bloquear el swipe/drag de Framer Motion.
+  * **Leyenda Adaptativa:** Añadido un badge flotante con z-index seguro indicando *"Toca o pasa el cursor para ampliar detalles"* para guiar al usuario móvil.
+- **Archivos modificados:**
+  * [Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+  * [Plantillas Core/App Ventas/src/pages/client/ProductPublicDetail.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+  * [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
 ## CORE-328: Cuatro Blindajes de Calidad y Robustez Operativa
 - **Fecha:** 2026-07-08
 - **Tipo:** Calidad Técnica / Robustez / Seguridad / WCAG Constrast / Zod validation
