@@ -5760,12 +5760,24 @@ app.post('/api/project/token/register', async (req, res) => {
   }
 
   try {
-    const accessToken = await getFirebaseAccessToken();
+    let accessToken = await getFirebaseAccessToken();
     if (!accessToken) {
       return res.status(401).json({ error: 'Sesión de Firebase CLI no activa. Corre "firebase login" en el servidor.' });
     }
 
     const centralProjectId = 'prototipe-ecosistema-control';
+
+    // Helper para realizar peticiones tolerantes a expiración de tokens (401)
+    async function fetchWithRetry(url, options) {
+      let response = await fetch(url, options);
+      if (response.status === 401) {
+        console.log('[Token Register] Token de Firebase CLI devuelto 401 (No Autorizado). Forzando refresco de sesión...');
+        const freshToken = await getFirebaseAccessToken(true);
+        options.headers['Authorization'] = `Bearer ${freshToken}`;
+        response = await fetch(url, options);
+      }
+      return response;
+    }
 
     // Verificar si ya existe un token activo para este clientId (evitar duplicados)
     if (!forceRegenerate) {
@@ -5784,7 +5796,7 @@ app.post('/api/project/token/register', async (req, res) => {
           }
         }
       };
-      const queryRes = await fetch(queryUrl, {
+      const queryRes = await fetchWithRetry(queryUrl, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(queryBody)
@@ -5812,7 +5824,7 @@ app.post('/api/project/token/register', async (req, res) => {
       }
     };
 
-    const writeRes = await fetch(docUrl, {
+    const writeRes = await fetchWithRetry(docUrl, {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(docPayload)
@@ -9725,7 +9737,7 @@ app.get('/api/instancias/sync-and-deploy-stream', async (req, res) => {
 import os from 'os';
 
 // Helper para obtener el Access Token activo de Firebase CLI
-async function getFirebaseAccessToken() {
+async function getFirebaseAccessToken(forceRefresh = false) {
   const configPath = path.join(os.homedir(), '.config', 'configstore', 'firebase-tools.json');
   if (!await fs.pathExists(configPath)) {
     throw new Error('No se encontró la sesión activa de Firebase CLI. Ejecuta "firebase login".');
@@ -9736,8 +9748,8 @@ async function getFirebaseAccessToken() {
     throw new Error('No hay tokens guardados en Firebase CLI. Ejecuta "firebase login".');
   }
 
-  // Si el access_token no ha expirado, usarlo directamente
-  if (tokens.access_token && tokens.expires_at && tokens.expires_at > Date.now()) {
+  // Si el access_token no ha expirado y no se solicita refresco forzado, usarlo directamente
+  if (!forceRefresh && tokens.access_token && tokens.expires_at && tokens.expires_at > Date.now()) {
     return tokens.access_token;
   }
 
