@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-300: Habilitación Interactiva de Sandbox de Selector de Mapa (Leaflet)
+- **Fecha:** 2026-07-07
+- **Tipo:** Refactorización / Playground
+- **Descripción:** Se transformó el sandbox estático heredado `LeafletMapPickerSandbox.jsx` en una simulación geográfica premium e interactiva. Se desarrollaron controles dinámicos de latitud, longitud, nivel de zoom y marcadores temáticos, integrando una cuadrícula cartográfica vectorial manipulable mediante clics con geocodificación simulada que actualiza las coordenadas geográficas en tiempo real.
+- **Archivo modificado:** `Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LeafletMapPickerSandbox.jsx`
+
+
 ## CORE-299: Habilitación Interactiva de Sandbox de Generación PDF
 - **Fecha:** 2026-07-07
 - **Tipo:** Refactorización / Playground
