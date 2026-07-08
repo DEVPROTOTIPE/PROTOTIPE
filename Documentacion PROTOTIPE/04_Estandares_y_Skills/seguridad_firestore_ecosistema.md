@@ -69,9 +69,11 @@ service cloud.firestore {
 
     // ─── HELPERS GLOBALES DE ACCESO ──────────────────────────────────
     
-    // Verifica si la sesión pertenece al Administrador del sistema
+    // Verifica si la sesión pertenece al Administrador del sistema consultando Firestore
     function isAdmin() {
-      return request.auth != null;
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // Verifica si el celular proveído coincide con la sesión del usuario
@@ -80,6 +82,13 @@ service cloud.firestore {
     }
 
     // ─── REGLAS POR COLECCIÓN ────────────────────────────────────────
+
+    // 0. Aislamiento Multitenant de la Telemetría (Clientes Control)
+    // Evita lecturas abiertas no deseadas. Filtro estricto por matching de clientId y claims.
+    match /clientes_control/{clientId} {
+      allow read: if request.auth != null && (clientId == request.auth.token.clientId || isAdmin());
+      allow write: if isAdmin();
+    }
 
     // 1. Configuración Global de la Aplicación
     match /config/{document} {
