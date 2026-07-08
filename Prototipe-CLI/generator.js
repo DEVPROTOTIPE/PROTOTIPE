@@ -3189,27 +3189,43 @@ async function registerInCentralConsole(answers, clientId, uniqueToken) {
       createdAt: new Date().toISOString()
     });
 
-    const payloadToken = formatREST({
-      active: true,
-      clientId,
-      createdAt: new Date().toISOString()
-    });
+    // Registrar el cliente en clientes_control (usa apiKey pública, solo actualiza campos permitidos)
+    const resultCliente = await fetchWithRetry(`${centralUrl}/clientes_control/${clientId}?key=${activeCentralApiKey}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payloadCliente)
+    }).then(() => ({ status: 'fulfilled' })).catch(e => ({ status: 'rejected', reason: e }));
 
-    // [BLINDAJE-REGISTRO] Promise.allSettled: cada registro falla de forma independiente.
-    // Con Promise.all, un fallo en 'clientes_control' cancelaba el registro del 'token' y viceversa,
-    // dejando la telemetría en estado inconsistente (cliente sin token o token sin cliente).
-    const [resultCliente, resultToken] = await Promise.allSettled([
-      fetchWithRetry(`${centralUrl}/clientes_control/${clientId}?key=${activeCentralApiKey}`, {
-        method: 'PATCH',
+    // Registrar el token de telemetría vía Bridge local (autenticado con OAuth2 del CLI)
+    // Esto garantiza que request.auth != null en las reglas de Firestore y evita el error de permisos.
+    let resultToken = { status: 'rejected', reason: new Error('Bridge no disponible') };
+    try {
+      const bridgeRes = await fetch('http://localhost:3001/api/project/token/register', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payloadCliente)
-      }),
-      fetchWithRetry(`${centralUrl}/tokens/${uniqueToken}?key=${activeCentralApiKey}`, {
+        body: JSON.stringify({ clientId, token: uniqueToken })
+      });
+      const bridgeData = await bridgeRes.json();
+      if (bridgeData.success) {
+        resultToken = { status: 'fulfilled' };
+      } else {
+        resultToken = { status: 'rejected', reason: new Error(bridgeData.error || 'Error desconocido del Bridge') };
+      }
+    } catch (bridgeErr) {
+      // Bridge no disponible: fallback a REST directo con apiKey (puede fallar por reglas de auth)
+      console.warn(pc.yellow('   → Bridge CLI no disponible. Intentando registro directo de token (puede requerir re-registro manual)...'));
+      const payloadToken = formatREST({
+        active: true,
+        clientId,
+        token: uniqueToken,
+        createdAt: new Date().toISOString()
+      });
+      resultToken = await fetchWithRetry(`${centralUrl}/tokens/${uniqueToken}?key=${activeCentralApiKey}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payloadToken)
-      })
-    ]);
+      }).then(() => ({ status: 'fulfilled' })).catch(e => ({ status: 'rejected', reason: e }));
+    }
 
     const clienteOk = resultCliente.status === 'fulfilled';
     const tokenOk   = resultToken.status   === 'fulfilled';
@@ -3219,7 +3235,8 @@ async function registerInCentralConsole(answers, clientId, uniqueToken) {
     } else {
       if (!clienteOk) console.warn(pc.yellow(`⚠️  Registro de instancia en clientes_control falló: ${resultCliente.reason?.message}`));
       if (!tokenOk)   console.warn(pc.yellow(`⚠️  Registro de token de telemetría falló: ${resultToken.reason?.message}`));
-      console.warn(pc.yellow('   → El proyecto fue creado, pero su registro en la Consola Central quedó incompleto. Registra manualmente o re-ejecuta el CLI.'));
+      console.warn(pc.yellow('   → El proyecto fue creado, pero su registro en la Consola Central quedó incompleto.'));
+      console.warn(pc.yellow(`   → Para re-registrar el token manualmente, ve al CRM del Dashboard y usa "Registrar Token" para: ${clientId}`));
     }
     } catch (err) {
       console.warn(pc.yellow(`⚠️  No se pudo realizar el auto-registro en la Consola Central: ${err.message}`));

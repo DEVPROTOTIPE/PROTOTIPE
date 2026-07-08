@@ -158,6 +158,38 @@
     - [cuestionario_certificacion_desarrollo_2026.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/cuestionario_certificacion_desarrollo_2026.md) [NEW]
     - [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
 
+* **[x] ~~Tarea CORE-319: Resiliencia ante Exceso de Cuotas y Modo Mantenimiento Global (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - DescripciÃ³n: Integrado el soporte para Modo Mantenimiento global bloqueante e interceptaciÃ³n de cuota de Firestore en caliente (`resource-exhausted`) para forzar la conmutaciÃ³n visual al modo de solo lectura local en el Scaffold de ventas y Core Seed.
+  - Archivos:
+    - [App.jsx (App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
+    - [appConfigService.js (App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/appConfigService.js) [MODIFY]
+    - [appConfigStore.js (App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY]
+    - [App.jsx (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/App.jsx) [MODIFY]
+    - [appConfigService.js (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/appConfigService.js) [MODIFY]
+    - [appConfigStore.js (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js) [MODIFY]
+    - [App.jsx (template-core-seed)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/App.jsx) [MODIFY]
+    - [appConfigService.js (template-core-seed)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/appConfigService.js) [MODIFY]
+    - [appConfigStore.js (template-core-seed)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js) [MODIFY]
+    - [generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [toggle_maintenance.js](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/toggle_maintenance.js) [NEW]
+    - [ClientCredits.jsx (App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCredits.jsx) [MODIFY] (Saneamiento de sintaxis)
+    - [ClientCredits.jsx (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/client/ClientCredits.jsx) [MODIFY] (Saneamiento de sintaxis)
+    - [DeveloperSettings.jsx (App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY] (Saneamiento de sintaxis)
+    - [DeveloperSettings.jsx (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY] (Saneamiento de sintaxis)
+    - [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+    - [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [ventas-moni-app/prototipe.lock.json](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/prototipe.lock.json) [MODIFY]
+    - [ventas-moni-app/src/App.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/App.jsx) [MODIFY]
+    - [ventas-moni-app/src/pages/admin/settings/sections/DeveloperSettings.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+    - [ventas-moni-app/src/pages/client/ClientCredits.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/client/ClientCredits.jsx) [MODIFY]
+    - [ventas-moni-app/src/services/appConfigService.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/appConfigService.js) [MODIFY]
+    - [ventas-moni-app/src/store/appConfigStore.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/store/appConfigStore.js) [MODIFY]
+
 * **[ ] Tarea CORE-312: IntegraciÃ³n de Portal B2C - ConsolidaciÃ³n de Abonos de CrÃ©ditos en Firestore (2026-07-07)**
   - Estatus: Pendiente.
   - Fecha: 2026-07-07
@@ -2858,28 +2890,4 @@
   - Descripcion: Correccion al error de parseo en menu_backup.ps1 al iniciarse. Los emojis de caja (ðŸ“¦) y lineas de separacion (â”€) guardados en UTF-8 sin BOM se interpretaban como caracteres ANSI rotos por el interprete de PowerShell 5.1 en Windows, rompiendo la sintaxis y arrojando errores inesperados. Se escribio un script automatizado para forzar el guardado en codificacion UTF-8 con BOM en todos los scripts de soporte de PowerShell (menu_backup.ps1, git_backup.ps1 y subproject_backup.ps1).
   - Archivos: [menu_backup.ps1](file:///d:/PROTOTIPE/menu_backup.ps1) [MODIFY], [git_backup.ps1](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY], [subproject_backup.ps1](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
 
-* **[x] ~~Tarea CORE-319: Resiliencia ante Exceso de Cuotas y Modo Mantenimiento Global (2026-07-08)~~**
-  - Estatus: Completado.
-  - Fecha: 2026-07-08
-  - DescripciÃ³n: Integrado el soporte para Modo Mantenimiento global bloqueante e interceptaciÃ³n de cuota de Firestore en caliente (`resource-exhausted`) para forzar la conmutaciÃ³n visual al modo de solo lectura local en el Scaffold de ventas y Core Seed.
-  - Archivos:
-    - [App.jsx (App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
-    - [appConfigService.js (App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/appConfigService.js) [MODIFY]
-    - [appConfigStore.js (App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY]
-    - [App.jsx (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/App.jsx) [MODIFY]
-    - [appConfigService.js (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/appConfigService.js) [MODIFY]
-    - [appConfigStore.js (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js) [MODIFY]
-    - [App.jsx (template-core-seed)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/App.jsx) [MODIFY]
-    - [appConfigService.js (template-core-seed)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/appConfigService.js) [MODIFY]
-    - [appConfigStore.js (template-core-seed)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js) [MODIFY]
-    - [generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
-    - [toggle_maintenance.js](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/toggle_maintenance.js) [NEW]
-    - [ClientCredits.jsx (App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCredits.jsx) [MODIFY] (Saneamiento de sintaxis)
-    - [ClientCredits.jsx (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/client/ClientCredits.jsx) [MODIFY] (Saneamiento de sintaxis)
-    - [DeveloperSettings.jsx (App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY] (Saneamiento de sintaxis)
-    - [DeveloperSettings.jsx (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY] (Saneamiento de sintaxis)
-    - [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
-    - [bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
-    - [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
-    - [server.js (CLI)](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY] (Endpoint REST /api/project/maintenance)
-    - [App.jsx (dev-dashboard)](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY] (Switch CRM modal)
+

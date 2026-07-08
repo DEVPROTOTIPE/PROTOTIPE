@@ -5751,6 +5751,106 @@ app.post('/api/project/maintenance', async (req, res) => {
   }
 });
 
+// Endpoint para registrar o regenerar el token de telemetría de un cliente en Firestore Central
+// Resuelve el error: "Missing or insufficient permissions" al procesar la cola de telemetría
+app.post('/api/project/token/register', async (req, res) => {
+  const { clientId, token: customToken, forceRegenerate } = req.body;
+  if (!clientId) {
+    return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+  }
+
+  try {
+    const accessToken = await getFirebaseAccessToken();
+    if (!accessToken) {
+      return res.status(401).json({ error: 'Sesión de Firebase CLI no activa. Corre "firebase login" en el servidor.' });
+    }
+
+    const centralProjectId = 'prototipe-ecosistema-control';
+
+    // Verificar si ya existe un token activo para este clientId (evitar duplicados)
+    if (!forceRegenerate) {
+      const queryUrl = `https://firestore.googleapis.com/v1/projects/${centralProjectId}/databases/(default)/documents:runQuery`;
+      const queryBody = {
+        structuredQuery: {
+          from: [{ collectionId: 'tokens' }],
+          where: {
+            compositeFilter: {
+              op: 'AND',
+              filters: [
+                { fieldFilter: { field: { fieldPath: 'clientId' }, op: 'EQUAL', value: { stringValue: clientId } } },
+                { fieldFilter: { field: { fieldPath: 'active' }, op: 'EQUAL', value: { booleanValue: true } } }
+              ]
+            }
+          }
+        }
+      };
+      const queryRes = await fetch(queryUrl, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(queryBody)
+      });
+      const queryData = await queryRes.json();
+      const existing = Array.isArray(queryData) ? queryData.filter(d => d.document) : [];
+      if (existing.length > 0) {
+        const existingToken = existing[0].document.fields?.token?.stringValue;
+        return res.json({ success: true, clientId, token: existingToken, message: 'Token activo ya existente en Firestore Central. No se requiere acción.' });
+      }
+    }
+
+    // Generar o usar token provisto
+    const telemetryToken = customToken || `${clientId}-token-${Date.now()}`;
+    const docId = telemetryToken; // Usar el token como ID del documento para lookups O(1)
+
+    const docUrl = `https://firestore.googleapis.com/v1/projects/${centralProjectId}/databases/(default)/documents/tokens/${docId}`;
+    const docPayload = {
+      fields: {
+        clientId: { stringValue: clientId },
+        token: { stringValue: telemetryToken },
+        active: { booleanValue: true },
+        createdAt: { stringValue: new Date().toISOString() },
+        description: { stringValue: `Token de telemetría auto-registrado desde Bridge CLI para ${clientId}` }
+      }
+    };
+
+    const writeRes = await fetch(docUrl, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(docPayload)
+    });
+
+    if (!writeRes.ok) {
+      const errData = await writeRes.json();
+      return res.status(writeRes.status).json({ error: errData.error?.message || 'Fallo al registrar token en Firestore Central.' });
+    }
+
+    console.log(`[Token Register] Token registrado en Firestore Central para: ${clientId}`);
+
+    // Sincronizar también en el .env.local del proyecto si existe
+    try {
+      const projectDir = await findProjectDir(clientId);
+      if (projectDir) {
+        const envPath = path.join(projectDir, '.env.local');
+        if (await fs.pathExists(envPath)) {
+          let envContent = await fs.readFile(envPath, 'utf-8');
+          if (envContent.includes('VITE_DEVELOPER_TELEMETRY_TOKEN=')) {
+            envContent = envContent.replace(/VITE_DEVELOPER_TELEMETRY_TOKEN=.*/g, `VITE_DEVELOPER_TELEMETRY_TOKEN=${telemetryToken}`);
+          } else {
+            envContent += `\nVITE_DEVELOPER_TELEMETRY_TOKEN=${telemetryToken}`;
+          }
+          await fs.writeFile(envPath, envContent, 'utf-8');
+          console.log(`[Token Register] Token sincronizado en .env.local de ${clientId}`);
+        }
+      }
+    } catch (syncErr) {
+      console.warn(`[Token Register] No se pudo sincronizar en .env.local: ${syncErr.message}`);
+    }
+
+    return res.json({ success: true, clientId, token: telemetryToken, message: 'Token registrado exitosamente en Firestore Central.' });
+  } catch (err) {
+    res.status(500).json({ error: `Error al registrar token: ${err.message}` });
+  }
+});
+
 // Endpoint para actualizar variables de entorno local
 app.post('/api/project/env', async (req, res) => {
   const { clientId, variables } = req.body;

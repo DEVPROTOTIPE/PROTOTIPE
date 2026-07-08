@@ -20,7 +20,11 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 - **Automatización y Dashboard CLI:**
   * Creado el script CLI de soporte `toggle_maintenance.js` e integrado su endpoint REST (`POST /api/project/maintenance`) en `server.js` del Bridge para posibilitar la consulta y conmutación en caliente del estado en Firestore.
   * Desarrollado el switch visual interactivo de Modo Mantenimiento con indicador de estado `animate-pulse` dentro de la modal de gestión del CRM en `App.jsx` del Dashboard Central, enlazado directamente al Bridge.
-- **Archivos modificados:** `App.jsx` (App Ventas, template-ventas, template-core-seed, dev-dashboard), `appConfigService.js` (App Ventas, template-ventas, template-core-seed), `appConfigStore.js` (App Ventas, template-ventas, template-core-seed), `generator.js`, `server.js` (CLI), `toggle_maintenance.js` (NEW), `ClientCredits.jsx` (App Ventas, template-ventas), `DeveloperSettings.jsx` (App Ventas, template-ventas), `tareas_pendientes.md`, `bitacora_cambios.md`, `mapa_documentacion_ia.md`
+- **Corrección de Permisos de Telemetría (Firestore Central):**
+  * Desarrollado el endpoint `/api/project/token/register` en `server.js` que utiliza credenciales OAuth2 de la sesión de Firebase CLI para registrar los tokens en `/tokens/` en la Consola Central.
+  * Modificado `generator.js` para que `registerInCentralConsole` enrute el registro del token de telemetría del cliente mediante el Bridge local en lugar de realizar una llamada directa no autorizada por API Key.
+  * Sembrado y registrado manualmente el token `ventas-smartfix-dev-token-998877` de `ventas-smartfix` directamente en la base de datos central de Firestore para desbloquear las transmisiones de telemetría del cliente en producción.
+- **Archivos modificados:** `App.jsx` (App Ventas, template-ventas, template-core-seed, dev-dashboard, ventas-moni-app), `appConfigService.js` (App Ventas, template-ventas, template-core-seed, ventas-moni-app), `appConfigStore.js` (App Ventas, template-ventas, template-core-seed, ventas-moni-app), `generator.js`, `server.js` (CLI), `toggle_maintenance.js` (NEW), `ClientCredits.jsx` (App Ventas, template-ventas, ventas-moni-app), `DeveloperSettings.jsx` (App Ventas, template-ventas, ventas-moni-app), `prototipe.lock.json` (ventas-moni-app), `tareas_pendientes.md`, `bitacora_cambios.md`, `mapa_documentacion_ia.md`
 
 ## CLI-025: Autenticación OAuth2 Unificada en el Dashboard (Google/GitHub)
 - **Fecha:** 2026-07-08
