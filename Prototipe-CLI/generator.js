@@ -381,6 +381,42 @@ async function validateFirebaseCredentials(apiKey, projectId) {
 }
 
 /**
+ * Valida de forma remota que el Firebase Storage Bucket exista y esté activo en Google Cloud Storage.
+ * @param {string} storageBucket Nombre del bucket de storage (ej: ventas-smartfix.appspot.com)
+ */
+async function validateFirebaseStorageBucket(storageBucket) {
+  const bucketName = String(storageBucket || '').trim().replace(/^gs:\/\//, '');
+  if (!bucketName) {
+    throw new Error('El bucket de Firebase Storage está vacío.');
+  }
+
+  const url = `https://firebasestorage.googleapis.com/v0/b/${bucketName}`;
+  try {
+    const res = await fetch(url, { method: 'GET' });
+    const text = await res.text();
+    
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (_) {
+      throw new Error(`El bucket "${bucketName}" no devolvió un formato de metadatos válido de Storage.`);
+    }
+
+    if (res.status === 404) {
+      throw new Error(`El bucket de Firebase Storage "${bucketName}" no existe o no está activo en Firebase Console. Habilita Storage en la consola de Firebase antes de continuar.`);
+    }
+
+    // Cualquier otro estatus (200, 401, 403, 400) significa que el bucket físico existe en la nube de Google
+    return true;
+  } catch (err) {
+    if (err.message.includes('fetch failed') || err.message.includes('network') || err.message.includes('FetchError')) {
+      throw new Error(`Error de red al conectar con Firebase Storage: ${err.message}`);
+    }
+    throw err;
+  }
+}
+
+/**
  * Valida el entorno local asegurando que las dependencias CLI (firebase, gh si se requiere) estén
  * instaladas y con sesión iniciada.
  * @param {Object} answers Datos de configuración
@@ -432,6 +468,17 @@ async function checkEnvironment(answers) {
     } catch (err) {
       spinner.fail();
       throw new Error(`Fallo en preflight check de Firebase: ${err.message}`);
+    }
+  }
+
+  // 1.15 Validar bucket de Firebase Storage en la nube si no es aprovisionamiento automático y se proporciona
+  if (!answers.autoProvisionFirebase && answers.firebaseStorageBucket) {
+    spinner.text = '🔍 Validando Firebase Storage Bucket en la nube (Preflight)...';
+    try {
+      await validateFirebaseStorageBucket(answers.firebaseStorageBucket);
+    } catch (err) {
+      spinner.fail();
+      throw new Error(`Fallo en preflight check de Firebase Storage: ${err.message}`);
     }
   }
 

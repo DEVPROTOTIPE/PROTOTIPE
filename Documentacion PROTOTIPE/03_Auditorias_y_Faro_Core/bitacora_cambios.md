@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CLI-020: Implementación de Storage Preflight Check (DEC-003)
+- **Fecha:** 2026-07-07
+- **Tipo:** Seguridad / Scaffolding / Código
+- **Estatus:** Completado.
+- **Descripción:** Implementar la llamada de validación REST del Firebase Storage Bucket en generator.js antes de la creación física del proyecto de marca.
+- **Archivos modificados:** `generator.js`, `tareas_pendientes.md`, `bitacora_cambios.md`
+
 ## CORE-318: Alineación de Reglas de IA (GEMINI.md)
 - **Fecha:** 2026-07-07
 - **Tipo:** Seguridad / Gobernanza / Documentación
