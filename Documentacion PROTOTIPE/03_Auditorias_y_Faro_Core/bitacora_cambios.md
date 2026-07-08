@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-311: Saneamiento Documental de Contradicciones (NotebookLM Alignment)
+- **Fecha:** 2026-07-07
+- **Tipo:** Documentación / Consistencia
+- **Estatus:** Completado.
+- **Descripción:** Se resolvieron las discrepancias de Cloud Functions en registro_decisiones_estrategicas.md y estandar_arquitectonico_ecosistema.md, detallando la naturaleza local del endpoint HTTP de telemetría y el SDK centralizado. Asimismo, se alineó la regla de localStorage en changelog_general.md prohibiendo su uso para persistencia de negocio.
+- **Archivos modificados:** `registro_decisiones_estrategicas.md`, `estandar_arquitectonico_ecosistema.md`, `changelog_general.md`
+
 ## CORE-310: Indexación de Mapa de Aplicación y Plan de Reducción de Verbosidad
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación / Optimización IA

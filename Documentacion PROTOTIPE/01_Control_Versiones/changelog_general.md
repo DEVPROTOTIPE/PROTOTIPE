@@ -51,7 +51,7 @@
 
 ### Comercial
 - **Landing Page Activo Oficial**: Incorporada la Landing Page corporativa optimizada en SEO y CRO al inventario de activos del proyecto.
-- **Modal de Leads Express (CRO)**: Implementado interceptor de clics de WhatsApp (`wa.me`) que solicita datos mínimos del cliente para auto-completar formularios de forma local mediante LocalStorage. Queda estrictamente aclarado que no existe almacenamiento de colas transaccionales en LocalStorage; todo flujo transaccional y cola offline en el ecosistema se implementa exclusivamente mediante Dexie/IndexedDB.
+- **Modal de Leads Express (CRO)**: Implementado interceptor de clics de WhatsApp (`wa.me`) que solicita datos mínimos del cliente para auto-completar formularios de forma local mediante LocalStorage. Queda estrictamente aclarado que el uso de `localStorage` en el ecosistema está estrictamente limitado a estados de UI y pre-llenados temporales simples en el navegador; cualquier persistencia transaccional, colas offline, telemetría o auditorías locales debe implementarse obligatoriamente mediante Dexie.js / IndexedDB, estando prohibido el uso de LocalStorage para datos críticos de negocio.
 - **Calculadora de Diagnóstico Express**: Rediseñado el widget de autoevaluación comercial de 32 combinaciones de retos operacionales por nicho, colapsable mediante trigger card interactivo.
 
 ### Negocio

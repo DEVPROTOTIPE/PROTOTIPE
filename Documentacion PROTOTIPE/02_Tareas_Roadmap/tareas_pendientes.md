@@ -1,5 +1,14 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-311: Saneamiento Documental de Contradicciones (NotebookLM Alignment) (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se resuelven las discrepancias de Cloud Functions en registro_decisiones_estrategicas.md y estandar_arquitectonico_ecosistema.md, y se alinea la regla de LocalStorage en changelog_general.md.
+  - Archivos:
+    - [registro_decisiones_estrategicas.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/registro_decisiones_estrategicas.md) [MODIFY]
+    - [estandar_arquitectonico_ecosistema.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/estandar_arquitectonico_ecosistema.md) [MODIFY]
+    - [changelog_general.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/01_Control_Versiones/changelog_general.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-310: Indexación de Mapa de Aplicación y Plan de Reducción de Verbosidad (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

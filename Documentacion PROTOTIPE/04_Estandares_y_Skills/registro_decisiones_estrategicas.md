@@ -28,6 +28,7 @@ Este archivo consolida las decisiones operativas, técnicas, comerciales y arqui
 * **Fecha:** 2026-07-06
 * **Contexto:** Se requiere simplificar al máximo el mantenimiento y la infraestructura en la nube para clientes finales.
 * **Decisión:** PROTOTIPE operará exclusivamente bajo un modelo Serverless estático (Hosting + Reglas físicas de base de datos). Queda prohibido el despliegue de Cloud Functions en producción. Cualquier lógica de integración se resolverá del lado del cliente o a través de la API REST local del Bridge CLI.
+  La variable de entorno `VITE_DEVELOPER_TELEMETRY_ENDPOINT` queda redirigida localmente a `http://localhost:3001` para el validador del modal de diagnóstico, delegando la transmisión comisional productiva de forma directa a Firestore Central (`reportesBilling`) vía SDK de cliente mediante `centralFirebaseService.js`.
 
 ### DEC-002: Purga Absoluta de Seeding e Inteligencia Artificial
 * **Fecha:** 2026-06-24
