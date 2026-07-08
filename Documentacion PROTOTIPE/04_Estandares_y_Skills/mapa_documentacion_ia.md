@@ -4,7 +4,7 @@
 # INDEXADOR SEMÁNTICO RÁPIDO PROTOTIPE (Ahorro de Tokens)
 docs_roots:
   01_Control_Versiones: [arquitectura_git.md]
-  02_Tareas_Roadmap: [tareas_pendientes.md, control_creacion_componentes.md, plan_extraccion_componentes.md]
+  02_Tareas_Roadmap: [tareas_pendientes.md, control_creacion_componentes.md, plan_extraccion_componentes.md, ideas_y_backlog_futuro.md]
   03_Auditorias_y_Faro_Core: [bitacora_cambios.md, bitacora_cambios_historico_hasta_2026-07-06.md, auditoria_ecosistema_actual.md, registro_errores_bugs.md, reporte_auditoria_ecosistema_completo.md]
   04_Estandares_y_Skills: [mapa_aplicacion.md, mapa_documentacion_ia.md, protocolo_colaboracion_ia.md, protocolo_rollback_autonomo_ia.md, prompt_maestro_descubrimiento.md]
   06_Biblioteca_Componentes: [README.md]
@@ -28,6 +28,7 @@ docs_roots:
 | **control_creacion_componentes.md** | Checklist y Control de 230 Componentes | **Obligatorio al crear componentes por vertical:** Registra y marca los componentes completados y restantes por vertical. | [Ver Control de Creación](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/control_creacion_componentes.md) |
 | **checklist_auditoria_core.md** | Hoja de Ruta de Auditoría del Core | **Obligatorio al iniciar/progresar la auditoría:** Lista detallada de puntos de control por módulo para corregir bugs, rendimiento y UI en App Ventas. | [Ver Checklist](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/checklist_auditoria_core.md) |
 | **plan_extraccion_componentes.md** | Plan de Extracción de Biblioteca | Para consultar los requerimientos técnicos y desacoplamiento de los 8 componentes recomendados a extraer. | [Ver Plan de Extracción](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/plan_extraccion_componentes.md) |
+| **ideas_y_backlog_futuro.md** | Buzón de Ideas y Notas del Backlog | **Para guardar propuestas y notas de futuros sprints:** Repositorio de ideas de diseño, flujos sugeridos, integraciones comerciales e ideas de análisis con NotebookLM para revisar después. | [Ver Buzón de Ideas](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/ideas_y_backlog_futuro.md) |
 | **bitacora_cambios.md** | Registro de Cambios Activos | **Obligatorio al finalizar:** Registrar cambios de la sesión activa de desarrollo y commits del Roadmap. | [Ver Bitácora Activa](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) |
 | **bitacora_cambios_historico_hasta_2026-07-06.md** | Historial Histórico de Cambios | Registros históricos acumulados de cambios técnicos anteriores al 2026-07-07 compactados para NotebookLM. | [Ver Histórico](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios_historico_hasta_2026-07-06.md) |
 | **auditoria_estabilizacion_git_2026.md** | Auditoría de Git, Upstream y Respaldos | Certificación final del blindaje de Git, resolución de non-fast-forward y restauración de rastreo upstream en los scripts de respaldo. | [Ver Auditoría Git](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_estabilizacion_git_2026.md) |

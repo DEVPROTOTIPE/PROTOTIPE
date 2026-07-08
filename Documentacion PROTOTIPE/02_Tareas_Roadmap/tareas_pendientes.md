@@ -8,6 +8,14 @@
     - [manual_onboarding_desarrollador_junior.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_onboarding_desarrollador_junior.md) [NEW]
     - [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
 
+* **[x] ~~Tarea CORE-315: Creación de Buzón de Ideas y Notas del Backlog (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se crea el archivo ideas_y_backlog_futuro.md en la carpeta del Roadmap para centralizar notas, ideas innovadoras y propuestas de optimización a evaluar en futuros sprints.
+  - Archivos:
+    - [ideas_y_backlog_futuro.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/ideas_y_backlog_futuro.md) [NEW]
+    - [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-314: Creación de Cuestionario de Certificación Técnica para Desarrolladores (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-315: Creación de Buzón de Ideas y Notas del Backlog
+- **Fecha:** 2026-07-07
+- **Tipo:** Documentación / Backlog
+- **Estatus:** Completado.
+- **Descripción:** Creación de ideas_y_backlog_futuro.md bajo 02_Tareas_Roadmap/ para almacenar notas, flujos interactivos, y ideas de auditoría analítica con NotebookLM de cara a futuros desarrollos.
+- **Archivos modificados:** `ideas_y_backlog_futuro.md`, `mapa_documentacion_ia.md`
+
 ## CORE-314: Creación de Cuestionario de Certificación Técnica para Desarrolladores
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación / QA y Onboarding
