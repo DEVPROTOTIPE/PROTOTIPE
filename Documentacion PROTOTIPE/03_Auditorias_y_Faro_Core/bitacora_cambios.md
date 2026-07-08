@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-299: Habilitación Interactiva de Sandbox de Generación PDF
+- **Fecha:** 2026-07-07
+- **Tipo:** Refactorización / Playground
+- **Descripción:** Se transformó el sandbox estático heredado `generacion_pdfSandbox.jsx` en un playground funcional e interactivo. Se agregaron controles dinámicos para configurar id de instancia, periodo de cobro, total de ventas, tasas comisionales (1-5%) y estados de pago, renderizando una previsualización de la factura y conectando el botón de acción con el servicio real `pdfService.js` para compilar y descargar PDFs reales con jsPDF desde el navegador.
+- **Archivo modificado:** `Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/generacion_pdfSandbox.jsx`
+
+
 ## CORE-298: Endurecimiento de Reglas de Seguridad en Caliente para Nichos Transaccionales
 - **Fecha:** 2026-07-07
 - **Tipo:** Refactorización / Seguridad

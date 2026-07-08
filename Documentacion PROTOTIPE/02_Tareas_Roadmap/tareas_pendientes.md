@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-299: Habilitación Interactiva de Sandbox de Generación PDF (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se transformó el sandbox estático `generacion_pdfSandbox.jsx` en un playground funcional e interactivo con controles de configuración conectados al servicio real de exportación pdfService.js.
+  - Archivos: [Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/generacion_pdfSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/generacion_pdfSandbox.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-298: Endurecimiento de Reglas de Seguridad en Caliente para Nichos Transaccionales (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
