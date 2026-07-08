@@ -304,6 +304,7 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Plantillas Core/App Ventas/src/pages/admin/settings/sections/AppearanceSettings.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-008).
 * **`/Plantillas Core/App Ventas/src/services/orderService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-010).
 * **`/Plantillas Core/App Ventas/src/schemas/inventorySchemas.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-010).
+* **`/Plantillas Core/App Ventas/src/schemas/appConfigSchema.js`**: Esquema de validación Zod con fallbacks automáticos para configuraciones Firestore (Tarea CORE-328).
 * **`/Plantillas Core/App Ventas/src/components/client/catalog/ProductCard.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-011).
 * **`/Plantillas Core/App Ventas/src/services/centralFirebaseService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-016).
 * **`/Prototipe-CLI/templates/template-core-seed/src/App.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-018).
@@ -311,6 +312,7 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Prototipe-CLI/templates/template-ventas/src/App.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-018).
 * **`/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-018).
 * **`/Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-018).
+* **`/Plantillas Core/App Ventas/src/hooks/useColorContrast.js`**: Hook para calcular dinámicamente contraste de textos en botones sobre fondos HSL cromáticos (Tarea CORE-328).
 * **`/Prototipe-CLI/plantillas_registro.json`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
 * **`/Prototipe-CLI/config.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
 * **`/Prototipe-CLI/templates/template-core-seed/src/services/centralFirebaseService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).

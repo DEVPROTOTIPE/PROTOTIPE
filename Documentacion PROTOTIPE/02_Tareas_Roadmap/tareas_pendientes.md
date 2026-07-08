@@ -1,5 +1,16 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-328: Cuatro Blindajes de Calidad y Robustez Operativa (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Implementados los cuatro blindajes de calidad técnica aprobados en el plan de acción: (1) Creado el hook utilitario `useColorContrast.js` para cálculos dinámicos de contraste WCAG en runtime, eliminando la colisión/colapso de legibilidad en marcas blancas con colores claros en el botón de mantenimiento de `App.jsx`. (2) Definido un esquema de validación robusto con Zod en `appConfigSchema.js` para asegurar que las configuraciones locales y centrales no causen crasheos por campos undefined o tipos de datos inválidos en `useAppConfigSync.js`. (3) Implementados límites defensivos de timeout de 15 segundos en las 4 operaciones de base de datos críticas de `orderService.js` (`createOrder`, `cancelOrder`, `completeOrder` (aprobación de crédito), y `createPhysicalOrder`) usando una envoltura de promesas para evitar que la UI se cuelgue con spinners infinitos en caso de problemas persistentes de red o modo offline. (4) Compilado con éxito tanto `App Ventas` como `dev-dashboard` sin warnings ni errores de linter.
+  - Archivos:
+    - [Plantillas Core/App Ventas/src/hooks/useColorContrast.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useColorContrast.js) [NEW]
+    - [Plantillas Core/App Ventas/src/schemas/appConfigSchema.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/schemas/appConfigSchema.js) [NEW]
+    - [Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [Plantillas Core/App Ventas/src/App.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
+    - [Plantillas Core/App Ventas/src/services/orderService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/orderService.js) [MODIFY]
+
 * **[x] ~~Tarea CORE-327: Sincronización Paralela en CLI y Robustecimiento de Gitignore (2026-07-08)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-08

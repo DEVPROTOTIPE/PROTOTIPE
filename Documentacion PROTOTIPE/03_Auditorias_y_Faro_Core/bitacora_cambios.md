@@ -9,6 +9,23 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-328: Cuatro Blindajes de Calidad y Robustez Operativa
+- **Fecha:** 2026-07-08
+- **Tipo:** Calidad Técnica / Robustez / Seguridad / WCAG Constrast / Zod validation
+- **Descripción:** 
+  * **Cálculo Dinámico de Contraste (WCAG Compliance):** Desarrollado el hook reactivo `useColorContrast.js` que extrae en caliente los valores de color de variables CSS del DOM root (RGB/Hex) y computa la luminancia relativa conforme a especificaciones WCAG. Retorna la clase de texto adecuada (`text-white` o `text-black`), erradicando problemas de legibilidad de marca blanca con colores claros en el botón de mantenimiento de `App.jsx`.
+  * **Validación de Configuración Firestore con Zod:** Configurado un esquema completo de datos en `appConfigSchema.js` definiendo tipos de datos, enums y valores fallbacks seguros para todas las propiedades. Refactorizado `useAppConfigSync.js` para validar y parsear con Zod las respuestas de las suscripciones a colecciones de configuraciones locales y del servidor central, eliminando crasheos por campos inconsistentes o indefinidos.
+  * **Timeouts en Operaciones Críticas de Firestore:** Implementada la envoltura asíncrona `withTimeout` en `orderService.js` limitando la espera de red a un máximo de 15 segundos para operaciones críticas de escritura (`createOrder`, `cancelOrder`, `completeOrder`/créditos y `createPhysicalOrder`), previniendo colisiones visuales de spinners infinitos y fallas por bloqueos de red o modo offline.
+  * **Integridad del Ecosistema:** Validadas y aprobadas las compilaciones de producción locales (`npm run build`) tanto en `App Ventas` como en el dashboard centralizador `dev-dashboard` sin linter warnings.
+- **Archivos modificados:**
+  * [Plantillas Core/App Ventas/src/hooks/useColorContrast.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useColorContrast.js) [NEW]
+  * [Plantillas Core/App Ventas/src/schemas/appConfigSchema.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/schemas/appConfigSchema.js) [NEW]
+  * [Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  * [Plantillas Core/App Ventas/src/App.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
+  * [Plantillas Core/App Ventas/src/services/orderService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/orderService.js) [MODIFY]
+  * [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  * [mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
 ## CORE-327: Sincronización Paralela en CLI y Robustecimiento de Gitignore
 - **Fecha:** 2026-07-08
 - **Tipo:** Rendimiento de CLI / Seguridad / Git / Automatización
