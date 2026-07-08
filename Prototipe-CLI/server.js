@@ -10363,6 +10363,29 @@ app.get('/api/roadmap', async (req, res) => {
     const content = await fs.readFile(roadmapPath, 'utf8');
     const tasks = parseRoadmapContent(content);
 
+    // Ordenar de forma descendente por prefijo ponderado (CORE > CLI > DOC > otros) y número de tarea (325 > 324)
+    const PREFIX_ORDER = {
+      'CORE': 1,
+      'CLI': 2,
+      'DOC': 3,
+      'TPL': 4
+    };
+    tasks.sort((a, b) => {
+      const getParts = (id = '') => {
+        const m = id.match(/^([A-Z]+)-(\d+)$/i);
+        return m ? { prefix: m[1].toUpperCase(), num: parseInt(m[2], 10) } : { prefix: 'OTHER', num: 0 };
+      };
+      const pA = getParts(a.id);
+      const pB = getParts(b.id);
+      if (pA.prefix !== pB.prefix) {
+        const wA = PREFIX_ORDER[pA.prefix] || 99;
+        const wB = PREFIX_ORDER[pB.prefix] || 99;
+        if (wA !== wB) return wA - wB;
+        return pA.prefix.localeCompare(pB.prefix);
+      }
+      return pB.num - pA.num;
+    });
+
     res.json({ success: true, tasks });
   } catch (err) {
     console.error('Error al obtener el roadmap:', err.message);

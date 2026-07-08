@@ -1,5 +1,29 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-326: Desactivación Remota Ineludible y Motivo Personalizado (Bloqueo Total) (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Implementado el sistema de suspensión remota de cuentas controlado desde el CRM central en `dev-dashboard`. Cuando `deactivated: true` se propaga mediante el listener en tiempo real a Zustand, las aplicaciones desmontan la UI principal y muestran una pantalla de bloqueo ineludible y responsiva con el motivo personalizado de desactivación. Sincronizado en Core, Plantillas y clientes.
+  - Archivos:
+    - [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [Plantillas Core/App Ventas/src/store/appConfigStore.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY]
+    - [Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [Plantillas Core/App Ventas/src/App.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
+    - [Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js) [MODIFY]
+    - [Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [Prototipe-CLI/templates/template-ventas/src/App.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/App.jsx) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/store/appConfigStore.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/store/appConfigStore.js) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/App.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-325: Aislamiento de Modales Administrativos por Rutas (Privacidad y Seguridad) (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Modularización e inyección de los componentes wrappers RemoteAlertModal, TelemetryReportModal y PingRequestModal en App.jsx para restringir el renderizado de modales administrativos únicamente a rutas `/admin/*`, protegiendo la privacidad y evitando fugas de avisos internos ante clientes finales.
+  - Archivos:
+    - [Plantillas Core/App Ventas/src/App.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/App.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/App.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-324: Panel de Productos Estrella y Tendencias de Venta en Dashboard (2026-07-08)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-08
@@ -264,14 +288,19 @@
     - [ventas-moni-app/src/services/appConfigService.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/appConfigService.js) [MODIFY]
     - [ventas-moni-app/src/store/appConfigStore.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/store/appConfigStore.js) [MODIFY]
 
-* **[ ] Tarea CORE-312: IntegraciÃ³n de Portal B2C - ConsolidaciÃ³n de Abonos de CrÃ©ditos en Firestore (2026-07-07)**
-  - Estatus: Pendiente.
+* **[x] ~~Tarea CORE-312: Integración de Portal B2C - Consolidación de Abonos de Créditos en Firestore (2026-07-07)~~**
+  - Estatus: Completado.
   - Fecha: 2026-07-07
   - DescripciÃ³n: Conectar la pasarela de pagos simulada del portal de clientes (ClientCredits.jsx) con el registro transaccional real de abonos en Firestore bajo la colecciÃ³n de auditorÃ­a fÃ­sica /credits/{id}/pagos.
   - Archivos:
     - [ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/credits/components/ClientCredits.jsx) [MODIFY]
     - [server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
     - [App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [App.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
+    - [App.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/App.jsx) [MODIFY]
+    - [ClientFilterModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ClientFilterModal.jsx) [MODIFY]
+    - [ClientFilterModal.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/components/client/catalog/ClientFilterModal.jsx) [MODIFY]
+    - [hosting.ZGlzdA.cache](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/.firebase/hosting.ZGlzdA.cache) [MODIFY]
     - [telemetryService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/telemetryService.js) [MODIFY]
     - [telemetryService.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/telemetryService.js) [MODIFY]
     - [telemetryService.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/telemetryService.js) [MODIFY]

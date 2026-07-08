@@ -9,6 +9,51 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-326: Desactivación Remota Ineludible y Motivo Personalizado (Bloqueo Total)
+- **Fecha:** 2026-07-08
+- **Tipo:** Suspensión de Servicio / CRM / Control Central / Seguridad
+- **Descripción:** 
+  * **Control de CRM Central:** Añadida una sección dedicada en el panel lateral de gestión de clientes del CRM (`dev-dashboard/src/App.jsx`) con un checkbox de suspensión temporal de cuenta y entrada de texto para el motivo personalizado de deactivación.
+  * **Inicialización Centralizada:** Implementado un hook `useEffect` en el modal de gestión del CRM para autohidratar todas las variables editables (`editNiche`, `editAlertActive`, `editDeactivated`, etc.) previniendo estados inconsistentes o vacíos.
+  * **Listener Snapshot Central:** Actualizado `useAppConfigSync.js` en Core, Plantillas y cliente `ventas-moni-app` para capturar en tiempo real las variables centralizadas `deactivated` y `deactivationReason` de Firestore (`clientes_control`).
+  * **Bloqueo Ineludible en Raíz:** Inyectada validación de estado en `App.jsx` de todas las aplicaciones. Si `deactivated === true`, se desmonta completamente el router de React y se renderiza en su lugar una pantalla de suspensión de servicio premium y responsiva basada en HSL, impidiendo cualquier interacción o manipulación del DOM por parte del cliente, pero manteniendo el listener reactivo para reactivaciones en caliente.
+  * **UX de Alertas de WhatsApp:** Agregado toast de advertencia en el Gestor de Plantillas si se intenta sincronizar la alerta remota sin seleccionar un cliente en el dropdown (`waClientId`).
+- **Archivos modificados:**
+  * [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  * [Plantillas Core/App Ventas/src/store/appConfigStore.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY]
+  * [Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  * [Plantillas Core/App Ventas/src/App.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
+  * [Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js) [MODIFY]
+  * [Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  * [Prototipe-CLI/templates/template-ventas/src/App.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/App.jsx) [MODIFY]
+  * [Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js) [MODIFY]
+  * [Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js) [MODIFY]
+  * [Prototipe-CLI/templates/template-core-seed/src/App.jsx](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/App.jsx) [MODIFY]
+  * [Instancias Clientes/ventas/ventas-moni-app/src/store/appConfigStore.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/store/appConfigStore.js) [MODIFY]
+  * [Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js) [MODIFY]
+  * [Instancias Clientes/ventas/ventas-moni-app/src/App.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/App.jsx) [MODIFY]
+  * [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+  * [mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+## CORE-325: Sincronización de Cobros WhatsApp con Alertas Remotas e Inyección Auto-Reminder
+- **Fecha:** 2026-07-08
+- **Tipo:** Facturación / Alertas / WhatsApp / Automatización
+- **Descripción:** 
+  * **Sincronización Interactiva:** Se agregó el checkbox de control en la UI del Gestor de Plantillas de WhatsApp para sincronizar en tiempo real el cobro con la alerta remota de la aplicación (`sistemaAlerta`).
+  * **Conversión de Formatos:** Implementado el helper asíncrono `syncRemoteAlertFromTemplate` que limpia la sintaxis de WhatsApp (`*`, `_`, `~`) para presentar textos legibles y limpios en la interfaz web, asociando la plantilla elegida al tipo de alerta correspondiente (`info` para simples, `warning` para urgentes).
+  * **Apagado al Recaudar:** Se modificó `handleTogglePayment` para desactivar de inmediato la alerta remota (`sistemaAlerta = null`) al marcar una comisión como `"pagado"`, resolviendo la molestia de alertas persistentes tras recibir el pago.
+  * **Auto-Reminder Sweep:** Se inyectó un hook `useEffect` controlado por sesión (`autoScanCompletedRef`) que se ejecuta el día 1° de cada mes para detectar reportes de comisiones atrasadas y activar automáticamente el Recordatorio de Pago simple en las instancias de clientes correspondientes.
+  * **Eliminación de Warnings de Compilación:** Se removieron las claves de color duplicadas en el objeto literal `COLOR_NAMES` de `ClientFilterModal.jsx` (tanto en la plantilla base como en la instancia del cliente), erradicando las alertas en amarillo de Vite/esbuild.
+  * **Aislamiento de Seguridad Administrativa:** Se diseñó el wrapper `RemoteAlertModal` y se adaptaron los modales de telemetría mensual y ping test en `App.jsx` (Core y cliente `ventas-moni-app`) usando `useLocation` de React Router. Esto restringe su visualización exclusivamente a rutas administrativas (`/admin/*`), protegiendo la privacidad del comerciante ante los clientes finales del catálogo.
+- **Archivos modificados:**
+  * [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  * [Plantillas Core/App Ventas/src/App.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
+  * [Instancias Clientes/ventas/ventas-moni-app/src/App.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/App.jsx) [MODIFY]
+  * [Plantillas Core/App Ventas/src/components/client/catalog/ClientFilterModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ClientFilterModal.jsx) [MODIFY]
+  * [Instancias Clientes/ventas/ventas-moni-app/src/components/client/catalog/ClientFilterModal.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/components/client/catalog/ClientFilterModal.jsx) [MODIFY]
+  * [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
+
 ## CORE-324: Reemplazo de Conversión de Seguimiento por Panel de Rendimiento General de Productos
 - **Fecha:** 2026-07-08
 - **Tipo:** UI/UX / Inteligencia Comercial / Métricas / Rendimiento
