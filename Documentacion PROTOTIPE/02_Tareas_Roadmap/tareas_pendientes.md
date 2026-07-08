@@ -1,5 +1,12 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[ ] Tarea CORE-312: Integración de Portal B2C - Consolidación de Abonos de Créditos en Firestore (2026-07-07)**
+  - Estatus: Pendiente.
+  - Fecha: 2026-07-07
+  - Descripción: Conectar la pasarela de pagos simulada del portal de clientes (ClientCredits.jsx) con el registro transaccional real de abonos en Firestore bajo la colección de auditoría física /credits/{id}/pagos.
+  - Archivos:
+    - [ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/credits/components/ClientCredits.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-311: Saneamiento Documental de Contradicciones (NotebookLM Alignment) (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
