@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-306: Sincronización Desatendida de Recursos Firebase en el CLI
+- **Fecha:** 2026-07-07
+- **Tipo:** Refactorización / Automatización
+- **Descripción:** Se estabilizaron y securizaron las llamadas al Firebase CLI en `generator.js` y `server.js` del CLI de Prototype. Se inyectó el parámetro `--token` leyendo automáticamente de la variable de entorno `process.env.FIREBASE_TOKEN` para permitir que el despliegue automático de hosting, reglas e índices se ejecute de forma desatendida y segura sin requerir interacción humana en la terminal del servidor o entornos de despliegue continuo.
+- **Archivos modificados:** `Prototipe-CLI/generator.js`, `Prototipe-CLI/server.js`
+
+
 ## CORE-305: Integración de Configuración de Pasarela en Ajustes de Desarrollador
 - **Fecha:** 2026-07-07
 - **Tipo:** Implementación / Panel de Control

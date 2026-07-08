@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-306: Sincronización Desatendida de Recursos Firebase en el CLI (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se estabilizaron y securizaron las llamadas a firebase deploy en generator.js y server.js del CLI inyectando la bandera --token a partir de variables de entorno del sistema.
+  - Archivos: [Prototipe-CLI/generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY], [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
 * **[x] ~~Tarea CORE-305: Integración de Configuración de Pasarela en Ajustes de Desarrollador (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

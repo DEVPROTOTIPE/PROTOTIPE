@@ -2953,9 +2953,13 @@ async function deployFirebase(answers, targetDir) {
 
   // [A3] Helper interno de retry específico para comandos Firebase que pueden fallar por rate-limiting o red
   async function execFirebaseWithRetry(args, maxRetries = 2, retryDelayMs = 5000) {
+    const finalArgs = [...args];
+    if (process.env.FIREBASE_TOKEN) {
+      finalArgs.push('--token', process.env.FIREBASE_TOKEN);
+    }
     for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
       try {
-        await execAsyncCommand('firebase', args, { cwd: targetDir });
+        await execAsyncCommand('firebase', finalArgs, { cwd: targetDir });
         return; // éxito
       } catch (err) {
         if (attempt <= maxRetries) {

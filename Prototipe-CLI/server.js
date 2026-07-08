@@ -5334,10 +5334,10 @@ app.post('/api/project/sync-database', async (req, res) => {
     const firebaseProjectId = meta.firebase?.projectId || '';
 
     if (sync && differencesCount > 0 && firebaseProjectId) {
-      console.log(`[Database Sync] Desplegando reglas automáticas a Firebase para: ${firebaseProjectId}`);
       try {
+        const tokenSuffix = process.env.FIREBASE_TOKEN ? ` --token "${process.env.FIREBASE_TOKEN}"` : '';
         const { stdout } = await execAsync(
-          `firebase deploy --only firestore:rules,firestore:indexes,storage -P ${firebaseProjectId}`,
+          `firebase deploy --only firestore:rules,firestore:indexes,storage -P ${firebaseProjectId}${tokenSuffix}`,
           { cwd: projectDir, timeout: 120000 }
         );
         deployed = true;
@@ -9807,7 +9807,8 @@ app.post('/api/project/firebase-rules/deploy', async (req, res) => {
       }
     }
 
-    const cmd = `firebase deploy --only ${deployOnly} -P ${firebaseProjectId}`;
+    const tokenSuffix = process.env.FIREBASE_TOKEN ? ` --token "${process.env.FIREBASE_TOKEN}"` : '';
+    const cmd = `firebase deploy --only ${deployOnly} -P ${firebaseProjectId}${tokenSuffix}`;
     const stdout = execSync(cmd, { cwd: projectDir, encoding: 'utf8' });
     res.json({ success: true, message: `Reglas de Firebase desplegadas con éxito.`, output: stdout });
   } catch (err) {
