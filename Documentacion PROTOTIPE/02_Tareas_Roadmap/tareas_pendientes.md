@@ -1,5 +1,46 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-324: Panel de Productos Estrella y Tendencias de Venta en Dashboard (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Reemplazado el panel de telemetría de conversión por un tablero dinámico de "Productos Estrella" en AdminHome.jsx. Este módulo analiza en tiempo real los pedidos completados y expone de forma visual el podio de los 3 productos más vendidos con su miniatura, nombre, cantidad y monto facturado. Sincronizado en la plantilla base y en la réplica de cliente.
+  - Archivos:
+    - [Plantillas Core/App Ventas/src/pages/admin/AdminHome.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminHome.jsx) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/pages/admin/AdminHome.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/AdminHome.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-323: Centro de Mando Express y Animación Glow Burst en Logo (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Diseñada e implementada funcionalidad interactiva y de resplandor expansivo (Glow Burst) en el logotipo flotante central del Dashboard del Administrador. Al presionarse, despliega un menú flotante con atajos rápidos para registrar pedidos, revisar cartera de créditos, gestionar portales QR y abrir configuraciones, incluyendo telemetría rápida del estado de conexión Firestore. Sincronizado en la plantilla base y en la réplica de cliente.
+  - Archivos:
+    - [Plantillas Core/App Ventas/src/pages/admin/AdminHome.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminHome.jsx) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/pages/admin/AdminHome.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/AdminHome.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-322: Sincronización Inmediata de Abonos en Panel de Administración (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Corregido bug de refresco visual en AdminCredits.jsx donde la lista de deudas no se actualizaba tras registrar un abono exitoso. Se encapsuló la carga de datos en useCallback y se invocó en el onSuccess de la mutación. Sincronizado en la plantilla base y en la réplica de cliente.
+  - Archivos:
+    - [Plantillas Core/App Ventas/src/pages/admin/AdminCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminCredits.jsx) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/pages/admin/AdminCredits.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/AdminCredits.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-321: Diseño Premium e Interactivo del Reverso de Tarjeta B2C (Fidelización e Identificación QR) (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Diseñado e implementado el reverso interactivo de la tarjeta de crédito holográfica en el portal de créditos del cliente. Se implementó un código QR de identificación escaneable dinámico estilo Apple Wallet (con animación de zoom y modal a pantalla completa con fondo de alto contraste) para facilitar el escaneo del número de celular del cliente en el punto de venta de la tienda física. Se desacopló la marca cambiando la etiqueta "PROTOTIPE" a "VIP MEMBER" para marca blanca. Sincronizado en la plantilla base y en la réplica de cliente.
+  - Archivos:
+    - [Plantillas Core/App Ventas/src/pages/client/ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCredits.jsx) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/pages/client/ClientCredits.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/client/ClientCredits.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-320: Dinamización de Layouts y Mitigación de Warnings de Permisos en Sincronización (2026-07-08)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-08
+  - Descripción: Implementada dinamización en la sección de telemetría y operaciones del Dashboard Central (grid con items-start y tarjetas con h-auto) para adaptarse a cualquier cantidad de clientes. Estabilizado el gráfico de comisiones a h-320px para solventar warnings de Recharts. Mitigados warnings de permisos en la sincronización silenciosa (hook useAppConfigSync) mediante la comparación inteligente hasChanges en Zustand para evitar escrituras redundantes.
+  - Archivos:
+    - [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js) [MODIFY]
+
 * **[x] ~~Tarea CORE-286: Sincronización en Caliente de Errores Manuales (2026-07-08)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-08

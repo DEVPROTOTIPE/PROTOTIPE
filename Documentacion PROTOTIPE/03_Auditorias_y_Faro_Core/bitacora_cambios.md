@@ -8,6 +8,100 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Tipo:** Sistema
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
+
+## CORE-324: Reemplazo de Conversión de Seguimiento por Panel de Rendimiento General de Productos
+- **Fecha:** 2026-07-08
+- **Tipo:** UI/UX / Inteligencia Comercial / Métricas / Rendimiento
+- **Descripción:** 
+  * Se removió el antiguo panel de "Conversión de Seguimiento de Pedidos" en el Dashboard del Administrador (`AdminHome.jsx`) por no aportar utilidad real al negocio.
+  * **Nuevo Módulo de Rendimiento General de Productos (Diseño de Podio y Barras de Progreso):** 
+    1. Se implementó un agregador dinámico en memoria (`topProducts` mediante `useMemo`) que analiza el historial completo de pedidos completados (`orders`) de Firestore.
+    2. Suma las cantidades vendidas e ingresos facturados por cada producto y variantes de forma agregada en tiempo real.
+    3. Clasifica el catálogo de productos por cantidad vendida y expone los 5 más vendidos.
+  * **Diseño Visual de Rendimiento Relativo (Fiel al mockup):**
+    1. Se calcula el **rendimiento relativo** de cada producto dividiendo sus unidades vendidas por la cantidad del producto líder (1° lugar = 100%).
+    2. Se renderiza una pila vertical de tarjetas estilizadas con fondo degradado suave (`bg-surface-2/60`).
+    3. Cada fila expone: medalla de posición (🥇, 🥈, 🥉, 🎖️), nombre del producto, unidades totales vendidas (ej. `9 unds`).
+    4. Se inyectó una barra de progreso horizontal con la variable de color principal y brillo de acento, que anima su ancho de forma elástica según el rendimiento relativo.
+    5. La fila inferior detalla el porcentaje de rendimiento relativo a la izquierda y el total facturado formateado en pesos a la derecha.
+  * **[PROPAGACIÓN CORE]** Sincronizado en la plantilla base y en la réplica de cliente `ventas-moni-app`.
+- **Archivos modificados:**
+  * [Plantillas Core/App Ventas/src/pages/admin/AdminHome.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminHome.jsx) [MODIFY]
+  * [Instancias Clientes/ventas/ventas-moni-app/src/pages/admin/AdminHome.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/AdminHome.jsx) [MODIFY]
+
+## CORE-323: Centro de Mando Express y Animación Glow Burst en Logo Administrador
+- **Fecha:** 2026-07-08
+- **Tipo:** UI/UX / Interactividad / Gamificación / Atajos Rápidos
+- **Descripción:** 
+  * Se diseñó e implementó una funcionalidad interactiva y estética al hacer clic en el logotipo flotante central del negocio en el Dashboard del Administrador (`AdminHome.jsx`).
+  * **Efecto Visual Glow Burst:** Al presionar el avatar/logo, se dispara una animación de partículas de onda de choque expansiva (`isBursting`) utilizando anillos de Framer Motion con un resplandor degradado difuminado con base en la variable de acento HSL (`var(--color-accent)`).
+  * **Centro de Mando Express:** Al mismo tiempo, se despliega un popover flotante en la parte inferior central con desenfoque de fondo (`backdrop-blur-sm bg-black/60`). Este menú de accesos rápidos expone una rejilla 2x2 para simplificar el flujo diario del administrador:
+    1. *Registrar Pedido:* Abre la gestión de pedidos (`AdminOrders.jsx`).
+    2. *Ver Cartera:* Redirige a créditos y fiados (`AdminCredits.jsx`).
+    3. *Acceso QR:* Accede a la configuración de códigos QR del portal B2C (`AdminPortalQR.jsx`).
+    4. *Ajustes Negocio:* Abre las opciones y parámetros comerciales (`AdminSettings.jsx`).
+  * **Footer de Telemetría:** Se inyectó una pequeña barra técnica de estado en el pie del panel que muestra que la base de datos Firestore está online (`pulsing dot` verde) y que la sincronización PWA local está operativa.
+  * **[PROPAGACIÓN CORE]** Sincronizado en `App Ventas` y en la réplica de producción del cliente `ventas-moni-app`.
+- **Archivos modificados:**
+  * [Plantillas Core/App Ventas/src/pages/admin/AdminHome.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminHome.jsx) [MODIFY]
+  * [Instancias Clientes/ventas/ventas-moni-app/src/pages/admin/AdminHome.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/AdminHome.jsx) [MODIFY]
+
+## CORE-322: Sincronización Inmediata de Abonos en Panel de Administración
+- **Fecha:** 2026-07-08
+- **Tipo:** UI/UX / Estabilidad / Datos
+- **Descripción:** 
+  * Se corrigió la falta de actualización reactiva al registrar abonos o pagos totales de créditos desde el panel de administración (`AdminCredits.jsx`). Previamente, el listado paginado de créditos se almacenaba en un estado local desconectado del ciclo de éxito del mutation, obligando al administrador a recargar la página (F5) para ver reflejados los cambios de saldos o transiciones de estado de deudas a "pagado".
+  * **Estrategia de Solución:**
+    1. Se importó `useCallback` desde React y se encapsuló la función de carga paginada `loadPagedCredits` para evitar recreaciones de referencia infinitas.
+    2. Se configuró el `useEffect` para depender de esta función callback de manera estable.
+    3. Se inyectó la llamada a `loadPagedCredits()` en el callback de éxito `onSuccess` del hook mutation `addPayment`.
+  * **[PROPAGACIÓN CORE]** El parche fue propagado y verificado exitosamente tanto en `App Ventas` como en la réplica de cliente `ventas-moni-app`.
+- **Archivos modificados:**
+  * [Plantillas Core/App Ventas/src/pages/admin/AdminCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminCredits.jsx) [MODIFY]
+  * [Instancias Clientes/ventas/ventas-moni-app/src/pages/admin/AdminCredits.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/AdminCredits.jsx) [MODIFY]
+
+## CORE-321: Diseño Premium e Interactivo del Reverso de Tarjeta (Fidelización e Identificación QR)
+- **Fecha:** 2026-07-08
+- **Tipo:** UI/UX / Diseño Visual / Frontend / Interactividad
+- **Descripción:** 
+  * Se diseñó e implementó un reverso premium tridimensional para el componente `HolographicTiltCard` en la vista de créditos del cliente (`ClientCredits.jsx`).
+  * **Tarjeta de Identificación Escaneable (Estilo Apple Wallet / Starbucks):** Reemplacé la simulación del CVV por un **Código QR de Identificación del Cliente** generado de forma dinámica a partir de su número de celular usando la librería `qrcode` (`QRCode.toDataURL`). 
+  * **Interactividad y Zoom:** Al hacer clic sobre el código QR en el reverso, se previene la rotación de la tarjeta (`e.stopPropagation()`) y se abre un modal de zoom en pantalla completa con un difuminado de fondo (`backdrop-blur-md bg-black/80`). Este modal presenta el QR en alta definición y con alto contraste junto a la ficha de cliente (`user.nombre` y `user.celular`), facilitando que el cajero de la tienda física escanee el dispositivo para cargar la ficha de crédito en caja de forma instantánea.
+  * **Desacoplamiento de Marca (White Label):** Se removió el logo de `PROTOTIPE` del reverso y se inyectó la etiqueta `VIP MEMBER`, dejando la visualización 100% personalizada con marca blanca para los clientes del negocio final.
+  * La cara trasera incluye:
+    1. Banda magnética superior oscura con sombras internas.
+    2. Panel de firma manuscrita simulada con el nombre del cliente.
+    3. Caja de QR en miniatura interactiva con llamada a la acción "Tocar para ampliar".
+    4. Leyenda de validez de cuenta, nombre de la tienda (`appName`) y WhatsApp de soporte.
+    5. Insignia de fidelidad `VIP MEMBER`.
+  * **[PROPAGACIÓN CORE]** El cambio fue aplicado y validado tanto en la plantilla base de `App Ventas` como en la réplica de producción del cliente `ventas-moni-app`.
+- **Archivos modificados:**
+  * [Plantillas Core/App Ventas/src/pages/client/ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCredits.jsx) [MODIFY]
+  * [Instancias Clientes/ventas/ventas-moni-app/src/pages/client/ClientCredits.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/client/ClientCredits.jsx) [MODIFY]
+
+## CORE-320: Dinamización de Layouts y Mitigación de Warnings de Permisos en Sincronización
+- **Fecha:** 2026-07-08
+- **Tipo:** UI/UX / Estabilidad / Rendimiento / Firebase
+- **Descripción:** 
+  * **Optimización de Sección de Operaciones y Telemetría:** Se retiraron las alturas mínimas rígidas (`min-h-[460px]`) en el desglose de clientes y consola de telemetría de `App.jsx`, configurando el grid de soporte con `items-start`. Esto permite que la tarjeta de desglose se encoja o expanda de manera fluida y nativa adaptándose a la cantidad real de clientes (1 o múltiples), eliminando áreas vacías innecesarias.
+  * **Expansión y Estabilización de Gráfico en Primera Fila:** Se configuró la fila superior del Dashboard con `items-stretch` para que la tarjeta de *Comisiones Generales* iguale la altura de la del *Radar de Salud*. Se asignó un alto fijo de `320px` a `<ResponsiveContainer width="100%" height={320} minWidth={0}>` para solventar de raíz y permanentemente el warning de consola de Recharts (`width(-1) and height(-1) of chart should be greater than 0`) causado por race conditions de flexbox en la fase de medición inicial.
+  * **Mitigación del Warning [BillingSync] en Clientes:** Se inyectó una verificación inteligente `hasChanges` utilizando el Zustand store en `useAppConfigSync.js` de la plantilla base `App Ventas` y de la instancia de cliente `ventas-moni-app`. El hook ahora compara los parámetros de facturación centrales con los locales en memoria antes de intentar escribir en Firestore. Esto erradica por completo la advertencia `Missing or insufficient permissions` provocada por intentos de sobreescritura redundantes en cuentas sin rol administrativo asignado (por ejemplo, clientes en el portal de créditos).
+- **Archivos modificados:**
+  * [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  * [Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+  * [Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js) [MODIFY]
+
+## CORE-312: Optimización de Layout y Monitoreo de Telemetría (Dashboard Central)
+- **Fecha:** 2026-07-08
+- **Tipo:** UI/UX / Layout / Telemetría
+- **Descripción:** 
+  * Reestructurado el layout del dashboard en 3 filas horizontales balanceadas para optimizar el espacio visual:
+    1. Sección de Métricas: Gráfico de Comisiones Generales (2/3 de ancho) y Radar de Salud de Instancias (1/3 de ancho).
+    2. Sección Operativa y Monitoreo (Grid de 50/50): Listado de Desglose de Clientes con scroll vertical acotado (max-h-380px) a la izquierda, y Consola de Telemetría (telemetry_monitor.sh) a la derecha, logrando simetría y eliminando espacios vacíos.
+    3. Sección Financiera: Simulador de Proyecciones de Ingresos a ancho completo (100%).
+  * Corregido un ReferenceError de runtime al remover una propiedad `onClick` de AreaChart que apuntaba a una función inexistente.
+- **Archivos modificados:** [App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx)
+
 ## CORE-286: Sincronización en Caliente de Errores Manuales
 - **Fecha:** 2026-07-08
 - **Tipo:** Telemetría / UX / Código
