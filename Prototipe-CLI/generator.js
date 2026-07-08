@@ -1661,7 +1661,34 @@ test-results/
   }
 
   const step5_2 = ora('Generar reglas de almacenamiento storage.rules').start();
-  const storageRulesContent = `rules_version = '2';\nservice firebase.storage {\n  match /b/{bucket}/o {\n    match /{allPaths=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n`;
+  const storageRulesContent = `rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper de validación de administrador cruzando con Firestore
+    function isAdminUser() {
+      return request.auth != null &&
+        firestore.exists(/databases/(default)/documents/users/\$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/users/\$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Escrituras a recursos generales de marca o core requieren rol admin
+    match /brand/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdminUser();
+    }
+    match /core/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdminUser();
+    }
+
+    // El resto de los directorios de usuario
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+`;
   const storageRulesPath = path.join(targetDir, 'storage.rules');
   if (!(await fs.pathExists(storageRulesPath))) {
     await fs.writeFile(storageRulesPath, storageRulesContent, 'utf-8');
@@ -1680,7 +1707,46 @@ test-results/
     rulesContent = await fs.readFile(firestoreRulesPath, 'utf-8');
     isInherited = true;
   } else {
-    rulesContent = `rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n`;
+    rulesContent = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper de validación de administrador global
+    function isAdmin() {
+      return request.auth != null && 
+        exists(/databases/\$(database)/documents/users/\$(request.auth.uid)) &&
+        get(/databases/\$(database)/documents/users/\$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Aislamiento multitenant de la telemetría del cliente
+    match /clientes_control/{clientId} {
+      allow read: if request.auth != null && (clientId == request.auth.token.clientId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Colección de usuarios
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Telemetría y errores
+    match /app_failures/{failureId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+    match /reportesBilling/{reportId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Regla de fallback
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+`;
   }
 
   // Inyectar reglas específicas por módulo si están activos

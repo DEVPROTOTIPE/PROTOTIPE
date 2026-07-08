@@ -3904,8 +3904,74 @@ app.post('/api/register-core', async (req, res) => {
     await fs.writeFile(path.join(templatePath, '.gitkeep'), '', 'utf-8');
 
     // 4.1 Proporcionar archivos Firebase base en el Core
-    const firestoreRulesDefault = `rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n`;
-    const storageRulesDefault = `rules_version = '2';\nservice firebase.storage {\n  match /b/{bucket}/o {\n    match /{allPaths=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n`;
+    const firestoreRulesDefault = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper de validación de administrador global
+    function isAdmin() {
+      return request.auth != null && 
+        exists(/databases/\$(database)/documents/users/\$(request.auth.uid)) &&
+        get(/databases/\$(database)/documents/users/\$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Aislamiento multitenant de la telemetría del cliente
+    match /clientes_control/{clientId} {
+      allow read: if request.auth != null && (clientId == request.auth.token.clientId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Colección de usuarios
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Telemetría y errores
+    match /app_failures/{failureId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+    match /reportesBilling/{reportId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Regla de fallback
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+`;
+    const storageRulesDefault = `rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper de validación de administrador cruzando con Firestore
+    function isAdminUser() {
+      return request.auth != null &&
+        firestore.exists(/databases/(default)/documents/users/\$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/users/\$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Escrituras a recursos generales de marca o core requieren rol admin
+    match /brand/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdminUser();
+    }
+    match /core/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdminUser();
+    }
+
+    // El resto de los directorios de usuario
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+`;
     const firestoreIndexesDefault = JSON.stringify({ indexes: [], fieldOverrides: [] }, null, 2) + '\n';
     const firebaseJsonDefault = JSON.stringify({
       firestore: {
@@ -9523,9 +9589,75 @@ async function autoHealCoreRules(corePath, type, cloudRules) {
     console.log(`[Autocuración] Poblado "${fileName}" con las reglas activas de la nube.`);
   } else {
     if (type === 'firestore') {
-      contentToSave = `rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n`;
+      contentToSave = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper de validación de administrador global
+    function isAdmin() {
+      return request.auth != null && 
+        exists(/databases/\$(database)/documents/users/\$(request.auth.uid)) &&
+        get(/databases/\$(database)/documents/users/\$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Aislamiento multitenant de la telemetría del cliente
+    match /clientes_control/{clientId} {
+      allow read: if request.auth != null && (clientId == request.auth.token.clientId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Colección de usuarios
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Telemetría y errores
+    match /app_failures/{failureId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+    match /reportesBilling/{reportId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Regla de fallback
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+`;
     } else {
-      contentToSave = `rules_version = '2';\nservice firebase.storage {\n  match /b/{bucket}/o {\n    match /{allPaths=**} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}\n`;
+      contentToSave = `rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper de validación de administrador cruzando con Firestore
+    function isAdminUser() {
+      return request.auth != null &&
+        firestore.exists(/databases/(default)/documents/users/\$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/users/\$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Escrituras a recursos generales de marca o core requieren rol admin
+    match /brand/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdminUser();
+    }
+    match /core/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdminUser();
+    }
+
+    // El resto de los directorios de usuario
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+`;
     }
     console.log(`[Autocuración] Poblado "${fileName}" con plantilla restrictiva por defecto.`);
   }

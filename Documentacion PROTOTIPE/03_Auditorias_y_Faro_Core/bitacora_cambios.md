@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CLI-021: Endurecimiento Físico de Reglas de Seguridad (DEC-004)
+- **Fecha:** 2026-07-07
+- **Tipo:** Seguridad / Scaffolding / Código
+- **Estatus:** Completado.
+- **Descripción:** Modificar e integrar los templates estrictos de firestore.rules y storage.rules (RBAC y multitenant) en generator.js y server.js del CLI.
+- **Archivos modificados:** `generator.js`, `server.js`, `tareas_pendientes.md`, `bitacora_cambios.md`
+
 ## DOC-002: Documentación de Especificación CORS en Storage (DEC-005)
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación
