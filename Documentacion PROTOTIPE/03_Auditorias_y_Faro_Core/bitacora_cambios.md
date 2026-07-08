@@ -9,6 +9,20 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CLI-023: Inyección en Caliente de Componentes
+- **Fecha:** 2026-07-07
+- **Tipo:** Scaffolding / Automatización / Código
+- **Estatus:** Completado.
+- **Descripción:** Copiar JSX de la biblioteca recomendados directamente al Scaffold al finalizar la inicialización del proyecto.
+- **Archivos modificados:** `generator.js`, `tareas_pendientes.md`, `bitacora_cambios.md`
+
+## CLI-024: Automatización de Cuenta de Servicio IAM
+- **Fecha:** 2026-07-07
+- **Tipo:** Scaffolding / Google Cloud / Código
+- **Estatus:** Completado.
+- **Descripción:** Obtener y descargar programáticamente la clave de cuenta de servicio de Firebase vía API de IAM para depositarla en /scratch.
+- **Archivos modificados:** `generator.js`, `tareas_pendientes.md`, `bitacora_cambios.md`
+
 ## DOC-003: Documentación de Aislamiento Multitenant de Clientes Control (DEC-004)
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación

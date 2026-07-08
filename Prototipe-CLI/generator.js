@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import pc from 'picocolors';
+import os from 'os';
 import { execSync, spawn } from 'child_process';
 import { fileURLToPath, pathToFileURL } from 'url';
 import ora from 'ora';
@@ -2288,6 +2289,13 @@ console.log('✅ Mapa de arquitectura para la IA generado.');
     console.warn(`[Auto-Map] No se pudo autogenerar el mapa de IA inicial: ${mapErr.message}`);
   }
 
+  // 7.0. Aprovisionar Cuenta de Servicio e Inyectar Componentes recomendados en caliente
+  const projectId = answers.projectId || answers.config?.projectId;
+  if (projectId) {
+    await createServiceAccountIAM(projectId, targetDir);
+  }
+  await injectSelectedComponents(answers, targetDir);
+
   // 7.1. Configurar package.json con el nombre del proyecto de marca blanca y el script de seed
   const stepPkg = ora('Configurando package.json y scripts de la marca').start();
   try {
@@ -3286,3 +3294,151 @@ async function generatePrototypeLock(answers, targetDir, clientId) {
     console.warn(pc.yellow(`[lock] No se pudo generar prototipe.lock.json: ${err.message}. Se generara en la proxima sincronizacion.`));
   }
 }
+
+/**
+ * Obtener token del Firebase CLI para llamadas REST
+ */
+function getDeveloperAccessToken() {
+  const possiblePaths = [
+    path.join(os.homedir(), '.config', 'configstore', 'firebase-tools.json'),
+    path.join(process.env.APPDATA || '', 'configstore', 'firebase-tools.json')
+  ];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      try {
+        const data = JSON.parse(fs.readFileSync(p, 'utf-8'));
+        if (data.tokens && data.tokens.access_token) {
+          return data.tokens.access_token;
+        }
+      } catch (_) {}
+    }
+  }
+  return null;
+}
+
+/**
+ * Automatiza la creación de una cuenta de servicio vía API IAM de GCP y guarda su JSON en /scratch
+ */
+async function createServiceAccountIAM(projectId, targetDir) {
+  const stepSA = ora('Aprovisionar cuenta de servicio de Google Cloud vía API IAM...').start();
+  const token = getDeveloperAccessToken();
+  
+  if (!token) {
+    stepSA.warn('⚠️ No se pudo obtener el token de sesión de Firebase CLI. Omitiendo creación automática de cuenta de servicio.');
+    return;
+  }
+
+  const accountId = 'app-seeding-acct';
+  const email = `${accountId}@${projectId}.iam.gserviceaccount.com`;
+  const scratchDir = path.join(targetDir, 'scratch');
+  const serviceAccountJsonPath = path.join(scratchDir, 'firebase-service-account.json');
+
+  try {
+    // 1. Crear Cuenta de Servicio
+    const createUrl = `https://iam.googleapis.com/v1/projects/${projectId}/serviceAccounts`;
+    const createRes = await fetch(createUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        accountId: accountId,
+        serviceAccount: {
+          displayName: 'Cuenta de Seeding Automatica del CLI'
+        }
+      })
+    });
+
+    if (!createRes.ok) {
+      const errData = await createRes.json();
+      // Si el error es 409 (ya existe), ignoramos pacíficamente
+      if (createRes.status !== 409) {
+        throw new Error(errData.error?.message || 'Fallo al crear cuenta de servicio.');
+      }
+    }
+
+    // 2. Crear Key JSON
+    const keyUrl = `https://iam.googleapis.com/v1/projects/${projectId}/serviceAccounts/${email}/keys`;
+    const keyRes = await fetch(keyUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!keyRes.ok) {
+      const errData = await keyRes.json();
+      throw new Error(errData.error?.message || 'Fallo al generar llave de cuenta de servicio.');
+    }
+
+    const keyData = await keyRes.json();
+    if (!keyData.privateKeyData) {
+      throw new Error('La respuesta de la API no contiene privateKeyData.');
+    }
+
+    // Decodificar Base64
+    const decodedJson = Buffer.from(keyData.privateKeyData, 'base64').toString('utf8');
+    
+    // Asegurar directorio y escribir archivo
+    await fs.ensureDir(scratchDir);
+    await fs.writeFile(serviceAccountJsonPath, decodedJson, 'utf-8');
+    stepSA.succeed('Cuenta de servicio firebase-service-account.json generada correctamente en /scratch.');
+  } catch (err) {
+    stepSA.warn(`⚠️ [API IAM] No se pudo aprovisionar la cuenta de servicio de forma desatendida: ${err.message}`);
+  }
+}
+
+/**
+ * Inyecta en caliente los componentes recomendados copiando los JSX de la biblioteca al Scaffold
+ */
+async function injectSelectedComponents(answers, targetDir) {
+  if (!Array.isArray(answers.selectedRecomendations) || answers.selectedRecomendations.length === 0) {
+    return;
+  }
+
+  const stepInj = ora('Inyectar en caliente componentes recomendados de la biblioteca...').start();
+  let count = 0;
+
+  for (const rec of answers.selectedRecomendations) {
+    if (!rec.link) continue;
+    
+    // Normalizar ruta del link en Windows
+    const linkPath = path.resolve(rec.link);
+    if (!fs.existsSync(linkPath)) continue;
+
+    try {
+      const mdContent = await fs.readFile(linkPath, 'utf8');
+
+      // 1. Extraer targetPath de metadatos JSON
+      const jsonMatch = mdContent.match(/<!--\s*(\{[\s\S]*?\})\s*-->/);
+      if (!jsonMatch) continue;
+
+      const meta = JSON.parse(jsonMatch[1]);
+      const targetPath = meta.targetPath;
+      if (!targetPath) continue;
+
+      // 2. Extraer Código React
+      const codeMatch = mdContent.match(/```(?:jsx|javascript)\s*\n([\s\S]*?)\n```/i);
+      if (!codeMatch) continue;
+
+      const codeContent = codeMatch[1];
+      const destinationPath = path.join(targetDir, targetPath);
+
+      // Crear directorio e inyectar JSX
+      await fs.ensureDir(path.dirname(destinationPath));
+      await fs.writeFile(destinationPath, codeContent, 'utf-8');
+      count++;
+    } catch (err) {
+      console.warn(pc.yellow(`  ⚠️ No se pudo inyectar en caliente el componente "${rec.name}": ${err.message}`));
+    }
+  }
+
+  if (count > 0) {
+    stepInj.succeed(`Inyectados en caliente ${count} componentes recomendados directamente en el Scaffold.`);
+  } else {
+    stepInj.info('No se inyectaron componentes recomendados (no se encontró código funcional en las fichas).');
+  }
+}
+

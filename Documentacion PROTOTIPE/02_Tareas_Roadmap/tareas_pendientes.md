@@ -1,5 +1,23 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CLI-023: Inyección en Caliente de Componentes (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Copiar físicamente los archivos JSX de la biblioteca recomendados al Scaffold al finalizar la inicialización del proyecto.
+  - Archivos:
+    - [generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-024: Automatización de Cuenta de Servicio IAM (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Solicitar y descargar la cuenta de servicio de Firebase de forma programática a través de la API IAM y guardarla en /scratch.
+  - Archivos:
+    - [generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
 * **[x] ~~Tarea DOC-003: Documentación de Aislamiento Multitenant de Clientes Control (DEC-004) (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
