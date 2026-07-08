@@ -11,9 +11,10 @@
 * **[x] ~~Tarea CORE-284: Depuración e Integridad de ID de Cliente en Firestore (2026-07-08)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-08
-  - Descripción: Corregido el duplicado en el Directorio del CRM de Clientes. El documento del cliente en la colección `clientes_control` estaba indexado bajo el ID `moni-app`, mientras que los reportes de telemetría y su carpeta física utilizan `ventas-moni-app` como identificador único. Se migró y reindexó el documento a `ventas-moni-app` y se depuró la clave obsoleta.
+  - Descripción: Corregido el duplicado en el Directorio del CRM de Clientes. El documento del cliente en la colección `clientes_control` estaba indexado bajo el ID `moni-app`, mientras que los reportes de telemetría y su carpeta física utilizan `ventas-moni-app` como identificador único. Se migró y reindexó el documento a `ventas-moni-app` y se depuró la clave obsoleta. Se actualizó además el metadato del CLI (`.prototipe.json`) de la instancia física para unificar su ID.
   - Archivos:
     - Base de datos Firestore Ecosistema: Colección `clientes_control` [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/.prototipe.json](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/.prototipe.json) [MODIFY]
 
 * **[x] ~~Tarea CORE-283: Saneamiento de PIN de Desarrollo y Clave Maestra (2026-07-08)~~**
   - Estatus: Completado.

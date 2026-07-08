@@ -16,6 +16,7 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
   * Corregida la duplicidad del cliente ventas-moni en la vista del CRM de Clientes. 
   * Se identificó un desfase entre el ID del documento en `clientes_control` (`moni-app`) y el identificador que utiliza la instancia local y envía en los reportes de facturación (`ventas-moni-app`).
   * Se procedió a clonar el registro de `moni-app` en un nuevo documento con la clave correcta `ventas-moni-app` y a purgar el registro con la clave desactualizada.
+  * Se actualizó el archivo de metadatos de sincronización del CLI (`.prototipe.json`) de la instancia de cliente para apuntar al `clientId` unificado `ventas-moni-app`, logrando que la consola de sincronización muestre la paridad y estado correcto del cliente sin solicitar un re-registro redundante.
 
 ## CORE-283: Saneamiento de PIN de Desarrollo y Clave Maestra
 - **Fecha:** 2026-07-08

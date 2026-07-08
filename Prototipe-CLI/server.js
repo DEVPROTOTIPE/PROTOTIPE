@@ -8859,6 +8859,20 @@ app.get('/api/instancias/list', async (req, res) => {
         try { 
           meta = await fs.readJson(metaPath); 
           meta = validatePrototipeMetadata(meta, folderName);
+          
+          // [AUTO-HEAL] Sincronizar clientId con el definido en .env.local para evitar desalineaciones si la carpeta es renombrada
+          const envPath = path.join(fullPath, '.env.local');
+          if (await fs.pathExists(envPath)) {
+            const envContent = await fs.readFile(envPath, 'utf-8');
+            const match = envContent.match(/VITE_DEVELOPER_CLIENT_ID\s*=\s*(.*)/);
+            if (match) {
+              const envClientId = match[1].trim().replace(/['"]/g, '');
+              if (envClientId && meta.clientId !== envClientId) {
+                meta.clientId = envClientId;
+                await fs.writeJson(metaPath, meta, { spaces: 2 });
+              }
+            }
+          }
         } catch (_) { 
           return null; 
         }
