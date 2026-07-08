@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## DOC-002: Documentación de Especificación CORS en Storage (DEC-005)
+- **Fecha:** 2026-07-07
+- **Tipo:** Documentación
+- **Estatus:** Completado.
+- **Descripción:** Registrar el payload JSON CORS y el resolvedor dinámico de fallback de Storage en el manual de configuración de marca de los inquilinos.
+- **Archivos modificados:** `manual_brand_config.md`, `tareas_pendientes.md`, `bitacora_cambios.md`, `mapa_documentacion_ia.md`
+
 ## DOC-001: Documentación de Storage Preflight Check (DEC-003)
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación

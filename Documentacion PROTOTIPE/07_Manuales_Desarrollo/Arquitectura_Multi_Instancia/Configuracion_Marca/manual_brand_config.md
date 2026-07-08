@@ -65,6 +65,25 @@ Una vez sembrada la base de datos, inicia el servidor de desarrollo local:
    ```
 La aplicación leerá de inmediato la configuración sembrada en Firestore y configurará el tema visual por defecto (`morado-premium`).
 
+### Paso 4: Configuración CORS de Firebase Storage (DEC-005)
+Para que el frontend de la marca pueda cargar y renderizar recursos (como imágenes de catálogo, logos personalizados, firmas digitales o mermas con fotos) desde el Storage sin bloqueos de origen cruzado (CORS), se debe aplicar una política CORS en el bucket utilizando `gsutil`.
+
+1. **Setup Automático vía Express Backend:**
+   El backend Express del CLI Bridge (`server.js`) expone el endpoint `POST /api/project/firebase/cors-setup` que automatiza esta inyección. Utiliza una caché en memoria (`storageBucketCache`) y cuenta con fallback automático de conmutación de `.appspot.com` a `.firebasestorage.app` en caso de error 404.
+
+2. **Payload JSON CORS Aplicado:**
+   El payload inyectado en Google Cloud Storage a través de `gsutil` contiene la siguiente estructura de cabeceras obligatoria:
+   ```json
+   [
+     {
+       "origin": ["http://localhost:5173", "http://localhost:3000", "http://localhost:5174"],
+       "method": ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+       "responseHeader": ["Content-Type", "Authorization", "x-goog-meta-custom-header"],
+       "maxAgeSeconds": 3600
+     }
+   ]
+   ```
+
 ---
 
 ## 4. Preguntas Frecuentes y Solución de Problemas (Troubleshooting)
