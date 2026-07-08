@@ -9,6 +9,20 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-305: Integración de Configuración de Pasarela en Ajustes de Desarrollador
+- **Fecha:** 2026-07-07
+- **Tipo:** Implementación / Panel de Control
+- **Descripción:** Se agregaron los controles interactivos para activar/desactivar la pasarela de pagos en línea e indexar el procesador de pago local (Bold, Wompi, Mercado Pago) en el formulario de configuración de módulos de la pestaña Developer (`DeveloperSettings.jsx`) en App Ventas, sincronizando los cambios en la base de datos de configuración del cliente de Firebase.
+- **Archivo modificado:** `Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx`
+
+
+## CORE-304: Implementación de Módulo B2C de Créditos, Abonos Online y Extractos PDF
+- **Fecha:** 2026-07-07
+- **Tipo:** Implementación / B2C
+- **Descripción:** Se completó el Portal de Créditos del Cliente Final (B2C) en `ClientCredits.jsx` en App Ventas. Se integró la opción de abonos en línea seguros por tarjeta/PSE vinculándola al simulador interactivo de pasarelas, se inyectó el recálculo dinámico de saldos locales y se habilitó la descarga en caliente de extractos financieros en formato PDF compilados dinámicamente con jsPDF.
+- **Archivo modificado:** `Plantillas Core/App Ventas/src/pages/client/ClientCredits.jsx`
+
+
 ## CORE-303: Integración Elástica de Pasarelas de Pago Online en Catálogo Base
 - **Fecha:** 2026-07-07
 - **Tipo:** Implementación / E-Commerce

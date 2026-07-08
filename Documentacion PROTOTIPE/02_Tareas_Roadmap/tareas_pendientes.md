@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-305: Integración de Configuración de Pasarela en Ajustes de Desarrollador (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se agregaron los switches de activación de la pasarela online y selectores de procesador (Bold/Wompi/MP) en el formulario de configuración de módulos de la pestaña Developer de ajustes del administrador.
+  - Archivos: [Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-303: Integración Elástica de Pasarelas de Pago Online en Catálogo Base (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
