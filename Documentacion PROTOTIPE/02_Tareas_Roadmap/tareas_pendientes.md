@@ -1,5 +1,14 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-317: Endurecimiento de Seguridad y Gobernanza (AGENTS.md) (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Inyectar la sección obligatoria de directivas de seguridad y gobernanza Firebase (DEC-003 a DEC-006) en AGENTS.md, cubriendo la prohibición de Cloud Functions, chequeo preflight de Storage, políticas CORS y RBAC estricto.
+  - Archivos:
+    - [AGENTS.md](file:///d:/PROTOTIPE/.agents/AGENTS.md) [MODIFY]
+    - [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-313: Creación de Manual de Onboarding para Desarrolladores Junior (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-317: Endurecimiento de Seguridad y Gobernanza (AGENTS.md)
+- **Fecha:** 2026-07-07
+- **Tipo:** Seguridad / Gobernanza / Documentación
+- **Estatus:** Completado.
+- **Descripción:** Endurecimiento e inyección en AGENTS.md de las políticas y directivas de seguridad de Firebase y Storage asociadas a DEC-003, DEC-005 y DEC-006 (prohibición de Cloud Functions, preflight checks, CORS y RBAC de Firestore).
+- **Archivos modificados:** `AGENTS.md`, `tareas_pendientes.md`, `bitacora_cambios.md`
+
 ## CORE-316: Mitigación de Riesgos y Disaster Recovery (NotebookLM Audit)
 - **Fecha:** 2026-07-07
 - **Tipo:** Refactorización / Código / Documentación

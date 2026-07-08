@@ -401,3 +401,39 @@ Al completar:
 
 Omitir la pre-creación de tarea antes de modificar código es una **violación crítica de consistencia** equivalente a omitir la actualización de bitácora. Se penaliza con la misma severidad que el estándar de documentación ya vigente.
 
+
+---
+
+## ESTÁNDAR DE SEGURIDAD Y GOBERNANZA DE FIREBASE (OBLIGATORIO)
+
+Para garantizar la estabilidad presupuestaria (costo $0 USD) y la robustez transaccional de PROTOTIPE, todo agente IA debe obedecer estrictamente las siguientes directivas de seguridad, API y base de datos:
+
+### 23.1 Prohibición Absoluta de Cloud Functions (DEC-006)
+- **Directiva:** Queda estrictamente prohibido al agente proponer, codificar, inicializar o desplegar servicios basados en Firebase Cloud Functions en entornos de desarrollo, staging o producción.
+- **Razón:** Toda lógica operativa debe resolverse del lado del cliente (React) o mediante el motor local del CLI Bridge. Los reportes de telemetría y cobros mensuales deben persistirse de forma directa a Firestore Central (`reportesBilling` y `app_failures`) a través de `centralFirebaseService.js`, apuntando localmente en modo desarrollo a `http://localhost:3001` únicamente para diagnósticos visuales.
+
+### 23.2 Preflight Check y Control CORS en Storage (DEC-003 y DEC-005)
+- **Storage Preflight Check:** Antes de inyectar o compilar componentes que requieran subida de imágenes o adjuntos (como selectores de productos, firmas digitales, mermas con fotos), la IA debe validar preventivamente la disponibilidad y permisos del bucket del cliente mediante peticiones HTTP HEAD silenciosas y seguras. Si el bucket no responde, se debe suspender la acción y notificar al usuario.
+- **Configuración CORS Resiliente:** En scripts del CLI que configuren buckets, se debe automatizar la inyección CORS vía `gsutil` soportando tanto el bucket `.appspot.com` principal como el fallback `.firebasestorage.app`. El JSON exacto de la política CORS obligatoria que se debe inyectar es:
+  ```json
+  [
+    {
+      "origin": ["*"],
+      "method": ["GET", "POST", "PUT", "DELETE", "HEAD"],
+      "responseHeader": ["Content-Type", "Authorization", "x-goog-meta-filename", "x-goog-meta-uuid"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+  ```
+
+### 23.3 Restricción Estricta RBAC de Escrituras (Firestore y Storage)
+- **Regla Firestore de Acceso Admin:** Todo flujo administrativo sensible (eliminar registros, purgar logs, modificar saldos base de clientes) debe exigir de forma mandatoria que el `uid` autenticado del usuario exista en el documento `/users/{uid}` con el atributo exacto `role: 'admin'`. No se permite confiar en parámetros o banderas booleanas del lado del cliente.
+- **Regla Storage de Acceso Admin:** Se prohíbe el uso de políticas de Storage abiertas del tipo `allow write: if request.auth != null;` para directorios sensibles del sistema (ej: carpetas de configuración, logos de marca, recursos del core). La subida a estas ubicaciones requiere obligatoriamente verificar el rol admin mediante un cruce de reglas físicas Firestore (ej. `get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'`).
+
+### 23.4 Privacidad y Aislamiento Multitenant (clientes_control)
+- **Directiva:** Queda terminantemente prohibido configurar reglas de Firestore Central abiertas del tipo `allow read: if true;` sobre colecciones multitenant críticas como `/clientes_control/`.
+- **Implementación Física:** El acceso a la telemetría, facturación y esquemas de HSL de cada cliente se debe restringir a nivel de base de datos obligando a que la consulta valide de forma atómica:
+  1. El ID del cliente (`clientId`).
+  2. El token secreto del desarrollador (`telemetryToken`).
+  Ninguna aplicación cliente debe poder listar transversalmente registros de otros inquilinos.
+
