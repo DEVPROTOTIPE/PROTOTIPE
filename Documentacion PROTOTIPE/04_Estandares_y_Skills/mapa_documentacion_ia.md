@@ -1,5 +1,16 @@
 # 🗺️ Mapa Semántico del Sistema de Documentación (Para la IA)
 
+```yaml
+# INDEXADOR SEMÁNTICO RÁPIDO PROTOTIPE (Ahorro de Tokens)
+docs_roots:
+  01_Control_Versiones: [arquitectura_git.md]
+  02_Tareas_Roadmap: [tareas_pendientes.md, control_creacion_componentes.md, plan_extraccion_componentes.md]
+  03_Auditorias_y_Faro_Core: [bitacora_cambios.md, bitacora_cambios_historico_hasta_2026-07-06.md, auditoria_ecosistema_actual.md, registro_errores_bugs.md, reporte_auditoria_ecosistema_completo.md]
+  04_Estandares_y_Skills: [mapa_aplicacion.md, mapa_documentacion_ia.md, protocolo_colaboracion_ia.md, protocolo_rollback_autonomo_ia.md, prompt_maestro_descubrimiento.md]
+  06_Biblioteca_Componentes: [README.md]
+  07_Manuales_Desarrollo: [manual_contribucion_desarrollador_monorepo.md, diagrama_flujo_ecosistema.md, diccionario_tecnico_completo.md, manual_y_auditoria_completa_prototipe_2026.md]
+```
+
 > [!IMPORTANT]
 > **INSTRUCCIONES DE NAVEGACIÓN Y USO ESTRATÉGICO PARA LA IA:**
 > Este archivo es tu GPS global y de toma de decisiones. Contiene metadatos técnicos estructurados de todo el directorio `D:\PROTOTIPE\Documentacion PROTOTIPE\`.
@@ -58,6 +69,7 @@
 | **plan_sincronizacion_cores.md (dev-dashboard)** | Plan de Sincronización y Deploy | **Para sincronizar o desplegar en lote:** Guía detallada para la integración del CoreSyncPanel en el dashboard y el aislamiento de deploys en carpetas físicas de clientes. | [Ver Plan Sincronización](file:///D:/PROTOTIPE/Central%20PROTOTIPE/Documentacion%20dev-dashboard/plan_sincronizacion_cores.md) |
 | **mapa_documentacion_ia.md** | GPS Semántico de la Documentación | **Obligatorio para ubicar cualquier manual:** GPS de la IA para referenciar instantáneamente cualquier componente de la biblioteca, estándar o bitácora de cambios. Sincronizado: 2026-07-06 (CORE-268-GIT-STABILIZATION-COMPLETED). | [Ver Mapa Semántico](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) |
 | **protocolo_colaboracion_ia.md** | Protocolo de Colaboración IA | **Para operar con IAs externas:** Manual del bucle cerrado de Peer Review y Prompt Maestro de Inicialización para entrenar instantáneamente a cualquier IA de razonamiento externo. | [Ver Protocolo de Colaboración](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md) |
+| **protocolo_rollback_autonomo_ia.md** | Protocolo de Rollback IA | **Obligatorio ante fallos recurrentes de compilación o build:** Manual de rescate cognitivo y límites de reversión física autorizada de archivos para evitar bucles. | [Ver Protocolo de Rollback](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/protocolo_rollback_autonomo_ia.md) |
 | **prompt_maestro_descubrimiento.md** | Prompt Maestro de Descubrimiento (Briefing) | **Para estructurar nuevas ideas de Apps con IAs externas:** Prompt optimizado para ChatGPT/Claude que mapea ideas vagas a un Manifiesto Técnico JSON de aprovisionamiento en base al catálogo y verticales de PROTOTIPE. | [Ver Prompt Maestro](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/prompt_maestro_descubrimiento.md) |
 
 

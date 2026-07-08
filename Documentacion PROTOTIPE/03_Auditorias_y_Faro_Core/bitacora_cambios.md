@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-309: Protocolo de Rollback para IA e Indexación Semántica
+- **Fecha:** 2026-07-07
+- **Tipo:** Documentación / Control de Calidad IA
+- **Estatus:** Completado.
+- **Descripción:** Se creó el archivo protocolo_rollback_autonomo_ia.md para definir el protocolo de restauración segura y límites de descarte de archivos autorizados por el programador. Adicionalmente, se inyectó el indexador semántico minificado en YAML en la cabecera de mapa_documentacion_ia.md, reduciendo el consumo de tokens y optimizando búsquedas RAG.
+- **Archivos modificados:** `protocolo_rollback_autonomo_ia.md`, `mapa_documentacion_ia.md`
+
 ## CORE-308: Potenciación del Diagrama de Flujo de Arquitectura y Mermaid
 - **Fecha:** 2026-07-07
 - **Tipo:** Documentación / Diseño Visual

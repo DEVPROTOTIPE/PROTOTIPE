@@ -1,5 +1,13 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-309: Protocolo de Rollback para IA e Indexación Semántica (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se diseña el protocolo_rollback_autonomo_ia.md como manual de rescate cognitivo y se inyecta el Header YAML de indexación rápida en mapa_documentacion_ia.md para optimizar tokens.
+  - Archivos:
+    - [protocolo_rollback_autonomo_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/protocolo_rollback_autonomo_ia.md) [NEW]
+    - [mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-308: Potenciación del Diagrama de Flujo de Arquitectura y Mermaid (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
