@@ -1,5 +1,14 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-318: Alineación de Reglas de IA (GEMINI.md) (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Replicar la sección de directivas de seguridad y gobernanza de Firebase (DEC-003 a DEC-006) en el archivo central de resguardo GEMINI.md para mantener la alineación de todas las IAs en el monorepo.
+  - Archivos:
+    - [GEMINI.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md) [MODIFY]
+    - [tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-317: Endurecimiento de Seguridad y Gobernanza (AGENTS.md) (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07

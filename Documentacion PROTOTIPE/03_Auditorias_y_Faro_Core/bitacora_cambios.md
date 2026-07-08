@@ -9,6 +9,13 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-318: Alineación de Reglas de IA (GEMINI.md)
+- **Fecha:** 2026-07-07
+- **Tipo:** Seguridad / Gobernanza / Documentación
+- **Estatus:** Completado.
+- **Descripción:** Sincronización e inyección en el archivo central GEMINI.md del estándar de seguridad y gobernanza de Firebase (DEC-003 a DEC-006) para garantizar consistencia.
+- **Archivos modificados:** `GEMINI.md`, `tareas_pendientes.md`, `bitacora_cambios.md`
+
 ## CORE-317: Endurecimiento de Seguridad y Gobernanza (AGENTS.md)
 - **Fecha:** 2026-07-07
 - **Tipo:** Seguridad / Gobernanza / Documentación
