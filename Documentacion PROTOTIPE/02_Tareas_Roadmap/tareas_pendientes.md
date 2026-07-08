@@ -1,5 +1,11 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-293: Saneamiento de Placeholders - Contexto de Negocio Real de App Ventas (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se reemplazó la plantilla vacía autogenerada de `contexto_negocio.md` en el directorio de documentación del Core de App Ventas por las directivas de negocio reales (crédito, caja, stock y KPIs).
+  - Archivos: [Plantillas Core/App Ventas/Documentacion App Ventas/contexto_negocio.md](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/contexto_negocio.md) [MODIFY]
+
 * **[x] ~~Tarea CORE-292: Sincronización del Mapa Semántico de Documentación de la IA (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
