@@ -2871,6 +2871,7 @@
     - [appConfigService.js (template-core-seed)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/appConfigService.js) [MODIFY]
     - [appConfigStore.js (template-core-seed)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js) [MODIFY]
     - [generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [toggle_maintenance.js](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/toggle_maintenance.js) [NEW]
     - [ClientCredits.jsx (App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCredits.jsx) [MODIFY] (Saneamiento de sintaxis)
     - [ClientCredits.jsx (template-ventas)](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/client/ClientCredits.jsx) [MODIFY] (Saneamiento de sintaxis)
     - [DeveloperSettings.jsx (App Ventas)](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY] (Saneamiento de sintaxis)

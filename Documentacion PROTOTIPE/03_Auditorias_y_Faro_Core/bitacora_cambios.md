@@ -12,12 +12,14 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 ## CORE-319: Resiliencia ante Exceso de Cuotas y Modo Mantenimiento Global
 - **Fecha:** 2026-07-08
 - **Tipo:** Estabilidad / Resiliencia / Código
-- **Descripción:** Implementar el bloqueo de Modo Mantenimiento global (bloqueante en App.jsx) e interceptación de excepciones de cuotas de Firestore en tiempo real (`resource-exhausted`) para habilitar el modo de solo lectura local de forma transversal en el monorepo.
+- **Descripción:** Implementar el bloqueo de Modo Mantenimiento global (bloqueante en App.jsx) e interceptación de excepciones de cuotas de Firestore en tiempo real (`resource-exhausted`) para habilitar el modo de solo lectura local de forma transversal.
 - **Saneamiento Pre-existente:**
   * Corregido un token de cierre huérfano `)}` por `</div>` en `ClientCredits.jsx` que causaba fallos sintácticos en el build de producción.
   * Corregida la línea truncada del switch de garantías en `DeveloperSettings.jsx` cerrando correctamente las etiquetas HTML para posibilitar compilaciones limpias.
   * Agregado el import faltante de `motion` en `App.jsx` de `template-core-seed` para resolver fallos de linter no-undef.
-- **Archivos modificados:** `App.jsx` (App Ventas, template-ventas, template-core-seed), `appConfigService.js` (App Ventas, template-ventas, template-core-seed), `appConfigStore.js` (App Ventas, template-ventas, template-core-seed), `generator.js`, `ClientCredits.jsx` (App Ventas, template-ventas), `DeveloperSettings.jsx` (App Ventas, template-ventas), `tareas_pendientes.md`, `bitacora_cambios.md`
+- **Automatización CLI:**
+  * Creado el script CLI de soporte `toggle_maintenance.js` para consultar y conmutar el Modo Mantenimiento de cualquier cliente inquilino en 1 segundo mediante llamadas REST a la API de Firestore.
+- **Archivos modificados:** `App.jsx` (App Ventas, template-ventas, template-core-seed), `appConfigService.js` (App Ventas, template-ventas, template-core-seed), `appConfigStore.js` (App Ventas, template-ventas, template-core-seed), `generator.js`, `toggle_maintenance.js` (NEW), `ClientCredits.jsx` (App Ventas, template-ventas), `DeveloperSettings.jsx` (App Ventas, template-ventas), `tareas_pendientes.md`, `bitacora_cambios.md`
 
 ## CLI-025: Autenticación OAuth2 Unificada en el Dashboard (Google/GitHub)
 - **Fecha:** 2026-07-08
