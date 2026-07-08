@@ -3,10 +3,18 @@
 * **[x] ~~Tarea CORE-329: Lupa Zoom en Detalle de Producto y QR Público (2026-07-08)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-08
-  - Descripción: Integrada la funcionalidad de lupa interactiva de la biblioteca directamente en la vista de detalle de producto (`ProductDetailPage.jsx`) y en la vista de acceso público por código QR (`ProductPublicDetail.jsx`). Admite interacción hover en escritorio y movimientos táctiles en móvil, respetando el swipe de imágenes.
+  - Descripción:
+    * **Lupa Interactiva:** Integrada la funcionalidad de lupa interactiva de la biblioteca directamente en la vista de detalle de producto (`ProductDetailPage.jsx`) y en la vista de acceso público por código QR (`ProductPublicDetail.jsx`). Admite interacción hover en escritorio y movimientos táctiles en móvil, respetando el swipe de imágenes.
+    * **Corrección de Segmentación de Chunks (Windows Backslash & React Context Bug):**
+      - Se normalizaron las rutas de Rollup reemplazando barras invertidas (`\`) por diagonales (`/`) para evitar que `react` se empaquetara de manera incorrecta bajo Windows.
+      - Se unificaron React, React DOM, React Router, Zustand y TanStack Query en un único bundle consolidado denominado `vendor`, erradicando por completo las alertas de dependencias circulares y asegurando la carga correcta en servidores de hosting de producción (previniendo el error `Cannot read properties of undefined (reading 'createContext')`).
   - Archivos:
+    - [Plantillas Core/App Ventas/vite.config.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/vite.config.js) [MODIFY]
     - [Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
     - [Plantillas Core/App Ventas/src/pages/client/ProductPublicDetail.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/vite.config.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/vite.config.js) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/pages/client/ProductDetailPage.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/pages/client/ProductPublicDetail.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
 
 * **[x] ~~Tarea CORE-328: Cuatro Blindajes de Calidad y Robustez Operativa (2026-07-08)~~**
   - Estatus: Completado.
