@@ -12,6 +12,12 @@
   - Descripción: Se agregaron los switches de activación de la pasarela online y selectores de procesador (Bold/Wompi/MP) en el formulario de configuración de módulos de la pestaña Developer de ajustes del administrador.
   - Archivos: [Plantillas Core/App Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/settings/sections/DeveloperSettings.jsx) [MODIFY]
 
+* **[x] ~~Tarea CORE-304: Implementación de Módulo B2C de Créditos, Abonos Online y Extractos PDF (2026-07-07)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+  - Descripción: Se completó el Portal de Créditos del Cliente Final (B2C) en ClientCredits.jsx en App Ventas, integrando abonos online simulados por Bold/PSE y descargas de extractos de cuenta en PDF.
+  - Archivos: [Plantillas Core/App Ventas/src/pages/client/ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCredits.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-303: Integración Elástica de Pasarelas de Pago Online en Catálogo Base (2026-07-07)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-07
