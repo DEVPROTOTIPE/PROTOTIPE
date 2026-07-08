@@ -276,6 +276,14 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+// Middleware para interceptar errores de parseo de JSON mal formado y evitar caídas del Bridge CLI
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    console.warn('[Express Parser Warning] Payload JSON mal formado o caracteres no escapados recibidos. Ignorado de forma segura.');
+    return res.status(400).json({ error: 'Payload JSON mal formado.' });
+  }
+  next();
+});
 
 function hexToHsl(hex) {
   hex = hex.replace(/^#/, '');
