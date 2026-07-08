@@ -12,7 +12,7 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 ## CLI-025: Autenticación OAuth2 Unificada en el Dashboard (Google/GitHub)
 - **Fecha:** 2026-07-08
 - **Tipo:** Seguridad / Autenticación / Código
-- **Estatus:** En progreso.
+- **Estatus:** Completado.
 - **Descripción:** Desarrollar la Autenticación OAuth2 unificada en el Dashboard para eliminar los logins por consola y transmitir credenciales al Bridge.
 - **Archivos modificados:** `generator.js`, `server.js`, `App.jsx`, `firebase.js`, `tareas_pendientes.md`, `bitacora_cambios.md`
 

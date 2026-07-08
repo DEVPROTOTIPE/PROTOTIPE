@@ -1,7 +1,7 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
-* **[/] Tarea CLI-025: Autenticación OAuth2 Unificada en el Dashboard (Google/GitHub) (2026-07-08)**
-  - Estatus: En progreso.
+* **[x] ~~Tarea CLI-025: Autenticación OAuth2 Unificada en el Dashboard (Google/GitHub) (2026-07-08)~~**
+  - Estatus: Completado.
   - Fecha: 2026-07-08
   - Descripción: Desarrollar la Autenticación OAuth2 unificada en el Dashboard para eliminar los logins por consola y transmitir credenciales al Bridge.
   - Archivos:
