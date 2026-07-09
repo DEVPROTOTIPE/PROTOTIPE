@@ -9,6 +9,50 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const configPath = path.join(__dirname, 'notification_config.json');
 
+const logFilePath = path.join(__dirname, 'notification_server.log');
+function writeToLogFile(level, args) {
+  const timestamp = new Date().toISOString();
+  const message = args.map(arg => {
+    if (arg instanceof Error) return arg.stack || arg.message;
+    if (typeof arg === 'object') {
+      try { return JSON.stringify(arg); } catch (_) { return String(arg); }
+    }
+    return String(arg);
+  }).join(' ');
+  const logLine = `[${timestamp}] [${level}] ${message}\n`;
+  try {
+    fs.appendFileSync(logFilePath, logLine, 'utf8');
+  } catch (_) {}
+}
+
+const originalLog = console.log;
+const originalError = console.error;
+const originalWarn = console.warn;
+
+console.log = (...args) => {
+  originalLog(...args);
+  writeToLogFile('INFO', args);
+};
+console.error = (...args) => {
+  originalError(...args);
+  writeToLogFile('ERROR', args);
+};
+console.warn = (...args) => {
+  originalWarn(...args);
+  writeToLogFile('WARN', args);
+};
+
+// Manejo global de excepciones para evitar caídas del proceso hijo
+process.on('uncaughtException', (err) => {
+  console.error('[Notify Service] Error no capturado (uncaughtException):', err.message || err);
+  if (err.stack) console.error(err.stack);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Notify Service] Promesa rechazada no manejada (unhandledRejection):', reason?.message || reason);
+  if (reason?.stack) console.error(reason.stack);
+});
+
 // Caché de configuración en memoria con valores por defecto
 let systemConfig = {
   alertsEnabled: false,
@@ -62,7 +106,18 @@ process.on('message', (msg) => {
   }
 });
 
+// Escapa caracteres especiales HTML para textos de usuario antes de insertar en mensajes con parse_mode HTML
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 // Helper para enviar alertas a Telegram (Raw)
+// Si Telegram devuelve un error 400 de parseo HTML, reintenta en modo texto plano
 async function sendTelegramMessage(token, chatId, text, replyMarkup = null) {
   if (!token || !chatId) return;
   const payload = {
@@ -73,15 +128,48 @@ async function sendTelegramMessage(token, chatId, text, replyMarkup = null) {
   if (replyMarkup) {
     payload.reply_markup = replyMarkup;
   }
-  const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  let response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
     body: JSON.stringify(payload)
   });
 
+  // Fallback: si el HTML está mal formado (400), reenviar en texto plano sin parse_mode
   if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Telegram (${response.status}): ${errText}`);
+    const rawBody = await response.text().catch(() => '');
+    let errData = {};
+    try {
+      errData = JSON.parse(rawBody);
+    } catch (_) {
+      errData = { description: rawBody || String(response.status) };
+    }
+
+    const isHtmlError = response.status === 400 &&
+      (errData.description?.includes('parse') || errData.description?.includes('HTML') || errData.description?.includes('entities'));
+    
+    if (isHtmlError) {
+      console.warn('[Telegram] HTML parse error — reintentando en modo texto plano:', errData.description?.slice(0, 120));
+      // Limpiar etiquetas HTML del texto para el fallback
+      const plainText = text
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+      const plainPayload = { chat_id: chatId, text: plainText };
+      if (replyMarkup) plainPayload.reply_markup = replyMarkup;
+      
+      const retryResponse = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        body: JSON.stringify(plainPayload)
+      });
+
+      if (!retryResponse.ok) {
+        const retryBody = await retryResponse.text().catch(() => String(retryResponse.status));
+        throw new Error(`Telegram (${retryResponse.status}): ${retryBody}`);
+      }
+    } else {
+      throw new Error(`Telegram (${response.status}): ${rawBody}`);
+    }
   }
 }
 
@@ -99,23 +187,40 @@ async function sendDiscordMessage(webhookUrl, content) {
   }
 }
 
+let lastConfigReadTime = 0;
+function getSystemConfig() {
+  const now = Date.now();
+  if (now - lastConfigReadTime > 2000) {
+    if (fs.existsSync(configPath)) {
+      try {
+        const raw = fs.readFileSync(configPath, 'utf8');
+        systemConfig = JSON.parse(raw);
+        lastConfigReadTime = now;
+      } catch (_) {}
+    }
+  }
+  return systemConfig;
+}
+
 // Helper para obtener configuración específica de un canal con fallback general
 function getChannelConfig(channelName) {
-  const channel = systemConfig.channels?.[channelName] || {};
+  const config = getSystemConfig();
+  const channel = config.channels?.[channelName] || {};
   const hasChannelCreds = !!(channel.telegramToken || channel.discordWebhookUrl);
   
   return {
-    telegramToken: (hasChannelCreds ? channel.telegramToken : systemConfig.telegramToken) || '',
-    telegramChatId: (hasChannelCreds ? channel.telegramChatId : systemConfig.telegramChatId) || '',
-    discordWebhookUrl: (hasChannelCreds ? channel.discordWebhookUrl : systemConfig.discordWebhookUrl) || '',
-    enabled: systemConfig.alertsEnabled && (channel.enabled !== false)
+    telegramToken: (hasChannelCreds ? channel.telegramToken : config.telegramToken) || '',
+    telegramChatId: (hasChannelCreds ? channel.telegramChatId : config.telegramChatId) || '',
+    discordWebhookUrl: (hasChannelCreds ? channel.discordWebhookUrl : config.discordWebhookUrl) || '',
+    enabled: config.alertsEnabled && (channel.enabled !== false)
   };
 }
 
 // ─── Control de Acceso: Whitelist de Chat IDs ───
 // Si no hay allowedChatIds configurados → modo abierto (retrocompatible).
 function isAuthorized(chatId, command) {
-  const auth = systemConfig.auth || {};
+  const config = getSystemConfig();
+  const auth = config.auth || {};
   const allowed = (auth.allowedChatIds || []).map(Number);
   const admins  = (auth.adminChatIds  || []).map(Number);
   const adminCmds = auth.requireAdminCommands || [
@@ -126,6 +231,23 @@ function isAuthorized(chatId, command) {
   if (allowed.length === 0) return { ok: true };
 
   const numId = Number(chatId);
+
+  // Admitir temporalmente deep-links privados si provienen de un grupo autorizado
+  if (command && command.startsWith('/start ')) {
+    const payload = command.split(' ')[1] || '';
+    if (payload.startsWith('addtask_') || payload.startsWith('searchtasks_')) {
+      const groupChatId = Number(payload.split('_')[1]);
+      if (groupChatId && allowed.includes(groupChatId)) {
+        return { ok: true };
+      }
+    }
+  }
+
+  // Permitir la interacción si el usuario se encuentra en un estado conversacional activo
+  if (userStates[numId]) {
+    return { ok: true };
+  }
+
   if (!allowed.includes(numId)) return { ok: false, reason: 'not_allowed' };
 
   const needsAdmin = adminCmds.some(c => (command || '').startsWith(c));
@@ -912,6 +1034,196 @@ async function getClientInstancesList() {
   }
 }
 
+// ─── Helpers de Telemetría (Facturación / Billing mensual) ───
+
+async function getTelemetryReport(clientId, periodStr = null) {
+  try {
+    const token = await getFirebaseAccessToken();
+    const projectId = process.env.VITE_DEVELOPER_CENTRAL_PROJECT_ID || 'prototipe-ecosistema-control';
+    
+    // Si se pasa 'any', buscaremos el más reciente sin importar periodo
+    const isAny = periodStr === 'any';
+    const now = new Date();
+    const period = periodStr || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const docId = `${clientId}_${period}`;
+    
+    if (!isAny) {
+      const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/reportesBilling/${docId}`;
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const docData = await response.json();
+        return parseFirestoreDocument(docData);
+      }
+      
+      if (response.status !== 404) {
+        throw new Error(`REST Error (${response.status})`);
+      }
+    }
+
+    // Intentar buscar el reporte más reciente de este cliente mediante query
+    const queryUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`;
+    const queryBody = {
+      structuredQuery: {
+        from: [{ collectionId: 'reportesBilling' }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: 'clientId' },
+            op: 'EQUAL',
+            value: { stringValue: clientId }
+          }
+        },
+        orderBy: [{ field: { fieldPath: 'updatedAt' }, direction: 'DESCENDING' }],
+        limit: 1
+      }
+    };
+    const queryRes = await fetch(queryUrl, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(queryBody)
+    });
+    
+    if (queryRes.ok) {
+      const queryData = await queryRes.json();
+      const docs = Array.isArray(queryData) ? queryData.filter(d => d.document) : [];
+      if (docs.length > 0) {
+        return parseFirestoreDocument(docs[0].document);
+      }
+    }
+    return null;
+  } catch (err) {
+    console.error(`[Notify Service] Error en getTelemetryReport para ${clientId}:`, err.message);
+    throw err;
+  }
+}
+
+async function getTelemetryStatusMsg(clientId) {
+  try {
+    const report = await getTelemetryReport(clientId);
+    if (!report) {
+      return {
+        text: `📊 <b>Telemetría — ${clientId}</b>\n\n` +
+              `❌ <b>No hay reportes de telemetría de facturación (Billing) registrados.</b>\n` +
+              `<i>El sistema no ha recibido ninguna transmisión para este cliente en el periodo actual o anterior.</i>`,
+        success: false
+      };
+    }
+
+    const updatedAtStr = formatFirestoreDate(report.updatedAt);
+    
+    // Calcular tiempo transcurrido desde el último envío
+    let ageStr = 'desconocida';
+    if (report.updatedAt) {
+      const updatedMs = typeof report.updatedAt.toMillis === 'function' 
+        ? report.updatedAt.toMillis() 
+        : new Date(report.updatedAt).getTime();
+      if (!isNaN(updatedMs)) {
+        const diffMs = Date.now() - updatedMs;
+        const diffHours = diffMs / (1000 * 60 * 60);
+        if (diffHours < 1) {
+          const diffMins = Math.floor(diffMs / (1000 * 60));
+          ageStr = `hace ${diffMins} minutos`;
+        } else if (diffHours < 24) {
+          ageStr = `hace ${Math.floor(diffHours)} horas`;
+        } else {
+          ageStr = `hace ${Math.floor(diffHours / 24)} días`;
+        }
+      }
+    }
+
+    const formatCurrency = (val) => {
+      if (val === undefined || val === null) return '$ 0.00';
+      return `$ ${Number(val).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    };
+
+    const text = `📊 <b>Telemetría — ${clientId}</b>\n` +
+                 `📅 Periodo: <code>${report.periodo || 'N/A'}</code>\n` +
+                 `⏱️ Último envío: <b>${updatedAtStr}</b> (<code>${ageStr}</code>)\n\n` +
+                 `💰 <b>Facturación & Volumen:</b>\n` +
+                 `• Total Ventas: <b>${formatCurrency(report.totalVentas)}</b>\n` +
+                 `• Ventas Netas: <b>${formatCurrency(report.totalVentasNetas)}</b>\n` +
+                 `• Impuestos: <b>${formatCurrency(report.totalImpuestos)}</b>\n` +
+                 `• Cantidad Pedidos: <code>${report.orderCount || 0} pedidos</code>\n` +
+                 `• Facturas DIAN: <code>${report.facturasDianCount || 0}</code>\n\n` +
+                 `⚙️ <b>Configuración:</b>\n` +
+                 `• Modo de Cobro: <code>${report.billingMode || 'percentage'}</code>\n` +
+                 `• Facturación Electrónica: <code>${report.enableDianBilling ? 'Activada ✓' : 'Desactivada ✗'}</code>\n` +
+                 `• Schema Version: <code>v${report.schemaVersion || 1}</code>`;
+
+    return { text, success: true, report };
+  } catch (err) {
+    return {
+      text: `❌ <b>Error al consultar telemetría para <code>${clientId}</code>:</b>\n<code>${err.message}</code>`,
+      success: false
+    };
+  }
+}
+
+async function getTelemetryCheckReport() {
+  try {
+    const clients = await getClientInstancesList();
+    if (clients.length === 0) {
+      return '⚠️ No se encontraron clientes registrados en el CLI local.';
+    }
+
+    const now = new Date();
+    const currentPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    let reportText = `🩺 <b>Auditoría del Sistema de Telemetría (Mes: ${currentPeriod})</b>\n\n` +
+                     `Verificación de recepción de telemetría de facturación (Billing) mensual:\n\n`;
+
+    let activeCount = 0;
+    let inactiveCount = 0;
+
+    for (const clientId of clients) {
+      try {
+        const telemetry = await getTelemetryReport(clientId, currentPeriod);
+        if (telemetry) {
+          const updatedMs = typeof telemetry.updatedAt.toMillis === 'function' 
+            ? telemetry.updatedAt.toMillis() 
+            : new Date(telemetry.updatedAt).getTime();
+          let ageStr = 'hace poco';
+          if (!isNaN(updatedMs)) {
+            const diffMs = Date.now() - updatedMs;
+            const diffHours = diffMs / (1000 * 60 * 60);
+            if (diffHours < 24) {
+              ageStr = `hoy`;
+            } else {
+              ageStr = `hace ${Math.floor(diffHours / 24)}d`;
+            }
+          }
+          const orders = telemetry.orderCount || 0;
+          reportText += `✅ <code>${clientId}</code>: **Recibido** (<code>${ageStr}</code>, <code>${orders} ped</code>)\n`;
+          activeCount++;
+        } else {
+          // Intentar ver si tiene algún reporte de meses anteriores
+          const oldTelemetry = await getTelemetryReport(clientId, 'any');
+          if (oldTelemetry) {
+            reportText += `⚠️ <code>${clientId}</code>: **Desactualizado** (Periodo anterior: <code>${oldTelemetry.periodo}</code>)\n`;
+          } else {
+            reportText += `❌ <code>${clientId}</code>: **Sin datos** (Nunca ha transmitido)\n`;
+          }
+          inactiveCount++;
+        }
+      } catch (err) {
+        reportText += `⚠️ <code>${clientId}</code>: **Error de conexión** (<code>${err.message}</code>)\n`;
+        inactiveCount++;
+      }
+    }
+
+    reportText += `\n📊 <b>Resumen de Cobertura:</b>\n` +
+                  `• Transmitiendo este mes: <b>${activeCount}/${clients.length}</b>\n` +
+                  `• Pendientes o sin datos: <b>${inactiveCount}/${clients.length}</b>\n\n` +
+                  `<i>Para enviar telemetría manualmente, ingresa a la pestaña "Desarrollador" en el CRM del cliente y presiona "Enviar Telemetría".</i>`;
+
+    return reportText;
+  } catch (err) {
+    return `❌ <b>Error al realizar la auditoría de telemetría:</b>\n<code>${err.message}</code>`;
+  }
+}
+
 // ─── Formatters de Git (Sprint 1) ───
 
 async function getGitTargetsList() {
@@ -1008,6 +1320,101 @@ async function generateAutoCommitMessage(repoPath) {
     return '';
   }
 }
+
+async function getTaskDetailReport(taskId) {
+  const res = await fetch('http://localhost:3001/api/roadmap').catch(() => null);
+  if (!res?.ok) return '❌ Error al consultar el Roadmap.';
+  const data = await res.json();
+  const tasks = data.tasks || [];
+  const t = tasks.find(x => x.id?.toLowerCase() === taskId.trim().toLowerCase());
+  if (!t) return `⚠️ No se encontró ninguna tarea con el ID <code>${taskId}</code> en el Roadmap.`;
+
+  // Los detalles están en t.detail (estructura real de la API /api/roadmap)
+  const det = t.detail || {};
+  const fecha      = det.fecha      || t.fecha || t.date || '';
+  const fechaFin   = det.fechaFin   || t.fechaFin || '';
+  const descripcion = det.descripcion || t.descripcion || [];
+  const archivos   = det.archivos   || t.archivos || [];
+
+  const statusLabel    = t.completed ? '✅ Completada' : '⏳ Pendiente';
+  const registeredDate = fecha    ? `\n📅 Registrada: <code>${escapeHtml(fecha)}</code>`    : '';
+  const completedDate  = fechaFin ? `\n📅 Finalizada: <code>${escapeHtml(fechaFin)}</code>` : '';
+
+  let descLabel = '';
+  if (descripcion.length > 0) {
+    descLabel = `\n💬 <b>Descripción:</b>\n${descripcion.map(d => `• ${escapeHtml(d)}`).join('\n')}`;
+  } else if (t.text) {
+    // Fallback: mostrar el texto del título como descripción
+    const cleanText = t.text.replace(/^Tarea\s+[\w-]+:\s*/i, '').trim();
+    descLabel = `\n💬 <b>Descripción:</b>\n• ${escapeHtml(cleanText)}`;
+  }
+
+  let filesLabel = '';
+  if (archivos.length > 0) {
+    const actionIcons = { MODIFY: '📝', NEW: '➕', DELETE: '🗑️' };
+    filesLabel = `\n\n📁 <b>Archivos afectados:</b>\n${archivos.map(f => `${actionIcons[f.action] || '📝'} <code>${escapeHtml(f.name)}</code>`).join('\n')}`;
+  }
+
+  return `ℹ️ <b>Detalle de Tarea — ${escapeHtml(t.id)}</b>\n\n` +
+         `🔹 <b>Estado:</b> ${statusLabel}${registeredDate}${completedDate}` +
+         `${descLabel}${filesLabel}`;
+}
+
+
+function normalizeText(str) {
+  if (!str) return '';
+  return str
+    .toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+async function searchTasksInRoadmap(query) {
+  const res = await fetch('http://localhost:3001/api/roadmap').catch(() => null);
+  if (!res?.ok) return '❌ Error al consultar el Roadmap.';
+  const data = await res.json();
+  const tasks = data.tasks || [];
+  
+  const qClean = normalizeText(query);
+  const words = qClean.split(/\s+/).filter(w => w.length > 1);
+
+  if (words.length === 0 && qClean.length > 0) {
+    words.push(qClean);
+  }
+
+  const matches = tasks.filter(t => {
+    const fieldsToSearch = [
+      t.id,
+      t.text,
+      t.rawText,
+      t.rawLine,
+      ...(t.descripcion || [])
+    ].map(f => normalizeText(f)).join(' ');
+
+    return words.every(word => fieldsToSearch.includes(word));
+  });
+
+  if (matches.length === 0) {
+    return `🔍 <b>Búsqueda de Tareas</b>\n\n❌ No se encontraron coincidencias para: "<i>${query}</i>"\n<i>Intenta con palabras clave más simples (ej. pdf, backup, deploy).</i>`;
+  }
+
+  let text = `🔍 <b>Coincidencias encontradas (${matches.length}):</b>\n\n`;
+  const displayLimit = 12;
+  matches.slice(0, displayLimit).forEach(t => {
+    const icon = t.completed ? '✅' : '⏳';
+    const safeText = escapeHtml(t.text || t.id);
+    const statusLabel = t.completed ? `<s>${safeText}</s>` : `<b>${safeText}</b>`;
+    text += `${icon} <b>${t.id}</b>: ${statusLabel}\n`;
+  });
+
+  if (matches.length > displayLimit) {
+    text += `\n<i>... y ${matches.length - displayLimit} coincidencias más. Escribe algo más específico.</i>`;
+  }
+  return text;
+}
+
 
 async function executeGitPush(token, chatId, repoPath) {
   const msgId = await sendJobMessage(token, chatId,
@@ -1304,8 +1711,8 @@ async function startTelegramCommandPolling() {
 
       for (const update of data.result) {
         botOffsets[token] = update.update_id + 1;
-        
-        let text = '';
+        try {
+          let text = '';
         let chatId = null;
         let queryId = null;
 
@@ -1325,11 +1732,15 @@ async function startTelegramCommandPolling() {
           }).catch(() => {});
         }
 
+        if (text) {
+          console.log(`[Telegram Polling] Update recibido | Token: ${token.slice(0, 8)}... | Chat: ${chatId} | Text: ${text}`);
+        }
         if (!text) continue;
 
         // ─── Verificación de Autorización ───
         const authResult = isAuthorized(chatId, text);
         if (!authResult.ok) {
+          console.warn(`[Telegram Access Denied] Intento no autorizado del Chat ID: ${chatId} (Causa: ${authResult.reason}) | Comando: ${text}`);
           // Solo informar si es usuario conocido sin nivel admin suficiente
           if (authResult.reason === 'not_admin') {
             await sendTelegramMessage(token, chatId,
@@ -1341,37 +1752,53 @@ async function startTelegramCommandPolling() {
 
         // Interceptación de estados conversacionales (Máquina de Estados)
         if (userStates[chatId] && userStates[chatId].step === 'AWAITING_TEXT' && !queryId) {
-          // Si el mensaje es una cancelación explícita
           if (text.toLowerCase() === 'cancelar' || text.toLowerCase() === '/cancelar') {
             delete userStates[chatId];
-            await sendTelegramMessage(token, chatId, '❌ <b>Creación Cancelada:</b> Se ha cancelado el asistente de tareas.');
+            await sendTelegramMessage(token, chatId, '❌ <b>Búsqueda Finalizada:</b> Has salido del modo búsqueda.');
             continue;
           }
 
-          const { domain, groupChatId } = userStates[chatId];
-          // Guardar en el Bridge local
-          const res = await fetch(`http://localhost:3001/api/roadmap/add`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text, domain })
-          }).catch(() => null);
-          
-          if (!res || !res.ok) {
-            const errData = res ? await res.json().catch(() => ({})) : {};
-            await sendTelegramMessage(token, chatId, `❌ Error al agregar la tarea: ${errData.error || 'Fallo de red'}`);
-          } else {
-            const data = await res.json();
-            const taskId = data.id || domain;
-            await sendTelegramMessage(token, chatId,
-              `🆕 <b>Tarea Creada con Éxito</b>\n\nID: <code>${taskId}</code> registrado en <code>tareas_pendientes.md</code>.`);
-            // Si fue iniciado desde un grupo via deep-link, confirmar allí también
+          const { context, domain, groupChatId } = userStates[chatId];
+
+          if (context === 'search_task') {
+            const report = await searchTasksInRoadmap(text);
+            const textResponse = `${report}\n\n<i>✍️ Escribe otro término para seguir buscando en el Roadmap, o presiona <b>Finalizar Búsqueda</b> para salir.</i>`;
+            const backMarkup = {
+              inline_keyboard: [
+                [{ text: '❌ Finalizar Búsqueda', callback_data: '/tasks' }],
+                [{ text: '🏠 Menú Principal', callback_data: '/start' }]
+              ]
+            };
+            await sendTelegramMessage(token, chatId, textResponse, backMarkup);
             if (groupChatId && groupChatId !== chatId) {
-              await sendTelegramMessage(token, groupChatId,
-                `🆕 <b>Tarea Creada desde Chat Privado</b>\n\nID: <code>${taskId}</code> \u2014 <i>${text.slice(0, 80)}${text.length > 80 ? '...' : ''}</i>`
-              ).catch(() => {});
+              await sendTelegramMessage(token, groupChatId, `🔍 <b>Búsqueda realizada en chat privado por operador (Término: "${text}"):</b>\n\n${report}`, backMarkup).catch(() => {});
+            }
+          } else {
+            // Flujo de creación de tarea
+            delete userStates[chatId]; // Limpiar estado al procesar la entrada
+            const res = await fetch(`http://localhost:3001/api/roadmap/add`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text, domain: domain || 'CORE' })
+            }).catch(() => null);
+            
+            if (!res || !res.ok) {
+              const errData = res ? await res.json().catch(() => ({})) : {};
+              await sendTelegramMessage(token, chatId, `❌ Error al agregar la tarea: ${errData.error || 'Fallo de red'}`);
+            } else {
+              const data = await res.json();
+              const taskId = data.id || domain;
+              await sendTelegramMessage(token, chatId,
+                `🆕 <b>Tarea Creada con Éxito</b>\n\nID: <code>${taskId}</code> registrado en <code>tareas_pendientes.md</code>.`);
+              // Si fue iniciado desde un grupo via deep-link, confirmar allí también
+              if (groupChatId && groupChatId !== chatId) {
+                await sendTelegramMessage(token, groupChatId,
+                  `🆕 <b>Tarea Creada desde Chat Privado</b>\n\nID: <code>${taskId}</code> \u2014 <i>${text.slice(0, 80)}${text.length > 80 ? '...' : ''}</i>`
+                ).catch(() => {});
+              }
             }
           }
-          
+          continue;
         }
 
         // ─── Interceptor AWAITING_CONFIRM (confirmación de acciones destructivas) ───
@@ -1399,6 +1826,10 @@ async function startTelegramCommandPolling() {
         }
 
         if (text.startsWith('/')) {
+          if (userStates[chatId]?.context === 'search_task') {
+            delete userStates[chatId];
+          }
+
           const parts = text.split(' ');
           const rawCmd = parts[0].toLowerCase().split('@')[0];
           const arg = parts.slice(1).join(' ').trim();
@@ -1419,17 +1850,32 @@ async function startTelegramCommandPolling() {
             continue;
           }
 
+          if (rawCmd === '/start' && arg && arg.startsWith('searchtasks_')) {
+            // Deep-link desde grupo: searchtasks_{groupChatId}
+            const parts = arg.split('_');
+            const groupChatId = parts[1] ? Number(parts[1]) : null;
+            userStates[chatId] = { step: 'AWAITING_TEXT', context: 'search_task', groupChatId };
+            await sendTelegramMessage(token, chatId,
+              `🔍 <b>Búsqueda de Tareas en el Roadmap</b>\n\n` +
+              `Escribe la palabra clave o término que deseas buscar en <code>tareas_pendientes.md</code>:\n\n` +
+              `<i>(Escribe "cancelar" para abortar)</i>`
+            );
+            continue;
+          }
+
           if (rawCmd === '/start' || rawCmd === '/help' || rawCmd === '/ayuda') {
             const helpText = `👋 <b>Asistente de Control de PROTOTIPE</b>\n\n` +
                              `Toca los botones o envía comandos para controlar la consola CLI remotamente:\n\n` +
-                             `🩺 <b>Salud & Estado:</b>\n` +
+                             `🩺 <b>Salud &amp; Estado:</b>\n` +
                              `• <code>/status</code> - Latencia y estado PWA de clientes.\n` +
                              `• <code>/crashes</code> - Últimos 5 fallos críticos.\n\n` +
-                             `📝 <b>Briefing & Preventas:</b>\n` +
+                             `📝 <b>Briefing &amp; Preventas:</b>\n` +
                              `• <code>/leads</code> - Preventas completadas.\n\n` +
-                             `💰 <b>Facturación:</b>\n` +
-                             `• <code>/billing</code> - Resumen financiero.\n\n` +
-                             `⚙️ <b>DevOps & Hosting:</b>\n` +
+                             `💰 <b>Facturación &amp; Telemetría:</b>\n` +
+                             `• <code>/billing</code> - Resumen financiero global.\n` +
+                             `• <code>/telemetria [cliente]</code> - Estado de recepción y reporte de telemetría mensual.\n` +
+                             `• <code>/telemetria_check</code> - Auditoría de cobertura de telemetría.\n\n` +
+                             `⚙️ <b>DevOps &amp; Hosting:</b>\n` +
                              `• <code>/clientes</code> - Lista de clientes en el CLI.\n` +
                              `• <code>/deploy [cliente]</code> - Compilar y desplegar.\n` +
                              `• <code>/logs</code> - Últimos logs del servidor.\n\n` +
@@ -1437,19 +1883,22 @@ async function startTelegramCommandPolling() {
                              `• <code>/git</code> - Status, log, commits sin push, publicar.\n\n` +
                              `🖥️ <b>Dev Server Vite:</b>\n` +
                              `• <code>/devserver [cliente]</code> - Estado, arrancar, detener.\n\n` +
-                             `⚡ <b>Optimización & Parches:</b>\n` +
+                             `⚡ <b>Optimización &amp; Parches:</b>\n` +
                              `• <code>/fix [cliente]</code> - Dividir chunks, restablecer PWA.\n` +
                              `• <code>/rules</code> - Matriz de desviación y deploy de reglas Firebase.\n\n` +
                              `🧪 <b>Verificación E2E:</b>\n` +
                              `• <code>/tests</code> - Resultados de pruebas Playwright.\n\n` +
                              `📦 <b>Semillas Cores:</b>\n` +
                              `• <code>/cores</code> - Inventario y rutas de cores registrados.\n\n` +
-                             `📋 <b>Roadmap & Tareas:</b>\n` +
+                             `📋 <b>Roadmap &amp; Tareas:</b>\n` +
                              `• <code>/tasks</code> - Tareas pendientes.\n` +
                              `• <code>/addtask</code> - Agregar tarea con asistente.\n\n` +
                              `🔧 <b>Configuración:</b>\n` +
-                             `• <code>/maintenance</code> - Modo mantenimiento.\n` +
-                             `• <code>/integrity</code> - Diagnóstico de consistencia y drifts.`;
+                             `• <code>/maintenance</code> - Modo mantenimiento.\n\n` +
+                             `🔍 <b>Diagnóstico &amp; Salud:</b>\n` +
+                             `• <code>/integrity</code> - Diagnóstico completo de consistencia y drifts.\n` +
+                             `• <code>/integrity_autofix</code> - Reparar automáticamente todos los drifts fixables.\n` +
+                             `• <code>/health</code> - Ping de salud a todos los clientes en producción.`;
             
             const replyMarkup = {
               inline_keyboard: [
@@ -1459,7 +1908,7 @@ async function startTelegramCommandPolling() {
                 ],
                 [
                   { text: '📝 Ver Preventas', callback_data: '/leads'   },
-                  { text: '💰 Facturación',  callback_data: '/billing'  }
+                  { text: '📊 Telemetría',    callback_data: '/telemetria' }
                 ],
                 [
                   { text: '🛠️ Git',           callback_data: '/git'      },
@@ -1482,7 +1931,8 @@ async function startTelegramCommandPolling() {
                   { text: '🔍 Diagnóstico',    callback_data: '/integrity' }
                 ],
                 [
-                  { text: '🪵 Ver Logs', callback_data: '/logs' }
+                  { text: '🩺 Salud Clientes', callback_data: '/health'    },
+                  { text: '🪵 Ver Logs',        callback_data: '/logs'      }
                 ]
               ]
             };
@@ -1508,6 +1958,51 @@ async function startTelegramCommandPolling() {
             const report = await getBillingSummaryReport();
             const backMarkup = { inline_keyboard: [[{ text: '🏠 Menú Principal', callback_data: '/start' }]] };
             await sendTelegramMessage(token, chatId, report, backMarkup);
+          } 
+          else if (rawCmd === '/telemetria') {
+            if (!arg) {
+              const list = await getClientInstancesList();
+              if (list.length === 0) {
+                const backMarkup = { inline_keyboard: [[{ text: '🏠 Menú Principal', callback_data: '/start' }]] };
+                await sendTelegramMessage(token, chatId, '⚠️ No se encontraron clientes registrados para verificar telemetría.', backMarkup);
+              } else {
+                const textMsg = `📊 <b>Auditoría de Telemetría</b>\n\nSelecciona el cliente del cual deseas obtener su último reporte de facturación transmitido:\n\n` +
+                                `<i>También puedes realizar una auditoría general de cobertura de todos los clientes.</i>`;
+                const replyMarkup = {
+                  inline_keyboard: [
+                    ...list.map(c => [{ text: `📊 ${c}`, callback_data: `/telemetria ${c}` }]),
+                    [{ text: '🩺 Auditoría de Cobertura', callback_data: '/telemetria_check' }],
+                    [{ text: '🏠 Menú Principal', callback_data: '/start' }]
+                  ]
+                };
+                await sendTelegramMessage(token, chatId, textMsg, replyMarkup);
+              }
+            } else {
+              const status = await getTelemetryStatusMsg(arg);
+              const replyMarkup = {
+                inline_keyboard: [
+                  [
+                    { text: '🔄 Refrescar', callback_data: `/telemetria ${arg}` },
+                    { text: '↩️ Volver', callback_data: '/telemetria' }
+                  ],
+                  [{ text: '🏠 Menú Principal', callback_data: '/start' }]
+                ]
+              };
+              await sendTelegramMessage(token, chatId, status.text, replyMarkup);
+            }
+          }
+          else if (rawCmd === '/telemetria_check') {
+            const report = await getTelemetryCheckReport();
+            const replyMarkup = {
+              inline_keyboard: [
+                [
+                  { text: '🔄 Re-auditar', callback_data: '/telemetria_check' },
+                  { text: '↩️ Volver', callback_data: '/telemetria' }
+                ],
+                [{ text: '🏠 Menú Principal', callback_data: '/start' }]
+              ]
+            };
+            await sendTelegramMessage(token, chatId, report, replyMarkup);
           } 
           else if (rawCmd === '/clientes') {
             const list = await getClientInstancesList();
@@ -1665,38 +2160,295 @@ async function startTelegramCommandPolling() {
               await sendTelegramMessage(token, chatId, '❌ Error al consultar la lista de tareas pendientes del Roadmap.');
             } else {
               const data = await res.json();
-              const pending = (data.tasks || []).filter(t => !t.completed);
+              let allTasks = data.tasks || [];
+              let filterDomain = arg ? arg.toUpperCase() : null;
+
+              if (filterDomain) {
+                allTasks = allTasks.filter(t => 
+                  t.id?.toUpperCase().startsWith(filterDomain) || 
+                  (t.domains && t.domains.includes(filterDomain))
+                );
+              }
+
+              const pending = allTasks.filter(t => !t.completed);
+              const filterTitle = filterDomain ? ` [Filtro: ${filterDomain}]` : '';
+
               if (pending.length === 0) {
                 const backMarkup = {
                   inline_keyboard: [
-                    [{ text: '🆕 Crear Tarea', callback_data: '/addtask' }],
+                    [
+                      { text: '🆕 Crear Tarea', callback_data: '/addtask' },
+                      { text: '🔍 Limpiar Filtro', callback_data: '/tasks' }
+                    ],
                     [{ text: '🏠 Menú Principal', callback_data: '/start' }]
                   ]
                 };
-                await sendTelegramMessage(token, chatId, '📋 <b>Roadmap de Tareas:</b>\n\n✅ ¡No hay tareas pendientes en <code>tareas_pendientes.md</code>! Todo al día.', backMarkup);
+                await sendTelegramMessage(token, chatId, `📋 <b>Roadmap de Tareas${filterTitle}:</b>\n\n✅ ¡No hay tareas pendientes! Todo al día.`, backMarkup);
               } else {
-                let text = `📋 <b>Tareas Pendientes (${pending.length}):</b>\n\n`;
-                const displayList = pending.slice(0, 8);
+                let text = `📋 <b>Tareas Pendientes${filterTitle} (${pending.length}):</b>\n\n`;
+                const displayList = pending.slice(0, 6);
                 displayList.forEach(t => {
-                  text += `• <b>${t.id}</b>: ${t.text || t.rawLine}\n`;
+                  text += `• <b>${t.id}</b>: ${escapeHtml(t.text || t.rawLine)}\n`;
                 });
-                if (pending.length > 8) {
-                  text += `\n<i>... y ${pending.length - 8} tareas más.</i>`;
+                if (pending.length > 6) {
+                  text += `\n<i>... y ${pending.length - 6} tareas más.</i>`;
                 }
-                
+
                 const replyMarkup = {
                   inline_keyboard: [
                     ...displayList.map(t => [
-                      { text: `✅ Completar ${t.id}`, callback_data: `/completetask ${t.lineIndex} ${t.id}` }
+                      { text: `ℹ️ Detalle ${t.id}`, callback_data: `/task_detail ${t.id}` },
+                      { text: `✅ Completar`, callback_data: `/completetask ${t.lineIndex} ${t.id}` }
                     ]),
                     [
                       { text: '🆕 Crear Tarea', callback_data: '/addtask' },
-                      { text: '🏠 Menú', callback_data: '/start' }
-                    ]
+                      { text: '✅ Ver Hechas', callback_data: '/tasks_completed' }
+                    ],
+                    [
+                      { text: '🔍 Filtrar', callback_data: '/tasks_filter' },
+                      { text: '🔎 Buscar', callback_data: '/tasks_search' }
+                    ],
+                    [{ text: '🏠 Menú Principal', callback_data: '/start' }]
                   ]
                 };
                 await sendTelegramMessage(token, chatId, text, replyMarkup);
               }
+            }
+          }
+          else if (rawCmd === '/tasks_completed') {
+            const res = await fetch('http://localhost:3001/api/roadmap').catch(() => null);
+            if (!res || !res.ok) {
+              await sendTelegramMessage(token, chatId, '❌ Error al consultar las tareas completadas.');
+            } else {
+              const data = await res.json();
+              const completed = (data.tasks || []).filter(t => t.completed);
+
+              if (completed.length === 0) {
+                const backMarkup = {
+                  inline_keyboard: [
+                    [{ text: '📋 Ver Pendientes', callback_data: '/tasks' }],
+                    [{ text: '🏠 Menú Principal', callback_data: '/start' }]
+                  ]
+                };
+                await sendTelegramMessage(token, chatId, '📋 <b>Historial de Tareas Hechas:</b>\n\nNo hay tareas completadas registradas en el Roadmap.', backMarkup);
+              } else {
+                let text = `✅ <b>Historial de Tareas Hechas (${completed.length}):</b>\n\n`;
+                const displayList = completed.slice(0, 6);
+                displayList.forEach(t => {
+                  text += `• <b>${t.id}</b>: <s>${escapeHtml(t.text || t.id)}</s>\n`;
+                });
+                if (completed.length > 6) {
+                  text += `\n<i>... y ${completed.length - 6} tareas completadas más.</i>`;
+                }
+
+                const replyMarkup = {
+                  inline_keyboard: [
+                    ...displayList.map(t => [
+                      { text: `ℹ️ Detalle ${t.id}`, callback_data: `/task_detail ${t.id}` },
+                      { text: `↩️ Reabrir`, callback_data: `/completetask ${t.lineIndex} ${t.id}` }
+                    ]),
+                    [
+                      { text: '📋 Ver Pendientes', callback_data: '/tasks' },
+                      { text: '📄 Exportar Historial', callback_data: '/tasks_export' }
+                    ],
+                    [{ text: '🏠 Menú Principal', callback_data: '/start' }]
+                  ]
+                };
+                await sendTelegramMessage(token, chatId, text, replyMarkup);
+              }
+            }
+          }
+          else if (rawCmd === '/tasks_export') {
+            const text = '📄 <b>Exportación de Historial de Tareas Hechas</b>\n\n' +
+                         'Selecciona el rango de tareas completadas que deseas exportar en un archivo Markdown (.md):\n\n' +
+                         '<i>El bot generará el archivo en caliente y te lo enviará como un adjunto descargable.</i>';
+            const replyMarkup = {
+              inline_keyboard: [
+                [
+                  { text: '⏱️ Últimas 10', callback_data: '/tasks_export_run 10' },
+                  { text: '📊 Últimas 50', callback_data: '/tasks_export_run 50' }
+                ],
+                [
+                  { text: '📈 Últimas 100', callback_data: '/tasks_export_run 100' },
+                  { text: '📚 Todas las Hechas', callback_data: '/tasks_export_run all' }
+                ],
+                [
+                  { text: '📋 Volver a Tareas', callback_data: '/tasks' },
+                  { text: '🏠 Menú Principal', callback_data: '/start' }
+                ]
+              ]
+            };
+            await sendTelegramMessage(token, chatId, text, replyMarkup);
+          }
+          else if (rawCmd === '/tasks_export_run') {
+            if (!arg) {
+              await sendTelegramMessage(token, chatId, '❌ Rango de exportación inválido.');
+            } else {
+              const res = await fetch('http://localhost:3001/api/roadmap').catch(() => null);
+              if (!res || !res.ok) {
+                await sendTelegramMessage(token, chatId, '❌ Error al consultar las tareas del Roadmap para exportación.');
+              } else {
+                const data = await res.json();
+                const completed = (data.tasks || []).filter(t => t.completed);
+
+                if (completed.length === 0) {
+                  await sendTelegramMessage(token, chatId, '📋 <b>Exportación Cancelada:</b> No hay tareas completadas en tu Roadmap.');
+                } else {
+                  let limit = arg === 'all' ? completed.length : parseInt(arg, 10);
+                  if (isNaN(limit)) limit = completed.length;
+
+                  const tasksToExport = completed.slice(0, limit);
+                  const rangeLabel = arg === 'all' ? 'Todas' : `Últimas ${limit}`;
+
+                  let md = `# 📄 Reporte de Tareas Completadas - PROTOTIPE\n`;
+                  md += `Generado automáticamente vía Telegram el: ${new Date().toLocaleDateString('es-ES')}\n`;
+                  md += `Rango de exportación: ${rangeLabel} (Total: ${tasksToExport.length} tareas)\n`;
+                  md += `========================================================================\n\n`;
+
+                  tasksToExport.forEach((t, index) => {
+                    // Los detalles de tarea están en t.detail (estructura de la API /api/roadmap)
+                    const d = t.detail || {};
+                    const fecha      = d.fecha      || t.fecha || t.date || '';
+                    const fechaFin   = d.fechaFin   || t.fechaFin || '';
+                    const estatus    = d.estatus    || (t.completed ? 'Completada' : 'Pendiente');
+                    const descripcion = d.descripcion || t.descripcion || [];
+                    const archivos   = d.archivos   || t.archivos || [];
+
+                    // Extraer solo el título limpio sin el prefijo "Tarea ID: "
+                    const cleanTitle = (t.text || t.rawLine || t.id)
+                      .replace(/^Tarea\s+[\w-]+:\s*/i, '')
+                      .replace(/~~|\*\*/g, '')
+                      .trim();
+
+                    md += `## [${index + 1}] ${t.id} — ${cleanTitle}\n`;
+                    md += `- **Estatus:** ${estatus}\n`;
+                    if (fecha)    md += `- **Fecha de Registro:** ${fecha}\n`;
+                    if (fechaFin) md += `- **Fecha de Finalización:** ${fechaFin}\n`;
+                    if (descripcion.length > 0) {
+                      md += `- **Descripción:**\n`;
+                      descripcion.forEach(line => {
+                        md += `  * ${line}\n`;
+                      });
+                    }
+                    if (archivos.length > 0) {
+                      md += `- **Archivos Afectados:**\n`;
+                      archivos.forEach(f => {
+                        md += `  * [${f.action || 'MODIFY'}] ${f.name}\n`;
+                      });
+                    }
+                    md += `\n------------------------------------------------------------------------\n\n`;
+                  });
+
+
+                  try {
+                    const formData = new FormData();
+                    formData.append('chat_id', chatId.toString());
+                    formData.append('caption', `📄 **Reporte de Tareas Hechas (${rangeLabel})**\n\nSe han exportado ${tasksToExport.length} tareas completadas en formato Markdown.`);
+                    
+                    const blob = new Blob([md], { type: 'text/markdown' });
+                    formData.append('document', blob, `tareas_completadas_${arg}.md`);
+
+                    const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendDocument`, {
+                      method: 'POST',
+                      body: formData
+                    });
+
+                    if (!tgRes.ok) {
+                      const tgErr = await tgRes.json().catch(() => ({}));
+                      console.error('[Telegram Export Error] Telegram API respondió con error:', tgErr);
+                      await sendTelegramMessage(token, chatId, `❌ Error al enviar el reporte por Telegram: ${tgErr.description || 'Fallo de red'}`);
+                    } else {
+                      const backMarkup = {
+                        inline_keyboard: [
+                          [
+                            { text: '📋 Ver Roadmap', callback_data: '/tasks' },
+                            { text: '🏠 Menú Principal', callback_data: '/start' }
+                          ]
+                        ]
+                      };
+                      await sendTelegramMessage(token, chatId, `✅ **Exportación Finalizada**\n\nTu archivo de reporte para el rango <code>${rangeLabel}</code> ha sido generado y enviado con éxito.`, backMarkup);
+                    }
+                  } catch (err) {
+                    console.error('[Telegram Export Exception]:', err.message);
+                    await sendTelegramMessage(token, chatId, `❌ Error interno al generar el documento: ${err.message}`);
+                  }
+                }
+              }
+            }
+          }
+          else if (rawCmd === '/tasks_filter') {
+            const text = '🔍 <b>Filtrar Tareas por Dominio</b>\n\nSelecciona el dominio de tareas que deseas ver:';
+            const replyMarkup = {
+              inline_keyboard: [
+                [
+                  { text: '🌐 CORE', callback_data: '/tasks CORE' },
+                  { text: '🛠️ CLI', callback_data: '/tasks CLI' }
+                ],
+                [
+                  { text: '🎨 DASH', callback_data: '/tasks DASH' },
+                  { text: '📐 TPL', callback_data: '/tasks TPL' }
+                ],
+                [
+                  { text: '🔥 INST', callback_data: '/tasks INST' },
+                  { text: '📝 DOC', callback_data: '/tasks DOC' }
+                ],
+                [
+                  { text: '💼 BIZ', callback_data: '/tasks BIZ' },
+                  { text: '📋 Ver Todas', callback_data: '/tasks' }
+                ],
+                [{ text: '🏠 Menú Principal', callback_data: '/start' }]
+              ]
+            };
+            await sendTelegramMessage(token, chatId, text, replyMarkup);
+          }
+          else if (rawCmd === '/tasks_search') {
+            if (botUsername) {
+              const payload = `searchtasks_${chatId}`;
+              const customText = 
+                `🔎 <b>Búsqueda de Tareas</b>\n\n` +
+                `Presiona el botón de abajo para iniciar la búsqueda en chat privado con el bot.\n\n` +
+                `El resultado se enviará y confirmará aquí en el grupo.`;
+              const replyMarkup = {
+                inline_keyboard: [
+                  [{ text: '🔍 Buscar Tareas', url: `https://t.me/${botUsername}?start=${payload}` }],
+                  [{ text: '↩️ Volver', callback_data: '/tasks' }]
+                ]
+              };
+              await sendTelegramMessage(token, chatId, customText, replyMarkup);
+            } else {
+              userStates[chatId] = { step: 'AWAITING_TEXT', context: 'search_task', groupChatId: null };
+              await sendTelegramMessage(token, chatId, `🔎 <b>Escribe tu búsqueda:</b>\n\nEscribe el término a buscar en este chat.\n\n<i>(Escribe "cancelar" para abortar)</i>`);
+            }
+          }
+          else if (rawCmd === '/task_detail') {
+            if (!arg) {
+              await sendTelegramMessage(token, chatId, '❌ ID de tarea faltante para la vista de detalle.');
+            } else {
+              const report = await getTaskDetailReport(arg);
+              const res = await fetch('http://localhost:3001/api/roadmap').catch(() => null);
+              let taskBtn = [];
+              if (res?.ok) {
+                const data = await res.json();
+                const t = (data.tasks || []).find(x => x.id?.toLowerCase() === arg.trim().toLowerCase());
+                if (t) {
+                  if (t.completed) {
+                    taskBtn = [{ text: `↩️ Reabrir Tarea`, callback_data: `/completetask ${t.lineIndex} ${t.id}` }];
+                  } else {
+                    taskBtn = [{ text: `✅ Completar Tarea`, callback_data: `/completetask ${t.lineIndex} ${t.id}` }];
+                  }
+                }
+              }
+
+              const replyMarkup = {
+                inline_keyboard: [
+                  taskBtn.length > 0 ? taskBtn : [],
+                  [
+                    { text: '📋 Ver Roadmap', callback_data: '/tasks' },
+                    { text: '🏠 Menú Principal', callback_data: '/start' }
+                  ]
+                ].filter(arr => arr.length > 0)
+              };
+              await sendTelegramMessage(token, chatId, report, replyMarkup);
             }
           }
           else if (rawCmd === '/completetask') {
@@ -1713,8 +2465,16 @@ async function startTelegramCommandPolling() {
               }).catch(() => null);
               
               if (!res || !res.ok) {
-                await sendTelegramMessage(token, chatId, `❌ Error al intentar marcar la tarea <code>${taskId}</code> como completada.`);
+                await sendTelegramMessage(token, chatId, `❌ Error al cambiar el estado de la tarea <code>${taskId}</code>.`);
               } else {
+                const resRoad = await fetch('http://localhost:3001/api/roadmap').catch(() => null);
+                let isDoneNow = false;
+                if (resRoad?.ok) {
+                  const roadData = await resRoad.json();
+                  const t = (roadData.tasks || []).find(x => x.id === taskId);
+                  if (t) isDoneNow = t.completed;
+                }
+
                 const backMarkup = {
                   inline_keyboard: [
                     [
@@ -1723,7 +2483,10 @@ async function startTelegramCommandPolling() {
                     ]
                   ]
                 };
-                await sendTelegramMessage(token, chatId, `✅ <b>Tarea Completada</b>\n\nLa tarea <code>${taskId}</code> fue marcada exitosamente como completada en <code>tareas_pendientes.md</code>.`, backMarkup);
+                
+                const actionLabel = isDoneNow ? 'Completada' : 'Reabierta';
+                const emoji = isDoneNow ? '✅' : '⏳';
+                await sendTelegramMessage(token, chatId, `${emoji} <b>Estado de Tarea Actualizado</b>\n\nLa tarea <code>${taskId}</code> fue marcada como <b>${actionLabel}</b> exitosamente en <code>tareas_pendientes.md</code>.`, backMarkup);
               }
             }
           }
@@ -1908,101 +2671,254 @@ async function startTelegramCommandPolling() {
             await sendTelegramMessage(token, chatId, '❌ Creación de tarea cancelada.');
           }
           else if (rawCmd === '/integrity' || rawCmd === '/diagnostico') {
-            const res = await fetch('http://localhost:3001/api/integrity/status').catch(() => null);
-            if (!res || !res.ok) {
-              await sendTelegramMessage(token, chatId, '❌ Error al consultar la integridad física del ecosistema.');
-            } else {
-              const data = await res.json();
-              let text = `🔍 <b>Diagnóstico de Consistencia Física (Pre-flight):</b>\n\n`;
-              
-              const hasDrifts = (data.codeDrifts?.length > 0) || (data.roadmapDrifts?.length > 0) || (data.sandboxDrifts?.length > 0);
-              
-              if (!hasDrifts) {
-                text += `✅ <b>¡Consistencia Perfecta!</b>\n` +
-                        `• Código, documentación y sandbox 100% alineados.\n` +
-                        `• Reglas de proyecto cumplidas al 100%.\n\n`;
-              } else {
-                text += `⚠️ <b>Inconsistencias Detectadas:</b>\n\n`;
-                if (data.codeDrifts?.length > 0) {
-                  text += `📁 <b>Code Drifts (${data.codeDrifts.length}):</b>\n`;
-                  data.codeDrifts.slice(0, 3).forEach(d => {
-                    text += `• <code>${d.id}</code>: ${d.message}\n`;
-                  });
-                  if (data.codeDrifts.length > 3) text += `<i>... y ${data.codeDrifts.length - 3} desvíos más.</i>\n`;
-                  text += `\n`;
-                }
-                if (data.roadmapDrifts?.length > 0) {
-                  text += `📋 <b>Roadmap Drifts (${data.roadmapDrifts.length}):</b>\n`;
-                  data.roadmapDrifts.slice(0, 3).forEach(d => {
-                    text += `• <code>${d.id}</code>: ${d.message}\n`;
-                  });
-                  if (data.roadmapDrifts.length > 3) text += `<i>... y ${data.roadmapDrifts.length - 3} desvíos más.</i>\n`;
-                  text += `\n`;
-                }
+            const jobMsgId = await sendJobMessage(token, chatId, '🔍 <b>Ejecutando diagnóstico...</b>\n<i>Analizando consistencia del ecosistema.</i>');
+            (async () => {
+              const res = await fetch('http://localhost:3001/api/integrity/status').catch(() => null);
+              if (!res || !res.ok) {
+                await editJobMessage(token, chatId, jobMsgId, '❌ Error al consultar la integridad física del ecosistema.');
+                return;
               }
-              
-              text += `📊 <b>Métricas de Control:</b>\n` +
-                      `• Tareas Completadas: <code>${data.metrics?.taskCount || 0}</code>\n` +
-                      `• Entradas de Bitácora: <code>${data.metrics?.bitacoraCount || 0}</code>\n`;
-                      
-              const replyMarkup = {
-                inline_keyboard: hasDrifts ? [
-                  [{ text: '⚡ Auto-healer (Fix-Map)', callback_data: '/integrity_autofix' }],
-                  [{ text: '🏠 Menú Principal', callback_data: '/start' }]
-                ] : [
-                  [{ text: '🏠 Menú Principal', callback_data: '/start' }]
-                ]
-              };
-              
-              await sendTelegramMessage(token, chatId, text, replyMarkup);
-            }
+              const data = await res.json();
+
+              const codeDrifts     = data.codeDrifts     || [];
+              const roadmapDrifts  = data.roadmapDrifts  || [];
+              const sandboxDrifts  = data.sandboxDrifts  || [];
+              const commitDrifts   = data.commitDrifts   || [];
+              const mapMissing     = codeDrifts.filter(d => d.type === 'MAP_MISSING');
+              const fileMissing    = codeDrifts.filter(d => d.type === 'FILE_NOT_FOUND');
+              const hasFixable     = mapMissing.length + fileMissing.length + sandboxDrifts.length + roadmapDrifts.length > 0;
+
+              // Extraer advertencias de linter del stderr
+              const linterLines    = (data.stderr || '').split('\n').filter(l => l.trim().startsWith('- [Fallo'));
+              const libraryOk      = data.stdout?.includes('INTEGRIDAD DE LA BIBLIOTECA AL 100%');
+
+              let text = `🔍 <b>Diagnóstico del Ecosistema PROTOTIPE</b>\n`;
+              text += `📅 ${new Date().toLocaleDateString('es-CO', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })}\n\n`;
+
+              // Sección Biblioteca
+              text += libraryOk
+                ? `✅ <b>Biblioteca:</b> Integridad al 100%\n`
+                : `⚠️ <b>Biblioteca:</b> Revisar integridad\n`;
+
+              // Drifts críticos y medios
+              if (!hasFixable && commitDrifts.length === 0) {
+                text += `✅ <b>Drifts:</b> Ninguno detectado — sistema limpio\n`;
+              } else {
+                text += `\n📊 <b>Drifts detectados:</b>\n`;
+                if (roadmapDrifts.length > 0)  text += `  🔴 ${roadmapDrifts.length} tarea(s) sin entrada en bitácora <i>(HIGH)</i>\n`;
+                if (mapMissing.length > 0)      text += `  🟡 ${mapMissing.length} archivo(s) sin registrar en mapa <i>(MEDIUM)</i>\n`;
+                if (fileMissing.length > 0)     text += `  🟡 ${fileMissing.length} referencia(s) rotas en roadmap <i>(MEDIUM)</i>\n`;
+                if (sandboxDrifts.length > 0)   text += `  🟡 ${sandboxDrifts.length} sandbox(es) faltante(s) <i>(MEDIUM)</i>\n`;
+                if (commitDrifts.length > 0)    text += `  🔵 ${commitDrifts.length} tarea(s) sin commit Git asociado <i>(INFO)</i>\n`;
+              }
+
+              // Advertencias de linter
+              if (linterLines.length > 0) {
+                text += `\n⚠️ <b>Linter (${linterLines.length} advertencias):</b>\n`;
+                linterLines.slice(0, 2).forEach(l => {
+                  text += `  • ${escapeHtml(l.replace(/^\s*-\s+\[Fallo[^\]]*\]\s*/,'').trim())}\n`;
+                });
+                if (linterLines.length > 2) text += `  <i>... y ${linterLines.length - 2} más.</i>\n`;
+              }
+
+              // Detalles de drifts (máx 3 por categoría)
+              if (hasFixable) {
+                text += `\n<b>📋 Detalle:</b>\n`;
+                [...roadmapDrifts.slice(0,2), ...mapMissing.slice(0,2), ...fileMissing.slice(0,1), ...sandboxDrifts.slice(0,1)]
+                  .forEach(d => { text += `  • <code>${escapeHtml(d.id || '')}</code> — ${escapeHtml(d.message || '').slice(0,80)}\n`; });
+              }
+
+              // Botones
+              const keyboard = [];
+              if (hasFixable) keyboard.push([{ text: '🔧 Reparar Todo Automáticamente', callback_data: '/integrity_autofix' }]);
+              keyboard.push([{ text: '📄 Exportar Reporte Completo', callback_data: '/integrity_report' }]);
+              keyboard.push([{ text: '🔄 Re-ejecutar', callback_data: '/integrity' }, { text: '🏠 Menú', callback_data: '/start' }]);
+
+              await editJobMessage(token, chatId, jobMsgId, text, { inline_keyboard: keyboard });
+            })();
           }
           else if (rawCmd === '/integrity_autofix') {
             const msgId = await sendJobMessage(token, chatId,
-              '⚡ <b>Auto-curación en progreso...</b>\n<i>Analizando y corrigiendo drifts del mapa de aplicación.</i>'
+              '⚡ <b>Reparación automática en curso...</b>\n<i>Ejecutando los 4 fixers de integridad en secuencia.</i>'
             );
             (async () => {
               const backMarkup = {
                 inline_keyboard: [
-                  [{ text: '🔍 Volver a Diagnóstico', callback_data: '/integrity' }],
-                  [{ text: '🏠 Menú Principal', callback_data: '/start' }]
+                  [{ text: '🔍 Ver Diagnóstico', callback_data: '/integrity' },
+                   { text: '🏠 Menú', callback_data: '/start' }]
                 ]
               };
               try {
-                await fetch('http://localhost:3001/api/integrity/autofix', { method: 'POST' }).catch(() => {});
-                
+                // 1. Obtener estado actual
                 const resStatus = await fetch('http://localhost:3001/api/integrity/status').catch(() => null);
-                if (resStatus && resStatus.ok) {
-                  const dataStatus = await resStatus.json();
-                  if (dataStatus.codeDrifts && dataStatus.codeDrifts.length > 0) {
-                    for (const d of dataStatus.codeDrifts) {
-                      if (d.type === 'MAP_MISSING' && d.file) {
-                        await fetch('http://localhost:3001/api/integrity/fix-map', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ file: d.file, id: d.id })
-                        }).catch(() => {});
-                      }
-                    }
-                  }
-                  const remaining = (dataStatus.codeDrifts?.length || 0) + (dataStatus.roadmapDrifts?.length || 0);
-                  await editJobMessage(token, chatId, msgId,
-                    remaining === 0
-                      ? `✅ <b>Auto-curación Completada</b>\n\n¡Consistencia perfecta! Todos los drifts fueron resueltos.`
-                      : `⚠️ <b>Auto-curación Parcial</b>\n\n${remaining} desvío(s) restantes requieren revisión manual.\nEjecuta <code>/integrity</code> para ver el detalle.`,
-                    backMarkup
-                  );
+                if (!resStatus || !resStatus.ok) throw new Error('No se pudo obtener el estado de integridad.');
+                const st = await resStatus.json();
+
+                const codeDrifts    = st.codeDrifts    || [];
+                const roadmapDrifts = st.roadmapDrifts || [];
+                const sandboxDrifts = st.sandboxDrifts || [];
+                const mapMissing    = codeDrifts.filter(d => d.type === 'MAP_MISSING');
+                const fileMissing   = codeDrifts.filter(d => d.type === 'FILE_NOT_FOUND');
+
+                const results = [];
+
+                // Fixer 1: autocureLibrary
+                await fetch('http://localhost:3001/api/integrity/autofix', { method: 'POST' }).catch(() => {});
+                results.push(`✅ <b>Fixer 1 — Auto-cure catálogo</b>: ejecutado`);
+
+                // Fixer 2: fix-map-bulk (MAP_MISSING)
+                if (mapMissing.length > 0) {
+                  const fmRes = await fetch('http://localhost:3001/api/integrity/fix-map-bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files: mapMissing.map(d => ({ file: d.file, id: d.id })) })
+                  }).catch(() => null);
+                  const fmData = fmRes && fmRes.ok ? await fmRes.json() : null;
+                  results.push(`✅ <b>Fixer 2 — Registro en mapa:</b> ${fmData?.message || `${mapMissing.length} archivo(s) procesado(s)`}`);
                 } else {
-                  await editJobMessage(token, chatId, msgId,
-                    '✅ <b>Pipeline de Auto-curación Terminado</b>\n\nEjecuta <code>/integrity</code> para verificar el estado.',
-                    backMarkup
-                  );
+                  results.push(`⏭️ <b>Fixer 2 — Registro en mapa:</b> sin drifts pendientes`);
                 }
+
+                // Fixer 3: prune-drifts (FILE_NOT_FOUND)
+                if (fileMissing.length > 0) {
+                  const prRes = await fetch('http://localhost:3001/api/integrity/prune-drifts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files: fileMissing.map(d => ({ file: d.file, id: d.id })) })
+                  }).catch(() => null);
+                  const prData = prRes && prRes.ok ? await prRes.json() : null;
+                  results.push(`✅ <b>Fixer 3 — Purga de referencias rotas:</b> ${prData?.message || `${fileMissing.length} referencia(s) purgada(s)`}`);
+                } else {
+                  results.push(`⏭️ <b>Fixer 3 — Purga de referencias:</b> sin referencias rotas`);
+                }
+
+                // Fixer 4: scaffold-sandbox-bulk
+                if (sandboxDrifts.length > 0) {
+                  const sbRes = await fetch('http://localhost:3001/api/integrity/scaffold-sandbox-bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sandboxes: sandboxDrifts.map(d => ({ technicalName: d.technicalName || d.id, fullName: d.fullName || d.id })) })
+                  }).catch(() => null);
+                  const sbData = sbRes && sbRes.ok ? await sbRes.json() : null;
+                  results.push(`✅ <b>Fixer 4 — Scaffolds de sandbox:</b> ${sbData?.message || `${sandboxDrifts.length} sandbox(es) creado(s)`}`);
+                } else {
+                  results.push(`⏭️ <b>Fixer 4 — Scaffolds de sandbox:</b> sin sandboxes faltantes`);
+                }
+
+                // Verificación post-fix
+                const resPost = await fetch('http://localhost:3001/api/integrity/status').catch(() => null);
+                const postSt  = resPost && resPost.ok ? await resPost.json() : null;
+                const remaining = postSt
+                  ? (postSt.codeDrifts?.length || 0) + (postSt.roadmapDrifts?.length || 0) + (postSt.sandboxDrifts?.length || 0)
+                  : null;
+
+                let finalText = `⚡ <b>Reparación Automática Completada</b>\n\n`;
+                finalText += results.join('\n') + '\n\n';
+                finalText += remaining === 0
+                  ? `✅ <b>Verificación post-fix:</b> ¡Sistema al 100% de integridad!`
+                  : remaining !== null
+                    ? `⚠️ <b>Verificación post-fix:</b> ${remaining} drift(s) requieren atención manual. Ejecuta /integrity para el detalle.`
+                    : `ℹ️ No se pudo verificar el estado post-fix.`;
+
+                await editJobMessage(token, chatId, msgId, finalText, backMarkup);
+
               } catch (err) {
                 await editJobMessage(token, chatId, msgId,
-                  `❌ <b>Error en Auto-curación:</b>\n<code>${err.message}</code>`,
+                  `❌ <b>Error en Reparación Automática:</b>\n<code>${escapeHtml(err.message)}</code>`,
                   backMarkup
                 );
+              }
+            })();
+          }
+          else if (rawCmd === '/integrity_report') {
+            // Exporta el reporte completo como documento .txt
+            const res = await fetch('http://localhost:3001/api/integrity/status').catch(() => null);
+            if (!res || !res.ok) {
+              await sendTelegramMessage(token, chatId, '❌ Error al obtener el reporte de integridad.');
+            } else {
+              const data = await res.json();
+              const lines = [
+                '=== REPORTE DE INTEGRIDAD PROTOTIPE ===',
+                `Fecha: ${new Date().toLocaleString('es-CO')}`,
+                '',
+                '--- STDOUT (Verificación Biblioteca) ---',
+                data.stdout || '(vacío)',
+                '',
+                '--- STDERR (Linter & Advertencias) ---',
+                data.stderr || '(ninguna)',
+                '',
+                '--- ROADMAP DRIFTS ---',
+                (data.roadmapDrifts || []).length === 0 ? '(ninguno)' : (data.roadmapDrifts || []).map(d => `[${d.severity}] ${d.id}: ${d.message}`).join('\n'),
+                '',
+                '--- CODE DRIFTS ---',
+                (data.codeDrifts || []).length === 0 ? '(ninguno)' : (data.codeDrifts || []).map(d => `[${d.severity}] [${d.type}] ${d.id}: ${d.message}`).join('\n'),
+                '',
+                '--- SANDBOX DRIFTS ---',
+                (data.sandboxDrifts || []).length === 0 ? '(ninguno)' : (data.sandboxDrifts || []).map(d => `${d.id}: ${d.message || ''}`).join('\n'),
+                '',
+                '--- COMMIT DRIFTS ---',
+                (data.commitDrifts || []).length === 0 ? '(ninguno)' : (data.commitDrifts || []).map(d => `[${d.severity}] ${d.id}: ${d.message}`).join('\n'),
+              ].join('\n');
+              try {
+                const formData = new FormData();
+                formData.append('chat_id', chatId.toString());
+                formData.append('caption', `📄 Reporte de Integridad — ${new Date().toLocaleDateString('es-CO')}`);
+                formData.append('document', new Blob([lines], { type: 'text/plain' }), `integridad_${new Date().toISOString().split('T')[0]}.txt`);
+                await fetch(`https://api.telegram.org/bot${token}/sendDocument`, { method: 'POST', body: formData });
+              } catch (err) {
+                await sendTelegramMessage(token, chatId, `❌ Error al enviar el reporte: ${escapeHtml(err.message)}`);
+              }
+            }
+          }
+          else if (rawCmd === '/health') {
+            const jobMsgId = await sendJobMessage(token, chatId, '🩺 <b>Verificando salud de clientes en producción...</b>\n<i>Enviando ping a todas las instancias registradas.</i>');
+            (async () => {
+              try {
+                // Obtener lista de clientes registrados en la colección central clientes_control
+                const clients = await queryCollectionREST('clientes_control', 'nombre', 100);
+                if (!Array.isArray(clients) || clients.length === 0) {
+                  await editJobMessage(token, chatId, jobMsgId, '⚠️ No se encontraron clientes registrados en el panel de control central.\nUsa <code>/clientes</code> para ver el inventario.');
+                  return;
+                }
+
+                // Hacer ping a cada cliente en paralelo
+                const pingResults = await Promise.allSettled(
+                  clients.map(async (c) => {
+                    const url  = c.url || c.domain || c.firebase?.appUrl || '';
+                    const name = c.nombre || c.name || c.clientId || c.id || 'Sin nombre';
+                    if (!url) return { name, status: 'sin_url', latency: null };
+                    const start = Date.now();
+                    try {
+                      const r = await fetch(url, { signal: AbortSignal.timeout(6000) });
+                      const latency = Date.now() - start;
+                      return { name, url, status: r.ok ? 'online' : `error_${r.status}`, latency };
+                    } catch (e) {
+                      return { name, url, status: e.name === 'TimeoutError' ? 'timeout' : 'offline', latency: null };
+                    }
+                  })
+                );
+
+                const rows = pingResults.map(r => {
+                  const { name, url, status, latency } = r.value || { name: '?', status: 'error', latency: null };
+                  const icon = status === 'online' ? '🟢' : status === 'timeout' ? '🟡' : status === 'sin_url' ? '⚪' : '🔴';
+                  const lat  = latency !== null ? ` <i>(${latency}ms)</i>` : '';
+                  return `${icon} <b>${escapeHtml(name)}</b>${lat}\n   <code>${escapeHtml(url || 'URL no configurada')}</code>`;
+                });
+
+                const online  = pingResults.filter(r => r.value?.status === 'online').length;
+                const total   = pingResults.length;
+                let text = `🩺 <b>Estado de Salud — Clientes en Producción</b>\n`;
+                text += `📅 ${new Date().toLocaleString('es-CO')}\n\n`;
+                text += `<b>Online:</b> ${online}/${total} instancias\n\n`;
+                text += rows.join('\n\n');
+
+                const backMarkup = { inline_keyboard: [
+                  [{ text: '🔄 Re-verificar', callback_data: '/health' }, { text: '🏠 Menú', callback_data: '/start' }]
+                ]};
+                await editJobMessage(token, chatId, jobMsgId, text, backMarkup);
+
+              } catch (err) {
+                await editJobMessage(token, chatId, jobMsgId, `❌ Error al verificar salud: <code>${escapeHtml(err.message)}</code>`);
               }
             })();
           }
@@ -2369,7 +3285,11 @@ async function startTelegramCommandPolling() {
             await sendTelegramMessage(token, chatId, '❌ Operación cancelada.');
           }
         }
+      } catch (updateErr) {
+        console.error(`[Telegram Update Error] Error al procesar update ${update.update_id}:`, updateErr.message || updateErr);
+        if (updateErr.stack) console.error(updateErr.stack);
       }
+    }
     } catch (err) {
       console.error(`[Telegram Polling Error] token ${token.slice(0, 8)}...:`, err.message);
     }

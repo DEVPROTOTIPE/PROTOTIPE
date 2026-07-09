@@ -10360,7 +10360,7 @@ app.post('/api/project/firebase-rules/deploy', async (req, res) => {
 
     const tokenSuffix = process.env.FIREBASE_TOKEN ? ` --token "${process.env.FIREBASE_TOKEN}"` : '';
     const cmd = `firebase deploy --only ${deployOnly} -P ${firebaseProjectId}${tokenSuffix}`;
-    const stdout = execSync(cmd, { cwd: projectDir, encoding: 'utf8' });
+    const { stdout } = await execAsync(cmd, { cwd: projectDir });
     res.json({ success: true, message: `Reglas de Firebase desplegadas con éxito.`, output: stdout });
   } catch (err) {
     console.error(`[Firebase Rules Deploy Error]:`, err.message);

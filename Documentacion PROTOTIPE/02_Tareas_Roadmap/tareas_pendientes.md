@@ -1,5 +1,72 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CLI-358: Estabilización de Notificaciones y Auditoría de Telemetría~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Robustecimiento del Servidor de Notificaciones mediante manejadores globales de excepciones (uncaughtException/unhandledRejection) y aislamiento de updates. Corrección del error execSync indefinido en despliegue de reglas Firebase en server.js. Implementación de los comandos /telemetria [cliente] y /telemetria_check en Telegram para auditar transmisiones mensuales de facturación. Habilitación del Chat ID correcto del grupo general (-1004435396668) y desarrollo de getSystemConfig para recarga en caliente. Corrección del comando /health para consumir clientes de la colección central clientes_control de Firestore Central en lugar del endpoint obsoleto /api/clients.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+    - [`notification_config.json`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_config.json) [MODIFY]
+    - [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-357: Integración Sistema de Diagnóstico al Bot de Telegram (3 Niveles)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: `/integrity` enriquecido con todos los tipos de drift + linter + botones granulares. `/integrity_autofix` con secuencia de 4 fixers (autocure, fix-map-bulk, prune-drifts, scaffold-sandbox-bulk) + verificación post-fix. Nuevo `/integrity_report` exporta `.txt`. Nuevo `/health` hace ping en paralelo a clientes. `/start` actualizado.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-356: Fix Exportación Completa de Tareas (acceso a t.detail)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Corregido acceso a campos `t.detail.fecha`, `t.detail.fechaFin`, `t.detail.descripcion`, `t.detail.archivos` en el export `/tasks_export_run` y en `getTaskDetailReport`. Anteriormente se leían en el nivel raíz (vacíos), generando exportaciones solo con títulos. Ahora se exporta el contenido completo de cada tarea.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-355: Fix HTML Escaping en Bot de Telegram (Encoding)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Implementada función `escapeHtml()` en `notification_server.js`. Aplicada en `getTaskDetailReport`, `searchTasksInRoadmap`, listado `/tasks` y `/tasks_completed`. Añadido fallback automático a texto plano cuando Telegram devuelve error 400 HTML parse. Header `charset=utf-8` en todos los fetch a la API de Telegram.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[ ] Tarea CLI-353: Configuración y Testeo de Roadmap en Telegram (Prueba A)**
+  - Estatus: Nueva
+  - Fecha de registro: 2026-07-09
+  - Descripción: Tarea de prueba A para certificar la visualización de la botonera interactiva de detalles, filtros y completado en Telegram.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[ ] Tarea BIZ-354: Planificación de Integración de Leads Comerciales (Prueba B)**
+  - Estatus: Nueva
+  - Fecha de registro: 2026-07-09
+  - Descripción: Tarea de prueba B asociada al dominio BIZ para testear el funcionamiento de los filtros y búsquedas avanzadas.
+  - Archivos:
+    - Sin archivos modificados (planificación inicial).
+
+* **[x] ~~Tarea CLI-352: Potencialización de la Gestión de Roadmap en Telegram~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Expandida la funcionalidad de Roadmap en Telegram. Se implementaron los comandos `/tasks_completed` (historial de tareas hechas), `/tasks_filter` (filtrado dinámico de pendientes por dominio), `/task_detail` (detalle extendido con archivos y cambio de estado) y `/tasks_search` (asistente de búsqueda asíncrona con bypass de Privacy Mode en chat privado).
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-341: Resolución de Bug de Descarga de Facturas PDF (Revertida)~~**
+  - Estatus: Revertida (Cancelada)
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Cambio revertido bajo petición directa del usuario para preservar el flujo de impresión nativo original (basado en iframe e impresión de ticket) en lugar del exportador jsPDF.
+  - Archivos:
+    - [`pdfService.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/pdfService.js) [REVERT]
+    - [`AdminOrders.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/AdminOrders.jsx) [REVERT]
+    - [`pdfService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/pdfService.js) [REVERT]
+    - [`AdminOrders.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminOrders.jsx) [REVERT]
+
 * **[x] ~~Tarea CLI-351: Documentación Consolidada de la Consola de Telegram~~**
   - Estatus: Completada
   - Fecha de registro: 2026-07-09

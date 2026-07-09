@@ -1,5 +1,140 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[ ] Tarea CLI-353: Configuración y Testeo de Roadmap en Telegram (Prueba A)**
+  - Estatus: Nueva
+  - Fecha de registro: 2026-07-09
+  - Descripción: Tarea de prueba A para certificar la visualización de la botonera interactiva de detalles, filtros y completado en Telegram.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[ ] Tarea BIZ-354: Planificación de Integración de Leads Comerciales (Prueba B)**
+  - Estatus: Nueva
+  - Fecha de registro: 2026-07-09
+  - Descripción: Tarea de prueba B asociada al dominio BIZ para testear el funcionamiento de los filtros y búsquedas avanzadas.
+  - Archivos:
+    - Sin archivos modificados (planificación inicial).
+
+* **[x] ~~Tarea CLI-352: Potencialización de la Gestión de Roadmap en Telegram~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Expandida la funcionalidad de Roadmap en Telegram. Se implementaron los comandos `/tasks_completed` (historial de tareas hechas), `/tasks_filter` (filtrado dinámico de pendientes por dominio), `/task_detail` (detalle extendido con archivos y cambio de estado) y `/tasks_search` (asistente de búsqueda asíncrona con bypass de Privacy Mode en chat privado).
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-341: Resolución de Bug de Descarga de Facturas PDF (Revertida)~~**
+  - Estatus: Revertida (Cancelada)
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Cambio revertido bajo petición directa del usuario para preservar el flujo de impresión nativo original (basado en iframe e impresión de ticket) en lugar del exportador jsPDF.
+  - Archivos:
+    - [`pdfService.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/pdfService.js) [REVERT]
+    - [`AdminOrders.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/AdminOrders.jsx) [REVERT]
+    - [`pdfService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/pdfService.js) [REVERT]
+    - [`AdminOrders.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminOrders.jsx) [REVERT]
+
+* **[x] ~~Tarea CLI-351: Documentación Consolidada de la Consola de Telegram~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Creado el manual de operación definitivo `manual_consola_telegram.md` en subcarpeta `07_Manuales_Desarrollo/`. El manual detalla la arquitectura de 3 capas del servicio, la configuración de seguridad (`auth whitelist`), la mitigación de Privacy Mode de grupos mediante deep-links, el catálogo completo de comandos informativos y DevOps, y la lógica de auto-commit y Auto-Merge condicional a main. Se actualizó el mapa semántico `mapa_documentacion_ia.md` indexando el nuevo recurso.
+  - Archivos:
+    - [`manual_consola_telegram.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_consola_telegram.md) [NEW]
+    - [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-350: Eliminación de Ramas Master Obsoletas en GitHub~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Tras el cambio de Default Branch a main por parte del usuario, se ejecutó la eliminación remota definitiva de la rama master en los repositorios Maestro (`PROTOTIPE`) y Dashboard (`prototipe-dev-dashboard`) mediante `git push origin --delete master`. Se corrió `git fetch --prune` en ambos repositorios locales para purgar las referencias obsoletas de GitHub, dejando la arquitectura Git 100% saneada en main y develop.
+  - Archivos:
+    - Sin archivos modificados (acción operativa de Git).
+
+* **[x] ~~Tarea CLI-349: Alineación de Arquitectura de Ramas Git a main/develop~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Estandarizada la arquitectura Git eliminando ramas master redundantes y unificando el flujo de producción a main y desarrollo a develop. Se modificaron los scripts core de backup (`git_backup.ps1` y `subproject_backup.ps1`) para apuntar el Auto-Merge siempre a main. Se renombró la rama master local del dev-dashboard a main, subiéndola a GitHub. Quedan pendientes en GitHub las desactivaciones de master como default branch para poder eliminarlas remotamente en el Maestro y Dashboard.
+  - Archivos:
+    - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+    - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+
+* **[x] ~~Tarea CLI-348: Paridad de Estrategia de Auto-Merge y Push en Telegram~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Resuelto problema por el cual el push ejecutado desde Telegram no aplicaba la fusión a producción (Auto-Merge) en GitHub para ramas del Core. Se modificó `executeGitPush` para pasar explícitamente `push=true` y `autoMerge=true` (siempre que el repositorio no sea una instancia de cliente, replicando al 100% las condiciones de control de versiones del dashboard React), permitiendo que los cambios se suban y consoliden correctamente en las ramas principales remotes.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-347: Pre-flight Detallado de Publicación Git en Telegram~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Implementado el reporte interactivo de Pre-flight en el comando `/git_push_confirm` del bot de Telegram. Este reporte muestra al usuario un resumen detallado antes de proceder con el push: el mensaje de commit previsto que se generará automáticamente, la rama Git activa, la tarea del roadmap (`/api/roadmap`) a la que se vinculará (con título y estado), una lista de los primeros 10 archivos a respaldar con iconos visuales de tipo de cambio, y una advertencia de seguridad crítica si se detectan archivos `.env` expuestos.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-346: Paridad de Mensaje de Commit Automático en Telegram~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Implementada la función `generateAutoCommitMessage(repoPath)` en `notification_server.js` para replicar con exactitud la lógica de auto-commit del dashboard React: detecta archivos modificados, agregados y eliminados, extrae el branch actual, la fecha ISO, y vincula automáticamente la tarea activa del roadmap (`/api/roadmap`). Se integró al endpoint de backup para que todos los pushes remotos ejecutados desde Telegram cumplan al 100% con Conventional Commits y trazabilidad.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-345: Resultados de Pruebas E2E e Inventario de Cores (Sprint 3)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Implementados los comandos interactivos de Telegram para diagnóstico de pruebas y plantillas: `/tests` que lista todos los proyectos configurados con pruebas Playwright en el orquestador y permite ver los detalles de la última corrida de pruebas (passed/failed, duración y resumen). `/cores` que lista de forma ordenada los cores semilla registrados en el CLI con sus claves, nombres técnicos, nichos asociados y rutas físicas. Menú `/help` actualizado con soporte de botones inline.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-344: Parche de Chunks, Recursos PWA y Desviación de Reglas (Sprint 2)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Implementados los comandos interactivos de Telegram para optimización y autocuración: `/fix` con selector de cliente y opciones de dividir chunks de Vite y restaurar recursos PWA (iconos y favicon) con confirmación interactiva. `/rules` para consultar en vivo la matriz de desviación (drift) de reglas de seguridad de Firestore y Storage en la nube de Firebase, con botones táctiles rápidos para desplegar reglas actualizadas a las instancias con drift. Menú `/help` actualizado.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-343: Control Remoto de Git y DevServer por Telegram (Sprint 1)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Implementada la fase 1 del control total del dashboard vía Telegram: Módulo Git con consulta de estado, historial de commits recientes, commits no publicados y ejecución remota de push con confirmación. Módulo DevServer con consulta de estado activo/detenido, arranque directo de servidores locales npm run dev y parada controlada mediante confirmación y reinicio. Menú /help actualizado.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-342: Fix 3 Correcciones Estructurales del Bot de Telegram~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Auth Whitelist (allowedChatIds/adminChatIds), Job Tracker con editMessageText para operaciones largas, Fix AWAITING_TEXT en grupos via deep-link a chat privado.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+    - [`notification_config.json`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_config.json) [MODIFY]
+
+
+* **[x] ~~Tarea CLI-341: Asistente Interactivo de Creación de Tareas por Telegram (Roadmap Wizard)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-09
+  - Descripción: Implementación del asistente conversacional paso a paso (Wizard State-Machine) en notification_server.js para la creación de tareas en tareas_pendientes.md desde Telegram sin escritura manual. Incluye selección de dominio, categoría y plantillas predefinidas mediante botoneras táctiles, captura de texto libre vía interceptor de estados en memoria (AWAITING_TEXT), y soporte de fallback directo por comando /addtask [texto].
+  - Archivos:
+    - [Prototipe-CLI/notification_server.js](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [NEW]
+    - [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [Prototipe-CLI/notification_config.json](file:///d:/PROTOTIPE/Prototipe-CLI/notification_config.json) [NEW]
+    - [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+    - [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+    - [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Canales_Notificaciones_Telegram/manual_integracion_telegram.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Canales_Notificaciones_Telegram/manual_integracion_telegram.md) [NEW]
+    - [Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [MODIFY]
+    - [Central PROTOTIPE/dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [Central PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx) [MODIFY]
+
+
 * **[x] ~~Tarea CORE-340: Comandos Interactivos, Botones de Telegram y Corrección de Token OAuth2 (2026-07-09)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-09

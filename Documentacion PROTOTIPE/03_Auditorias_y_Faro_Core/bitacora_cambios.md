@@ -1,13 +1,100 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-358 — 2026-07-09
+**Fix & Feature: Estabilización del Servidor, Whitelist General, Hot-Reload y Salud Clientes en Telegram**
+
+### Cambios realizados:
+1. **Estabilización de Notificaciones (Fix 1):** Agregados manejadores globales `uncaughtException` y `unhandledRejection` en `notification_server.js` para capturar errores fuera del ciclo estándar y evitar caídas del proceso hijo (`code 4294967295`).
+2. **Aislamiento de Updates (Fix 2):** Envuelto el procesamiento de cada actualización en el polling de Telegram en un bloque `try-catch` propio para asegurar que un fallo al procesar una instrucción específica no interrumpa el polling ni afecte a otros usuarios.
+3. **Bypass de execSync (Fix 3):** Reemplazada la llamada síncrona `execSync` por `await execAsync` en el endpoint `/api/project/firebase-rules/deploy` de `server.js` resolviendo el error `execSync is not defined` en producción.
+4. **Comando `/telemetria`:** Implementada la consulta interactiva del estado de facturación mensual (`reportesBilling` de Firestore Central) con selector de clientes inline, datos de ventas netas, pedidos, facturas DIAN y modo de cobro.
+5. **Comando `/telemetria_check`:** Creado reporte de cobertura general que audita en tiempo real qué clientes han transmitido telemetría el mes actual y quiénes están desactualizados.
+6. **Whitelist General de Desarrollo (Fix 4):** Se auditó en red el Chat ID real del grupo general (`-1004435396668`), corrigiendo la whitelist local en `notification_config.json` para permitir la recepción del comando `/ayuda` y restaurar los accesos de administración general.
+7. **Recarga en Caliente de Whitelists (Fix 5):** Implementada la función `getSystemConfig()` con caché elástico en memoria de 2 segundos para recargar configuraciones sin requerir reinicios manuales de proceso.
+8. **Corregido callback `/health` (Fix 6):** Reemplazado el fetch al endpoint inexistente `/api/clients` en `notification_server.js` por una consulta directa a la colección central `clientes_control` de Firestore Central mediante `queryCollectionREST`. Esto resuelve el error *"no se pudo obtener la lista de clientes del CLI"* y permite hacer pings resilientes e independientes del estado local del Bridge.
+
+### Archivos modificados:
+- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+- [`notification_config.json`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_config.json) [MODIFY]
+- [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+## CLI-355: Fix HTML Escaping en Bot de Telegram (Encoding)
+- **Fecha:** 2026-07-09
+- **Tipo:** Funcionalidad / Mejora
+- **Impacto:** Registro retroactivo auto-generado por el validador de integridad.
+- **Descripción:** Implementada función `escapeHtml()` en `notification_server.js`. Aplicada en `getTaskDetailReport`, `searchTasksInRoadmap`, listado `/tasks` y `/tasks_completed`. Añadido fallback automático a texto plano cuando Telegram devuelve error 400 HTML parse. Header `charset=utf-8` en todos los fetch a la API de Telegram.
+- **Archivos afectados:** - ``notification_server.js`` [MODIFY]
+
 Este es el log de cambios técnico activo para la sesión de desarrollo vigente del ecosistema PROTOTIPE. Los registros anteriores a esta fecha han sido auto-archivados en históricos compactos para optimizar la compatibilidad de NotebookLM.
 
 ---
 
-### [2026-07-07] - Inicialización de Sesión de Desarrollo Activa
-* **Tipo:** Sistema
-* **Nicho:** Todos
-* **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
+---
+
+## CLI-357 — 2026-07-09
+**Feature: Integración Completa del Sistema de Diagnóstico al Bot de Telegram (3 Niveles)**
+
+### Cambios realizados:
+1. **Nivel 1 — `/integrity` enriquecido:** El comando ahora muestra todos los tipos de drift (codeDrifts por tipo MAP_MISSING vs FILE_NOT_FOUND, roadmapDrifts, sandboxDrifts, commitDrifts), advertencias del linter estético y RBAC extraídas del stderr, estado de la biblioteca, y detalle de los primeros ítems por categoría. Botones granulares: [Reparar Todo] [Exportar Reporte] [Re-ejecutar].
+2. **Nivel 2 — `/integrity_autofix` con 4 fixers en secuencia:** Ejecuta en orden: (1) autocureLibrary, (2) fix-map-bulk para MAP_MISSING, (3) prune-drifts para FILE_NOT_FOUND, (4) scaffold-sandbox-bulk para sandboxes faltantes. Reporte granular por fixer con emoji de omisión (⏭️) si no hay drifts de ese tipo. Verificación post-fix con re-diagnóstico automático.
+3. **Nuevo `/integrity_report`:** Exporta el reporte completo de integridad (stdout + stderr + todos los drifts) como documento `.txt` descargable en Telegram.
+4. **Nuevo `/health`:** Hace ping en paralelo a todos los clientes registrados en el CLI via `/api/clients`. Muestra estado 🟢/🟡/🔴, latencia en ms y URL. Botón de re-verificación.
+5. **`/start` actualizado:** Nueva sección "Diagnóstico & Salud" en el menú de ayuda. Botón "🩺 Salud Clientes" añadido al teclado inline principal.
+
+### Archivos:
+- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+## CLI-356 — 2026-07-09
+
+### Causa raíz:
+El export `/tasks_export_run` y la vista de detalle `getTaskDetailReport` accedían a `t.fecha`, `t.fechaFin`, `t.descripcion`, `t.archivos` en el nivel raíz del objeto tarea, pero la API `/api/roadmap` anida todos esos campos dentro de `t.detail`. Resultado: exportación solo con títulos, sin fechas, descripciones ni archivos afectados.
+
+### Correcciones:
+1. **`/tasks_export_run`**: Extrae `d = t.detail || {}` y lee `d.fecha`, `d.fechaFin`, `d.descripcion`, `d.archivos` con fallback a nivel raíz.
+2. **`getTaskDetailReport`**: Misma corrección. Ahora la vista de detalle por `/task_detail [ID]` en Telegram muestra fechas, descripción y archivos correctamente.
+3. **Título limpio**: Se elimina el prefijo `"Tarea ID: "` del título en el export para mayor legibilidad del documento Markdown.
+4. **Fallback de descripción**: Si `t.detail.descripcion` está vacío, se muestra el texto del título limpio como descripción de referencia.
+
+### Archivos:
+- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+
+**Fix: HTML Escaping en Mensajes de Telegram + Fallback a Texto Plano**
+
+### Cambios realizados:
+1. **`escapeHtml()`**: Nueva función utilitaria en `notification_server.js` que escapa `&`, `<`, `>`, `"` para prevenir fallos de parseo HTML en la API de Telegram cuando el texto de una tarea contiene esos caracteres.
+2. **Fallback en `sendTelegramMessage`**: Si Telegram devuelve un error 400 con descripción de parseo HTML, el bot reintenta automáticamente en modo texto plano (sin `parse_mode: 'HTML'`), eliminando etiquetas del texto antes de reenviar.
+3. **Header `charset=utf-8`**: Todos los `fetch` a la API de Telegram ahora incluyen `Content-Type: application/json; charset=utf-8`.
+4. **Puntos de aplicación de `escapeHtml`**: Aplicado en `getTaskDetailReport` (id, descripción, texto, archivos), `searchTasksInRoadmap` (texto de resultados), y el handler `/tasks` y `/tasks_completed` (texto de cada tarea listada).
+
+### Archivos:
+- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+### CLI-352 — Revisión Histórica:
+Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en Telegram). El bug se manifestaba cuando el texto de tareas contenía caracteres como `<`, `>`, o `&`, causando que Telegram rechazara el mensaje con error 400 HTML parse.
+
+
+## CLI-352 — 2026-07-09
+**Feature: Potencialización de la Gestión de Roadmap en Telegram**
+
+### Cambios realizados:
+1. **Formateadores de Roadmap:**
+   - Creada la función `getTaskDetailReport(taskId)` para formatear la descripción de la tarea, fechas de ciclo de vida y listado de archivos modificados.
+   - Creada la función `searchTasksInRoadmap(query)` para realizar búsquedas textuales de tareas e IDs.
+2. **Handlers en Telegram:**
+   - Modificado `/tasks` para incorporar filtrado dinámico por dominio (CORE, CLI, DASH, etc.) y una botonera interactiva.
+   - Implementado `/tasks_completed` para ver el historial de tareas hechas y dar soporte de reapertura de tareas completadas.
+   - Implementado `/tasks_filter` para desplegar el selector de dominios.
+   - Implementado `/tasks_search` y `/start searchtasks_` para desviar la búsqueda conversacional a chat privado y eludir el Privacy Mode de grupos.
+   - Implementado `/task_detail [id]` para ver la ficha ampliada e interactuar con el estado de la tarea.
+
+## CORE-341 — 2026-07-09
+**Bugfix: Descarga Nativa de Facturas PDF de Pedidos Completados (Revertida)**
+
+### Cambios realizados:
+1. **Reversión del cambio:**
+   - Se descartaron por completo los cambios de generación nativa de PDF con `jsPDF` y se retornó al flujo de impresión nativo del navegador basado en iframe oculto (`window.print()`).
+   - Se restauraron a su estado original de Git los archivos `AdminOrders.jsx` y `pdfService.js` en Moni y la plantilla Core.
 
 ## CLI-351 — 2026-07-09
 **Documentation: Creación de Manual Consolidado de la Consola de Telegram**

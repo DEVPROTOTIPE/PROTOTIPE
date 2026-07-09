@@ -1,7 +1,7 @@
 {
   "alertsEnabled": true,
   "telegramToken": "8811924070:AAFNqKEt3oPMdOUxEmLKW2f8IP5rfCSVt70",
-  "telegramChatId": "-4961041821",
+  "telegramChatId": "-5324206031",
   "discordWebhookUrl": "",
   "auth": {
     "allowedChatIds": [
@@ -9,10 +9,12 @@
       -5276731536,
       -5553510828,
       -5337460055,
-      -5248470922
+      -5248470922,
+      -1004435396668
     ],
     "adminChatIds": [
-      -4961041821
+      -4961041821,
+      -1004435396668
     ],
     "requireAdminCommands": [
       "/deploy",
