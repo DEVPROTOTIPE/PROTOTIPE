@@ -1,5 +1,18 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea COMP-359: Creación del Componente Premium FloatingPromoGrenade (Granada Promocional Flotante)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Creado el componente premium de gamificación FloatingPromoGrenade con efectos de levitación, ignición animada y explosión de confeti mediante framer-motion y canvas-confetti. Incluye ficha técnica en la biblioteca y playground interactivo en el dashboard.
+  - Archivos:
+    - [`floating_promo_grenade.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Granada_Promocional_Flotante/floating_promo_grenade.md) [NEW]
+    - [`FloatingPromoGrenade.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/FloatingPromoGrenade.jsx) [NEW]
+    - [`FloatingPromoGrenadeSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/FloatingPromoGrenadeSandbox.jsx) [NEW]
+    - [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [`README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 * **[x] ~~Tarea CLI-358: Estabilización de Notificaciones y Auditoría de Telemetría~~**
   - Estatus: Completada
   - Fecha de registro: 2026-07-09

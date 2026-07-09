@@ -120,6 +120,7 @@ Este directorio funciona como el almacén centralizado de componentes de interfa
 
 ### 10. 📂 Fidelización y Gamificación (`/Fielizacion_y_Gamificacion`)
 * [Ruleta de la Fortuna de Premios (RaffleWheelOfFortune)](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Ruleta_Fortuna_Premios/ruleta_fortuna_premios.md): Rueda interactiva segmentada en SVG con física de inercia y giros elásticos, sistema de cupones auto-generados e integración de canvas-confeti para premiaciones.
+* [Granada Promocional Flotante (FloatingPromoGrenade)](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Granada_Promocional_Flotante/floating_promo_grenade.md): Desencadenador interactivo flotante en forma de granada promocional que simula una explosión animada de confeti y revela un modal glassmorphic de cupones activos.
 
 ### 11. 📂 Reservas y Citas (`/Reservas_y_Citas`)
 * [Selector de Reservas tipo Agenda (AgendaReservationCalendar)](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Reservas_y_Citas/Selector_Reservas_Agenda/selector_reservas_agenda.md): Calendario semanal responsivo y cuadrícula de horarios parametrizables para reservas de citas y servicios con visualización de franjas libres y ocupadas.

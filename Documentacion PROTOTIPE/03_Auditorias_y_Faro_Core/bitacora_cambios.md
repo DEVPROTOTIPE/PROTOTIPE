@@ -1,5 +1,23 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## COMP-359 — 2026-07-09
+**Feature: Creación del Componente Premium FloatingPromoGrenade (Granada Promocional Flotante)**
+
+### Cambios realizados:
+1. **Ficha Técnica en Biblioteca:** Creada la ficha técnica `floating_promo_grenade.md` en `06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Granada_Promocional_Flotante/`. Contiene propósito, casos de uso, estilos con variables HSL, código completo React y flujo secuencial de interacción en diagramas Mermaid.
+2. **Componente Físico React:** Implementado `FloatingPromoGrenade.jsx` en `dev-dashboard/src/components/common/`. Dispone de estados de animación interactiva (floating, ignited, revealed) mediante Framer Motion y detonador asíncrono de partículas `canvas-confetti`.
+3. **Playground Sandbox:** Creado `FloatingPromoGrenadeSandbox.jsx` en `dev-dashboard/src/components/admin/sandboxes/`. Integra controles dinámicos para agregar, listar y eliminar cupones interactivos en tiempo real y visualizador de pruebas.
+4. **Mapeo e Integridad del Dashboard:** Registrada la asociación del componente en `COMPONENT_SANDBOX_MAP` de `ComponentSandbox.jsx` para garantizar su carga en el dashboard y el linter de compilación.
+5. **Catálogos y Mapas Semánticos:** Indexada la entrada en el catálogo maestro `README.md` de la biblioteca y en el GPS de documentación `mapa_documentacion_ia.md`.
+
+### Archivos modificados:
+- [`floating_promo_grenade.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Granada_Promocional_Flotante/floating_promo_grenade.md) [NEW]
+- [`FloatingPromoGrenade.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/FloatingPromoGrenade.jsx) [NEW]
+- [`FloatingPromoGrenadeSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/FloatingPromoGrenadeSandbox.jsx) [NEW]
+- [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+- [`README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+- [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 ## CLI-358 — 2026-07-09
 **Fix & Feature: Estabilización del Servidor, Whitelist General, Hot-Reload y Salud Clientes en Telegram**
 
