@@ -407,7 +407,7 @@ async function main() {
           needsSanitization = true;
           matchedReasons.push('ID analítica (G-XXXXX)');
         }
-        if (content.includes('VITE_FIREBASE_API_KEY') && !content.includes('import.meta.env')) {
+        if (content.includes('VITE_FIREBASE_API_KEY') && !content.includes('import.meta.env') && !content.includes('process.env')) {
           matchedReasons.push('⚠️ Advertencia: VITE_FIREBASE_API_KEY hardcodeada');
         }
 
