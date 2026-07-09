@@ -635,6 +635,16 @@ async function pollCollections() {
   }
 }
 
+// Helper para resolver nombre y URL física de un cliente con fallbacks (idéntico al frontend)
+function resolveClientInfo(c) {
+  const url = c.url
+    || c.appUrl
+    || (c.firebaseConfig?.projectId ? `https://${c.firebaseConfig.projectId}.web.app` : null)
+    || `https://${c.id}.web.app`;
+  const name = c.nombre || c.name || c.id || 'Sin nombre';
+  return { id: c.id, name, url };
+}
+
 // ─── Bucle de Pings en Segundo Plano para Monitoreo de Sitios (Health Monitor) ───
 
 async function checkClientHealthREST() {
@@ -650,7 +660,7 @@ async function checkClientHealthREST() {
     }
 
     for (const client of clients) {
-      const url = client.url;
+      const { id, name, url } = resolveClientInfo(client);
       if (!url) continue;
 
       const startTime = Date.now();
@@ -696,7 +706,7 @@ async function checkClientHealthREST() {
         responseTimeMs = Date.now() - startTime;
       }
 
-      const prevData = healthMap.get(client.id);
+      const prevData = healthMap.get(id);
       const prevStatus = prevData?.status;
 
       let alertType = null;
@@ -726,12 +736,12 @@ async function checkClientHealthREST() {
       };
 
       // Guardar resultados en Firestore central para visualización en el dashboard
-      await writeDocumentREST('health_checks', client.id, fullData);
+      await writeDocumentREST('health_checks', id, fullData);
 
       if (alertType) {
         const channelConfig = getChannelConfig('crashes');
         if (channelConfig.enabled) {
-          const clientName = client.nombre || client.id;
+          const clientName = name;
           let emoji = alertType === 'down' ? '🔴' : '🟢';
           let title = alertType === 'down' ? 'SaaS Down' : 'SaaS Up';
           let detailText = alertType === 'down' ? 'está caído' : 'se ha recuperado';
@@ -2884,8 +2894,7 @@ async function startTelegramCommandPolling() {
                 // Hacer ping a cada cliente en paralelo
                 const pingResults = await Promise.allSettled(
                   clients.map(async (c) => {
-                    const url  = c.url || c.domain || c.firebase?.appUrl || '';
-                    const name = c.nombre || c.name || c.clientId || c.id || 'Sin nombre';
+                    const { url, name } = resolveClientInfo(c);
                     if (!url) return { name, status: 'sin_url', latency: null };
                     const start = Date.now();
                     try {
