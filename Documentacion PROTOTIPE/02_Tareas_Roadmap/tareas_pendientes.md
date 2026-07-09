@@ -6,6 +6,7 @@
   - Descripción: Desarrollar e integrar notificaciones activas por cambio de estado en Health Monitor. Involucra crear la interfaz de configuración en HealthMonitorView.jsx (modal con credenciales de Telegram/Discord), persistir la configuración en Firestore (configuracion_sistema/monitoreo), implementar envío de alerta de prueba directa y programar lógica de despacho en transiciones Up/Down.
   - Archivos:
     - [dev-dashboard/src/components/admin/HealthMonitorView.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx) [MODIFY]
+    - [dev-dashboard/firestore.rules](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firestore.rules) [MODIFY]
     - [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
 * **[x] ~~Tarea CORE-332: Optimización de Bundles de Producción y Resolución de Alerta PWA (2026-07-09)~~**
   - Estatus: Completado.

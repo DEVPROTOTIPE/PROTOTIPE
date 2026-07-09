@@ -19,6 +19,7 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
   * Programado el envío de alertas en caliente al pulsar "Probar Conexión" y lógica de control de transiciones de salud (Up/Down) para prevenir notificaciones duplicadas (spam).
   * **Archivos afectados:**
     - [Central PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx) [MODIFY]
+    - [Central PROTOTIPE/dev-dashboard/firestore.rules](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firestore.rules) [MODIFY]
     - [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
 
 ## CORE-334: Registro de Componente AnimatedNavbarMobile (Bottom Nav PWA)
