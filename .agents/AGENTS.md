@@ -229,7 +229,7 @@ Para asegurar que todo cambio de código, inyección de componentes o portabilid
 3. **Sincronización Documental Obligatoria:** En el mismo paso del cambio físico de código, la IA actualizará de forma obligatoria y proactiva antes de enviar su respuesta:
    - **`bitacora_cambios.md`**: Registrando el código de tarea y el impacto técnico.
    - **`mapa_aplicacion.md`**: Reflejando cualquier nueva ruta o reestructuración física.
-   - **`tareas_pendientes.md`**: Marcando la tarea realizada como completada e identificando cualquier re-trabajo o revisión histórica.
+   - **`tareas_pendientes.md`**: Marcando la tarea realizada como completada e identificando cualquier re-trabajo o revisión histórica. *Evitación de Drifts:* Si mueves, renombras o eliminas un archivo físico en el monorepo que previamente estaba declarado en la lista de archivos de cualquier tarea en `tareas_pendientes.md`, DEBES corregir, actualizar o remover inmediatamente la referencia a dicho archivo en la tarea correspondiente para prevenir advertencias de consistencia de disco (`FILE_NOT_FOUND`).
    - **`mapa_documentacion_ia.md`**: Registrando o actualizando el mapa semántico si se crearon, modificaron o archivaron documentos.
    - **OBLIGACIÓN ABSOLUTA DE CIERRE**: Queda estrictamente prohibido responder al usuario informando de la finalización de un cambio sin haber editado y guardado físicamente estos archivos de documentación en el disco y Git en ese mismo turno. Este paso no requiere confirmación del usuario y debe ejecutarse de forma automática.
 

@@ -71,9 +71,9 @@
   - Estatus: Completada
   - Fecha de registro: 2026-07-09
   - Fecha de finalización: 2026-07-09
-  - Descripción: Creado el manual de operación definitivo `manual_consola_telegram.md` en subcarpeta `07_Manuales_Desarrollo/`. El manual detalla la arquitectura de 3 capas del servicio, la configuración de seguridad (`auth whitelist`), la mitigación de Privacy Mode de grupos mediante deep-links, el catálogo completo de comandos informativos y DevOps, y la lógica de auto-commit y Auto-Merge condicional a main. Se actualizó el mapa semántico `mapa_documentacion_ia.md` indexando el nuevo recurso.
+  - Descripción: Creado el manual de operación definitivo `manual_integracion_telegram.md` en subcarpeta `07_Manuales_Desarrollo/Servicios_y_Firebase/Canales_Notificaciones_Telegram/`. El manual detalla la arquitectura de 3 capas del servicio, la configuración de seguridad (`auth whitelist`), la mitigación de Privacy Mode de grupos mediante deep-links, el catálogo completo de comandos informativos y DevOps, y la lógica de auto-commit y Auto-Merge condicional a main. Se actualizó el mapa semántico `mapa_documentacion_ia.md` indexando el nuevo recurso.
   - Archivos:
-    - [`manual_consola_telegram.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_consola_telegram.md) [NEW]
+    - [`manual_integracion_telegram.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Canales_Notificaciones_Telegram/manual_integracion_telegram.md) [MODIFY]
     - [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
 
 * **[x] ~~Tarea CLI-350: Eliminación de Ramas Master Obsoletas en GitHub~~**
