@@ -9,6 +9,16 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CLI-348 — 2026-07-09
+**Fix: Sincronización Completa de Auto-Merge y Push en Telegram**
+
+### Cambios realizados:
+1. **Paso Explícito de Parámetros Git:**
+   - Corregido el flujo en `executeGitPush` donde la omisión de los parámetros query string en la llamada local hacía que la API de backup usara fallbacks de red pasivos.
+   - Forzado el parámetro `&push=true` para garantizar el empuje a GitHub en cada invocación remota.
+2. **Estrategia de Auto-Merge Condicional:**
+   - Implementado el parámetro dinámico `&autoMerge=[true/false]` basado en el repositorio. Si la ruta pertenece al Core del sistema (maestro, dev-dashboard o plantillas) y no es una instancia de cliente, se activa la consolidación automática a la rama de producción (`main`/`master`) en el repositorio remoto, garantizando la paridad al 100% con la lógica del dashboard.
+
 ## CLI-347 — 2026-07-09
 **Feature: Reporte Interactivo de Pre-flight para Publicación de Git en Telegram**
 

@@ -1016,7 +1016,14 @@ async function executeGitPush(token, chatId, repoPath) {
     const backMarkup = { inline_keyboard: [[{ text: '🏠 Menú Principal', callback_data: '/start' }]] };
     try {
       const autoMessage = await generateAutoCommitMessage(repoPath);
+      
+      // Auto-Merge habilitado por defecto si no es instancia de cliente (paridad con el dashboard React)
+      const isInstance = repoPath.includes('Instancias Clientes');
+      const doAutoMerge = !isInstance;
+      
       const url = `http://localhost:3001/api/git/backup-stream?path=${encodeURIComponent(repoPath)}` + 
+                  `&push=true` +
+                  `&autoMerge=${doAutoMerge}` +
                   (autoMessage ? `&message=${encodeURIComponent(autoMessage)}` : '');
       
       const res     = await fetch(url, { signal: AbortSignal.timeout(180000) });
@@ -1029,8 +1036,13 @@ async function executeGitPush(token, chatId, repoPath) {
         ? `✅ <b>Cambios Publicados</b>\n\n🚀 GitHub / Hosting actualizado con éxito.`
         : `❌ <b>Push Fallido</b>\n\n<code>${last}</code>`;
       
-      if (ok && autoMessage) {
-        finalMsg += `\n\n💬 <b>Mensaje de Commit:</b>\n<code>${autoMessage}</code>`;
+      if (ok) {
+        if (autoMessage) {
+          finalMsg += `\n\n💬 <b>Mensaje de Commit:</b>\n<code>${autoMessage}</code>`;
+        }
+        if (doAutoMerge) {
+          finalMsg += `\n\n🔄 <b>Fusión Automática:</b>\nFusionado a producción (main/master) en GitHub.`;
+        }
       }
       
       await editJobMessage(token, chatId, msgId, finalMsg, backMarkup);

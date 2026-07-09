@@ -1,5 +1,13 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CLI-348: Paridad de Estrategia de Auto-Merge y Push en Telegram~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Resuelto problema por el cual el push ejecutado desde Telegram no aplicaba la fusión a producción (Auto-Merge) en GitHub para ramas del Core. Se modificó `executeGitPush` para pasar explícitamente `push=true` y `autoMerge=true` (siempre que el repositorio no sea una instancia de cliente, replicando al 100% las condiciones de control de versiones del dashboard React), permitiendo que los cambios se suban y consoliden correctamente en las ramas principales remotes.
+  - Archivos:
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
 * **[x] ~~Tarea CLI-347: Pre-flight Detallado de Publicación Git en Telegram~~**
   - Estatus: Completada
   - Fecha de registro: 2026-07-09
