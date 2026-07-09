@@ -9,7 +9,7 @@ app_layout:
     state: [store/]
   Prototipe_CLI:
     root: /Prototipe-CLI/
-    core_scripts: [server.js, generator.js, worker_create_project.js, sync_clients.js]
+    core_scripts: [server.js, generator.js, worker_create_project.js, sync_clients.js, notification_server.js]
     templates: [templates/template-ventas/, templates/template-core-seed/]
   Plantilla_Core:
     root: /Plantillas Core/App Ventas/src/
@@ -22,6 +22,7 @@ app_layout:
 Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e integraciones con Firebase de **App Ventas**. Debe mantenerse actualizado ante cualquier creación, eliminación o refactorización de archivos.
 
 ## 📂 Estructura de Documentación y Negocio
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Canales_Notificaciones_Telegram/manual_integracion_telegram.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-340).
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/ESTADO_REAL_PROTOTIPE_2.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-302).
 * **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_rollback_autonomo_ia.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-309).
 * **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/registro_decisiones_estrategicas.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-311).
@@ -329,6 +330,8 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Plantillas Core/App Ventas/tests/helpers/checkout.helpers.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea LINE-2007).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-030).
 * **`/Prototipe-CLI/server.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-031).
+* **`/Prototipe-CLI/notification_server.js`**: Servidor de notificaciones Telegram del ecosistema. Incluye ciclo de polling de comandos, Inline Keyboards, State Machine para wizard /addtask, interceptor AWAITING_TEXT, y soporte multi-canal. Incorpora los módulos remotos de control de versiones de Git (/git), administración de dev servers Vite (/devserver), herramientas de autocuración (/fix), matriz de desviación de reglas Firebase (/rules), diagnósticos de Playwright (/tests), e inventario de Cores semilla (/cores) con flujo interactivo de confirmación AWAITING_CONFIRM. Integra paridad funcional al 100% con la lógica de auto-commit del dashboard React (autogenerando mensajes de commit dinámicos a partir de Git y el roadmap) y proporciona un reporte interactivo de Pre-flight detallado con vista previa de archivos modificados y alertas de fuga de secretos (.env). Actualizado en CLI-347.
+* **`/Prototipe-CLI/notification_config.json`**: Archivo de configuración local para los canales de Telegram (tokens, chat IDs por subcanal). Excluido del linter de integridad por ser artefacto de credenciales de entorno. [NEW] CLI-341.
 * **`/Central PROTOTIPE/dev-dashboard/src/components/ui/DarkModeToggle.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-032).
 * **`/Central PROTOTIPE/dev-dashboard/src/index.css`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-032).
 * **`/Prototipe-CLI/generator.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-033).

@@ -221,6 +221,35 @@ const GIT_ROOT = path.resolve(CLI_ROOT, '..');
 const TEMPLATES_DIR = path.join(CLI_ROOT, 'templates');
 const WORKER_PATH  = path.join(CLI_ROOT, 'worker_create_project.js');
 
+// ─── Levantar Servidor de Notificaciones (Proceso Hijo / Opción A) ───
+const notificationServerPath = path.join(CLI_ROOT, 'notification_server.js');
+let notificationProcess = null;
+
+function startNotificationServer() {
+  if (fs.existsSync(notificationServerPath)) {
+    console.log(`[CLI Server] Levantando Servidor de Notificaciones desde: ${notificationServerPath}`);
+    notificationProcess = fork(notificationServerPath);
+
+    notificationProcess.on('error', (err) => {
+      console.error('[CLI Server] Error en el Servidor de Notificaciones hijo:', err);
+    });
+
+    notificationProcess.on('exit', (code, signal) => {
+      // Si finalizó por señal SIGTERM o código 0, no reiniciar (cierre intencionado)
+      if (code === 0 || signal === 'SIGTERM' || signal === 'SIGINT') {
+        console.log('[CLI Server] Servidor de Notificaciones hijo finalizado de forma intencionada.');
+        return;
+      }
+      console.warn(`[CLI Server] Servidor de Notificaciones hijo finalizó inesperadamente (código ${code}, señal ${signal}). Reiniciando en 5 segundos...`);
+      setTimeout(startNotificationServer, 5000);
+    });
+  } else {
+    console.error(`[CLI Server] No se encontró el archivo del servidor de notificaciones en: ${notificationServerPath}`);
+  }
+}
+
+startNotificationServer();
+
 // ─────────────────────────────────────────────────────────────────────────────
 // writeFileWithRetry — Escritura resiliente con reintentos exponenciales
 // Previene errores EBUSY/EPERM causados por bloqueos temporales del sistema
@@ -5629,10 +5658,56 @@ app.all('/api/project/deploy', async (req, res) => {
     await runCommand('firebase', ['deploy', '--only', 'hosting', '-P', firebaseProjectId]);
     send({ type: 'log', line: '🎉 Despliegue completado con éxito!' });
     send({ type: 'result', success: true, url: `https://${firebaseProjectId}.web.app` });
+    
+    // Notificación DevOps de Despliegue Exitoso
+    fetch('http://localhost:5050/api/notify/telegram', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: `🚀 <b>DevOps: Despliegue de Hosting Exitoso</b>\n` +
+              `----------------------------------\n` +
+              `🏢 <b>Cliente:</b> <code>${clientId}</code>\n` +
+              `🔥 <b>Proyecto:</b> <code>${firebaseProjectId}</code>\n` +
+              `🔗 <b>URL:</b> <a href="https://${firebaseProjectId}.web.app">https://${firebaseProjectId}.web.app</a>\n` +
+              `----------------------------------`
+      })
+    }).catch(() => {});
+
+    fetch('http://localhost:5050/api/notify/discord', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: `🚀 **DevOps: Despliegue de Hosting Exitoso**\n🏢 **Cliente:** \`${clientId}\`\n🔥 **Proyecto:** \`${firebaseProjectId}\`\n🔗 **URL:** https://${firebaseProjectId}.web.app`
+      })
+    }).catch(() => {});
+
     if (!res.writableEnded) res.end();
   } catch (err) {
     send({ type: 'log', line: `❌ Error durante el despliegue: ${err.message}` });
     send({ type: 'result', success: false, error: err.message });
+
+    // Notificación DevOps de Despliegue Fallido
+    fetch('http://localhost:5050/api/notify/telegram', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: `❌ <b>DevOps: Fallo de Despliegue (Firebase deploy)</b>\n` +
+              `----------------------------------\n` +
+              `🏢 <b>Cliente:</b> <code>${clientId}</code>\n` +
+              `🔥 <b>Proyecto:</b> <code>${firebaseProjectId || clientId}</code>\n` +
+              `💬 <b>Error:</b> <code>${err.message}</code>\n` +
+              `----------------------------------`
+      })
+    }).catch(() => {});
+
+    fetch('http://localhost:5050/api/notify/discord', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: `❌ **DevOps: Fallo de Despliegue (Firebase deploy)**\n🏢 **Cliente:** \`${clientId}\`\n💬 **Error:** \`${err.message}\``
+      })
+    }).catch(() => {});
+
     if (!res.writableEnded) res.end();
   }
 });
@@ -7125,6 +7200,11 @@ const devServerLogListeners = new Map(); // clientId -> Set of Response objects
 
 // Registrar hooks globales de salida para evitar procesos Vite zombis
 function cleanupDevServers() {
+  if (notificationProcess) {
+    try {
+      notificationProcess.kill('SIGTERM');
+    } catch (_) {}
+  }
   for (const [clientId, serverInfo] of devServers.entries()) {
     if (serverInfo && serverInfo.child) {
       try {
@@ -7139,6 +7219,85 @@ process.on('SIGINT', () => {
 });
 process.on('exit', () => {
   cleanupDevServers();
+});
+
+// ─── ENDPOINTS PARA MICROSERVICIO DE NOTIFICACIONES OMNICANAL ───
+app.post('/api/project/notify/config', (req, res) => {
+  if (notificationProcess && notificationProcess.connected) {
+    notificationProcess.send({ type: 'config', data: req.body });
+    return res.json({ success: true, message: 'Configuración sincronizada con el microservicio.' });
+  }
+  res.status(503).json({ error: 'El microservicio de notificaciones no está activo.' });
+});
+
+app.post('/api/project/notify/test', async (req, res) => {
+  try {
+    const { telegramToken, telegramChatId, discordWebhookUrl } = req.body;
+    const promises = [];
+
+    if (telegramToken && telegramChatId) {
+      promises.push(
+        fetch('http://localhost:5050/api/notify/telegram', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: '🔔 <b>Prueba de Conexión:</b> Notificaciones de Telegram de PROTOTIPE funcionando.',
+            chatId: telegramChatId,
+            token: telegramToken
+          })
+        }).then(async r => {
+          if (!r.ok) {
+            const txt = await r.text();
+            throw new Error(`Telegram: ${txt}`);
+          }
+        })
+      );
+    }
+
+    if (discordWebhookUrl) {
+      promises.push(
+        fetch('http://localhost:5050/api/notify/discord', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: '🔔 **Prueba de Conexión:** Notificaciones de Discord de PROTOTIPE funcionando.',
+            webhookUrl: discordWebhookUrl
+          })
+        }).then(async r => {
+          if (!r.ok) {
+            const txt = await r.text();
+            throw new Error(`Discord: ${txt}`);
+          }
+        })
+      );
+    }
+
+    if (promises.length === 0) {
+      return res.status(400).json({ error: 'Debes proporcionar credenciales de Telegram o Discord.' });
+    }
+
+    await Promise.all(promises);
+    res.json({ success: true, message: 'Alerta de prueba enviada.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/project/notify/error', async (req, res) => {
+  try {
+    const response = await fetch('http://localhost:5050/api/notify/error', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Fallo en microservicio: ${errText}`);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.get('/api/project/dev/status', async (req, res) => {
@@ -10391,12 +10550,19 @@ app.get('/api/roadmap', async (req, res) => {
     const content = await fs.readFile(roadmapPath, 'utf8');
     const tasks = parseRoadmapContent(content);
 
-    // Ordenar de forma descendente por prefijo ponderado (CORE > CLI > DOC > otros) y número de tarea (325 > 324)
+    // Ordenar: primero por número de tarea descendente (más reciente arriba),
+    // usando el prefijo sólo como desempate cuando los números son idénticos.
+    // Así CLI-341 aparece antes que CORE-340, sin importar el dominio.
     const PREFIX_ORDER = {
       'CORE': 1,
-      'CLI': 2,
-      'DOC': 3,
-      'TPL': 4
+      'CLI':  2,
+      'DASH': 3,
+      'TPL':  4,
+      'PLT':  5,
+      'INST': 6,
+      'DOC':  7,
+      'LND':  8,
+      'BIZ':  9
     };
     tasks.sort((a, b) => {
       const getParts = (id = '') => {
@@ -10405,13 +10571,14 @@ app.get('/api/roadmap', async (req, res) => {
       };
       const pA = getParts(a.id);
       const pB = getParts(b.id);
-      if (pA.prefix !== pB.prefix) {
-        const wA = PREFIX_ORDER[pA.prefix] || 99;
-        const wB = PREFIX_ORDER[pB.prefix] || 99;
-        if (wA !== wB) return wA - wB;
-        return pA.prefix.localeCompare(pB.prefix);
-      }
-      return pB.num - pA.num;
+      // 1º — número descendente (criterio principal)
+      if (pA.num !== pB.num) return pB.num - pA.num;
+      // 2º — prefijo como desempate (CORE < CLI < ... para iguales)
+      const wA = PREFIX_ORDER[pA.prefix] || 99;
+      const wB = PREFIX_ORDER[pB.prefix] || 99;
+      if (wA !== wB) return wA - wB;
+      // 3º — alfabético
+      return pA.prefix.localeCompare(pB.prefix);
     });
 
     res.json({ success: true, tasks });

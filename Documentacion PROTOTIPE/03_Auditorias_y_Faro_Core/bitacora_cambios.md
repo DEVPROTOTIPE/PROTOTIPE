@@ -9,6 +9,212 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CLI-347 — 2026-07-09
+**Feature: Reporte Interactivo de Pre-flight para Publicación de Git en Telegram**
+
+### Cambios realizados:
+1. **Reporte Pre-flight Detallado:**
+   - Rediseñado el comando `/git_push_confirm` para que antes de solicitar la confirmación final, genere un informe de pre-flight enriquecido.
+   - Muestra el nombre del repositorio, la rama Git activa, el mensaje de commit previsto generado automáticamente.
+   - Detalla la tarea del Roadmap a la que se asociará (incluyendo su ID, descripción textual y estado actual).
+   - Lista de manera visual los primeros 10 archivos que se subirán con iconos semánticos (`📝`, `➕`, `🗑️`, `🔄`).
+2. **Alertas de Seguridad en Tiempo Real:**
+   - Verifica la propiedad `envLeak` en vivo. Si se detectan archivos `.env` expuestos, muestra una advertencia destacada en el chat y detalla cuáles archivos están comprometidos antes de la confirmación.
+
+## CLI-346 — 2026-07-09
+**Feature: Paridad de Auto-Commit y Mensaje de Commit Inteligente en Telegram**
+
+### Cambios realizados:
+1. **Generación Automática de Commit Message:**
+   - Desarrollada la función `generateAutoCommitMessage(repoPath)` en `notification_server.js` que replica con precisión la lógica visual de "Auto" del dashboard React.
+   - Analiza el estado del repo (`GET /api/git/status`) agrupando archivos agregados, modificados y eliminados.
+   - Mapea y enlaza de forma dinámica el ID de la tarea activa no completada en el Roadmap del CLI (`GET /api/roadmap`) y formatea la fecha ISO junto al branch activo.
+2. **Respaldo Inteligente (/git_push_confirm):**
+   - Modificado el handler `executeGitPush` del bot de Telegram para autogenerar e inyectar el mensaje del commit en la petición del stream del backup de Git (`/api/git/backup-stream?message=...`).
+   - El mensaje final del push en Telegram ahora detalla con precisión el commit message aplicado para la tranquilidad del operador técnico.
+
+## CLI-345 — 2026-07-09
+**Feature: Diagnóstico de Pruebas Playwright e Inventario de Cores (Sprint 3)**
+
+### Cambios realizados:
+1. **Módulo de Pruebas (/tests):**
+   - Desarrollada función `getE2EProjectsList()` que interactúa con `/api/e2e/projects` para listar todos los proyectos con Playwright configurado.
+   - Creado `/tests [projectId]` que interactúa con `/api/e2e/last-result` para reportar el resultado de la última ejecución de pruebas Playwright en formato legible, mostrando si pasó/falló, duración de ejecución y cantidad de tests aprobados/reprobados.
+2. **Inventario de Cores (/cores):**
+   - Implementado `getCoresReport()` que consulta `/api/cores` para mapear los cores registrados en el archivo local de plantillas, mostrando su clave, nicho de mercado, estado de actividad, y ruta absoluta.
+3. **Ayuda Integrada (/help):**
+   - Incorporados comandos `/tests` y `/cores` con inline buttons correspondientes.
+
+### Archivos modificados:
+- `Prototipe-CLI/notification_server.js` (Formatters y handlers de tests/cores)
+
+---
+
+## CLI-344 — 2026-07-09
+**Feature: Autocuración y Desviación de Reglas de Firebase vía Telegram (Sprint 2)**
+
+### Cambios realizados:
+1. **Módulo de Reparación (/fix):**
+   - Implementado flujo interactivo con selector de cliente para fix.
+   - Añadido `/fix_chunks_action` que solicita confirmación `AWAITING_CONFIRM` antes de invocar `POST /api/project/fix/chunks` para optimizar bundles y dividir dependencias pesadas de Vite.
+   - Añadido `/fix_pwa_action` que solicita confirmación `AWAITING_CONFIRM` antes de invocar `POST /api/project/fix/pwa` para restablecer íconos y favicon faltantes desde la plantilla base.
+2. **Matriz de Reglas de Firebase (/rules):**
+   - Creado `getFirebaseRulesDriftReport()` que consulta `GET /api/project/firebase-rules/drift-global` y genera un reporte en vivo del estado de consistencia local vs nube para las reglas de Firestore y Storage de todos los clientes.
+   - Incorporada botonera interactiva que detecta qué instancias tienen desviación (drift: true) y genera botones táctiles específicos `🩹 Desplegar: [cliente]` para aplicar reglas actualizadas en caliente vía `POST /api/project/firebase-rules/deploy`.
+3. **Menú de Ayuda (/help):**
+   - Actualizado con comandos explicativos `/fix` y `/rules` e inline buttons rápidos.
+
+### Archivos modificados:
+- `Prototipe-CLI/notification_server.js` (Formatters, interceptor y handlers de fix/rules)
+
+---
+
+## CLI-343 — 2026-07-09
+**Feature: Módulos Git y DevServer remotos en Bot de Telegram (Sprint 1)**
+
+### Cambios realizados:
+1. **Módulo Git (/git):**
+   - Implementado flujo interactivo con `getGitTargetsList()` consultando `/api/git/targets`. Genera un selector inline de repositorios con indicador visual de cambios (🔴/🟢).
+   - Implementados comandos secundarios `/git_repo [id]` que expone un submenú táctil para cada repositorio (Ver Cambios, Commits, Sin Publicar, Publicar).
+   - Implementados formateadores y handlers detallados: `/git_status` (consulta `/api/git/status` y muestra el estado y alertando de archivos `.env`), `/git_log` (commits recientes), `/git_unpushed` (commits sin push validando el task ID y Conventional Commits).
+   - Integrado `/git_push_confirm` para solicitar confirmación táctil (`AWAITING_CONFIRM`) antes de invocar `/api/git/backup-stream` para publicar cambios de manera asíncrona.
+2. **Módulo DevServer (/devserver):**
+   - Desarrollada vista táctil del estado del servidor de desarrollo Vite (`/api/project/dev/status`) con botones dinámicos según el estado (Arrancar o Detener/Reiniciar).
+   - Integrados comandos `/devserver_start`, `/devserver_stop_confirm` y `/devserver_restart` para el control de procesos npm dev asíncronos mediante confirmación manual.
+3. **Ayuda Integrada (/help):**
+   - Actualizada la interfaz de ayuda `/help` con descripciones de comandos claras y botones táctiles rápidos en un layout inline balanceado y mobile-friendly.
+
+### Archivos modificados:
+- `Prototipe-CLI/notification_server.js` (Formatters, interceptor de confirmación, y nuevos comandos)
+
+---
+
+## CLI-342 — 2026-07-09
+**Fix: 3 Correcciones Estructurales del Bot de Telegram**
+
+### Cambios realizados:
+1. **Auth Whitelist (Fix 1):** Implementada función `isAuthorized(chatId, command)` en `notification_server.js`. Verifica `systemConfig.auth.allowedChatIds` y `adminChatIds`. Comandos destructivos requieren nivel admin. Silencio total para IDs desconocidos. Config en `notification_config.json` con sección `auth`.
+2. **Job Tracker (Fix 2):** Implementados helpers `sendJobMessage()` y `editJobMessage()` + Map `activeJobs`. Los comandos `/deploy` e `/integrity_autofix` ahora envían mensaje "⏳ En progreso" y lo editan con el resultado final usando background IIFE + `AbortSignal.timeout(600000)`. Nuevo endpoint `POST /api/notify/job-complete` para callbacks externos.
+3. **AWAITING_TEXT fix (Fix 3):** Resuelto Privacy Mode de Telegram en grupos. Handler `/addtask_cat CUSTOM` ahora genera botón deep-link `t.me/BOT?start=addtask_{chatId}_{domain}`. `/start` intercepta payload, activa `AWAITING_TEXT` en DM privado con campo `groupChatId` para confirmar de vuelta al grupo. `botUsername` se resuelve en startup vía `getMe`.
+
+### Archivos modificados:
+- `Prototipe-CLI/notification_server.js` (3 fixes: isAuthorized, sendJobMessage/editJobMessage, deep-link /start)
+- `Prototipe-CLI/notification_config.json` (sección auth con allowedChatIds/adminChatIds)
+
+---
+
+## CLI-341: Asistente Interactivo de Creación de Tareas por Telegram + Fix Roadmap Integrity
+- **Fecha:** 2026-07-09
+- **Tipo:** Feature / Telegram UX / Bugfix Prebuild / Linter Mejoras
+- **Archivos modificados:**
+  - `Prototipe-CLI/notification_server.js` [NEW]
+  - `Prototipe-CLI/server.js` [MODIFY]
+  - `Prototipe-CLI/notification_config.json` [NEW]
+  - `Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs` [MODIFY]
+  - `Central PROTOTIPE/dev-dashboard/src/App.jsx` [MODIFY]
+  - `Central PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx` [MODIFY]
+  - `Documentacion PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Canales_Notificaciones_Telegram/manual_integracion_telegram.md` [NEW]
+
+### Feature: Wizard de /addtask en Telegram
+- Implementado asistente conversacional step-by-step (State Machine con `userStates`) en `notification_server.js`.
+- Flujo interactivo: selección de **Dominio** → **Categoría** → **Plantilla predefinida o Texto Libre**.
+- Botoneras táctiles (Inline Keyboards de Telegram) en cada paso, sin escritura manual.
+- Captura de texto libre via intercepción de mensajes en estado `AWAITING_TEXT`.
+- Fallback directo: `/addtask [DOM] [Texto]` para tareas exprés.
+- Las tareas creadas se persisten en `tareas_pendientes.md` via `POST /api/roadmap/add` del CLI Bridge.
+
+### Bugfix: Desalineación del Roadmap en Prebuild
+- **Causa raíz:** La tarea generada automáticamente (`DOC-4`) era un stub vacío sin lista de `- Archivos:`. El linter `verify_library_integrity.cjs` la tomaba como la tarea activa y fallaba al no encontrar ningún archivo git-modificado registrado.
+- **Corrección 1 — Roadmap:** Reemplazada `DOC-4` por `CLI-341` con la lista completa de todos los archivos modificados y nuevos del workspace.
+- **Corrección 2 — Exclusiones del Linter:** Añadidos filtros para artefactos auto-generados que nunca deben chequearse: `notification_config.json`, rutas `.tmp/`, archivos `.firebase/*.cache`.
+- **Corrección 3 — Matching de Directorios:** El algoritmo `isRegistered` fue mejorado para manejar el caso donde `git status --porcelain` reporta un directorio completo untracked con `/` al final. Ahora hace **prefix-match inverso**: si un archivo registrado empieza con el prefijo del directorio reportado, se considera registrado.
+
+### Resultado
+- `verify_library_integrity.cjs` pasa al 100% con `✅ INTEGRIDAD DE LA BIBLIOTECA AL 100% OK.`
+- Cero falsos positivos por archivos de configuración local o cachés de Firebase.
+- Las advertencias restantes (`LeafletMapPickerSandbox`, `OrderDeliveryPanel`) son preexistentes y no bloqueantes.
+
+## CORE-340: Comandos Interactivos, Botones de Telegram, Corrección de Token OAuth2 y Depuración de Reportes
+- **Fecha:** 2026-07-09
+- **Tipo:** Ajustes / DevOps / Telegram Commands / Documentación / Polling / UX / Bugfix
+- **Descripción:** 
+  * Diseñado e implementado el ciclo de Polling de Comandos en tiempo real (cada 3 segundos) en `notification_server.js` para procesar comandos interactivos de Telegram.
+  * Corregido el flujo de refresco de tokens OAuth2 de Firebase CLI en `notification_server.js` integrando el `client_secret` oficial de Google Cloud (`j9iVZfS8kkCEFUPaAeJV0sAi`) para resolver errores `401 Unauthorized/ACCESS_TOKEN_TYPE_UNSUPPORTED` al consultar Firestore REST.
+  * Añadida compatibilidad con **Callback Queries e Inline Keyboards** de Telegram para permitir ejecutar comandos mediante botones táctiles interactivos en los chats (`🩺 Salud`, `🚨 Errores`, `📝 Preventas`, `💰 Facturación`, `📦 Clientes CLI`).
+  * **Corrección de Duplicados en Salud (`/status`):** Se modificó la consulta para cruzar la colección `health_checks` con los clientes activos en `clientes_control`, eliminando registros obsoletos/duplicados como `moni-app` y corrigiendo el color del emoji a verde `🟢` cuando el estado es `green`.
+  * **Filtro de Preventas Incompletas (`/leads`):** Se añadió un filtro que descarta preventas borradores/incompletas, mostrando solo briefings finalizados (`finalizado === true`, `status === 'completed'` o `progreso === 100`).
+  * **Corrección de Fecha Inválida (`/billing`):** Creado el helper `formatFirestoreDate()` para parsear correctamente objetos de tipo Firestore Timestamp (con métodos `toDate` y `toMillis`), resolviendo el error de "invalid date".
+  * **Corrección de Listado de Clientes CLI (`/clientes`):** Reescrita la función `getClientInstancesList()` para procesar adecuadamente la estructura de datos agrupada por plantillas devuelta por el API local `/api/instancias/list`.
+  * **Corrección de Llamada DevOps (`/deploy`):** Se corrigió la petición de red del bot hacia el endpoint del Bridge local `/api/project/deploy` enviando el `clientId` dentro del cuerpo de la petición (`POST body`) en formato JSON en lugar de pasarlo en la URL (query string). Esto satisface la validación estricta de parámetros del Bridge que exige cuerpo de petición para solicitudes POST, habilitando la compilación y despliegue automáticos.
+  * **Asistente de Creación de Tareas Interactivo (`/addtask`):** Diseñado e implementado un asistente conversacional estructurado por pasos (Wizard State-Machine) en `notification_server.js` que se gestiona mediante botones táctiles. El flujo guía al usuario en la selección del dominio (Paso 1), selección de categoría (Paso 2) y elección de plantilla predefinida o entrada manual en texto libre (Paso 3) capturada a través de un interceptor de estados en memoria.
+  * Creado el manual definitivo `manual_integracion_telegram.md` detallando la arquitectura del fork, ruteo por canal, guía de creación de bots y catálogo completo de comandos.
+- **Archivos afectados:**
+  - [Prototipe-CLI/notification_server.js](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+  - [Documentacion PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Canales_Notificaciones_Telegram/manual_integracion_telegram.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Canales_Notificaciones_Telegram/manual_integracion_telegram.md) [NEW]
+  - [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+  - [Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+## CORE-339: Ruteo de Alertas por Canal Específico y Guía de Creación de Bots
+- **Fecha:** 2026-07-09
+- **Tipo:** Ajustes / UX / Omnichannel Alerts / Ruteo / Documentación
+- **Descripción:** 
+  * Implementado el ruteo de alertas por canal específico (`crashes`, `briefings`, `billing`, y `devops`) en `notification_server.js` con fallback inteligente al Canal General (si no se configuran credenciales locales).
+  * Diseñado y renderizado un selector de subpestañas interactivo en la tarjeta "Canales de Alertas Omnicanal" de la sección Ajustes de `App.jsx` para conmutar entre la configuración general y la de cada subcanal.
+  * Añadida una guía interactiva y colapsable que describe detalladamente los pasos para crear bots en Telegram con `@BotFather` y obtener IDs de chats y grupos con bots de soporte.
+  * Actualizado el endpoint de prueba del microservicio para enrutar el despacho a través de las credenciales del canal seleccionado en tiempo real.
+- **Archivos afectados:**
+  - [Prototipe-CLI/notification_server.js](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+  - [dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+## CORE-338: Relocalización y Consolidación de Configuración de Alertas Omnicanal
+- **Fecha:** 2026-07-09
+- **Tipo:** Ajustes / UX / Omnichannel Alerts / Refactorización / Firestore
+- **Descripción:** 
+  * Reubicado el panel de configuración de Telegram Bot y Discord Webhook desde el monitor de salud (`HealthMonitorView.jsx`) hacia la pestaña de Ajustes globales (`activeTab === 'settings'`) en `App.jsx`, presentándolo en formato de tarjeta premium.
+  * Eliminado el modal redundante y el botón de engranaje de configuración en `HealthMonitorView.jsx` para centralizar toda la administración del sistema.
+  * Corregidos y mapeados los campos de las colecciones de Firestore central (`app_failures`, `briefings` y `reportesBilling`) en `pollCollections` de `notification_server.js` para asegurar paridad con los esquemas reales (ej. `timestamp` en fallos, `fecha` en preventas, `updatedAt` en facturación), resolviendo de raíz el problema por el cual no se despachaban las alertas a Telegram/Discord.
+- **Archivos afectados:**
+  - [Prototipe-CLI/notification_server.js](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+  - [dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+  - [dev-dashboard/src/components/admin/HealthMonitorView.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx) [MODIFY]
+
+## CORE-337: DevOps y SaaS Business Alerts Integration
+- **Fecha:** 2026-07-09
+- **Tipo:** DevOps / SaaS Alerts / REST API / OAuth2 / Firebase CLI Integration
+- **Descripción:** 
+  * Reescrito el motor de listeners de `notification_server.js` para migrar del SDK cliente de Firebase (el cual fallaba por restricciones de autenticación anónima) a un sistema resiliente de polling activo cada 15 segundos sobre la **Firestore REST API**.
+  * Implementada la obtención y refresco automático de tokens OAuth2 leyendo directamente la sesión activa de **Firebase CLI** (`firebase-tools.json`), permitiendo acceso completo de lectura/escritura como administrador sin credenciales estáticas ni exposición de contraseñas.
+  * Añadida lógica de parseo recursivo (`parseFirestoreDocument`) para convertir respuestas crudas tipadas de Firestore REST a objetos JavaScript puros.
+  * Integrada la lógica autónoma del **Health Monitor (pings y disponibilidad de clientes)** directamente en el microservicio en segundo plano:
+    - Realiza pings HTTP y validaciones de PWA manifest a todas las instancias activas de `clientes_control` cada 5 minutos de forma 100% independiente del navegador.
+    - Compara el estado con el último registro de Firestore y despacha de forma autónoma alertas **SaaS Down (🔴)** y **SaaS Up (🟢)** ante caídas y recuperaciones.
+    - Escribe los resultados actualizados e historial de latencia directamente en la colección Firestore `health_checks`, sincronizando el semáforo visual del dashboard central en caliente.
+  * Integrada alerta DevOps de despliegue exitoso o fallido directamente en el flujo de `/api/project/deploy` de `server.js` (con disparadores automáticos a los canales correspondientes).
+  * Integrada alerta DevOps de pre-compilación fallida en el script de linter y calidad `verify_library_integrity.cjs` antes de forzar la salida del proceso.
+  * Corregido y optimizado el regex parser del linter de Git para dar soporte a espacios en nombres de carpetas (`Documentacion PROTOTIPE`), eliminando fallos falsos positivos en compilación.
+- **Archivos afectados:**
+  - [Prototipe-CLI/notification_server.js](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+  - [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [dev-dashboard/scripts/verify_library_integrity.cjs](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [MODIFY]
+  - [dev-dashboard/src/components/admin/HealthMonitorView.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx) [MODIFY]
+  - [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+  - [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
+## CORE-336: Microservicio de Notificaciones y Acoplamiento de Proceso Hijo
+- **Fecha:** 2026-07-09
+- **Tipo:** CLI / Microservicios / Express / Proceso Hijo IPC
+- **Descripción:** 
+  * Se diseñó y creó el microservicio independiente `notification_server.js` en el puerto `5050` para centralizar el envío de alertas a Telegram y Discord, evitando la inicialización de Firebase Client SDK en el CLI (eliminando fallos por falta de permisos/sesión activa).
+  * Implementado sistema de caché local con persistencia en `notification_config.json` para almacenamiento local tolerante a fallos y sin conexión a red.
+  * Acoplado arranque 100% automático del microservicio mediante `child_process.fork()` desde `server.js` en el arranque del CLI, incluyendo auto-reinicios resilientes y limpieza de proceso zombie al apagar la terminal.
+  * Integrada comunicación bidireccional IPC (`parent.send()`) para propagar cambios de configuración desde el dashboard central en tiempo real.
+  * Modificada la interfaz de `HealthMonitorView.jsx` y endpoints de `server.js` para canalizar las alertas de prueba y configuración del monitor de salud a través del nuevo microservicio.
+- **Archivos afectados:**
+  - [Prototipe-CLI/notification_server.js](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [NEW]
+  - [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+  - [Central PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx) [MODIFY]
+  - [Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
 ## CORE-335: Sistema de Alertas Activas Omnicanal (Telegram/Discord Webhooks)
 - **Fecha:** 2026-07-09
 - **Tipo:** Dashboard / Notificaciones / Firebase / Integración API
