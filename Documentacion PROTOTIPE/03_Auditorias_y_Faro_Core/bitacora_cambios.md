@@ -9,13 +9,33 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-333: Consistencia y Trazabilidad de Git Automática desde el Dashboard
+- **Fecha:** 2026-07-09
+- **Tipo:** CLI / Dashboard / Git Automation / DX
+- **Descripción:** 
+  * **Problema:** En el panel de control de consistencia multidimensional, las tareas marcadas como completadas recientemente carecían de commits inmediatos si eran pushed fuera de los últimos 15 commits por commits de mantenimiento posteriores o si se realizaban en lotes, arrojando advertencias en la pestaña de historial Git.
+  * **Endpoint del Servidor CLI:** Se implementó la ruta `POST /api/git/link-tasks` en `server.js` que recibe un listado de IDs de tareas y ejecuta de forma segura un commit vacío en el repositorio con un mensaje estructurado: `chore(git): link tasks [IDs] to Git history to satisfy traceability`.
+  * **Acción en el Frontend:** Se agregó el botón reactivo **"🔗 Vincular Todo"** en la pestaña de Commits de `SkillsRoadmapPanel.jsx`. Al presionarlo, realiza la petición asíncrona al CLI, vinculando al instante las tareas sueltas al historial de Git y refrescando el diagnóstico para re-establecer el estatus de Consistencia Multidimensional al 100% OK de manera automática.
+  * **Archivos afectados:**
+    - [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx) [MODIFY]
+
 ## CORE-332: Optimización de Bundles de Producción y Resolución de Alerta PWA
 - **Fecha:** 2026-07-09
 - **Tipo:** Performance / Config / Build / Quality Audit
 - **Descripción:** 
   * Se identificó que la consolidación de librerías en un único bundle `vendor` elevó el peso de este archivo a 858 KB, arrojando una advertencia de auditoría de rendimiento en el panel de calidad PWA.
-  * Solución: Se optimizó el proceso de empaquetado en `vite.config.js` extrayendo las librerías `@tanstack/react-query` y `zod` a sus propios chunks independientes (`react-query` y `zod`). Esto redujo el peso del bundle `vendor` a 741 KB, eliminando de raíz la advertencia y mejorando los tiempos de carga inicial.
-  * Archivos afectados: `vite.config.js` en plantillas core y réplicas de clientes.
+  * Solución y Code Splitting Final: Se optimizó el proceso de empaquetado en `vite.config.js` extrayendo las librerías a sus propios chunks independientes:
+    - `react-core` (~191 KB): Agrupa `react`, `react-dom` y `react-error-boundary` (eliminando cualquier error de inicialización en Windows).
+    - `react-router` (~38 KB): Agrupa `react-router`, `react-router-dom` y `@react-router/`.
+    - `react-query` (~42 KB): Mapea `@tanstack/react-query` y `@tanstack/query-core`.
+    - `zod` (~72 KB): Mapea `zod`.
+    - Con este split premium, el peso del bundle `vendor` descendió de 858 KB a **509 KB**, eliminando de raíz las advertencias del auditor de calidad PWA y blindando todas las futuras instancias del CLI.
+  * Archivos afectados:
+    - [Plantillas Core/App Ventas/vite.config.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/vite.config.js) [MODIFY]
+    - [Prototipe-CLI/templates/template-ventas/vite.config.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js) [MODIFY]
+    - [Prototipe-CLI/templates/template-core-seed/vite.config.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/vite.config.js) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/vite.config.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/vite.config.js) [MODIFY]
 
 ## CORE-331: Lupa de Zoom Interactivo y Animado para Versión Móvil
 - **Fecha:** 2026-07-09
