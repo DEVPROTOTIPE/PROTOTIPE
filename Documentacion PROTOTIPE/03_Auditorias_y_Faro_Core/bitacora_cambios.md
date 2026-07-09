@@ -9,6 +9,30 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-332: Optimización de Bundles de Producción y Resolución de Alerta PWA
+- **Fecha:** 2026-07-09
+- **Tipo:** Performance / Config / Build / Quality Audit
+- **Descripción:** 
+  * Se identificó que la consolidación de librerías en un único bundle `vendor` elevó el peso de este archivo a 858 KB, arrojando una advertencia de auditoría de rendimiento en el panel de calidad PWA.
+  * Solución: Se optimizó el proceso de empaquetado en `vite.config.js` extrayendo las librerías `@tanstack/react-query` y `zod` a sus propios chunks independientes (`react-query` y `zod`). Esto redujo el peso del bundle `vendor` a 741 KB, eliminando de raíz la advertencia y mejorando los tiempos de carga inicial.
+  * Archivos afectados: `vite.config.js` en plantillas core y réplicas de clientes.
+
+## CORE-331: Lupa de Zoom Interactivo y Animado para Versión Móvil
+- **Fecha:** 2026-07-09
+- **Tipo:** UI/UX / Mobile Optimization / Gestures / Framer Motion
+- **Descripción:** 
+  * Para evitar acercamientos o movimientos de zoom accidentales en móviles al arrastrar o hacer scroll por la página, se creó un botón interactivo de lupa animada (pulsante) en la parte inferior izquierda de la imagen del producto.
+  * Al presionar este botón, se activa el modo lupa en móviles, deshabilitando de forma segura el scroll de la pantalla (`touch-none` en el contenedor) y bloqueando el deslizamiento del carrusel de imágenes de Framer Motion (`drag={false}` en la imagen).
+  * Con el modo activo, el usuario puede explorar e inspeccionar a detalle la textura de la imagen arrastrando su dedo de forma inmersiva y fluida directamente en el contenedor del producto. Al presionar el botón de nuevo, se desactiva y se restaura el control de navegación estándar de la app.
+  * Archivos afectados: `ProductDetailPage.jsx`, `ProductPublicDetail.jsx` en plantillas core y réplicas de clientes.
+
+## CORE-330: Remoción de Bordes Negros en Detalle de Producto
+- **Fecha:** 2026-07-09
+- **Tipo:** UI/UX / Brand Customization
+- **Descripción:** 
+  * Se suavizaron los bordes rígidos y oscuros alrededor de los elementos clave de la página de detalle de producto y la vista pública QR. Se eliminaron los contornos toscos y se reemplazaron por sombras sutiles y bordes muy atenuados adaptados al tema de color (HSL) activo, puliendo la interfaz de marca blanca.
+  * Archivos afectados: `ProductDetailPage.jsx`, `ProductPublicDetail.jsx` en plantillas core y réplicas de clientes.
+
 ## CORE-329: Lupa Zoom en Detalle de Producto y QR Público
 - **Fecha:** 2026-07-08
 - **Tipo:** UI/UX / Feature Premium / Mobile Optimization / Gestures

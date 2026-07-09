@@ -1,5 +1,33 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-332: Optimización de Bundles de Producción y Resolución de Alerta PWA (2026-07-09)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-09
+  - Descripción: Se fragmentó el bundle `vendor` en `vite.config.js` extrayendo las librerías `@tanstack/react-query` y `zod` a sus respectivos chunks independientes (`react-query` y `zod`), logrando reducir el peso del bundle `vendor` principal por debajo de 800 KB (de 858 KB a 741 KB) y solucionando la advertencia del reporte de auditoría PWA de calidad.
+  - Archivos:
+    - [Plantillas Core/App Ventas/vite.config.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/vite.config.js) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/vite.config.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/vite.config.js) [MODIFY]
+
+* **[x] ~~Tarea CORE-331: Lupa de Zoom Interactivo y Animado para Versión Móvil (2026-07-09)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-09
+  - Descripción: Se implementó un botón flotante con una lupa animada (pulsante) en la esquina inferior izquierda del carrusel de imágenes para dispositivos móviles. Al activarse, se deshabilita el scroll de la página y el swipe de la galería para permitir al usuario explorar y ampliar en tiempo real los detalles de la imagen arrastrando el dedo en el propio contenedor, evitando gestos accidentales.
+  - Archivos:
+    - [Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+    - [Plantillas Core/App Ventas/src/pages/client/ProductPublicDetail.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/pages/client/ProductDetailPage.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/pages/client/ProductPublicDetail.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+
+* **[x] ~~Tarea CORE-330: Remoción de Bordes Negros en Detalle de Producto (2026-07-09)~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-09
+  - Descripción: Se eliminaron y suavizaron los bordes rígidos oscuros en la página de detalle de producto (`ProductDetailPage.jsx`) y en la vista pública QR (`ProductPublicDetail.jsx`) para que armonicen con el esquema cromático y de marca de la aplicación en marca blanca.
+  - Archivos:
+    - [Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+    - [Plantillas Core/App Ventas/src/pages/client/ProductPublicDetail.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/pages/client/ProductDetailPage.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+    - [Instancias Clientes/ventas/ventas-moni-app/src/pages/client/ProductPublicDetail.jsx](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+
 * **[x] ~~Tarea CORE-329: Lupa Zoom en Detalle de Producto y QR Público (2026-07-08)~~**
   - Estatus: Completado.
   - Fecha: 2026-07-08
