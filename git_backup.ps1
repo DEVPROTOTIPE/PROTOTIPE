@@ -331,8 +331,6 @@ try {
             
             if ($AutoMerge) {
                 $mainBranch = "main"
-                $hasMaster = (git branch --list "master" 2>$null)
-                if ($hasMaster) { $mainBranch = "master" }
                 
                 Write-Host ""
                 Write-Host " [Merge] Auto-Merge activado (Zero-Checkout). Fusionando [$branchName] -> [$mainBranch]..." -ForegroundColor Yellow

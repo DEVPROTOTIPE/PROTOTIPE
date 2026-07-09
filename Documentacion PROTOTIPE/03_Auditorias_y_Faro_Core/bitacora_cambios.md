@@ -9,6 +9,38 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CLI-351 — 2026-07-09
+**Documentation: Creación de Manual Consolidado de la Consola de Telegram**
+
+### Cambios realizados:
+1. **Manual Técnico:**
+   - Creado y estructurado el archivo [`manual_consola_telegram.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_consola_telegram.md) bajo el directorio temático de manuales.
+   - Describe la arquitectura de 3 capas, la configuración de seguridad (`auth whitelist`), la mitigación de Privacy Mode de grupos mediante deep-links, el catálogo completo de comandos informativos y DevOps, y la lógica de auto-commit y Auto-Merge condicional a main.
+2. **Sincronización del Mapa:**
+   - Registrado e indexado el manual en [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) con sus metadatos y criterio de decisión.
+
+## CLI-350 — 2026-07-09
+**Architecture: Eliminación de Ramas Master Obsoletas en GitHub**
+
+### Cambios realizados:
+1. **Eliminación Remota:**
+   - Se eliminaron con éxito las ramas remotas `master` obsoletas en el Maestro (`PROTOTIPE`) y Dashboard (`prototipe-dev-dashboard`) mediante `git push origin --delete master`.
+2. **Purgación Local:**
+   - Ejecutado `git fetch --prune` para purgar referencias huérfanas en los repositorios locales, dejando la arquitectura limpia en `main` y `develop`.
+
+## CLI-349 — 2026-07-09
+**Architecture: Alineación de Arquitectura de Ramas Git a main/develop**
+
+### Cambios realizados:
+1. **Unificación de scripts de Respaldo a main:**
+   - Modificados los scripts locales `git_backup.ps1` y `subproject_backup.ps1` para eliminar la validación dinámica `$hasMaster = (git branch --list "master")` que forzaba el Auto-Merge hacia `master` si la rama existía localmente.
+   - Forzada la variable `$mainBranch = "main"` en ambos scripts. Todos los procesos automáticos de fusión (Auto-Merge) consolidados ahora apuntan a la rama estándar de producción `main`.
+2. **Re-estructuración Física de dev-dashboard:**
+   - Realizado checkout de `master` y renombrado local a `main` en `Central PROTOTIPE/dev-dashboard`.
+   - Subida y vinculada la rama a GitHub (`git push -u origin main`).
+3. **Control Remoto en GitHub (Pendiente):**
+   - Intentada la eliminación de `master` en origin, la cual requiere que el administrador modifique en la interfaz web de GitHub la rama por defecto (Default Branch) de `master` a `main` tanto en `PROTOTIPE` como en `prototipe-dev-dashboard`.
+
 ## CLI-348 — 2026-07-09
 **Fix: Sincronización Completa de Auto-Merge y Push en Telegram**
 

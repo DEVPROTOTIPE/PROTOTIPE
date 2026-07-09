@@ -359,10 +359,7 @@ try {
         }
 
         if ($AutoMerge) {
-            # Detectar si la rama principal se llama main o master en el repo local
             $mainBranch = "main"
-            $hasMaster = (git branch --list "master" 2>$null)
-            if ($hasMaster) { $mainBranch = "master" }
             
             Write-Host ""
             Write-Host "  [Git Strategies] Auto-Merge activado (Zero-Checkout). Fusionando [$branchName] -> [$mainBranch]..." -ForegroundColor Yellow

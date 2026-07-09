@@ -1,5 +1,31 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CLI-351: Documentación Consolidada de la Consola de Telegram~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Creado el manual de operación definitivo `manual_consola_telegram.md` en subcarpeta `07_Manuales_Desarrollo/`. El manual detalla la arquitectura de 3 capas del servicio, la configuración de seguridad (`auth whitelist`), la mitigación de Privacy Mode de grupos mediante deep-links, el catálogo completo de comandos informativos y DevOps, y la lógica de auto-commit y Auto-Merge condicional a main. Se actualizó el mapa semántico `mapa_documentacion_ia.md` indexando el nuevo recurso.
+  - Archivos:
+    - [`manual_consola_telegram.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_consola_telegram.md) [NEW]
+    - [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-350: Eliminación de Ramas Master Obsoletas en GitHub~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Tras el cambio de Default Branch a main por parte del usuario, se ejecutó la eliminación remota definitiva de la rama master en los repositorios Maestro (`PROTOTIPE`) y Dashboard (`prototipe-dev-dashboard`) mediante `git push origin --delete master`. Se corrió `git fetch --prune` en ambos repositorios locales para purgar las referencias obsoletas de GitHub, dejando la arquitectura Git 100% saneada en main y develop.
+  - Archivos:
+    - Sin archivos modificados (acción operativa de Git).
+
+* **[x] ~~Tarea CLI-349: Alineación de Arquitectura de Ramas Git a main/develop~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Estandarizada la arquitectura Git eliminando ramas master redundantes y unificando el flujo de producción a main y desarrollo a develop. Se modificaron los scripts core de backup (`git_backup.ps1` y `subproject_backup.ps1`) para apuntar el Auto-Merge siempre a main. Se renombró la rama master local del dev-dashboard a main, subiéndola a GitHub. Quedan pendientes en GitHub las desactivaciones de master como default branch para poder eliminarlas remotamente en el Maestro y Dashboard.
+  - Archivos:
+    - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+    - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+
 * **[x] ~~Tarea CLI-348: Paridad de Estrategia de Auto-Merge y Push en Telegram~~**
   - Estatus: Completada
   - Fecha de registro: 2026-07-09
