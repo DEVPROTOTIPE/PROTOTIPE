@@ -236,6 +236,7 @@ docs_roots:
 | **iconos_cuidado_prendas.md** | Fila de símbolos de lavado internacionales con tooltips explicativos interactivos en hover. | React, HSL config | [Ver Cuidado Prendas](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Iconos_Cuidado_Prendas/iconos_cuidado_prendas.md) |
 | **pestanas_filtro_temporada.md** | Hilera deslizable de tags horizontales premium para filtrar colecciones y catálogos en tiempo real. | React, scroll ref | [Ver Filtro Temporadas](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Pestanas_Filtro_Temporada/pestanas_filtro_temporada.md) |
 | **insignias_descuento_volumen.md** | Visualizador de escalas de precios al por mayor, totalización interactiva y barra de progreso de metas de ahorro. | React, HSL config | [Ver Descuento Volumen](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Insignias_Descuento_Volumen/insignias_descuento_volumen.md) |
+| **barra_navegacion_animada_movil.md** | Barra de navegación táctil inferior elástica para PWA móvil con burbuja animada de acompañamiento en Framer Motion. | React, Framer Motion | [Ver Barra Navegación](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md) |
 
 ### ⚙️ Servicios Técnicos y Mecanizado de Precisión
 | Componente | Qué Resuelve / Características Técnicas | Dependencias | Ruta de Acceso Directo |

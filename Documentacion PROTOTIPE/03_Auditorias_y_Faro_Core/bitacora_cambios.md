@@ -9,6 +9,21 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 * **Nicho:** Todos
 * **Descripción:** Bitácora activa reiniciada de forma limpia. El historial acumulado anterior (2.08 MB) se trasladó con éxito a `bitacora_cambios_historico_hasta_2026-07-06.md` para optimizar los límites de NotebookLM.
 
+## CORE-334: Registro de Componente AnimatedNavbarMobile (Bottom Nav PWA)
+- **Fecha:** 2026-07-09
+- **Tipo:** Biblioteca de Componentes / UX / Mobile UI
+- **Descripción:** 
+  * Se creó e integró el componente premium `AnimatedNavbarMobile` (barra de navegación inferior elástica) para móviles y PWA.
+  * Se generó la documentación técnica `.md` en la categoría `Ecommerce_y_Ventas` con la firma de props, especificaciones visuales y diagrama de interacción Mermaid.
+  * Se implementó el archivo de sandbox interactivo independiente `AnimatedNavbarMobileSandbox.jsx` en el dashboard de administración con controles de preset (3, 4, 5 botones) y simulación de pantalla de teléfono inteligente en tiempo real.
+  * Se registró el componente en los mapas semánticos de documentación y en el `README.md` del catálogo.
+  * **Archivos afectados:**
+    - [Documentacion PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md) [NEW]
+    - [Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/AnimatedNavbarMobileSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/AnimatedNavbarMobileSandbox.jsx) [NEW]
+    - [Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
 ## CORE-333: Consistencia y Trazabilidad de Git Automática desde el Dashboard
 - **Fecha:** 2026-07-09
 - **Tipo:** CLI / Dashboard / Git Automation / DX
