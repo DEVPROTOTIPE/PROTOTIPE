@@ -7819,6 +7819,34 @@ app.post('/api/git/amend-commit', async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/git/link-tasks
+// Permite vincular tareas completadas que carecen de commits mediante un commit vacío.
+// Body: { path, taskIds }
+// ─────────────────────────────────────────────────────────────────────────────
+app.post('/api/git/link-tasks', async (req, res) => {
+  const { path: targetPath, taskIds } = req.body;
+
+  if (!taskIds || !Array.isArray(taskIds) || taskIds.length === 0) {
+    return res.status(400).json({ error: 'El parámetro "taskIds" debe ser un array no vacío.' });
+  }
+
+  const repoPath = targetPath ? path.resolve(targetPath) : GIT_ROOT;
+  if (!isPathContained(GIT_ROOT, repoPath)) {
+    return res.status(403).json({ error: 'Ruta fuera del ecosistema PROTOTIPE. Acceso denegado.' });
+  }
+  if (!await fs.pathExists(repoPath)) return res.status(404).json({ error: 'Ruta no existe.' });
+
+  try {
+    const message = `chore(git): link tasks ${taskIds.join(', ')} to Git history to satisfy traceability`;
+    await execGitCommand(['commit', '--allow-empty', '-m', message], repoPath);
+    res.json({ success: true, message: `Commit vacío creado con éxito vinculando: ${taskIds.join(', ')}` });
+  } catch (err) {
+    console.error('[API /api/git/link-tasks] Error:', err.message);
+    res.status(500).json({ error: `Fallo al crear commit de vinculación: ${err.message}` });
+  }
+});
+
 // --- GESTOR DE DEPENDENCIAS (NPM INSTALL SSE) ---
 app.get('/api/project/dependencies/install', async (req, res) => {
   const { clientId } = req.query;
@@ -13157,6 +13185,7 @@ async function startServer(port) {
       'POST:/api/project/dev/stop': 'Detener servidor local',
       'GET:/api/project/drift/global': 'Paridad global de marcas',
       'POST:/api/git/discard': 'Descarte de cambios locales',
+      'POST:/api/git/link-tasks': 'Vincular tareas sin commits',
       'GET:/api/git/diff-file': 'Diff visual HTML de archivos',
       'GET:/api/project/dependencies/install': 'SSE Stream de npm install',
       'GET:/api/git/targets': 'Obtener repositorios activos',
