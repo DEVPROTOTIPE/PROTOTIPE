@@ -357,7 +357,7 @@
   - Fecha: 2026-07-07
   - DescripciÃ³n: Conectar la pasarela de pagos simulada del portal de clientes (ClientCredits.jsx) con el registro transaccional real de abonos en Firestore bajo la colecciÃ³n de auditorÃ­a fÃ­sica /credits/{id}/pagos.
   - Archivos:
-    - [ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/credits/components/ClientCredits.jsx) [MODIFY]
+    - [ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCredits.jsx) [MODIFY]
     - [server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
     - [App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
     - [App.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]

@@ -277,6 +277,9 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 ---
 
 ## 📂 Estructura de Módulos y Archivos Clave
+* **`/Instancias Clientes/ventas/ventas-moni-app/.firebase/hosting.ZGlzdA.cache`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-312).
+* **`/Instancias Clientes/ventas/ventas-moni-app/src/components/client/catalog/ClientFilterModal.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-312).
+* **`/Plantillas Core/App Ventas/src/components/client/catalog/ClientFilterModal.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-312).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/generacion_pdfSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-299).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LeafletMapPickerSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-300).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ProgramadorRutasDomicilioSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-301).
