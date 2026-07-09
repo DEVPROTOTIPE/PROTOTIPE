@@ -14,6 +14,7 @@
 8. **Corregido callback `/health` (Fix 6):** Reemplazado el fetch al endpoint inexistente `/api/clients` en `notification_server.js` por una consulta directa a la colección central `clientes_control` de Firestore Central mediante `queryCollectionREST`. Esto resuelve el error *"no se pudo obtener la lista de clientes del CLI"* y permite hacer pings resilientes e independientes del estado local del Bridge.
 9. **Consolidación Documental (Doc 1):** Fusionados el manual técnico del Servidor de Notificaciones y la guía de integración anterior en un único documento consolidado maestro: `Servicios_y_Firebase/Canales_Notificaciones_Telegram/manual_integracion_telegram.md`. Se eliminó el duplicado temporal `manual_consola_telegram.md` y se actualizó su registro y rol semántico en `mapa_documentacion_ia.md`.
 10. **Propagación de Reglas de IA (Doc 2):** Propagada la nueva regla de prevención de drifts físico-documentales (control de borrado/renombrado de archivos declarados en Roadmap) tanto en el archivo de personalizaciones `AGENTS.md` como en los dos archivos centrales de reglas de IA `GEMINI.md` de la CLI y de Copia de Seguridad.
+11. **Exclusiones de Linter de Git (Fix 7):** Modificado el script de integridad `verify_library_integrity.cjs` en `dev-dashboard` para excluir permanentemente los archivos de reglas de IA (`GEMINI.md` y `AGENTS.md`) de la comprobación de trazabilidad de Git, evitando fallos accidentales de compilación debidos a sincronizaciones en lote.
 
 ### Archivos modificados:
 - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
@@ -24,6 +25,7 @@
 - [`AGENTS.md`](file:///d:/PROTOTIPE/.agents/AGENTS.md) [MODIFY]
 - [`GEMINI.md`](file:///d:/PROTOTIPE/Prototipe-CLI/GEMINI.md) [MODIFY]
 - [`GEMINI.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md) [MODIFY]
+- [`verify_library_integrity.cjs`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs) [MODIFY]
 
 ## CLI-355: Fix HTML Escaping en Bot de Telegram (Encoding)
 - **Fecha:** 2026-07-09
