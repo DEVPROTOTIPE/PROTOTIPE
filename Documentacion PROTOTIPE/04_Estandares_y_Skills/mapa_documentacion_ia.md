@@ -546,6 +546,8 @@ docs_roots:
 | :--- | :--- | :--- | :--- |
 | **ruleta_fortuna_premios.md** | Ruleta interactiva segmentada en SVG con física de inercia y giros elásticos, sistema de cupones auto-generados e integración de canvas-confeti para premiaciones. | React, dynamic canvas-confeti | [Ver Ruleta de la Fortuna](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Ruleta_Fortuna_Premios/ruleta_fortuna_premios.md) |
 | **floating_promo_grenade.md** | Granada promocional flotante con levitación infinita, animación de ignición y explosión de confeti, y modal glassmorphic de cupones. | React, Framer Motion, canvas-confeti | [Ver Ficha Técnica](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Granada_Promocional_Flotante/floating_promo_grenade.md) |
+| **galleta_fortuna_interactiva.md** | Galleta de la fortuna animada en SVG con fractura rotacional de mitades, confeti elástico y mensaje de fortuna/descuento en tarjeta glassmorphic. | React, Framer Motion, canvas-confeti | [Ver Ficha Técnica](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Galleta_Fortuna/galleta_fortuna_interactiva.md) |
+
 
 
 ### 📅 Reservas y Citas
