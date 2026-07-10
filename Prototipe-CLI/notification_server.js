@@ -350,66 +350,100 @@ function dispatchBillingMoraAlert(data) {
 
 // ─── MÓDULO DE ACCESO OAUTH2 FIREBASE CLI Y REST CLIENT ───
 
+let cachedAccessToken = null;
+let cachedTokenExpiresAt = 0;
+let activeRefreshPromise = null;
+
 async function getFirebaseAccessToken() {
-  const homedir = os.homedir();
-  const possiblePaths = [
-    path.join(homedir, '.config', 'configstore', 'firebase-tools.json'),
-    path.join(process.env.APPDATA || '', 'configstore', 'firebase-tools.json')
-  ];
+  const safetyMargin = 5 * 60 * 1000; // 5 minutos de margen de seguridad
+  if (cachedAccessToken && cachedTokenExpiresAt > Date.now() + safetyMargin) {
+    return cachedAccessToken;
+  }
 
-  let configPath = null;
-  let config = null;
+  if (activeRefreshPromise) {
+    return activeRefreshPromise;
+  }
 
-  for (const p of possiblePaths) {
-    if (fs.existsSync(p)) {
-      try {
-        configPath = p;
-        config = JSON.parse(fs.readFileSync(p, 'utf8'));
-        break;
-      } catch (_) {}
+  activeRefreshPromise = (async () => {
+    const homedir = os.homedir();
+    const possiblePaths = [
+      path.join(homedir, '.config', 'configstore', 'firebase-tools.json'),
+      path.join(process.env.APPDATA || '', 'configstore', 'firebase-tools.json')
+    ];
+
+    let configPath = null;
+    let config = null;
+
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        try {
+          configPath = p;
+          config = JSON.parse(fs.readFileSync(p, 'utf8'));
+          break;
+        } catch (_) {}
+      }
     }
-  }
 
-  if (!config || !config.tokens) {
-    throw new Error('No se encontró la sesión activa de Firebase CLI. Ejecuta "firebase login".');
-  }
+    if (!config || !config.tokens) {
+      throw new Error('No se encontró la sesión activa de Firebase CLI. Ejecuta "firebase login".');
+    }
 
-  const tokens = config.tokens;
+    const tokens = config.tokens;
 
-  // Si el access_token no ha expirado, usarlo directamente
-  if (tokens.access_token && tokens.expires_at && tokens.expires_at > Date.now()) {
-    return tokens.access_token;
-  }
+    // Volver a validar tras leer del disco por si otro proceso lo actualizó
+    if (tokens.access_token && tokens.expires_at && tokens.expires_at > Date.now() + safetyMargin) {
+      cachedAccessToken = tokens.access_token;
+      cachedTokenExpiresAt = tokens.expires_at;
+      return tokens.access_token;
+    }
 
-  // Refrescar el token usando OAuth2
-  const clientId = '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com';
-  const clientSecret = 'j9iVZfS8kkCEFUPaAeJV0sAi';
+    // Refrescar el token usando OAuth2
+    const clientId = '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com';
+    const clientSecret = 'j9iVZfS8kkCEFUPaAeJV0sAi';
+    try {
+      const res = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          client_id: clientId,
+          client_secret: clientSecret,
+          refresh_token: tokens.refresh_token
+        })
+      });
+      const data = await res.json();
+      if (data.access_token) {
+        tokens.access_token = data.access_token;
+        tokens.expires_at = Date.now() + (data.expires_in * 1000) - 60000;
+        
+        try {
+          fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+        } catch (writeErr) {
+          console.warn('[Notify Service] Fallo al escribir firebase-tools.json en disco:', writeErr.message);
+        }
+
+        cachedAccessToken = data.access_token;
+        cachedTokenExpiresAt = tokens.expires_at;
+        return data.access_token;
+      }
+    } catch (err) {
+      console.error('[Notify Service] Error al refrescar token de Firebase:', err.message);
+    }
+
+    if (tokens.access_token) {
+      cachedAccessToken = tokens.access_token;
+      cachedTokenExpiresAt = tokens.expires_at || 0;
+      return tokens.access_token;
+    }
+    throw new Error('No se pudo refrescar el token de Firebase.');
+  })();
+
   try {
-    const res = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        client_id: clientId,
-        client_secret: clientSecret,
-        refresh_token: tokens.refresh_token
-      })
-    });
-    const data = await res.json();
-    if (data.access_token) {
-      tokens.access_token = data.access_token;
-      tokens.expires_at = Date.now() + (data.expires_in * 1000) - 60000;
-      fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-      return data.access_token;
-    }
-  } catch (err) {
-    console.error('[Notify Service] Error al refrescar token de Firebase:', err.message);
+    const token = await activeRefreshPromise;
+    return token;
+  } finally {
+    activeRefreshPromise = null;
   }
-
-  if (tokens.access_token) {
-    return tokens.access_token;
-  }
-  throw new Error('No se pudo refrescar el token de Firebase.');
 }
 
 function convertToFirestoreValue(value) {
@@ -3341,7 +3375,46 @@ app.listen(PORT, async () => {
     }
   }
 
-  // Inicializar Polling de Comandos cada 3 segundos
-  console.log('[Notify Service] Escuchador de comandos interactivos de Telegram activo (polling de 3s).');
-  setInterval(startTelegramCommandPolling, 3000);
+  // Inicializar Polling de Comandos de forma segura (recursivo con setTimeout)
+  console.log('[Notify Service] Escuchador de comandos interactivos de Telegram activo (polling seguro de 3s).');
+  runTelegramPollingLoop();
 });
+
+// ─── CONTROL DE CICLO DE VIDA Y GRACEFUL SHUTDOWN ───
+let isShuttingDown = false;
+let telegramTimeoutId = null;
+let isPollingTelegram = false;
+
+async function runTelegramPollingLoop() {
+  if (isShuttingDown || isPollingTelegram) return;
+  isPollingTelegram = true;
+  try {
+    await startTelegramCommandPolling();
+  } catch (err) {
+    console.error('[Notify Service] Error en loop de comandos Telegram:', err.message);
+  } finally {
+    isPollingTelegram = false;
+    if (!isShuttingDown) {
+      telegramTimeoutId = setTimeout(runTelegramPollingLoop, 3000);
+    }
+  }
+}
+
+function gracefulShutdown(signal) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  console.log(`[Notify Service] Recibida señal ${signal}. Iniciando apagado seguro (Graceful Shutdown)...`);
+  
+  if (telegramTimeoutId) {
+    clearTimeout(telegramTimeoutId);
+    console.log('[Notify Service] Polling de comandos de Telegram desactivado.');
+  }
+  
+  setTimeout(() => {
+    console.log('[Notify Service] Proceso finalizado limpiamente.');
+    process.exit(0);
+  }, 1000);
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));

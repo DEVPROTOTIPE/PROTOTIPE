@@ -22,6 +22,12 @@ app_layout:
 Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e integraciones con Firebase de **App Ventas**. Debe mantenerse actualizado ante cualquier creación, eliminación o refactorización de archivos.
 
 ## 📂 Estructura de Documentación y Negocio
+* **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Sistema_Notificaciones_Premium/premium_notification_center.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-364).
+* **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Granada_Promocional_Flotante/floating_promo_grenade.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-359).
+* **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Galleta_Fortuna/galleta_fortuna_interactiva.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-360).
+* **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Ruleta_Fortuna_Premios/interactivefortune_wheel.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-363).
+* **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/login_page.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-363).
+* **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/phone_id_login_page.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-363).
 * **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_consola_telegram.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-351).
 * **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Servicios_y_Firebase/Canales_Notificaciones_Telegram/manual_integracion_telegram.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-340).
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/ESTADO_REAL_PROTOTIPE_2.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-302).
@@ -253,6 +259,7 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_rendimiento_db_2026.md`**: Informe técnico de optimización de lecturas/escrituras en base de datos Firestore, sincronización delta para IndexedDB en POS y solución de lecturas duplicadas en montaje de hooks de pedidos.
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/analisis_costos_firebase_2026.md`**: Informe técnico detallado analizando la procedencia del cobro de $2 USD por almacenamiento de imágenes en Cloud Functions en el proyecto Ventas, y el plan de prevención/mitigación para retornar a $0 USD.
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_replicacion_cores_2026.md`**: Análisis de seguridad, robustez y conectividad central del motor de aprovisionamiento de marcas blancas al clonar Cores genéricos actuales y futuros.
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/analisis_adaptabilidad_core_seed.md`**: Informe técnico de diagnóstico, brechas y propuestas de adaptabilidad del Core Seed para marcas blancas en cualquier nicho. [NEW] CLI-365.
 * **`/Documentacion PROTOTIPE/Tareas Pendientes/`**: Bitácora y estado del roadmap del proyecto.
   * **`tareas_pendientes.md`**: Lista general de tareas completadas, en progreso e hitos de desarrollo técnico.
   * **`tareas_pendientes_prioritarias.md`**: Backlog prioritario de desarrollo e infraestructura futura (como la centralización de comisiones) que se ejecutará bajo tu consentimiento.
@@ -279,6 +286,15 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 ---
 
 ## 📂 Estructura de Módulos y Archivos Clave
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/FloatingPromoGrenadeSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-359).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/common/FloatingPromoGrenade.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-359).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveFortuneCookieSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-360).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/common/InteractiveFortuneCookie.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-360).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/common/RaffleWheelOfFortune.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-363).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/common/InteractiveFortuneWheel.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-363).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveFortuneWheelSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-363).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/RaffleWheelOfFortuneSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-363).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CatalogBannerSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-363).
 * **`/Instancias Clientes/ventas/ventas-moni-app/.firebase/hosting.ZGlzdA.cache`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-312).
 * **`/Instancias Clientes/ventas/ventas-moni-app/src/components/client/catalog/ClientFilterModal.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-312).
 * **`/Plantillas Core/App Ventas/src/components/client/catalog/ClientFilterModal.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-312).
@@ -331,7 +347,7 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Plantillas Core/App Ventas/tests/helpers/checkout.helpers.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea LINE-2007).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-030).
 * **`/Prototipe-CLI/server.js`**: Puente de API local de la consola de administración. Incluye la corrección para execSync indefinido en el despliegue de reglas Firebase. Actualizado en CLI-358.
-* **`/Prototipe-CLI/notification_server.js`**: Servidor de notificaciones Telegram del ecosistema. Incluye ciclo de polling de comandos, Inline Keyboards, State Machine para wizard /addtask, interceptor AWAITING_TEXT, y soporte multi-canal. Incorpora los módulos remotos de control de versiones de Git (/git), administración de dev servers Vite (/devserver), herramientas de autocuración (/fix), matriz de desviación de reglas Firebase (/rules), diagnósticos de Playwright (/tests), e inventario de Cores semilla (/cores) con flujo interactivo de confirmación AWAITING_CONFIRM. Robustecido contra crashes recurrentes con manejadores de excepciones globales (uncaughtException/unhandledRejection) y aislamiento de updates. Implementa los comandos `/telemetria` y `/telemetria_check` para auditar transmisiones mensuales de facturación. Actualizado en CLI-358.
+* **`/Prototipe-CLI/notification_server.js`**: Servidor de notificaciones Telegram del ecosistema. Incluye ciclo de polling de comandos, Inline Keyboards, State Machine para wizard /addtask, interceptor AWAITING_TEXT, y soporte multi-canal. Incorpora los módulos remotos de control de versiones de Git (/git), administración de dev servers Vite (/devserver), herramientas de autocuración (/fix), matriz de desviación de reglas Firebase (/rules), diagnósticos de Playwright (/tests), e inventario de Cores semilla (/cores). Robustecido con manejadores de excepciones y aislamiento de updates. Implementa los comandos `/telemetria` y `/telemetria_check` para auditar transmisiones mensuales. Robustecido con cerrojo de refresco de tokens OAuth2, polling seguro no solapado con setTimeout y Graceful Shutdown en señales SIGINT/SIGTERM. [MODIFY] CLI-365.
 * **`/Prototipe-CLI/notification_config.json`**: Archivo de configuración local para los canales de Telegram (tokens, chat IDs por subcanal). Excluido del linter de integridad por ser artefacto de credenciales de entorno. [NEW] CLI-341.
 * **`/Central PROTOTIPE/dev-dashboard/src/components/ui/DarkModeToggle.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-032).
 * **`/Central PROTOTIPE/dev-dashboard/src/index.css`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-032).
@@ -340,7 +356,14 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PWAInstallBannerSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-054).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CatalogFiltersSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-054).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/OrderTrackingSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-054).
-* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LoginPageSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-054).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/common/HybridLoginPage.jsx`**: Componente de página de Login Híbrido unificado para clientes (OTP) y equipo (Email/Password). [NEW] CLI-362.
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LoginPageSandbox.jsx`**: Playground de la página de Login Híbrida. Modificado para renderizar HybridLoginPage.jsx. [MODIFY] CLI-362.
+* **`/Central PROTOTIPE/dev-dashboard/src/components/common/PhoneIdLoginPage.jsx`**: Componente de página de Login por Teléfono ID (sin OTP) para clientes y equipo (Email/Password). [NEW] CLI-363.
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PhoneIdLoginPageSandbox.jsx`**: Playground de la página de Login por Teléfono ID. [NEW] CLI-363.
+* **`/Central PROTOTIPE/dev-dashboard/src/components/common/PremiumNotificationCenter.jsx`**: Componente de bandeja de notificaciones premium con mitigación de bloqueos táctiles. [NEW] CLI-364.
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PremiumNotificationCenterSandbox.jsx`**: Playground del centro de notificaciones premium. [NEW] CLI-364.
+* **`/Central PROTOTIPE/dev-dashboard/src/components/common/PremiumWelcomeSplash.jsx`**: Componente de pantalla de bienvenida con ondas sonar y orbes ambientales. [NEW] CLI-365.
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/WelcomePageSandbox.jsx`**: Playground de la pantalla de bienvenida. Modificado para renderizar PremiumWelcomeSplash.jsx. [MODIFY] CLI-365.
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/FormularioProductoIASandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-054).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ReservasAgendaSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-179).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/POSExpressScannerSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-179).

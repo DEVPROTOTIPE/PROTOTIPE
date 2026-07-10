@@ -1,5 +1,61 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-365 — 2026-07-09
+**Feature: Implementación de la Pantalla de Bienvenida PremiumWelcomeSplash**
+
+### Cambios realizados:
+1. **Ficha Técnica en Biblioteca:** Actualizada `welcome_page.md` en `06_Biblioteca_Componentes/Paginas/Pantalla_Bienvenida/` incorporando la definición de API, props y especificación visual de PremiumWelcomeSplash.
+2. **Componente Físico React:** Creado `PremiumWelcomeSplash.jsx` en `dev-dashboard/src/components/common/` implementando fondos ambientales con orbes HSL neón, ondas sonar animadas con Framer Motion, y touch targets táctiles de 48px para la PWA.
+3. **Playground Sandbox:** Actualizado `WelcomePageSandbox.jsx` en `src/components/admin/sandboxes/` para renderizar el splash e interactuar con la simulación de callbacks y eventos de redirección.
+4. **Mapeo e Integridad del Dashboard:** Registrados los aliases `welcomepage`, `welcome_page`, `premiumwelcomesplash` y `premium_welcome_splash` en `ComponentSandbox.jsx`.
+
+## CLI-364 — 2026-07-09
+**Feature: Implementación del Módulo PremiumNotificationCenter (Centro de Notificaciones)**
+
+### Cambios realizados:
+1. **Ficha Técnica en Biblioteca:** Creada `premium_notification_center.md` en `06_Biblioteca_Componentes/Formularios_y_UI/Sistema_Notificaciones_Premium/`. Contiene el manifiesto JSON, estilos de variables de colores semánticos HSL, código completo React y lógica de mitigación del BUG-002.
+2. **Componente Físico React:** Implementado `PremiumNotificationCenter.jsx` en `dev-dashboard/src/components/common/`. Resuelve el BUG-002 usando listeners en fase de captura (`mousedown`, `touchstart`), scrollbar nativo de Tailwind v4.3, prevención de recortes en los bordes y transiciones de Framer Motion.
+3. **Playground Sandbox:** Creado `PremiumNotificationCenterSandbox.jsx` en `src/components/admin/sandboxes/` que simula la barra de navegación del ecosistema para comprobar el posicionamiento absoluto, z-index y el layout responsivo.
+4. **Mapeo e Integridad del Dashboard:** Registrados los aliases `premiumnotificationcenter`, `premium_notification_center`, `notificationhistorytray` y `notification_history_tray` en `ComponentSandbox.jsx`.
+
+## CLI-363 — 2026-07-09
+**Feature: Implementación del Módulo PhoneIdLoginPage (Acceso Directo por Teléfono)**
+
+### Cambios realizados:
+1. **Ficha Técnica en Biblioteca:** Creada `phone_id_login_page.md` en `06_Biblioteca_Componentes/Paginas/Pagina_Login/`. Explica el propósito del acceso directo omitiendo OTP y detalla la sanitización del ID del teléfono.
+2. **Componente Físico React:** Implementado `PhoneIdLoginPage.jsx` en `dev-dashboard/src/components/common/`. Renderiza el formulario con ingreso directo de teléfono, delegando la confirmación y emitiendo el callback `onLoginSuccess`.
+3. **Playground Sandbox:** Creado `PhoneIdLoginPageSandbox.jsx` en `src/components/admin/sandboxes/` para visualización interactiva del flujo directo.
+4. **Mapeo e Integridad del Dashboard:** Registrados los alias `phoneidloginpage` y `phone_id_login_page` en `ComponentSandbox.jsx`.
+
+## CLI-362 — 2026-07-09
+**Feature: Implementación de la Página de Login Híbrida Premium (HybridLoginPage)**
+
+### Cambios realizados:
+1. **Ficha Técnica en Biblioteca:** Creada `login_page.md` en `06_Biblioteca_Componentes/Paginas/Pagina_Login/`. Contiene manifiesto JSON, propósito, diseño glassmorphism con HSL, código completo React y flujo secuencial de autenticación en diagramas Mermaid.
+2. **Componente Físico React:** Implementado `HybridLoginPage.jsx` en `dev-dashboard/src/components/common/`. Integra cambio elástico de pestañas, sanitización dinámica de entradas numéricas y simulación de flujos OTP y contraseñas.
+3. **Playground Sandbox:** Actualizado `LoginPageSandbox.jsx` para importar y renderizar directamente a `HybridLoginPage` dentro de `SandboxLayout`.
+4. **Mapeo e Integridad del Dashboard:** Registrados los aliases `hybridloginpage` y `hybrid_login_page` en el mapa de sandboxes.
+5. **Catálogos y Mapas Semánticos:** Indexada la entrada en el catálogo maestro `README.md` de la biblioteca, en `mapa_documentacion_ia.md` y en `mapa_aplicacion.md`. Tarea `CLI-362` completada en `tareas_pendientes.md`.
+
+## CLI-361 — 2026-07-09
+**Feature: Creación del Componente Premium InteractiveFortuneWheel (Ruleta Interactiva de Fortuna Premium)**
+
+### Cambios realizados:
+1. **Ficha Técnica en Biblioteca:** Creada `interactivefortune_wheel.md` en `06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Ruleta_Fortuna_Premios/`. Contiene manifiesto JSON, propósito, estilos con tokens HSL, código React completo y diagrama Mermaid de secuencia.
+2. **Componente Físico React:** Implementado `InteractiveFortuneWheel.jsx` en `dev-dashboard/src/components/common/`. Usa `conic-gradient` matemáticamente calculado (`360 / prizes.length`) para N porciones dinámicas sin modificar código. Física de inercia real con Bézier `[0.2, 0.8, 0.2, 1]` durante 6s. Halo magnético `blur-3xl` animado al girar. Modal glassmorphic de resultado con `canvas-confetti`.
+3. **Playground Sandbox:** Creado `InteractiveFortuneWheelSandbox.jsx` con `CustomSelect` para cambiar entre 4/6/8 porciones dinámicamente y badge de último premio ganado vía `onPrizeWon`.
+4. **Mapeo e Integridad del Dashboard:** Registrados 3 aliases en `COMPONENT_SANDBOX_MAP` de `ComponentSandbox.jsx`.
+5. **Catálogos y Mapas Semánticos:** Indexada la entrada en `README.md` de la biblioteca y en `mapa_documentacion_ia.md`. Tarea `COMP-361` completada en `tareas_pendientes.md`.
+
+### Archivos modificados:
+- [`interactivefortune_wheel.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Ruleta_Fortuna_Premios/interactivefortune_wheel.md) [NEW]
+- [`InteractiveFortuneWheel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/InteractiveFortuneWheel.jsx) [NEW]
+- [`InteractiveFortuneWheelSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveFortuneWheelSandbox.jsx) [NEW]
+- [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+- [`README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+- [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+- [`tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
 ## COMP-360 — 2026-07-09
 **Feature: Creación del Componente Premium InteractiveFortuneCookie (Galleta de la Fortuna Interactiva)**
 

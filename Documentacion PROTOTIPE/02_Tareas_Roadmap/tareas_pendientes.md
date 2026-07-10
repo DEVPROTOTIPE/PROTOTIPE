@@ -1,5 +1,103 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[/] Tarea CLI-365: Implementación de la Pantalla de Bienvenida PremiumWelcomeSplash**
+  - Estatus: En progreso
+  - Fecha de registro: 2026-07-09
+  - Descripción: Creado el componente premium PremiumWelcomeSplash con animación sonar vectorial, orbes ambientales difuminados, touch targets de 48px y active:scale-95, y redirección a login o catálogo para la PWA de Prototype.
+  - Archivos:
+    - [`welcome_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pantalla_Bienvenida/welcome_page.md) [MODIFY]
+    - [`PremiumWelcomeSplash.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/PremiumWelcomeSplash.jsx) [NEW]
+    - [`WelcomePageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/WelcomePageSandbox.jsx) [MODIFY]
+    - [`analisis_adaptabilidad_core_seed.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/analisis_adaptabilidad_core_seed.md) [NEW]
+    - [`premium_notification_center.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Sistema_Notificaciones_Premium/premium_notification_center.md) [NEW]
+    - [`PremiumNotificationCenter.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/PremiumNotificationCenter.jsx) [NEW]
+    - [`PremiumNotificationCenterSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PremiumNotificationCenterSandbox.jsx) [NEW]
+    - [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+    - [`phone_id_login_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/phone_id_login_page.md) [NEW]
+    - [`PhoneIdLoginPage.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/PhoneIdLoginPage.jsx) [NEW]
+    - [`PhoneIdLoginPageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PhoneIdLoginPageSandbox.jsx) [NEW]
+    - [`login_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/login_page.md) [NEW]
+    - [`HybridLoginPage.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/HybridLoginPage.jsx) [NEW]
+    - [`LoginPageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LoginPageSandbox.jsx) [MODIFY]
+    - [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [`README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [`mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+    - [`interactivefortune_wheel.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Ruleta_Fortuna_Premios/interactivefortune_wheel.md) [NEW]
+    - [`CatalogBannerSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CatalogBannerSandbox.jsx) [MODIFY]
+    - [`RaffleWheelOfFortuneSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/RaffleWheelOfFortuneSandbox.jsx) [MODIFY]
+    - [`InteractiveFortuneWheelSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveFortuneWheelSandbox.jsx) [NEW]
+    - [`InteractiveFortuneWheel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/InteractiveFortuneWheel.jsx) [NEW]
+    - [`RaffleWheelOfFortune.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/RaffleWheelOfFortune.jsx) [NEW]
+    - [`CatalogBanner.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/ui/CatalogBanner.jsx) [NEW]
+
+* **[x] ~~Tarea CLI-364: Implementación del Módulo PremiumNotificationCenter (Centro de Notificaciones)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Creado el componente premium PremiumNotificationCenter con mitigación táctil móvil BUG-002 usando fase de captura en eventos de mousedown/touchstart, scroll nativo scrollbar-thin, prevención de clipping y layout adaptable responsive.
+  - Archivos:
+    - [`premium_notification_center.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Sistema_Notificaciones_Premium/premium_notification_center.md) [NEW]
+    - [`PremiumNotificationCenter.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/PremiumNotificationCenter.jsx) [NEW]
+    - [`PremiumNotificationCenterSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PremiumNotificationCenterSandbox.jsx) [NEW]
+    - [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`phone_id_login_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/phone_id_login_page.md) [NEW]
+    - [`PhoneIdLoginPage.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/PhoneIdLoginPage.jsx) [NEW]
+    - [`PhoneIdLoginPageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PhoneIdLoginPageSandbox.jsx) [NEW]
+    - [`login_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/login_page.md) [NEW]
+    - [`HybridLoginPage.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/HybridLoginPage.jsx) [NEW]
+    - [`LoginPageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LoginPageSandbox.jsx) [MODIFY]
+    - [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [`README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [`mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+    - [`interactivefortune_wheel.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Ruleta_Fortuna_Premios/interactivefortune_wheel.md) [NEW]
+    - [`CatalogBannerSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CatalogBannerSandbox.jsx) [MODIFY]
+    - [`RaffleWheelOfFortuneSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/RaffleWheelOfFortuneSandbox.jsx) [MODIFY]
+    - [`InteractiveFortuneWheelSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveFortuneWheelSandbox.jsx) [NEW]
+    - [`InteractiveFortuneWheel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/InteractiveFortuneWheel.jsx) [NEW]
+    - [`RaffleWheelOfFortune.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/RaffleWheelOfFortune.jsx) [NEW]
+    - [`CatalogBanner.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/ui/CatalogBanner.jsx) [NEW]
+
+* **[x] ~~Tarea CLI-363: Implementación del Módulo PhoneIdLoginPage (Acceso Directo por Teléfono)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Creado el componente premium PhoneIdLoginPage que omite el paso de verificación por código OTP para permitir accesos rápidos usando únicamente el número de celular como identificador único.
+  - Archivos:
+    - [`phone_id_login_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/phone_id_login_page.md) [NEW]
+    - [`PhoneIdLoginPage.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/PhoneIdLoginPage.jsx) [NEW]
+    - [`PhoneIdLoginPageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PhoneIdLoginPageSandbox.jsx) [NEW]
+    - [`login_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/login_page.md) [NEW]
+    - [`HybridLoginPage.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/HybridLoginPage.jsx) [NEW]
+    - [`LoginPageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LoginPageSandbox.jsx) [MODIFY]
+    - [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [`README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [`mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+    - [`interactivefortune_wheel.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Ruleta_Fortuna_Premios/interactivefortune_wheel.md) [NEW]
+    - [`CatalogBannerSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CatalogBannerSandbox.jsx) [MODIFY]
+    - [`RaffleWheelOfFortuneSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/RaffleWheelOfFortuneSandbox.jsx) [MODIFY]
+    - [`InteractiveFortuneWheelSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveFortuneWheelSandbox.jsx) [NEW]
+    - [`InteractiveFortuneWheel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/InteractiveFortuneWheel.jsx) [NEW]
+    - [`RaffleWheelOfFortune.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/RaffleWheelOfFortune.jsx) [NEW]
+    - [`CatalogBanner.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/ui/CatalogBanner.jsx) [NEW]
+
+* **[x] ~~Tarea CLI-362: Implementación de la Página de Login Híbrida Premium (HybridLoginPage)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Creado el módulo de inicio de sesión premium HybridLoginPage con soporte para login clásico de equipo y OTP de un solo clic para clientes. Incorpora sanitización de entrada de teléfono, transiciones fluidas de AnimatePresence, orbes de fondo glassmorphic, y validación de rol de cliente explícito.
+  - Archivos:
+    - [`login_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/login_page.md) [NEW]
+    - [`HybridLoginPage.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/HybridLoginPage.jsx) [NEW]
+    - [`LoginPageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LoginPageSandbox.jsx) [MODIFY]
+    - [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [`README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [`mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
 * **[x] ~~Tarea COMP-360: Creación del Componente Premium InteractiveFortuneCookie (Galleta de la Fortuna Interactiva)~~**
   - Estatus: Completada
   - Fecha de registro: 2026-07-09
@@ -12,6 +110,24 @@
     - [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
     - [`README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
     - [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-361: Creación del Componente Premium InteractiveFortuneWheel (Ruleta Interactiva de Fortuna Premium)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Creado el componente de gamificación premium InteractiveFortuneWheel con conic-gradient matemático auto-escalable a N porciones, física de inercia real Framer Motion (Bézier [0.2,0.8,0.2,1] 6s), halo magnético animado, confeti al ganar y modal glassmorphic de resultado. Incluye playground con selector de 4/6/8 porciones y conector onPrizeWon al motor de cupones. También incluye la corrección del componente RaffleWheelOfFortune y el componente CatalogBanner con sus respectivos sandboxes interactivos.
+  - Archivos:
+    - [`interactivefortune_wheel.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Ruleta_Fortuna_Premios/interactivefortune_wheel.md) [NEW]
+    - [`InteractiveFortuneWheel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/InteractiveFortuneWheel.jsx) [NEW]
+    - [`InteractiveFortuneWheelSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveFortuneWheelSandbox.jsx) [NEW]
+    - [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [`README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [`CatalogBannerSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CatalogBannerSandbox.jsx) [MODIFY]
+    - [`CatalogBanner.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/ui/CatalogBanner.jsx) [NEW]
+    - [`RaffleWheelOfFortune.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/RaffleWheelOfFortune.jsx) [NEW]
+    - [`RaffleWheelOfFortuneSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/RaffleWheelOfFortuneSandbox.jsx) [MODIFY]
+
 
 * **[x] ~~Tarea COMP-359: Creación del Componente Premium FloatingPromoGrenade (Granada Promocional Flotante)~~**
   - Estatus: Completada
