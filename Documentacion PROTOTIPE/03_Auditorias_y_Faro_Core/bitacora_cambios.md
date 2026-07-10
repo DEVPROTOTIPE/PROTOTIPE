@@ -1,5 +1,115 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-375 — 2026-07-10
+**Auditoría: Auditoría Técnica Completa de la Semilla Base template-core-seed**
+
+### Cambios realizados:
+1. **Auditoría Técnica:** Realizada una inspección exhaustiva de la semilla base `app-ventas` (`template-core-seed`), identificando brechas de seguridad (lecturas públicas de pedidos, créditos y entregas; falta de validación de propiedad en perfiles; exposición de claves de control central), performance (conexiones persistentes de pings a la central abiertas para usuarios anónimos), DevOps (comando de shell específico de Windows en Playwright), testing (falta de alias resolving en Vitest) y negocio (desconexión del stock audit en ventas directas).
+2. **Documentación:** Creado el informe completo de auditoría y remediación `auditoria_template_core_seed.md` en el directorio de auditorías del proyecto.
+3. **Registro y Roadmap:** Registrada la tarea `CLI-375` en `tareas_pendientes.md` y catalogada en `mapa_documentacion_ia.md`.
+
+### Archivos modificados:
+- [`auditoria_template_core_seed.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_template_core_seed.md) [NEW]
+- [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+- [`tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+- [`bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+## CLI-374 — 2026-07-10
+**Mejora: Aprovisionamiento de Testing en Core Seed y Dinamicidad en Enlaces del Servidor**
+
+### Cambios realizados:
+1. **sync_templates.js:** Se agregaron `tests/`, `.github/`, `vitest.config.js`, `playwright.config.js`, `.gitignore` y `template.json` al array `SYNC_PATHS`. Adicionalmente, se inyectó una validación post-sync para abortar y salir con código 1 si algún archivo crítico no se encuentra en el destino.
+2. **template-core-seed:**
+   - Agregadas las dependencias de pruebas (`vitest`, `@vitest/coverage-v8`, `@playwright/test`, `jsdom`) al `package.json` junto con scripts de tests.
+   - Creados archivos de configuración genéricos `vitest.config.js`, `playwright.config.js`, y el workflow `.github/workflows/ci.yml`.
+   - Creadas pruebas iniciales genéricas: unitaria (`tests/unit/smoke.spec.js`) y E2E (`tests/e2e/app-health.spec.js`).
+   - Creado `template.json` para metadatos del core.
+   - Corregido conflicto del Build Integrity Guard refactorizando las importaciones dinámicas de `telemetryService` en `App.jsx` a estáticas.
+3. **server.js:** Se eliminaron enlaces absolutos hardcodeados a `D:/PROTOTIPE` en la generación de enlaces de bitácoras, manuales y briefings de descubrimiento, reemplazándolos con URL dinámicas basadas en `GIT_ROOT` y `getDocumentationRoot()`.
+
+### Archivos modificados:
+- [`sync_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY]
+- [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/package.json) [MODIFY]
+- [`vitest.config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/vitest.config.js) [NEW]
+- [`playwright.config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/playwright.config.js) [NEW]
+- [`.github/workflows/ci.yml`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/.github/workflows/ci.yml) [NEW]
+- [`smoke.spec.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/tests/unit/smoke.spec.js) [NEW]
+- [`app-health.spec.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/tests/e2e/app-health.spec.js) [NEW]
+- [`template.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/template.json) [NEW]
+- [`App.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/App.jsx) [MODIFY]
+
+---
+
+## CLI-373 — 2026-07-10
+**Estabilización: E2E Checkout, Cobertura del Dominio y Configuración CI/CD**
+
+### Cambios realizados:
+1. **E2E Playwright:** Eliminadas dependencias rígidas en `tests/helpers/checkout.helpers.js`. El flujo del test checkout ahora es dinámico, resiliente a variaciones de delivery/pago, y pasa exitosamente con Playwright (4/4 ✅).
+2. **Pruebas Unitarias de Dominio (Vitest):**
+   - Creado `tests/unit/inventoryService.spec.js` (87.73% de cobertura).
+   - Creado `tests/unit/salesService.spec.js` (81.81% de cobertura).
+   - Expandido `tests/unit/creditService.spec.js` (77.77% de cobertura).
+   - Expandido `tests/unit/orderService.extended.spec.js` (61.88% de cobertura).
+   - Todas las pruebas unitarias de dominio superan con éxito el objetivo establecido de ≥60% de cobertura.
+3. **CI/CD Pipeline:** Creado `.github/workflows/ci.yml` configurando la instalación, pruebas unitarias Vitest con cobertura, pruebas Playwright E2E y compilación de producción.
+4. **Documentación Técnica:** Creados `arquitectura_features.md`, `modelo_firestore.md`, `estrategia_testing.md` y `guia_multitenant.md` en la carpeta local de documentación, y registrados en el mapa semántico global de la IA.
+
+### Archivos modificados:
+- [`checkout.helpers.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/helpers/checkout.helpers.js) [MODIFY]
+- [`inventoryService.spec.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/unit/inventoryService.spec.js) [NEW]
+- [`salesService.spec.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/unit/salesService.spec.js) [NEW]
+- [`creditService.spec.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/unit/creditService.spec.js) [MODIFY]
+- [`orderService.extended.spec.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/unit/orderService.extended.spec.js) [MODIFY]
+- [`ci.yml`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/.github/workflows/ci.yml) [NEW]
+
+---
+
+## CLI-372 — 2026-07-10
+**Fix: Inicialización en Memoria de `commercialOptimization.enabled` y Drift de Hidratación LocalStorage**
+
+### Cambios realizados:
+1. **Causa raíz:** En `appConfigStore.js`, el estado inicial en memoria de `commercialOptimization.enabled` estaba hardcodeado en `false`. Adicionalmente, el store incluía `commercialOptimization` en la lista `partialize` de persistencia en LocalStorage. Si la aplicación se cargó alguna vez con la configuración antigua (donde el default era `false`), el LocalStorage cacheaba `enabled: false`. Esto prevalecía al arrancar antes de que Firestore sobrescribiera los valores.
+2. **Corrección:**
+   - Cambiado el valor inicial en memoria de `commercialOptimization.enabled` de `false` a `true` en el store.
+   - Eliminado `commercialOptimization` del arreglo `partialize` en Zustand, evitando que estados que cambian dinámicamente desde Firestore o reglas del negocio se cacheen indefinidamente en el LocalStorage de clientes antiguos, solucionando de raíz el drift de hidratación.
+
+### Archivos modificados:
+- [`appConfigStore.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY]
+
+---
+
+## CLI-371 — 2026-07-10
+**Fix: Interruptor Maestro `commercialOptimization.enabled` Bloqueaba Recomendaciones del Carrito**
+
+### Cambios realizados:
+1. **Causa raíz:** El campo `commercialOptimization.enabled` en `appConfigSchema.js` tenía `default(false)`, actuando como kill-switch global. Esto bloqueaba `cartRecsEnabled` en `CartDrawer.jsx` aunque todos los sub-tools (cartRecommendations, historyRecommendations) tuvieran sus defaults en `true`. La sección "Recomendado para ti" nunca renderizaba ni iniciaba el fetch para clientes sin configuración explícita en Firestore.
+2. **Corrección:** Cambiado el default del interruptor maestro de `false` a `true`. Los clientes sin el campo en Firestore ahora reciben el comportamiento activo (opt-out en lugar de opt-in), consistente con sus herramientas hijas.
+
+### Archivos modificados:
+- [`appConfigSchema.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/schemas/appConfigSchema.js) [MODIFY]
+
+---
+
+## CLI-370 — 2026-07-10
+**Tooling: Creación del Sistema de Enforcement de Integridad de Bitácora**
+
+### Cambios realizados:
+1. **Skill `bitacora-recorder`:** Creada nueva skill en `04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/bitacora-recorder/SKILL.md`. Define el template obligatorio de entrada, la regla de atomicidad (1 tarea = 1 entrada), el protocolo de registro paso a paso, ejemplos de correcto vs incorrecto, y el protocolo de corrección retroactiva.
+2. **Script `validate_bitacora.js`:** Creado script Node.js que parsea cualquier `bitacora_cambios.md`, detecta entradas sin sección "Archivos modificados", sin ítems de cambios o con archivos sin tags de operación. Sale con código 1 si hay errores, 0 si todo es correcto. Primera ejecución encontró 21/26 entradas malformadas en la bitácora global.
+3. **GEMINI.md Sección 10.4:** Agregada subsección "Template Obligatorio de Bitácora (CRÍTICO — INVIOLABLE)" con la regla de atomicidad, el template exacto a seguir, el test de sanidad de archivos y el comando de validación disponible.
+4. **CLI-366 (corrección retroactiva):** Corregida la entrada CLI-366 en la bitácora global para contener solo los 4 archivos reales del módulo ScratchCardReward. Agregada nota de auditoría explicando que el sistema externo de tareas agrupó erróneamente archivos de CLI-361 a CLI-365 dentro de esa entrada.
+
+### Archivos modificados:
+- [`SKILL.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/bitacora-recorder/SKILL.md) [NEW]
+- [`validate_bitacora.js`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/validate_bitacora.js) [NEW]
+- [`GEMINI.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md) [MODIFY]
+- [`bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
 ## CLI-369 — 2026-07-10
 **Auditoría: Validación Arquitectónica Post-FDD — App Ventas Core v2**
 
@@ -11,10 +121,11 @@
 5. **npm outdated:** Patches disponibles: `firebase` 12.15→12.16, `lucide-react` 1.23→1.24, `prettier` 3.9.4→3.9.5. Versiones major en hold: Vite v8, Babel v8 (requieren evaluación de breaking changes).
 6. **Reglas FDD confirmadas:** Sección `§4` de `restricciones_tecnicas.md` documenta el grafo de dependencias aprobado, la obligatoriedad de barrels, y los contratos JSDoc.
 
-### Archivos consultados (sin modificación):
-- `src/features/*/index.js` (barrels de todos los dominios)
-- `tests/e2e/checkout.spec.js`
-- `tests/helpers/checkout.helpers.js`
+### Archivos modificados:
+- [`restricciones_tecnicas.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/restricciones_tecnicas.md) [MODIFY]
+- [`bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+> ℹ️ **Auditoría de solo lectura:** Los archivos `src/features/*/index.js`, `tests/e2e/checkout.spec.js` y `tests/helpers/checkout.helpers.js` fueron analizados sin modificación. Solo se actualizaron la documentación de restricciones y la bitácora.
 
 ---
 
@@ -26,6 +137,12 @@
 2. **Actualización de Seguridad en Reglas (`firestore.rules`):** Modificados los permisos de eliminación (`allow delete`) de la colección `notifications` para permitir de forma explícita que destinatarios con rol `'client'`, `'vendedor'`, `'bodeguero'` o `'mensajero'` puedan ejecutar borrados físicos de sus propias notificaciones sin requerir privilegios de administrador.
 3. **Validación y Build:** Ejecutada la compilación completa de producción exitosamente (`npm run build`) y ejecutada la suite de pruebas unitarias (`npx vitest run`) validando la estabilidad general del sistema.
 
+### Archivos modificados:
+- [`notificationCenterService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/notificationCenterService.js) [MODIFY]
+- [`firestore.rules`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firestore.rules) [MODIFY + DEPLOY]
+
+---
+
 ## CLI-367 — 2026-07-09
 **Feature: Implementación del Módulo InteractiveGoldPot (Olla de Oro Interactiva)**
 
@@ -34,6 +151,14 @@
 2. **Componente Físico React:** Creado `InteractiveGoldPot.jsx` en `dev-dashboard/src/components/common/` implementando la orquestación física del abono, efecto squash-and-stretch en Framer Motion, crecimiento gradual del tamaño y olla en SVG.
 3. **Playground Sandbox:** Creado `InteractiveGoldPotSandbox.jsx` en `src/components/admin/sandboxes/` con selectores `CustomSelect` para configurar la meta y el abono inicial.
 4. **Mapeo e Integridad del Dashboard:** Mapeados los aliases de `interactivegoldpot` y `interactive_gold_pot` en `ComponentSandbox.jsx`.
+
+### Archivos modificados:
+- [`interactive_gold_pot.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Olla_Oro_Interactiva/interactive_gold_pot.md) [NEW]
+- [`InteractiveGoldPot.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/InteractiveGoldPot.jsx) [NEW]
+- [`InteractiveGoldPotSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveGoldPotSandbox.jsx) [NEW]
+- [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+
+---
 
 ## CLI-366 — 2026-07-09
 **Feature: Implementación del Módulo ScratchCardReward (Tarjeta de Rasca y Gana)**
@@ -44,6 +169,16 @@
 3. **Playground Sandbox:** Creado `ScratchCardRewardSandbox.jsx` en `src/components/admin/sandboxes/` para renderizar y depurar interactivamente los premios y resetear el componente.
 4. **Mapeo e Integridad del Dashboard:** Registrados los aliases `scratchcardreward`, `scratch_card_reward` y `tarjeta_rasca_gana` en `ComponentSandbox.jsx`.
 
+### Archivos modificados:
+- [`scratch_card_reward.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Tarjeta_Rasca_Gana/scratch_card_reward.md) [NEW]
+- [`ScratchCardReward.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/ScratchCardReward.jsx) [NEW]
+- [`ScratchCardRewardSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ScratchCardRewardSandbox.jsx) [NEW]
+- [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+
+> ⚠️ **Nota de auditoría:** El sistema externo de tareas agrupó erróneamente los archivos de CLI-361 a CLI-365 (WelcomePage, NotificationCenter, LoginPages, FortuneWheel, CatalogBanner, server.js, etc.) dentro de la tarea CLI-366. Esos archivos pertenecen a sus respectivos CLIs documentados individualmente arriba. Esta entrada contiene **exclusivamente** los 4 archivos del módulo ScratchCardReward.
+
+---
+
 ## CLI-365 — 2026-07-09
 **Feature: Implementación de la Pantalla de Bienvenida PremiumWelcomeSplash**
 
@@ -52,6 +187,14 @@
 2. **Componente Físico React:** Creado `PremiumWelcomeSplash.jsx` en `dev-dashboard/src/components/common/` implementando fondos ambientales con orbes HSL neón, ondas sonar animadas con Framer Motion, y touch targets táctiles de 48px para la PWA.
 3. **Playground Sandbox:** Actualizado `WelcomePageSandbox.jsx` en `src/components/admin/sandboxes/` para renderizar el splash e interactuar con la simulación de callbacks y eventos de redirección.
 4. **Mapeo e Integridad del Dashboard:** Registrados los aliases `welcomepage`, `welcome_page`, `premiumwelcomesplash` y `premium_welcome_splash` en `ComponentSandbox.jsx`.
+
+### Archivos modificados:
+- [`welcome_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pantalla_Bienvenida/welcome_page.md) [MODIFY]
+- [`PremiumWelcomeSplash.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/PremiumWelcomeSplash.jsx) [NEW]
+- [`WelcomePageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/WelcomePageSandbox.jsx) [MODIFY]
+- [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+
+---
 
 ## CLI-364 — 2026-07-09
 **Feature: Implementación del Módulo PremiumNotificationCenter (Centro de Notificaciones)**
@@ -62,6 +205,14 @@
 3. **Playground Sandbox:** Creado `PremiumNotificationCenterSandbox.jsx` en `src/components/admin/sandboxes/` que simula la barra de navegación del ecosistema para comprobar el posicionamiento absoluto, z-index y el layout responsivo.
 4. **Mapeo e Integridad del Dashboard:** Registrados los aliases `premiumnotificationcenter`, `premium_notification_center`, `notificationhistorytray` y `notification_history_tray` en `ComponentSandbox.jsx`.
 
+### Archivos modificados:
+- [`premium_notification_center.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Sistema_Notificaciones_Premium/premium_notification_center.md) [NEW]
+- [`PremiumNotificationCenter.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/PremiumNotificationCenter.jsx) [NEW]
+- [`PremiumNotificationCenterSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PremiumNotificationCenterSandbox.jsx) [NEW]
+- [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+
+---
+
 ## CLI-363 — 2026-07-09
 **Feature: Implementación del Módulo PhoneIdLoginPage (Acceso Directo por Teléfono)**
 
@@ -70,6 +221,14 @@
 2. **Componente Físico React:** Implementado `PhoneIdLoginPage.jsx` en `dev-dashboard/src/components/common/`. Renderiza el formulario con ingreso directo de teléfono, delegando la confirmación y emitiendo el callback `onLoginSuccess`.
 3. **Playground Sandbox:** Creado `PhoneIdLoginPageSandbox.jsx` en `src/components/admin/sandboxes/` para visualización interactiva del flujo directo.
 4. **Mapeo e Integridad del Dashboard:** Registrados los alias `phoneidloginpage` y `phone_id_login_page` en `ComponentSandbox.jsx`.
+
+### Archivos modificados:
+- [`phone_id_login_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/phone_id_login_page.md) [NEW]
+- [`PhoneIdLoginPage.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/PhoneIdLoginPage.jsx) [NEW]
+- [`PhoneIdLoginPageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PhoneIdLoginPageSandbox.jsx) [NEW]
+- [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+
+---
 
 ## CLI-362 — 2026-07-09
 **Feature: Implementación de la Página de Login Híbrida Premium (HybridLoginPage)**
@@ -80,6 +239,18 @@
 3. **Playground Sandbox:** Actualizado `LoginPageSandbox.jsx` para importar y renderizar directamente a `HybridLoginPage` dentro de `SandboxLayout`.
 4. **Mapeo e Integridad del Dashboard:** Registrados los aliases `hybridloginpage` y `hybrid_login_page` en el mapa de sandboxes.
 5. **Catálogos y Mapas Semánticos:** Indexada la entrada en el catálogo maestro `README.md` de la biblioteca, en `mapa_documentacion_ia.md` y en `mapa_aplicacion.md`. Tarea `CLI-362` completada en `tareas_pendientes.md`.
+
+### Archivos modificados:
+- [`login_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/login_page.md) [NEW]
+- [`HybridLoginPage.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/HybridLoginPage.jsx) [NEW]
+- [`LoginPageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LoginPageSandbox.jsx) [MODIFY]
+- [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+- [`README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+- [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+- [`mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+- [`tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
+---
 
 ## CLI-361 — 2026-07-09
 **Feature: Creación del Componente Premium InteractiveFortuneWheel (Ruleta Interactiva de Fortuna Premium)**
@@ -186,38 +357,27 @@ Este es el log de cambios técnico activo para la sesión de desarrollo vigente 
 4. **Nuevo `/health`:** Hace ping en paralelo a todos los clientes registrados en el CLI via `/api/clients`. Muestra estado 🟢/🟡/🔴, latencia en ms y URL. Botón de re-verificación.
 5. **`/start` actualizado:** Nueva sección "Diagnóstico & Salud" en el menú de ayuda. Botón "🩺 Salud Clientes" añadido al teclado inline principal.
 
-### Archivos:
+### Archivos modificados:
 - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+---
 
 ## CLI-356 — 2026-07-09
-
-### Causa raíz:
-El export `/tasks_export_run` y la vista de detalle `getTaskDetailReport` accedían a `t.fecha`, `t.fechaFin`, `t.descripcion`, `t.archivos` en el nivel raíz del objeto tarea, pero la API `/api/roadmap` anida todos esos campos dentro de `t.detail`. Resultado: exportación solo con títulos, sin fechas, descripciones ni archivos afectados.
-
-### Correcciones:
-1. **`/tasks_export_run`**: Extrae `d = t.detail || {}` y lee `d.fecha`, `d.fechaFin`, `d.descripcion`, `d.archivos` con fallback a nivel raíz.
-2. **`getTaskDetailReport`**: Misma corrección. Ahora la vista de detalle por `/task_detail [ID]` en Telegram muestra fechas, descripción y archivos correctamente.
-3. **Título limpio**: Se elimina el prefijo `"Tarea ID: "` del título en el export para mayor legibilidad del documento Markdown.
-4. **Fallback de descripción**: Si `t.detail.descripcion` está vacío, se muestra el texto del título limpio como descripción de referencia.
-
-### Archivos:
-- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
-
-
-**Fix: HTML Escaping en Mensajes de Telegram + Fallback a Texto Plano**
+**Fix: Acceso a `t.detail` en Exportación de Tareas + HTML Escaping en Mensajes Telegram**
 
 ### Cambios realizados:
-1. **`escapeHtml()`**: Nueva función utilitaria en `notification_server.js` que escapa `&`, `<`, `>`, `"` para prevenir fallos de parseo HTML en la API de Telegram cuando el texto de una tarea contiene esos caracteres.
-2. **Fallback en `sendTelegramMessage`**: Si Telegram devuelve un error 400 con descripción de parseo HTML, el bot reintenta automáticamente en modo texto plano (sin `parse_mode: 'HTML'`), eliminando etiquetas del texto antes de reenviar.
-3. **Header `charset=utf-8`**: Todos los `fetch` a la API de Telegram ahora incluyen `Content-Type: application/json; charset=utf-8`.
-4. **Puntos de aplicación de `escapeHtml`**: Aplicado en `getTaskDetailReport` (id, descripción, texto, archivos), `searchTasksInRoadmap` (texto de resultados), y el handler `/tasks` y `/tasks_completed` (texto de cada tarea listada).
+1. **`/tasks_export_run` (Fix 1):** Extrae `d = t.detail || {}` y lee `d.fecha`, `d.fechaFin`, `d.descripcion`, `d.archivos` con fallback a nivel raíz. La exportación ahora incluye fechas, descripciones y archivos completos.
+2. **`getTaskDetailReport` (Fix 2):** Misma corrección. La vista `/task_detail [ID]` muestra correctamente fechas, descripción y archivos.
+3. **Título limpio (Fix 3):** Se elimina el prefijo `"Tarea ID: "` del título en el export para mayor legibilidad.
+4. **Fallback de descripción (Fix 4):** Si `t.detail.descripcion` está vacío, se muestra el texto del título limpio como descripción de referencia.
+5. **`escapeHtml()` (Fix 5):** Nueva función utilitaria que escapa `&`, `<`, `>`, `"` para prevenir fallos de parseo HTML en la API de Telegram.
+6. **Fallback en `sendTelegramMessage` (Fix 6):** Si Telegram devuelve error 400 HTML parse, el bot reintenta en modo texto plano automáticamente.
+7. **Header `charset=utf-8` (Fix 7):** Todos los `fetch` a la API de Telegram incluyen `Content-Type: application/json; charset=utf-8`.
 
-### Archivos:
+### Archivos modificados:
 - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
 
-### CLI-352 — Revisión Histórica:
-Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en Telegram). El bug se manifestaba cuando el texto de tareas contenía caracteres como `<`, `>`, o `&`, causando que Telegram rechazara el mensaje con error 400 HTML parse.
-
+---
 
 ## CLI-352 — 2026-07-09
 **Feature: Potencialización de la Gestión de Roadmap en Telegram**
@@ -233,6 +393,11 @@ Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en
    - Implementado `/tasks_search` y `/start searchtasks_` para desviar la búsqueda conversacional a chat privado y eludir el Privacy Mode de grupos.
    - Implementado `/task_detail [id]` para ver la ficha ampliada e interactuar con el estado de la tarea.
 
+### Archivos modificados:
+- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+---
+
 ## CORE-341 — 2026-07-09
 **Bugfix: Descarga Nativa de Facturas PDF de Pedidos Completados (Revertida)**
 
@@ -240,6 +405,12 @@ Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en
 1. **Reversión del cambio:**
    - Se descartaron por completo los cambios de generación nativa de PDF con `jsPDF` y se retornó al flujo de impresión nativo del navegador basado en iframe oculto (`window.print()`).
    - Se restauraron a su estado original de Git los archivos `AdminOrders.jsx` y `pdfService.js` en Moni y la plantilla Core.
+
+### Archivos modificados:
+- [`AdminOrders.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminOrders.jsx) [MODIFY]
+- [`pdfService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/pdfService.js) [MODIFY]
+
+---
 
 ## CLI-351 — 2026-07-09
 **Documentation: Creación de Manual Consolidado de la Consola de Telegram**
@@ -251,6 +422,12 @@ Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en
 2. **Sincronización del Mapa:**
    - Registrado e indexado el manual en [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) con sus metadatos y criterio de decisión.
 
+### Archivos modificados:
+- [`manual_consola_telegram.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_consola_telegram.md) [NEW]
+- [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
 ## CLI-350 — 2026-07-09
 **Architecture: Eliminación de Ramas Master Obsoletas en GitHub**
 
@@ -259,6 +436,12 @@ Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en
    - Se eliminaron con éxito las ramas remotas `master` obsoletas en el Maestro (`PROTOTIPE`) y Dashboard (`prototipe-dev-dashboard`) mediante `git push origin --delete master`.
 2. **Purgación Local:**
    - Ejecutado `git fetch --prune` para purgar referencias huérfanas en los repositorios locales, dejando la arquitectura limpia en `main` y `develop`.
+
+### Archivos modificados:
+> ℹ️ **Operación Git remota pura:** No se modificaron archivos del código fuente. Se ejecutaron comandos `git push origin --delete master` y `git fetch --prune` sobre los repositorios `PROTOTIPE` y `prototipe-dev-dashboard`.
+- [`bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
 
 ## CLI-349 — 2026-07-09
 **Architecture: Alineación de Arquitectura de Ramas Git a main/develop**
@@ -273,6 +456,12 @@ Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en
 3. **Control Remoto en GitHub (Pendiente):**
    - Intentada la eliminación de `master` en origin, la cual requiere que el administrador modifique en la interfaz web de GitHub la rama por defecto (Default Branch) de `master` a `main` tanto en `PROTOTIPE` como en `prototipe-dev-dashboard`.
 
+### Archivos modificados:
+- [`git_backup.ps1`](file:///d:/PROTOTIPE/Prototipe-CLI/git_backup.ps1) [MODIFY]
+- [`subproject_backup.ps1`](file:///d:/PROTOTIPE/Prototipe-CLI/subproject_backup.ps1) [MODIFY]
+
+---
+
 ## CLI-348 — 2026-07-09
 **Fix: Sincronización Completa de Auto-Merge y Push en Telegram**
 
@@ -282,6 +471,11 @@ Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en
    - Forzado el parámetro `&push=true` para garantizar el empuje a GitHub en cada invocación remota.
 2. **Estrategia de Auto-Merge Condicional:**
    - Implementado el parámetro dinámico `&autoMerge=[true/false]` basado en el repositorio. Si la ruta pertenece al Core del sistema (maestro, dev-dashboard o plantillas) y no es una instancia de cliente, se activa la consolidación automática a la rama de producción (`main`/`master`) en el repositorio remoto, garantizando la paridad al 100% con la lógica del dashboard.
+
+### Archivos modificados:
+- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+---
 
 ## CLI-347 — 2026-07-09
 **Feature: Reporte Interactivo de Pre-flight para Publicación de Git en Telegram**
@@ -295,6 +489,11 @@ Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en
 2. **Alertas de Seguridad en Tiempo Real:**
    - Verifica la propiedad `envLeak` en vivo. Si se detectan archivos `.env` expuestos, muestra una advertencia destacada en el chat y detalla cuáles archivos están comprometidos antes de la confirmación.
 
+### Archivos modificados:
+- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+---
+
 ## CLI-346 — 2026-07-09
 **Feature: Paridad de Auto-Commit y Mensaje de Commit Inteligente en Telegram**
 
@@ -306,6 +505,11 @@ Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en
 2. **Respaldo Inteligente (/git_push_confirm):**
    - Modificado el handler `executeGitPush` del bot de Telegram para autogenerar e inyectar el mensaje del commit en la petición del stream del backup de Git (`/api/git/backup-stream?message=...`).
    - El mensaje final del push en Telegram ahora detalla con precisión el commit message aplicado para la tranquilidad del operador técnico.
+
+### Archivos modificados:
+- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+
+---
 
 ## CLI-345 — 2026-07-09
 **Feature: Diagnóstico de Pruebas Playwright e Inventario de Cores (Sprint 3)**
@@ -320,7 +524,7 @@ Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en
    - Incorporados comandos `/tests` y `/cores` con inline buttons correspondientes.
 
 ### Archivos modificados:
-- `Prototipe-CLI/notification_server.js` (Formatters y handlers de tests/cores)
+- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
 
 ---
 
@@ -339,7 +543,7 @@ Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en
    - Actualizado con comandos explicativos `/fix` y `/rules` e inline buttons rápidos.
 
 ### Archivos modificados:
-- `Prototipe-CLI/notification_server.js` (Formatters, interceptor y handlers de fix/rules)
+- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
 
 ---
 
@@ -359,7 +563,7 @@ Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en
    - Actualizada la interfaz de ayuda `/help` con descripciones de comandos claras y botones táctiles rápidos en un layout inline balanceado y mobile-friendly.
 
 ### Archivos modificados:
-- `Prototipe-CLI/notification_server.js` (Formatters, interceptor de confirmación, y nuevos comandos)
+- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
 
 ---
 
@@ -372,8 +576,8 @@ Esta corrección complementa la feature CLI-352 (Potencialización de Roadmap en
 3. **AWAITING_TEXT fix (Fix 3):** Resuelto Privacy Mode de Telegram en grupos. Handler `/addtask_cat CUSTOM` ahora genera botón deep-link `t.me/BOT?start=addtask_{chatId}_{domain}`. `/start` intercepta payload, activa `AWAITING_TEXT` en DM privado con campo `groupChatId` para confirmar de vuelta al grupo. `botUsername` se resuelve en startup vía `getMe`.
 
 ### Archivos modificados:
-- `Prototipe-CLI/notification_server.js` (3 fixes: isAuthorized, sendJobMessage/editJobMessage, deep-link /start)
-- `Prototipe-CLI/notification_config.json` (sección auth con allowedChatIds/adminChatIds)
+- [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+- [`notification_config.json`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_config.json) [MODIFY]
 
 ---
 

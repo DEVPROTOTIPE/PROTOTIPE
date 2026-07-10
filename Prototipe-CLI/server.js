@@ -1361,7 +1361,8 @@ graph TD
         
         // Construir la URL relativa del componente/módulo para evitar enlaces rotos
         const relativeUrlPath = isModuleCategory ? cleanCategory : `06_Biblioteca_Componentes/${cleanCategory}`;
-        const componentRef = `* [${targetName.replace(/_/g, ' ')} (${targetName})](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/${relativeUrlPath}/${targetName}/${targetName.toLowerCase()}.md): ${description || 'Componente/Módulo extraído.'}`;
+        const docRootUrl = `file:///${baseDocDir.replace(/\\/g, '/')}`;
+        const componentRef = `* [${targetName.replace(/_/g, ' ')} (${targetName})](${docRootUrl}/${relativeUrlPath}/${targetName}/${targetName.toLowerCase()}.md): ${description || 'Componente/Módulo extraído.'}`;
         
         if (!categoryContent.includes(`(${targetName})`)) {
           // Agregar debajo del header de la categoría
@@ -1382,7 +1383,8 @@ graph TD
         const matchTable = mapaDoc.match(insertRegex) || mapaDoc.match(/(\| \*\*README\.md\*\* \|[\s\S]*?\|)/i);
         if (matchTable) {
           const relativeUrlPath = isModuleCategory ? cleanCategory : `06_Biblioteca_Componentes/${cleanCategory}`;
-          const newRow = `\n| **${targetName.toLowerCase()}.md** | Ficha del componente ${targetName} | Componente extraído de la aplicación local. | [Ver Componente](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/${relativeUrlPath}/${targetName}/${targetName.toLowerCase()}.md) |`;
+          const docRootUrl = `file:///${baseDocDir.replace(/\\/g, '/')}`;
+          const newRow = `\n| **${targetName.toLowerCase()}.md** | Ficha del componente ${targetName} | Componente extraído de la aplicación local. | [Ver Componente](${docRootUrl}/${relativeUrlPath}/${targetName}/${targetName.toLowerCase()}.md) |`;
           mapaDoc = mapaDoc.replace(matchTable[1], matchTable[1] + newRow);
           await fs.writeFile(mapaDocPath, mapaDoc, 'utf-8');
         }
@@ -10925,7 +10927,8 @@ app.post('/api/roadmap/update', async (req, res) => {
         archivos.forEach(file => {
           if (file && file.name) {
             const act = (file.action || 'MODIFY').toUpperCase();
-            const url = file.url || `file:///d:/PROTOTIPE/${file.name}`;
+            const gitRootUrl = `file:///${GIT_ROOT.replace(/\\/g, '/')}`;
+            const url = file.url || `${gitRootUrl}/${file.name}`;
             newDetailLines.push(`    - [\`${file.name}\`](${url}) [${act}]`);
           }
         });
@@ -11984,9 +11987,10 @@ async function syncArchiveInDocsMap(archivePath) {
     // Si ya existe la entrada de este archivo en el mapa, no la duplicamos
     if (content.includes(fileName)) return;
     
-    const targetLine = "| **bitacora_cambios.md** | Registro de Cambios Activos | **Obligatorio al finalizar:** Registrar cambios de la sesión activa de desarrollo y commits del Roadmap. | [Ver Bitácora Activa](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) |";
+    const docRootUrl = `file:///${path.join(GIT_ROOT, 'Documentacion PROTOTIPE').replace(/\\/g, '/')}`;
+    const targetLine = `| **bitacora_cambios.md** | Registro de Cambios Activos | **Obligatorio al finalizar:** Registrar cambios de la sesión activa de desarrollo y commits del Roadmap. | [Ver Bitácora Activa](${docRootUrl}/03_Auditorias_y_Faro_Core/bitacora_cambios.md) |`;
     
-    const newLine = `| **${fileName}** | Histórico de Cambios | Registros históricos acumulados de cambios técnicos anteriores al 2026-07-07 compactados para NotebookLM. | [Ver Histórico](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/${fileName}) |`;
+    const newLine = `| **${fileName}** | Histórico de Cambios | Registros históricos acumulados de cambios técnicos anteriores al 2026-07-07 compactados para NotebookLM. | [Ver Histórico](${docRootUrl}/03_Auditorias_y_Faro_Core/${fileName}) |`;
     
     if (content.includes(targetLine)) {
       content = content.replace(targetLine, `${targetLine}\n${newLine}`);
@@ -12521,7 +12525,8 @@ app.post('/api/library/manual', async (req, res) => {
     const docMapFile = path.join(GIT_ROOT, 'Documentacion PROTOTIPE', '04_Estandares_y_Skills', 'mapa_documentacion_ia.md');
     if (await fs.pathExists(docMapFile)) {
       let docMapContent = await fs.readFile(docMapFile, 'utf8');
-      const entryText = `| **manual_${sanitizedName.toLowerCase()}.md** | Manual Técnico de Integración de ${sanitizedName} | Propósito: Guía de integración detallada. | [Ver Manual](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/${sanitizedCategory}/${sanitizedName}/manual_${sanitizedName.toLowerCase()}.md) |`;
+      const docRootUrl = `file:///${path.join(GIT_ROOT, 'Documentacion PROTOTIPE').replace(/\\/g, '/')}`;
+      const entryText = `| **manual_${sanitizedName.toLowerCase()}.md** | Manual Técnico de Integración de ${sanitizedName} | Propósito: Guía de integración detallada. | [Ver Manual](${docRootUrl}/07_Manuales_Desarrollo/${sanitizedCategory}/${sanitizedName}/manual_${sanitizedName.toLowerCase()}.md) |`;
       if (!docMapContent.includes(`manual_${sanitizedName.toLowerCase()}.md`)) {
         docMapContent = docMapContent.trim() + '\n' + entryText + '\n';
         await fs.writeFile(docMapFile, docMapContent, 'utf8');
@@ -13010,8 +13015,9 @@ app.post('/api/briefing/export', async (req, res) => {
     if (await fs.pathExists(mapaPath)) {
       let mapaContent = await fs.readFile(mapaPath, 'utf-8');
       
-      const newBriefingRow = `| **${briefingFileName}** | Levantamiento de Requerimientos | Registro detallado de la entrevista de descubrimiento comercial para ${empresa} realizada el ${fecha}. | [Ver Briefing](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/Plantillas_de_Levantamiento/${cleanContacto}/${briefingFileName}) |\n`;
-      const newAnalisisRow = `| **${analisisFileName}** | Análisis Post-Descubrimiento | Diagnóstico técnico, estimación de complejidad y roadmap comercial para ${empresa}. | [Ver Análisis](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/Plantillas_de_Levantamiento/${cleanContacto}/${analisisFileName}) |\n`;
+      const docRootUrl = `file:///${docRoot.replace(/\\/g, '/')}`;
+      const newBriefingRow = `| **${briefingFileName}** | Levantamiento de Requerimientos | Registro detallado de la entrevista de descubrimiento comercial para ${empresa} realizada el ${fecha}. | [Ver Briefing](${docRootUrl}/05_Estrategia_Comercial_Ecosistema/Plantillas_de_Levantamiento/${cleanContacto}/${briefingFileName}) |\n`;
+      const newAnalisisRow = `| **${analisisFileName}** | Análisis Post-Descubrimiento | Diagnóstico técnico, estimación de complejidad y roadmap comercial para ${empresa}. | [Ver Análisis](${docRootUrl}/05_Estrategia_Comercial_Ecosistema/Plantillas_de_Levantamiento/${cleanContacto}/${analisisFileName}) |\n`;
 
       const sectionIndex = mapaContent.indexOf(docSectionHeader);
       

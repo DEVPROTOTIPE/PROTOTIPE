@@ -179,20 +179,53 @@ No todo cambio requiere actualizar los 3 archivos principales. Aplicar la siguie
 - **Prohibido** eliminar tareas completadas. Marcarlas con `[x]` y formato tachado `~~tarea~~`.
 - Si un cambio afecta a una tarea previamente completada, registrar la relaciÃ³n histÃ³rica o versiÃ³n de revisiÃ³n bajo el Ã­tem original para trazabilidad.
 - Si una modificaciÃ³n altera la estructura fÃ­sica, lÃ³gica o de datos, actualizar `mapa_aplicacion.md` en el mismo paso.
-- **DOCUMENTACIÃ“N OBLIGATORIA EN EL PROYECTO AFECTADO:** Siempre que se realice un cambio de cÃ³digo en una plantilla core, CLI o instancia de cliente, es obligatorio y prioritario registrar el cambio y actualizar el roadmap directamente en la carpeta de documentaciÃ³n interna del proyecto correspondiente (ej. `Plantillas Core/App Ventas/Documentacion App Ventas/bitacora_cambios.md` y `tareas_pendientes.md`). No limitarse Ãºnicamente a los registros del directorio general `Documentacion PROTOTIPE`.
-- **MULTIPLICIDAD DE PROYECTOS:** En caso de que se realice una modificaciÃ³n que influya de forma paralela en varios proyectos o directorios diferentes (ej. modificar simultÃ¡neamente la lÃ³gica del orquestador en `Prototipe-CLI` y la UI en `dev-dashboard`), se debe documentar obligatoria y detalladamente cada cambio en la carpeta de documentaciÃ³n local de cada proyecto de manera individual e independiente.
-- **ADVERTENCIA CRÃTICA:** Omitir la actualizaciÃ³n de documentaciÃ³n local tras un cambio de cÃ³digo es una violaciÃ³n grave del estÃ¡ndar. Es obligatorio, inmediato y proactivo. No requiere recordatorio del usuario.
+- Si un cambio afecta a una tarea previamente completada, registrar la relación histórica o versión de revisión bajo el ítem original para trazabilidad.
+- Si una modificación altera la estructura física, lógica o de datos, actualizar `mapa_aplicacion.md` en el mismo paso.
+- **DOCUMENTACIÓN OBLIGATORIA EN EL PROYECTO AFECTADO:** Siempre que se realice un cambio de código en una plantilla core, CLI o instancia de cliente, es obligatorio y prioritario registrar el cambio y actualizar el roadmap directamente en la carpeta de documentación interna del proyecto correspondiente (ej. `Plantillas Core/App Ventas/Documentacion App Ventas/bitacora_cambios.md` y `tareas_pendientes.md`). No limitarse únicamente a los registros del directorio general `Documentacion PROTOTIPE`.
+- **MULTIPLICIDAD DE PROYECTOS:** En caso de que se realice una modificación que influya de forma paralela en varios proyectos o directorios diferentes (ej. modificar simultáneamente la lógica del orquestador en `Prototipe-CLI` y la UI en `dev-dashboard`), se debe documentar obligatoria y detalladamente cada cambio en la carpeta de documentación local de cada proyecto de manera individual e independiente.
+- **ADVERTENCIA CRÍTICA:** Omitir la actualización de documentación local tras un cambio de código es una violación grave del estándar. Es obligatorio, inmediato y proactivo. No requiere recordatorio del usuario.
 
 ### 10.3 Idempotencia de triggers
 
-Antes de ejecutar cualquier trigger que genere documentaciÃ³n, verificar si ya existe un delta real respecto al Ãºltimo registro:
+Antes de ejecutar cualquier trigger que genere documentación, verificar si ya existe un delta real respecto al último registro:
 
 - Si no hay cambios nuevos: **NO** duplicar entradas en `bitacora_cambios.md`.
-- Notificar: `â„¹ï¸ No se detectaron cambios nuevos desde el Ãºltimo registro.`
+- Notificar: `ℹ️ No se detectaron cambios nuevos desde el último registro.`
+
+### 10.4 Template Obligatorio de Bitácora (CRÍTICO — INVIOLABLE)
+
+**REGLA DE ATOMICIDAD:** Cada entrada de bitácora representa **exactamente un cambio técnico**.
+Está **PROHIBIDO** agrupar archivos de tareas distintas en una misma entrada.
+
+Toda entrada en `bitacora_cambios.md` DEBE seguir esta estructura exacta:
+
+```markdown
+## [ID] — [YYYY-MM-DD]
+**[Tipo]: [Descripción concisa en una línea]**
+
+### Cambios realizados:
+1. **[Componente o área]:** [Qué se hizo y por qué.]
+
+### Archivos modificados:
+- [`nombre_archivo.ext`](file:///ruta/absoluta/nombre_archivo.ext) [NEW|MODIFY|DELETE|DEPLOY]
+```
+
+**Reglas de la sección "Archivos modificados" (OBLIGATORIA):**
+- Mínimo 1 archivo. Sin excepción, salvo tags `[MINOR]`, `[BUILD_FAILED]`, `[SYNC_FAILED]`.
+- Solo archivos que fueron editados **por esta tarea específica**.
+- Cada archivo lleva su tag de operación: `[NEW]`, `[MODIFY]`, `[DELETE]`, `[DEPLOY]`.
+- Rutas absolutas con formato de enlace markdown.
+
+**Test de sanidad antes de listar un archivo:**
+> *"¿Modifiqué este archivo como parte de ESTA tarea o fue otra tarea diferente?"*
+> - SÍ, es de esta tarea → incluirlo.
+> - NO, es de otra tarea → crear entrada separada con su propio ID.
+
+**Validación disponible:** `node "D:\PROTOTIPE\Documentacion PROTOTIPE\04_Estandares_y_Skills\Copia_Seguridad_Reglas_y_Skills\validate_bitacora.js"`
 
 ---
 
-## SECCIÃ“N 11 â€” NAVEGACIÃ“N Y AUDITORÃA OBLIGATORIA AL INICIAR
+## SECCIÓN 11 — NAVEGACIÓN Y AUDITORÍA OBLIGATORIA AL INICIAR
 
 Al iniciar el primer turno en cualquier proyecto del ecosistema, leer obligatoriamente en este orden:
 

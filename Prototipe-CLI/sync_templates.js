@@ -261,7 +261,13 @@ async function main() {
     'firestore.rules',
     'storage.rules',
     'vite.config.js',
+    'vitest.config.js',
+    'playwright.config.js',
+    '.gitignore',
+    '.github',
+    'tests',
     'eslint.config.js',
+    'template.json',
     'GEMINI.md',
     'flujos_aplicacion.md',
     'mapa_arquitectura.md',
@@ -547,6 +553,31 @@ async function main() {
   }
 
   console.log(pc.green('✅ Copia e higienización finalizada.'));
+
+  // --- VALIDACIÓN POST-SYNC (Infraestructura obligatoria) ---
+  console.log(pc.yellow('\n🔍 Realizando validación post-sincronización...'));
+  const criticalFiles = [
+    'package.json',
+    'firestore.rules',
+    'firestore.indexes.json',
+    'vitest.config.js',
+    'playwright.config.js',
+    '.github/workflows/ci.yml',
+    'template.json',
+    'tests'
+  ];
+  const missingFiles = [];
+  for (const f of criticalFiles) {
+    if (!await fs.pathExists(path.join(destino, f))) {
+      missingFiles.push(f);
+    }
+  }
+  if (missingFiles.length > 0) {
+    console.error(pc.red(`❌ FALLO DE SINCRONIZACIÓN: Falta infraestructura obligatoria de testing/CI/CD en el destino: ${missingFiles.join(', ')}`));
+    process.exit(1);
+  }
+  console.log(pc.green('   ✅ Toda la infraestructura obligatoria de testing/CI/CD está presente en el destino.'));
+
 
   // Validar compilación
   console.log(pc.yellow('\n⚙️ Validando compilación local en la plantilla...'));

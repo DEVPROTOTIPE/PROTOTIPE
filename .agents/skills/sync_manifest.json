@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lastSyncAt": "2026-07-07T19:42:51.817Z",
+  "lastSyncAt": "2026-07-10T20:20:16.024Z",
   "skills": {
     "briefing-analizador": {
       "sha256": "37a1a613576f02377beaeb2111340371ee5b16ca05766b721ad98992a57c55dc",
@@ -69,6 +69,10 @@
     "sandbox-integrator": {
       "sha256": "918431e20aa9d1dfa021a0469ed207d0a3689eddb9917668f796b95e0afb77cb",
       "syncedAt": "2026-07-06T13:09:57.726Z"
+    },
+    "bitacora-recorder": {
+      "sha256": "414d69a0eef7ad841103b58c6254fc9a3bc4ddd166de9edbad88b4720714cd50",
+      "syncedAt": "2026-07-10T20:20:16.024Z"
     }
   }
 }

@@ -1,5 +1,47 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CLI-375: Auditoría Técnica Completa de la Semilla Base template-core-seed~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-10
+  - Fecha de finalización: 2026-07-10
+  - Descripción: Realizada una auditoría técnica profunda y consolidada del proyecto de plantilla base `app-ventas` (template-core-seed). Evaluada la modularidad, acoplamiento, seguridad física de Firestore rules, performance del listener de la base central, portabilidad de scripts, tests E2E y configuraciones de CI en entornos Linux. Generado el reporte formal consolidando fallas críticas y score global de la plantilla.
+  - Archivos:
+    - [`auditoria_template_core_seed.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_template_core_seed.md) [NEW]
+
+* **[x] ~~Tarea CLI-374: Aprovisionamiento de Infraestructura de Pruebas y CI/CD en Core Seed y CLI~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-10
+  - Fecha de finalización: 2026-07-10
+  - Descripción: Incorporado el aprovisionamiento automático de carpetas de pruebas unitarias/E2E y workflows de GitHub Actions en la sincronización de plantillas (`sync_templates.js`). Equipada la semilla base (`template-core-seed`) con Vitest, Playwright, configuración de JSDOM, pruebas iniciales y ci.yml reutilizable. Corregido el Build Integrity Guard en el build de producción de la semilla y hechos dinámicos todos los enlaces file:/// del servidor.
+  - Archivos:
+    - [`sync_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY]
+    - [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/package.json) [MODIFY]
+    - [`vitest.config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/vitest.config.js) [NEW]
+    - [`playwright.config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/playwright.config.js) [NEW]
+    - [`.github/workflows/ci.yml`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/.github/workflows/ci.yml) [NEW]
+    - [`smoke.spec.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/tests/unit/smoke.spec.js) [NEW]
+    - [`app-health.spec.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/tests/e2e/app-health.spec.js) [NEW]
+    - [`template.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/template.json) [NEW]
+    - [`App.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-373: Estabilización Pre-Release del Core Ventas (Checkout E2E, Cobertura Vitest y CI/CD)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-10
+  - Fecha de finalización: 2026-07-10
+  - Descripción: Estabilización del test E2E checkout Playwright haciéndolo totalmente resiliente a los pasos del CheckoutModal. Incrementada la cobertura de pruebas unitarias para inventoryService (87%), salesService (81%), creditService (77%) y orderService (61%), superando el objetivo del 60%. Creado el pipeline de CI/CD en GitHub Actions y redactada la documentación maestra local del core.
+  - Archivos:
+    - [`checkout.helpers.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/helpers/checkout.helpers.js) [MODIFY]
+    - [`inventoryService.spec.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/unit/inventoryService.spec.js) [NEW]
+    - [`salesService.spec.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/unit/salesService.spec.js) [NEW]
+    - [`creditService.spec.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/unit/creditService.spec.js) [MODIFY]
+    - [`orderService.extended.spec.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/unit/orderService.extended.spec.js) [MODIFY]
+    - [`ci.yml`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/.github/workflows/ci.yml) [NEW]
+    - [`arquitectura_features.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/arquitectura_features.md) [NEW]
+    - [`modelo_firestore.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/modelo_firestore.md) [NEW]
+    - [`estrategia_testing.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/estrategia_testing.md) [NEW]
+    - [`guia_multitenant.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/guia_multitenant.md) [NEW]
+
 * **[/] Tarea CLI-367: Implementación del Módulo InteractiveGoldPot (Olla de Oro Interactiva)**
   - Estatus: En progreso
   - Fecha de registro: 2026-07-09
