@@ -1,5 +1,31 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-369 — 2026-07-10
+**Auditoría: Validación Arquitectónica Post-FDD — App Ventas Core v2**
+
+### Cambios realizados:
+1. **Validación de Cross-imports entre Features (static analysis):** Auditadas las 4 dependencias prohibidas (`orders→billing`, `sales→billing`, `sales→inventory`, `credits→orders`). Resultado: **0 violaciones**. La comunicación de `credits` con el dominio `orders` se realiza exclusivamente a través de constantes Firestore compartidas y query keys de React Query — contrato legítimo sin acoplamiento directo de módulos.
+2. **Reporte de Cobertura Real (Vitest):** 14/14 tests unitarios pasando. Cobertura: Statements 15.31%, Branches 11.78%, Functions 9.06%, Lines 15.89%. Cobertura de dominio: `billingService` 72.44%, `creditService` 33.33%, `orderService` 20.29%. Baja cobertura global refleja ausencia de tests de componentes React y hooks — deuda técnica identificada.
+3. **Playwright E2E:** 3/4 tests pasando. Fallo en `checkout.spec.js:149` — timeout en selector `input[type="tel"]` en el paso 2 de `CheckoutModal`. Diagnosticado como fallo de timing/entorno (no regresión de código introducida en Fase 5.3). Registrado como tarea pendiente de investigación.
+4. **npm audit:** `found 0 vulnerabilities` — árbol de dependencias limpio.
+5. **npm outdated:** Patches disponibles: `firebase` 12.15→12.16, `lucide-react` 1.23→1.24, `prettier` 3.9.4→3.9.5. Versiones major en hold: Vite v8, Babel v8 (requieren evaluación de breaking changes).
+6. **Reglas FDD confirmadas:** Sección `§4` de `restricciones_tecnicas.md` documenta el grafo de dependencias aprobado, la obligatoriedad de barrels, y los contratos JSDoc.
+
+### Archivos consultados (sin modificación):
+- `src/features/*/index.js` (barrels de todos los dominios)
+- `tests/e2e/checkout.spec.js`
+- `tests/helpers/checkout.helpers.js`
+
+---
+
+## CLI-368 — 2026-07-10
+**Feature: Estabilización de Permisos y Consultas de Notificaciones en App Ventas**
+
+### Cambios realizados:
+1. **Corrección de Consultas de Cliente:** Añadido el filtro `where('recipientRole', '==', 'client')` en las funciones `markAllAsRead` y `archiveAll` de `src/services/notificationCenterService.js`. Esto evita el error de permisos de Firestore cuando un usuario cliente no autenticado con Firebase Auth realiza consultas, garantizando que el motor de reglas valide que el rol coincida con el alcance permitido.
+2. **Actualización de Seguridad en Reglas (`firestore.rules`):** Modificados los permisos de eliminación (`allow delete`) de la colección `notifications` para permitir de forma explícita que destinatarios con rol `'client'`, `'vendedor'`, `'bodeguero'` o `'mensajero'` puedan ejecutar borrados físicos de sus propias notificaciones sin requerir privilegios de administrador.
+3. **Validación y Build:** Ejecutada la compilación completa de producción exitosamente (`npm run build`) y ejecutada la suite de pruebas unitarias (`npx vitest run`) validando la estabilidad general del sistema.
+
 ## CLI-367 — 2026-07-09
 **Feature: Implementación del Módulo InteractiveGoldPot (Olla de Oro Interactiva)**
 

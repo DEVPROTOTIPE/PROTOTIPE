@@ -93,6 +93,7 @@ docs_roots:
 | **contexto_negocio.md (App Ventas)** | Contexto de Negocio y Reglas Operativas del Dominio | Consultar tareas, bitácora o flujos específicos de este core. | [Ver Documento](file:///D:/PROTOTIPE/Plantillas%20Core/App Ventas/Documentacion App Ventas/contexto_negocio.md) |
 | **restricciones_tecnicas.md (App Ventas)** | Restricciones Técnicas y Patrones Prohibidos | Consultar tareas, bitácora o flujos específicos de este core. | [Ver Documento](file:///D:/PROTOTIPE/Plantillas%20Core/App Ventas/Documentacion App Ventas/restricciones_tecnicas.md) |
 | **guia_estilos_ui.md (App Ventas)** | Guía de Estilos de UI y Sistema de Diseño del Core | Consultar tareas, bitácora o flujos específicos de este core. | [Ver Documento](file:///D:/PROTOTIPE/Plantillas%20Core/App Ventas/Documentacion App Ventas/guia_estilos_ui.md) |
+| **auditoria_estabilizacion_post_fdd.md (App Ventas)** | Auditoría de Estabilización Post-FDD | Consultar la auditoría estructural post-FDD, acoplamiento de dominios, configuraciones y deuda técnica restante. | [Ver Documento](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/auditoria_estabilizacion_post_fdd.md) |
 
 <!-- END_AUTO_CORES_DOCS -->
 
