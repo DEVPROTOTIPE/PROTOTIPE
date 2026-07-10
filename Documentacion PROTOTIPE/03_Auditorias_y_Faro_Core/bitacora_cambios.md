@@ -1,5 +1,23 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-367 — 2026-07-09
+**Feature: Implementación del Módulo InteractiveGoldPot (Olla de Oro Interactiva)**
+
+### Cambios realizados:
+1. **Ficha Técnica en Biblioteca:** Creada `interactive_gold_pot.md` en `06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Olla_Oro_Interactiva/` con el manifiesto JSON, API de props y flujo de interacción.
+2. **Componente Físico React:** Creado `InteractiveGoldPot.jsx` en `dev-dashboard/src/components/common/` implementando la orquestación física del abono, efecto squash-and-stretch en Framer Motion, crecimiento gradual del tamaño y olla en SVG.
+3. **Playground Sandbox:** Creado `InteractiveGoldPotSandbox.jsx` en `src/components/admin/sandboxes/` con selectores `CustomSelect` para configurar la meta y el abono inicial.
+4. **Mapeo e Integridad del Dashboard:** Mapeados los aliases de `interactivegoldpot` y `interactive_gold_pot` en `ComponentSandbox.jsx`.
+
+## CLI-366 — 2026-07-09
+**Feature: Implementación del Módulo ScratchCardReward (Tarjeta de Rasca y Gana)**
+
+### Cambios realizados:
+1. **Ficha Técnica en Biblioteca:** Creada `scratch_card_reward.md` en `06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Tarjeta_Rasca_Gana/` conteniendo el manifiesto JSON, estilos de variables de colores semánticos HSL, y especificación de props.
+2. **Componente Físico React:** Creado `ScratchCardReward.jsx` en `dev-dashboard/src/components/common/` implementando la lógica de raspado real con Canvas HTML5 destructivo y mitigación de scroll mediante `touch-none`.
+3. **Playground Sandbox:** Creado `ScratchCardRewardSandbox.jsx` en `src/components/admin/sandboxes/` para renderizar y depurar interactivamente los premios y resetear el componente.
+4. **Mapeo e Integridad del Dashboard:** Registrados los aliases `scratchcardreward`, `scratch_card_reward` y `tarjeta_rasca_gana` en `ComponentSandbox.jsx`.
+
 ## CLI-365 — 2026-07-09
 **Feature: Implementación de la Pantalla de Bienvenida PremiumWelcomeSplash**
 

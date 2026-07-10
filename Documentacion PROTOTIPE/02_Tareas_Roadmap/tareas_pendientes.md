@@ -1,8 +1,63 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
-* **[/] Tarea CLI-365: Implementación de la Pantalla de Bienvenida PremiumWelcomeSplash**
+* **[/] Tarea CLI-367: Implementación del Módulo InteractiveGoldPot (Olla de Oro Interactiva)**
   - Estatus: En progreso
   - Fecha de registro: 2026-07-09
+  - Descripción: Creado el componente InteractiveGoldPot con físicas Framer Motion, efecto squash-and-stretch, entrada COP formateada en vivo, crecimiento gradual y olla en SVG.
+  - Archivos:
+    - [`interactive_gold_pot.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Olla_Oro_Interactiva/interactive_gold_pot.md) [NEW]
+    - [`Olla_Oro_Interactiva/`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Olla_Oro_Interactiva/) [NEW]
+    - [`InteractiveGoldPot.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/InteractiveGoldPot.jsx) [NEW]
+    - [`InteractiveGoldPotSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveGoldPotSandbox.jsx) [NEW]
+    - [`mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+    - [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [`README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [`Tarjeta_Rasca_Gana/`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Tarjeta_Rasca_Gana/) [MODIFY]
+    - [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [`ScratchCardRewardSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ScratchCardRewardSandbox.jsx) [MODIFY]
+    - [`ScratchCardReward.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/ScratchCardReward.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-366: Implementación del Módulo ScratchCardReward (Tarjeta de Rasca y Gana)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
+  - Descripción: Creado el componente premium ScratchCardReward con Canvas HTML5 destructivo, moneda SVG de arrastre animada, bloqueo de scroll táctil (touch-none) y auto-revelación al 50% con celebración de confeti.
+  - Archivos:
+    - [`scratch_card_reward.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Tarjeta_Rasca_Gana/scratch_card_reward.md) [NEW]
+    - [`Tarjeta_Rasca_Gana/`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Tarjeta_Rasca_Gana/) [NEW]
+    - [`ScratchCardReward.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/ScratchCardReward.jsx) [NEW]
+    - [`ScratchCardRewardSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ScratchCardRewardSandbox.jsx) [NEW]
+    - [`welcome_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pantalla_Bienvenida/welcome_page.md) [MODIFY]
+    - [`PremiumWelcomeSplash.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/PremiumWelcomeSplash.jsx) [NEW]
+    - [`WelcomePageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/WelcomePageSandbox.jsx) [MODIFY]
+    - [`analisis_adaptabilidad_core_seed.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/analisis_adaptabilidad_core_seed.md) [NEW]
+    - [`premium_notification_center.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Sistema_Notificaciones_Premium/premium_notification_center.md) [NEW]
+    - [`PremiumNotificationCenter.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/PremiumNotificationCenter.jsx) [NEW]
+    - [`PremiumNotificationCenterSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PremiumNotificationCenterSandbox.jsx) [NEW]
+    - [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
+    - [`phone_id_login_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/phone_id_login_page.md) [NEW]
+    - [`PhoneIdLoginPage.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/PhoneIdLoginPage.jsx) [NEW]
+    - [`PhoneIdLoginPageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PhoneIdLoginPageSandbox.jsx) [NEW]
+    - [`login_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pagina_Login/login_page.md) [NEW]
+    - [`HybridLoginPage.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/HybridLoginPage.jsx) [NEW]
+    - [`LoginPageSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LoginPageSandbox.jsx) [MODIFY]
+    - [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+    - [`README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+    - [`mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+    - [`mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+    - [`interactivefortune_wheel.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Ruleta_Fortuna_Premios/interactivefortune_wheel.md) [NEW]
+    - [`CatalogBannerSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/CatalogBannerSandbox.jsx) [MODIFY]
+    - [`RaffleWheelOfFortuneSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/RaffleWheelOfFortuneSandbox.jsx) [MODIFY]
+    - [`InteractiveFortuneWheelSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveFortuneWheelSandbox.jsx) [NEW]
+    - [`InteractiveFortuneWheel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/InteractiveFortuneWheel.jsx) [NEW]
+    - [`RaffleWheelOfFortune.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/RaffleWheelOfFortune.jsx) [NEW]
+    - [`CatalogBanner.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/ui/CatalogBanner.jsx) [NEW]
+
+* **[x] ~~Tarea CLI-365: Implementación de la Pantalla de Bienvenida PremiumWelcomeSplash~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-09
+  - Fecha de finalización: 2026-07-09
   - Descripción: Creado el componente premium PremiumWelcomeSplash con animación sonar vectorial, orbes ambientales difuminados, touch targets de 48px y active:scale-95, y redirección a login o catálogo para la PWA de Prototype.
   - Archivos:
     - [`welcome_page.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pantalla_Bienvenida/welcome_page.md) [MODIFY]
@@ -144,70 +199,6 @@
 
 * **[x] ~~Tarea CLI-358: Estabilización de Notificaciones y Auditoría de Telemetría~~**
   - Estatus: Completada
-  - Fecha de registro: 2026-07-09
-  - Fecha de finalización: 2026-07-09
-  - Descripción: Robustecimiento del Servidor de Notificaciones mediante manejadores globales de excepciones (uncaughtException/unhandledRejection) y aislamiento de updates. Corrección del error execSync indefinido en despliegue de reglas Firebase en server.js. Implementación de los comandos /telemetria [cliente] y /telemetria_check en Telegram para auditar transmisiones mensuales de facturación. Habilitación del Chat ID correcto del grupo general (-1004435396668) y desarrollo de getSystemConfig para recarga en caliente. Corrección del comando /health para consumir clientes de la colección central clientes_control de Firestore Central en lugar del endpoint obsoleto /api/clients.
-  - Archivos:
-    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
-    - [`notification_config.json`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_config.json) [MODIFY]
-    - [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
-
-* **[x] ~~Tarea CLI-357: Integración Sistema de Diagnóstico al Bot de Telegram (3 Niveles)~~**
-  - Estatus: Completada
-  - Fecha de registro: 2026-07-09
-  - Fecha de finalización: 2026-07-09
-  - Descripción: `/integrity` enriquecido con todos los tipos de drift + linter + botones granulares. `/integrity_autofix` con secuencia de 4 fixers (autocure, fix-map-bulk, prune-drifts, scaffold-sandbox-bulk) + verificación post-fix. Nuevo `/integrity_report` exporta `.txt`. Nuevo `/health` hace ping en paralelo a clientes. `/start` actualizado.
-  - Archivos:
-    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
-
-* **[x] ~~Tarea CLI-356: Fix Exportación Completa de Tareas (acceso a t.detail)~~**
-  - Estatus: Completada
-  - Fecha de registro: 2026-07-09
-  - Fecha de finalización: 2026-07-09
-  - Descripción: Corregido acceso a campos `t.detail.fecha`, `t.detail.fechaFin`, `t.detail.descripcion`, `t.detail.archivos` en el export `/tasks_export_run` y en `getTaskDetailReport`. Anteriormente se leían en el nivel raíz (vacíos), generando exportaciones solo con títulos. Ahora se exporta el contenido completo de cada tarea.
-  - Archivos:
-    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
-
-* **[x] ~~Tarea CLI-355: Fix HTML Escaping en Bot de Telegram (Encoding)~~**
-  - Estatus: Completada
-  - Fecha de registro: 2026-07-09
-  - Fecha de finalización: 2026-07-09
-  - Descripción: Implementada función `escapeHtml()` en `notification_server.js`. Aplicada en `getTaskDetailReport`, `searchTasksInRoadmap`, listado `/tasks` y `/tasks_completed`. Añadido fallback automático a texto plano cuando Telegram devuelve error 400 HTML parse. Header `charset=utf-8` en todos los fetch a la API de Telegram.
-  - Archivos:
-    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
-
-* **[ ] Tarea CLI-353: Configuración y Testeo de Roadmap en Telegram (Prueba A)**
-  - Estatus: Nueva
-  - Fecha de registro: 2026-07-09
-  - Descripción: Tarea de prueba A para certificar la visualización de la botonera interactiva de detalles, filtros y completado en Telegram.
-  - Archivos:
-    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
-
-* **[ ] Tarea BIZ-354: Planificación de Integración de Leads Comerciales (Prueba B)**
-  - Estatus: Nueva
-  - Fecha de registro: 2026-07-09
-  - Descripción: Tarea de prueba B asociada al dominio BIZ para testear el funcionamiento de los filtros y búsquedas avanzadas.
-  - Archivos:
-    - Sin archivos modificados (planificación inicial).
-
-* **[x] ~~Tarea CLI-352: Potencialización de la Gestión de Roadmap en Telegram~~**
-  - Estatus: Completada
-  - Fecha de registro: 2026-07-09
-  - Fecha de finalización: 2026-07-09
-  - Descripción: Expandida la funcionalidad de Roadmap en Telegram. Se implementaron los comandos `/tasks_completed` (historial de tareas hechas), `/tasks_filter` (filtrado dinámico de pendientes por dominio), `/task_detail` (detalle extendido con archivos y cambio de estado) y `/tasks_search` (asistente de búsqueda asíncrona con bypass de Privacy Mode en chat privado).
-  - Archivos:
-    - [`notification_server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/notification_server.js) [MODIFY]
-
-* **[x] ~~Tarea CORE-341: Resolución de Bug de Descarga de Facturas PDF (Revertida)~~**
-  - Estatus: Revertida (Cancelada)
-  - Fecha de registro: 2026-07-09
-  - Fecha de finalización: 2026-07-09
-  - Descripción: Cambio revertido bajo petición directa del usuario para preservar el flujo de impresión nativo original (basado en iframe e impresión de ticket) en lugar del exportador jsPDF.
-  - Archivos:
-    - [`pdfService.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/pdfService.js) [REVERT]
-    - [`AdminOrders.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/AdminOrders.jsx) [REVERT]
-    - [`pdfService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/pdfService.js) [REVERT]
-    - [`AdminOrders.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminOrders.jsx) [REVERT]
 
 * **[x] ~~Tarea CLI-351: Documentación Consolidada de la Consola de Telegram~~**
   - Estatus: Completada

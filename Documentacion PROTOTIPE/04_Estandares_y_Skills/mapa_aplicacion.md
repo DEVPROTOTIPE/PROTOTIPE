@@ -364,6 +364,10 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/PremiumNotificationCenterSandbox.jsx`**: Playground del centro de notificaciones premium. [NEW] CLI-364.
 * **`/Central PROTOTIPE/dev-dashboard/src/components/common/PremiumWelcomeSplash.jsx`**: Componente de pantalla de bienvenida con ondas sonar y orbes ambientales. [NEW] CLI-365.
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/WelcomePageSandbox.jsx`**: Playground de la pantalla de bienvenida. Modificado para renderizar PremiumWelcomeSplash.jsx. [MODIFY] CLI-365.
+* **`/Central PROTOTIPE/dev-dashboard/src/components/common/ScratchCardReward.jsx`**: Componente de tarjeta de rasca y gana con físicas de Canvas HTML5. [NEW] CLI-366.
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ScratchCardRewardSandbox.jsx`**: Playground de la tarjeta de rasca y gana interactiva. [NEW] CLI-366.
+* **`/Central PROTOTIPE/dev-dashboard/src/components/common/InteractiveGoldPot.jsx`**: Componente de olla de oro interactiva con físicas de Framer Motion y crecimiento gradual. [NEW] CLI-367.
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveGoldPotSandbox.jsx`**: Playground de la olla de oro interactiva de ahorro. [NEW] CLI-367.
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/FormularioProductoIASandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-054).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ReservasAgendaSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-179).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/POSExpressScannerSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-179).
