@@ -1,5 +1,8 @@
 # Dependencias de Node
 **/node_modules/
+.tmp.driveupload/
+**/.tmp.driveupload/
+Documentacion PROTOTIPE.zip
 
 # Compilaciones
 **/dist/
