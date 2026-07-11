@@ -27,31 +27,40 @@ try {
 } catch (_) {}
 
 // Limpiar reportes previos
+fs.ensureDirSync(SCRATCH_DIR);
 fs.removeSync(path.join(SCRATCH_DIR, 'integration-results.json'));
 fs.removeSync(path.join(SCRATCH_DIR, 'specials-results.json'));
 fs.removeSync(path.join(SCRATCH_DIR, 'smoke-results.json'));
 fs.removeSync(path.join(SCRATCH_DIR, 'firestore-emulator-results.json'));
 fs.removeSync(path.join(SCRATCH_DIR, 'multiplatform-results.json'));
 
+const LOG_FILE = path.join(SCRATCH_DIR, 'certification.log');
+fs.writeFileSync(LOG_FILE, `=== CERTIFICATION LOG - TIMESTAMP: ${new Date().toISOString()} ===\n`, 'utf8');
+
+function logToBoth(text) {
+  console.log(text);
+  fs.appendFileSync(LOG_FILE, text + '\n', 'utf8');
+}
+
 const steps = [];
 let buildCandidatoCode = 0;
 let buildDashboardCode = 0;
 
 function runStep(name, cmd, cwd) {
-  console.log(`\n======================================================`);
-  console.log(`Step: ${name}`);
-  console.log(`Cmd:  ${cmd}`);
-  console.log(`Cwd:  ${cwd}`);
-  console.log(`======================================================`);
+  logToBoth(`\n======================================================`);
+  logToBoth(`Step: ${name}`);
+  logToBoth(`Cmd:  ${cmd}`);
+  logToBoth(`Cwd:  ${cwd}`);
+  logToBoth(`======================================================`);
   
   const start = Date.now();
   let code = 0;
   let errorMsg = null;
   try {
     execSync(cmd, { cwd, stdio: 'inherit' });
-    console.log(`\n🟢 Step '${name}' finalizado con éxito.\n`);
+    logToBoth(`\n🟢 Step '${name}' finalizado con éxito.\n`);
   } catch (err) {
-    console.error(`\n🔴 Step '${name}' FALLÓ con código de salida no cero.\n`);
+    logToBoth(`\n🔴 Step '${name}' FALLÓ con código de salida no cero.\n`);
     code = err.status || 1;
     errorMsg = err.message;
     if (name.includes('Build de Producción')) buildDashboardCode = 1;
@@ -67,7 +76,7 @@ function runStep(name, cmd, cwd) {
   });
 
   if (code !== 0) {
-    console.error(`❌ CERTIFICACIÓN ABORTADA: Step '${name}' falló.`);
+    logToBoth(`❌ CERTIFICACIÓN ABORTADA: Step '${name}' falló.`);
     process.exit(1);
   }
 }
@@ -132,14 +141,14 @@ const totalFailed = pipelineFailed + emulatorFailed + multiplatformData.failed +
 // Validar que no existan tests omitidos, skipped o todo
 const totalOmitted = firestoreData.filter(r => r.status === 'skipped' || r.status === 'todo').length;
 
-console.log('\n===========================================================================');
-console.log(`📊  AUDITORÍA DE CERTIFICACIÓN AUTOMÁTICA DE EXCELENCIA:`);
-console.log(`    - Pipeline de Promoción:       ${pipelinePassed} / 83 Pasados (Fallidos: ${pipelineFailed})`);
-console.log(`    - Firestore Emulator (Reglas): ${emulatorPassed} / ${firestoreData.length} Pasados (Fallidos: ${emulatorFailed})`);
-console.log(`    - Pruebas Multiplataforma:    ${multiplatformData.passed} / ${multiplatformData.total} Pasadas`);
-console.log(`    - Build de Dashboard:          ${buildDashboardCode === 0 ? 'EXIT 0 (PASS)' : 'EXIT 1 (FAIL)'}`);
-console.log(`    - Tests Omitidos/Skipped/Todo: ${totalOmitted} (Debe ser 0)`);
-console.log('===========================================================================\n');
+logToBoth('\n===========================================================================');
+logToBoth(`📊  AUDITORÍA DE CERTIFICACIÓN AUTOMÁTICA DE EXCELENCIA:`);
+logToBoth(`    - Pipeline de Promoción:       ${pipelinePassed} / 83 Pasados (Fallidos: ${pipelineFailed})`);
+logToBoth(`    - Firestore Emulator (Reglas): ${emulatorPassed} / ${firestoreData.length} Pasados (Fallidos: ${emulatorFailed})`);
+logToBoth(`    - Pruebas Multiplataforma:    ${multiplatformData.passed} / ${multiplatformData.total} Pasadas`);
+logToBoth(`    - Build de Dashboard:          ${buildDashboardCode === 0 ? 'EXIT 0 (PASS)' : 'EXIT 1 (FAIL)'}`);
+logToBoth(`    - Tests Omitidos/Skipped/Todo: ${totalOmitted} (Debe ser 0)`);
+logToBoth('===========================================================================\n');
 
 const report = {
   metadata: {
@@ -181,12 +190,12 @@ const report = {
 
 const reportPath = path.join(SCRATCH_DIR, 'certification-report.json');
 fs.writeJsonSync(reportPath, report, { spaces: 2 });
-console.log(`💾 Reporte de certificación guardado en: ${reportPath}`);
+logToBoth(`💾 Reporte de certificación guardado en: ${reportPath}`);
 
 if (totalFailed > 0 || totalOmitted > 0) {
-  console.error('🔴 CERTIFICACIÓN FALLIDA: Se detectaron fallas, aserciones faltantes o tests omitidos.');
+  logToBoth('🔴 CERTIFICACIÓN FALLIDA: Se detectaron fallas, aserciones faltantes o tests omitidos.');
   process.exit(1);
 } else {
-  console.log('🏆 100% CERTIFICADO: Todos los escenarios y aserciones pasaron exitosamente sin ningún pendiente.');
+  logToBoth('🏆 100% CERTIFICADO: Todos los escenarios y aserciones pasaron exitosamente sin ningún pendiente.');
   process.exit(0);
 }

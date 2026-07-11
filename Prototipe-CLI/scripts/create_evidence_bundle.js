@@ -36,7 +36,18 @@ async function run() {
     { src: path.join(CLI_ROOT, 'scratch', 'certification-report.json'), destName: 'certification-report.json' },
     { src: path.join(CLI_ROOT, 'scripts', 'test_firestore_emulator.js'), destName: 'test_firestore_emulator.js' },
     { src: path.join(CLI_ROOT, 'scripts', 'test_multiplatform.js'), destName: 'test_multiplatform.js' },
-    { src: path.join(CLI_ROOT, 'scripts', 'run_full_certification.js'), destName: 'run_full_certification.js' }
+    { src: path.join(CLI_ROOT, 'scripts', 'run_full_certification.js'), destName: 'run_full_certification.js' },
+    { src: path.join(CLI_ROOT, 'scripts', 'distribute_rules.js'), destName: 'distribute_rules.js' },
+    { src: path.join(CLI_ROOT, 'scripts', 'create_evidence_bundle.js'), destName: 'create_evidence_bundle.js' },
+    { src: path.join(CLI_ROOT, 'knowledge', 'firestore', 'core.rules'), destName: 'core.rules' },
+    { src: path.join(CLI_ROOT, 'knowledge', 'firestore', 'features', 'credits.rules'), destName: 'credits.rules' },
+    { src: path.join(CLI_ROOT, 'knowledge', 'firestore', 'features', 'inventory.rules'), destName: 'inventory.rules' },
+    { src: path.join(CLI_ROOT, 'knowledge', 'firestore', 'features', 'notifications.rules'), destName: 'notifications.rules' },
+    { src: path.join(CLI_ROOT, 'knowledge', 'firestore', 'features', 'orders.rules'), destName: 'orders.rules' },
+    { src: path.join(CLI_ROOT, 'knowledge', 'telemetry', 'app-registry.json'), destName: 'app-registry.json' },
+    { src: path.join(CLI_ROOT, 'lib', 'CorePromotionValidator.js'), destName: 'CorePromotionValidator.js' },
+    { src: path.join(CLI_ROOT, '..', 'Plantillas Core', 'App Ventas', 'src', 'services', 'telemetryService.js'), destName: 'telemetryService.js' },
+    { src: path.join(CLI_ROOT, 'scratch', 'certification.log'), destName: 'certification.log' }
   ];
 
   const copiedFiles = [];
@@ -131,15 +142,15 @@ async function run() {
     error: scanError
   };
 
-  const scanReportPath = path.join(SCRATCH_DIR, 'evidence-bundle-scan.json');
+  const scanReportPath = path.join(EVIDENCE_TEMP, 'evidence-bundle-scan.json');
   await fs.writeJson(scanReportPath, scanReport, { spaces: 2 });
-  console.log(`💾 Escaneo guardado en: ${scanReportPath}`);
+  await fs.writeJson(path.join(SCRATCH_DIR, 'evidence-bundle-scan.json'), scanReport, { spaces: 2 });
+  console.log('📄 Generado evidence-bundle-scan.json de forma exitosa.');
 
   // Comprimir el bundle temporal a ZIP usando tar nativo o Powershell como fallback
   console.log('🤐 Comprimiendo el bundle temporal en un archivo ZIP...');
   try {
     if (process.platform === 'win32') {
-      // Usar Powershell Compress-Archive para empaquetado nativo limpio sin dependencias de tar en Windows viejos
       execSync(`powershell -Command "Compress-Archive -Path '${EVIDENCE_TEMP}\\*' -DestinationPath '${ZIP_PATH}' -Force"`, { stdio: 'inherit' });
     } else {
       execSync(`tar -a -c -f "${ZIP_PATH}" -C "${EVIDENCE_TEMP}" .`, { stdio: 'inherit' });
@@ -149,6 +160,21 @@ async function run() {
     console.error('🔴 Falla al comprimir el bundle de evidencia:', err.message);
     process.exit(1);
   }
+
+  // Calcular el hash del ZIP resultante
+  const zipSha256 = calculateSHA256(ZIP_PATH);
+  console.log(`🔑 SHA-256 del ZIP: ${zipSha256}`);
+
+  // Escribir el reporte de escaneo final agregando los metadatos de compresión
+  const finalScanReport = {
+    ...scanReport,
+    zipSha256,
+    bundleCreatedAt: new Date().toISOString(),
+    baseCommitSha,
+    certifiedCommitSha,
+    totalFiles: copiedFiles.length + 2 // Copied + MANIFEST.json + evidence-bundle-scan.json
+  };
+  await fs.writeJson(path.join(SCRATCH_DIR, 'evidence-bundle-scan.json'), finalScanReport, { spaces: 2 });
 
   // Eliminar la carpeta temporal
   await fs.remove(EVIDENCE_TEMP);
