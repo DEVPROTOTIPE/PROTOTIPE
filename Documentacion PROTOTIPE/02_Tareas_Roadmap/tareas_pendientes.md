@@ -1,8 +1,18 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `99.27%` de completitud en base a 409 tareas completadas de 412 tareas únicas verificables.
+* **Estado del Roadmap:** `99.27%` de completitud en base a 410 tareas completadas de 413 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea BUG-405: Corrección de Sincronización del Core, Escaneo de Subcarpetas en Windows y Purga de Instancias de Prueba~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Se agregó la ruta `'src/core'` al array `SYNC_PATHS` en `sync_templates.js` para asegurar que el kernel, providers y contracts de la plataforma se propaguen correctamente a las instancias cliente. Se modificó el endpoint `/api/git/status` en `server.js` para soportar de manera robusta el escaneo en subdirectorios de segundo nivel (ej. `Instancias Clientes/seed/App-*`) insensibles a la capitalización de unidad de Windows (`d:` vs `D:`). Adicionalmente, se eliminaron permanentemente todas las instancias de prueba de `Instancias Clientes/seed/` para limpiar el entorno de desarrollo y evitar drifts falsos en el dashboard.
+  - Archivos:
+    - [`Prototipe-CLI/sync_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Instancias Clientes/seed/`](file:///d:/PROTOTIPE/Instancias%20Clientes/seed/) [DELETE]
 
 * **[x] ~~Tarea CLI-404: Auditoría de Robustez, Certificación de Reglas Firestore y Spark-first Policy (H-01, H-02, H-03, H-05)~~**
   - Estatus: Completada

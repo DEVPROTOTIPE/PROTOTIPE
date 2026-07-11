@@ -1,5 +1,20 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-405 — 2026-07-11
+**Feature: Corrección de Sincronización del Core, Escaneo de Subcarpetas en Windows y Purga de Instancias de Prueba**
+
+### Cambios realizados:
+1. **Sincronización del Core:** Se agregó la ruta `'src/core'` al array `SYNC_PATHS` en `sync_templates.js` para asegurar que el kernel, providers y contracts de la plataforma se propaguen correctamente a las instancias cliente.
+2. **Escaneo de Nivel 2 en Windows:** Modificado el endpoint `/api/git/status` en `server.js` para soportar de manera robusta el escaneo en subdirectorios de segundo nivel (ej. `Instancias Clientes/seed/App-*`) insensibles a la capitalización de unidad de Windows (`d:` vs `D:`). Esto resolvió la discrepancia que hacía aparecer al Maestro con cambios pero sin archivos en el panel de detalle de la derecha.
+3. **Purga de Instancias de Prueba:** Se eliminaron permanentemente todas las instancias de prueba del directorio `Instancias Clientes/seed/` (App-clinic-e2e-app, App-clinica-veterinaria-sanitas, App-crm-e2e-app, etc.) para limpiar el entorno operativo, preservando únicamente la instancia de producción del cliente `ventas-moni-app` en `/ventas/`.
+
+### Archivos modificados:
+- [`Prototipe-CLI/sync_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY]
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`Instancias Clientes/seed/`](file:///d:/PROTOTIPE/Instancias%20Clientes/seed/) [DELETE]
+
+---
+
 ## CLI-404-SECURITY-ROBUSTNESS-CERTIFICATION — 2026-07-11
 **Feature: Auditoría de Robustez, Certificación de Reglas Firestore y Spark-first Policy**
 
