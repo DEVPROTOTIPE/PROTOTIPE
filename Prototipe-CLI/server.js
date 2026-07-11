@@ -9656,7 +9656,8 @@ app.get('/api/git/status', async (req, res) => {
     };
 
     // Si es el Maestro, consolidamos todos los cambios de todo el ecosistema
-    if (resolvedPath === GIT_ROOT) {
+    const isMaster = resolvedPath.replace(/\\/g, '/').toLowerCase() === GIT_ROOT.replace(/\\/g, '/').toLowerCase();
+    if (isMaster) {
       // 1. Cambios de la raíz
       await processDirChanges(GIT_ROOT);
 
@@ -9676,6 +9677,18 @@ app.get('/api/git/status', async (req, res) => {
           if (await hasGitFolder(fullPath)) {
             const relPrefix = path.relative(GIT_ROOT, fullPath);
             await processDirChanges(fullPath, relPrefix);
+          } else {
+            // Escaneo nivel 2 (subcarpetas del Core si aplica)
+            const subDirs = await fs.readdir(fullPath).catch(() => []);
+            for (const subDir of subDirs) {
+              const subFullPath = path.join(fullPath, subDir);
+              const subStat = await fs.stat(subFullPath).catch(() => null);
+              if (!subStat || !subStat.isDirectory()) continue;
+              if (await hasGitFolder(subFullPath)) {
+                const relPrefix = path.relative(GIT_ROOT, subFullPath);
+                await processDirChanges(subFullPath, relPrefix);
+              }
+            }
           }
         }
       }
@@ -9690,6 +9703,18 @@ app.get('/api/git/status', async (req, res) => {
           if (await hasGitFolder(fullPath)) {
             const relPrefix = path.relative(GIT_ROOT, fullPath);
             await processDirChanges(fullPath, relPrefix);
+          } else {
+            // Escaneo nivel 2 (subcarpetas de clientes como seed/app-name)
+            const subDirs = await fs.readdir(fullPath).catch(() => []);
+            for (const subDir of subDirs) {
+              const subFullPath = path.join(fullPath, subDir);
+              const subStat = await fs.stat(subFullPath).catch(() => null);
+              if (!subStat || !subStat.isDirectory()) continue;
+              if (await hasGitFolder(subFullPath)) {
+                const relPrefix = path.relative(GIT_ROOT, subFullPath);
+                await processDirChanges(subFullPath, relPrefix);
+              }
+            }
           }
         }
       }
