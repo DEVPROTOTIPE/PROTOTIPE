@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IndustrySchema",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "displayName": { "type": "string" },
+    "defaultFeatures": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "defaultPatterns": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["id", "displayName", "defaultFeatures", "defaultPatterns"]
+}

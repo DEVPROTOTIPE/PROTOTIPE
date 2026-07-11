@@ -1,0 +1,18 @@
+{
+  "id": "OrderCard",
+  "version": "1.0.0",
+  "category": "Visualizacion",
+  "capabilities": ["order-management", "delivery-tracking"],
+  "requiredFeatures": ["orders"],
+  "compatibleIndustries": ["retail", "restaurant"],
+  "dependencies": {
+    "npm": ["lucide-react", "framer-motion"],
+    "internal": ["src/core/config/ComponentRegistry.js"]
+  },
+  "permissions": ["orders.view"],
+  "maturityLevel": "stable",
+  "responsiveSupport": "fully-responsive",
+  "accessibilityScore": 92,
+  "performanceScore": 95,
+  "qualityScore": 94
+}

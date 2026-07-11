@@ -1,0 +1,7 @@
+{
+  "id": "pattern-search-details",
+  "displayName": "Search & Details",
+  "requiredFeatures": [],
+  "capabilities": ["search-filtering", "drawer-detail"],
+  "permissions": []
+}

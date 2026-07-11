@@ -1,0 +1,7 @@
+scratch/
+blueprints/
+idempotency/
+journals/
+locks/
+*.log
+node_modules/

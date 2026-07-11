@@ -1,0 +1,7 @@
+{
+  "id": "appointments",
+  "displayName": "Agenda de Citas",
+  "capabilities": ["calendar-management", "reservations", "reminders"],
+  "compatibleIndustries": ["healthcare", "wellness", "education", "services"],
+  "dependencies": ["patients"]
+}

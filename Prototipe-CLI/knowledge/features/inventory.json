@@ -1,0 +1,7 @@
+{
+  "id": "inventory",
+  "displayName": "Inventario y Stock",
+  "capabilities": ["inventory-tracking", "stock-alerts", "barcodes"],
+  "compatibleIndustries": ["retail", "restaurant", "hardware"],
+  "dependencies": []
+}

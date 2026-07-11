@@ -1,0 +1,60 @@
+{
+  "capabilities": {
+    "calendar-management": {
+      "displayName": "Gestión de Calendario y Turnos",
+      "description": "Permite agendar reservas, citas médicas, turnos de peluquerías o eventos en un calendario dinámico.",
+      "resolvesFeatures": ["appointments"],
+      "resolvesComponents": ["PremiumCalendar"],
+      "resolvesPatterns": ["pattern-calendar-workspace"],
+      "tags": ["agenda", "citas", "turnos", "reservas", "horarios"]
+    },
+    "customer-records": {
+      "displayName": "Registro de Clientes y Pacientes",
+      "description": "Ficha única para guardar historial, datos demográficos, mascotas, alumnos o miembros.",
+      "resolvesFeatures": ["patients"],
+      "resolvesComponents": [],
+      "resolvesPatterns": ["pattern-search-details"],
+      "tags": ["pacientes", "clientes", "historial", "alumnos", "mascotas", "miembros"]
+    },
+    "sales-pipeline": {
+      "displayName": "Embudo de Ventas y Prospectos",
+      "description": "Seguimiento de prospectos inmobiliarios, oportunidades comerciales o leads en un tablero Kanban.",
+      "resolvesFeatures": ["crm"],
+      "resolvesComponents": [],
+      "resolvesPatterns": ["pattern-kanban-workspace"],
+      "tags": ["crm", "oportunidades", "leads", "kanban", "embudo", "propiedades"]
+    },
+    "pos-checkout": {
+      "displayName": "Punto de Venta POS",
+      "description": "Módulo de caja registradora, cobros físicos rápidos y arqueo de caja diario.",
+      "resolvesFeatures": ["sales"],
+      "resolvesComponents": ["CajaDiariaPOS"],
+      "resolvesPatterns": ["pattern-wizard-flow"],
+      "tags": ["caja", "pos", "ventas", "checkout", "arqueo"]
+    },
+    "order-processing": {
+      "displayName": "Procesamiento de Pedidos y Domicilios",
+      "description": "Recibe pedidos de e-commerce o comandas de restaurantes, y gestiona su preparación y tracking de entrega.",
+      "resolvesFeatures": ["orders"],
+      "resolvesComponents": ["OrderCard"],
+      "resolvesPatterns": ["pattern-search-details"],
+      "tags": ["pedidos", "domicilio", "delivery", "comandas", "cocina"]
+    },
+    "inventory-tracking": {
+      "displayName": "Control de Inventario y Stock",
+      "description": "Gestión física de productos en stock, alertas de stock mínimo y códigos de barra.",
+      "resolvesFeatures": ["inventory"],
+      "resolvesComponents": [],
+      "resolvesPatterns": ["pattern-search-details"],
+      "tags": ["stock", "inventario", "productos", "almacen", "codigo de barras"]
+    },
+    "billing-invoicing": {
+      "displayName": "Cobros y Facturación Electrónica",
+      "description": "Emisión de recibos de pago en PDF, cálculo de comisiones e integraciones de pago.",
+      "resolvesFeatures": ["billing"],
+      "resolvesComponents": [],
+      "resolvesPatterns": ["pattern-search-details"],
+      "tags": ["factura", "cobros", "pagos", "pdf", "boleta"]
+    }
+  }
+}

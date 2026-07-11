@@ -1,0 +1,7 @@
+{
+  "id": "crm",
+  "displayName": "CRM Negocios",
+  "capabilities": ["lead-management", "funnel-tracking", "sales-pipeline"],
+  "compatibleIndustries": ["realestate", "consulting", "services"],
+  "dependencies": []
+}

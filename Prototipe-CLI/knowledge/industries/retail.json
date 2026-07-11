@@ -1,0 +1,6 @@
+{
+  "id": "retail",
+  "displayName": "Ventas y Retail Físico",
+  "defaultFeatures": ["inventory", "sales", "orders", "billing"],
+  "defaultPatterns": ["pattern-wizard-flow", "pattern-search-details"]
+}

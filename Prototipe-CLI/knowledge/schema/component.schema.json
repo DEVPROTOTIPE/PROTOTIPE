@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ComponentSchema",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "version": { "type": "string" },
+    "category": { "type": "string" },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "requiredFeatures": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "compatibleIndustries": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "npm": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "internal": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["npm", "internal"]
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "maturityLevel": { "type": "string", "enum": ["alpha", "beta", "stable"] },
+    "responsiveSupport": { "type": "string", "enum": ["mobile-first", "desktop-only", "fully-responsive"] },
+    "accessibilityScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "performanceScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "qualityScore": { "type": "integer", "minimum": 0, "maximum": 100 }
+  },
+  "required": [
+    "id",
+    "version",
+    "category",
+    "capabilities",
+    "requiredFeatures",
+    "compatibleIndustries",
+    "dependencies",
+    "permissions",
+    "maturityLevel",
+    "responsiveSupport",
+    "accessibilityScore",
+    "performanceScore",
+    "qualityScore"
+  ]
+}

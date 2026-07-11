@@ -1,0 +1,7 @@
+{
+  "id": "orders",
+  "displayName": "Gestión de Pedidos",
+  "capabilities": ["order-management", "delivery-tracking", "whatsapp-notifications"],
+  "compatibleIndustries": ["retail", "restaurant"],
+  "dependencies": ["inventory"]
+}

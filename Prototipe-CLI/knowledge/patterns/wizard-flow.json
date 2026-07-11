@@ -1,0 +1,7 @@
+{
+  "id": "pattern-wizard-flow",
+  "displayName": "Wizard Flow",
+  "requiredFeatures": [],
+  "capabilities": ["stepper-navigation", "form-wizard"],
+  "permissions": []
+}

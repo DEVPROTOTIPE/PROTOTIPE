@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ClientLineageMigrationBlueprint",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "migrationId": {
+      "type": "string",
+      "pattern": "^mig-[a-z0-9-]+$"
+    },
+    "promotionId": {
+      "type": "string",
+      "pattern": "^promo-[a-z0-9-]+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING_PREFLIGHT",
+        "PREFLIGHT_APPROVED",
+        "PENDING_BACKUP",
+        "BACKUP_CREATED",
+        "RUNNING_MIGRATION",
+        "RUNNING_POST_VALIDATION",
+        "COMPLETED",
+        "FAILED",
+        "ROLLING_BACK",
+        "ROLLED_BACK"
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "clientId": { "type": "string", "minLength": 1 },
+        "previousCoreType": { "type": "string", "minLength": 1 },
+        "newCoreType": { "type": "string", "minLength": 1 },
+        "previousCoreVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "newCoreVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "hashAlgorithm": { "type": "string", "const": "sha256" },
+        "previousFilesHashes": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "previousFeatures": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": [
+        "clientId",
+        "previousCoreType",
+        "newCoreType",
+        "previousCoreVersion",
+        "newCoreVersion",
+        "hashAlgorithm",
+        "previousFilesHashes",
+        "previousFeatures"
+      ]
+    },
+    "results": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "backup": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "backupIdentifier": { "type": "string" },
+            "backupPath": { "type": "string" },
+            "verified": { "type": "boolean" }
+          },
+          "required": ["backupIdentifier", "backupPath", "verified"]
+        },
+        "write": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "newFilesHashes": {
+              "type": "object",
+              "additionalProperties": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+            },
+            "newFeatures": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "required": ["newFilesHashes", "newFeatures"]
+        },
+        "postValidation": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "driftCount": { "type": "integer" },
+            "status": { "type": "string" }
+          },
+          "required": ["driftCount", "status"]
+        },
+        "rollback": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "rolledBackAt": { "type": "string", "format": "date-time" },
+            "hashesMatch": { "type": "boolean" }
+          },
+          "required": ["rolledBackAt", "hashesMatch"]
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": { "type": "string" },
+              "step": { "type": "string" },
+              "message": { "type": "string" },
+              "path": { "type": "string" },
+              "retryable": { "type": "boolean" }
+            },
+            "required": ["code", "step", "message"]
+          }
+        }
+      },
+      "required": ["backup", "write", "postValidation", "rollback", "errors"]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "migrationId",
+    "promotionId",
+    "status",
+    "createdAt",
+    "updatedAt",
+    "spec",
+    "results"
+  ]
+}

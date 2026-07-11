@@ -1,0 +1,7 @@
+{
+  "instanceId": "crm-instance",
+  "clientName": "CRM Ventas",
+  "vertical": "crm",
+  "schemaVersion": "1.0.0",
+  "features": ["leads", "tasks", "billing"]
+}

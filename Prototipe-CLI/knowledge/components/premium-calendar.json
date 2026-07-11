@@ -1,0 +1,18 @@
+{
+  "id": "PremiumCalendar",
+  "version": "1.2.0",
+  "category": "Visualizacion",
+  "capabilities": ["calendar-management", "reservations"],
+  "requiredFeatures": ["appointments"],
+  "compatibleIndustries": ["healthcare", "wellness", "education"],
+  "dependencies": {
+    "npm": ["lucide-react", "framer-motion"],
+    "internal": ["src/core/config/ComponentRegistry.js"]
+  },
+  "permissions": ["appointments.view"],
+  "maturityLevel": "stable",
+  "responsiveSupport": "fully-responsive",
+  "accessibilityScore": 95,
+  "performanceScore": 98,
+  "qualityScore": 96
+}

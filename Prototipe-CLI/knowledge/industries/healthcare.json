@@ -1,0 +1,6 @@
+{
+  "id": "healthcare",
+  "displayName": "Salud y Cuidado Clínico",
+  "defaultFeatures": ["appointments", "patients", "billing"],
+  "defaultPatterns": ["pattern-calendar-workspace", "pattern-search-details"]
+}

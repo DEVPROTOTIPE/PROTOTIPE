@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0.0",
+  "allowedCollections": {
+    "paymentMethods": {
+      "mode": "static-catalog",
+      "allowedFields": ["code", "label", "enabled"],
+      "forbiddenFields": ["createdBy", "tenantId", "email", "phone"]
+    },
+    "categories": {
+      "mode": "static-catalog",
+      "allowedFields": ["id", "name", "slug", "icon"],
+      "forbiddenFields": ["tenantId", "createdAt", "updatedBy"]
+    }
+  },
+  "forbiddenCollections": [
+    "pedidos", "ventas", "clientes_caja", "users", "app_failures", "telemetry_events"
+  ]
+}

@@ -1,0 +1,12 @@
+    // ─── FEATURE INVENTORY (PRODUCTOS Y CATEGORÍAS) ─────────────────
+    match /products/{document} {
+      allow read: if true; // Catálogo público
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['variantes', 'salesCount', 'updatedAt'])
+      );
+    }
+    match /categories/{document} {
+      allow read: if true;
+      allow write, delete: if isAdmin();
+    }

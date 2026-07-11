@@ -1,0 +1,22 @@
+{
+  "layouts": [
+    {
+      "id": "sidebar",
+      "displayName": "Sidebar Navigation",
+      "devices": ["desktop", "tablet"],
+      "operationalContexts": ["desktop-office", "point-of-sale"]
+    },
+    {
+      "id": "topbar",
+      "displayName": "Topbar Navigation",
+      "devices": ["desktop"],
+      "operationalContexts": ["public-catalog", "customer-selfservice"]
+    },
+    {
+      "id": "dock",
+      "displayName": "Dock Navigation Bar",
+      "devices": ["mobile"],
+      "operationalContexts": ["on-the-road", "mobile-sales"]
+    }
+  ]
+}

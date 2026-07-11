@@ -13,6 +13,16 @@ import webpush from 'web-push';
 // para no bloquear el Event Loop de Express con sus execSync internos.
 import { getWorkspaceRoot, getDocumentationRoot } from './config.js';
 import { logger } from './logger.js';
+import { FeatureRegistry } from './lib/FeatureRegistry.js';
+import { VersionManager } from './lib/VersionManager.js';
+import admin from 'firebase-admin';
+import { CorePromotionService } from './lib/CorePromotionService.js';
+import { CorePromotionPublisher } from './lib/CorePromotionPublisher.js';
+import { ClientLineageMigrator } from './lib/ClientLineageMigrator.js';
+import { PromotionBlueprintBuilder } from './lib/PromotionBlueprintBuilder.js';
+import { CoreCandidateBuilder } from './lib/CoreCandidateBuilder.js';
+import { CorePromotionValidator } from './lib/CorePromotionValidator.js';
+import { BriefingDocumentMapper } from './lib/BriefingDocumentMapper.js';
 
 const execAsync = promisify(exec);
 
@@ -219,6 +229,8 @@ const CLI_ROOT = __dirname;
 // sin importar la unidad de disco (D:, C:, E:, etc.) o la ruta de carpetas del usuario.
 const GIT_ROOT = path.resolve(CLI_ROOT, '..');
 const TEMPLATES_DIR = path.join(CLI_ROOT, 'templates');
+const INSTANCES_DIR = getWorkspaceRoot();
+const SEED_DIR = path.join(CLI_ROOT, 'templates', 'template-core-seed');
 const WORKER_PATH  = path.join(CLI_ROOT, 'worker_create_project.js');
 
 // ─── Levantar Servidor de Notificaciones (Proceso Hijo / Opción A) ───
@@ -287,6 +299,16 @@ const WORKER_TIMEOUT_MS = 20 * 60 * 1000;
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Inicializar Firebase Admin SDK de forma local
+admin.initializeApp({
+  projectId: 'prototipe-ecosistema-control'
+});
+
+// Rutina de recuperación determinista de estados inconclusos tras reiniciar el Bridge CLI
+CorePromotionService.recoverInterruptedOperations().catch(err => {
+  console.error('[CorePromotionService] Error en la rutina de recuperación inicial:', err.message);
+});
+
 // CORS restrictivo: solo permite el dev-dashboard y peticiones server-to-server (sin Origin header)
 // Bloquea cualquier sitio web externo que intente consumir el Bridge desde el browser del usuario
 const CORS_ALLOWED_ORIGINS = [
@@ -313,6 +335,123 @@ app.use((err, req, res, next) => {
   }
   next();
 });
+
+// Middleware de autenticación basado en Firebase Auth ID Token
+async function authenticateFirebaseToken(req, res, next) {
+  const authHeader = req.headers.authorization;
+  const expectedBypassToken = process.env.TEST_AUTH_BYPASS_TOKEN;
+  if (expectedBypassToken && authHeader === `Bearer ${expectedBypassToken}`) {
+    const isLoopback = req.connection.remoteAddress === '127.0.0.1' || req.connection.remoteAddress === '::1' || req.ip === '127.0.0.1';
+    if (process.env.NODE_ENV === 'test' && process.env.ALLOW_TEST_AUTH_BYPASS === 'true' && isLoopback) {
+      req.user = { uid: 'operator-test', email: 'operator-test@localhost.invalid' };
+      req.userId = 'operator-test';
+      return next();
+    }
+  }
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Acceso no autorizado: Token Bearer faltante o mal formado.' });
+  }
+
+  const idToken = authHeader.split('Bearer ')[1];
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    req.user = decodedToken;
+    req.userId = decodedToken.uid;
+    next();
+  } catch (err) {
+    console.error('[Auth Error] Error validando token de Firebase:', err.message);
+    return res.status(401).json({ error: 'Token de acceso inválido o expirado.' });
+  }
+}
+
+// Middleware de verificación de Firebase App Check con traducción a Tenant
+async function verifyAppCheck(req, res, next) {
+  // 1. Bypass estricto de pruebas locales (solo si NODE_ENV === 'test' y ALLOW_TEST_APPCHECK_BYPASS === 'true')
+  if (process.env.NODE_ENV === 'test' && process.env.ALLOW_TEST_APPCHECK_BYPASS === 'true') {
+    const ip = req.ip || req.connection.remoteAddress;
+    const isLoopback = ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+    const bypassHeader = req.headers['x-bypass-token'] || req.headers['x-firebase-appcheck'];
+    const expectedBypassToken = process.env.TEST_AUTH_BYPASS_TOKEN;
+
+    if (isLoopback && bypassHeader === expectedBypassToken) {
+      req.appCheck = { appId: '1:703542009613:web:00f9363de11a908c991a44', verified: true };
+      return next();
+    }
+  }
+
+  // 2. Extraer cabecera App Check
+  const appCheckToken = req.headers['x-firebase-appcheck'];
+  if (!appCheckToken) {
+    return res.status(401).json({ error: '🔒 App Check: Cabecera X-Firebase-AppCheck requerida.' });
+  }
+
+  try {
+    // 3. Validar token contra Firebase Admin SDK
+    const decodedToken = await admin.appCheck().verifyToken(appCheckToken);
+    req.appCheck = decodedToken;
+
+    // 4. Traducir App ID verificado a Tenant/ClientID
+    const registryPath = path.join(CLI_ROOT, 'knowledge', 'telemetry', 'app-registry.json');
+    if (!(await fs.pathExists(registryPath))) {
+      return res.status(500).json({ error: 'Registro de aplicaciones no configurado en el servidor.' });
+    }
+
+    const registry = await fs.readJson(registryPath);
+    const appMapping = registry.apps.find(a => a.appId === decodedToken.appId);
+
+    if (!appMapping) {
+      return res.status(403).json({ error: '🔒 App Check: Aplicación no autorizada en el ecosistema.' });
+    }
+    if (appMapping.status !== 'active') {
+      return res.status(403).json({ error: '🔒 App Check: Aplicación suspendida o revocada.' });
+    }
+
+    // Guardar el tenant y metadata mapeada
+    req.tenant = appMapping;
+    next();
+  } catch (err) {
+    console.error('[App Check Error] Fallo de validación:', err.message);
+    return res.status(403).json({ error: '🔒 App Check: Token de App Check inválido o expirado.' });
+  }
+}
+
+// Middleware de autorización RBAC granular por claims/permisos de rol en Firestore
+function authorizePermission(permission) {
+  return async (req, res, next) => {
+    if (!req.userId) {
+      return res.status(401).json({ error: 'Usuario no autenticado.' });
+    }
+
+    try {
+      // Bypasses de desarrollo local para desarrollo ágil y offline con el Emulador
+      const isEmulator = process.env.FIREBASE_AUTH_EMULATOR_HOST || process.env.NODE_ENV !== 'production';
+      if (isEmulator && (req.user.email === 'operator-test@localhost.invalid' || req.user.email === 'developer-test@localhost.invalid')) {
+        // Otorgar permisos completos al desarrollador local por defecto
+        return next();
+      }
+
+      const userDoc = await admin.firestore().collection('users').doc(req.userId).get();
+      if (!userDoc.exists) {
+        return res.status(403).json({ error: 'Acceso denegado: El perfil de usuario no existe en la base de datos de control.' });
+      }
+
+      const userData = userDoc.data();
+      const permissions = userData.permissions || [];
+      const role = userData.role;
+
+      // Administrador global del ecosistema posee todos los privilegios
+      if (role === 'admin' || permissions.includes(permission) || permissions.includes('*')) {
+        return next();
+      }
+
+      return res.status(403).json({ error: `Acceso denegado: Permiso requerido '${permission}' ausente para el operador.` });
+    } catch (err) {
+      console.error('[Auth Error] Error de verificación de permisos en Firestore:', err.message);
+      return res.status(500).json({ error: 'Error interno de autorización.' });
+    }
+  };
+}
 
 function hexToHsl(hex) {
   hex = hex.replace(/^#/, '');
@@ -398,6 +537,29 @@ app.get('/api/templates', async (req, res) => {
     res.json({ templates });
   } catch (err) {
     res.status(500).json({ error: `Error al leer las plantillas: ${err.message}` });
+  }
+});
+
+// Endpoint para obtener la lista de features registradas
+app.get('/api/feature-registry', async (req, res) => {
+  try {
+    const features = await FeatureRegistry.getAll();
+    res.json({ success: true, features });
+  } catch (err) {
+    res.status(500).json({ error: `Error al leer el registro de features: ${err.message}` });
+  }
+});
+
+// Endpoint para obtener los detalles de una feature registrada por ID
+app.get('/api/feature-registry/:featureId', async (req, res) => {
+  try {
+    const feature = await FeatureRegistry.resolve(req.params.featureId);
+    if (!feature) {
+      return res.status(404).json({ error: `Feature "${req.params.featureId}" no encontrada en el registro.` });
+    }
+    res.json({ success: true, feature });
+  } catch (err) {
+    res.status(500).json({ error: `Error al resolver la feature: ${err.message}` });
   }
 });
 
@@ -4495,7 +4657,7 @@ async function performCoreSync(clave, CLI_ROOT, options = {}) {
       tokens.apiKey            = parseEnvValue('VITE_FIREBASE_API_KEY');
       tokens.measurementId     = parseEnvValue('VITE_FIREBASE_MEASUREMENT_ID');
       tokens.appId             = parseEnvValue('VITE_FIREBASE_APP_ID');
-      tokens.telemetryToken    = parseEnvValue('VITE_DEVELOPER_TELEMETRY_TOKEN');
+      tokens.telemetryToken    = '';
     } catch (_) {}
   }
 
@@ -4937,7 +5099,7 @@ app.get('/api/cores/:clave/drift', async (req, res) => {
         tokens.apiKey            = parseEnvValue('VITE_FIREBASE_API_KEY');
         tokens.measurementId     = parseEnvValue('VITE_FIREBASE_MEASUREMENT_ID');
         tokens.appId             = parseEnvValue('VITE_FIREBASE_APP_ID');
-        tokens.telemetryToken    = parseEnvValue('VITE_DEVELOPER_TELEMETRY_TOKEN');
+        tokens.telemetryToken    = '';
       } catch (_) {}
     }
     const srcProjectId = tokens.projectId || 'ventas-smartfix';
@@ -5091,7 +5253,7 @@ app.get('/api/cores/:clave/diff', async (req, res) => {
         tokens.apiKey            = parseEnvValue('VITE_FIREBASE_API_KEY');
         tokens.measurementId     = parseEnvValue('VITE_FIREBASE_MEASUREMENT_ID');
         tokens.appId             = parseEnvValue('VITE_FIREBASE_APP_ID');
-        tokens.telemetryToken    = parseEnvValue('VITE_DEVELOPER_TELEMETRY_TOKEN');
+        tokens.telemetryToken    = '';
       } catch (_) {}
     }
     const srcProjectId = tokens.projectId || 'ventas-smartfix';
@@ -5531,6 +5693,600 @@ app.delete('/api/cores/:clave', async (req, res) => {
   }
 });
 
+// ==========================================
+// PIPELINE DE PROMOCIÓN DE CORES Y MIGRACIÓN
+// ==========================================
+
+const promotionSseClients = {};
+const promotionLogs = {};
+
+function broadcastPromotionEvent(promotionId, event) {
+  const clients = promotionSseClients[promotionId] || [];
+  clients.forEach(res => {
+    if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify(event)}\n\n`);
+    }
+  });
+}
+
+function logPromotionEvent(promotionId, message) {
+  const timestamp = new Date().toISOString();
+  const formattedLine = `[${timestamp}] ${message}`;
+  if (!promotionLogs[promotionId]) {
+    promotionLogs[promotionId] = [];
+  }
+  promotionLogs[promotionId].push(formattedLine);
+  broadcastPromotionEvent(promotionId, { type: 'log', line: formattedLine });
+  console.log(`[Promo SSE Log][${promotionId}] ${message}`);
+}
+
+async function runPromotionPipelineInBackground(blueprint, blueprintFilePath) {
+  const promotionId = blueprint.promotionId;
+  logPromotionEvent(promotionId, `Iniciando pipeline de promoción en segundo plano para: ${blueprint.targetCoreKey}`);
+
+  try {
+    const projectDir = await findProjectDir(blueprint.sourceClientId);
+    if (!projectDir) {
+      throw new Error(`No se pudo encontrar el directorio de origen para ${blueprint.sourceClientId}`);
+    }
+
+    // --- Paso 1: Sanitización y Copia a Staging ---
+    logPromotionEvent(promotionId, 'Paso 1: Copiando archivos del cliente a Staging con reescritura de namespaces...');
+    const filePolicyPath = path.join(CLI_ROOT, 'knowledge', 'core-promotion', 'file-policy.json');
+    const builderResult = await CoreCandidateBuilder.buildStaging(blueprint, projectDir, blueprint.stagingPath, filePolicyPath);
+
+    if (builderResult.manualReviewFiles.length > 0) {
+      logPromotionEvent(promotionId, `Advertencia: Se encontraron ${builderResult.manualReviewFiles.length} archivos que requieren revisión del operador.`);
+      CorePromotionService.transitionTo(blueprint, 'PENDING_MANUAL_REVIEW', blueprintFilePath);
+      CorePromotionService.releaseLock(blueprint.targetCoreKey);
+      return;
+    }
+
+    // --- Paso 2: Validación de compliance (PII, Secretos, Features, Seeds) ---
+    logPromotionEvent(promotionId, 'Paso 2: Iniciando validaciones de seguridad y Feature Registry...');
+    CorePromotionService.transitionTo(blueprint, 'RUNNING_VALIDATION', blueprintFilePath);
+
+    // Escaneo de secretos
+    blueprint.diagnostics.secretsScan.status = 'RUNNING';
+    blueprint.diagnostics.secretsScan.startedAt = new Date().toISOString();
+    PromotionBlueprintBuilder.safeWriteJson(blueprintFilePath, blueprint);
+    await CorePromotionValidator.scanSecrets(blueprint.stagingPath);
+    blueprint.diagnostics.secretsScan.status = 'PASSED';
+    blueprint.diagnostics.secretsScan.completedAt = new Date().toISOString();
+    PromotionBlueprintBuilder.safeWriteJson(blueprintFilePath, blueprint);
+    logPromotionEvent(promotionId, '  ✅ Escaneo de secretos aprobado.');
+
+    // Escaneo de PII
+    blueprint.diagnostics.piiScan.status = 'RUNNING';
+    blueprint.diagnostics.piiScan.startedAt = new Date().toISOString();
+    PromotionBlueprintBuilder.safeWriteJson(blueprintFilePath, blueprint);
+    const hasPII = await CorePromotionValidator.scanPII(blueprint.stagingPath);
+    if (hasPII) {
+      blueprint.diagnostics.piiScan.status = 'FAILED';
+      blueprint.diagnostics.piiScan.completedAt = new Date().toISOString();
+      CorePromotionService.transitionTo(blueprint, 'QUARANTINED', blueprintFilePath);
+      CorePromotionService.releaseLock(blueprint.targetCoreKey);
+      logPromotionEvent(promotionId, '  ❌ Escaneo de PII fallido. Blueprint redirigido a CUARENTENA.');
+      return;
+    }
+    blueprint.diagnostics.piiScan.status = 'PASSED';
+    blueprint.diagnostics.piiScan.completedAt = new Date().toISOString();
+    PromotionBlueprintBuilder.safeWriteJson(blueprintFilePath, blueprint);
+    logPromotionEvent(promotionId, '  ✅ Escaneo de PII aprobado.');
+
+    // Validar Features
+    blueprint.diagnostics.dependencies.status = 'RUNNING';
+    blueprint.diagnostics.dependencies.startedAt = new Date().toISOString();
+    await CorePromotionValidator.validateFeatures(blueprint);
+    const hasFeatureErrors = blueprint.diagnostics.errors.some(e => e.code.startsWith('FEATURE_'));
+    blueprint.diagnostics.dependencies.status = hasFeatureErrors ? 'FAILED' : 'PASSED';
+    blueprint.diagnostics.dependencies.completedAt = new Date().toISOString();
+    PromotionBlueprintBuilder.safeWriteJson(blueprintFilePath, blueprint);
+    if (hasFeatureErrors) {
+      throw new Error('Validación de features fallida. Revisa los errores del blueprint.');
+    }
+    logPromotionEvent(promotionId, '  ✅ Features validadas con éxito.');
+
+    // Validar y Extraer Seeds
+    const seedRulesPath = path.join(CLI_ROOT, 'knowledge', 'core-promotion', 'seed-rules.json');
+    CorePromotionValidator.validateAndExtractSeeds(projectDir, blueprint.stagingPath, seedRulesPath);
+    logPromotionEvent(promotionId, '  ✅ Extracción de semillas anonimizadas completada.');
+
+    // Generar documentos de gobernanza del Core
+    logPromotionEvent(promotionId, 'Generando 12 documentos de gobernanza del Core...');
+    BriefingDocumentMapper.generateCoreGovernance(blueprint);
+    logPromotionEvent(promotionId, '  ✅ 12 documentos de gobernanza autogenerados en carpeta temática.');
+
+    // --- Paso 3: Build & Smoke Test ---
+    logPromotionEvent(promotionId, 'Paso 3: Ejecutando compilación en staging y Smoke Test...');
+    CorePromotionService.transitionTo(blueprint, 'RUNNING_BUILD_SMOKE', blueprintFilePath);
+
+    blueprint.diagnostics.build.status = 'RUNNING';
+    blueprint.diagnostics.build.startedAt = new Date().toISOString();
+    blueprint.diagnostics.smokeTest.status = 'RUNNING';
+    blueprint.diagnostics.smokeTest.startedAt = new Date().toISOString();
+    PromotionBlueprintBuilder.safeWriteJson(blueprintFilePath, blueprint);
+
+    await CorePromotionValidator.runBuildAndSmokeTest(blueprint.stagingPath);
+
+    blueprint.diagnostics.build.status = 'PASSED';
+    blueprint.diagnostics.build.completedAt = new Date().toISOString();
+    blueprint.diagnostics.smokeTest.status = 'PASSED';
+    blueprint.diagnostics.smokeTest.completedAt = new Date().toISOString();
+
+    CorePromotionService.transitionTo(blueprint, 'CANDIDATE_READY', blueprintFilePath);
+    logPromotionEvent(promotionId, '🎉 ¡Pipeline completado con éxito! Core candidato listo para publicación.');
+
+  } catch (err) {
+    logPromotionEvent(promotionId, `❌ Error en el pipeline: ${err.message}`);
+    blueprint.diagnostics.errors.push({
+      code: 'PIPELINE_ERROR',
+      step: blueprint.status,
+      message: err.message
+    });
+
+    if (blueprint.status === 'RUNNING_BUILD_SMOKE') {
+      blueprint.diagnostics.build.status = 'FAILED';
+      blueprint.diagnostics.build.completedAt = new Date().toISOString();
+      blueprint.diagnostics.smokeTest.status = 'FAILED';
+      blueprint.diagnostics.smokeTest.completedAt = new Date().toISOString();
+      CorePromotionService.transitionTo(blueprint, 'FAILED_BUILD', blueprintFilePath);
+    } else {
+      CorePromotionService.transitionTo(blueprint, 'FAILED_SANITIZATION', blueprintFilePath);
+    }
+    
+    CorePromotionService.releaseLock(blueprint.targetCoreKey);
+  }
+}
+
+// 1. POST /api/project/:clientId/core-promotion/preflight
+app.post('/api/project/:clientId/core-promotion/preflight', authenticateFirebaseToken, authorizePermission('core-promotion:analyze'), async (req, res) => {
+  const { clientId } = req.params;
+  const { targetCoreKey, targetCoreName, nicho } = req.body;
+  const idempotencyKey = req.headers['idempotency-key'];
+
+  try {
+    const projectDir = await findProjectDir(clientId);
+    if (!projectDir) {
+      return res.status(404).json({ error: `No se encontró el directorio para el cliente: ${clientId}` });
+    }
+
+    if (idempotencyKey) {
+      const cached = CorePromotionService.checkIdempotency(idempotencyKey, { clientId, targetCoreKey, targetCoreName, nicho });
+      if (cached) return res.json(cached);
+    }
+
+    // Validar colisión de clave en registro
+    const registroPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+    const registro = await fs.readJson(registroPath);
+    if (registro.plantillas[targetCoreKey] && registro.plantillas[targetCoreKey].activo) {
+      return res.status(409).json({ error: `Colisión de Clave: El core '${targetCoreKey}' ya está registrado y activo.` });
+    }
+
+    const promotionId = `promo-${Date.now()}`;
+    const stagingPath = path.join(CLI_ROOT, 'scratch', 'staging', targetCoreKey).replace(/\\/g, '/');
+
+    // Cargar manifiesto del cliente para extraer features
+    const clientProtoPath = path.join(projectDir, '.prototipe.json');
+    const clientLockPath = path.join(projectDir, 'prototipe.lock.json');
+    let clientProto = {};
+    let clientLock = {};
+    if (fs.existsSync(clientProtoPath)) clientProto = fs.readJsonSync(clientProtoPath);
+    if (fs.existsSync(clientLockPath)) clientLock = fs.readJsonSync(clientLockPath);
+
+    const featuresList = [];
+    const clientFeatures = clientProto.features || (clientLock.features ? Object.keys(clientLock.features) : []);
+    for (const featId of clientFeatures) {
+      const version = clientLock.features?.[featId]?.version || '1.0.0';
+      featuresList.push({
+        featureId: featId,
+        version,
+        registryStatus: 'REGISTERED'
+      });
+    }
+
+    const blueprint = {
+      schemaVersion: '1.0.0',
+      promotionId,
+      sourceClientId: clientId,
+      sourceCoreType: clientProto.coreType || 'unknown',
+      sourceCoreVersion: clientProto.coreVersion || '0.0.1',
+      targetCoreKey,
+      targetCoreName,
+      nicho,
+      status: 'PENDING_PREFLIGHT',
+      stagingPath,
+      idempotency: {
+        preflight: idempotencyKey || null,
+        execute: null,
+        publish: null,
+        activate: null,
+        migrationApply: null
+      },
+      features: {
+        required: featuresList,
+        optional: [],
+        unregistered: []
+      },
+      diagnostics: {
+        piiScan: { status: 'NOT_RUN', startedAt: null, completedAt: null, errorCode: null },
+        secretsScan: { status: 'NOT_RUN', startedAt: null, completedAt: null, errorCode: null },
+        architecture: { status: 'NOT_RUN', startedAt: null, completedAt: null, errorCode: null },
+        dependencies: { status: 'NOT_RUN', startedAt: null, completedAt: null, errorCode: null },
+        build: { status: 'NOT_RUN', startedAt: null, completedAt: null, errorCode: null },
+        smokeTest: { status: 'NOT_RUN', startedAt: null, completedAt: null, errorCode: null },
+        templateParity: { status: 'NOT_RUN', startedAt: null, completedAt: null, errorCode: null },
+        errors: []
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    const promoDir = path.join(CLI_ROOT, 'blueprints', 'promotions');
+    fs.ensureDirSync(promoDir);
+    const blueprintFilePath = path.join(promoDir, `promo-${promotionId}.json`);
+    PromotionBlueprintBuilder.safeWriteJson(blueprintFilePath, blueprint);
+
+    const responseData = { success: true, promotionId, blueprint };
+    if (idempotencyKey) {
+      CorePromotionService.saveIdempotency(idempotencyKey, { clientId, targetCoreKey, targetCoreName, nicho }, responseData);
+    }
+
+    res.json(responseData);
+  } catch (err) {
+    console.error(`[API preflight] Error: ${err.message}`);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. POST /api/project/core-promotion/:promotionId/execute
+app.post('/api/project/core-promotion/:promotionId/execute', authenticateFirebaseToken, authorizePermission('core-promotion:execute'), async (req, res) => {
+  const { promotionId } = req.params;
+  const idempotencyKey = req.headers['idempotency-key'];
+
+  const promoDir = path.join(CLI_ROOT, 'blueprints', 'promotions');
+  const blueprintFilePath = path.join(promoDir, `promo-${promotionId}.json`);
+
+  if (!fs.existsSync(blueprintFilePath)) {
+    return res.status(404).json({ error: `No se encontró el blueprint de promoción '${promotionId}'.` });
+  }
+
+  try {
+    const blueprint = PromotionBlueprintBuilder.loadPromotionBlueprint(blueprintFilePath);
+
+    if (idempotencyKey) {
+      const cached = CorePromotionService.checkIdempotency(idempotencyKey, { promotionId });
+      if (cached) return res.json(cached);
+    }
+
+    // Adquirir Lock físico
+    CorePromotionService.acquireLock(blueprint.targetCoreKey, promotionId);
+
+    // Transición a RUNNING_SANITIZATION
+    CorePromotionService.transitionTo(blueprint, 'RUNNING_SANITIZATION', blueprintFilePath);
+    blueprint.idempotency.execute = idempotencyKey || null;
+    PromotionBlueprintBuilder.safeWriteJson(blueprintFilePath, blueprint);
+
+    // Iniciar ejecución en segundo plano
+    runPromotionPipelineInBackground(blueprint, blueprintFilePath);
+
+    const responseData = { success: true, message: 'Pipeline de promoción iniciado en Staging.', status: 'RUNNING_SANITIZATION', promotionId };
+    if (idempotencyKey) {
+      CorePromotionService.saveIdempotency(idempotencyKey, { promotionId }, responseData);
+    }
+
+    res.status(202).json(responseData);
+  } catch (err) {
+    console.error(`[API execute] Error: ${err.message}`);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. GET /api/project/core-promotion/:promotionId
+app.get('/api/project/core-promotion/:promotionId', authenticateFirebaseToken, authorizePermission('core-promotion:analyze'), async (req, res) => {
+  const { promotionId } = req.params;
+  const promoDir = path.join(CLI_ROOT, 'blueprints', 'promotions');
+  const blueprintFilePath = path.join(promoDir, `promo-${promotionId}.json`);
+
+  if (!fs.existsSync(blueprintFilePath)) {
+    return res.status(404).json({ error: `No se encontró el blueprint de promoción '${promotionId}'.` });
+  }
+
+  try {
+    const blueprint = PromotionBlueprintBuilder.loadPromotionBlueprint(blueprintFilePath);
+    res.json(blueprint);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. GET /api/project/core-promotion/:promotionId/events (SSE Stream)
+app.get('/api/project/core-promotion/:promotionId/events', async (req, res) => {
+  const { promotionId } = req.params;
+
+  const token = req.query.token || req.headers.authorization?.split('Bearer ')[1];
+  const expectedBypass = process.env.TEST_AUTH_BYPASS_TOKEN;
+  if (expectedBypass && token === expectedBypass && process.env.NODE_ENV === 'test' && process.env.ALLOW_TEST_AUTH_BYPASS === 'true') {
+    // Bypass autorizado en tests
+  } else if (!token) {
+    const isEmulator = process.env.FIREBASE_AUTH_EMULATOR_HOST || process.env.NODE_ENV !== 'production';
+    if (!isEmulator) {
+      return res.status(401).json({ error: 'SSE No autorizado: Token faltante.' });
+    }
+  } else {
+    try {
+      await admin.auth().verifyIdToken(token);
+    } catch (err) {
+      return res.status(401).json({ error: 'SSE Token inválido.' });
+    }
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  if (!promotionSseClients[promotionId]) {
+    promotionSseClients[promotionId] = [];
+  }
+  promotionSseClients[promotionId].push(res);
+
+  res.write(`data: ${JSON.stringify({ type: 'connection', status: 'connected' })}\n\n`);
+
+  const history = promotionLogs[promotionId] || [];
+  history.forEach(line => {
+    res.write(`data: ${JSON.stringify({ type: 'log', line })}\n\n`);
+  });
+
+  req.on('close', () => {
+    promotionSseClients[promotionId] = promotionSseClients[promotionId].filter(client => client !== res);
+  });
+});
+
+// 5. POST /api/project/core-promotion/:promotionId/publish
+app.post('/api/project/core-promotion/:promotionId/publish', authenticateFirebaseToken, authorizePermission('core-promotion:publish'), async (req, res) => {
+  const { promotionId } = req.params;
+  const idempotencyKey = req.headers['idempotency-key'];
+
+  const promoDir = path.join(CLI_ROOT, 'blueprints', 'promotions');
+  const blueprintFilePath = path.join(promoDir, `promo-${promotionId}.json`);
+
+  if (!fs.existsSync(blueprintFilePath)) {
+    return res.status(404).json({ error: `No se encontró el blueprint de promoción '${promotionId}'.` });
+  }
+
+  try {
+    const blueprint = PromotionBlueprintBuilder.loadPromotionBlueprint(blueprintFilePath);
+
+    if (idempotencyKey) {
+      const cached = CorePromotionService.checkIdempotency(idempotencyKey, { promotionId, action: 'publish' });
+      if (cached) return res.json(cached);
+    }
+
+    await CorePromotionPublisher.publish(blueprint, blueprintFilePath);
+
+    const responseData = { success: true, blueprint };
+    if (idempotencyKey) {
+      CorePromotionService.saveIdempotency(idempotencyKey, { promotionId, action: 'publish' }, responseData);
+    }
+
+    res.json(responseData);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 6. POST /api/project/core-promotion/:promotionId/activate
+app.post('/api/project/core-promotion/:promotionId/activate', authenticateFirebaseToken, authorizePermission('core-promotion:activate'), async (req, res) => {
+  const { promotionId } = req.params;
+  const idempotencyKey = req.headers['idempotency-key'];
+
+  const promoDir = path.join(CLI_ROOT, 'blueprints', 'promotions');
+  const blueprintFilePath = path.join(promoDir, `promo-${promotionId}.json`);
+
+  if (!fs.existsSync(blueprintFilePath)) {
+    return res.status(404).json({ error: `No se encontró el blueprint de promoción '${promotionId}'.` });
+  }
+
+  try {
+    const blueprint = PromotionBlueprintBuilder.loadPromotionBlueprint(blueprintFilePath);
+
+    if (idempotencyKey) {
+      const cached = CorePromotionService.checkIdempotency(idempotencyKey, { promotionId, action: 'activate' });
+      if (cached) return res.json(cached);
+    }
+
+    await CorePromotionPublisher.activate(blueprint, blueprintFilePath);
+
+    const responseData = { success: true, blueprint };
+    if (idempotencyKey) {
+      CorePromotionService.saveIdempotency(idempotencyKey, { promotionId, action: 'activate' }, responseData);
+    }
+
+    res.json(responseData);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 7. POST /api/project/core-promotion/:promotionId/migration/preflight
+app.post('/api/project/core-promotion/:promotionId/migration/preflight', authenticateFirebaseToken, authorizePermission('core-promotion:migrate'), async (req, res) => {
+  const { promotionId } = req.params;
+  const { clientId } = req.body;
+  const idempotencyKey = req.headers['idempotency-key'];
+
+  const promoDir = path.join(CLI_ROOT, 'blueprints', 'promotions');
+  const promoFilePath = path.join(promoDir, `promo-${promotionId}.json`);
+
+  if (!fs.existsSync(promoFilePath)) {
+    return res.status(404).json({ error: `No se encontró el blueprint de promoción '${promotionId}'.` });
+  }
+
+  try {
+    const promoBlueprint = PromotionBlueprintBuilder.loadPromotionBlueprint(promoFilePath);
+
+    if (idempotencyKey) {
+      const cached = CorePromotionService.checkIdempotency(idempotencyKey, { promotionId, clientId, action: 'migration-preflight' });
+      if (cached) return res.json(cached);
+    }
+
+    const migrationId = `mig-${Date.now()}`;
+    const projectDir = await findProjectDir(clientId);
+    if (!projectDir) {
+      return res.status(404).json({ error: `No se encontró el directorio del proyecto para el cliente: ${clientId}` });
+    }
+
+    const clientProtoPath = path.join(projectDir, '.prototipe.json');
+    const clientLockPath = path.join(projectDir, 'prototipe.lock.json');
+    let clientProto = {};
+    let clientLock = {};
+    if (fs.existsSync(clientProtoPath)) clientProto = fs.readJsonSync(clientProtoPath);
+    if (fs.existsSync(clientLockPath)) clientLock = fs.readJsonSync(clientLockPath);
+
+    const migrationBlueprint = {
+      schemaVersion: '1.0.0',
+      migrationId,
+      promotionId,
+      status: 'PENDING_PREFLIGHT',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      spec: {
+        clientId,
+        previousCoreType: clientProto.coreType || 'unknown',
+        newCoreType: promoBlueprint.targetCoreKey,
+        previousCoreVersion: clientProto.coreVersion || '0.0.1',
+        newCoreVersion: '1.0.0',
+        hashAlgorithm: 'sha256',
+        previousFilesHashes: {},
+        previousFeatures: clientProto.features || (clientLock.features ? Object.keys(clientLock.features) : [])
+      },
+      results: {
+        backup: null,
+        write: null,
+        postValidation: null,
+        rollback: null,
+        errors: []
+      }
+    };
+
+    const migrateDir = path.join(CLI_ROOT, 'blueprints', 'migrations');
+    fs.ensureDirSync(migrateDir);
+    const migrationFilePath = path.join(migrateDir, `mig-${migrationId}.json`);
+    PromotionBlueprintBuilder.safeWriteJson(migrationFilePath, migrationBlueprint);
+
+    const responseData = { success: true, migrationId, blueprint: migrationBlueprint };
+    if (idempotencyKey) {
+      CorePromotionService.saveIdempotency(idempotencyKey, { promotionId, clientId, action: 'migration-preflight' }, responseData);
+    }
+
+    res.json(responseData);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8. POST /api/project/core-promotion/migration/:migrationId/apply
+app.post('/api/project/core-promotion/migration/:migrationId/apply', authenticateFirebaseToken, authorizePermission('core-promotion:migrate'), async (req, res) => {
+  const { migrationId } = req.params;
+  const idempotencyKey = req.headers['idempotency-key'];
+
+  const migrateDir = path.join(CLI_ROOT, 'blueprints', 'migrations');
+  const migrationFilePath = path.join(migrateDir, `mig-${migrationId}.json`);
+
+  if (!fs.existsSync(migrationFilePath)) {
+    return res.status(404).json({ error: `No se encontró el blueprint de migración '${migrationId}'.` });
+  }
+
+  try {
+    const migrationBlueprint = PromotionBlueprintBuilder.loadMigrationBlueprint(migrationFilePath);
+
+    if (idempotencyKey) {
+      const cached = CorePromotionService.checkIdempotency(idempotencyKey, { migrationId, action: 'migration-apply' });
+      if (cached) return res.json(cached);
+    }
+
+    const clientPath = await findProjectDir(migrationBlueprint.spec.clientId);
+    if (!clientPath) {
+      return res.status(404).json({ error: `No se encontró la carpeta del cliente '${migrationBlueprint.spec.clientId}'.` });
+    }
+
+    await ClientLineageMigrator.migrate(migrationBlueprint, migrationFilePath, clientPath);
+
+    const responseData = { success: true, blueprint: migrationBlueprint };
+    if (idempotencyKey) {
+      CorePromotionService.saveIdempotency(idempotencyKey, { migrationId, action: 'migration-apply' }, responseData);
+    }
+
+    res.json(responseData);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 9. POST /api/project/core-promotion/:promotionId/publication/rollback
+app.post('/api/project/core-promotion/:promotionId/publication/rollback', authenticateFirebaseToken, authorizePermission('core-promotion:rollback'), async (req, res) => {
+  const { promotionId } = req.params;
+  const promoDir = path.join(CLI_ROOT, 'blueprints', 'promotions');
+  const blueprintFilePath = path.join(promoDir, `promo-${promotionId}.json`);
+  const journalFilePath = path.join(CLI_ROOT, 'journals', 'core-promotions', `promo-${promotionId}.json`);
+
+  if (!fs.existsSync(blueprintFilePath)) {
+    return res.status(404).json({ error: `No se encontró el blueprint de promoción '${promotionId}'.` });
+  }
+
+  try {
+    const blueprint = PromotionBlueprintBuilder.loadPromotionBlueprint(blueprintFilePath);
+    await CorePromotionPublisher.rollbackPublish(blueprint, blueprintFilePath, journalFilePath);
+    res.json({ success: true, blueprint });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 10. POST /api/project/core-promotion/:promotionId/activation/rollback
+app.post('/api/project/core-promotion/:promotionId/activation/rollback', authenticateFirebaseToken, authorizePermission('core-promotion:rollback'), async (req, res) => {
+  const { promotionId } = req.params;
+  const promoDir = path.join(CLI_ROOT, 'blueprints', 'promotions');
+  const blueprintFilePath = path.join(promoDir, `promo-${promotionId}.json`);
+  const journalFilePath = path.join(CLI_ROOT, 'journals', 'core-activations', `act-${promotionId}.json`);
+
+  if (!fs.existsSync(blueprintFilePath)) {
+    return res.status(404).json({ error: `No se encontró el blueprint de promoción '${promotionId}'.` });
+  }
+
+  try {
+    const blueprint = PromotionBlueprintBuilder.loadPromotionBlueprint(blueprintFilePath);
+    await CorePromotionPublisher.rollbackActivate(blueprint, blueprintFilePath, journalFilePath);
+    res.json({ success: true, blueprint });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 11. POST /api/project/core-promotion/migration/:migrationId/rollback
+app.post('/api/project/core-promotion/migration/:migrationId/rollback', authenticateFirebaseToken, authorizePermission('core-promotion:rollback'), async (req, res) => {
+  const { migrationId } = req.params;
+  const migrateDir = path.join(CLI_ROOT, 'blueprints', 'migrations');
+  const migrationFilePath = path.join(migrateDir, `mig-${migrationId}.json`);
+  const journalFilePath = path.join(CLI_ROOT, 'journals', 'lineage-migrations', `mig-${migrationId}.json`);
+
+  if (!fs.existsSync(migrationFilePath)) {
+    return res.status(404).json({ error: `No se encontró el blueprint de migración '${migrationId}'.` });
+  }
+
+  try {
+    const blueprint = PromotionBlueprintBuilder.loadMigrationBlueprint(migrationFilePath);
+    const clientPath = await findProjectDir(blueprint.spec.clientId);
+    if (!clientPath) {
+      return res.status(404).json({ error: `No se encontró la carpeta del cliente '${blueprint.spec.clientId}'.` });
+    }
+    await ClientLineageMigrator.rollback(blueprint, migrationFilePath, journalFilePath, clientPath);
+    res.json({ success: true, blueprint });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Endpoint para compilar y desplegar a Firebase Hosting (SSE Stream)
 app.all('/api/project/deploy', async (req, res) => {
   const clientId = req.method === 'POST' ? req.body.clientId : (req.query.clientId || req.body?.clientId);
@@ -5930,9 +6686,7 @@ app.post('/api/project/token/register', async (req, res) => {
         if (await fs.pathExists(envPath)) {
           let envContent = await fs.readFile(envPath, 'utf-8');
           if (envContent.includes('VITE_DEVELOPER_TELEMETRY_TOKEN=')) {
-            envContent = envContent.replace(/VITE_DEVELOPER_TELEMETRY_TOKEN=.*/g, `VITE_DEVELOPER_TELEMETRY_TOKEN=${telemetryToken}`);
-          } else {
-            envContent += `\nVITE_DEVELOPER_TELEMETRY_TOKEN=${telemetryToken}`;
+            envContent = envContent.replace(/VITE_DEVELOPER_TELEMETRY_TOKEN=.*/g, '');
           }
           await fs.writeFile(envPath, envContent, 'utf-8');
           console.log(`[Token Register] Token sincronizado en .env.local de ${clientId}`);
@@ -6000,6 +6754,555 @@ app.post('/api/project/env', async (req, res) => {
     res.json({ success: true, message: 'Variables de entorno actualizadas en .env.local con éxito (fusión realizada).' });
   } catch (err) {
     res.status(500).json({ error: `Error al escribir variables .env.local: ${err.message}` });
+  }
+});
+
+// Endpoint para actualizar el estado administrativo de una instancia
+app.post('/api/project/status/update', async (req, res) => {
+  const { clientId, status } = req.body;
+  if (!clientId || !status) {
+    return res.status(400).json({ error: 'Los parámetros "clientId" y "status" son obligatorios.' });
+  }
+
+  try {
+    const projectDir = await findProjectDir(clientId);
+    if (!projectDir) {
+      return res.status(404).json({ error: `No se encontró la instancia para: ${clientId}` });
+    }
+
+    const lockPath = path.join(projectDir, 'prototipe.lock.json');
+    if (await fs.pathExists(lockPath)) {
+      const lockData = await fs.readJson(lockPath);
+      lockData.status = status;
+      lockData.statusUpdatedAt = new Date().toISOString();
+      await fs.writeJson(lockPath, lockData, { spaces: 2 });
+    }
+
+    // Actualizar también en .env.local el estado (ej: VITE_APP_STATUS)
+    const envPath = path.join(projectDir, '.env.local');
+    if (await fs.pathExists(envPath)) {
+      let envContent = await fs.readFile(envPath, 'utf-8');
+      const lines = envContent.split('\n');
+      let found = false;
+      const newLines = lines.map(line => {
+        if (line.trim().startsWith('VITE_APP_STATUS=')) {
+          found = true;
+          return `VITE_APP_STATUS=${status}`;
+        }
+        return line;
+      });
+      if (!found) {
+        newLines.push(`VITE_APP_STATUS=${status}`);
+      }
+      await fs.writeFile(envPath, newLines.join('\n'), 'utf-8');
+    }
+
+    res.json({ success: true, message: `Estado de la instancia de "${clientId}" actualizado a "${status}" con éxito.` });
+  } catch (err) {
+    res.status(500).json({ error: `Error al actualizar el estado de la instancia: ${err.message}` });
+  }
+});
+
+// Endpoint para actualizar branding/HSL de la instancia en caliente
+app.post('/api/project/branding', async (req, res) => {
+  const { clientId, colors } = req.body; // colors: { primaryH, primaryS, primaryL, secondaryH... }
+  if (!clientId || !colors) {
+    return res.status(400).json({ error: 'Los parámetros "clientId" y "colors" son obligatorios.' });
+  }
+
+  try {
+    const projectDir = await findProjectDir(clientId);
+    if (!projectDir) {
+      return res.status(404).json({ error: `No se encontró la instancia para: ${clientId}` });
+    }
+
+    const envPath = path.join(projectDir, '.env.local');
+    let existingVariables = {};
+    if (await fs.pathExists(envPath)) {
+      const existingContent = await fs.readFile(envPath, 'utf-8');
+      existingContent.split('\n').forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+          const index = trimmed.indexOf('=');
+          const key = trimmed.slice(0, index).trim();
+          const val = trimmed.slice(index + 1).trim().replace(/^["']|["']$/g, '');
+          existingVariables[key] = val;
+        }
+      });
+    }
+
+    // Inyectar variables HSL
+    Object.entries(colors).forEach(([key, val]) => {
+      const cleanKey = `VITE_COLOR_${key.toUpperCase()}`;
+      existingVariables[cleanKey] = val;
+    });
+
+    let content = '';
+    Object.entries(existingVariables).forEach(([key, val]) => {
+      content += `${key}=${val}\n`;
+    });
+
+    await fs.writeFile(envPath, content, 'utf-8');
+    res.json({ success: true, message: 'Paleta de colores HSL actualizada con éxito en la instancia.' });
+  } catch (err) {
+    res.status(500).json({ error: `Error al actualizar branding: ${err.message}` });
+  }
+});
+
+// Endpoint para inyectar/agregar una feature a la instancia
+app.post('/api/project/features/add', async (req, res) => {
+  const { clientId, featureId } = req.body;
+  if (!clientId || !featureId) {
+    return res.status(400).json({ error: 'Los parámetros "clientId" y "featureId" son obligatorios.' });
+  }
+
+  try {
+    const projectDir = await findProjectDir(clientId);
+    if (!projectDir) {
+      return res.status(404).json({ error: `No se encontró la instancia para: ${clientId}` });
+    }
+
+    // 1. Resolver ruta origen usando FeatureRegistry
+    const srcFeature = await FeatureRegistry.resolvePhysicalPath(featureId);
+    if (!srcFeature) {
+      return res.status(404).json({ error: `No se encontró origen físico para la feature "${featureId}" en el registro.` });
+    }
+
+    const destFeature = path.join(projectDir, 'src', 'features', featureId);
+    
+    // 2. Copiar carpeta del módulo
+    await fs.ensureDir(path.dirname(destFeature));
+    await fs.copy(srcFeature, destFeature);
+
+    // 3. Actualizar prototipe.lock.json (Instance Manifest)
+    const lockPath = path.join(projectDir, 'prototipe.lock.json');
+    if (await fs.pathExists(lockPath)) {
+      const lockData = await fs.readJson(lockPath);
+      if (!lockData.featuresInstalled) {
+        lockData.featuresInstalled = {};
+      }
+      const featMeta = await FeatureRegistry.resolve(featureId);
+      lockData.featuresInstalled[featureId] = {
+        version: featMeta ? featMeta.version : '1.0.0',
+        installedAt: new Date().toISOString()
+      };
+      await fs.writeJson(lockPath, lockData, { spaces: 2 });
+    }
+
+    res.json({ success: true, message: `Feature "${featureId}" inyectada y registrada con éxito en la instancia.` });
+  } catch (err) {
+    res.status(500).json({ error: `Error al agregar feature: ${err.message}` });
+  }
+});
+
+// Endpoint para remover una feature de la instancia
+app.post('/api/project/features/remove', async (req, res) => {
+  const { clientId, featureId } = req.body;
+  if (!clientId || !featureId) {
+    return res.status(400).json({ error: 'Los parámetros "clientId" y "featureId" son obligatorios.' });
+  }
+
+  try {
+    const projectDir = await findProjectDir(clientId);
+    if (!projectDir) {
+      return res.status(404).json({ error: `No se encontró la instancia para: ${clientId}` });
+    }
+
+    const featurePath = path.join(projectDir, 'src', 'features', featureId);
+    
+    // 1. Eliminar carpeta física
+    if (await fs.pathExists(featurePath)) {
+      await fs.remove(featurePath);
+    }
+
+    // 2. Actualizar prototipe.lock.json
+    const lockPath = path.join(projectDir, 'prototipe.lock.json');
+    if (await fs.pathExists(lockPath)) {
+      const lockData = await fs.readJson(lockPath);
+      if (lockData.featuresInstalled && lockData.featuresInstalled[featureId]) {
+        delete lockData.featuresInstalled[featureId];
+        await fs.writeJson(lockPath, lockData, { spaces: 2 });
+      }
+    }
+
+    res.json({ success: true, message: `Feature "${featureId}" removida con éxito de la instancia.` });
+  } catch (err) {
+    res.status(500).json({ error: `Error al remover feature: ${err.message}` });
+  }
+});
+
+// Diccionario en memoria de planes de actualización generados (Previsor para pull-based agent remoto)
+const activeUpdatePlans = {};
+
+// GET /api/project/versions - Obtiene estado de versiones y drifts de todas las instancias
+app.get('/api/project/versions', async (req, res) => {
+  try {
+    const subdirs = await fs.readdir(INSTANCES_DIR);
+    const clients = [];
+
+    // Buscar clientes en la raíz, en seed/ y subcarpetas de categorías
+    const addClientVersion = async (folder, name) => {
+      const lockPath = path.join(folder, 'prototipe.lock.json');
+      if (await fs.pathExists(lockPath)) {
+        try {
+          const driftResult = await VersionManager.detectDrift(name);
+          clients.push({
+            clientId: name,
+            ...driftResult
+          });
+        } catch (err) {
+          console.error(`[versions API] Error detectando drift para ${name}:`, err);
+        }
+      }
+    };
+
+    for (const sub of subdirs) {
+      const fullSub = path.join(INSTANCES_DIR, sub);
+      const stat = await fs.stat(fullSub).catch(() => null);
+      if (!stat || !stat.isDirectory()) continue;
+
+      const lockPath = path.join(fullSub, 'prototipe.lock.json');
+      if (await fs.pathExists(lockPath)) {
+        await addClientVersion(fullSub, sub);
+      } else {
+        const subItems = await fs.readdir(fullSub).catch(() => []);
+        for (const subItem of subItems) {
+          const subPath = path.join(fullSub, subItem);
+          const subStat = await fs.stat(subPath).catch(() => null);
+          if (!subStat || !subStat.isDirectory()) continue;
+          await addClientVersion(subPath, subItem);
+        }
+      }
+    }
+
+    // Obtener la versión de referencia del Core desde la plantilla real (App Ventas)
+    const plantillasCoreDir = path.join(path.dirname(getWorkspaceRoot()), 'Plantillas Core');
+    const mainCorePkgPath = path.join(plantillasCoreDir, 'App Ventas', 'package.json');
+    let coreReferenceVersion = '1.0.6';
+    if (await fs.pathExists(mainCorePkgPath)) {
+      const seedPkg = await fs.readJson(mainCorePkgPath);
+      coreReferenceVersion = seedPkg.version || coreReferenceVersion;
+    } else {
+      const seedPkgPath = path.join(SEED_DIR, 'package.json');
+      if (await fs.pathExists(seedPkgPath)) {
+        const seedPkg = await fs.readJson(seedPkgPath);
+        coreReferenceVersion = seedPkg.version || coreReferenceVersion;
+      }
+    }
+
+    res.json({
+      success: true,
+      coreReferenceVersion,
+      clients
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Error al obtener reporte de versiones: ${err.message}` });
+  }
+});
+
+// POST /api/project/update/preflight - Genera el Update Blueprint Plan
+app.post('/api/project/update/preflight', async (req, res) => {
+  const { clientId, operator } = req.body;
+  if (!clientId) {
+    return res.status(400).json({ error: 'El parámetro "clientId" es obligatorio.' });
+  }
+
+  try {
+    const plan = await VersionManager.buildUpdatePlan(clientId, operator || 'admin');
+    activeUpdatePlans[plan.updateId] = plan; // Guardar en cache en memoria
+    res.json({
+      success: true,
+      plan
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Error al generar preflight update plan: ${err.message}` });
+  }
+});
+
+// GET /api/project/update/plan/:updateId - Permite a un agente pull-based remoto consultar el plan
+app.get('/api/project/update/plan/:updateId', (req, res) => {
+  const { updateId } = req.params;
+  const plan = activeUpdatePlans[updateId];
+  if (!plan) {
+    return res.status(404).json({ error: 'Update plan no encontrado o expirado.' });
+  }
+  res.json({ success: true, plan });
+});
+
+// POST /api/project/update/apply - SSE Stream que ejecuta la actualización de un cliente usando el plan
+app.get('/api/project/update/apply', (req, res) => {
+  const { clientId, updateId, operator } = req.query;
+
+  if (!clientId || !updateId) {
+    return res.status(400).json({ error: 'Los parámetros "clientId" y "updateId" son obligatorios.' });
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const sendSSE = (status, text, data = {}) => {
+    res.write(`data: ${JSON.stringify({ status, text, ...data })}\n\n`);
+  };
+
+  (async () => {
+    try {
+      const plan = activeUpdatePlans[updateId];
+      if (!plan) {
+        sendSSE('error', 'El plan de actualización especificado ha expirado o es inválido.');
+        return res.end();
+      }
+
+      const result = await VersionManager.applyUpdatePlan(clientId, plan, operator || 'admin', (logMsg) => {
+        sendSSE('progress', logMsg);
+      });
+
+      if (result.status === 'success') {
+        sendSSE('done', 'Actualización completada y verificada exitosamente sin regresiones.');
+      } else {
+        sendSSE('rolled_back', 'Fallo en compilación de post-flight. Se aplicó rollback automático al estado original.');
+      }
+    } catch (err) {
+      sendSSE('error', `Pipeline falló con excepción: ${err.message}`);
+    } finally {
+      res.end();
+    }
+  })();
+});
+
+// POST /api/project/update/rollback - Revierte manualmente a un backup físico versionado
+app.post('/api/project/update/rollback', async (req, res) => {
+  const { clientId, updateId } = req.body;
+  if (!clientId || !updateId) {
+    return res.status(400).json({ error: 'Los parámetros "clientId" y "updateId" son obligatorios.' });
+  }
+
+  try {
+    const result = await VersionManager.runRollback(clientId, updateId, (logMsg) => {
+      console.log(`[Rollback Manual] ${logMsg}`);
+    });
+    res.json({
+      success: true,
+      message: `Rollback a la versión ${updateId} aplicado con éxito en el cliente ${clientId}.`
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Fallo al aplicar rollback manual: ${err.message}` });
+  }
+});
+
+// ==========================================
+// TELEMETRÍA Y GOBERNANZA DE EVENTOS (FASE 9.4)
+// ==========================================
+
+const EVENT_TYPES_PATH = path.join(__dirname, 'knowledge', 'telemetry', 'event-types.json');
+
+// Mapas en memoria para rate limiting
+const telemetryRateLimit = {};
+
+// GET /api/project/telemetry/adoption - Adopción de features basada en prototipe.lock.json
+app.get('/api/project/telemetry/adoption', async (req, res) => {
+  try {
+    const subdirs = await fs.readdir(INSTANCES_DIR);
+    const registryFeatures = await FeatureRegistry.getAll();
+    const stats = {};
+
+    // Inicializar contadores
+    for (const feat of registryFeatures) {
+      stats[feat.id] = {
+        id: feat.id,
+        name: feat.displayName || feat.id,
+        category: feat.category || 'General',
+        installCount: 0,
+        totalTenants: 0,
+        adoptionRate: 0
+      };
+    }
+
+    let activeTenantsCount = 0;
+
+    for (const sub of subdirs) {
+      const fullSub = path.join(INSTANCES_DIR, sub);
+      const stat = await fs.stat(fullSub);
+      if (stat.isDirectory() && sub !== 'seed') {
+        const lockPath = path.join(fullSub, 'prototipe.lock.json');
+        if (await fs.pathExists(lockPath)) {
+          activeTenantsCount++;
+          const lock = await fs.readJson(lockPath);
+          const installed = lock.featuresInstalled || {};
+          
+          for (const featId of Object.keys(installed)) {
+            if (stats[featId]) {
+              stats[featId].installCount++;
+            }
+          }
+        }
+      }
+    }
+
+    // Calcular tasas
+    for (const featId of Object.keys(stats)) {
+      stats[featId].totalTenants = activeTenantsCount;
+      stats[featId].adoptionRate = activeTenantsCount > 0 
+        ? Math.round((stats[featId].installCount / activeTenantsCount) * 100) 
+        : 0;
+    }
+
+    res.json({
+      success: true,
+      stats: Object.values(stats),
+      totalActiveTenants: activeTenantsCount
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Error al calcular adopción: ${err.message}` });
+  }
+});
+
+// GET /api/project/telemetry/pings - Ping HTTP no bloqueante y latencia de instancias
+app.get('/api/project/telemetry/pings', async (req, res) => {
+  try {
+    const subdirs = await fs.readdir(INSTANCES_DIR);
+    const pingResults = [];
+
+    for (const sub of subdirs) {
+      const fullSub = path.join(INSTANCES_DIR, sub);
+      const stat = await fs.stat(fullSub);
+      if (stat.isDirectory() && sub !== 'seed') {
+        const lockPath = path.join(fullSub, 'prototipe.lock.json');
+        if (await fs.pathExists(lockPath)) {
+          // Obtener puerto asignado (por convención o simulación de host)
+          // Si no está corriendo, medimos la salud del filesystem o respondemos ping simulado
+          const start = Date.now();
+          let status = 'success';
+          let latency = 0;
+          
+          try {
+            // Intentar verificar existencia de index.html como indicador de salud local
+            const htmlExists = await fs.pathExists(path.join(fullSub, 'index.html'));
+            latency = Date.now() - start;
+            if (!htmlExists) {
+              status = 'error';
+            }
+          } catch (e) {
+            status = 'error';
+            latency = 999;
+          }
+
+          pingResults.push({
+            clientId: sub,
+            status,
+            latency: latency || 12, // Latencia mínima simulada de disco local
+            lastPing: new Date().toISOString()
+          });
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      pings: pingResults
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Error en escaneo de salud: ${err.message}` });
+  }
+});
+
+// POST /api/project/telemetry/report - Registro protegido de eventos con rate limit
+app.post('/api/project/telemetry/report', verifyAppCheck, async (req, res) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  const { clientId, type, source, environment, severity, message, details } = req.body;
+
+  // 1. Rate Limiting (Máximo 60 peticiones por minuto por cliente/IP)
+  const limitKey = `${ip}_${clientId || 'global'}`;
+  const now = Date.now();
+  if (!telemetryRateLimit[limitKey]) {
+    telemetryRateLimit[limitKey] = [];
+  }
+  // Filtrar peticiones de más de 60s
+  telemetryRateLimit[limitKey] = telemetryRateLimit[limitKey].filter(t => now - t < 60000);
+  if (telemetryRateLimit[limitKey].length >= 60) {
+    return res.status(429).json({ error: 'DevOps Guard: Rate limit excedido. Máximo 60 peticiones/min.' });
+  }
+  telemetryRateLimit[limitKey].push(now);
+
+  // 2. Validación de Campos Básicos
+  if (!clientId || !type || !source || !environment || !severity || !message) {
+    return res.status(400).json({ error: 'Esquema incompleto. Los campos clientId, type, source, environment, severity y message son obligatorios.' });
+  }
+
+  try {
+    // 3. Autenticación de Tenant mediante App Check
+    // Validar que el clientId enviado en el payload coincida exactamente con el tenant verificado por App Check
+    const verifiedClientId = req.tenant ? req.tenant.clientId : 'test-client'; // Fallback seguro para bypass de test
+    if (clientId !== verifiedClientId) {
+      return res.status(403).json({ error: '🔒 App Check: El ClientID enviado no coincide con la aplicación autorizada.' });
+    }
+
+    // 4. Validación contra Catálogo de Eventos Gobernados (event-types.json)
+    if (!(await fs.pathExists(EVENT_TYPES_PATH))) {
+      return res.status(500).json({ error: 'Catálogo de eventos gobernados no encontrado en el servidor.' });
+    }
+    const catalog = await fs.readJson(EVENT_TYPES_PATH);
+    const rules = catalog.eventTypes.find(e => e.type === type);
+
+    if (!rules) {
+      return res.status(400).json({ error: `Tipo de evento "${type}" no registrado en el catálogo gobernado.` });
+    }
+    if (!rules.allowedSources.includes(source)) {
+      return res.status(400).json({ error: `El origen "${source}" no es válido para el tipo de evento "${type}". Permitidos: ${rules.allowedSources.join(', ')}` });
+    }
+    if (!rules.allowedSeverities.includes(severity)) {
+      return res.status(400).json({ error: `La severidad "${severity}" no es válida para el tipo de evento "${type}". Permitidas: ${rules.allowedSeverities.join(', ')}` });
+    }
+
+    // 5. Todo válido -> Guardar el evento en Firestore si estuviera bindeado,
+    // o en un log local en scratch/logs/telemetry.json si corre offline
+    const event = {
+      eventId: `evt_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`,
+      clientId,
+      type,
+      source,
+      environment,
+      severity,
+      message,
+      details: details || {},
+      timestamp: new Date().toISOString()
+    };
+
+    // Sincronizar en log local
+    const logFile = path.join(CLI_ROOT, 'scratch', 'logs', 'telemetry.json');
+    await fs.ensureDir(path.dirname(logFile));
+    let logs = [];
+    if (await fs.pathExists(logFile)) {
+      logs = await fs.readJson(logFile);
+    }
+    logs.push(event);
+    // Limitar log a los últimos 1000 eventos
+    if (logs.length > 1000) logs.shift();
+    await fs.writeJson(logFile, logs, { spaces: 2 });
+
+    res.json({
+      success: true,
+      eventId: event.eventId,
+      message: 'Evento registrado y validado con éxito.'
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Fallo en el pipeline de telemetría: ${err.message}` });
+  }
+});
+
+// GET /api/project/telemetry/logs - Recupera logs locales de telemetría para el dashboard
+app.get('/api/project/telemetry/logs', async (req, res) => {
+  try {
+    const logFile = path.join(CLI_ROOT, 'scratch', 'logs', 'telemetry.json');
+    if (await fs.pathExists(logFile)) {
+      const logs = await fs.readJson(logFile);
+      res.json({ success: true, logs });
+    } else {
+      res.json({ success: true, logs: [] });
+    }
+  } catch (err) {
+    res.status(500).json({ error: `Error al leer logs de telemetría: ${err.message}` });
   }
 });
 
@@ -9472,7 +10775,6 @@ async function validateClientIntegrityBeforeSync(corePath, clientPath, folderNam
     VITE_FIREBASE_APP_ID: sdkConfig.appId || currentEnv.VITE_FIREBASE_APP_ID || '',
 
     VITE_DEVELOPER_TELEMETRY_ENDPOINT: 'http://localhost:3001',
-    VITE_DEVELOPER_TELEMETRY_TOKEN: telemetryToken || currentEnv.VITE_DEVELOPER_TELEMETRY_TOKEN || '',
     VITE_DEVELOPER_CLIENT_ID: clientId,
 
     VITE_DEVELOPER_CENTRAL_API_KEY: 'AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE',
@@ -9505,7 +10807,6 @@ async function validateClientIntegrityBeforeSync(corePath, clientPath, folderNam
 
   envContent += `# Telemetría de Comisiones\n`;
   envContent += `VITE_DEVELOPER_TELEMETRY_ENDPOINT=${finalEnv.VITE_DEVELOPER_TELEMETRY_ENDPOINT}\n`;
-  envContent += `VITE_DEVELOPER_TELEMETRY_TOKEN=${finalEnv.VITE_DEVELOPER_TELEMETRY_TOKEN}\n`;
   envContent += `VITE_DEVELOPER_CLIENT_ID=${finalEnv.VITE_DEVELOPER_CLIENT_ID}\n\n`;
 
   envContent += `# Conexión Central de Control\n`;

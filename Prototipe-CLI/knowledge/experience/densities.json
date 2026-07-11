@@ -1,0 +1,22 @@
+{
+  "densities": [
+    {
+      "id": "compact",
+      "displayName": "Compact Layout Density",
+      "contexts": ["desktop-office", "point-of-sale"],
+      "recommendedTypography": ["Outfit", "Inter"]
+    },
+    {
+      "id": "comfortable",
+      "displayName": "Comfortable Layout Density",
+      "contexts": ["on-the-road", "mobile-sales", "public-catalog"],
+      "recommendedTypography": ["Outfit", "Inter", "Roboto"]
+    },
+    {
+      "id": "spacious",
+      "displayName": "Spacious Layout Density",
+      "contexts": ["customer-selfservice"],
+      "recommendedTypography": ["Outfit", "Inter"]
+    }
+  ]
+}

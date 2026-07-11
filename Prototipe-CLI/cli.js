@@ -72,13 +72,54 @@ async function main() {
     process.exit(1);
   }
 
-  // 2. Formulario Interactivo
+  // 2. Formulario Interactivo del Briefing Studio
   const answers = await inquirer.prompt([
     {
       type: 'list',
       name: 'template',
       message: 'Selecciona la plantilla base para el nuevo proyecto:',
       choices: templates
+    },
+    {
+      type: 'input',
+      name: 'processes',
+      message: 'Describe los procesos y tareas principales del negocio (ej. agendar citas médicas, controlar inventario y ventas, gestionar cotizaciones):',
+      validate: input => input.trim().length > 0 ? true : 'Describir los procesos es obligatorio para deducir capacidades.',
+      when: (ans) => ans.template === 'template-core-seed'
+    },
+    {
+      type: 'list',
+      name: 'device',
+      message: 'Dispositivo principal de uso de la aplicación:',
+      choices: [
+        { name: '💻 Computadora de Escritorio / Laptop', value: 'desktop' },
+        { name: '📱 Smartphone / Móvil en Terreno', value: 'mobile' },
+        { name: '📟 Tablet / Pantalla de Mostrador', value: 'tablet' }
+      ],
+      when: (ans) => ans.template === 'template-core-seed'
+    },
+    {
+      type: 'list',
+      name: 'operationalContext',
+      message: 'Contexto operativo del operador:',
+      choices: [
+        { name: '🏢 Oficina / Trabajo de Escritorio (Alta densidad)', value: 'desktop-office' },
+        { name: '🛒 Caja POS / Punto de Venta rápido', value: 'point-of-sale' },
+        { name: '🚗 Reparto / En Movimiento (Terreno)', value: 'on-the-road' }
+      ],
+      when: (ans) => ans.template === 'template-core-seed'
+    },
+    {
+      type: 'list',
+      name: 'visualStyle',
+      message: 'Estilo estético y vibra visual deseada:',
+      choices: [
+        { name: '✨ Moderno y Limpio (Outfit)', value: 'modern-clean' },
+        { name: '🏛️ Corporativo y Profesional (Inter)', value: 'corporate-serious' },
+        { name: '🌸 Suave y Amigable (Outfit)', value: 'soft-friendly' },
+        { name: '📊 Técnico y Preciso (Roboto)', value: 'technical-precise' }
+      ],
+      when: (ans) => ans.template === 'template-core-seed'
     },
     {
       type: 'input',

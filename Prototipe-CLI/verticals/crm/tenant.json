@@ -1,0 +1,6 @@
+{
+  "tenantId": "tenant-crm-001",
+  "plan": "enterprise",
+  "status": "active",
+  "featuresEnabled": ["leads", "tasks", "billing"]
+}

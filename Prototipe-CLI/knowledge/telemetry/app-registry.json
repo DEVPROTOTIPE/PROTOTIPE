@@ -1,0 +1,16 @@
+{
+  "apps": [
+    {
+      "appId": "1:703542009613:web:00f9363de11a908c991a44",
+      "clientId": "test-client",
+      "niche": "retail_clothing",
+      "status": "active"
+    },
+    {
+      "appId": "1:703542009613:web:1111111111111111111111",
+      "clientId": "ventas-moni-app",
+      "niche": "grocery_food",
+      "status": "active"
+    }
+  ]
+}

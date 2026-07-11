@@ -1,0 +1,201 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CorePromotionBlueprint",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "promotionId": {
+      "type": "string",
+      "pattern": "^promo-[a-z0-9-]+$"
+    },
+    "sourceClientId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceCoreType": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceCoreVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "targetCoreKey": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "targetCoreName": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 80
+    },
+    "nicho": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 120
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING_PREFLIGHT",
+        "PREFLIGHT_APPROVED",
+        "RUNNING_SANITIZATION",
+        "PENDING_MANUAL_REVIEW",
+        "RUNNING_VALIDATION",
+        "RUNNING_BUILD_SMOKE",
+        "CANDIDATE_READY",
+        "PUBLISHING",
+        "PUBLISHED_INACTIVE",
+        "ACTIVATING",
+        "ACTIVE",
+        "FAILED_SANITIZATION",
+        "QUARANTINED",
+        "FAILED_BUILD",
+        "FAILED_ACTIVATION",
+        "ROLLING_BACK_ACTIVATION",
+        "ROLLING_BACK_PUBLICATION",
+        "ROLLED_BACK",
+        "DISCARDED"
+      ]
+    },
+    "stagingPath": {
+      "type": "string"
+    },
+    "idempotency": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preflight": { "type": ["string", "null"], "format": "uuid" },
+        "execute": { "type": ["string", "null"], "format": "uuid" },
+        "publish": { "type": ["string", "null"], "format": "uuid" },
+        "activate": { "type": ["string", "null"], "format": "uuid" },
+        "migrationApply": { "type": ["string", "null"], "format": "uuid" }
+      },
+      "required": ["preflight", "execute", "publish", "activate", "migrationApply"]
+    },
+    "features": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/feature" }
+        },
+        "optional": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/feature" }
+        },
+        "unregistered": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["required", "optional", "unregistered"]
+    },
+    "diagnostics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "piiScan": { "$ref": "#/definitions/checkResult" },
+        "secretsScan": { "$ref": "#/definitions/checkResult" },
+        "architecture": { "$ref": "#/definitions/checkResult" },
+        "dependencies": { "$ref": "#/definitions/checkResult" },
+        "build": { "$ref": "#/definitions/checkResult" },
+        "smokeTest": { "$ref": "#/definitions/checkResult" },
+        "templateParity": { "$ref": "#/definitions/checkResult" },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": { "type": "string" },
+              "step": { "type": "string" },
+              "message": { "type": "string" },
+              "path": { "type": "string" }
+            },
+            "required": ["code", "step", "message"]
+          }
+        }
+      },
+      "required": [
+        "piiScan",
+        "secretsScan",
+        "architecture",
+        "dependencies",
+        "build",
+        "smokeTest",
+        "templateParity",
+        "errors"
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "definitions": {
+    "feature": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "featureId": { "type": "string" },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "registryStatus": {
+          "type": "string",
+          "enum": ["REGISTERED", "MISSING", "INCOMPATIBLE"]
+        }
+      },
+      "required": ["featureId", "version", "registryStatus"]
+    },
+    "checkResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["NOT_RUN", "RUNNING", "PASSED", "FAILED", "SKIPPED"]
+        },
+        "startedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "completedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "errorCode": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["status", "startedAt", "completedAt", "errorCode"]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "promotionId",
+    "sourceClientId",
+    "sourceCoreType",
+    "sourceCoreVersion",
+    "targetCoreKey",
+    "targetCoreName",
+    "nicho",
+    "status",
+    "idempotency",
+    "features",
+    "diagnostics",
+    "createdAt",
+    "updatedAt"
+  ]
+}

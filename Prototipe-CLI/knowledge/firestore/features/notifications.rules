@@ -1,0 +1,34 @@
+    // ─── FEATURE NOTIFICATIONS (CENTRO DE NOTIFICACIONES) ────────────
+    match /notifications/{document} {
+      allow create: if true;
+      allow read: if isAdmin() || resource.data.recipientRole == 'client';
+      allow update: if isAdmin()
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+      allow delete: if isAdmin() 
+        || resource.data.recipientRole == 'client' 
+        || resource.data.recipientRole == 'vendedor' 
+        || resource.data.recipientRole == 'bodeguero' 
+        || resource.data.recipientRole == 'mensajero';
+    }
+
+    match /fcmTokens/{document} {
+      allow read: if isAdmin();
+      allow create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    match /clientNotifications/{document} {
+      allow read: if isAdmin() || (
+        request.auth != null && 
+        resource.data.clienteCelular != null &&
+        request.auth.token.phone_number == resource.data.clienteCelular
+      );
+      allow create: if true;
+      allow update: if isAdmin() || (
+        request.auth != null && 
+        resource.data.clienteCelular != null &&
+        request.auth.token.phone_number == resource.data.clienteCelular
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt'])
+      );
+      allow delete: if isAdmin();
+    }

@@ -1,0 +1,29 @@
+{
+  "defaultAction": "deny",
+  "policies": {
+    "src/main.jsx": {
+      "action": "copy"
+    },
+    "src/vendedores.jsx": {
+      "action": "copy"
+    },
+    "index.html": {
+      "action": "copy"
+    },
+    "briefing.md": {
+      "action": "copy"
+    },
+    ".prototipe.json": {
+      "action": "regenerate",
+      "strategy": "none"
+    },
+    "prototipe.lock.json": {
+      "action": "regenerate",
+      "strategy": "none"
+    },
+    "package.json": {
+      "action": "regenerate",
+      "strategy": "none"
+    }
+  }
+}

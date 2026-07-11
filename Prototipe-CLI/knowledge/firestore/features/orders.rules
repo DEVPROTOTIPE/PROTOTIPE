@@ -1,0 +1,40 @@
+    // ─── FEATURE ORDERS (PEDIDOS RETAIL & MAYORISTAS) ────────────────
+    // ⚠️ CLASIFICACIÓN DE DISEÑO:
+    // Los pedidos creados directamente desde la aplicación cliente son BORRADORES NO CONFIABLES
+    // y están en estado [DISEÑADO / PENDIENTE DE BACKEND DE LA FEATURE].
+    // Mientras no exista validación server-side, no pueden considerarse pagados, aprobar créditos,
+    // descontar inventario de forma definitiva, ni certificar integridad financiera.
+    match /orders/{document} {
+      // Clientes autenticados anónima o telefónicamente crean pedidos
+      allow create: if request.auth != null 
+        && request.resource.data.keys().hasAll(['items', 'cliente', 'total', 'metodoPago', 'estado', 'ownerUid', 'createdAt', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['items', 'cliente', 'total', 'metodoPago', 'estado', 'ownerUid', 'createdAt', 'updatedAt', 'ocultoCliente'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.estado == 'pendiente'
+        && request.resource.data.total is number 
+        && request.resource.data.total > 0
+        && request.resource.data.items is list
+        && request.resource.data.items.size() > 0
+        && request.resource.data.items.size() <= 100 // Límite de ítems
+        && request.resource.data.createdAt == request.time;
+
+      // Lectura permitida solo para el dueño del pedido o administrador
+      allow read: if isAdmin() || (request.auth != null && resource.data.ownerUid == request.auth.uid);
+
+      // Actualización restringida: el cliente solo puede cancelar el pedido si está pendiente, o marcarlo como oculto
+      allow update: if isAdmin() || (
+        request.auth != null 
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.total == resource.data.total
+        && request.resource.data.items == resource.data.items
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'ocultoCliente', 'updatedAt'])
+        && (
+          (request.resource.data.estado == 'cancelado' && resource.data.estado == 'pendiente')
+          || (request.resource.data.ocultoCliente == true)
+        )
+      );
+
+      allow delete: if isAdmin();
+    }

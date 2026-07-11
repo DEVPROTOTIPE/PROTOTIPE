@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BlueprintSchema",
+  "type": "object",
+  "properties": {
+    "blueprintVersion": { "type": "string" },
+    "instanceId": { "type": "string" },
+    "clientName": { "type": "string" },
+    "vertical": { "type": "string" },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "features": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "patterns": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "components": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "experience": {
+      "type": "object",
+      "properties": {
+        "layout": { "type": "string" },
+        "density": { "type": "string", "enum": ["compact", "comfortable", "spacious"] },
+        "themeMode": { "type": "string", "enum": ["light", "dark", "dark-detect"] },
+        "typography": { "type": "string" }
+      },
+      "required": ["layout", "density", "themeMode", "typography"]
+    },
+    "branding": {
+      "type": "object",
+      "properties": {
+        "paletteChoice": { "type": "string" },
+        "initials": { "type": "string" }
+      },
+      "required": ["paletteChoice", "initials"]
+    }
+  },
+  "required": [
+    "blueprintVersion",
+    "instanceId",
+    "clientName",
+    "vertical",
+    "capabilities",
+    "features",
+    "patterns",
+    "components",
+    "experience",
+    "branding"
+  ]
+}

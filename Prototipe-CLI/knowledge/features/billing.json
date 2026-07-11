@@ -1,0 +1,7 @@
+{
+  "id": "billing",
+  "displayName": "Cobros y Facturación",
+  "capabilities": ["billing-invoicing", "payments", "pdf-receipts"],
+  "compatibleIndustries": ["retail", "healthcare", "wellness", "realestate", "consulting", "services"],
+  "dependencies": []
+}

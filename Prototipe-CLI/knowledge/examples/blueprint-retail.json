@@ -1,0 +1,20 @@
+{
+  "blueprintVersion": "1.0.0",
+  "instanceId": "tienda-moda-express",
+  "clientName": "Tienda Moda Express",
+  "vertical": "retail",
+  "capabilities": ["pos-checkout", "inventory-tracking", "order-processing", "billing-invoicing"],
+  "features": ["inventory", "sales", "orders", "billing"],
+  "patterns": ["pattern-wizard-flow", "pattern-search-details", "pattern-dashboard-workspace"],
+  "components": ["CajaDiariaPOS", "OrderCard"],
+  "experience": {
+    "layout": "topbar",
+    "density": "comfortable",
+    "themeMode": "light",
+    "typography": "Inter"
+  },
+  "branding": {
+    "paletteChoice": "emerald",
+    "initials": "TME"
+  }
+}

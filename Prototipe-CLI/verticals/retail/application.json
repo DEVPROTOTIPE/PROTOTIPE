@@ -1,0 +1,7 @@
+{
+  "instanceId": "retail-instance",
+  "clientName": "Tienda Retail",
+  "vertical": "retail",
+  "schemaVersion": "1.0.0",
+  "features": ["inventory", "sales", "orders", "delivery", "billing"]
+}

@@ -76,9 +76,13 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Verifica si el celular proveído coincide con la sesión del usuario
-    function isOwner(phoneField) {
-      return phoneField != null && (isAdmin() || request.auth == null);
+    // Verifica si el recurso pertenece al usuario autenticado (por número de teléfono o UID)
+    function isOwner(phoneField, ownerUidField) {
+      return request.auth != null && (
+        isAdmin() || 
+        request.auth.uid == ownerUidField || 
+        (phoneField != null && request.auth.token.phone_number == phoneField)
+      );
     }
 
     // ─── REGLAS POR COLECCIÓN ────────────────────────────────────────
@@ -98,14 +102,16 @@ service cloud.firestore {
 
     // 2. Base de Datos de Clientes y Perfiles
     match /users/{userId} {
-      // Clientes pueden leer/escribir su propio nodo (donde el ID del doc es su número celular)
-      allow read, write: if isAdmin() || (userId != null && request.auth == null);
+      // Permitir la creación de perfil inicial para registros
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // Proteger lecturas y actualizaciones: solo el dueño o admin
+      allow read, update: if isAdmin() || (request.auth != null && request.auth.uid == userId);
       allow list: if isAdmin(); // Protege contra descargas masivas de números/nombres
       allow delete: if isAdmin();
 
       // Subcolecciones privadas (ej: Favoritos)
       match /favorites/{favoriteId} {
-        allow read, write: if isAdmin() || true;
+        allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
       }
     }
 
@@ -121,12 +127,19 @@ service cloud.firestore {
 
     // 4. Pedidos y Transacciones
     match /orders/{document} {
-      allow create: if true; // Clientes sin auth crean pedidos
-      allow read: if isAdmin() || (resource.data.cliente.celular != null && request.query.limit <= 20);
+      allow create: if true; // Clientes sin auth crean pedidos (e-commerce público)
+      allow read: if isAdmin() || (
+        request.auth != null && 
+        resource.data.cliente.celular != null && 
+        request.auth.token.phone_number == resource.data.cliente.celular &&
+        request.query.limit <= 20
+      );
       allow update: if isAdmin() || (
+        request.auth != null &&
         resource.data.cliente.celular != null &&
+        request.auth.token.phone_number == resource.data.cliente.celular &&
         (
-          // Permite al cliente cancelar o marcar como oculto su propio pedido
+          // Permite al cliente cancelar su propio pedido si está pendiente
           (request.resource.data.estado == 'cancelado' && resource.data.estado == 'pendiente') ||
           (request.resource.data.ocultoCliente == true)
         )
@@ -136,7 +149,11 @@ service cloud.firestore {
 
     // 5. Créditos y Contabilidad
     match /credits/{document} {
-      allow read: if isAdmin() || (resource.data.clienteCelular != null);
+      allow read: if isAdmin() || (
+        request.auth != null && 
+        resource.data.clienteCelular != null &&
+        request.auth.token.phone_number == resource.data.clienteCelular
+      );
       allow write, delete: if isAdmin();
     }
 
@@ -148,7 +165,11 @@ service cloud.firestore {
 
     // 7. Notificaciones y Logs
     match /clientNotifications/{document} {
-      allow read, update: if isAdmin() || (resource.data.clienteCelular != null);
+      allow read, update: if isAdmin() || (
+        request.auth != null && 
+        resource.data.clienteCelular != null &&
+        request.auth.token.phone_number == resource.data.clienteCelular
+      );
       allow create: if true;
       allow delete: if isAdmin();
     }

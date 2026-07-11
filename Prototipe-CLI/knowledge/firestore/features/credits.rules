@@ -1,0 +1,9 @@
+    // ─── FEATURE CREDITS (CRÉDITOS Y FIADOS) ──────────────────────────
+    match /credits/{document} {
+      allow read: if isAdmin() || (
+        request.auth != null && 
+        resource.data.clienteCelular != null &&
+        request.auth.token.phone_number == resource.data.clienteCelular
+      );
+      allow write, delete: if isAdmin();
+    }

@@ -1,0 +1,8 @@
+{
+  "welcomeWidget": "StatsGrid",
+  "layoutPreset": "grid-bento",
+  "activeWidgets": [
+    { "id": "appointmentsCount", "size": "col-span-4" },
+    { "id": "patientRegistry", "size": "col-span-8" }
+  ]
+}

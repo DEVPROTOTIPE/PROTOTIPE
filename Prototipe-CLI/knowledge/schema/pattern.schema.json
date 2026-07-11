@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PatternSchema",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "displayName": { "type": "string" },
+    "requiredFeatures": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["id", "displayName", "requiredFeatures", "capabilities", "permissions"]
+}

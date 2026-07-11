@@ -1,0 +1,8 @@
+{
+  "welcomeWidget": "StatsGrid",
+  "layoutPreset": "grid-bento",
+  "activeWidgets": [
+    { "id": "leadPipeline", "size": "col-span-8" },
+    { "id": "activityTimeline", "size": "col-span-4" }
+  ]
+}

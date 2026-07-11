@@ -1,0 +1,7 @@
+{
+  "id": "pattern-dashboard-workspace",
+  "displayName": "Dashboard Workspace",
+  "requiredFeatures": [],
+  "capabilities": ["grid-bento-analytics"],
+  "permissions": []
+}

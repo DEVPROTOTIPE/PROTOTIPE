@@ -1,0 +1,7 @@
+{
+  "instanceId": "clinica-veterinaria-sanitas",
+  "clientName": "Clínica Veterinaria Sanitas",
+  "vertical": "clinica",
+  "schemaVersion": "1.0.0",
+  "features": ["appointments", "patients", "billing"]
+}

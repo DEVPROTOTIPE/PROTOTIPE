@@ -1,0 +1,7 @@
+{
+  "id": "sales",
+  "displayName": "Punto de Venta POS",
+  "capabilities": ["pos-checkout", "sales-tracking", "cash-register"],
+  "compatibleIndustries": ["retail", "restaurant"],
+  "dependencies": ["inventory"]
+}

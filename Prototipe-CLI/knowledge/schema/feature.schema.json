@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FeatureSchema",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "displayName": { "type": "string" },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "compatibleIndustries": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "npmDependencies": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "required": ["id", "displayName", "capabilities", "compatibleIndustries", "dependencies"]
+}

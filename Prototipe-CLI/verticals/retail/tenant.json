@@ -1,0 +1,6 @@
+{
+  "tenantId": "tenant-retail-001",
+  "plan": "enterprise",
+  "status": "active",
+  "featuresEnabled": ["inventory", "sales", "orders", "delivery", "billing"]
+}

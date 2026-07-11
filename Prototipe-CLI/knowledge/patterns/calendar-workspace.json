@@ -1,0 +1,7 @@
+{
+  "id": "pattern-calendar-workspace",
+  "displayName": "Calendar Workspace",
+  "requiredFeatures": ["appointments"],
+  "capabilities": ["calendar-view", "slot-picker"],
+  "permissions": ["appointments.view"]
+}

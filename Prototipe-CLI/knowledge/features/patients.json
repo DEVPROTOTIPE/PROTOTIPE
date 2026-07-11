@@ -1,0 +1,7 @@
+{
+  "id": "patients",
+  "displayName": "Registro de Pacientes",
+  "capabilities": ["database-records", "medical-history", "pet-management"],
+  "compatibleIndustries": ["healthcare", "wellness"],
+  "dependencies": []
+}

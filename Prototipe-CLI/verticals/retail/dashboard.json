@@ -1,0 +1,8 @@
+{
+  "welcomeWidget": "StatsGrid",
+  "layoutPreset": "grid-bento",
+  "activeWidgets": [
+    { "id": "revenueMetrics", "size": "col-span-6" },
+    { "id": "lowStockAlerts", "size": "col-span-6" }
+  ]
+}

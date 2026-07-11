@@ -5,15 +5,18 @@
 app_layout:
   Dashboard_Central:
     root: /Central PROTOTIPE/dev-dashboard/src/
-    components: [components/admin/, components/ui/, components/common/]
-    state: [store/]
+    components: [components/admin/BrandingEffectsPanel.jsx, components/admin/ClientLifecyclePanel.jsx, components/admin/VersionManagerView.jsx, components/admin/SaaSOperationsView.jsx, components/admin/BriefingStudioView.jsx, components/admin/FeatureMarketplaceView.jsx, components/admin/ComponentLibraryView.jsx, components/admin/ComponentSandbox.jsx, components/ui/, components/common/]
+    state: [store/, services/SaaSMetricsService.js, services/AlertEngine.js, config/saas_config.js]
   Prototipe_CLI:
     root: /Prototipe-CLI/
-    core_scripts: [server.js, generator.js, worker_create_project.js, sync_clients.js, notification_server.js]
+    core_scripts: [server.js, generator.js, worker_create_project.js, sync_clients.js, notification_server.js, scripts/validate-knowledge.js, scripts/test_promotion_pipeline.js, scripts/test_robustness_specials.js, scripts/test_bridge_health.js, scripts/test_smoke_visual.js, scripts/test_firestore_emulator.js, scripts/test_multiplatform.js, scripts/run_full_certification.js, scripts/distribute_rules.js]
     templates: [templates/template-ventas/, templates/template-core-seed/]
+    knowledge: [knowledge/core-promotion/, knowledge/firestore/, knowledge/telemetry/app-registry.json, knowledge/telemetry/event-types.json, knowledge/feature-registry.json, knowledge/schema/]
+    lib: [lib/CoreCandidateBuilder.js, lib/CorePromotionValidator.js, lib/BriefingDocumentMapper.js, lib/PromotionBlueprintBuilder.js, lib/CorePromotionService.js, lib/CorePromotionPublisher.js, lib/ClientLineageMigrator.js, lib/FeatureRegistry.js, lib/VersionManager.js, lib/CapabilityResolver.js, lib/FeatureRecommender.js, lib/ExplainabilityLogger.js, lib/PackageMerger.js, lib/ProvisioningValidator.js, lib/BlueprintSimulation.js, lib/ExperienceComposer.js, lib/BiResolver.js]
   Plantilla_Core:
     root: /Plantillas Core/App Ventas/src/
     layers: [features/, components/, services/, hooks/, constants/, store/]
+    rules: [/Plantillas Core/App Ventas/firestore.rules, /Plantillas Core/App Ventas/firestore.indexes.json]
   Instancias_Clientes:
     root: /Instancias Clientes/
     active_instances: [ventas/ventas-moni-app/]
@@ -111,6 +114,8 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_landing_page_2026.md`**: Reporte de auditoría de seguridad (rel="noopener noreferrer"), optimizaciones SEO (metadatos Open Graph/Twitter Cards), semántica HTML5 y análisis de diseño premium de la landing page.
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_critica_server_cli_2026.md`**: Auditoría de seguridad de `server.js`. Evalúa riesgos de comandos shell exec/spawn, path traversal en inputs y conmutación de puertos.
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_generator_js.md`**: Auditoría de robustez de `generator.js`. Analiza la fusión lógica de manifiestos, procesamiento de logos con Jimp y resiliencia del seeding.
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/Prototipe_CLI/manual_promocion_clientes_a_cores.md`**: Manual técnico y operacional sobre el pipeline transaccional de promoción de cores, migración y rollbacks compensatorios (Fase 6).
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/Testing/matriz_pruebas_promocion_cores.md`**: Matriz de cobertura de los 45 escenarios del plan de pruebas frente a las aserciones ejecutadas.
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_seguridad_aprovisionamiento_2026.md`**: Auditoría de seguridad del aprovisionador en la nube, evaluando roles de servicio de Firebase, validación de credenciales y mitigación de falsos negativos.
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_paridad_y_exclusiones_2026.md`**: Auditoría técnica del motor de paridad y sincronización de Cores. Analiza riesgos de sobreescritura, y detalla la arquitectura de preservación de branding y inyección SEO en index.html, la fusión de dependencias en package.json y los filtros flexibles de exclusión.
 * **`/Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/estrategia_negocio.md`**: Define el flujo operativo para adaptar la aplicación a clientes a partir de requerimientos de preventa, analizando componentes en la biblioteca o planificando nuevos módulos modularizados.
@@ -337,6 +342,13 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Prototipe-CLI/plantillas_registro.json`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
 * **`/Prototipe-CLI/config.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
 * **`/Prototipe-CLI/templates/template-core-seed/src/services/centralFirebaseService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
+* **`/Prototipe-CLI/templates/template-core-seed/src/core/experience/ExperienceSchemas.js`**: Esquemas de validación estricta Zod de la experiencia (Fase 7).
+* **`/Prototipe-CLI/templates/template-core-seed/src/core/experience/ExperienceResolver.js`**: Traductor lógico de briefing a especificación de UX (Fase 7).
+* **`/Prototipe-CLI/templates/template-core-seed/src/core/permissions/PermissionRegistry.js`**: Registro centralizado de roles y capacidades (Fase 7).
+* **`/Prototipe-CLI/templates/template-core-seed/src/core/config/ComponentRegistry.js`**: Registro central de inyección y gobernanza de componentes React (Fase 7).
+* **`/Prototipe-CLI/templates/template-core-seed/src/core/config/PatternRegistry.js`**: Registro de patrones de interacción de alto nivel (Fase 7).
+* **`/Prototipe-CLI/templates/template-core-seed/src/core/dashboard/DashboardComposer.js`**: Compositor dinámico de la interfaz Bento del dashboard (Fase 7).
+* **`/Prototipe-CLI/templates/template-core-seed/src/core/experience/ExperienceRegistry.js`**: Orquestador central de bootstrap y branding visual (Fase 7).
 * **`/Prototipe-CLI/templates/template-core-seed/src/components/admin/settings/DeveloperDiagnosticsModal.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
 * **`/Prototipe-CLI/templates/template-core-seed/src/services/appConfigService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
 * **`/Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
@@ -346,7 +358,17 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Central PROTOTIPE/dev-dashboard/src/services/pdfService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-023).
 * **`/Plantillas Core/App Ventas/tests/helpers/checkout.helpers.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea LINE-2007).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-030).
-* **`/Prototipe-CLI/server.js`**: Puente de API local de la consola de administración. Incluye la corrección para execSync indefinido en el despliegue de reglas Firebase. Actualizado en CLI-358.
+* **`/Prototipe-CLI/server.js`**: Puente de API local de la consola de administración. Incluye la corrección para execSync indefinido en el despliegue de reglas Firebase y el middleware de autenticación criptográfica Firebase Auth/RBAC. Actualizado en CLI-397.
+* **`/Prototipe-CLI/knowledge/core-promotion/promotion-blueprint.schema.json`**: JSON Schema del blueprint de promoción en formato Draft-07. [NEW] CLI-397.
+* **`/Prototipe-CLI/knowledge/core-promotion/lineage-migration.schema.json`**: JSON Schema del blueprint de migración de linajes de clientes. [NEW] CLI-397.
+* **`/Prototipe-CLI/knowledge/core-promotion/journal.schema.json`**: JSON Schema del journal transaccional de operaciones del monorepo. [NEW] CLI-397.
+* **`/Prototipe-CLI/knowledge/core-promotion/file-policy.json`**: Configuración de políticas granulares de exclusión y transformación en staging. [NEW] CLI-397.
+* **`/Prototipe-CLI/knowledge/core-promotion/seed-rules.json`**: Reglas de filtrado y anonimización de colecciones/campos para seeds. [NEW] CLI-397.
+* **`/Prototipe-CLI/lib/PromotionBlueprintBuilder.js`**: Lector/escritor seguro de blueprints y journals con validación AJV y protección Prototype Pollution. [NEW] CLI-397.
+* **`/Prototipe-CLI/lib/CorePromotionService.js`**: Coordinador general del pipeline y encargado de la rutina de recuperación tras reinicio del Bridge. [NEW] CLI-397.
+* **`/Prototipe-CLI/lib/CoreCandidateBuilder.js`**: Constructor del core candidato en staging aplicando file-policy.json y reescritura de namespaces. [NEW] CLI-399.
+* **`/Prototipe-CLI/lib/CorePromotionValidator.js`**: Validador de staging. Escanea secretos, PII, verifica features, anonimiza seeds y compila producción Vite. [NEW] CLI-399.
+* **`/Prototipe-CLI/lib/BriefingDocumentMapper.js`**: Mapeador de especificaciones de gobernanza del core a partir de briefings y blueprints. [NEW] CLI-399.
 * **`/Prototipe-CLI/notification_server.js`**: Servidor de notificaciones Telegram del ecosistema. Incluye ciclo de polling de comandos, Inline Keyboards, State Machine para wizard /addtask, interceptor AWAITING_TEXT, y soporte multi-canal. Incorpora los módulos remotos de control de versiones de Git (/git), administración de dev servers Vite (/devserver), herramientas de autocuración (/fix), matriz de desviación de reglas Firebase (/rules), diagnósticos de Playwright (/tests), e inventario de Cores semilla (/cores). Robustecido con manejadores de excepciones y aislamiento de updates. Implementa los comandos `/telemetria` y `/telemetria_check` para auditar transmisiones mensuales. Robustecido con cerrojo de refresco de tokens OAuth2, polling seguro no solapado con setTimeout y Graceful Shutdown en señales SIGINT/SIGTERM. [MODIFY] CLI-365.
 * **`/Prototipe-CLI/notification_config.json`**: Archivo de configuración local para los canales de Telegram (tokens, chat IDs por subcanal). Excluido del linter de integridad por ser artefacto de credenciales de entorno. [NEW] CLI-341.
 * **`/Central PROTOTIPE/dev-dashboard/src/components/ui/DarkModeToggle.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-032).
@@ -517,7 +539,13 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
     * **`src/components/admin/CobrosPanel.jsx`**: Módulo completo y modular del historial de comisiones recaudadas a pantalla completa. Ofrece métricas de cobro y efectividad, buscador, filtros por año, paginación, toggle de agrupación para consolidar el historial acumulado por cliente (abriendo un Side Drawer detallado) o desglose periodizado, e interacción de reversión de pagos con animaciones de carga.
     * **`src/components/admin/ComisionesPanel.jsx`**: Módulo completo y modular de visualización y exportación de comisiones acumuladas a pantalla completa. Presenta un desglose interactivo de aportes por cliente con barras de progreso y porcentaje de contribución, historial paginado de transacciones con búsquedas y ordenamientos, exportación general a PDF de métricas y proyecciones, y un Side Drawer lateral con el desglose histórico de periodos por cliente seleccionado.
     * **`src/components/admin/NichesManagerPanel.jsx`**: Módulo completo y modular de administración, creación y edición de verticales de negocio (nichos) del monorepo a pantalla completa. Permite buscar nichos, añadir nuevos atributos dinámicos (de tipo texto o dropdown con opciones delimitadas por comas), editar propiedades y borrar nichos mediante ventana de confirmación segura, unificado con `config/niches_metadata.json` del backend. [NEW]
-     * **`src/components/admin/BrandingEffectsPanel.jsx`**: Panel de control interactivo (Design Studio) para seleccionar e interactuar con los nuevos tokens de efectos de branding avanzados (shadowStyle, glassmorphism, animationSpeed y radiusMode) con previsualización en vivo. [NEW]
+    * **`src/components/admin/BrandingEffectsPanel.jsx`**: Panel de control interactivo (Design Studio) para seleccionar e interactuar con los nuevos tokens de efectos de branding avanzados (shadowStyle, glassmorphism, animationSpeed y radiusMode) con previsualización en vivo. [NEW]
+    * **`src/components/admin/ClientLifecyclePanel.jsx`**: Panel modular premium de gestión de ciclo de vida del cliente. Permite la edición en caliente de variables SaaS, branding (paleta HSL), estado de cuenta SaaS (active, suspended, offboarded) e inyección/remoción en vivo de features funcionales del FeatureRegistry en la instancia. [NEW] CLI-394.
+    * **`src/components/admin/VersionManagerView.jsx`**: Panel modular premium de gestión de versiones y control de actualizaciones del cliente. Integra semáforos HSL de drift, modal interactivo de plan pre-flight, y terminal de logs SSE en vivo con DevOps Guard Simulator integrado. [NEW] CLI-395.
+    * **`src/services/SaaSMetricsService.js`**: Servicio desacoplado para consolidar el cálculo de MRR, ARR, Churn Rate e ingresos comisionales del ecosistema SaaS. [NEW] CLI-395.
+    * **`src/components/admin/SaaSOperationsView.jsx`**: Panel ejecutivo presentacional de operaciones SaaS. Muestra indicadores financieros, pings HTTP y consola de logs de incidentes. [NEW] CLI-396.
+    * **`src/services/AlertEngine.js`**: Motor desacoplado para evaluar la salud de las instancias, latencias y errores de telemetría y generar alertas operativas. [NEW] CLI-396.
+    * **`src/config/saas_config.js`**: Configuración dinámica de costos de infraestructura por tenant, tarifas y umbrales del ecosistema SaaS. [NEW] CLI-396.
     * **`src/components/admin/SkillsRoadmapPanel.jsx`** **(EXTENDIDO - CORE-263/264/265)**: Panel central de herramientas del desarrollador que agrupa en pestañas las utilidades de gestión del ecosistema. **Desde CORE-264/265**, incorpora 4 funcionalidades avanzadas en Roadmap: (1) **Panel de Detalles Interactivo 2 columnas** — al seleccionar una tarea se despliega una vista lateral con descripción técnica, lista de archivos con badges por color (`MODIFY`/`NEW`/`DELETE`) y metadatos; (2) **Buscador en Tiempo Real y Filtros Inteligentes** — foco con `/`, 3 filtros de estado (`Todas`, `Pendientes`, `Hechas`) y un **carrusel de pills de dominios** que muestra contadores por dominio y permite filtrado multi-dominio; (3) **Formulario de Creación Inline** — unificado mediante un desplegable **`CustomSelect`** con soporte para 9 dominios oficiales (CORE/CLI/DASH/TPL/PLT/INST/DOC/LND/BIZ) y auto-ID secuencial calculado; (4) **Barra de Métricas y Renderizado Multi-badge** — visualiza en cabecera el porcentaje de avance general y en el listado múltiples etiquetas de colores según el dominio inferido dinámicamente. [MODIFY]
     * **`src/components/admin/HealthMonitorView.jsx`**: Panel semafórico de monitoreo de disponibilidad HTTP y manifests de las instancias con gráficos históricos de latencia en ms.
     * **`src/firebase.js`**: Módulo de inicialización singleton de Firebase Central en dev-dashboard para persistir y sincronizar la colección `historial_respaldos`.
@@ -579,6 +607,14 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/src/components/ui/BackgroundCanvas.jsx`** (Template Core Seed): Componente de renderizado de fondos dinámicos interactivos (mallas fluidas Mesh Gradient, auroras y partículas flotantes aceleradas por GPU) compatible con dirección fluida en 4 ejes, opacidades graduables y formas vectoriales personalizadas procedimentales (círculos, glow, estrellas e iconos SVG por nicho). [MODIFY]
 * **`/src/components/ui/particlesIcons.js`** (Template Core Seed): Biblioteca premium y organizada con 110 iconos vectoriales de Lucide distribuidos en 11 categorías temáticas para partículas flotantes personalizadas del lienzo. [NEW]
 * **`/src/components/ui/InteractiveTiltCard.jsx`** (Template Core Seed): Tarjeta interactiva con inclinación física 3D y brillo holográfico (Glare) optimizada para aceleración por hardware. [NEW]
+* **`/src/core/kernel/ApplicationKernel.js`** (Core v2.7): Bootstrap y orquestador centralizado de la carga lineal de features activas. [NEW] Tarea CLI-378.
+* **`/src/core/kernel/FeatureLifecycleManager.js`** (Core v2.7): Máquina de estados finitos que valida transiciones de ciclo de vida en runtime. [NEW] Tarea CLI-378.
+* **`/src/core/kernel/FeatureHealthManager.js`** (Core v2.7): Administrador de diagnóstico de salud operativa en runtime. [NEW] Tarea CLI-378.
+* **`/src/features/inventory/services/inventoryInterface.js`** (Core v2.7): Contrato y API pública de inventario que encapsula las operaciones de deducción transaccional de stock con optimización de lecturas. [NEW] Tarea CLI-380.
+* **`/src/features/inventory/module.js`** (Core v2.7): Manifiesto de feature de inventario. [NEW] Tarea CLI-380.
+* **`/src/features/sales/module.js`** (Core v2.7): Manifiesto de feature de ventas/POS. [NEW] Tarea CLI-380.
+* **`/src/features/orders/module.js`** (Core v2.7): Manifiesto de feature de pedidos. [NEW] Tarea CLI-380.
+* **`/src/features/credits/module.js`** (Core v2.7): Manifiesto de feature de créditos. [NEW] Tarea CLI-380.
 
 
 

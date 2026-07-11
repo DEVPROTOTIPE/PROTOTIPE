@@ -1,0 +1,139 @@
+{
+  "features": [
+    {
+      "id": "sales",
+      "displayName": "Punto de Venta POS",
+      "version": "1.0.0",
+      "category": "commerce",
+      "description": "Módulo de cobro en punto de venta con soporte offline y scanner de códigos de barras.",
+      "capabilities": ["pos-checkout", "sales-tracking", "cash-register"],
+      "compatibleIndustries": ["retail", "restaurant", "grocery_food", "licores-cocteleria"],
+      "dependencies": ["inventory"],
+      "physicalPaths": [
+        "templates/template-ventas/src/features/sales",
+        "templates/template-core-seed/src/features/sales"
+      ],
+      "npmDependencies": {
+        "lucide-react": "^0.344.0"
+      },
+      "status": "stable",
+      "tags": ["pos", "caja", "venta", "scanner", "código de barras", "tienda"]
+    },
+    {
+      "id": "inventory",
+      "displayName": "Inventario de Productos",
+      "version": "1.0.0",
+      "category": "logistics",
+      "description": "Control de stock en tiempo real, alertas de bajo stock, categorías y variantes de productos.",
+      "capabilities": ["inventory-tracking", "stock-alerts", "product-catalog"],
+      "compatibleIndustries": ["retail", "restaurant", "grocery_food", "insumos-agricolas", "repuestos-motos", "distribuidoras-beauty", "petshops-locales", "repuestos-lineablanca", "moda-local-calzado", "alimentacion-saludable", "home-office-ergonomia", "licores-cocteleria", "coleccionismo-geek", "distribucion-horeca", "alimentos-artesanales"],
+      "dependencies": [],
+      "physicalPaths": [
+        "templates/template-ventas/src/features/inventory",
+        "templates/template-core-seed/src/features/inventory"
+      ],
+      "npmDependencies": {
+        "lucide-react": "^0.344.0"
+      },
+      "status": "stable",
+      "tags": ["inventario", "stock", "bodega", "almacén", "producto", "catálogo"]
+    },
+    {
+      "id": "orders",
+      "displayName": "Pedidos y Domicilios",
+      "version": "1.0.0",
+      "category": "logistics",
+      "description": "Gestión de pedidos en línea, estados de entrega, geolocalización y notificaciones de repartidores.",
+      "capabilities": ["order-tracking", "delivery-management", "notifications"],
+      "compatibleIndustries": ["restaurant", "grocery_food", "licores-cocteleria", "alimentos-artesanales", "distribucion-horeca"],
+      "dependencies": ["inventory"],
+      "physicalPaths": [
+        "templates/template-ventas/src/features/orders",
+        "templates/template-core-seed/src/features/orders"
+      ],
+      "npmDependencies": {
+        "lucide-react": "^0.344.0"
+      },
+      "status": "stable",
+      "tags": ["pedido", "order", "tracking", "seguimiento", "domicilio", "delivery", "reparto"]
+    },
+    {
+      "id": "billing",
+      "displayName": "Facturación Electrónica DIAN",
+      "version": "1.0.0",
+      "category": "finance",
+      "description": "Facturación fiscal electrónica, generación de facturas XML, cálculo de comisiones e integración DIAN.",
+      "capabilities": ["fiscal-invoicing", "commissions-calculation", "financial-reporting"],
+      "compatibleIndustries": ["retail", "restaurant", "healthcare", "wellness", "technical_services", "refrigeration_ac", "contractors", "machinery_rental", "carpentry", "laundry", "furniture_repair", "wellness_podology", "grocery_food", "insumos-agricolas", "alimentos-artesanales", "ferreteria-rural", "repuestos-motos", "distribuidoras-beauty", "petshops-locales", "repuestos-lineablanca", "moda-local-calzado", "alimentacion-saludable", "home-office-ergonomia", "licores-cocteleria", "coleccionismo-geek", "distribucion-horeca"],
+      "dependencies": [],
+      "physicalPaths": [
+        "templates/template-ventas/src/features/billing",
+        "templates/template-core-seed/src/features/billing"
+      ],
+      "npmDependencies": {
+        "jspdf": "^2.5.1",
+        "jspdf-autotable": "^3.8.2",
+        "html2canvas": "^1.4.1"
+      },
+      "status": "stable",
+      "tags": ["factura", "comisión", "invoice", "billing", "dian", "pdf", "recaudo"]
+    },
+    {
+      "id": "appointments",
+      "displayName": "Agenda y Reservas de Turnos",
+      "version": "1.0.0",
+      "category": "services",
+      "description": "Calendario de citas interactivo con recordatorios por WhatsApp y asignación de profesionales.",
+      "capabilities": ["calendar-management", "reservations", "reminders"],
+      "compatibleIndustries": ["healthcare", "wellness", "wellness_podology", "technical_services", "refrigeration_ac", "contractors", "laundry", "furniture_repair"],
+      "dependencies": ["patients"],
+      "physicalPaths": [
+        "templates/template-ventas/src/features/appointments",
+        "templates/template-core-seed/src/features/appointments"
+      ],
+      "npmDependencies": {
+        "lucide-react": "^0.344.0"
+      },
+      "status": "stable",
+      "tags": ["agenda", "reserva", "cita", "calendario", "fecha", "whatsapp"]
+    },
+    {
+      "id": "patients",
+      "displayName": "Historial Clínico e Historial de Pacientes",
+      "version": "1.0.0",
+      "category": "services",
+      "description": "Gestión del historial clínico de pacientes, firmas de conformidad y control de tratamientos médicos.",
+      "capabilities": ["clinical-history", "consent-signature", "patient-records"],
+      "compatibleIndustries": ["healthcare", "wellness", "wellness_podology"],
+      "dependencies": [],
+      "physicalPaths": [
+        "templates/template-ventas/src/features/patients",
+        "templates/template-core-seed/src/features/patients"
+      ],
+      "npmDependencies": {
+        "lucide-react": "^0.344.0"
+      },
+      "status": "stable",
+      "tags": ["paciente", "historial", "clinica", "firma", "consentimiento", "tratamiento"]
+    },
+    {
+      "id": "crm",
+      "displayName": "Gestión de Relaciones con Clientes (CRM)",
+      "version": "1.0.0",
+      "category": "management",
+      "description": "Seguimiento de prospectos, base de datos unificada de clientes, histórico de transacciones y deudas pendientes.",
+      "capabilities": ["client-tracking", "debts-management", "sales-leads"],
+      "compatibleIndustries": ["retail", "wellness", "technical_services", "refrigeration_ac", "contractors", "machinery_rental", "carpentry", "furniture_repair", "grocery_food", "insumos-agricolas", "ferreteria-rural", "repuestos-motos", "distribuidoras-beauty", "petshops-locales", "repuestos-lineablanca", "moda-local-calzado", "alimentacion-saludable", "home-office-ergonomia", "licores-cocteleria", "coleccionismo-geek", "distribucion-horeca", "alimentos-artesanales"],
+      "dependencies": [],
+      "physicalPaths": [
+        "templates/template-ventas/src/features/crm",
+        "templates/template-core-seed/src/features/crm"
+      ],
+      "npmDependencies": {
+        "lucide-react": "^0.344.0"
+      },
+      "status": "stable",
+      "tags": ["crm", "clientes", "deudas", "créditos", "seguimiento"]
+    }
+  ]
+}

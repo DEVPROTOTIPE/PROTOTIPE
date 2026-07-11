@@ -1,0 +1,28 @@
+{
+  "eventTypes": [
+    {
+      "type": "error",
+      "description": "Excepciones en tiempo de ejecución o fallos de compilación",
+      "allowedSources": ["client-runtime", "build-pipeline", "cli"],
+      "allowedSeverities": ["critical", "warning"]
+    },
+    {
+      "type": "performance",
+      "description": "Métricas de rendimiento de carga e interacción",
+      "allowedSources": ["client-runtime", "cli"],
+      "allowedSeverities": ["info", "warning"]
+    },
+    {
+      "type": "audit_status",
+      "description": "Estado de auditoría y análisis físico de la app",
+      "allowedSources": ["cli", "build-pipeline"],
+      "allowedSeverities": ["info", "warning", "critical"]
+    },
+    {
+      "type": "heartbeat",
+      "description": "Pulso periódico de actividad y salud de la instancia",
+      "allowedSources": ["client-runtime"],
+      "allowedSeverities": ["info"]
+    }
+  ]
+}

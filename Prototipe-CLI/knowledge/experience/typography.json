@@ -1,0 +1,19 @@
+{
+  "typography": [
+    {
+      "id": "Outfit",
+      "displayName": "Outfit Modern sans-serif",
+      "visualStyles": ["modern-clean", "soft-friendly"]
+    },
+    {
+      "id": "Inter",
+      "displayName": "Inter Balanced sans-serif",
+      "visualStyles": ["corporate-serious", "modern-clean"]
+    },
+    {
+      "id": "Roboto",
+      "displayName": "Roboto Tech sans-serif",
+      "visualStyles": ["technical-precise", "corporate-serious"]
+    }
+  ]
+}

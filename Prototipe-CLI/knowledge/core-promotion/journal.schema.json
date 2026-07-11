@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TransactionalJournal",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "operationId": {
+      "type": "string",
+      "pattern": "^(?:promo|mig|act)-[a-z0-9-]+$"
+    },
+    "operationType": {
+      "type": "string",
+      "enum": ["CORE_PUBLICATION", "CORE_ACTIVATION", "LINEAGE_MIGRATION"]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "IN_PROGRESS",
+        "COMPLETED",
+        "ROLLING_BACK",
+        "ROLLED_BACK",
+        "FAILED"
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "IN_PROGRESS", "COMPLETED", "FAILED", "ROLLED_BACK"]
+          },
+          "startedAt": { "type": ["string", "null"], "format": "date-time" },
+          "completedAt": { "type": ["string", "null"], "format": "date-time" },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "path": { "type": "string" },
+                "artifactType": {
+                  "type": "string",
+                  "enum": ["FILE", "DIRECTORY", "REGISTRY_ENTRY"]
+                },
+                "ownership": {
+                  "type": "string",
+                  "enum": ["CREATED_BY_OPERATION", "MODIFIED_BY_OPERATION"]
+                },
+                "action": {
+                  "type": "string",
+                  "enum": ["CREATE", "MODIFY", "DELETE", "RENAME"]
+                },
+                "beforeHash": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+                "afterHash": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+                "rollbackAction": {
+                  "type": "string",
+                  "enum": [
+                    "DELETE_IF_HASH_MATCHES",
+                    "RESTORE_BACKUP_IF_HASH_MATCHES",
+                    "RENAME_BACK",
+                    "NO_ACTION"
+                  ]
+                },
+                "backupPath": { "type": "string" },
+                "originalEntryData": { "type": ["object", "null"] }
+              },
+              "required": ["path", "artifactType", "ownership", "action", "beforeHash", "afterHash", "rollbackAction"]
+            }
+          }
+        },
+        "required": ["id", "status", "startedAt", "completedAt", "artifacts"]
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "operationId",
+    "operationType",
+    "status",
+    "createdAt",
+    "updatedAt",
+    "steps"
+  ]
+}

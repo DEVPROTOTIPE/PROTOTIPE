@@ -1,0 +1,32 @@
+{
+  "widgets": [
+    {
+      "id": "AppointmentsCalendarWidget",
+      "displayName": "Calendario de Citas Recientes",
+      "requiredCapabilities": ["calendar-management"],
+      "recommendedComponents": ["PremiumCalendar"],
+      "size": "large"
+    },
+    {
+      "id": "SalesSummaryWidget",
+      "displayName": "Resumen Analítico de Ventas",
+      "requiredCapabilities": ["pos-checkout"],
+      "recommendedComponents": ["CajaDiariaPOS"],
+      "size": "medium"
+    },
+    {
+      "id": "ActiveOrdersWidget",
+      "displayName": "Pedidos y Domicilios Activos",
+      "requiredCapabilities": ["order-processing"],
+      "recommendedComponents": ["OrderCard"],
+      "size": "medium"
+    },
+    {
+      "id": "QuickActionsWidget",
+      "displayName": "Acciones Rápidas de Operación",
+      "requiredCapabilities": [],
+      "recommendedComponents": [],
+      "size": "small"
+    }
+  ]
+}

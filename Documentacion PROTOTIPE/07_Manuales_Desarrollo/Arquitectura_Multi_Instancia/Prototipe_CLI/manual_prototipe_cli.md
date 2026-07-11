@@ -343,4 +343,10 @@ Si durante la ejecución de `POST /api/create-project` o desde el Dashboard Dev 
 1. **Despliegue Local (Desarrollo):** Ejecuta de inmediato `firebase login --reauth` en tu terminal del sistema para restablecer las credenciales locales globales de Firebase.
 2. **Entornos Autónomos (Servidores / CI):** Genera un token perpetuo de despliegue usando `firebase login:ci`, y asígnalo a la variable de entorno `FIREBASE_TOKEN` del backend. El API Bridge detectará este token y lo inyectará en cascada en todos los comandos de la CLI de Firebase agregando `--token "%FIREBASE_TOKEN%"`.
 
+---
+
+## 🚀 11. Pipeline de Promoción y Migración de Cores (Fase 6)
+
+El daemon de `server.js` aloja y orquesta los endpoints del pipeline de promoción de cores e inmunidad ante drifts. Toda la documentación técnica de los contratos JSON, políticas de sanitización, locks concurrentes y máquina de estados transaccionales se encuentra centralizada en el [Manual de Promoción de Instancias Clientes a Plantillas Core](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/Arquitectura_Multi_Instancia/Prototipe_CLI/manual_promocion_clientes_a_cores.md).
+
 

@@ -1,5 +1,423 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+## Métrica de Avance del Ecosistema (Cálculo Analítico)
+* **Estado del Roadmap:** `99.27%` de completitud en base a 409 tareas completadas de 412 tareas únicas verificables.
+* **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-404: Auditoría de Robustez, Certificación de Reglas Firestore y Spark-first Policy (H-01, H-02, H-03, H-05)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Refactorizado el Bridge local y las aplicaciones cliente para implementar la política Spark-first (fallo seguro en CI si requiere Blaze a menos que se autorice explícitamente con `--allow-billing-plan=blaze`). Se removieron tokens estáticos de telemetría de todos los bundles y configuraciones (.env.local). Se implementó la verificación de App Check server-side en el Bridge y la traducción dinámica de App ID a tenant (app-registry.json). Se crearon las reglas compuestas modulares de Firestore (core + features) y la suite de tests de emulador test_firestore_emulator.js (15/15 pasadas) con motor de aserciones en memoria de fallback. Se integró la verificación de portabilidad multiplataforma test_multiplatform.js. Todos los artefactos fueron compilados y certificados al 100%.
+  - Archivos:
+    - [`Prototipe-CLI/scripts/test_firestore_emulator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_firestore_emulator.js) [NEW]
+    - [`Prototipe-CLI/scripts/test_multiplatform.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_multiplatform.js) [NEW]
+    - [`Prototipe-CLI/scripts/run_full_certification.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/run_full_certification.js) [MODIFY]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/sync_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/sync_templates.js) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/services/telemetryService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/telemetryService.js) [MODIFY]
+    - [`Prototipe-CLI/knowledge/firestore/`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/firestore/) [NEW]
+    - [`Prototipe-CLI/knowledge/telemetry/app-registry.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/telemetry/app-registry.json) [NEW]
+    - [`Prototipe-CLI/scripts/distribute_rules.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/distribute_rules.js) [NEW]
+
+* **[x] ~~Tarea BUG-404: Mitigación de Vulnerabilidad Crítica H-01 en Firestore Rules (Post-Auditoría)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Corregida la vulnerabilidad crítica H-01 documentada en el estándar de seguridad de Firestore (`seguridad_firestore_ecosistema.md`). Se eliminaron las reglas que permitían lecturas y escrituras anónimas desprotegidas en `/users/{userId}` y `/favorites` mediante `|| true` o `request.auth == null` sin validar propiedad. Se agregaron comprobaciones obligatorias de UID (`request.auth.uid == userId`) y teléfono (`request.auth.token.phone_number == celular`) en pedidos, créditos y notificaciones de clientes.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/seguridad_firestore_ecosistema.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/seguridad_firestore_ecosistema.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-403: Pipeline de Promoción de Cores - Fase 7: Suite de Robustez, Hardening y Certificación~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Desarrollada y ejecutada la suite de robustez y casos especiales (`test_robustness_specials.js`), el health check de Express (`test_bridge_health.js`), y el orquestador unificado de certificación de npm (`run_full_certification.js`), elevando la cobertura real certificada al 88.89% con 30 aserciones de robustez pasadas y cero fallos. Endurecido el bypass local en `server.js` bajo IPs loopback.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
+    - [`Prototipe-CLI/scripts/test_robustness_specials.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_robustness_specials.js) [NEW]
+    - [`Prototipe-CLI/scripts/test_bridge_health.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_bridge_health.js) [NEW]
+    - [`Prototipe-CLI/scripts/run_full_certification.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/run_full_certification.js) [NEW]
+
+* **[x] ~~Tarea CLI-402: Pipeline de Promoción de Cores - Fase 6: Pruebas de Integración y Calidad de Transacciones~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Desarrollada y ejecutada la suite completa de integración `scripts/test_promotion_pipeline.js` validando los 34 puntos críticos de control de estados, transiciones controladas, locks físicos, idempotencia por clave hash, escaneo de secretos/PII en cuarentena, compilación Vite local, generación de gobernanza, y compensaciones atómicas por rollback y restauración de registros/backups en plantillas y linaje de clientes.
+  - Archivos:
+    - [`Prototipe-CLI/scripts/test_promotion_pipeline.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_promotion_pipeline.js) [NEW]
+
+* **[x] ~~Tarea CLI-401: Pipeline de Promoción de Cores - Fase 5: Migración de Linaje y Drift de Clientes~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Creado `ClientLineageMigrator.js` que realiza copias de seguridad físicas en caliente de manifiestos de cliente (`.prototipe.json`, `prototipe.lock.json`, `package.json`), calcula drift de archivos y alineación mediante hashes SHA-256 e implementa rollback transaccional con reversión y consistencia a cero desviaciones.
+  - Archivos:
+    - [`Prototipe-CLI/lib/ClientLineageMigrator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ClientLineageMigrator.js) [NEW]
+
+* **[x] ~~Tarea CLI-400: Pipeline de Promoción de Cores - Fase 4: Publicación, Activación y Rollback Compensatorio~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Creado `CorePromotionPublisher.js` para realizar publicación atómica en templates inactivos, mutar metadatos en `plantillas_registro.json` a v0.0.1, activar en producción a v1.0.0 e implementar reversiones de estados y Journal de compensaciones para restauración de backups.
+  - Archivos:
+    - [`Prototipe-CLI/lib/CorePromotionPublisher.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/CorePromotionPublisher.js) [NEW]
+    - [`Prototipe-CLI/knowledge/core-promotion/journal.schema.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/core-promotion/journal.schema.json) [MODIFY]
+    - [`Prototipe-CLI/lib/CorePromotionService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/CorePromotionService.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-399: Pipeline de Promoción de Cores - Fase 3: Staging y Validadores~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Implementado el constructor de staging `CoreCandidateBuilder.js` que aplica selectivamente las directivas de `file-policy.json`, reescribe namespaces de marca y extrae colores cromáticos de `index.css`. Implementado `CorePromotionValidator.js` para escaneo y redacción de secretos en logs, análisis de PII en Markdown/JSON orientando a cuarentena, paridad del Feature Registry, anonimización de seeds según `seed-rules.json` y smoke tests de Vite (`npm run build`). Creado `BriefingDocumentMapper.js` para la generación autónoma de los 12 manuales y guías del nuevo Core.
+  - Archivos:
+    - [`Prototipe-CLI/lib/CoreCandidateBuilder.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/CoreCandidateBuilder.js) [NEW]
+    - [`Prototipe-CLI/lib/CorePromotionValidator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/CorePromotionValidator.js) [NEW]
+    - [`Prototipe-CLI/lib/BriefingDocumentMapper.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/BriefingDocumentMapper.js) [NEW]
+
+* **[x] ~~Tarea CLI-398: Pipeline de Promoción de Cores - Fase 2: Estados, Locks e Idempotencia~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Implementada la máquina de estados lógicos con validaciones estrictas de transiciones de estados permitidos, persistencia física de locks en disco con temporizador de Heartbeat cada 30s, liberación automática de stale locks, motor de idempotencia persistente con hash SHA-256 de payloads y control de colisiones 409 Conflict.
+  - Archivos:
+    - [`Prototipe-CLI/lib/CorePromotionService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/CorePromotionService.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-397-FASE1: Pipeline de Promoción de Cores - Contratos y Seguridad~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Implementados todos los JSON Schemas de validación (CorePromotionBlueprint, ClientLineageMigrationBlueprint, JournalSchema), reglas de extracción de semillas (seed-rules.json), políticas estructuradas de exclusión y transformación (file-policy.json), el middleware de Firebase Auth/RBAC y la base del CorePromotionService con su rutina de recuperación.
+  - Archivos:
+    - [`Prototipe-CLI/knowledge/core-promotion/promotion-blueprint.schema.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/core-promotion/promotion-blueprint.schema.json) [NEW]
+    - [`Prototipe-CLI/knowledge/core-promotion/lineage-migration.schema.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/core-promotion/lineage-migration.schema.json) [NEW]
+    - [`Prototipe-CLI/knowledge/core-promotion/journal.schema.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/core-promotion/journal.schema.json) [NEW]
+    - [`Prototipe-CLI/knowledge/core-promotion/file-policy.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/core-promotion/file-policy.json) [NEW]
+    - [`Prototipe-CLI/knowledge/core-promotion/seed-rules.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/core-promotion/seed-rules.json) [NEW]
+    - [`Prototipe-CLI/lib/PromotionBlueprintBuilder.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/PromotionBlueprintBuilder.js) [NEW]
+    - [`Prototipe-CLI/lib/CorePromotionService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/CorePromotionService.js) [NEW]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
+
+* **[x] ~~Tarea CLI-396-HOTFIX: Hotfix de Detección de Instancias en Segundo Nivel (Version Manager & CoreSync)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Resuelta la asimetría de búsqueda de directorios físicos en `GET /api/project/versions` implementando escaneo en dos niveles. Se inyectaron las constantes globales de ruta `INSTANCES_DIR` y `SEED_DIR` que causaban ReferenceError silenciosos en Express. Se agregaron estilos de altura mínima y se ajustó la opacidad de los items de clientes en el scroll del Sincronizador Core para garantizar visibilidad óptima en el dashboard. Se envolvieron el modal del Update Plan y el progress log drawer en `createPortal(..., document.body)` para evitar desalineaciones por transformaciones de CSS de los contenedores padres y garantizar que aparezcan perfectamente centrados en la pantalla. Se implementó resolución de plantilla core dinámica y extensible `getCorePathForClient()` en `VersionManager.js` para detectar en caliente el core-type de la instancia (ej: `ventas`, `servicios`, `estetica`) mediante su `.prototipe.json` y escanear difusamente el directorio físico `Plantillas Core` en búsqueda de su respectiva carpeta física, haciéndolo compatible de forma transparente con cualquier core presente y futuro. Se integró una comparación inteligente de contenido UTF-8 mediante `filesDiffer()` en `VersionManager.js` para evitar proponer modificaciones de archivos del core o features que físicamente ya se encuentran alineados en el disco del cliente, eliminando avisos redundantes en el Blueprint. Se programó la auto-alineación del lockfile físico en caliente con la versión real del `package.json` de la instancia en `detectDrift` para mitigar drifts lógicos falsos si el core de la instancia ya está actualizado.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/lib/VersionManager.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/VersionManager.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/VersionManagerView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/VersionManagerView.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-396: SaaS Operations Dashboard & Global Config (Fase 9.4)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Implementación de panel ejecutivo presentacional de operaciones SaaS, telemetría y consola terminal de incidentes, AlertEngine desacoplado, configuración SaaS editable y homologación interactiva de divisas (COP/USD) bindeada a Firestore.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/SaaSOperationsView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/SaaSOperationsView.jsx) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/services/AlertEngine.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/services/AlertEngine.js) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/config/saas_config.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/config/saas_config.js) [NEW]
+    - [`Prototipe-CLI/knowledge/telemetry/event-types.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/telemetry/event-types.json) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/services/SaaSMetricsService.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/services/SaaSMetricsService.js) [MODIFY]
+
+* **[x] ~~Tarea DOC-MEMBER-PROVISIONING: Documentación Maestra del Flujo de Aprovisionamiento~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Creado manual_aprovisionamiento_clientes.md e indexado en el mapa semántico.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_aprovisionamiento_clientes.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_aprovisionamiento_clientes.md) [NEW]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-393: Feature Marketplace & Registry (Fase 9.1)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Implementación de Feature Registry como única fuente de verdad para resolver features en generator.js y enriquecimiento del lockfile operacional, exponiendo la interfaz en la pestaña Feature Marketplace del Dashboard Central.
+  - Archivos:
+    - [`Prototipe-CLI/knowledge/feature-registry.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/feature-registry.json) [NEW]
+    - [`Prototipe-CLI/lib/FeatureRegistry.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/FeatureRegistry.js) [NEW]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureMarketplaceView.jsx`](file:///d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureMarketplaceView.jsx) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-392-HOTFIX-ZOD: Hotfix de Validación Zod en Bootstrap de Manifiestos~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Corregida discrepancia de propiedades en application.json y tenant.json esperadas por el front-end.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-392: Despliegue y Validación Final del Dashboard Central~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Registro de cambios locales Git y despliegue del Dashboard Central a Firebase Hosting.
+  - Archivos:
+    - [`Prototipe-CLI/cli.js`](file:///d:/PROTOTIPE/Prototipe-CLI/cli.js)
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js)
+    - [`Prototipe-CLI/package-lock.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package-lock.json)
+    - [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json)
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_core_vs_features_template.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_core_vs_features_template.md)
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_experience_framework.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_experience_framework.md)
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/evolucion_plataforma_prototype.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/evolucion_plataforma_prototype.md)
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/disenio_arquitectura_core_v2.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/disenio_arquitectura_core_v2.md)
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/disenio_arquitectura_provisioning_ia_fase8.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/disenio_arquitectura_provisioning_ia_fase8.md)
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/especificacion_disenio_experiencia_fase7.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/especificacion_disenio_experiencia_fase7.md)
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md)
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md)
+    - [`Prototipe-CLI/knowledge/`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/)
+    - [`Prototipe-CLI/lib/`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/)
+    - [`Prototipe-CLI/scripts/validate-knowledge.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/validate-knowledge.js)
+    - [`Prototipe-CLI/verticals/`](file:///d:/PROTOTIPE/Prototipe-CLI/verticals/)
+    - [`Instancias Clientes/seed/App-clinic-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-clinic-e2e-app/prototipe.lock.json)
+    - [`Instancias Clientes/seed/App-clinica-veterinaria-sanitas/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-clinica-veterinaria-sanitas/prototipe.lock.json)
+    - [`Instancias Clientes/seed/App-crm-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-crm-e2e-app/prototipe.lock.json)
+    - [`Instancias Clientes/seed/App-e2e-test-clinic/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-e2e-test-clinic/prototipe.lock.json)
+    - [`Instancias Clientes/seed/App-e2e-test-empty/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-e2e-test-empty/prototipe.lock.json)
+    - [`Instancias Clientes/seed/App-empty-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-empty-e2e-app/prototipe.lock.json)
+    - [`Instancias Clientes/seed/App-restaurante-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-restaurante-e2e-app/prototipe.lock.json)
+    - [`Instancias Clientes/seed/App-retail-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-retail-e2e-app/prototipe.lock.json)
+
+* **[x] ~~Tarea CLI-391: Fase 8.6 - Validación Multivertical E2E~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Creado `test-multivertical-e2e.js` para aprovisionar y compilar en producción las 5 verticales del ecosistema (Clínica, Retail, CRM, Restaurante y Vacío) de forma automática.
+  - Archivos:
+    - `Prototipe-CLI/scratch/test-multivertical-e2e.js` [NEW]
+
+* **[x] ~~Tarea CLI-390-DYNAMIC-SOURCE: De-acoplamiento de generator.js~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Reemplazadas rutas en piedra a `template-ventas`. La resolución de copiado de features ahora busca dinámicamente en todas las plantillas registradas.
+  - Archivos:
+    - `Prototipe-CLI/generator.js` [MODIFY]
+
+* **[x] ~~Tarea CLI-390: Fase 8.5 - Integración final en generator.js y cli.js (Briefing Studio)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Modificado `generator.js` para instanciar en caliente la Intelligence Layer (`BiResolver`, `CapabilityResolver`, `FeatureRecommender`, `ExperienceComposer`) a partir del Briefing Studio. Toda la generación física ahora es agnóstica e impulsada por el `Application Blueprint` validado y simulado antes del copiado físico, integrando `PackageMerger` y `ExplainabilityLogger`.
+  - Archivos:
+    - `Prototipe-CLI/lib/BiResolver.js` [NEW]
+    - `Prototipe-CLI/generator.js` [MODIFY]
+    - `Prototipe-CLI/cli.js` [MODIFY]
+    - `Prototipe-CLI/scratch/test-e2e-provisioning.js` [NEW]
+
+* **[x] ~~Tarea CLI-389-BENTO-MATCH: Hardening de Experience Composer (Fase 8.4)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Incorporado el scoring por superposición de capabilities (Bono de Match del 20% por capacidad en común), el Experience Decision Log con registro de alternativas descartadas y el mecanismo robusto de fallbacks de UI para briefings vacíos.
+  - Archivos:
+    - `Prototipe-CLI/lib/ExperienceComposer.js` [MODIFY]
+    - `Prototipe-CLI/scratch/test-experience-composer.js` [MODIFY]
+
+* **[x] ~~Tarea CLI-389: Fase 8.4 - Experience Composer, Experience Catalog y Bento Ranking~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Desarrollada la base de conocimiento de experiencia (`layouts.json`, `densities.json`, `typography.json`, `dashboard-widgets.json`), e implementado `ExperienceComposer.js` que selecciona tipografías, layouts y densidad por contexto, y rankea componentes Bento por fórmula ponderada.
+  - Archivos:
+    - `Prototipe-CLI/knowledge/experience/` [NEW]
+    - `Prototipe-CLI/lib/ExperienceComposer.js` [NEW]
+    - `Prototipe-CLI/knowledge/schema/component.schema.json` [MODIFY]
+    - `Prototipe-CLI/knowledge/components/` [MODIFY]
+    - `Prototipe-CLI/scratch/test-experience-composer.js` [NEW]
+
+* **[x] ~~Tarea CLI-388: Fase 8.3 - CapabilityResolver, FeatureRecommender y Explainability~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Desarrollados `CapabilityResolver.js` para traducción de capacidades de negocio unificadas, `FeatureRecommender.js` para resolución recursiva de dependencias transitivas de features, y `ExplainabilityLogger.js` para registrar rastros y justificaciones de inyecciones en formato JSONL y Markdown.
+  - Archivos:
+    - `Prototipe-CLI/lib/CapabilityResolver.js` [NEW]
+    - `Prototipe-CLI/lib/FeatureRecommender.js` [NEW]
+    - `Prototipe-CLI/lib/ExplainabilityLogger.js` [NEW]
+    - `Prototipe-CLI/scratch/test-intelligence-layer.js` [NEW]
+
+* **[x] ~~Tarea CLI-387: Fase 8.2 - Application Blueprint, ProvisioningValidator y Simulation~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Implementado el contrato central Application Blueprint (v1.0.0), los 5 blueprints de ejemplos oficiales en `knowledge/examples/`, el validador estático preflight `ProvisioningValidator.js`, el simulador de bundle y previsualización `BlueprintSimulation.js`, y el fusionador gobernado de dependencias `PackageMerger.js`.
+  - Archivos:
+    - `Prototipe-CLI/knowledge/schema/blueprint.schema.json` [NEW]
+    - `Prototipe-CLI/knowledge/examples/` [NEW]
+    - `Prototipe-CLI/lib/PackageMerger.js` [NEW]
+    - `Prototipe-CLI/lib/ProvisioningValidator.js` [NEW]
+    - `Prototipe-CLI/lib/BlueprintSimulation.js` [NEW]
+    - `Prototipe-CLI/scratch/test-blueprint-simulation.js` [NEW]
+    - `Prototipe-CLI/scripts/validate-knowledge.js` [MODIFY]
+    - `Prototipe-CLI/package.json` [MODIFY]
+
+* **[x] ~~Tarea CLI-386: Cierre de Contrato de Capabilities (Fase 8.1)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Cierre del contrato de Capabilities como unidad de razonamiento del motor de aprovisionamiento en la CLI. Enriquecido `capability.schema.json` y poblado `capability-map.json` con metadatos descriptivos.
+  - Archivos:
+    - `Prototipe-CLI/knowledge/schema/capability.schema.json` [MODIFY]
+    - `Prototipe-CLI/knowledge/capabilities/capability-map.json` [MODIFY]
+
+* **[x] ~~Tarea CLI-385: Creación de la Documentación Técnica Maestra de la Plataforma~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Creación del documento técnico maestro consolidado de evolución, arquitectura del Core v2.8 actual, Experience Framework y motores lógicos de la Fase 8. Sincronizado en el GPS semántico.
+  - Archivos:
+    - `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/evolucion_plataforma_prototype.md` [NEW]
+    - `Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md` [MODIFY]
+
+* **[x] ~~Tarea CLI-384: Fase 8.1 - Knowledge Layer y esquemas de validación de capacidades~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Estructuración y creación de la Knowledge Layer en el CLI bajo el subdirectorio `knowledge/`. Diseñados los esquemas de validación JSON Schema para features, componentes, patrones UX, industrias y el mapa unificado de capacidades. Implementado el script `validate-knowledge.js` con soporte para validación formal CI a través del paquete `ajv`. Pobladas y validadas las firmas declarativas iniciales de features, componentes y patrones por capacidades técnicas.
+  - Archivos:
+    - `knowledge/schema/feature.schema.json` [NEW]
+    - `knowledge/schema/component.schema.json` [NEW]
+    - `knowledge/schema/pattern.schema.json` [NEW]
+    - `knowledge/schema/capability.schema.json` [NEW]
+    - `knowledge/schema/industry.schema.json` [NEW]
+    - `knowledge/features/appointments.json` [NEW]
+    - `knowledge/features/patients.json` [NEW]
+    - `knowledge/features/crm.json` [NEW]
+    - `knowledge/features/billing.json` [NEW]
+    - `knowledge/features/inventory.json` [NEW]
+    - `knowledge/features/sales.json` [NEW]
+    - `knowledge/features/orders.json` [NEW]
+    - `knowledge/components/premium-calendar.json` [NEW]
+    - `knowledge/components/order-card.json` [NEW]
+    - `knowledge/components/caja-pos.json` [NEW]
+    - `knowledge/patterns/calendar-workspace.json` [NEW]
+    - `knowledge/patterns/search-details.json` [NEW]
+    - `knowledge/patterns/kanban-workspace.json` [NEW]
+    - `knowledge/patterns/wizard-flow.json` [NEW]
+    - `knowledge/patterns/dashboard-workspace.json` [NEW]
+    - `knowledge/capabilities/capability-map.json` [NEW]
+    - `knowledge/industries/healthcare.json` [NEW]
+    - `knowledge/industries/retail.json` [NEW]
+    - `scripts/validate-knowledge.js` [NEW]
+    - `package.json` [MODIFY]
+
+* **[x] ~~Tarea CLI-383: Fase 7 - Experience Framework & Provisioning Intelligence~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Implementación de la capa de Experience Framework y Provisioning Intelligence sobre el Core v2.8 estable. Diseñados e inyectados los esquemas Zod modulares para validación de manifiestos. Creado el ExperienceResolver para traducir briefings en configuraciones de UX. Creados ComponentRegistry y PatternRegistry avanzados integrados con PermissionRegistry y dependencias de features. Orquestado el DashboardComposer y el bootstrap unificado en App.jsx. Creados los Vertical Experience Packs en la CLI y modificado generator.js para escribir manifiestos desacoplados y build-manifest.json en el aprovisionamiento.
+  - Archivos:
+    - `src/core/experience/ExperienceSchemas.js` [NEW]
+    - `src/core/experience/ExperienceResolver.js` [NEW]
+    - `src/core/permissions/PermissionRegistry.js` [NEW]
+    - `src/core/config/ComponentRegistry.js` [NEW]
+    - `src/core/config/PatternRegistry.js` [NEW]
+    - `src/core/dashboard/DashboardComposer.js` [NEW]
+    - `src/core/experience/ExperienceRegistry.js` [NEW]
+    - `src/config/application.json` [NEW]
+    - `src/config/tenant.json` [NEW]
+    - `src/config/experience.json` [NEW]
+    - `src/config/patterns.json` [NEW]
+    - `src/config/branding.json` [NEW]
+    - `src/config/billing.json` [NEW]
+    - `src/config/dashboard.json` [NEW]
+    - `src/App.jsx` [MODIFY]
+    - `generator.js` [MODIFY]
+
+* **[x] ~~Tarea CLI-382: Arquitectura Core v2.8 (SaaS Enterprise Limpio) y Desacoplamiento Comercial de template-core-seed~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Evolución a la arquitectura Core v2.8 enfocada en el desacoplamiento de conceptos comerciales y retail en `template-core-seed` para convertirlo en un framework SaaS universal 100% agnóstico. Purgados todos los campos de catálogo y banco de stores y servicios de configuración general del Core. Refactorizado `billingService.js` y `pdfService.js` para usar adaptadores de facturación y recolectores de telemetría inyectables en runtime. Creado el cargador de features `FeatureLoader.js` con ordenación topológica y ciclo de vida secuencial. Implementado el `NavigationRegistry` para enrutado y menús dinámicos. Añadido script `audit-core-agnostic.js` que audita automáticamente imports y dependencias cruzadas prohibidas. Modificado el generador del CLI para componer la vertical en tiempo de aprovisionamiento. Validada la vertical clínica de forma exitosa mediante la generación local, compilación de producción y pase de auditoría con 0 violaciones comerciales.
+  - Archivos:
+    - `src/services/appConfigService.js` [MODIFY]
+    - `src/store/appConfigStore.js` [MODIFY]
+    - `src/hooks/useAppConfigSync.js` [MODIFY]
+    - `src/services/billingService.js` [MODIFY]
+    - `src/services/pdfService.js` [MODIFY]
+    - `src/pages/WelcomePage.jsx` [MODIFY]
+    - `src/constants/index.js` [MODIFY]
+    - `src/core/kernel/FeatureLoader.js` [NEW]
+    - `src/core/kernel/FeatureLifecycleManager.js` [NEW]
+    - `src/core/contracts/telemetryContract.js` [NEW]
+    - `src/core/config/NavigationRegistry.js` [NEW]
+    - `src/routes/AppRoutes.jsx` [MODIFY]
+    - `src/layouts/MainLayout.jsx` [MODIFY]
+    - `scripts/audit-core-agnostic.js` [NEW]
+    - `package.json` [MODIFY]
+    - `generator.js` [MODIFY]
+    - `cli.js` [MODIFY]
+    - `scratch/test-clinica-generator.js` [NEW]
+
+* **[x] ~~Tarea CLI-380: Desacoplamiento de Features (Inventory, Sales, Orders) y Contrato de Persistencia~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Refactorizados los módulos comerciales `inventory`, `sales`, `orders`, `delivery`, `billing` y `credits` introduciendo manifiestos de ciclo de vida (`module.js`) y enrutadores aislados (`routes.jsx`). Removido el acoplamiento a base de datos de checkout y POS mediante el contrato de dominio `deductInventoryStock`, aislando la lógica física de persistencia con control de concurrencia e inyección de caché.
+  - Archivos:
+    - [`src/features/inventory/routes.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/inventory/routes.jsx) [NEW]
+    - [`src/features/inventory/module.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/inventory/module.js) [NEW]
+    - [`src/features/inventory/services/inventoryInterface.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/inventory/services/inventoryInterface.js) [NEW]
+    - [`src/features/inventory/index.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/inventory/index.js) [MODIFY]
+    - [`src/features/sales/routes.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/sales/routes.jsx) [NEW]
+    - [`src/features/sales/module.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/sales/module.js) [NEW]
+    - [`src/features/sales/services/salesService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/sales/services/salesService.js) [MODIFY]
+    - [`src/features/orders/routes.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/orders/routes.jsx) [NEW]
+    - [`src/features/orders/module.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/orders/module.js) [NEW]
+    - [`src/features/orders/services/orderService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/orders/services/orderService.js) [MODIFY]
+    - [`src/features/credits/routes.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/credits/routes.jsx) [NEW]
+    - [`src/features/credits/module.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/credits/module.js) [NEW]
+    - [`src/features/delivery/routes.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/delivery/routes.jsx) [NEW]
+    - [`src/features/delivery/module.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/delivery/module.js) [NEW]
+    - [`src/features/billing/module.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/billing/module.js) [NEW]
+    - [`tests/unit/salesService.spec.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/tests/unit/salesService.spec.js) [MODIFY]
+    - [`src/hooks/useCartRecommendations.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useCartRecommendations.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-379: Enrutamiento Dinámico, Menús y Bootstrap en Cliente~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Refactorizado el router principal `AppRoutes.jsx` para realizar escaneo en caliente vía `import.meta.glob` y lazy loading real de rutas hijas de features. Actualizado el sidebar de administración en `AdminLayout.jsx` para resolver y filtrar menús dinámicamente según permisos y estado offline de `NavigationRegistry`. Adaptado `main.jsx` para bootstrap asíncrono ordenado.
+  - Archivos:
+    - [`src/routes/AppRoutes.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/routes/AppRoutes.jsx) [MODIFY]
+    - [`src/main.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/main.jsx) [MODIFY]
+    - [`src/layouts/AdminLayout.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/AdminLayout.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-378: Implementación Física de la Infraestructura de Core (Kernel, Eventos y Lifecycle v2.7)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Implementada la infraestructura medular de Core v2.7 en `template-core-seed`. Creados el `ApplicationKernel` para control lineal de transiciones, ordenación topológica y aislamiento de fallos, el `FeatureLifecycleManager` para estados de ciclo de vida de módulos, y el `FeatureHealthManager` para diagnóstico de salud operativa.
+  - Archivos:
+    - [`src/core/kernel/ApplicationKernel.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/core/kernel/ApplicationKernel.js) [NEW]
+    - [`src/core/kernel/FeatureLifecycleManager.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/core/kernel/FeatureLifecycleManager.js) [NEW]
+    - [`src/core/kernel/FeatureHealthManager.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/core/kernel/FeatureHealthManager.js) [NEW]
+
+* **[x] ~~Tarea CLI-377: Diseño Técnico de la Evolución Arquitectónica Core v2.1~~****
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-10
+  - Fecha de finalización: 2026-07-10
+  - Descripción: Estructurado y especificado el diseño arquitectónico definitivo para la evolución Core v2.1 de la plantilla base. Define el cargador de features con control de versión de esquema (`schemaVersion: 1`), enrutado dinámico con lazy loading real (evitando cargar bundles de features inactivas en el navegador), contratos abstractos del Core y la integración automatizada en el generador de la CLI.
+  - Archivos:
+    - [`disenio_arquitectura_core_v2.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/disenio_arquitectura_core_v2.md) [NEW]
+
+* **[x] ~~Tarea CLI-376: Auditoría Técnico-Arquitectónica SaaS Core vs Features de template-core-seed~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-10
+  - Fecha de finalización: 2026-07-10
+  - Descripción: Ejecutada una auditoría de acoplamiento y desacoplamiento Core vs Features sobre `template-core-seed`. Mapeados los imports permitidos/prohibidos, dependencias de bases de datos compartidas (sales/orders acoplados a products), riesgos de generabilidad manual de verticales no-retail (citas, clínicas, educación) y clasificación detallada de severidades y nivel de madurez de la plataforma.
+  - Archivos:
+    - [`auditoria_core_vs_features_template.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_core_vs_features_template.md) [NEW]
+
 * **[x] ~~Tarea CLI-375: Auditoría Técnica Completa de la Semilla Base template-core-seed~~**
   - Estatus: Completada
   - Fecha de registro: 2026-07-10
@@ -42,8 +460,8 @@
     - [`estrategia_testing.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/estrategia_testing.md) [NEW]
     - [`guia_multitenant.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/Documentacion%20App%20Ventas/guia_multitenant.md) [NEW]
 
-* **[/] Tarea CLI-367: Implementación del Módulo InteractiveGoldPot (Olla de Oro Interactiva)**
-  - Estatus: En progreso
+* **[x] ~~Tarea CLI-367: Implementación del Módulo InteractiveGoldPot (Olla de Oro Interactiva)~~**
+  - Estatus: Completada
   - Fecha de registro: 2026-07-09
   - Descripción: Creado el componente InteractiveGoldPot con físicas Framer Motion, efecto squash-and-stretch, entrada COP formateada en vivo, crecimiento gradual y olla en SVG.
   - Archivos:
@@ -58,6 +476,41 @@
     - [`ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
     - [`ScratchCardRewardSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ScratchCardRewardSandbox.jsx) [MODIFY]
     - [`ScratchCardReward.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/ScratchCardReward.jsx) [MODIFY]
+    - [`Prototipe-CLI/cli.js`](file:///d:/PROTOTIPE/Prototipe-CLI/cli.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/package-lock.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package-lock.json) [MODIFY]
+    - [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_core_vs_features_template.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_core_vs_features_template.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_experience_framework.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_experience_framework.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/evolucion_plataforma_prototype.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/evolucion_plataforma_prototype.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/disenio_arquitectura_core_v2.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/disenio_arquitectura_core_v2.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/disenio_arquitectura_provisioning_ia_fase8.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/disenio_arquitectura_provisioning_ia_fase8.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/especificacion_disenio_experiencia_fase7.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/especificacion_disenio_experiencia_fase7.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_aprovisionamiento_clientes.md`](file:///d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_aprovisionamiento_clientes.md) [NEW]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/estado_arquitectura_post_fase9_3.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/estado_arquitectura_post_fase9_3.md) [NEW]
+    - [`Prototipe-CLI/knowledge/`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/) [NEW]
+    - [`Prototipe-CLI/lib/`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/) [NEW]
+    - [`Prototipe-CLI/scripts/validate-knowledge.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/validate-knowledge.js) [MODIFY]
+    - [`Prototipe-CLI/verticals/`](file:///d:/PROTOTIPE/Prototipe-CLI/verticals/) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ClientLifecyclePanel.jsx`](file:///d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/ClientLifecyclePanel.jsx) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/VersionManagerView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/VersionManagerView.jsx) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/services/SaaSMetricsService.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/services/SaaSMetricsService.js) [NEW]
+    - [`Prototipe-CLI/lib/VersionManager.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/VersionManager.js) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureMarketplaceView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureMarketplaceView.jsx) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/config/saas_config.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/config/saas_config.js) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/services/AlertEngine.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/services/AlertEngine.js) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/SaaSOperationsView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/SaaSOperationsView.jsx) [NEW]
+    - [`Prototipe-CLI/knowledge/telemetry/event-types.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/telemetry/event-types.json) [NEW]
+    - [`Instancias Clientes/seed/App-clinic-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-clinic-e2e-app/prototipe.lock.json) [MODIFY]
+    - [`Instancias Clientes/seed/App-clinica-veterinaria-sanitas/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-clinica-veterinaria-sanitas/prototipe.lock.json) [MODIFY]
+    - [`Instancias Clientes/seed/App-crm-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-crm-e2e-app/prototipe.lock.json) [MODIFY]
+    - [`Instancias Clientes/seed/App-e2e-test-clinic/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-e2e-test-clinic/prototipe.lock.json) [MODIFY]
+    - [`Instancias Clientes/seed/App-e2e-test-empty/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-e2e-test-empty/prototipe.lock.json) [MODIFY]
+    - [`Instancias Clientes/seed/App-empty-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-empty-e2e-app/prototipe.lock.json) [MODIFY]
+    - [`Instancias Clientes/seed/App-restaurante-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-restaurante-e2e-app/prototipe.lock.json) [MODIFY]
+    - [`Instancias Clientes/seed/App-retail-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-retail-e2e-app/prototipe.lock.json) [MODIFY]
 
 * **[x] ~~Tarea CLI-366: Implementación del Módulo ScratchCardReward (Tarjeta de Rasca y Gana)~~**
   - Estatus: Completada

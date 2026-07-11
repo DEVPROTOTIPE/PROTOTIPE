@@ -8,6 +8,17 @@ import ora from 'ora';
 import { Jimp } from 'jimp';
 import { getWorkspaceRoot } from './config.js';
 
+// Motores de Aprovisionamiento Inteligente (Fase 8)
+import { BiResolver } from './lib/BiResolver.js';
+import { CapabilityResolver } from './lib/CapabilityResolver.js';
+import { FeatureRecommender } from './lib/FeatureRecommender.js';
+import { ExperienceComposer } from './lib/ExperienceComposer.js';
+import { ProvisioningValidator } from './lib/ProvisioningValidator.js';
+import { BlueprintSimulation } from './lib/BlueprintSimulation.js';
+import { ExplainabilityLogger } from './lib/ExplainabilityLogger.js';
+import { PackageMerger } from './lib/PackageMerger.js';
+import { FeatureRegistry } from './lib/FeatureRegistry.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const CLI_ROOT = __dirname;
@@ -425,6 +436,11 @@ async function validateFirebaseStorageBucket(storageBucket) {
 async function checkEnvironment(answers) {
   const spinner = ora('🔍 Ejecutando preflight check del entorno...').start();
   
+  if (answers.bypassPreflight || process.env.BYPASS_PREFLIGHT === 'true') {
+    spinner.succeed('Preflight check omitido (bypass activado).');
+    return;
+  }
+
   // 1. Validar Firebase CLI
   try {
     execSync('firebase --version', { stdio: 'ignore' });
@@ -871,6 +887,231 @@ export async function createProject(answers) {
       filter: (src) => !EXCLUDE_FROM_GEN.has(path.basename(src))
     });
     step1.succeed('Estructura base de plantilla copiada correctamente.');
+
+    // ─── COMPOSICIÓN DINÁMICA DE VERTICAL IMPULSADA POR BLUEPRINT (Fase 8.5) ───
+    if (answers.template === 'template-core-seed') {
+      const stepFeatures = ora('Ejecutando Inteligencia de Aprovisionamiento y Componiendo features').start();
+      
+      // 1. Inicializar o Resolver el Blueprint
+      let blueprint = answers.blueprint;
+      const expLogger = new ExplainabilityLogger(clientId);
+
+      if (!blueprint) {
+        try {
+          // A) Deducir capacidades
+          const biResolved = await BiResolver.resolve(answers);
+          
+          // B) Mapear a features, componentes, patrones
+          const capabilityResolved = await CapabilityResolver.resolve(biResolved.capabilities);
+          
+          // C) Resolver transitivamente dependencias
+          const recommenderResolved = await FeatureRecommender.resolveDependencies(capabilityResolved.features);
+          
+          // D) Componer la experiencia y widgets del dashboard
+          const experienceResolved = await ExperienceComposer.compose(
+            { capabilities: biResolved.capabilities, features: recommenderResolved.features },
+            biResolved.context
+          );
+          
+          // E) Consolidar el Blueprint
+          blueprint = {
+            version: "1.0.0",
+            clientId: clientId,
+            clientName: answers.projectName || "Custom Client",
+            vertical: biResolved.vertical,
+            capabilities: biResolved.capabilities,
+            features: recommenderResolved.features,
+            components: capabilityResolved.components,
+            patterns: capabilityResolved.patterns,
+            experience: experienceResolved.experience,
+            branding: {
+              paletteChoice: answers.paletteChoice || "slate",
+              initials: answers.initials || (answers.projectName ? answers.projectName.split(' ').map(w => w[0]).join('').substring(0, 3).toUpperCase() : 'APP')
+            },
+            dashboard: experienceResolved.dashboard
+          };
+
+          // Guardar rastros del pipeline en Explainability
+          expLogger.addEntries([
+            {
+              decision: "Pipeline de Inteligencia de Aprovisionamiento ejecutado",
+              reason: `Briefing cualitativo mapeado exitosamente a Blueprint plano.`,
+              confidence: 1.0,
+              source: "generator.js"
+            }
+          ]);
+          
+          expLogger.addEntries(biResolved.auditTrail);
+          expLogger.addEntries(capabilityResolved.auditTrail);
+          expLogger.addEntries(recommenderResolved.auditTrail);
+          expLogger.addEntries(experienceResolved.auditTrail);
+        } catch (err) {
+          stepFeatures.fail("Error en el pipeline de Inteligencia de Aprovisionamiento.");
+          throw err;
+        }
+      } else {
+        expLogger.addEntries([
+          {
+            decision: "Blueprint pre-validado inyectado directamente",
+            reason: "El generador recibió un Application Blueprint pre-construido.",
+            confidence: 1.0,
+            source: "generator.js"
+          }
+        ]);
+      }
+
+      // 2. Validar estáticamente el Blueprint
+      let validationResult;
+      try {
+        validationResult = await ProvisioningValidator.validate(blueprint);
+        if (!validationResult.isValid) {
+          throw new Error(validationResult.errors.join(' | '));
+        }
+      } catch (err) {
+        stepFeatures.fail(`[Fallo Validación] El Blueprint generado no cumple con las reglas físicas del ecosistema: ${err.message}`);
+        throw err;
+      }
+
+      // 3. Simular preflight
+      const simulation = await BlueprintSimulation.simulate(blueprint, validationResult);
+
+      // 4. Copiar manifiestos JSON resultantes
+      const configDestDir = path.join(targetDir, 'src', 'config');
+      await fs.ensureDir(configDestDir);
+
+      await fs.writeJson(path.join(configDestDir, 'application.json'), {
+        instanceId: blueprint.clientId,
+        clientName: blueprint.clientName,
+        vertical: blueprint.vertical,
+        schemaVersion: blueprint.version || "1.0.0",
+        features: blueprint.features
+      }, { spaces: 2 });
+
+      await fs.writeJson(path.join(configDestDir, 'tenant.json'), {
+        tenantId: `tenant-${blueprint.clientId}`,
+        plan: "enterprise",
+        status: "active",
+        featuresEnabled: blueprint.features
+      }, { spaces: 2 });
+
+      await fs.writeJson(path.join(configDestDir, 'experience.json'), blueprint.experience, { spaces: 2 });
+      await fs.writeJson(path.join(configDestDir, 'branding.json'), blueprint.branding, { spaces: 2 });
+      const composedDashboard = blueprint.dashboard || { widgets: [] };
+      await fs.writeJson(path.join(configDestDir, 'dashboard.json'), {
+        welcomeWidget: "StatsGrid",
+        layoutPreset: "grid-bento",
+        activeWidgets: (composedDashboard.widgets || []).map(w => ({
+          id: w.widgetId,
+          size: w.size || "medium"
+        })),
+        widgets: composedDashboard.widgets || []
+      }, { spaces: 2 });
+      await fs.writeJson(path.join(configDestDir, 'patterns.json'), { activePatterns: blueprint.patterns }, { spaces: 2 });
+
+      // Escribir manifiestos legacy para compatibilidad
+      await fs.writeJson(path.join(configDestDir, 'features.json'), {
+        activeFeatures: blueprint.features,
+        tenantId: blueprint.clientId,
+        subscriptionPlan: 'enterprise'
+      }, { spaces: 2 });
+
+      await fs.writeJson(path.join(configDestDir, 'build-manifest.json'), {
+        vertical: blueprint.vertical,
+        featuresInstalled: blueprint.features,
+        patternsActive: blueprint.patterns,
+        coreVersion: '2.8.0',
+        generatedAt: new Date().toISOString()
+      }, { spaces: 2 });
+
+      // 5. Copiar o generar las features correspondientes
+      const featuresDestDir = path.join(targetDir, 'src', 'features');
+      await fs.ensureDir(featuresDestDir);
+
+      for (const featureId of blueprint.features) {
+        const srcFeature = await FeatureRegistry.resolvePhysicalPath(featureId);
+        const destFeature = path.join(featuresDestDir, featureId);
+
+        if (srcFeature) {
+          // Copiar feature real del catálogo de origen detectado por FeatureRegistry
+          await fs.copy(srcFeature, destFeature);
+          expLogger.addEntries([{
+            decision: `Feature "${featureId}" copiada desde origen dinámico`,
+            source: srcFeature.replace(CLI_ROOT, ''),
+            reason: `Detectado origen físico de la feature mediante FeatureRegistry.`,
+            confidence: 1.0
+          }]);
+        } else {
+          // Generar estructura modular dummy limpia para compilación y test de agnosticidad
+          const featCamel = featureId.charAt(0).toUpperCase() + featureId.slice(1);
+          await fs.ensureDir(destFeature);
+          await fs.writeFile(path.join(destFeature, 'module.js'), `
+import { lazy } from 'react'
+
+export default {
+  id: '${featureId}',
+  displayName: 'Módulo ${featCamel}',
+  requires: [],
+  routes: [
+    {
+      path: '/admin/${featureId}',
+      name: 'Módulo ${featCamel}',
+      element: lazy(() => import('./pages/Admin${featCamel}')),
+      meta: { showInAdmin: true, label: '${featCamel}', icon: 'Layers' }
+    }
+  ],
+  async initialize(context) {
+    console.log('[${featCamel}] Inicializado.');
+  }
+}
+          `.trim());
+
+          await fs.ensureDir(path.join(destFeature, 'pages'));
+          await fs.writeFile(path.join(destFeature, 'pages', `Admin${featCamel}.jsx`), `
+import React from 'react'
+export default function Admin${featCamel}() {
+  return (
+    <div className="p-6 bg-surface rounded-2xl border border-app">
+      <h2 className="text-xl font-bold text-app mb-4">Módulo ${featCamel}</h2>
+      <p className="text-sm text-muted">Aprovisionado dinámicamente mediante el Application Blueprint.</p>
+    </div>
+  )
+}
+          `.trim());
+        }
+      }
+
+      // 6. Fusionar package.json mediante PackageMerger
+      const basePkgPath = path.join(targetDir, 'package.json');
+      if (await fs.pathExists(basePkgPath)) {
+        const basePkg = await fs.readJson(basePkgPath);
+        
+        // Recuperar metadatas de features y componentes recomendados
+        const featuresMetadatas = [];
+        for (const featId of blueprint.features) {
+          const featMetaPath = path.join(CLI_ROOT, 'knowledge', 'features', `${featId}.json`);
+          if (await fs.pathExists(featMetaPath)) {
+            featuresMetadatas.push(await fs.readJson(featMetaPath));
+          }
+        }
+
+        const componentsMetadatas = [];
+        for (const compId of blueprint.components) {
+          const compFileName = compId.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+          const compMetaPath = path.join(CLI_ROOT, 'knowledge', 'components', `${compFileName}.json`);
+          if (await fs.pathExists(compMetaPath)) {
+            componentsMetadatas.push(await fs.readJson(compMetaPath));
+          }
+        }
+
+        const mergedPkg = PackageMerger.merge(featuresMetadatas, componentsMetadatas, basePkg);
+        await fs.writeJson(basePkgPath, mergedPkg, { spaces: 2 });
+      }
+
+      // 7. Persistir Explainability Logs en el directorio destino
+      await expLogger.persist(targetDir);
+
+      stepFeatures.succeed(`Features y dependencias del Blueprint inyectadas con éxito en: App-${blueprint.clientId}.`);
+    }
 
     // ─── APROVISIONAMIENTO Y COPIA PROACTIVA DE BACKGROUNDCANVAS (MULTICORE) ───
     const stepCanvas = ora('Sincronizando motor de partículas y biblioteca de iconos en plantilla destino').start();
@@ -1494,7 +1735,6 @@ VITE_DEV_PIN=${generatedDevPin}
 
 # Telemetría de Comisiones del Desarrollador (Centralización Central - Bridge Local)
 VITE_DEVELOPER_TELEMETRY_ENDPOINT=http://localhost:3001
-VITE_DEVELOPER_TELEMETRY_TOKEN=${uniqueToken}
 VITE_DEVELOPER_CLIENT_ID=${clientId}
 
 # Variables de la Consola Central de Control (Developer Cockpit)
@@ -3299,6 +3539,16 @@ async function generatePrototypeLock(answers, targetDir, clientId) {
 
     await walkDir(targetDir);
 
+    const featuresInstalled = {};
+    const featuresList = answers.blueprint?.features || answers.features || [];
+    for (const featId of featuresList) {
+      const featMeta = await FeatureRegistry.resolve(featId);
+      featuresInstalled[featId] = {
+        version: featMeta ? featMeta.version : '1.0.0',
+        installedAt: new Date().toISOString()
+      };
+    }
+
     const lockData = {
       schemaVersion: 1,
       clientId,
@@ -3307,6 +3557,7 @@ async function generatePrototypeLock(answers, targetDir, clientId) {
       cliVersion: CLI_VERSION,
       niche: answers.niche || 'general',
       generatedAt: new Date().toISOString(),
+      featuresInstalled,
       files: fileHashes
     };
 

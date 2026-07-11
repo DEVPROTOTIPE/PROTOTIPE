@@ -1,0 +1,18 @@
+{
+  "id": "CajaDiariaPOS",
+  "version": "1.1.0",
+  "category": "Visualizacion",
+  "capabilities": ["pos-checkout", "cash-register"],
+  "requiredFeatures": ["sales"],
+  "compatibleIndustries": ["retail", "restaurant"],
+  "dependencies": {
+    "npm": ["lucide-react", "framer-motion"],
+    "internal": ["src/core/config/ComponentRegistry.js"]
+  },
+  "permissions": ["sales.view"],
+  "maturityLevel": "stable",
+  "responsiveSupport": "fully-responsive",
+  "accessibilityScore": 90,
+  "performanceScore": 94,
+  "qualityScore": 92
+}

@@ -1,0 +1,6 @@
+{
+  "tenantId": "tenant-clinica-001",
+  "plan": "enterprise",
+  "status": "active",
+  "featuresEnabled": ["appointments", "patients", "billing"]
+}

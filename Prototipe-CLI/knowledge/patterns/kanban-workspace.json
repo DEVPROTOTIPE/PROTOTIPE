@@ -1,0 +1,7 @@
+{
+  "id": "pattern-kanban-workspace",
+  "displayName": "Kanban Board",
+  "requiredFeatures": ["crm"],
+  "capabilities": ["funnel-tracking", "kanban-view"],
+  "permissions": ["crm.view"]
+}

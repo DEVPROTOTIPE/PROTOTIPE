@@ -45,7 +45,7 @@ async function extractSanitizationTokens(fuente) {
       tokens.apiKey            = parseEnvValue('VITE_FIREBASE_API_KEY');
       tokens.measurementId     = parseEnvValue('VITE_FIREBASE_MEASUREMENT_ID');
       tokens.appId             = parseEnvValue('VITE_FIREBASE_APP_ID');
-      tokens.telemetryToken    = parseEnvValue('VITE_DEVELOPER_TELEMETRY_TOKEN');
+      tokens.telemetryToken    = '';
     } catch { /* ignorar */ }
   }
 
