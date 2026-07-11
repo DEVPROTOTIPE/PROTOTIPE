@@ -250,6 +250,7 @@ async function main() {
     'src/schemas',
     'src/types',
     'src/providers',
+    'src/core',
     'src/config',
     'src/App.jsx',
     'src/App.css',
