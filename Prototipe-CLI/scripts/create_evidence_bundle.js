@@ -106,26 +106,44 @@ async function run() {
   let secretsCheck = 'CLEAN';
   let piiCheck = 'CLEAN';
   let scanError = null;
+  const piiFindings = [];
 
   try {
-    // Escaneo básico de secretos en base a expresiones regulares de API keys y Tokens
     const apiKeyRegex = /AIzaSy[A-Za-z0-9-_]{35}/g;
-    const genericTokenRegex = /token_?[a-zA-Z0-9]{16,}/g;
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
     
     for (const f of copiedFiles) {
       const fileAbs = path.join(EVIDENCE_TEMP, f.name);
       const content = await fs.readFile(fileAbs, 'utf-8');
       
-      // Omitir el reporte de certificación y manifest de la validación estricta de secretos
-      if (f.name === 'certification-report.json' || f.name === 'MANIFEST.json') continue;
+      // Omitir manifest de la validación estricta de secretos
+      if (f.name === 'MANIFEST.json') continue;
       
       if (content.match(apiKeyRegex)) {
         throw new Error(`Fallo de Seguridad: API Key de Firebase detectada en ${f.name}.`);
       }
-      if (content.match(emailRegex) && f.name.endsWith('.js')) {
-        piiCheck = 'WARNING (Posible PII detectada)';
+
+      const lines = content.split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        const matches = lines[i].match(emailRegex);
+        if (matches) {
+          for (const m of matches) {
+            const isFalsePositive = m.includes('example.com') || m.includes('soporte') || m.includes('test') || m.includes('client') || m.includes('antigravity');
+            piiFindings.push({
+              file: f.name,
+              pattern: m,
+              line: i + 1,
+              classification: isFalsePositive ? 'FALSE_POSITIVE' : 'CONFIRMED_PII',
+              justification: isFalsePositive ? 'Dirección de correo simulada o de configuración interna del Bridge' : 'PII real detectada en código de desarrollo'
+            });
+          }
+        }
       }
+    }
+    
+    if (piiFindings.length > 0) {
+      const hasRealPII = piiFindings.some(f => f.classification === 'CONFIRMED_PII');
+      piiCheck = hasRealPII ? 'WARNING' : 'CLEAN (FALSE_POSITIVES_ONLY)';
     }
   } catch (err) {
     secretsCheck = 'FAILED';
@@ -135,9 +153,10 @@ async function run() {
 
   const scanReport = {
     timestamp: new Date().toISOString(),
-    status: secretsCheck === 'CLEAN' ? 'SUCCESS' : 'FAILED',
+    status: (secretsCheck === 'CLEAN' && !piiFindings.some(f => f.classification === 'CONFIRMED_PII')) ? 'SUCCESS' : 'FAILED',
     secretsCheck,
     piiCheck,
+    piiFindings,
     scannedFiles: copiedFiles.map(f => f.name),
     error: scanError
   };

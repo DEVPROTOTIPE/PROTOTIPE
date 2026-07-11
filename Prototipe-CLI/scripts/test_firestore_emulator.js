@@ -482,7 +482,11 @@ async function runTests() {
   // Escribir reporte JSON local para certificación
   const reportPath = path.resolve(__dirname, '../scratch/firestore-emulator-results.json');
   fs.mkdirSync(path.dirname(reportPath), { recursive: true });
-  fs.writeFileSync(reportPath, JSON.stringify(results, null, 2), 'utf8');
+  const outputData = {
+    useMockSimulation,
+    results
+  };
+  fs.writeFileSync(reportPath, JSON.stringify(outputData, null, 2), 'utf8');
 
   if (failedTests.length > 0) {
     process.exit(1);
