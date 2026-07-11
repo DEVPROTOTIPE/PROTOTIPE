@@ -121,6 +121,14 @@ try {
   smokeData = fs.readJsonSync(path.join(SCRATCH_DIR, 'smoke-results.json'));
 } catch (e) {}
 
+try {
+  firestoreData = fs.readJsonSync(path.join(SCRATCH_DIR, 'firestore-emulator-results.json'));
+} catch (e) {}
+
+try {
+  multiplatformData = fs.readJsonSync(path.join(SCRATCH_DIR, 'multiplatform-results.json'));
+} catch (e) {}
+
 const allowPartial = process.argv.includes('--allow-partial');
 
 let firestoreResults = [];
