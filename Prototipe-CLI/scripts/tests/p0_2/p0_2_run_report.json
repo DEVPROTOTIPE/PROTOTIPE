@@ -1,42 +1,16 @@
 {
-  "passed": 15,
-  "failed": 29,
-  "missing": 1,
+  "passed": 60,
+  "failed": 0,
+  "productBehaviorFailed": 1,
+  "testInfraFailed": 0,
+  "missing": 0,
   "exitCode": 1,
-  "failedTests": [
-    "P0.2 - Blueprint Structural Schema Tests -> 2. Sin blueprintVersion: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 4. Sin clientName: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 5. Sin coreType: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 6. Sin vertical: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 7. SemVer 1.0 (inválido): Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 8. SemVer v1.0.0 (inválido): Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 9. SemVer prerelease (inválido): Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 10. SemVer build metadata (inválido): Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 11. instanceId con guion inicial: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 12. instanceId con guion final: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 13. instanceId con doble guion: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 14. instanceId con mayúsculas: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 15. clientName solo espacios: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 16. clientName con saltos de línea: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 17. Campo adicional top-level: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 18. Campo initials dentro de branding (debe ser rechazado en P0.2): Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 19. paletteChoice slate (rechazado): Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 20. paletteChoice custom sin colores: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 21. custom con solo primaryColor: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 22. custom con solo secondaryColor: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 23. paletteChoice emerald con colores de custom: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 27. Rechazo de experience: Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Structural Schema Tests -> 28. Rechazo de campos execution (targetPath): Se esperaba que la validación fallara",
-    "P0.2 - Blueprint Knowledge Layer Tests -> 2. coreType inexistente: Se esperaba que la validación semántica fallara",
-    "P0.2 - Blueprint Knowledge Layer Tests -> 4. Vertical inexistente (invalid_vertical): Se esperaba que la validación semántica fallara",
-    "P0.2 - Blueprint Knowledge Layer Tests -> 5. general, general_custom y servicio_mesa rechazados como vertical: Se esperaba que la validación semántica fallara",
-    "P0.2 - Blueprint Knowledge Layer Tests -> 6. Feature existente (sales): La Feature \"sales\" requiere la Feature \"inventory\", pero esta no se encuentra instalada en el Blueprint.",
-    "P0.2 - Blueprint Knowledge Layer Tests -> 8. Componente existente (OrderCard): El Componente \"OrderCard\" requiere la Feature \"orders\" instalada.",
-    "P0.2 - Blueprint Knowledge Layer Tests -> 12. blueprintVersion 2.3.1 sintaxis válida pero no soportada: Se esperaba que la validación semántica fallara"
+  "failedTests": [],
+  "missingTests": [],
+  "productBehaviorFailedTests": [
+    "P0.2 - Blueprint Cero Escrituras Test -> Cero escrituras físicas: El Generator aún realiza escrituras prematuras (fs.copy) antes de validar."
   ],
-  "missingTests": [
-    "P0.2 - Blueprint Adapter Tests -> normalizeProvisioningRequest interface availability: normalizeProvisioningRequest no está definido como función"
-  ],
+  "testInfraFailedTests": [],
   "catalogReport": {
     "features": {
       "total": 7,
@@ -121,5 +95,10 @@
       "notMatchingPattern": []
     }
   },
-  "noWriteResult": null
+  "noWriteResult": {
+    "validationFailed": true,
+    "filesBefore": 0,
+    "filesAfter": 1,
+    "directoryHashUnchanged": false
+  }
 }

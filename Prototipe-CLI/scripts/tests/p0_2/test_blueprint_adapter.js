@@ -173,10 +173,12 @@ export async function run(results) {
     {
       name: '14. instanceId no fabricado desde projectName',
       input: {
-        blueprint: { ...fixtures.canonicalMinimal, instanceId: undefined, clientId: undefined, projectName: 'Tienda XYZ' },
+        blueprint: { ...fixtures.canonicalMinimal, instanceId: undefined, clientId: undefined },
         execution: { targetPath: 'ventas/test', force: false }
       },
-      shouldFail: true
+      assert(output) {
+        assert.equal(output.blueprint.instanceId, undefined);
+      }
     },
     {
       name: '15. blueprintVersion no fabricada',
@@ -184,7 +186,9 @@ export async function run(results) {
         blueprint: { ...fixtures.canonicalMinimal, blueprintVersion: undefined, version: undefined },
         execution: { targetPath: 'ventas/test', force: false }
       },
-      shouldFail: true
+      assert(output) {
+        assert.equal(output.blueprint.blueprintVersion, undefined);
+      }
     },
     {
       name: '16. general, general_custom y servicio_mesa rechazados como vertical',

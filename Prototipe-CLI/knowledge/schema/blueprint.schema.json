@@ -2,56 +2,109 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "BlueprintSchema",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
-    "blueprintVersion": { "type": "string" },
-    "instanceId": { "type": "string" },
-    "clientName": { "type": "string" },
-    "vertical": { "type": "string" },
-    "capabilities": {
-      "type": "array",
-      "items": { "type": "string" }
+    "blueprintVersion": {
+      "type": "string",
+      "format": "blueprint-semver"
     },
-    "features": {
-      "type": "array",
-      "items": { "type": "string" }
+    "instanceId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
     },
-    "patterns": {
-      "type": "array",
-      "items": { "type": "string" }
+    "clientName": {
+      "type": "string",
+      "pattern": "^[^\\s\\r\\n]+(?:[ \\t]+[^\\s\\r\\n]+)*$"
     },
-    "components": {
-      "type": "array",
-      "items": { "type": "string" }
+    "coreType": {
+      "type": "string"
     },
-    "experience": {
-      "type": "object",
-      "properties": {
-        "layout": { "type": "string" },
-        "density": { "type": "string", "enum": ["compact", "comfortable", "spacious"] },
-        "themeMode": { "type": "string", "enum": ["light", "dark", "dark-detect"] },
-        "typography": { "type": "string" }
-      },
-      "required": ["layout", "density", "themeMode", "typography"]
+    "vertical": {
+      "type": "string"
     },
     "branding": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
-        "paletteChoice": { "type": "string" },
-        "initials": { "type": "string" }
+        "paletteChoice": {
+          "type": "string",
+          "not": { "const": "slate" }
+        },
+        "primaryColor": {
+          "type": "string",
+          "format": "hsl-color"
+        },
+        "secondaryColor": {
+          "type": "string",
+          "format": "hsl-color"
+        }
       },
-      "required": ["paletteChoice", "initials"]
+      "required": ["paletteChoice"],
+      "if": {
+        "properties": {
+          "paletteChoice": { "const": "custom" }
+        }
+      },
+      "then": {
+        "properties": {
+          "primaryColor": { "type": "string" },
+          "secondaryColor": { "type": "string" }
+        },
+        "required": ["primaryColor", "secondaryColor"]
+      },
+      "else": {
+        "properties": {
+          "primaryColor": { "type": "string" },
+          "secondaryColor": { "type": "string" }
+        },
+        "not": {
+          "anyOf": [
+            {
+              "properties": { "primaryColor": { "type": "string" } },
+              "required": ["primaryColor"]
+            },
+            {
+              "properties": { "secondaryColor": { "type": "string" } },
+              "required": ["secondaryColor"]
+            }
+          ]
+        }
+      }
+    },
+    "features": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z]+(?:-[a-z]+)*$"
+      }
+    },
+    "components": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][a-zA-Z0-9]*$"
+      }
+    },
+    "patterns": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^pattern-[a-z]+(?:-[a-z]+)*$"
+      }
     }
   },
   "required": [
     "blueprintVersion",
     "instanceId",
     "clientName",
+    "coreType",
     "vertical",
-    "capabilities",
+    "branding",
     "features",
-    "patterns",
     "components",
-    "experience",
-    "branding"
+    "patterns"
   ]
 }

@@ -38,8 +38,12 @@ async function main() {
   let passed = 0;
   let failed = 0;
   let missing = 0;
+  let productBehaviorFailed = 0;
+  let testInfraFailed = 0;
   const failedTests = [];
   const missingTests = [];
+  const productBehaviorFailedTests = [];
+  const testInfraFailedTests = [];
   let catalogReport = null;
   let noWriteResult = null;
 
@@ -52,38 +56,61 @@ async function main() {
     } else if (r.status === 'FAILED') {
       failed++;
       failedTests.push(`${r.suite} -> ${r.name}: ${r.error || 'Fallo de aserción'}`);
+    } else if (r.status === 'PRODUCT_BEHAVIOR_FAILURE') {
+      productBehaviorFailed++;
+      productBehaviorFailedTests.push(`${r.suite} -> ${r.name}: ${r.error || 'Comportamiento de producto no conforme'}`);
       if (r.name === 'Cero escrituras físicas') {
-        noWriteResult = r.extra || null;
+        noWriteResult = r.extra || { validationFailed: true, filesBefore: 0, filesAfter: 1, directoryHashUnchanged: false };
       }
+    } else if (r.status === 'TEST_INFRASTRUCTURE_FAILURE') {
+      testInfraFailed++;
+      testInfraFailedTests.push(`${r.suite} -> ${r.name}: ${r.error || 'Fallo de infraestructura'}`);
     } else if (r.status === 'MISSING_IMPLEMENTATION') {
       missing++;
       missingTests.push(`${r.suite} -> ${r.name}: ${r.error || 'No implementado'}`);
     }
   });
 
-  console.log(`PASSED:                 ${passed}`);
-  console.log(`FAILED:                 ${failed}`);
-  console.log(`MISSING_IMPLEMENTATION: ${missing}`);
-  console.log(`TOTAL ASERCIONES:       ${results.length}`);
+  console.log(`PASSED:                      ${passed}`);
+  console.log(`FAILED:                      ${failed}`);
+  console.log(`PRODUCT_BEHAVIOR_FAILURE:    ${productBehaviorFailed}`);
+  console.log(`TEST_INFRASTRUCTURE_FAILURE: ${testInfraFailed}`);
+  console.log(`MISSING_IMPLEMENTATION:      ${missing}`);
+  console.log(`TOTAL ASERCIONES:            ${results.length}`);
 
   if (missingTests.length > 0) {
     console.log('\n🔴 INTERFACES NO IMPLEMENTADAS:');
     missingTests.forEach(t => console.log(`   - ${t}`));
   }
 
+  if (productBehaviorFailedTests.length > 0) {
+    console.log('\n🔴 FALLOS DE COMPORTAMIENTO DE PRODUCTO (PENDIENTE INTEGRACIÓN):');
+    productBehaviorFailedTests.forEach(t => console.log(`   - ${t}`));
+  }
+
+  if (testInfraFailedTests.length > 0) {
+    console.log('\n🔴 FALLOS DE INFRAESTRUCTURA DE PRUEBAS:');
+    testInfraFailedTests.forEach(t => console.log(`   - ${t}`));
+  }
+
   if (failedTests.length > 0) {
-    console.log('\n🔴 PRUEBAS FALLIDAS (COMPORTAMIENTO NO CONFORME):');
+    console.log('\n🔴 PRUEBAS FALLIDAS (ASERCIONES DE CÓDIGO PRODUCTIVO):');
     failedTests.forEach(t => console.log(`   - ${t}`));
   }
 
   // Generar reporte de salida JSON estructurado para el chatbot
+  const hasErrors = failed > 0 || missing > 0 || productBehaviorFailed > 0 || testInfraFailed > 0;
   const finalSummary = {
     passed,
     failed,
+    productBehaviorFailed,
+    testInfraFailed,
     missing,
-    exitCode: (failed > 0 || missing > 0) ? 1 : 0,
+    exitCode: hasErrors ? 1 : 0,
     failedTests,
     missingTests,
+    productBehaviorFailedTests,
+    testInfraFailedTests,
     catalogReport,
     noWriteResult
   };

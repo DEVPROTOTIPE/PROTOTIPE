@@ -43,7 +43,7 @@ export async function run(results) {
     },
     {
       name: '6. Feature existente (sales)',
-      blueprint: { ...fixtures.canonicalMinimal, features: ['sales'] },
+      blueprint: { ...fixtures.canonicalMinimal, features: ['inventory', 'sales'] },
       shouldFail: false
     },
     {
@@ -54,7 +54,7 @@ export async function run(results) {
     },
     {
       name: '8. Componente existente (OrderCard)',
-      blueprint: { ...fixtures.canonicalMinimal, components: ['OrderCard'] },
+      blueprint: { ...fixtures.canonicalMinimal, features: ['inventory', 'orders'], components: ['OrderCard'] },
       shouldFail: false
     },
     {
