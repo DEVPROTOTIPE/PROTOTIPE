@@ -4,6 +4,17 @@
 * **Estado del Roadmap:** `100.00%` de completitud en base a 417 tareas completadas de 417 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
 
+* **[x] ~~Tarea CLI-413: Hardening de Paths del Scaffolding contra Directory Traversal y TOCTOU (P0.3 - Commit B)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementaron las defensas de seguridad de filesystem para la fase P0.3. Se creó `PathSecurity.js` con validación centralizada de contención de rutas. Se reforzó `ProvisioningEnvelopeAdapter.js` con validación temprana de `logoPath` y `execution.targetPath` en ambas ramas (isNested y legacy). Se añadió validación TOCTOU post-`ensureDir` en `generator.js` mediante `fs.realpath`. Resultado: 5/6 tests del scope Commit B en PASSED (1 falla IPC de secretos diferida al Commit C).
+  - Commit: `df76567` — `fix(p0.3): harden scaffolding paths against traversal and TOCTOU`
+  - Archivos:
+    - [`Prototipe-CLI/lib/PathSecurity.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/PathSecurity.js) [NEW]
+    - [`Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
 * **[x] ~~Tarea CLI-412: Suite de Pruebas de Seguridad Scaffolding en Estado RED (P0.3 - Commit A)~~**
   - Estatus: Completada
   - Fecha de registro: 2026-07-12

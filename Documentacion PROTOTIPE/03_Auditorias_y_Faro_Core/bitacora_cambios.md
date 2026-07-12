@@ -1,5 +1,25 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-413 — 2026-07-12
+**fix(p0.3): harden scaffolding paths against traversal and TOCTOU — Commit B**
+**Hash:** `df76567`
+
+### Cambios realizados:
+1. **[NEW] PathSecurity.js:** Clase estática centralizada con `validateContainedPath` (lanza `PATH_OUTSIDE_ALLOWED_ROOT`) e `isPathContained`. Bloquea null bytes, traversals relativos y rutas absolutas fuera de la raíz permitida.
+2. **[MODIFY] ProvisioningEnvelopeAdapter.js:** Validación temprana de `logoPath` contra `temp_uploads` y validación de `execution.targetPath` contra `getWorkspaceRoot()` mediante `PathSecurity.validateContainedPath` en ambas ramas (`isNested` y legacy).
+3. **[MODIFY] generator.js:** Integración de `PathSecurity.validateContainedPath` en `createProject` para resolver el `targetDir` al inicio, y validación TOCTOU post-`ensureDir` mediante `fs.realpath` combinado con `PathSecurity.isPathContained`.
+
+### Resultado de pruebas P0.3:
+- 5/6 pruebas del scope Commit B → **PASSED**
+- 1 falla pendiente (Fuga IPC de secretos) → scope Commit C
+
+### Archivos modificados:
+- [`Prototipe-CLI/lib/PathSecurity.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/PathSecurity.js) [NEW]
+- [`Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js) [MODIFY]
+- [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+---
+
 ## CLI-412 — 2026-07-12
 **Feature: Suite de Pruebas de Seguridad Scaffolding en Estado RED (P0.3 - Commit A)**
 
