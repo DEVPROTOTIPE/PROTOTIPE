@@ -25,6 +25,30 @@ app_layout:
 Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e integraciones con Firebase de **App Ventas**. Debe mantenerse actualizado ante cualquier creación, eliminación o refactorización de archivos.
 
 ## 📂 Estructura de Documentación y Negocio
+* **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pantalla_Bienvenida/welcome_page.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-366).
+* **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Tarjeta_Rasca_Gana/scratch_card_reward.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-366).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/estado_arquitectura_post_fase9_3.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-367).
+* **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Tarjeta_Rasca_Gana`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-367).
+* **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Olla_Oro_Interactiva/interactive_gold_pot.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-367).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_template_core_seed.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-375).
+* **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/especificacion_disenio_experiencia_fase7.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-392).
+* **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/disenio_arquitectura_provisioning_ia_fase8.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-392).
+* **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/disenio_arquitectura_core_v2.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-392).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/evolucion_plataforma_prototype.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-392).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_experience_framework.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-392).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_core_vs_features_template.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-392).
+* **`/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_aprovisionamiento_clientes.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea DOC-MEMBER-PROVISIONING).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_2.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-411).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_3.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-417).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_5.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-424).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_madurez_prototipe.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-425).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_6_queue_architecture.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-426).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_7_production_hardening.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-429).
+* **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Iconos_Marca/iconos_marca.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-445).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_feature_flags_y_marketplace.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-446).
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_integridad_y_criterios_aprovisionamiento.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-446).
+* **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_maquetacion_alineacion_ui.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-447).
+* **`/Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_disenio_premium.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-449).
 * **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Sistema_Notificaciones_Premium/premium_notification_center.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-364).
 * **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Granada_Promocional_Flotante/floating_promo_grenade.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-359).
 * **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Galleta_Fortuna/galleta_fortuna_interactiva.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-360).
@@ -291,6 +315,51 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 ---
 
 ## 📂 Estructura de Módulos y Archivos Clave
+* **`/Plantillas Core/App Ventas/Documentacion App Ventas/guia_multitenant.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-373).
+* **`/Plantillas Core/App Ventas/Documentacion App Ventas/estrategia_testing.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-373).
+* **`/Plantillas Core/App Ventas/Documentacion App Ventas/modelo_firestore.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-373).
+* **`/Plantillas Core/App Ventas/Documentacion App Ventas/arquitectura_features.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-373).
+* **`/Plantillas Core/App Ventas/.github/workflows/ci.yml`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-373).
+* **`/Plantillas Core/App Ventas/tests/unit/orderService.extended.spec.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-373).
+* **`/Plantillas Core/App Ventas/tests/unit/creditService.spec.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-373).
+* **`/Plantillas Core/App Ventas/tests/unit/inventoryService.spec.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-373).
+* **`/Prototipe-CLI/templates/template-core-seed/template.json`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-374).
+* **`/Prototipe-CLI/templates/template-core-seed/tests/e2e/app-health.spec.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-374).
+* **`/Prototipe-CLI/templates/template-core-seed/tests/unit/smoke.spec.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-374).
+* **`/Prototipe-CLI/templates/template-core-seed/.github/workflows/ci.yml`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-374).
+* **`/Prototipe-CLI/templates/template-core-seed/vitest.config.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-374).
+* **`/Plantillas Core/App Ventas/src/routes/AppRoutes.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-379).
+* **`/Plantillas Core/App Ventas/src/hooks/useCartRecommendations.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-380).
+* **`/Plantillas Core/App Ventas/tests/unit/salesService.spec.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-380).
+* **`/Plantillas Core/App Ventas/src/features/delivery/routes.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-380).
+* **`/Plantillas Core/App Ventas/src/features/credits/routes.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-380).
+* **`/Plantillas Core/App Ventas/src/features/orders/routes.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-380).
+* **`/Plantillas Core/App Ventas/src/features/sales/services/salesService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-380).
+* **`/Plantillas Core/App Ventas/src/features/sales/routes.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-380).
+* **`/Plantillas Core/App Ventas/src/features/inventory/routes.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-380).
+* **`/Prototipe-CLI/verticals`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-392).
+* **`/Prototipe-CLI/package-lock.json`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-392).
+* **`/Prototipe-CLI/scripts/tests/p0_2/test_blueprint_no_write.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-407).
+* **`/Prototipe-CLI/scripts/tests/p0_2/test_bridge_contract.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-408).
+* **`/Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-409).
+* **`/Prototipe-CLI/scripts/tests/p0_2/test_dashboard_payload_contract.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-409).
+* **`/Central PROTOTIPE/dev-dashboard/src/utils/provisioningPayload.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-409).
+* **`/Prototipe-CLI/scripts/tests/p0_3/run_p0_3_security_tests.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-412).
+* **`/Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-413).
+* **`/Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-415).
+* **`/Prototipe-CLI/lib/SecretRedactor.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-415).
+* **`/Prototipe-CLI/lib/PathSecurity.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-416).
+* **`/Prototipe-CLI/scripts/tests/p0_4/run_p0_4_lifecycle_tests.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-418).
+* **`/Prototipe-CLI/scripts/tests/p0_4/test_lifecycle_observability.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-418).
+* **`/Prototipe-CLI/scripts/tests/p0_6/run_p0_6_queue_tests.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-427).
+* **`/Prototipe-CLI/scripts/tests/p0_6/test_provisioning_queue.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-427).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/BrandIconsSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-445).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/ui/BrandIcons.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-445).
+* **`/Plantillas Core/App Ventas/src/components/admin/settings/DeliveryCustomMessengerPanel.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-446).
+* **`/Plantillas Core/App Ventas/src/components/admin/orders/OrderDeliveryPanel.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-446).
+* **`/Prototipe-CLI/scripts/test_support/normalize_result.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-451).
+* **`/Prototipe-CLI/scripts/test_support/network_guard.mjs`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-451).
+* **`/Prototipe-CLI/scripts/test_characterization_record.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-451).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/FloatingPromoGrenadeSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-359).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/common/FloatingPromoGrenade.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-359).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveFortuneCookieSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-360).

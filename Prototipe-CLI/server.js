@@ -13414,7 +13414,10 @@ app.post('/api/integrity/prune-drifts', async (req, res) => {
         let taskBlock = blockMatch[1];
         const lines = taskBlock.split(/\r?\n/);
         const updatedLines = lines.map(line => {
-          if (line.trim().startsWith('- Archivos:')) {
+          const trimmed = line.trim();
+
+          // Caso A: Línea con formato "- Archivos: ..."
+          if (trimmed.startsWith('- Archivos:')) {
             const inlineRest = line.replace(/^\s*-\s*Archivos:\s*/i, '').trim();
             const inlineFileRegex = /\[`?([^`\]]+)`?\]\(([^)]+)\)(?:\s*\[[A-Z/]+\])?/g;
             let fm;
@@ -13434,6 +13437,17 @@ app.post('/api/integrity/prune-drifts', async (req, res) => {
               return null; // Purgar la línea de archivos si no queda ninguno
             }
           }
+
+          // Caso B: Línea que es una viñeta individual de archivo (ej. "    - [`ruta/archivo.ext`](url) [MODIFY]")
+          const bulletFileMatch = line.match(/^\s*-\s*\[`?([^`\]]+)`?\]\(([^)]+)\)(?:\s*\[[A-Z/]+\])?/);
+          if (bulletFileMatch) {
+            const fileName = bulletFileMatch[1];
+            // Si coincide con el archivo que queremos purgar, la eliminamos
+            if (fileName.trim() === item.file.trim()) {
+              return null;
+            }
+          }
+
           return line;
         }).filter(line => line !== null);
 

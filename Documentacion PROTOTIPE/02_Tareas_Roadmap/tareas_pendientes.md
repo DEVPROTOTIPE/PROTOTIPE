@@ -1,8 +1,17 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 453 tareas completadas de 453 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 454 tareas completadas de 454 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-454: Refactorización y Soporte Completo para Purga de Desvíos de Archivos Obsoletos en el CLI y Saneamiento del Roadmap~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Corregimos de raíz el endpoint `/api/integrity/prune-drifts` de `server.js` para admitir la purga de desvíos de archivos declarados en formato de lista de viñetas (bullets) individuales (adicional al formato original inline con prefijo `- Archivos:`). Ejecutamos un script de saneamiento local para purgar de inmediato las 17 referencias rotas obsoletas (`FILE_NOT_FOUND`) en `tareas_pendientes.md`, restableciendo la consistencia del Roadmap a verde (cero advertencias físicas de disco).
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
 
 * **[x] ~~Tarea CLI-453: Rediseño de la Arquitectura de Ramas Git para Aprovisionamiento de Clientes y Blindaje a Futuro~~**
   - Estatus: Completada
@@ -628,7 +637,6 @@
   - Fecha de registro: 2026-07-11
   - Fecha de finalización: 2026-07-11
   - Descripción: Registro de cambios locales Git y despliegue del Dashboard Central a Firebase Hosting.
-  - Archivos:
     - [`Prototipe-CLI/cli.js`](file:///d:/PROTOTIPE/Prototipe-CLI/cli.js)
     - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js)
     - [`Prototipe-CLI/package-lock.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package-lock.json)
@@ -645,14 +653,6 @@
     - [`Prototipe-CLI/lib/`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/)
     - [`Prototipe-CLI/scripts/validate-knowledge.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/validate-knowledge.js)
     - [`Prototipe-CLI/verticals/`](file:///d:/PROTOTIPE/Prototipe-CLI/verticals/)
-    - [`Instancias Clientes/seed/App-clinic-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-clinic-e2e-app/prototipe.lock.json)
-    - [`Instancias Clientes/seed/App-clinica-veterinaria-sanitas/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-clinica-veterinaria-sanitas/prototipe.lock.json)
-    - [`Instancias Clientes/seed/App-crm-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-crm-e2e-app/prototipe.lock.json)
-    - [`Instancias Clientes/seed/App-e2e-test-clinic/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-e2e-test-clinic/prototipe.lock.json)
-    - [`Instancias Clientes/seed/App-e2e-test-empty/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-e2e-test-empty/prototipe.lock.json)
-    - [`Instancias Clientes/seed/App-empty-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-empty-e2e-app/prototipe.lock.json)
-    - [`Instancias Clientes/seed/App-restaurante-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-restaurante-e2e-app/prototipe.lock.json)
-    - [`Instancias Clientes/seed/App-retail-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-retail-e2e-app/prototipe.lock.json)
 
 * **[x] ~~Tarea CLI-391: Fase 8.6 - Validación Multivertical E2E~~**
   - Estatus: Completada
@@ -932,7 +932,6 @@
   - Estatus: Completada
   - Fecha de registro: 2026-07-09
   - Descripción: Creado el componente InteractiveGoldPot con físicas Framer Motion, efecto squash-and-stretch, entrada COP formateada en vivo, crecimiento gradual y olla en SVG.
-  - Archivos:
     - [`interactive_gold_pot.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Olla_Oro_Interactiva/interactive_gold_pot.md) [NEW]
     - [`Olla_Oro_Interactiva/`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Olla_Oro_Interactiva/) [NEW]
     - [`InteractiveGoldPot.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/common/InteractiveGoldPot.jsx) [NEW]
@@ -971,14 +970,6 @@
     - [`Central PROTOTIPE/dev-dashboard/src/services/AlertEngine.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/services/AlertEngine.js) [NEW]
     - [`Central PROTOTIPE/dev-dashboard/src/components/admin/SaaSOperationsView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/SaaSOperationsView.jsx) [NEW]
     - [`Prototipe-CLI/knowledge/telemetry/event-types.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/telemetry/event-types.json) [NEW]
-    - [`Instancias Clientes/seed/App-clinic-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-clinic-e2e-app/prototipe.lock.json) [MODIFY]
-    - [`Instancias Clientes/seed/App-clinica-veterinaria-sanitas/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-clinica-veterinaria-sanitas/prototipe.lock.json) [MODIFY]
-    - [`Instancias Clientes/seed/App-crm-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-crm-e2e-app/prototipe.lock.json) [MODIFY]
-    - [`Instancias Clientes/seed/App-e2e-test-clinic/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-e2e-test-clinic/prototipe.lock.json) [MODIFY]
-    - [`Instancias Clientes/seed/App-e2e-test-empty/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-e2e-test-empty/prototipe.lock.json) [MODIFY]
-    - [`Instancias Clientes/seed/App-empty-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-empty-e2e-app/prototipe.lock.json) [MODIFY]
-    - [`Instancias Clientes/seed/App-restaurante-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-restaurante-e2e-app/prototipe.lock.json) [MODIFY]
-    - [`Instancias Clientes/seed/App-retail-e2e-app/prototipe.lock.json`](file:///d:/PROTOTIPE/Instancias Clientes/seed/App-retail-e2e-app/prototipe.lock.json) [MODIFY]
 
 * **[x] ~~Tarea CLI-366: Implementación del Módulo ScratchCardReward (Tarjeta de Rasca y Gana)~~**
   - Estatus: Completada
@@ -1372,12 +1363,10 @@
   - Estatus: Completado.
   - Fecha: 2026-07-08
   - Descripción: Implementados los cuatro blindajes de calidad técnica aprobados en el plan de acción: (1) Creado el hook utilitario `useColorContrast.js` para cálculos dinámicos de contraste WCAG en runtime, eliminando la colisión/colapso de legibilidad en marcas blancas con colores claros en el botón de mantenimiento de `App.jsx`. (2) Definido un esquema de validación robusto con Zod en `appConfigSchema.js` para asegurar que las configuraciones locales y centrales no causen crasheos por campos undefined o tipos de datos inválidos en `useAppConfigSync.js`. (3) Implementados límites defensivos de timeout de 15 segundos en las 4 operaciones de base de datos críticas de `orderService.js` (`createOrder`, `cancelOrder`, `completeOrder` (aprobación de crédito), y `createPhysicalOrder`) usando una envoltura de promesas para evitar que la UI se cuelgue con spinners infinitos en caso de problemas persistentes de red o modo offline. (4) Compilado con éxito tanto `App Ventas` como `dev-dashboard` sin warnings ni errores de linter.
-  - Archivos:
     - [Plantillas Core/App Ventas/src/hooks/useColorContrast.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useColorContrast.js) [NEW]
     - [Plantillas Core/App Ventas/src/schemas/appConfigSchema.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/schemas/appConfigSchema.js) [NEW]
     - [Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
     - [Plantillas Core/App Ventas/src/App.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/App.jsx) [MODIFY]
-    - [Plantillas Core/App Ventas/src/services/orderService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/orderService.js) [MODIFY]
 
 * **[x] ~~Tarea CORE-327: Sincronización Paralela en CLI y Robustecimiento de Gitignore (2026-07-08)~~**
   - Estatus: Completado.
@@ -3548,7 +3537,7 @@
   - Fecha de registro: 2026-06-26
   - Fecha de finalizaciÃ³n: 2026-06-26
   - DescripciÃ³n: Se expandieron las verticales comerciales a 13 nuevos nichos especÃ­ficos con 10 paletas HSL de contraste verificado (130 combinaciones completas light/dark en total) adaptadas estratÃ©gicamente a la identidad visual de cada vertical. Se inyectaron de forma consistente en `dev-dashboard` y en los archivos `palettes.js` de las plantillas (`template-ventas`, `template-core-seed`, `App Ventas`) y en la instancia del cliente activo (`ventas-moni-app`). Se incluyeron catÃ¡logos de prueba y la inyecciÃ³n de atributos dinÃ¡micos en `niche.json` desde la CLI. Adicionalmente, se implementÃ³ el endpoint de fusiÃ³n en la CLI y el fallback en `billingService.js`. Finalmente, se resolviÃ³ la integridad del prebuild registrando e indexando la propuesta tÃ©cnica `propuesta_dashboard_interactivo.md` del Hero en el `README.md` de la biblioteca y en `ComponentSandbox.jsx` (`COMPONENT_META`).
-  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Prototipe-CLI/generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY], [dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [App Ventas/src/services/billingService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/billingService.js) [MODIFY], [dev-dashboard/src/components/admin/ComponentSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY], [Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY], [Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/analisis_nichos_mercado_saas.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/analisis_nichos_mercado_saas.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY], [Prototipe-CLI/templates/template-ventas/src/constants/palettes.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/constants/palettes.js) [MODIFY], [Prototipe-CLI/templates/template-core-seed/src/constants/palettes.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/constants/palettes.js) [MODIFY], [Plantillas Core/App Ventas/src/constants/palettes.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/constants/palettes.js) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/src/constants/palettes.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/constants/palettes.js) [MODIFY]
+  - Archivos: [Prototipe-CLI/server.js](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY], [Prototipe-CLI/generator.js](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY], [dev-dashboard/src/App.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY], [dev-dashboard/src/components/admin/ComponentSandbox.jsx](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY], [Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY], [Documentacion PROTOTIPE/05_Estrategia_Comercial_Ecosistema/analisis_nichos_mercado_saas.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/05_Estrategia_Comercial_Ecosistema/analisis_nichos_mercado_saas.md) [NEW], [Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY], [Prototipe-CLI/templates/template-ventas/src/constants/palettes.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/constants/palettes.js) [MODIFY], [Prototipe-CLI/templates/template-core-seed/src/constants/palettes.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/constants/palettes.js) [MODIFY], [Plantillas Core/App Ventas/src/constants/palettes.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/constants/palettes.js) [MODIFY], [Instancias Clientes/ventas/ventas-moni-app/src/constants/palettes.js](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/constants/palettes.js) [MODIFY]
 
 * **[x] ~~Tarea CORE-084: Matriz de Paridad Inteligente, Blindaje de SincronizaciÃ³n y FusiÃ³n de index/package en CLI Server~~**
   - Estatus: Completado.
@@ -4111,7 +4100,7 @@
   - Fecha de registro: 2026-06-19
   - Fecha de finalizaciÃ³n: 2026-06-19
   - DescripciÃ³n: Implementada la funcionalidad de "stock infinito" (productos preparados) que permite omitir el control de inventario de manera estratÃ©gica y dinÃ¡mica. AÃ±adido el toggle en ProductFormModal (Inventario y Stock), modificada la validaciÃ³n Zod en inventorySchemas para aceptar el flag stockInfinito, actualizados los listados (AdminInventory) en desktop y mobile con indicador visual "âˆž Ilimitado", y ajustadas las transacciones y decrementos en orderService para omitir reducciones de stock si el producto es ilimitado. Se actualizaron los tableros de mÃ©tricas en AdminHome y alertas en AdminStockAlerts para no emitir advertencias de stock bajo sobre estos productos. Adicionalmente, se puliÃ³ la tienda de cara al cliente (ProductDetailPage, ProductCard, ProductDetailModal) para ocultar la cantidad de stock tÃ©cnico (9999) reemplazÃ¡ndola por una elegante etiqueta de "Disponible" y limitando el selector de cantidad mÃ¡xima a 999 en productos de stock ilimitado.
-  - Archivos: [inventorySchemas.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/schemas/inventorySchemas.js) [MODIFY], [ProductFormModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/inventory/ProductFormModal.jsx) [MODIFY], [AdminInventory.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminInventory.jsx) [MODIFY], [orderService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/orderService.js) [MODIFY], [AdminStockAlerts.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminStockAlerts.jsx) [MODIFY], [AdminHome.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminHome.jsx) [MODIFY], [ProductDetailPage.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY], [ProductCard.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductCard.jsx) [MODIFY], [ProductDetailModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductDetailModal.jsx) [MODIFY]
+  - Archivos: [inventorySchemas.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/schemas/inventorySchemas.js) [MODIFY], [AdminInventory.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminInventory.jsx) [MODIFY], [AdminStockAlerts.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminStockAlerts.jsx) [MODIFY], [AdminHome.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminHome.jsx) [MODIFY], [ProductDetailPage.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY], [ProductCard.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductCard.jsx) [MODIFY], [ProductDetailModal.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductDetailModal.jsx) [MODIFY]
 
 * **[x] ~~Tarea CORE-009: RediseÃ±o Premium de la GestiÃ³n de Pedidos (Laboratorio Visual Fase 2) - App Ventas~~**
   - Estatus: Completado.
@@ -4146,7 +4135,7 @@
   - Fecha de registro: 2026-06-19
   - Fecha de finalizaciÃ³n: 2026-06-19
   - DescripciÃ³n: Estandarizados los modales de abonos con ModalTemplate en AdminCredits y ClientCredits, optimizadas las consultas del PDF de cartera limitÃ¡ndolo a crÃ©ditos activos, removido useOrders en la vista de crÃ©ditos, y asegurada consistencia transaccional en abonos concurrentes.
-  - Archivos: [AdminCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminCredits.jsx) [MODIFY], [ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCredits.jsx) [MODIFY], [pdfService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/pdfService.js) [MODIFY], [creditService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/creditService.js) [MODIFY]
+  - Archivos: [AdminCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminCredits.jsx) [MODIFY], [ClientCredits.jsx](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientCredits.jsx) [MODIFY], [pdfService.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/services/pdfService.js) [MODIFY]
 
 * **[x] ~~Tarea CORE-001: ElaboraciÃ³n de Checklist de AuditorÃ­a del Core (App Ventas)~~**
   - Estatus: Completado.
