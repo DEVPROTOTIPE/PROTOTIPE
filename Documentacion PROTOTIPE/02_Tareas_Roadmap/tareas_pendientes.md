@@ -1,8 +1,17 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 415 tareas completadas de 415 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 416 tareas completadas de 416 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-411: Cierre Documental e Informe de Certificación de la Fase P0.2 (P0.2 - Cierre)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se redactó el Informe Final de Certificación de la Fase P0.2 (`informe_certificacion_p0_2.md`), documentando el resumen ejecutivo, la lista de commits, la matriz de archivos modificados, el consolidado de pruebas y el estado Git de los repositorios.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_2.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_2.md) [NEW]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
 
 * **[x] ~~Tarea CLI-410: Conexión del Adapter al Flujo Real de Aprovisionamiento en Dashboard (P0.2 - Punto 5.3)~~**
   - Estatus: Completada

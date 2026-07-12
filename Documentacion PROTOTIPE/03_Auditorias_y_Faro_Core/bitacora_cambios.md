@@ -1,5 +1,18 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-411 — 2026-07-12
+**Feature: Cierre Documental e Informe de Certificación de la Fase P0.2 (P0.2 - Cierre)**
+
+### Cambios realizados:
+1. **Creado el Informe Final de Certificación:** Se compiló y estructuró el archivo `informe_certificacion_p0_2.md` conteniendo el consolidado técnico de la fase, commits asociados, matriz de impacto por repositorio, métricas del build y estado de la suite de pruebas.
+2. **Sincronización GPS Semántico:** Se añadió la entrada del informe de certificación en `mapa_documentacion_ia.md` para garantizar la navegabilidad y referenciación por IAs del equipo.
+
+### Archivos modificados:
+- [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_2.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_2.md) [NEW]
+- [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
 ## CLI-410 — 2026-07-12
 **Feature: Conexión del Adapter al Flujo Real de Aprovisionamiento en Dashboard (P0.2 - Punto 5.3)**
 
