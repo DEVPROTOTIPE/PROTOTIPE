@@ -5,7 +5,15 @@
  * al envelope canonico de aprovisionamiento (blueprint + execution + root params).
  */
 
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { normalizeProvisioningRequest } from './BlueprintAdapter.js';
+import { PathSecurity } from './PathSecurity.js';
+import { getWorkspaceRoot } from '../config.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const CLI_ROOT = path.resolve(__dirname, '..');
 
 const CANONICAL_BLUEPRINT_KEYS = new Set([
   'blueprintVersion', 'instanceId', 'clientName', 'coreType', 'vertical',
@@ -31,6 +39,14 @@ const INFRASTRUCTURE_KEYS = new Set([
 export function normalizeProvisioningEnvelope(body) {
   if (!body || typeof body !== 'object') {
     throw new Error('El cuerpo de la peticion no es un objeto valido.');
+  }
+
+  if (body.logoPath) {
+    const uploadDir = path.resolve(CLI_ROOT, 'temp_uploads');
+    const resolvedLogoPath = path.resolve(body.logoPath);
+    if (!PathSecurity.isPathContained(uploadDir, resolvedLogoPath)) {
+      throw new Error('PATH_OUTSIDE_ALLOWED_ROOT: El logo debe residir dentro del directorio temporal temp_uploads.');
+    }
   }
 
   const isNested = !!(body.blueprint && typeof body.blueprint === 'object');
@@ -78,6 +94,10 @@ export function normalizeProvisioningEnvelope(body) {
       }
     }
 
+    if (execution && execution.targetPath) {
+      PathSecurity.validateContainedPath(getWorkspaceRoot(), execution.targetPath);
+    }
+
     return {
       blueprint: blueprint ? { ...blueprint } : {},
       execution: execution ? { ...execution } : {},
@@ -103,6 +123,10 @@ export function normalizeProvisioningEnvelope(body) {
       } else {
         blueprint[key] = normalizedBlueprint[key];
       }
+    }
+
+    if (execution && execution.targetPath) {
+      PathSecurity.validateContainedPath(getWorkspaceRoot(), execution.targetPath);
     }
 
     return {

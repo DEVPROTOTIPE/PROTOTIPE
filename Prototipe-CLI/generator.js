@@ -18,6 +18,7 @@ import { BlueprintSimulation } from './lib/BlueprintSimulation.js';
 import { ExplainabilityLogger } from './lib/ExplainabilityLogger.js';
 import { PackageMerger } from './lib/PackageMerger.js';
 import { FeatureRegistry } from './lib/FeatureRegistry.js';
+import { PathSecurity } from './lib/PathSecurity.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -847,6 +848,10 @@ export async function createProject(answers) {
         step1.start('Copiar estructura base de plantilla');
       }
       await fs.ensureDir(tDir);
+      const resolvedRealPath = await fs.realpath(tDir);
+      if (!PathSecurity.isPathContained(getWorkspaceRoot(), resolvedRealPath)) {
+        throw new Error('PATH_OUTSIDE_ALLOWED_ROOT: TOCTOU detected on scaffolding root.');
+      }
       await fs.copy(sTempDir, tDir, {
         overwrite: true,
         filter: (src) => !EXCLUDE_FROM_GEN.has(path.basename(src))
@@ -888,7 +893,7 @@ export async function createProject(answers) {
 
   // Declarar targetDir y srcTemplateDir después de validar clientId
   const { getInstancePath } = await import('./config.js');
-  const targetDir = answers.targetPath || getInstancePath(coreType, `App-${folderName}`);
+  const targetDir = PathSecurity.validateContainedPath(getWorkspaceRoot(), answers.targetPath || getInstancePath(coreType, `App-${folderName}`));
   const existedBefore = await fs.pathExists(targetDir);
   try {
     const srcTemplateDir = path.join(TEMPLATES_DIR, answers.template);
