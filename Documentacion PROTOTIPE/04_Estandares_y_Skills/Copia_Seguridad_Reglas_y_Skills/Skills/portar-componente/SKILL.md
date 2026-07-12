@@ -84,10 +84,16 @@ Si el componente requiere un store de Zustand (ej. `useCartStore`) que no existe
 ### Fidelidad funcional total
 El código portado debe ser 100% funcional. Prohibido usar placeholders o esqueletos. El archivo de código de destino debe estar completo.
 
-### Alineación Estética y Prevención de Truncamiento (Crítico)
+### Alineación Estética, Accesibilidad y Prevención de Truncamiento (Crítico)
 Al portar y adaptar el componente, asegúrate de:
 1. Usar únicamente variables HSL adaptativas (`bg-[var(--color-bg)]`, `border-[var(--color-border)]`) y eliminar cualquier color estático oscuro de Tailwind.
 2. Comprobar si el componente contiene contenedores con scroll horizontal o vertical. Si es así, exige e inyecta paddings de holgura (mínimo `py-4` o `px-4` internos) para evitar que sombras de elevación, bordes activos o efectos de zoom/escala se corten físicamente.
+3. Asegurar que los botones interactivos o iconos de acción tengan un tamaño táctil mínimo de **44x44 CSS px** y declaren explícitamente los 5 estados en Tailwind (`resting`, `hover`, `focus`, `active:scale-[0.98]`, y `loading`).
+4. Reemplazar hovers planos por hovers condicionales con la media query `@media (hover: hover)` en Tailwind para evitar estados pegajosos tras el tap en móviles, utilizando preferencialmente animaciones de GPU (`transform` y `opacity`).
+5. Expresar la elevación y sombras en modo oscuro mediante **elevación tonal** progresiva de fondos (Niveles 0 al 3: base `bg-bg` -> tarjetas `bg-surface` -> popovers `bg-surface-2` -> modales `bg-surface-3`), nunca con sombras negras.
+6. Envolver desplegables/dropdowns customizados con **React Portals** (`createPortal`) al final del body si se ubican dentro de contenedores con `overflow-hidden` o `overflow-y-auto` para evitar clipping. Transformar dropdowns en Bottom Sheets en viewports móviles (`sm`).
+7. Enlazar inputs a labels mediante `htmlFor`. Declarar la propiedad `inputmode` para forzar el teclado óptimo en móviles en inputs de números (`inputmode="numeric" pattern="[0-9]*"`, decimales/precios -> `inputmode="decimal"`). Utilizar `<input type="date">` nativo en móviles.
+
 
 ### Contrato Obligatorio Para Features Con Firebase (Arquitectura Limpia)
 Si el componente a portar se conecta a Firebase/Firestore o maneja colecciones de datos del negocio (caja, inventarios, pedidos, créditos), es obligatorio estructurarlo/refactorizarlo bajo el patrón desacoplado de 3 capas:

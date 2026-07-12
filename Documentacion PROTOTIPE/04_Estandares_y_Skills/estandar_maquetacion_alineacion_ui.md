@@ -140,3 +140,112 @@ La "acidez visual" se produce cuando se inyectan colores ultra-saturados (rojos,
 * **Uso de Opacidad para Estados:** En lugar de usar alertas con fondos rojos intensos directos (`bg-red-500`), prefiere fondos con opacidad HSL que permitan ver el fondo original y resalten el texto:
   - **Recomendado:** `bg-red-500/10 text-red-500 border border-red-500/20`
   - **Evitar:** `bg-red-500 text-white font-bold` (a menos que sea un botón de eliminación destructivo de alta alerta).
+
+---
+
+## 6. Estándar de Botones y Estados Interactivos (Interactive Touchpoints)
+
+Para cumplir con las pautas de accesibilidad WCAG 2.2 y evitar interfaces frustrantes en pantallas móviles, los botones deben ser consistentes tanto en dimensiones físicas como en sus estados visuales.
+
+### 6.1 Tamaño del Objetivo Táctil (Touch Target Size)
+* **Regla:** Todos los elementos interactivos (botones, enlaces, iconos de acción) **DEBEN** tener un tamaño de objetivo táctil mínimo de **44x44 CSS píxeles** (o 48x48px según Material Design).
+* **Solución de Clase:** Si un botón iconográfico mide físicamente `w-8 h-8` (32px), se debe compensar el área con padding o usando un contenedor invisible de tamaño superior.
+  ```jsx
+  {/* Botón con área de clic extendida a 44px */}
+  <button className="flex items-center justify-center w-11 h-11 text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+    <Icono className="w-5 h-5" />
+  </button>
+  ```
+
+### 6.2 Estados Visuales Completos y Semánticos
+Todo botón o control interactivo debe declarar de manera explícita sus 5 estados de ciclo de vida visual en Tailwind:
+1. **Normal (Resting):** Colores de fondo de marca estables.
+2. **Hover:** Cambio de luminosidad o reducción controlada de opacidad (ej. `hover:opacity-90 transition-opacity`).
+3. **Focus:** Anillo de enfoque visible con contraste >= 3:1 (ej. `focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg)]`).
+4. **Active (Pressed):** Escala de compresión física para feedback táctil instantáneo (ej. `active:scale-[0.98] transition-all`).
+5. **Loading (Cargando):** Debe bloquear clics duplicados (`disabled={loading}`), ocultar el texto original con un spinner de carga, y usar `aria-busy="true"` + `aria-live="polite"`.
+
+### 6.3 Desactivación Semántica (Disabled State)
+* **Prohibición:** Queda prohibido el uso de clases fijas como `bg-slate-200 text-slate-400` para estados deshabilitados (debido a la inversión de contraste en Modo Claro).
+* **Solución de Clase:** Utilizar variables semánticas de tema que respeten la luminosidad correcta en ambos modos.
+  ```jsx
+  className="bg-[var(--color-surface-3)] text-[var(--color-text-muted)]/50 border border-[var(--color-border)] cursor-not-allowed"
+  ```
+
+---
+
+## 7. Estándar de Elevación y Sombras Semánticas (Depth & Elevation)
+
+La profundidad debe ser controlada de manera lógica para jerarquizar la interfaz, adaptándose perfectamente a los modos de luz.
+
+### 7.1 Modo Claro (Sombras Suaves Multi-capa)
+* **Directiva:** Evita sombras con alta opacidad de negro o sombras de color saturado. Utiliza sombras multi-capa sutiles para imitar la física de la luz natural.
+* **Solución de Clase (Tailwind):**
+  - Elevación Baja (Cards): `shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)]`
+  - Elevación Media (Dropdowns, Menús): `shadow-[0_4px_12px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.04)]`
+  - Elevación Alta (Modales, Diálogos): `shadow-[0_12px_28px_rgba(0,0,0,0.12),0_8px_10px_rgba(0,0,0,0.08)]`
+
+### 7.2 Modo Oscuro (Elevación Tonal de Material Design 3)
+* **Regla:** En interfaces oscuras, las sombras negras son invisibles. La elevación **DEBE** expresarse aclarando progresivamente el color de fondo de las superficies (`surface tonal contrast`).
+* **Directiva de Niveles:**
+  - **Nivel 0 (Fondo base):** `bg-[var(--color-bg)]` (Negro o gris muy oscuro).
+  - **Nivel 1 (Superficies de tarjetas):** `bg-[var(--color-surface)]` (Gris oscuro estándar).
+  - **Nivel 2 (Popovers, Dropdowns, Menús flotantes):** `bg-[var(--color-surface-2)]` (Tono intermedio).
+  - **Nivel 3 (Modales en primer plano):** `bg-[var(--color-surface-3)]` (Tono más claro para indicar proximidad).
+
+---
+
+## 8. Estándar de Listas y Botones Desplegables (Custom Dropdowns)
+
+Al prescindir de los selectores nativos (`<select>`), los controles customizados deben asegurar total resiliencia técnica y accesibilidad.
+
+### 8.1 Accesibilidad por Teclado y Atributos ARIA
+* **Regla:** Todo dropdown personalizado debe poder operarse completamente con el teclado (`Tab` para enfocar, `ArrowDown`/`ArrowUp` para navegar, `Enter`/`Space` para seleccionar, `Esc` para cerrar).
+* **Especificación ARIA:**
+  - Botón desencadenante: `aria-haspopup="listbox"` y `aria-expanded={isOpen}`.
+  - Lista de opciones: `role="listbox"`.
+  - Opción individual: `role="option"` y `aria-selected={isSelected}`.
+
+### 8.2 Prevención de Clipping (Corte de Layout)
+* **Error Común:** El dropdown se corta visualmente o genera scrollbars no deseados cuando se abre dentro de contenedores que tienen `overflow-hidden` o `overflow-y-auto`.
+* **Directiva:** Los desplegables que contengan más de 4 opciones deben renderizarse utilizando **React Portals** (`createPortal`) al final del `<body>` de la aplicación, o bien utilizar posicionamiento dinámico y absoluto (como `@floating-ui/react`) que recalcule su ubicación física en el viewport, invirtiendo su orientación hacia arriba (`placement: 'top'`) si colisiona con el borde inferior de la pantalla.
+
+### 8.3 Adaptación Responsiva Móvil (Bottom Sheet)
+* **Regla:** En dispositivos móviles (`sm` o inferiores), los desplegables con más de 6 opciones **DEBEN** dejar de renderizarse como menús flotantes pequeños para transformarse en un **Bottom Sheet** (cajón inferior) que se deslice desde la parte baja, maximizando el área útil táctil y la facilidad de lectura.
+
+---
+
+## 9. Estándar de Formulario Interactivos (Form Usability & Resets)
+
+Los campos interactivos deben alinearse a las directivas de usabilidad del Nielsen Norman Group y accesibilidad W3C.
+
+### 9.1 Relación de Label Obligatoria
+* **Regla:** Todo campo de entrada debe contar con una etiqueta `label` visible. Queda prohibido delegar la función de etiqueta exclusivamente al atributo `placeholder` (ya que este desaparece al escribir y provoca desorientación cognitiva).
+* **Asociación:** Asocia siempre explícitamente el label y el input utilizando `htmlFor` e `id` idénticos.
+  ```jsx
+  <label htmlFor="user-email">Correo Electrónico</label>
+  <input id="user-email" type="email" ... />
+  ```
+  *(Si el diseño exige ocultar visualmente la etiqueta, utiliza la clase `sr-only` de Tailwind para mantener el soporte de lectores de pantalla).*
+
+### 9.2 Teclados Móviles Semánticos en Inputs Numéricos (`inputmode`)
+* **Regla:** Además de aplicar el reset CSS para ocultar las flechas de número, los inputs que capturen datos puramente numéricos (como códigos, teléfonos o importes) **DEBEN** declarar la propiedad `inputmode` para forzar al sistema operativo móvil (iOS/Android) a disparar el teclado numérico óptimo.
+* **Directiva de Tipo:**
+  - Para cantidades enteras (ej. PIN, Código): `inputmode="numeric" pattern="[0-9]*"`
+  - Para importes o decimales (ej. Precios, Kilogramos): `inputmode="decimal"`
+
+### 9.3 Control de Inputs de Fecha (`type="date"`)
+* **Regla:** Para dispositivos móviles, se **DEBE** emplear la etiqueta nativa `<input type="date">` ya que aprovecha la ruleta nativa del sistema operativo (sumamente optimizada y accesible en pantallas táctiles). En entornos de escritorio, se prefiere envolver el control con librerías personalizadas para evitar discrepancias visuales drásticas entre navegadores.
+* **Estilizado de Indicador Nativo (Safari/Chrome Reset):**
+  ```css
+  /* Estilizado del indicador del calendario nativo sin deformar el input */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    background-image: url("data:image/svg+xml,..."); /* Icono SVG limpio */
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+  }
+  ```

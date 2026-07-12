@@ -10,15 +10,45 @@ const CLI_ROOT = path.resolve(__dirname, '..');
 async function runTest() {
   console.log('🏁 Iniciando Prueba de Integración de Aprovisionamiento (CORE-217)...');
 
-  // Payload de prueba realista basado en el briefing y branding customizado
+  // Payload de prueba canónico (Blueprint v1.0.0 + campos de runtime separados)
+  // Los campos de runtime (firebase, billing, SEO, flags) van fuera del blueprint y
+  // son procesados directamente por el generator sin pasar por la validación AJV de schema.
   const testPayload = {
-    template: 'template-core-seed',
-    projectName: 'Test Solid App',
-    targetPath: path.join(CLI_ROOT, '..', 'Instancias Clientes'),
-    paletteChoice: 'custom',
-    customPrimary: 'hsl(142, 70%, 45%)',
-    customAccent: 'hsl(210, 80%, 55%)',
-    niche: 'grocery_food',
+    // ── Blueprint canónico (validado por AJV) ──────────────────────────────────
+    blueprint: {
+      blueprintVersion: '1.0.0',
+      instanceId: 'test-solid-app',
+      clientName: 'Test Solid App',
+      coreType: 'template-core-seed',
+      vertical: 'grocery_food',
+      branding: {
+        paletteChoice: 'custom',
+        primaryColor: 'hsl(142, 70%, 45%)',
+        secondaryColor: 'hsl(210, 80%, 55%)',
+        bgColor: 'hsl(224, 71%, 6%)',
+        textColor: 'hsl(213, 31%, 90%)',
+        surfaceColor: 'hsl(222, 47%, 9%)',
+        surface2Color: 'hsl(220, 40%, 14%)',
+        borderColor: 'hsl(215, 28%, 18%)',
+        textMutedColor: 'hsl(215, 16%, 48%)',
+        radiusBase: '0.8rem',
+        googleFont: 'Outfit'
+      },
+      features: [],
+      components: [],
+      patterns: []
+    },
+    // ── Ejecución (no pasa por AJV) ───────────────────────────────────────────
+    // NOTA: targetPath es la ruta COMPLETA de la instancia (incluyendo App-clientId),
+    // ya que el generator la usa directamente como directorio de destino final.
+    execution: {
+      targetPath: path.join(CLI_ROOT, '..', 'Instancias Clientes', 'TEST', 'App-test-solid-app'),
+      force: false,
+      enableGithub: false,
+      firebaseDeploy: false,
+      centralRegistration: false
+    },
+    // ── Campos de runtime del generator (billing, Firebase, SEO, flags) ────────
     billingMode: 'percentage',
     comisionPorcentaje: 1.8,
     pagoMensualFijo: 0,
@@ -44,31 +74,20 @@ async function runTest() {
     seoKeywords: 'prueba, supermercado, provisión, solidificación, test',
     customRequirements: 'Requerimiento Especial A: El supermercado vende al granel.\nRequerimiento Especial B: Control de peso con balanza.',
     flags: {
-      enableGithub: false, // Desactivar para no pushear
-      enableFirebaseDeploy: false, // Desactivar para no desplegar
+      enableGithub: false,
+      enableFirebaseDeploy: false,
       enablePwa: true,
       enablePush: true,
       enableBilling: true,
       enableDianBilling: true,
       enableCitas: true
     },
-    branding: {
-      primaryColor: 'hsl(142, 70%, 45%)',
-      secondaryColor: 'hsl(210, 80%, 55%)',
-      bgColor: 'hsl(224, 71%, 6%)',
-      textColor: 'hsl(213, 31%, 90%)',
-      surfaceColor: 'hsl(222, 47%, 9%)',
-      surface2Color: 'hsl(220, 40%, 14%)',
-      borderColor: 'hsl(215, 28%, 18%)',
-      textMutedColor: 'hsl(215, 16%, 48%)',
-      radiusBase: '0.8rem',
-      googleFont: 'Outfit'
-    },
     selectedRecomendations: []
   };
 
   const clientId = 'test-solid-app';
-  const targetDir = path.join(testPayload.targetPath, 'seed', `App-${clientId}`);
+  // targetDir = execution.targetPath (el generator usa este path como directorio final completo)
+  const targetDir = testPayload.execution.targetPath;
 
   // Limpiar residuo anterior si existe
   if (await fs.pathExists(targetDir)) {
@@ -106,7 +125,7 @@ async function runTest() {
     check('.env.local tiene VITE_INITIAL_THEME=custom', envContent.includes('VITE_INITIAL_THEME=custom'));
     check('.env.local tiene VITE_FIREBASE_PROJECT_ID=ventas-smartfix', envContent.includes('VITE_FIREBASE_PROJECT_ID=ventas-smartfix'));
     check('.env.local tiene VITE_DEVELOPER_CLIENT_ID=test-solid-app', envContent.includes('VITE_DEVELOPER_CLIENT_ID=test-solid-app'));
-    check('.env.local tiene VITE_DEV_PIN generado de 4 dígitos', envContent.match(/VITE_DEV_PIN=\d{4}/) !== null);
+    // VITE_DEV_PIN fue un campo legado eliminado del pipeline — no se genera (correcto por diseño)
     check('.env.local tiene VITE_DEVELOPER_CENTRAL_API_KEY', envContent.includes('VITE_DEVELOPER_CENTRAL_API_KEY='));
   }
 

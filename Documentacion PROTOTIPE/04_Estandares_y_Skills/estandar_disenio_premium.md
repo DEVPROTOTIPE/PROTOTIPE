@@ -94,3 +94,98 @@ hover:bg-slate-50 hover:shadow-sm cursor-pointer
   {children}
 </div>
 ```
+
+---
+
+## 6. Gobernanza de Fondos y Contraste en Modo Oscuro (Semántica Tonal)
+
+Para evitar la "planitud visual" y garantizar la legibilidad en interfaces oscuras, los fondos deben estructurarse de manera semántica e incremental (elevación tonal).
+
+### 6.1 Estructura Semántica de Fondos
+*   **Fondo Base (`bg-[var(--color-bg)]`):** Se utiliza exclusivamente para el fondo general del viewport de la pantalla (body). Es el nivel más oscuro de la interfaz.
+*   **Superficie Principal (`bg-[var(--color-surface)]`):** Reservado para tarjetas de contenido, paneles principales, feeds de datos y secciones secundarias. Proporciona el contraste base sobre el fondo.
+*   **Superficie Destacada (`bg-[var(--color-surface-2)]`):** Utilizado para sub-secciones dentro de una tarjeta (como el resumen de totales en un checkout), popovers, selectores desplegables y barras de búsqueda.
+*   **Superficie Flotante (`bg-[var(--color-surface-3)]`):** Reservado para modales interactivos que aparecen en primer plano, bottom sheets y toasts flotantes. Al ser el elemento físicamente más cercano al usuario, posee el tono más claro en modo oscuro.
+
+### 6.2 Evitación de Colisiones de Fondo (Color Swatches)
+*   **Advertencia:** En el stylesheet global del Dashboard Central, cualquier contenedor `div` con las clases `rounded-2xl` (o `rounded-3xl`) y una clase de borde (`border`) se sobrescribe a fondo blanco/glassmorphic en Modo Claro.
+*   **Regla:** Cuando implementes selectores cromáticos interactivos con fondos dinámicos definidos en `style={{ backgroundColor: ... }}`, **nunca** combines `rounded-2xl`/`rounded-3xl` con clases de borde en el mismo elemento, o fuerza el inline style con `!important` para evitar la pérdida del swatch.
+
+---
+
+## 7. Estándar de Animaciones Fluidas y Rendimiento (Aceleración por Hardware)
+
+Las animaciones mal optimizadas provocan parpadeos y caídas drásticas de FPS en smartphones de gama media-baja.
+
+### 7.1 Propiedades Animables Permitidas
+*   **Regla:** Queda prohibido animar propiedades de maquetación que fuercen al navegador a recalcular el layout físico de la página (tales como `height`, `width`, `margin`, `padding`, `top`, `left`).
+*   **Directiva:** Utiliza exclusivamente propiedades de composición aceleradas por la GPU: **`transform`** (para mover y escalar) y **`opacity`** (para desvanecer).
+*   **Ejemplo (Incorrecto):**
+    ```css
+    transition-all duration-300 hover:h-12 hover:mt-2
+    ```
+*   **Ejemplo (Correcto - GPU):**
+    ```css
+    transition-all duration-300 hover:translate-y-[-4px] hover:scale-105
+    ```
+
+### 7.2 Aceleración por Hardware (`will-change`)
+*   Para elementos con micro-animaciones continuas o pesadas (como la aguja en medidores, ruletas de la suerte o widgets flotantes con efectos 3D), aplica la propiedad `will-change-transform` para indicarle al navegador que reserve memoria de video en la GPU, eliminando el lag en móviles.
+
+### 7.3 Respeto a la Accesibilidad (`reduced-motion`)
+*   Toda transición compleja con Framer Motion o CSS debe envolverse o desactivarse ante usuarios que tengan activada la preferencia de reducción de movimiento en el sistema operativo:
+    ```css
+    @media (prefers-reduced-motion: reduce) {
+      .animated-element {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+    ```
+
+---
+
+## 8. Interactividad y Hovers Pegajosos en Dispositivos Táctiles
+
+Un error común de interactividad es la aplicación directa de clases de hover en móviles. En iOS y Android, el estado `:hover` se activa en el primer tap y se queda "pegado" hasta que el usuario hace clic en otra parte de la pantalla, dando un aspecto roto y sucio.
+
+### 8.1 Condicionamiento de Hover para Punteros de Precisión
+*   **Regla:** Las clases de cambio de color o brillo por hover **DEBEN** limitarse a pantallas que dispongan de cursor físico de precisión utilizando media queries o selectores responsivos específicos.
+*   **Solución en Tailwind:**
+    ```jsx
+    {/* bg-primary/10 se activa en hover únicamente en pantallas con soporte de cursor */}
+    <button className="h-10 px-4 bg-surface border border-app rounded-xl [@media(hover:hover)]:hover:bg-[var(--color-primary)]/10 transition-colors">
+      Click
+    </button>
+    ```
+
+### 8.2 Feedback de Compresión (Active State)
+*   En pantallas móviles, el hover se sustituye por el estado de compresión activa (`active:scale-[0.98]`). Para evitar que el efecto se extienda indefinidamente al arrastrar el dedo (scrolling), agrega la propiedad `select-none` en el botón, impidiendo la selección accidental de texto.
+
+---
+
+## 9. Efectos de Brillo (Glow), Shimmer y Degradados Animados
+
+Los efectos de brillo y degradados añaden la firma estética "premium" característica de PROTOTIPE.
+
+### 9.1 Glow Dinámico Basado en HSL (Aura de Botón)
+Para botones principales de marca, utiliza sombras de brillo basadas en la opacidad del color primario HSL para lograr un efecto de relieve luminoso.
+*   **Solución de Clase:**
+    ```jsx
+    <button className="h-11 px-6 bg-[var(--color-primary)] !text-white rounded-xl shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.3)] hover:shadow-[0_0_25px_rgba(var(--color-primary-rgb),0.5)] transition-all">
+      Destacado
+    </button>
+    ```
+
+### 9.2 Shimmer Skeleton (Efecto de Barrido Lumínico)
+Para estados de carga, utiliza degradados lineales animados que se desplacen horizontalmente mediante aceleración gráfica.
+*   **Solución CSS inline o Clase:**
+    ```css
+    @keyframes shimmer {
+      100% { transform: translateX(100%); }
+    }
+    .animate-shimmer {
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+    ```

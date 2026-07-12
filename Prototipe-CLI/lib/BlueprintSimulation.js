@@ -23,7 +23,8 @@ export class BlueprintSimulation {
 
     console.log('✨  COMPOSICIÓN PROPUESTA:');
     console.log(`    - 📦  Features (${blueprint.features.length}):      ${blueprint.features.join(', ') || 'Ninguna (Semilla limpia)'}`);
-    console.log(`    - 🧠  Capabilities (${blueprint.capabilities.length}):  ${blueprint.capabilities.join(', ') || 'Ninguna'}`);
+    const blueprintCapabilities = blueprint.capabilities || [];
+    console.log(`    - 🧠  Capabilities (${blueprintCapabilities.length}):  ${blueprintCapabilities.join(', ') || 'Ninguna'}`);
     console.log(`    - 🧩  Components (${blueprint.components.length}):    ${blueprint.components.join(', ') || 'Ninguno'}`);
     console.log(`    - 📐  Patterns (${blueprint.patterns.length}):      ${blueprint.patterns.join(', ') || 'Ninguno'}`);
     
@@ -40,10 +41,15 @@ export class BlueprintSimulation {
     console.log(`    - 🚚  NPM Deps unificadas (${uniqueNpmDeps.length}): ${uniqueNpmDeps.join(', ') || 'Ninguna adicional'}`);
 
     console.log('\n🎨  EXPERIENCIA Y BRANDING:');
-    console.log(`    - Layout:         ${blueprint.experience.layout}`);
-    console.log(`    - Densidad UI:    ${blueprint.experience.density}`);
-    console.log(`    - Paleta Color:   ${blueprint.branding.paletteChoice}`);
-    console.log(`    - Tipografía:     ${blueprint.experience.typography}`);
+    const experience = blueprint.experience || {
+      layout: 'bento',
+      density: 'comfortable',
+      typography: blueprint.branding?.googleFont || 'Inter'
+    };
+    console.log(`    - Layout:         ${experience.layout}`);
+    console.log(`    - Densidad UI:    ${experience.density}`);
+    console.log(`    - Paleta Color:   ${blueprint.branding?.paletteChoice || 'custom'}`);
+    console.log(`    - Tipografía:     ${experience.typography}`);
 
     // Estimación del bundle
     const estimatedFeaturesWeight = blueprint.features.length * 15; // 15 KB por feature estimada
