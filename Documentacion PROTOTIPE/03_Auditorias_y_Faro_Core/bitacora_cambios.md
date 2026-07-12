@@ -1,5 +1,21 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-408 — 2026-07-12
+**Feature: Migración del Bridge y Frontera Contractual (P0.2 - Punto 5.1)**
+
+### Cambios realizados:
+1. **Creado ProvisioningEnvelopeAdapter.js:** Diseñado un adaptador en el Bridge que normaliza el `body` de las peticiones HTTP a la estructura de contrato (`blueprint` + `execution`), manteniendo desacoplados y en la raíz del payload los parámetros de infraestructura del Wizard (credenciales Firebase, adminEmail, VAPID, etc.) para que no contaminen el blueprint ni fallen contra la validación estricta de AJV.
+2. **Integración en server.js:** Se implementó `normalizeProvisioningEnvelope` al inicio del endpoint `POST /api/create-project`, adaptando peticiones de forma dinámica y actualizando todas las referencias de validación y sanitización secundarias para que lean del envelope canónico estructurado.
+3. **Suite de Pruebas test_bridge_contract.js:** Creada una suite específica para validar la normalización de payloads legacy planos, la inmutabilidad de payloads ya canónicos anidados y el rechazo preventivo de conflictos de aliases e inconsistencias de identificadores.
+
+### Archivos modificados:
+- [`Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js) [NEW]
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`Prototipe-CLI/scripts/tests/p0_2/test_bridge_contract.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/test_bridge_contract.js) [NEW]
+- [`Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js) [MODIFY]
+
+---
+
 ## CLI-407 — 2026-07-12
 **Feature: Integración y Desvío de Flujo Físico de Aprovisionamiento (P0.2 - Punto 4B)**
 

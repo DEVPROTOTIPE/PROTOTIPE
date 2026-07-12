@@ -1,8 +1,19 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `99.51%` de completitud en base a 412 tareas completadas de 414 tareas únicas verificables.
+* **Estado del Roadmap:** `99.76%` de completitud en base a 413 tareas completadas de 414 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-408: Migración del Bridge y Frontera Contractual (P0.2 - Punto 5.1)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se creó el adaptador `ProvisioningEnvelopeAdapter.js` encargado de normalizar las peticiones HTTP del Bridge (`req.body`) al envelope canónico (`blueprint` + `execution`), manteniendo las variables de infraestructura adicionales en el objeto root para no contaminar el blueprint. Se integró en `server.js` bajo el endpoint `/api/create-project` para actuar como frontera contractual. Se implementó la suite de pruebas `test_bridge_contract.js` y se integró en el runner para certificar el soporte dual de payloads (legacy planos y canónicos anidados) y la detección de conflictos de alias.
+  - Archivos:
+    - [`Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js) [NEW]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/scripts/tests/p0_2/test_bridge_contract.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/test_bridge_contract.js) [NEW]
+    - [`Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-407: Integración y Desvío de Flujo Físico de Aprovisionamiento (P0.2 - Punto 4B)~~**
   - Estatus: Completada
