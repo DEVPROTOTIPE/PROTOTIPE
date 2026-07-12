@@ -1,8 +1,16 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 430 tareas completadas de 430 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 431 tareas completadas de 431 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-431: Mitigación de Warnings de Permisos en BillingSync para Sesiones Cliente~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se inyectó la validación del rol de administrador (user && role === 'admin') y verificación de cambios (hasChanges) en useAppConfigSync.js antes de intentar propagar las tarifas de facturación a config/settings local. Esto evita que los usuarios con rol de cliente o no administradores disparen peticiones de escritura a colecciones protegidas, eliminando el error de "Missing or insufficient permissions" en la consola del navegador.
+  - Archivos:
+    - [`Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-430: Corrección de Bootstrap del Core del Cliente y Validación Zod de Manifiestos~~**
   - Estatus: Completada

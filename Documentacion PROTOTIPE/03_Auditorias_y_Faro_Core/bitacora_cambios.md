@@ -1,5 +1,18 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-431 — 2026-07-12
+**Feature: Mitigación de Warnings de Permisos en Sincronización de Facturación para Clientes**
+
+### Cambios realizados:
+1. **useAppConfigSync.js (template-core-seed):** Se inyectó la validación del rol de administrador (`user && role === 'admin'`) y de cambios reales (`hasChanges`) en `useAppConfigSync.js` antes de invocar `updateAppConfig` con las tarifas centrales obtenidas de Firestore Central. Esto evita llamadas de escritura redundantes y previene que usuarios no administradores (clientes o vendedores) intenten escribir en la colección `/config/settings` protegida, erradicando los warnings de `Missing or insufficient permissions` en la consola.
+2. **useAppConfigSync.js (App-app-ok-2026):** Se propagó y aplicó exactamente el mismo cambio en la instancia de prueba activa para corregir en caliente el comportamiento reportado tras el login de clientes.
+
+### Archivos modificados:
+- [`Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js) [MODIFY]
+- [`Instancias Clientes/App-app-ok-2026/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/App-app-ok-2026/src/hooks/useAppConfigSync.js) [MODIFY]
+
+---
+
 ## CLI-430 — 2026-07-12
 **Feature: Corrección del bootstrap del Core del cliente y validación Zod de manifiestos**
 
