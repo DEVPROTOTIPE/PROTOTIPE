@@ -1,13 +1,24 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
 ## CLI-432 — 2026-07-12
-**Feature: Habilitación de CORS para Puertos Dinámicos de Viewports Locales en Bridge CLI**
+**Feature: Habilitación de CORS, Bypass de App Check en Desarrollo y Saneamiento de Dependencias para Compilación**
 
 ### Cambios realizados:
-1. **server.js (Bridge CLI):** Se configuró una validación de origen flexible basada en una expresión regular (`/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/`) en el middleware de CORS de Express. Esto permite que cualquier viewport de cliente o panel de desarrollo que corra localmente en un puerto asignado dinámicamente por Vite (ej. `http://localhost:3131`) pueda enviar telemetría u operaciones de control al servidor Bridge API en el puerto `3001` sin ser bloqueado por políticas CORS.
+1. **server.js (Bridge CLI):** 
+   - Se configuró una validación de origen flexible basada en una expresión regular (`/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/`) en el middleware de CORS.
+   - Se implementó un bypass automático de la validación de Firebase App Check en entornos que no son de producción (`process.env.NODE_ENV !== 'production'`) para solicitudes provenientes de loopback (`localhost`/`127.0.0.1`), construyendo dinámicamente el `req.tenant` con el `clientId` del body. Esto erradica el error `401 Unauthorized` al reportar telemetría local.
+2. **event-types.json (Bridge CLI):** Se registró el tipo de evento `billing` con orígenes autorizados `client-runtime`, `cli`, `automatic` y `manual` para evitar fallos de validación (400 Bad Request) al enviar telemetría de facturación.
+3. **template-core-seed y Clientes:**
+   - Se portaron los directorios `src/core/eventbus/` y `src/core/events/` (que contienen `EventRegistry.js` y contratos de eventos) para resolver imports en los módulos de checkout.
+   - Se copiaron y unificaron componentes atómicos (`BackButton.jsx`, `LeafletMapPicker.jsx`), hooks, stores y servicios faltantes en la estructura del Core Seed para evitar errores de Rollup (`Could not resolve`).
+   - Se agregaron las dependencias `qrcode`, `canvas-confetti`, `embla-carousel-autoplay` y `embla-carousel-react` al manifiesto `package.json` para posibilitar el build.
+4. **salesService.js (POS):** Se refactorizó la importación dinámica de `offlineDB.js` a una importación estática al inicio del archivo para resolver el conflicto de Rollup y cumplir con las políticas del *Build Integrity Guard*.
 
 ### Archivos modificados:
 - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`Prototipe-CLI/knowledge/telemetry/event-types.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/telemetry/event-types.json) [MODIFY]
+- [`Prototipe-CLI/templates/template-core-seed/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/package.json) [MODIFY]
+- [`Prototipe-CLI/templates/template-ventas/src/features/sales/services/salesService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/features/sales/services/salesService.js) [MODIFY]
 
 ---
 
