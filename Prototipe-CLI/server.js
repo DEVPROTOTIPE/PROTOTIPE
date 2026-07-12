@@ -776,19 +776,22 @@ app.post('/api/upload-logo', async (req, res) => {
   }
 });
 
-// Clean up task after 30 minutes
+// Clean up task after dynamic TTL or 30 minutes
 function registerTaskCleanup(taskId) {
+  const TASK_CLEANUP_TTL_MS = Number(process.env.TASK_CLEANUP_TTL_MS || 1800000);
   setTimeout(() => {
     delete activeCreationTasks[taskId];
     console.log(`[Task Monitor] Tarea de aprovisionamiento '${taskId}' purgada de memoria.`);
-  }, 1800000);
+  }, TASK_CLEANUP_TTL_MS);
 }
 
 // Lógica de ejecución en segundo plano para el aprovisionamiento
 async function executeCreationTaskInBackground(taskId, answers) {
   const task = activeCreationTasks[taskId];
   if (!task) return;
-  
+
+  answers.__taskId = taskId;
+
   const log = (line) => {
     console.log(`[Creation Task ${taskId}] ${line}`);
     task.logs.push(line);
@@ -1207,9 +1210,37 @@ app.get('/api/provisioning/status', async (req, res) => {
  */
 function runCreateProjectWorker(answers, onLog) {
   return new Promise((resolve, reject) => {
+    // Aislamiento del fork: no heredar variables innecesarias del proceso padre.
+    const SAFE_ENV_ALLOWLIST = new Set([
+      'PATH', 'Path', 'PATHEXT',
+      'SYSTEMROOT', 'SystemRoot', 'SYSTEMDRIVE', 'SystemDrive',
+      'COMSPEC', 'ComSpec',
+      'TEMP', 'TMP',
+      'APPDATA', 'LOCALAPPDATA',
+      'USERPROFILE', 'HOMEDRIVE', 'HOMEPATH', 'USERNAME', 'USER',
+      'OS', 'PROCESSOR_ARCHITECTURE', 'ALLUSERSPROFILE', 'PUBLIC',
+      'PROGRAMDATA', 'ProgramData',
+      'PROGRAMFILES', 'ProgramFiles', 'PROGRAMFILES(X86)', 'ProgramFiles(x86)',
+      'COMMONPROGRAMFILES', 'CommonProgramFiles', 'COMMONPROGRAMFILES(X86)', 'CommonProgramFiles(x86)',
+      'PROTOTIPE_WORKSPACE_ROOT', 'PROTOTIPE_DOCS_ROOT',
+      'ALLOW_CMD_COMPAT_FALLBACK', 'BYPASS_PREFLIGHT',
+      'VITE_DEVELOPER_CENTRAL_API_KEY', 'VITE_DEVELOPER_CENTRAL_PROJECT_ID', 'VITE_DEVELOPER_CENTRAL_APP_ID',
+      'PORT', 'NODE_ENV', 'FIREBASE_TOKEN', 'ALLOW_TEST_AUTH_BYPASS', 'TEST_AUTH_BYPASS_TOKEN',
+      'TASK_CLEANUP_TTL_MS'
+    ]);
+
+    const childEnv = {};
+    for (const [key, value] of Object.entries(process.env)) {
+      const matchedKey = Array.from(SAFE_ENV_ALLOWLIST).find(
+        k => k.toLowerCase() === key.toLowerCase()
+      );
+      if (matchedKey) {
+        childEnv[key] = value;
+      }
+    }
+
     const child = fork(WORKER_PATH, [], {
-      // El worker hereda el env del padre (incluye PROTOTIPE_WORKSPACE_ROOT, etc.)
-      env: { ...process.env },
+      env: childEnv,
       // Silenciar stdio del hijo en el padre; el hijo imprime directamente a consola y manda LOG por IPC
       silent: false
     });

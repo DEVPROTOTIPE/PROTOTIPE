@@ -792,12 +792,15 @@ function resolveNicheCatalog(niche) {
  * @param {Object} answers Datos recolectados del Briefing
  */
 export async function createProject(answers) {
+  const taskIdPrefix = answers.__taskId ? `[taskId=${answers.__taskId}] ` : '';
+
   // 1. Normalizar y validar de inmediato el Blueprint si viene pre-inyectado
   const isPresetBlueprint = !!(answers.blueprint || answers.clientId || answers.instanceId || answers.projectName || answers.clientName);
   let presetValidationResult = null;
 
   if (isPresetBlueprint) {
     const normalized = normalizeProvisioningRequest(answers);
+    console.log(`${taskIdPrefix}Iniciando validación del Blueprint de aprovisionamiento.`);
     presetValidationResult = await ProvisioningValidator.validate(normalized.blueprint);
     if (!presetValidationResult.isValid) {
       throw new Error(`BLUEPRINT_SCHEMA_INVALID: ${presetValidationResult.errors.join(' | ')}`);
@@ -836,7 +839,7 @@ export async function createProject(answers) {
   let isTemplateCopied = false;
   const ensureBaseTemplateCopied = async (tDir, sTempDir) => {
     if (isTemplateCopied) return;
-    const step1 = ora('Copiar estructura base de plantilla').start();
+    const step1 = ora(`${taskIdPrefix}Copiar estructura base de plantilla`).start();
     const EXCLUDE_FROM_GEN = new Set([
       'node_modules', '.git', '.firebase', '.vite', '.eslintcache', '.parcel-cache',
       '.env.local', 'firebase-debug.log', '.DS_Store', 'Thumbs.db',
@@ -844,8 +847,8 @@ export async function createProject(answers) {
     ]);
     try {
       if (await fs.pathExists(tDir)) {
-        step1.info('La ruta de destino ya existe. Los archivos se sobrescribirán.');
-        step1.start('Copiar estructura base de plantilla');
+        step1.info(`${taskIdPrefix}La ruta de destino ya existe. Los archivos se sobrescribirán.`);
+        step1.start(`${taskIdPrefix}Copiar estructura base de plantilla`);
       }
       await fs.ensureDir(tDir);
       const resolvedRealPath = await fs.realpath(tDir);
@@ -856,10 +859,10 @@ export async function createProject(answers) {
         overwrite: true,
         filter: (src) => !EXCLUDE_FROM_GEN.has(path.basename(src))
       });
-      step1.succeed('Estructura base de plantilla copiada correctamente.');
+      step1.succeed(`${taskIdPrefix}Estructura base de plantilla copiada correctamente.`);
       isTemplateCopied = true;
     } catch (copyErr) {
-      step1.fail(`Fallo al copiar plantilla base: ${copyErr.message}`);
+      step1.fail(`${taskIdPrefix}Fallo al copiar plantilla base: ${copyErr.message}`);
       throw copyErr;
     }
   };
@@ -924,10 +927,10 @@ export async function createProject(answers) {
   if (!accentColor) accentColor = PALETTES.ruby.accent;
   if (!themeName) themeName = 'ruby';
 
-  console.log('\n' + pc.yellow(`⚡ Iniciando aprovisionamiento automatizado en: ${targetDir}`));
+  console.log('\n' + pc.yellow(`${taskIdPrefix}⚡ Iniciando aprovisionamiento automatizado en: ${targetDir}`));
 
   // 1. Iniciar bloque de composición de features e inyección de plantilla (Validado primero, escrito después)
-  const step1 = ora('Copiar estructura base de plantilla');
+  const step1 = ora(`${taskIdPrefix}Copiar estructura base de plantilla`);
   try {
 
     // ─── COMPOSICIÓN DINÁMICA DE VERTICAL IMPULSADA POR BLUEPRINT (Fase 8.5) ───
@@ -1006,12 +1009,13 @@ export async function createProject(answers) {
       let validationResult = presetValidationResult;
       if (!validationResult) {
         try {
+          console.log(`${taskIdPrefix}Validando Blueprint generado para: ${blueprint.instanceId || clientId}...`);
           validationResult = await ProvisioningValidator.validate(blueprint);
           if (!validationResult.isValid) {
             throw new Error(validationResult.errors.join(' | '));
           }
         } catch (err) {
-          stepFeatures.fail(`[Fallo Validación] El Blueprint generado no cumple con las reglas físicas del ecosistema: ${err.message}`);
+          stepFeatures.fail(`${taskIdPrefix}[Fallo Validación] El Blueprint generado no cumple con las reglas físicas del ecosistema: ${err.message}`);
           throw err;
         }
       }
@@ -3260,7 +3264,7 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
       '\n\nEl proyecto fue eliminado (rollback). Revisa los errores anteriores y vuelve a intentar.'
     );
   }
-  console.log(pc.green('✅ Validación post-generación exitosa. El proyecto está listo.'));
+  console.log(pc.green(`${taskIdPrefix}✅ Validación post-generación exitosa. El proyecto está listo.`));
 
   // [BLINDAJE-RETORNO] Asegurar que todos los valores retornados tengan fallback seguro
   const vapidPublicKey = (answers.firebaseVapidKey || answers.vapidPublicKey || '').trim();
@@ -3287,14 +3291,15 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
   return result;
 
   } catch (err) {
+    console.error(pc.red(`${taskIdPrefix}Error durante la generación: ${err.message}`));
     if (!existedBefore) {
       try {
         if (await fs.pathExists(targetDir)) {
           await fs.remove(targetDir);
-          console.log(pc.red(`\n🧹 Rollback exitoso: Directorio de destino inconcluso de la instancia eliminado: ${targetDir}`));
+          console.log(pc.red(`\n${taskIdPrefix}🧹 Rollback exitoso: Directorio de destino inconcluso de la instancia eliminado: ${targetDir}`));
         }
       } catch (cleanupErr) {
-        console.error(pc.red(`⚠️  Error al remover el directorio durante el rollback: ${cleanupErr.message}`));
+        console.error(pc.red(`${taskIdPrefix}⚠️  Error al remover el directorio durante el rollback: ${cleanupErr.message}`));
       }
     }
     throw err;
