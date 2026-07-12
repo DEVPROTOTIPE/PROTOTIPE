@@ -208,6 +208,35 @@ export async function run(results) {
       assert(output) {
         assert.equal(output.blueprint.branding.initials, undefined);
       }
+    },
+    {
+      name: '18. Campo desconocido en Blueprint canónico',
+      input: {
+        blueprint: { ...fixtures.canonicalMinimal, unexpectedPrivilege: true },
+        execution: { targetPath: 'ventas/test', force: false }
+      },
+      assert(output) {
+        assert.equal(output.blueprint.unexpectedPrivilege, true);
+      }
+    },
+    {
+      name: '19. Campo desconocido en payload legacy plano',
+      input: {
+        ...fixtures.legacyPayload,
+        unexpectedPrivilege: true
+      },
+      assert(output) {
+        assert.equal(output.blueprint.unexpectedPrivilege, true);
+      }
+    },
+    {
+      name: '20. Campo desconocido en execution',
+      input: {
+        blueprint: fixtures.canonicalMinimal,
+        execution: { targetPath: 'ventas/test', force: false, runArbitraryCommand: true }
+      },
+      shouldFail: true,
+      errorMatch: /REJECTED|desconocido/i
     }
   ];
 

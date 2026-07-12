@@ -5,3 +5,4 @@ journals/
 locks/
 *.log
 node_modules/
+artifacts/

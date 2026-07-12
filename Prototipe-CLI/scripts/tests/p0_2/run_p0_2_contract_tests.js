@@ -16,6 +16,7 @@ import { run as runCatalog } from './test_catalog_id_compatibility.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const CLI_ROOT = path.resolve(__dirname, '..', '..', '..');
 
 async function main() {
   console.log('========================================================');
@@ -119,10 +120,15 @@ async function main() {
   console.log(`Exit code final recomendado: ${finalSummary.exitCode}`);
   console.log('========================================================');
 
-  // Guardar reporte en scratch para lectura del chatbot
-  const reportPath = path.join(__dirname, 'p0_2_run_report.json');
-  
-  await fs.writeJson(reportPath, finalSummary, { spaces: 2 });
+  // Guardar reporte si se solicita expresamente por argumento
+  const shouldWriteReport = process.argv.includes('--write-report');
+  if (shouldWriteReport) {
+    const reportDir = path.resolve(CLI_ROOT, 'artifacts', 'p0_2');
+    await fs.ensureDir(reportDir);
+    const reportPath = path.join(reportDir, 'p0_2_run_report.json');
+    await fs.writeJson(reportPath, finalSummary, { spaces: 2 });
+    console.log(`📝 Reporte normalizado guardado en: ${reportPath}`);
+  }
   
   process.exit(finalSummary.exitCode);
 }

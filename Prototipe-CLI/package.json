@@ -17,7 +17,8 @@
     "validate:knowledge": "node scripts/validate-knowledge.js",
     "test:core-promotion": "node scripts/run_full_certification.js",
     "test:core-promotion-certification": "node scripts/run_full_certification.js --strict",
-    "test:p0.2": "node scripts/tests/p0_2/run_p0_2_contract_tests.js"
+    "test:p0.2": "node scripts/tests/p0_2/run_p0_2_contract_tests.js",
+    "test:p0.2:report": "node scripts/tests/p0_2/run_p0_2_contract_tests.js --write-report"
   },
   "dependencies": {
     "ajv": "^8.20.0",
