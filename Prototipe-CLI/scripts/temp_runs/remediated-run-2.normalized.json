@@ -1,0 +1,21 @@
+{
+  "invariants": {
+    "packageJsonExists": true,
+    "viteConfigExists": true,
+    "srcExists": true,
+    "publicExists": true
+  },
+  "defects": {
+    "vite_dev_pin_exposure": false,
+    "scaffolded_features_installed": false,
+    "malformed_blueprint_validation": false
+  },
+  "guardStats": {
+    "allowedControlProcesses": 0,
+    "unexpectedExternalProcesses": 0,
+    "unexpectedNetworkCalls": 0,
+    "firebaseCliInvocations": 0,
+    "githubApiInvocations": 0,
+    "centralApiInvocations": 0
+  }
+}
