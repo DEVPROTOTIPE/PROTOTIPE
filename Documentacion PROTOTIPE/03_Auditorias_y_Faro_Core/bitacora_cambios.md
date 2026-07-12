@@ -1,5 +1,35 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-430 — 2026-07-12
+**Feature: Corrección del bootstrap del Core del cliente y validación Zod de manifiestos**
+
+### Cambios realizados:
+1. **generator.js:** Se modificó la escritura de `experience.json` y `branding.json` para garantizar que cumplan con los esquemas de Zod del cliente en tiempo de arranque (`ExperienceSchemas.js`), forzando `layout` a `"sidebar"`, `themeMode` a `"dark-detect"`, e inyectando `initials` dinámicas calculadas desde el nombre del cliente y los colores HSL anidados.
+2. **BlueprintSimulation.js:** Se implementó una inicialización defensiva con fallbacks para `capabilities` y `experience` para evitar excepciones `TypeError` (`length` y `layout` de `undefined`) cuando se aprovisiona desde un blueprint explícito enviado por el Dashboard web.
+3. **ExperienceComposer.js:** Se adaptó la resolución de widgets Bento para tratar defensivamente la propiedad `capabilities` como un arreglo vacío si está ausente en el blueprint.
+
+### Archivos modificados:
+- [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+- [`Prototipe-CLI/lib/BlueprintSimulation.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/BlueprintSimulation.js) [MODIFY]
+- [`Prototipe-CLI/lib/ExperienceComposer.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ExperienceComposer.js) [MODIFY]
+
+---
+
+## CLI-429 — 2026-07-12 [MINOR]
+**docs(p0.7): register Production Hardening Audit Report**
+
+### Cambios realizados:
+1. **Auditoría de Hardening de Producción:** Creación y estructuración de `informe_p0_7_production_hardening.md` con un análisis forense y de brechas de la plataforma SaaS en 5 verticales clave: Seguridad Externa, Auditoría/Trazabilidad, Observabilidad Técnica, Cloud Lifecycle y Escalabilidad.
+2. **tareas_pendientes.md:** Registrada la tarea `CLI-429` como completada y actualizada la métrica de avance del ecosistema a 429/429.
+3. **mapa_documentacion_ia.md:** Registrado el nuevo informe en el índice YAML y el catálogo semántico, actualizando el estado de sincronización del GPS documental a `CLI-429-P0.7-AUDIT`.
+
+### Archivos modificados:
+- [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_7_production_hardening.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_7_production_hardening.md) [NEW]
+- [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+- [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
 ## CLI-428 — 2026-07-12 [MINOR]
 **feat(p0.6): implement provisioning queue and sequential concurrency control**
 

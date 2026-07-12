@@ -1,8 +1,27 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 428 tareas completadas de 428 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 430 tareas completadas de 430 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-430: Corrección de Bootstrap del Core del Cliente y Validación Zod de Manifiestos~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Corrección de los errores de validación de Zod (layout inválido bento y themeMode/initials faltantes) que bloqueaban el arranque de la app en la pantalla de carga del spinner. Asegurada compatibilidad total con ExperienceSchemas.js y saneamiento del preflight.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/lib/BlueprintSimulation.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/BlueprintSimulation.js) [MODIFY]
+    - [`Prototipe-CLI/lib/ExperienceComposer.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ExperienceComposer.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-429: Auditoría de Hardening de Producción y Diseño SaaS (P0.7)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Evaluación exhaustiva de seguridad externa (endpoints desprotegidos, RBAC, rate limiting), trazabilidad (identidad de operadores, logs JSON estructurados), observabilidad técnica (métricas, diccionario de errores), ciclo de vida cloud (rollback y purga de recursos en la nube) y escalabilidad en el Bridge de PROTOTIPE. Generación del informe oficial correspondiente.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_7_production_hardening.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_7_production_hardening.md) [NEW]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
 
 * **[x] ~~Tarea CLI-428: Implementación de Provisioning Queue & Job Management (P0.6)~~**
   - Estatus: Completada
