@@ -1,8 +1,16 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 423 tareas completadas de 423 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 424 tareas completadas de 424 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-424: Certificación E2E y Validación Productiva de Aprovisionamiento (P0.5)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Auditoría y validación E2E completa del flujo de aprovisionamiento de PROTOTIPE CLI. Análisis y verificación de escenarios de éxito, rollback automático, control de re-aprovisionamiento sobre carpetas preexistentes, trazabilidad de recursos Firebase cloud y resiliencia ante caídas del servidor mediante locks basados en archivo. Consolidado de resultados y documentación del informe de certificación oficial.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_5.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_5.md) [NEW]
 
 * **[x] ~~Tarea CLI-423: Rollback de Git y Recursos Cloud (P0.4 - Commit F)~~**
   - Estatus: Completada

@@ -1,5 +1,20 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-424 — 2026-07-12 [MINOR]
+**docs(p0.5): register E2E certification report for P0.5**
+
+### Cambios realizados:
+1. **Documentación:** Creación de `informe_certificacion_p0_5.md` conteniendo la arquitectura validada, diagrama Mermaid del flujo E2E, detalle de ejecución de los 5 escenarios solicitados, evidencia de pruebas y mitigación de riesgos de producción.
+2. **tareas_pendientes.md:** Registrada la tarea `CLI-424` como completada y actualizada la métrica global.
+3. **mapa_documentacion_ia.md:** Registrado el nuevo archivo de certificación E2E y actualizada la fecha de sincronización del GPS documental.
+
+### Archivos modificados:
+- [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_5.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_5.md) [NEW]
+- [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+- [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
 ## CLI-423 — 2026-07-12
 **fix(p0.4): implement provisioning rollback tracking — Commit F**
 **Hash:** `03b6bb4`
