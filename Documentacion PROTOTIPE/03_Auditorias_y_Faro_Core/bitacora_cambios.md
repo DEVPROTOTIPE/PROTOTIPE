@@ -1,5 +1,17 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-410 — 2026-07-12
+**Feature: Conexión del Adapter al Flujo Real de Aprovisionamiento en Dashboard (P0.2 - Punto 5.3)**
+
+### Cambios realizados:
+1. **Conexión en App.jsx:** Se importó la función utilitaria `buildProvisioningPayload` al inicio del archivo principal del Dashboard.
+2. **Normalización del Payload:** Se modificó la construcción de `cliPayload` en el handler de aprovisionamiento de clientes. Se renombró la estructura original a `rawPayload` y se pasó a través del adaptador antes de asignarse a `cliPayload`, asegurando la transformación al sobre canónico estructurado y la preservación intacta de la infraestructura en la raíz del payload antes del envío HTTP `POST`.
+
+### Archivos modificados:
+- [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+---
+
 ## CLI-409 — 2026-07-12
 **Feature: Adapter de Salida y Certificación de Payload en Dashboard (P0.2 - Punto 5.2)**
 

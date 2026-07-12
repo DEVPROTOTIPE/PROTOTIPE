@@ -1,8 +1,16 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 414 tareas completadas de 414 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 415 tareas completadas de 415 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-410: Conexión del Adapter al Flujo Real de Aprovisionamiento en Dashboard (P0.2 - Punto 5.3)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se conectó el adaptador `buildProvisioningPayload` en el flujo real del Wizard del Dashboard (`App.jsx`), interceptando la construcción manual del `cliPayload` y normalizándolo al sobre canónico estructurado antes del envío HTTP `POST` al Bridge local. Compilación de producción validada sin fallos.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
 
 * **[x] ~~Tarea CLI-409: Adapter de Salida y Certificación de Payload en Dashboard (P0.2 - Punto 5.2)~~**
   - Estatus: Completada
