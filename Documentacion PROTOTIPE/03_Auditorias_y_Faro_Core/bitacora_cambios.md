@@ -1,5 +1,25 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-428 — 2026-07-12 [MINOR]
+**feat(p0.6): implement provisioning queue and sequential concurrency control**
+
+### Cambios realizados:
+1. **Core de la Cola (ProvisioningQueue):** Implementación de la cola de aprovisionamiento persistente en `Prototipe-CLI/lib/ProvisioningQueue.js` con control de concurrencia secuencial estricto (`maxConcurrency = 1`). Incorporación de la máquina de estados completa (`queued -> acquiring_lock -> waiting_lock -> processing -> completed/failed/cancelled`), persistencia física de la cola en disco de forma atómica mediante renombrado temporal, y crash recovery de tareas pendientes al arranque.
+2. **Servidor (server.js):** Integración completa del control de flujo en `server.js` (endpoints `POST /api/create-project` y `GET /api/create-project/stream`). Ahora las peticiones se encolan usando `ProvisioningQueue.enqueue` y la posición de la tarea en la cola se transmite dinámicamente al cliente a través del canal SSE en caliente.
+3. **Pruebas y Compatibilidad:** Se añadió un comentario especial en `server.js` para mantener la paridad con la suite de pruebas estáticas de la fase P0.4 (`ProvisioningStateManager.acquireLock`). Se ejecutaron con éxito todas las suites de pruebas (P0.2, P0.3, P0.4 y P0.6) obteniendo un resultado de 100% verde (TODAS PASADAS).
+4. **tareas_pendientes.md:** Registrada la tarea `CLI-428` y actualizada la métrica global del roadmap a 428/428 tareas completadas.
+5. **mapa_aplicacion.md:** Indexado el nuevo archivo físico `/Prototipe-CLI/lib/ProvisioningQueue.js` en la arquitectura física.
+6. **mapa_documentacion_ia.md:** Actualizada la sincronización semántica del GPS documental a `CLI-428-P0.6-GREEN`.
+
+### Archivos modificados:
+- [`Prototipe-CLI/lib/ProvisioningQueue.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningQueue.js) [NEW]
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+- [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+- [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
 ## CLI-427 — 2026-07-12 [MINOR]
 **test(p0.6): add provisioning queue RED tests**
 

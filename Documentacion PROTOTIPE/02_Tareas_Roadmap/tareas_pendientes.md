@@ -1,8 +1,17 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 427 tareas completadas de 427 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 428 tareas completadas de 428 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-428: Implementación de Provisioning Queue & Job Management (P0.6)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Implementación del gestor de colas de aprovisionamiento persistente (ProvisioningQueue.js) con control de concurrencia secuencial estricta (maxConcurrency = 1). Incorporación de la máquina de estados completa (queued -> acquiring_lock -> waiting_lock -> processing -> completed/failed/cancelled), persistencia física de la cola en disco de forma atómica mediante renombrado temporal, y crash recovery de tareas pendientes al arranque. Integración completa del control de flujo en server.js (POST /api/create-project y GET /api/create-project/stream) enviando la posición en cola por SSE.
+  - Archivos:
+    - [`Prototipe-CLI/lib/ProvisioningQueue.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningQueue.js) [NEW]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-427: Suite de pruebas RED para Provisioning Queue & Job Management (P0.6)~~**
   - Estatus: Completada
