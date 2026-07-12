@@ -1,8 +1,20 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 455 tareas completadas de 455 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 456 tareas completadas de 456 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-456: Blindaje Total de URLs Hardcodeadas en Componentes Admin del Dashboard Central~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Corregido el bug crítico en `SaaSOperationsView.jsx` que causaba `ERR_CONNECTION_REFUSED` al conectar a `localhost:3000` (puerto incorrecto) en lugar de `localhost:3001` (Bridge CLI). Reemplazadas TODAS las URLs hardcodeadas `http://localhost:3000` y `http://localhost:3001` en 5 componentes admin (`SaaSOperationsView`, `ClientLifecyclePanel`, `CorePromotionModal`, `FeatureMarketplaceView`, `NichesManagerPanel`) por la constante centralizada `CLI_URL` importada desde `src/config.js`. Añadido manejo resiliente de errores por fetch individual en telemetría (cada request falla silenciosamente de forma independiente sin romper los demás). Esto garantiza que un cambio futuro de puerto del Bridge solo requiere modificar una variable de entorno (`VITE_CLI_URL`) sin tocar ningún componente.
+  - Archivos:
+    - [`dev-dashboard/src/components/admin/SaaSOperationsView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/SaaSOperationsView.jsx) [MODIFY]
+    - [`dev-dashboard/src/components/admin/ClientLifecyclePanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ClientLifecyclePanel.jsx) [MODIFY]
+    - [`dev-dashboard/src/components/admin/CorePromotionModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/CorePromotionModal.jsx) [MODIFY]
+    - [`dev-dashboard/src/components/admin/FeatureMarketplaceView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureMarketplaceView.jsx) [MODIFY]
+    - [`dev-dashboard/src/components/admin/NichesManagerPanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/NichesManagerPanel.jsx) [MODIFY]
 
 * **[x] ~~Tarea CLI-455: Corrección de Resolución de Puertos en el Inicio de Servidores Locales de Clientes en el Bridge CLI~~**
   - Estatus: Completada
