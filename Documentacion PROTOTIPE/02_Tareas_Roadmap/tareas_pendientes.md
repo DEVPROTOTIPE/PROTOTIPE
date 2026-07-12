@@ -1,8 +1,18 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 418 tareas completadas de 418 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 419 tareas completadas de 419 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-419: Persistencia de Estado y Lock Físico de Aprovisionamiento (P0.4 - Commit B)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementó `ProvisioningStateManager.js` para gestionar el ciclo de vida de aprovisionamiento persistente (`pending | provisioning | completed | failed | rollback`). Se implementó un control de exclusión mutua atómico file-based con la bandera `wx` en `artifacts/provisioning-lock/{clientId}.lock`. Se integró en `server.js` coordinando `ProvisioningStateManager` y el lock en memoria `projectSyncLocks`. Se añadió el endpoint `/api/provisioning/status` y se validó que las pruebas de concurrencia y ciclo de vida pasen a VERDE.
+  - Commit: `27293af` — `feat(p0.4): implement persistent provisioning state and file lock`
+  - Archivos:
+    - [`Prototipe-CLI/lib/ProvisioningStateManager.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningStateManager.js) [NEW]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-418: Suite de Pruebas de Ciclo de Vida y Observabilidad en Estado RED (P0.4 - Commit A)~~**
   - Estatus: Completada

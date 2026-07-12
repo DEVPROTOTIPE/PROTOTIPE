@@ -1,5 +1,24 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-419 — 2026-07-12
+**feat(p0.4): implement persistent provisioning state and file lock — Commit B**
+**Hash:** `27293af`
+
+### Cambios realizados:
+1. **ProvisioningStateManager.js:** Creado e implementado el administrador de estado persistente del ciclo de vida de aprovisionamiento en `artifacts/provisioning-state/{clientId}.json`. Soporta los estados `pending | provisioning | completed | failed | rollback` y un mecanismo atómico de exclusión mutua file-based con la bandera `wx` en `artifacts/provisioning-lock/{clientId}.lock`.
+2. **server.js:** Integración de transiciones de estado (`pending`, `provisioning`, `completed`, `failed`) y adquisición/liberación de bloqueos persistentes en el flujo en segundo plano de `/api/create-project`. Endpoint `GET /api/provisioning/status` añadido con filtrado selectivo de `state`, `isLocked` y `timestamps`.
+
+### Resultado de pruebas:
+- P0.4: Lock Persistente y Lifecycle Persistente pasaron a **VERDE** (2/2 PASSED). Las pruebas RED restantes siguen fallando según lo previsto.
+- P0.3: 9/9 PASSED (sin regresión).
+- P0.2: 70/70 PASSED (sin regresión).
+
+### Archivos modificados:
+- [`Prototipe-CLI/lib/ProvisioningStateManager.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningStateManager.js) [NEW]
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+---
+
 ## CLI-418 — 2026-07-12
 **test(p0.4): add lifecycle and observability RED tests — Commit A**
 **Hash:** `8dd6180`
