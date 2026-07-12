@@ -1,5 +1,19 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-406 — 2026-07-11
+**Feature: Remediación del Generador contra Exposición de PIN de Desarrollo y features Scaffolded**
+
+### Cambios realizados:
+1. **Remoción de Exposición de PIN:** Eliminada la variable `VITE_DEV_PIN` del archivo `.env.local` generado y su validación post-generación en `generator.js`, retirándola también de los valores de retorno del wizard para cumplir con el estándar de blindaje de secretos en el frontend.
+2. **Filtrado de Features Físicamente Instaladas:** Modificado `generator.js` para registrar en `build-manifest.json` y `features.json` únicamente las features que fueron copiadas con éxito desde su origen físico en el catálogo, excluyendo del manifiesto y del lockfile a las features mockeadas/scaffolded.
+3. **Validación Estricta de Esquema de Blueprints:** Implementada una validación robusta al inicio de `ProvisioningValidator.validate` que comprueba las propiedades requeridas del Application Blueprint (`clientId`, `features`, `components`, `patterns`) para evitar crashes sintácticos en tiempo de ejecución.
+
+### Archivos modificados:
+- [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+- [`Prototipe-CLI/lib/ProvisioningValidator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningValidator.js) [MODIFY]
+
+---
+
 ## CLI-405 — 2026-07-11
 **Feature: Corrección de Sincronización del Core, Escaneo de Subcarpetas en Windows y Purga de Instancias de Prueba**
 
@@ -16,6 +30,12 @@
 ---
 
 ## CLI-404-SECURITY-ROBUSTNESS-CERTIFICATION — 2026-07-11
+
+> ⚠️ **AVISO DE REVISIÓN [2026-07-11]:** Secciones de este documento fueron contradichas
+> por la auditoría técnica del Generator (commit 7251cf16, auditor ChatGPT SOL 5.6).
+> Las afirmaciones marcadas con [DISPUTADO] están pendientes de corrección en la rama
+> `refactor/generator-remediation-v3`. No usar como referencia de producción.
+
 **Feature: Auditoría de Robustez, Certificación de Reglas Firestore y Spark-first Policy**
 
 ### Cambios realizados:

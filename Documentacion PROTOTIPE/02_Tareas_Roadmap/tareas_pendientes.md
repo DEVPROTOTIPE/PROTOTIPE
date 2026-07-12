@@ -1,8 +1,17 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `99.27%` de completitud en base a 410 tareas completadas de 413 tareas únicas verificables.
+* **Estado del Roadmap:** `99.27%` de completitud en base a 411 tareas completadas de 414 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-406: Remediación del Generador contra Exposición de PIN de Desarrollo y features Scaffolded (P0.1, P0.2, P0.3, P0.4)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Corrección de los 3 defectos de seguridad y estructuración del Generator del CLI: remoción del PIN de desarrollo (`VITE_DEV_PIN`) y su validación; filtrado estricto en manifiestos y package.json de features que realmente se copiaron de un origen físico, excluyendo features scaffolded/mock; y validación rigurosa de tipo y esquema de Application Blueprint en `ProvisioningValidator` para prevenir crashes sintácticos inesperados.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/lib/ProvisioningValidator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningValidator.js) [MODIFY]
 
 * **[x] ~~Tarea BUG-405: Corrección de Sincronización del Core, Escaneo de Subcarpetas en Windows y Purga de Instancias de Prueba~~**
   - Estatus: Completada

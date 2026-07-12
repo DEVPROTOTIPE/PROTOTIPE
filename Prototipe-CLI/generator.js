@@ -1008,16 +1008,16 @@ export async function createProject(answers) {
       }, { spaces: 2 });
       await fs.writeJson(path.join(configDestDir, 'patterns.json'), { activePatterns: blueprint.patterns }, { spaces: 2 });
 
-      // Escribir manifiestos legacy para compatibilidad
+      // Escribir manifiestos legacy para compatibilidad (vacíos inicialmente, se actualizarán tras copiar features reales)
       await fs.writeJson(path.join(configDestDir, 'features.json'), {
-        activeFeatures: blueprint.features,
+        activeFeatures: [],
         tenantId: blueprint.clientId,
         subscriptionPlan: 'enterprise'
       }, { spaces: 2 });
 
       await fs.writeJson(path.join(configDestDir, 'build-manifest.json'), {
         vertical: blueprint.vertical,
-        featuresInstalled: blueprint.features,
+        featuresInstalled: [],
         patternsActive: blueprint.patterns,
         coreVersion: '2.8.0',
         generatedAt: new Date().toISOString()
@@ -1027,6 +1027,8 @@ export async function createProject(answers) {
       const featuresDestDir = path.join(targetDir, 'src', 'features');
       await fs.ensureDir(featuresDestDir);
 
+      const realFeaturesInstalled = [];
+
       for (const featureId of blueprint.features) {
         const srcFeature = await FeatureRegistry.resolvePhysicalPath(featureId);
         const destFeature = path.join(featuresDestDir, featureId);
@@ -1034,6 +1036,7 @@ export async function createProject(answers) {
         if (srcFeature) {
           // Copiar feature real del catálogo de origen detectado por FeatureRegistry
           await fs.copy(srcFeature, destFeature);
+          realFeaturesInstalled.push(featureId);
           expLogger.addEntries([{
             decision: `Feature "${featureId}" copiada desde origen dinámico`,
             source: srcFeature.replace(CLI_ROOT, ''),
@@ -1080,6 +1083,21 @@ export default function Admin${featCamel}() {
         }
       }
 
+      // Actualizar manifiestos finales únicamente con features reales físicamente instaladas
+      await fs.writeJson(path.join(configDestDir, 'features.json'), {
+        activeFeatures: realFeaturesInstalled,
+        tenantId: blueprint.clientId,
+        subscriptionPlan: 'enterprise'
+      }, { spaces: 2 });
+
+      await fs.writeJson(path.join(configDestDir, 'build-manifest.json'), {
+        vertical: blueprint.vertical,
+        featuresInstalled: realFeaturesInstalled,
+        patternsActive: blueprint.patterns,
+        coreVersion: '2.8.0',
+        generatedAt: new Date().toISOString()
+      }, { spaces: 2 });
+
       // 6. Fusionar package.json mediante PackageMerger
       const basePkgPath = path.join(targetDir, 'package.json');
       if (await fs.pathExists(basePkgPath)) {
@@ -1087,7 +1105,7 @@ export default function Admin${featCamel}() {
         
         // Recuperar metadatas de features y componentes recomendados
         const featuresMetadatas = [];
-        for (const featId of blueprint.features) {
+        for (const featId of realFeaturesInstalled) {
           const featMetaPath = path.join(CLI_ROOT, 'knowledge', 'features', `${featId}.json`);
           if (await fs.pathExists(featMetaPath)) {
             featuresMetadatas.push(await fs.readJson(featMetaPath));
@@ -1702,10 +1720,6 @@ export default function Admin${featCamel}() {
   const whatsappAdmin = String(answers.whatsappAdmin || '').replace(/\D/g, '').trim();
   const storeAddress = String(answers.storeAddress || '').trim();
 
-  // [SEGURIDAD C4] Generar PIN de desarrollador único e impredecible por instancia.
-  // Nunca usar '1609' estático que expone la consola dev de todas las instancias en producción.
-  const generatedDevPin = String(Math.floor(1000 + Math.random() * 9000));
-
   // Sanitizar todos los inputs eliminando espacios accidentales
   const fbApiKey = String(answers.firebaseApiKey || '').trim();
   const fbAuthDomain = String(answers.firebaseAuthDomain || '').trim();
@@ -1729,9 +1743,6 @@ VITE_DEVELOPER_ADMIN_EMAIL=${adminEmail}
 VITE_DEVELOPER_ADMIN_PASSWORD=${adminPassword}
 VITE_DEVELOPER_WHATSAPP_ADMIN=${whatsappAdmin}
 VITE_DEVELOPER_STORE_ADDRESS=${storeAddress}
-
-# [SEGURIDAD] PIN único del desarrollador — generado aleatoriamente por instancia
-VITE_DEV_PIN=${generatedDevPin}
 
 # Telemetría de Comisiones del Desarrollador (Centralización Central - Bridge Local)
 VITE_DEVELOPER_TELEMETRY_ENDPOINT=http://localhost:3001
@@ -3160,8 +3171,8 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
     validationErrors.push('.env.local no fue generado — las credenciales de Firebase no están disponibles.');
   } else {
     const envContent_check = await fs.readFile(envLocalPath, 'utf-8');
-    if (!envContent_check.includes('VITE_FIREBASE_PROJECT_ID=') || !envContent_check.includes('VITE_DEV_PIN=')) {
-      validationErrors.push('.env.local existe pero le faltan variables críticas (VITE_FIREBASE_PROJECT_ID o VITE_DEV_PIN).');
+    if (!envContent_check.includes('VITE_FIREBASE_PROJECT_ID=')) {
+      validationErrors.push('.env.local existe pero le falta la variable crítica VITE_FIREBASE_PROJECT_ID.');
     }
   }
 
@@ -3204,7 +3215,7 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
     primaryColor: primaryColor || 'hsl(142, 70%, 45%)',
     vapidPublicKey,
     adminPassword, // Exponer para que el wizard lo muestre al usuario al finalizar
-    devPin: generatedDevPin, // Exponer PIN generado para mostrarlo en el resumen del wizard
+    devPin: null, // Removido por directiva de seguridad
     prompt: promptContent
   };
 

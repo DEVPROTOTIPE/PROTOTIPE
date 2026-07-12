@@ -15,9 +15,50 @@ export class ProvisioningValidator {
    * @returns {Promise<Object>} Resultado de la validación
    */
   static async validate(blueprint, basePackageJson = { dependencies: {} }) {
-    console.log(`🛡️  [ProvisioningValidator] Validando Blueprint para: ${blueprint.instanceId}...`);
+    console.log(`🛡️  [ProvisioningValidator] Validando Blueprint para: ${blueprint ? (blueprint.clientId || blueprint.instanceId || 'unknown') : 'unknown'}...`);
     const errors = [];
     const warnings = [];
+
+    // Validar esquema básico del blueprint para evitar fallos de ejecución
+    if (!blueprint || typeof blueprint !== 'object') {
+      errors.push('El Application Blueprint no está definido o no es un objeto válido.');
+      return {
+        isValid: false,
+        errors,
+        warnings,
+        featuresMetadatas: [],
+        componentsMetadatas: [],
+        patternsMetadatas: []
+      };
+    }
+
+    if (!blueprint.clientId && !blueprint.instanceId) {
+      errors.push('El Blueprint debe definir "clientId" o "instanceId" con un identificador válido.');
+    }
+
+    if (!Array.isArray(blueprint.features)) {
+      errors.push('La propiedad "features" del Blueprint debe ser un array válido.');
+    }
+
+    if (!Array.isArray(blueprint.components)) {
+      errors.push('La propiedad "components" del Blueprint debe ser un array válido.');
+    }
+
+    if (!Array.isArray(blueprint.patterns)) {
+      errors.push('La propiedad "patterns" del Blueprint debe ser un array válido.');
+    }
+
+    if (errors.length > 0) {
+      return {
+        isValid: false,
+        errors,
+        warnings,
+        featuresMetadatas: [],
+        componentsMetadatas: [],
+        patternsMetadatas: []
+      };
+    }
+
 
     const featuresMetadatas = [];
     const componentsMetadatas = [];
