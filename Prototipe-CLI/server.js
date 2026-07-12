@@ -23,6 +23,7 @@ import { PromotionBlueprintBuilder } from './lib/PromotionBlueprintBuilder.js';
 import { CoreCandidateBuilder } from './lib/CoreCandidateBuilder.js';
 import { CorePromotionValidator } from './lib/CorePromotionValidator.js';
 import { BriefingDocumentMapper } from './lib/BriefingDocumentMapper.js';
+import { normalizeProvisioningEnvelope } from './lib/ProvisioningEnvelopeAdapter.js';
 
 const execAsync = promisify(exec);
 
@@ -962,7 +963,13 @@ async function executeCreationTaskInBackground(taskId, answers) {
 // Endpoint para iniciar el aprovisionamiento de manera asíncrona
 app.post('/api/create-project', async (req, res) => {
   projectDirCache.clear();
-  const answers = req.body;
+  
+  let answers;
+  try {
+    answers = normalizeProvisioningEnvelope(req.body);
+  } catch (err) {
+    return res.status(400).json({ error: `Formato de petición inválido: ${err.message}` });
+  }
   
   // Capturar token OAuth enviado desde la sesión web del dashboard
   const devToken = req.headers['x-developer-google-token'];
@@ -970,19 +977,17 @@ app.post('/api/create-project', async (req, res) => {
     answers.developerGoogleToken = devToken;
   }
 
-  if (answers.projectName) {
-    answers.projectName = answers.projectName.trim().replace(/[^a-zA-Z0-9\s\-_]/g, '');
+  if (answers.blueprint.clientName) {
+    answers.blueprint.clientName = answers.blueprint.clientName.trim().replace(/[^a-zA-Z0-9\s\-_]/g, '');
   }
   if (answers.firebaseProjectId) {
     answers.firebaseProjectId = answers.firebaseProjectId.trim().replace(/[^a-z0-9\-]/g, '');
   }
-  if (answers.template) {
-    answers.template = answers.template.trim().replace(/[^a-zA-Z0-9\-_]/g, '');
+  if (answers.blueprint.coreType) {
+    answers.blueprint.coreType = answers.blueprint.coreType.trim().replace(/[^a-zA-Z0-9\-_]/g, '');
   }
   
   // [BLIND-1] Coerción defensiva de tipos antes de cualquier validación.
-  // Un payload malformado (ej. comisionPorcentaje como string) provoca crashes
-  // crípticos dentro del generator.js, lejos del punto de origen real.
   const numericFields = ['comisionPorcentaje', 'pagoMensualFijo', 'montoFijoServicio', 'costoPorFacturaDian', 'setupFee'];
   for (const field of numericFields) {
     if (answers[field] !== undefined) {
@@ -996,58 +1001,61 @@ app.post('/api/create-project', async (req, res) => {
       answers[field] = answers[field] === 'true' || answers[field] === true || answers[field] === 1;
     }
   }
-  if (answers.branding && typeof answers.branding !== 'object') {
-    answers.branding = {};
+  if (answers.blueprint.branding && typeof answers.blueprint.branding !== 'object') {
+    answers.blueprint.branding = {};
   }
   if (answers.flags && typeof answers.flags !== 'object') {
     answers.flags = {};
   }
 
   // Validaciones básicas de campos requeridos
-  const requiredFields = [
-    'template',
-    'projectName',
-    'targetPath',
-    'paletteChoice',
-    'centralApiKey',
-    'centralAppId'
-  ];
-
-  for (const field of requiredFields) {
-    if (!answers[field]) {
-      return res.status(400).json({ error: `El campo '${field}' es obligatorio para el aprovisionamiento.` });
-    }
+  if (!answers.blueprint.coreType) {
+    return res.status(400).json({ error: "El campo 'coreType' (template) es obligatorio." });
+  }
+  if (!answers.blueprint.clientName) {
+    return res.status(400).json({ error: "El campo 'clientName' (projectName) es obligatorio." });
+  }
+  if (!answers.execution.targetPath) {
+    return res.status(400).json({ error: "El campo 'targetPath' es obligatorio." });
+  }
+  if (!answers.blueprint.branding?.paletteChoice) {
+    return res.status(400).json({ error: "El campo 'paletteChoice' es obligatorio." });
+  }
+  if (!answers.centralApiKey) {
+    return res.status(400).json({ error: "El campo 'centralApiKey' es obligatorio." });
+  }
+  if (!answers.centralAppId) {
+    return res.status(400).json({ error: "El campo 'centralAppId' es obligatorio." });
   }
 
   // [BLIND-2] Normalización de colores Hex a HSL antes de la validación y aprovisionamiento
   if (answers.customPrimary) answers.customPrimary = ensureHsl(answers.customPrimary);
   if (answers.customBg) answers.customBg = ensureHsl(answers.customBg);
-  if (answers.branding) {
+  if (answers.blueprint.branding) {
     const colorFields = [
       'primaryColor', 'secondaryColor', 'bgColor', 'textColor', 
       'surfaceColor', 'surface2Color', 'borderColor', 'textMutedColor'
     ];
     for (const field of colorFields) {
-      if (answers.branding[field]) {
-        answers.branding[field] = ensureHsl(answers.branding[field]);
+      if (answers.blueprint.branding[field]) {
+        answers.blueprint.branding[field] = ensureHsl(answers.blueprint.branding[field]);
       }
     }
   }
 
   // Validar contraste de colores HSL si la paleta elegida es custom
-  if (answers.paletteChoice === 'custom') {
-    const primaryColor = answers.customPrimary || (answers.branding && answers.branding.primaryColor);
-    const bgColor = answers.customBg || (answers.branding && answers.branding.bgColor) || 'hsl(224, 71%, 6%)';
+  if (answers.blueprint.branding?.paletteChoice === 'custom') {
+    const primaryColor = answers.blueprint.branding.primaryColor || answers.customPrimary;
+    const bgColor = answers.blueprint.branding.bgColor || answers.customBg || 'hsl(224, 71%, 6%)';
     if (primaryColor) {
       const validation = validateHSLColors(primaryColor, bgColor);
       if (!validation.valid) {
         console.warn(`[API Bridge Warning] Contraste HSL bajo detectado: ${validation.error}`);
-        // Registramos la advertencia pero no bloqueamos el aprovisionamiento
       }
     }
   }
 
-  const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const clientId = answers.blueprint.instanceId || answers.blueprint.clientName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
   // Validar exclusión mutua
   if (projectSyncLocks[clientId]) {
