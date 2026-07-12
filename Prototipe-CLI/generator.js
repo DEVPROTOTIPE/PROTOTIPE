@@ -3480,15 +3480,74 @@ async function setupGitHub(answers, targetDir, clientId) {
 
   // 2. Subir a GitHub si se solicitó en el briefing
   if (answers.enableGithub && gitInitialized) {
-    const repoName = `app-${clientId}`;
-    console.log(pc.cyan(`🐙 Creando y subiendo repositorio a GitHub: ${repoName}...`));
-    try {
-      execSync(`gh repo create ${repoName} --private --source=. --push`, { cwd: targetDir, stdio: 'ignore' });
-      githubUploaded = true;
-      githubUrl = `https://github.com/DEVPROTOTIPE/${repoName}`;
-      console.log(pc.green(`✅ Repositorio GitHub creado y subido con éxito: ${githubUrl}`));
-    } catch (err) {
-      console.warn(pc.yellow(`⚠️  No se pudo subir a GitHub automáticamente: ${err.message}. Asegúrate de tener gh CLI logueado.`));
+    const isSeed = answers.template === 'template-core-seed';
+    
+    if (isSeed) {
+      // Caso B: Core Seed - Crear un repositorio nuevo independiente
+      const repoName = `app-${clientId}`;
+      console.log(pc.cyan(`🐙 Creando y subiendo repositorio independiente a GitHub: ${repoName}...`));
+      try {
+        execSync(`gh repo create ${repoName} --private --source=. --push`, { cwd: targetDir, stdio: 'ignore' });
+        githubUploaded = true;
+        githubUrl = `https://github.com/DEVPROTOTIPE/${repoName}`;
+        console.log(pc.green('✅ Repositorio GitHub creado y subido con éxito: ' + githubUrl));
+      } catch (err) {
+        console.warn(pc.yellow(`⚠️  No se pudo subir a GitHub automáticamente: ${err.message}. Asegúrate de tener gh CLI logueado.`));
+      }
+    } else {
+      // Caso A: Core Comercial - Subir como rama del repositorio del Core correspondiente (blindado a futuro)
+      console.log(pc.cyan(`🐙 Resolviendo repositorio del Core maestro para plantilla: ${answers.template}...`));
+      try {
+        const { getRegistroPath } = await import('./config.js');
+        const registro = await fs.readJson(getRegistroPath());
+        const templateConfig = Object.values(registro.plantillas).find(p => path.basename(p.destino) === answers.template);
+        
+        if (!templateConfig || !templateConfig.fuente) {
+          throw new Error(`No se encontró configuración de plantilla fuente en plantillas_registro.json para: ${answers.template}`);
+        }
+
+        const coreSourceDir = templateConfig.fuente;
+        const coreGitDir = path.join(coreSourceDir, '.git');
+        const coreGitTempDir = path.join(coreSourceDir, '.git-backup-temp');
+        
+        let coreGitPath = coreGitDir;
+        if (!await fs.pathExists(coreGitDir) && await fs.pathExists(coreGitTempDir)) {
+          coreGitPath = coreGitTempDir;
+        }
+
+        if (!await fs.pathExists(coreGitPath)) {
+          throw new Error(`No se encontró el directorio Git (.git o .git-backup-temp) en el core fuente: ${coreSourceDir}`);
+        }
+
+        // Obtener el remoto origin del Core
+        const coreRemoteUrl = execSync(`git --git-dir="${coreGitPath}" remote get-url origin`, { encoding: 'utf-8' }).trim();
+        console.log(pc.gray(`   - Repositorio Core remoto detectado: ${coreRemoteUrl}`));
+        
+        // Reconfigurar el remoto origin en el subproyecto de la instancia
+        try {
+          execSync('git remote remove origin', { cwd: targetDir, stdio: 'ignore' });
+        } catch (_) {}
+        execSync(`git remote add origin "${coreRemoteUrl}"`, { cwd: targetDir, stdio: 'ignore' });
+        
+        // Crear y renombrar la rama local a cliente/[clientId]
+        const branchName = `cliente/${clientId}`;
+        execSync(`git branch -M "${branchName}"`, { cwd: targetDir, stdio: 'ignore' });
+        
+        console.log(pc.cyan(`   - Subiendo rama [${branchName}] al repositorio del Core en GitHub...`));
+        execSync(`git push -u origin "${branchName}" --no-verify`, { cwd: targetDir, stdio: 'ignore' });
+        
+        // Limpiar la URL de tokens o credenciales embebidas
+        let cleanRepoUrl = coreRemoteUrl
+          .replace(/^git@github\.com:/, 'https://github.com/')
+          .replace(/\.git$/, '')
+          .replace(/\/\/.*@github\.com/, '//github.com');
+        
+        githubUploaded = true;
+        githubUrl = `${cleanRepoUrl}/tree/${branchName}`;
+        console.log(pc.green(`✅ Rama de cliente creada y subida con éxito al Core remoto: ${githubUrl}`));
+      } catch (err) {
+        console.warn(pc.yellow(`⚠️  No se pudo asociar o subir al repositorio del Core remoto: ${err.message}. Continuando.`));
+      }
     }
   }
   return {

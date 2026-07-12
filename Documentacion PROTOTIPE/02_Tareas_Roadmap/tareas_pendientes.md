@@ -1,8 +1,17 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 452 tareas completadas de 452 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 453 tareas completadas de 453 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-453: Rediseño de la Arquitectura de Ramas Git para Aprovisionamiento de Clientes y Blindaje a Futuro~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Modificamos el paso de inicialización de GitHub en `generator.js` para alinear el aprovisionamiento con el modelo multitenant de ramas del Core correspondiente. Si la app se basa en un Core comercial registrado, en lugar de crear un repositorio remoto independiente, resuelve dinámicamente el repositorio de ese Core (leyendo su Git de origen local), asocia el remoto `origin` del nuevo subproyecto a ese repositorio, renombra la rama a `cliente/[clientId]` y empuja la rama inicial de scaffolding a GitHub. Blindamos a futuro la resolución dinámica de Cores leyendo `plantillas_registro.json` de forma adaptativa. Corregimos el cálculo de `githubUrl` en la Consola Central (`App.jsx`) para seguir esta misma convención y saneamos Firestore para el cliente histórico `ventas-moni-app`.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
 
 * **[x] ~~Tarea CLI-452: Remediación del Motor de Respaldos y Sincronización del .gitignore Maestro~~**
   - Estatus: Completada

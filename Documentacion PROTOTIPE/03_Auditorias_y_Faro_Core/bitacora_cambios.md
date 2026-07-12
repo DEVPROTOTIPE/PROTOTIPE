@@ -1,5 +1,18 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-453 — 2026-07-12
+**Feature: Rediseño de la Arquitectura de Ramas Git para Aprovisionamiento de Clientes**
+
+### Cambios realizados:
+1. **Paso setupGitHub en generator.js:** Rediseñamos el paso de inicialización de GitHub en `generator.js` para alinear el aprovisionamiento con la arquitectura de ramas del Core comercial correspondiente (cuando sea diferente de `template-core-seed`). Ahora resuelve de forma dinámica el repositorio remoto del Core maestro consultando `plantillas_registro.json` y leyendo el remoto local. Inicializa el Git local en la instancia del nuevo cliente, asocia el remoto al repositorio del Core, crea y renombra la rama a `cliente/[clientId]` y empuja la rama de scaffolding a GitHub.
+2. **Dashboard Central (App.jsx):** Corregimos el cálculo de la URL de GitHub en las tarjetas del CRM para que siga la misma convención de ramas dinámica (`prototipe-core-[coreType]/tree/cliente/[clientName]`) de forma blindada a futuro, cayendo en fallback a repositorio independiente para la semilla base (`template-core-seed`).
+
+### Archivos modificados:
+- [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+- [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+---
+
 ## CLI-452 — 2026-07-12
 **Feature: Remediación del Motor de Respaldos y Sincronización del .gitignore Maestro**
 
