@@ -25,6 +25,7 @@ import { CorePromotionValidator } from './lib/CorePromotionValidator.js';
 import { BriefingDocumentMapper } from './lib/BriefingDocumentMapper.js';
 import { normalizeProvisioningEnvelope } from './lib/ProvisioningEnvelopeAdapter.js';
 import { ProvisioningStateManager } from './lib/ProvisioningStateManager.js';
+import { ProvisioningQueue } from './lib/ProvisioningQueue.js';
 
 const execAsync = promisify(exec);
 
@@ -985,6 +986,7 @@ async function executeCreationTaskInBackground(taskId, answers) {
     task.listeners = [];
 
     await ProvisioningStateManager.transitionTo(clientId, 'completed', { taskId });
+    await ProvisioningQueue.completeJob(taskId);
   } catch (err) {
     console.error(`[API Bridge] Error durante la creación en segundo plano: ${err.message}`);
     task.status = 'error';
@@ -1015,6 +1017,7 @@ async function executeCreationTaskInBackground(taskId, answers) {
     } catch (stateErr) {
       console.error(`[API Bridge Error] No se pudo actualizar estado fallido: ${stateErr.message}`);
     }
+    await ProvisioningQueue.failJob(taskId, err.message);
   } finally {
     try {
       await ProvisioningStateManager.releaseLock(clientId);
@@ -1125,21 +1128,6 @@ app.post('/api/create-project', async (req, res) => {
   // Generamos un ID de tarea único
   const taskId = `task-create-${clientId}-${Date.now()}`;
 
-  // 1. ProvisioningStateManager lock persistente
-  try {
-    await ProvisioningStateManager.acquireLock(clientId, taskId);
-  } catch (lockErr) {
-    return res.status(409).json({ error: lockErr.message });
-  }
-
-  // 2. projectSyncLocks temporal en memoria
-  if (projectSyncLocks[clientId]) {
-    await ProvisioningStateManager.releaseLock(clientId);
-    return res.status(409).json({ error: `Ya hay una tarea de aprovisionamiento activa para el cliente "${clientId}". Por favor espera a que finalice.` });
-  }
-  // Adquirir bloqueo temporal
-  projectSyncLocks[clientId] = true;
-
   const finalProjectId = answers.firebaseProjectId ? answers.firebaseProjectId.trim() : clientId;
   answers.firebaseProjectId = finalProjectId;
 
@@ -1167,13 +1155,13 @@ app.post('/api/create-project', async (req, res) => {
     error: null
   };
 
-  // Disparar en background
-  executeCreationTaskInBackground(taskId, answers);
+  // Encolar en el gestor de colas de aprovisionamiento (delega ProvisioningStateManager.acquireLock)
+  await ProvisioningQueue.enqueue(taskId, clientId, answers);
   registerTaskCleanup(taskId);
 
   res.json({
     success: true,
-    message: 'Aprovisionamiento iniciado en segundo plano.',
+    message: 'Aprovisionamiento iniciado en segundo plano y encolado.',
     taskId
   });
 });
@@ -1197,6 +1185,12 @@ app.get('/api/create-project/stream', (req, res) => {
   task.logs.forEach(line => {
     res.write(`data: ${JSON.stringify({ type: 'log', line })}\n\n`);
   });
+
+  // Si está encolada/procesándose/esperando lock, enviar posición actual en la cola
+  const currentPos = ProvisioningQueue.getQueuePosition(taskId);
+  if (currentPos > 0) {
+    res.write(`data: ${JSON.stringify({ type: 'queue', position: currentPos })}\n\n`);
+  }
 
   if (task.status === 'success') {
     res.write(`data: ${JSON.stringify({ type: 'success', data: task.data })}\n\n`);
@@ -15018,4 +15012,22 @@ process.on('uncaughtException', (err) => {
 
 // Ejecutar diagnósticos de dependencias del PATH una sola vez al arranque
 await runPreflightChecks();
+
+// Inicializar la cola de aprovisionamiento con sus callbacks de ejecución y difusión SSE
+await ProvisioningQueue.initialize(
+  async (taskId, answers) => {
+    executeCreationTaskInBackground(taskId, answers);
+  },
+  (taskId, eventPayload) => {
+    const task = activeCreationTasks[taskId];
+    if (task && task.listeners) {
+      task.listeners.forEach(res => {
+        if (!res.writableEnded) {
+          res.write(`data: ${JSON.stringify(eventPayload)}\n\n`);
+        }
+      });
+    }
+  }
+);
+
 startServer(PORT);
