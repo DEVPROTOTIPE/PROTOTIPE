@@ -3101,7 +3101,7 @@ Por favor, lee e indiza obligatoriamente los siguientes archivos y carpetas de n
   - Porcentaje: ${answers.comisionPorcentaje ?? 1.5}%
   - Pago Mensual Fijo: $${answers.pagoMensualFijo ?? 0} COP
 - **Facturación Electrónica (DIAN)**: ${answers.enableDianBilling ? '🟢 Activa' : '🔴 Inactiva'} (Costo por factura: $${answers.costoPorFacturaDian ?? 0} COP)
-- **Token de Telemetría**: ${uniqueToken}
+- **Token de Telemetría**: [TOKEN_DE_TELEMETRIA]
 - **Colores de Marca** (Tema HSL: \`${themeName}\` — ya inyectados en \`src/index.css\`)
   | Token CSS | Valor |
   |---|---|
@@ -3265,17 +3265,26 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
   // [BLINDAJE-RETORNO] Asegurar que todos los valores retornados tengan fallback seguro
   const vapidPublicKey = (answers.firebaseVapidKey || answers.vapidPublicKey || '').trim();
 
-  return {
+  const result = {
     clientId: clientId || '',
     uniqueToken: uniqueToken || '',
     targetDir: targetDir || '',
     themeName: themeName || 'emerald',
     primaryColor: primaryColor || 'hsl(142, 70%, 45%)',
     vapidPublicKey,
-    adminPassword, // Exponer para que el wizard lo muestre al usuario al finalizar
+    adminPasswordSet: true,
     devPin: null, // Removido por directiva de seguridad
     prompt: promptContent
   };
+
+  Object.defineProperty(result, 'adminPassword', {
+    value: adminPassword,
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+
+  return result;
 
   } catch (err) {
     if (!existedBefore) {
