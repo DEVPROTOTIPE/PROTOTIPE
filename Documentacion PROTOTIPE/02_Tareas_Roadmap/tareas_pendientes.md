@@ -1,8 +1,18 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 426 tareas completadas de 426 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 427 tareas completadas de 427 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-427: Suite de pruebas RED para Provisioning Queue & Job Management (P0.6)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Creación de la suite de pruebas RED para Provisioning Queue & Job Management. Implementación de los scripts de prueba test_provisioning_queue.js y el runner run_p0_6_queue_tests.js, verificando de forma aislada y estática la persistencia atómica, máquina de estados, límites de concurrencia secuenciales, gobernanza de locks físicos, crash recovery y emisión SSE. Ejecución de la suite validando el estado esperado PRODUCT_BEHAVIOR_FAILURE de 7 fallos de comportamiento en el producto.
+  - Archivos:
+    - [`Prototipe-CLI/scripts/tests/p0_6/test_provisioning_queue.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_6/test_provisioning_queue.js) [NEW]
+    - [`Prototipe-CLI/scripts/tests/p0_6/run_p0_6_queue_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_6/run_p0_6_queue_tests.js) [NEW]
+    - [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
 
 * **[x] ~~Tarea CLI-426: Diseño y Arquitectura de la Cola de Aprovisionamiento (P0.6)~~**
   - Estatus: Completada

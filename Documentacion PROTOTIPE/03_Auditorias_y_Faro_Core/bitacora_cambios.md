@@ -1,5 +1,23 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-427 — 2026-07-12 [MINOR]
+**test(p0.6): add provisioning queue RED tests**
+
+### Cambios realizados:
+1. **Pruebas (RED Suite):** Creación del archivo de especificación de pruebas `test_provisioning_queue.js` y el runner ejecutor `run_p0_6_queue_tests.js`. Implementación de 7 casos de prueba para validar la persistencia atómica (tmp -> rename), la máquina de estados completa de la cola, el límite de concurrencia secuencial `maxConcurrency = 1`, la transición de lock física (`waiting_lock`), la recuperación ante crash/reinicios, el desacoplamiento con `ProvisioningStateManager` y la emisión de eventos de cola SSE (`type: 'queue'`).
+2. **Configuración:** Vinculación del comando `"test:p0.6"` en `package.json` para facilitar la ejecución.
+3. **tareas_pendientes.md:** Registrada la tarea `CLI-427` como completada y actualizada la métrica de avance global.
+4. **mapa_documentacion_ia.md:** Actualizada la sincronización semántica del GPS documental a `CLI-427-P0.6-RED`.
+
+### Archivos modificados:
+- [`Prototipe-CLI/scripts/tests/p0_6/test_provisioning_queue.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_6/test_provisioning_queue.js) [NEW]
+- [`Prototipe-CLI/scripts/tests/p0_6/run_p0_6_queue_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_6/run_p0_6_queue_tests.js) [NEW]
+- [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
+- [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+- [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
 ## CLI-426 — 2026-07-12 [MINOR]
 **docs(p0.6): register Provisioning Queue & Job Management design document**
 
