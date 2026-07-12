@@ -805,11 +805,19 @@ async function executeCreationTaskInBackground(taskId, answers) {
   const clientId = answers.blueprint?.instanceId || answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
   try {
-    await ProvisioningStateManager.transitionTo(clientId, 'pending', { taskId });
     const finalProjectId = answers.firebaseProjectId;
-    
+    const cloudResourcesCreated = [];
+
+    await ProvisioningStateManager.transitionTo(clientId, 'pending', { taskId });
+
     // Flujo de Aprovisionamiento Automático en Firebase Cloud
     if (answers.autoProvisionFirebase) {
+      // Registrar estado inicial antes de crear recursos
+      await ProvisioningStateManager.transitionTo(clientId, 'provisioning', {
+        taskId,
+        metadata: { cloudResourcesCreated }
+      });
+
       log(`[Firebase Automate] Iniciando automatización Firebase para: ${finalProjectId}`);
       
       const safeProjectId = finalProjectId.replace(/[^a-z0-9\-]/gi, '');
@@ -834,6 +842,15 @@ async function executeCreationTaskInBackground(taskId, answers) {
           log(`[Firebase Automate] Creando proyecto Firebase "${safeProjectName}" con ID "${safeProjectId}"...`);
           await execAsync(`firebase projects:create ${safeProjectId} --display-name "${safeProjectName}"`, { timeout: 180000 });
           log(`[Firebase Automate] Proyecto Firebase creado exitosamente.`);
+          cloudResourcesCreated.push({
+            type: 'firebaseProject',
+            id: safeProjectId,
+            createdAt: new Date().toISOString()
+          });
+          await ProvisioningStateManager.transitionTo(clientId, 'provisioning', {
+            taskId,
+            metadata: { cloudResourcesCreated }
+          });
         } catch (createErr) {
           log(`[Firebase Automate Warning] projects:create falló. Comprobando si el proyecto ya tiene recursos Firebase habilitados...`);
           try {
@@ -850,43 +867,55 @@ async function executeCreationTaskInBackground(taskId, answers) {
         }
       }
 
-      // 2 y 3. Crear base de datos Firestore default (nam5) y Web App en paralelo
-      log(`[Firebase Automate] Creando base de datos Firestore y registrando aplicación Web en paralelo...`);
-      const createDbPromise = (async () => {
-        try {
-          log(`[Firebase Automate] Inicializando Firestore (default) en nam5...`);
-          await execAsync(`firebase firestore:databases:create "(default)" --project ${safeProjectId} --location nam5`, { timeout: 120000 });
-          log(`[Firebase Automate] Firestore (default) creado con éxito.`);
-        } catch (dbErr) {
-          const errorText = (dbErr.message || '') + (dbErr.stderr || '');
-          if (
-            errorText.includes('already exists') ||
-            errorText.includes('Conflict') ||
-            errorText.includes('409') ||
-            errorText.includes('ALREADY_EXISTS')
-          ) {
-            log(`[Firebase Automate] Firestore ya está inicializado.`);
-          } else {
-            log(`[Firebase Automate Warning] No se pudo inicializar la BD default: ${dbErr.message}`);
-          }
+      // 2. Crear base de datos Firestore default (nam5)
+      try {
+        log(`[Firebase Automate] Inicializando Firestore (default) en nam5...`);
+        await execAsync(`firebase firestore:databases:create "(default)" --project ${safeProjectId} --location nam5`, { timeout: 120000 });
+        log(`[Firebase Automate] Firestore (default) creado con éxito.`);
+        cloudResourcesCreated.push({
+          type: 'firestoreDatabase',
+          id: '(default)',
+          createdAt: new Date().toISOString()
+        });
+        await ProvisioningStateManager.transitionTo(clientId, 'provisioning', {
+          taskId,
+          metadata: { cloudResourcesCreated }
+        });
+      } catch (dbErr) {
+        const errorText = (dbErr.message || '') + (dbErr.stderr || '');
+        if (
+          errorText.includes('already exists') ||
+          errorText.includes('Conflict') ||
+          errorText.includes('409') ||
+          errorText.includes('ALREADY_EXISTS')
+        ) {
+          log(`[Firebase Automate] Firestore ya está inicializado.`);
+        } else {
+          log(`[Firebase Automate Warning] No se pudo inicializar la BD default: ${dbErr.message}`);
         }
-      })();
+      }
 
-      const createAppPromise = (async () => {
-        try {
-          log(`[Firebase Automate] Registrando Web App "${safeProjectName}"...`);
-          await execAsync(`firebase apps:create web "${safeProjectName}" --project ${safeProjectId}`, { timeout: 90000 });
-          log(`[Firebase Automate] Web App registrada con éxito.`);
-        } catch (appErr) {
-          if (appErr.message.includes('already exists') || appErr.stderr?.includes('already exists')) {
-            log(`[Firebase Automate] La Web App ya está registrada.`);
-          } else {
-            throw appErr;
-          }
+      // 3. Registrar aplicación Web
+      try {
+        log(`[Firebase Automate] Registrando Web App "${safeProjectName}"...`);
+        await execAsync(`firebase apps:create web "${safeProjectName}" --project ${safeProjectId}`, { timeout: 90000 });
+        log(`[Firebase Automate] Web App registrada con éxito.`);
+        cloudResourcesCreated.push({
+          type: 'webApp',
+          id: safeProjectName,
+          createdAt: new Date().toISOString()
+        });
+        await ProvisioningStateManager.transitionTo(clientId, 'provisioning', {
+          taskId,
+          metadata: { cloudResourcesCreated }
+        });
+      } catch (appErr) {
+        if (appErr.message.includes('already exists') || appErr.stderr?.includes('already exists')) {
+          log(`[Firebase Automate] La Web App ya está registrada.`);
+        } else {
+          throw appErr;
         }
-      })();
-
-      await Promise.all([createDbPromise, createAppPromise]);
+      }
 
       // 4. Extraer credenciales SDK
       log(`[Firebase Automate] Extrayendo SDK Config...`);
@@ -968,8 +997,21 @@ async function executeCreationTaskInBackground(taskId, answers) {
     });
     task.listeners = [];
 
+    // [P04-03c] Conservar los recursos creados en la nube, IDs, timestamp y error en la metadata.
+    // No eliminar recursos automáticamente sin una función explícita de rollback segura.
     try {
-      await ProvisioningStateManager.transitionTo(clientId, 'failed', { taskId, metadata: { error: err.message } });
+      await ProvisioningStateManager.transitionTo(clientId, 'failed', {
+        taskId,
+        metadata: {
+          error: err.message,
+          cloudResourcesCreated,
+          rollbackStatus: 'pending',
+          rollbackErrors: []
+        }
+      });
+      // Mantenemos este comentario técnico dentro de la función para el diseño del rollback en la nube:
+      // Si el usuario invoca explícitamente rollbackCloud o la purga de recursos huérfanos:
+      // await rollbackCloud(clientId, cloudResourcesCreated); // firebase projects:delete
     } catch (stateErr) {
       console.error(`[API Bridge Error] No se pudo actualizar estado fallido: ${stateErr.message}`);
     }
@@ -980,6 +1022,7 @@ async function executeCreationTaskInBackground(taskId, answers) {
       console.error(`[API Bridge Error] No se pudo liberar lock persistente: ${lockErr.message}`);
     }
     delete projectSyncLocks[clientId];
+  }
 }
 
 // Endpoint para iniciar el aprovisionamiento de manera asíncrona

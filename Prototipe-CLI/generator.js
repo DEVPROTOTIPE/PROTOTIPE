@@ -898,6 +898,10 @@ export async function createProject(answers) {
   const { getInstancePath } = await import('./config.js');
   const targetDir = PathSecurity.validateContainedPath(getWorkspaceRoot(), answers.targetPath || getInstancePath(coreType, `App-${folderName}`));
   const existedBefore = await fs.pathExists(targetDir);
+  const gitExistedBefore = existedBefore ? await fs.pathExists(path.join(targetDir, '.git')) : false;
+  const nodeModulesExistedBefore = existedBefore ? await fs.pathExists(path.join(targetDir, 'node_modules')) : false;
+  const packageLockExistedBefore = existedBefore ? await fs.pathExists(path.join(targetDir, 'package-lock.json')) : false;
+  let gitInitialized = false;
   try {
     const srcTemplateDir = path.join(TEMPLATES_DIR, answers.template);
     if (!isPathContained(TEMPLATES_DIR, srcTemplateDir)) {
@@ -3204,7 +3208,7 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
   await installDependencies(targetDir);
 
   // 10. Git e integración con GitHub
-  await setupGitHub(answers, targetDir, clientId);
+  gitInitialized = await setupGitHub(answers, targetDir, clientId);
 
   // 11. Despliegue en Firebase del Cliente
   await deployFirebase(answers, targetDir);
@@ -3301,6 +3305,35 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
       } catch (cleanupErr) {
         console.error(pc.red(`${taskIdPrefix}⚠️  Error al remover el directorio durante el rollback: ${cleanupErr.message}`));
       }
+    } else {
+      // existedBefore === true: rollback seguro
+      try {
+        // Limpiar .git parcial si no existía antes de este intento y fue inicializado
+        if (!gitExistedBefore && gitInitialized) {
+          const gitDir = path.join(targetDir, '.git');
+          if (await fs.pathExists(gitDir)) {
+            await fs.remove(gitDir);
+            console.log(pc.red(`\n${taskIdPrefix}🧹 Rollback re-provisión: .git parcial generado durante proceso fallido eliminado.`));
+          }
+        }
+        // Limpiar node_modules incompleto si no existía antes de este intento
+        if (!nodeModulesExistedBefore) {
+          const nmDir = path.join(targetDir, 'node_modules');
+          if (await fs.pathExists(nmDir)) {
+            await fs.remove(nmDir);
+            console.log(pc.red(`\n${taskIdPrefix}🧹 Rollback re-provisión: node_modules incompleto eliminado.`));
+          }
+        }
+        // Limpiar package-lock.json si no existía antes de este intento
+        if (!packageLockExistedBefore) {
+          const lockFile = path.join(targetDir, 'package-lock.json');
+          if (await fs.pathExists(lockFile)) {
+            await fs.remove(lockFile);
+          }
+        }
+      } catch (cleanupErr) {
+        console.error(pc.red(`${taskIdPrefix}⚠️  Error al limpiar artefactos parciales durante el rollback: ${cleanupErr.message}`));
+      }
     }
     throw err;
   }
@@ -3390,6 +3423,7 @@ async function setupGitHub(answers, targetDir, clientId) {
       console.warn(pc.yellow(`⚠️  No se pudo subir a GitHub automáticamente: ${err.message}. Asegúrate de tener gh CLI logueado.`));
     }
   }
+  return gitInitialized;
 }
 
 /**
