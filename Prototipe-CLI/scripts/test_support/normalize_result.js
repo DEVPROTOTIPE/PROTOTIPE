@@ -1,4 +1,6 @@
 import path from 'node:path';
+import os from 'node:os';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Normaliza objetos y salidas de caracterización para eliminar datos dinámicos o dependientes del host.
@@ -23,10 +25,24 @@ export function normalizeResult(data) {
     if (typeof val === 'string') {
       // Reemplazar rutas del host a un formato relativo universal
       let normalized = val.replace(/\\\\/g, '/').replace(/\\/g, '/');
-      // Buscar patrones de rutas absolutas comunes del sistema de Sergio
-      normalized = normalized.replace(/C:\/Users\/Sergio\/\.gemini\/antigravity\/brain\/[^/]+/g, 'WORKSPACE_ARTIFACT_DIR');
+      
+      const sandboxRoot = (process.env.PROTOTIPE_SANDBOX_DIR || path.join(os.tmpdir(), 'PROTOTIPE_CHARACTERIZATION_SANDBOX')).replace(/\\/g, '/');
+      
+      // Resolver MONOREPO_ROOT dinámicamente
+      const __filename = typeof fileURLToPath !== 'undefined' ? fileURLToPath(import.meta.url) : (typeof __filename !== 'undefined' ? __filename : '');
+      const currentDir = __filename ? path.dirname(__filename) : process.cwd();
+      const monorepoRoot = path.resolve(currentDir, '..', '..').replace(/\\/g, '/');
+
+      const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      normalized = normalized.replace(new RegExp(escapeRegExp(sandboxRoot), 'ig'), 'SANDBOX_ROOT');
+      normalized = normalized.replace(new RegExp(escapeRegExp(monorepoRoot), 'ig'), 'MONOREPO_ROOT');
+      
+      // Fallbacks históricos
       normalized = normalized.replace(/D:\/PROTOTIPE_CHARACTERIZATION_SANDBOX/ig, 'SANDBOX_ROOT');
       normalized = normalized.replace(/D:\/PROTOTIPE/ig, 'MONOREPO_ROOT');
+
+      normalized = normalized.replace(/C:\/Users\/Sergio\/\.gemini\/antigravity\/brain\/[^/]+/g, 'WORKSPACE_ARTIFACT_DIR');
       normalized = normalized.replace(/C:\/[^/]+/g, 'SYSTEM_ROOT');
       return normalized;
     }

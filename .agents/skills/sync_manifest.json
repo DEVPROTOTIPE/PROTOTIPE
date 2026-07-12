@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lastSyncAt": "2026-07-12T20:06:29.351Z",
+  "lastSyncAt": "2026-07-12T20:48:36.706Z",
   "skills": {
     "briefing-analizador": {
       "sha256": "37a1a613576f02377beaeb2111340371ee5b16ca05766b721ad98992a57c55dc",
@@ -11,20 +11,20 @@
       "syncedAt": "2026-07-03T19:01:42.014Z"
     },
     "component-creator": {
-      "sha256": "2143f38685ec2f7de35214d1055f7db216bca97481b3c7af3fd33185e6e10e00",
-      "syncedAt": "2026-07-12T20:06:29.351Z"
+      "sha256": "df282c3e02f078bb862595fccb1bd1b3fefe2d6dd110fd2c266ee60882fb0951",
+      "syncedAt": "2026-07-12T20:48:36.706Z"
     },
     "component-extractor": {
-      "sha256": "4be4ab76dc5e02c0be704855d35cf06eea3b4430291cde5af5cf82f4ca07ab4d",
-      "syncedAt": "2026-07-12T20:06:29.351Z"
+      "sha256": "4bf4f9f55a66bbe47fc881b6594480aaf49c2f64d16c369ce6bac31b42ff07e8",
+      "syncedAt": "2026-07-12T20:48:36.706Z"
     },
     "cotizador-rapido": {
       "sha256": "6569970290c89572ee9a80d86d9b2c46a94e8191c8a6b7ca20c560db4e962798",
       "syncedAt": "2026-07-03T19:01:42.014Z"
     },
     "crear-skill-prototipe": {
-      "sha256": "6bde5de8b099db55a422881eaa20419bd058f64e3a3a11f551c469bd863addde",
-      "syncedAt": "2026-07-12T20:06:29.351Z"
+      "sha256": "b008d06147cd6f35cdc8406d04f44249c2b44c2616975ff541943947c2992f13",
+      "syncedAt": "2026-07-12T20:48:36.706Z"
     },
     "database-seeder": {
       "sha256": "0de63b8d8f64a2f1a6fc1f0f256f2afb0820e0c9916ede5e9b14cc529551b754",
@@ -55,8 +55,8 @@
       "syncedAt": "2026-07-03T19:01:42.014Z"
     },
     "portar-componente": {
-      "sha256": "8c56329294ddf1e9a0c10912bab7c6cf1b0debc7d058bac0ff647612aea526b5",
-      "syncedAt": "2026-07-12T20:06:29.351Z"
+      "sha256": "b106f47156ad4c6f0fff1ab5a732102f2e962c07dd71514cfd4fedc449846f76",
+      "syncedAt": "2026-07-12T20:48:36.706Z"
     },
     "post-discovery-analyzer": {
       "sha256": "d3b9515fdff1fb468938ca5763d7fc8e5c984dcaf58f2b25c8dfd79a088648a7",

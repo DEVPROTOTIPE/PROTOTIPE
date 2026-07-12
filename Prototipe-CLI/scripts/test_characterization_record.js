@@ -11,13 +11,14 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import os from 'node:os';
 import { normalizeResult } from './test_support/normalize_result.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..');
 
-const HISTORICAL_SANDBOX_DIR = 'D:\\PROTOTIPE_CHARACTERIZATION_SANDBOX';
+const HISTORICAL_SANDBOX_DIR = process.env.PROTOTIPE_SANDBOX_DIR || path.join(os.tmpdir(), 'PROTOTIPE_CHARACTERIZATION_SANDBOX');
 const EXPECTED_BASELINE_COMMIT = '7251cf16eb7ee5ce248fb54cee12b55968ace253';
 const SNAPSHOT_SHA256 = '982e10a0234ecc9006b1b6313f46c8e4d7a9fc9b6abb504ea1582147a5a7d6cb';
 

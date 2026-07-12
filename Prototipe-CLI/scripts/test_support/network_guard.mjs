@@ -5,6 +5,7 @@ import tls from 'node:tls';
 import dns from 'node:dns';
 import child_process from 'node:child_process';
 import path from 'node:path';
+import os from 'node:os';
 
 // Estado de la interceptación
 const stats = {
@@ -19,7 +20,7 @@ const stats = {
 global.__network_guard_stats__ = stats;
 
 // --- CONFIGURACIÓN DE PROXY PARA PROCESS.ENV (Aislamiento de Rutas) ---
-const HISTORICAL_SANDBOX_DIR = 'D:\\PROTOTIPE_CHARACTERIZATION_SANDBOX';
+const HISTORICAL_SANDBOX_DIR = process.env.PROTOTIPE_SANDBOX_DIR || path.join(os.tmpdir(), 'PROTOTIPE_CHARACTERIZATION_SANDBOX');
 const sandboxWorkspace = path.join(HISTORICAL_SANDBOX_DIR, 'Instancias Clientes');
 const sandboxDocs = path.join(HISTORICAL_SANDBOX_DIR, 'Documentacion PROTOTIPE');
 

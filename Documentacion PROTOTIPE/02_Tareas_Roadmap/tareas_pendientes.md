@@ -1,8 +1,21 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 450 tareas completadas de 450 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 451 tareas completadas de 451 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-451: Desacoplamiento de Sandbox de Caracterización y Aislamiento de Entorno del CLI~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Desacoplamos físicamente las rutas absolutas del sandbox de caracterización (`D:\PROTOTIPE_CHARACTERIZATION_SANDBOX`) utilizando variables de entorno y fallbacks dinámicos del sistema basados en `os.tmpdir()`. Saneamos el normalizador de resultados (`normalize_result.js`) usando expresiones regulares parametrizadas para normalizar de forma dinámica tanto las rutas del sandbox como la raíz del monorepo en cualquier host.
+  - Archivos:
+    - [`Prototipe-CLI/scripts/test_characterization_record.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_characterization_record.js) [MODIFY]
+    - [`Prototipe-CLI/scripts/test_support/network_guard.mjs`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_support/network_guard.mjs) [MODIFY]
+    - [`Prototipe-CLI/scripts/test_support/normalize_result.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_support/normalize_result.js) [MODIFY]
+    - [`.agents/skills/sync_manifest.json`](file:///d:/PROTOTIPE/.agents/skills/sync_manifest.json) [MODIFY]
+    - [`Prototipe-CLI/knowledge/core-promotion/file-policy.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/core-promotion/file-policy.json) [MODIFY]
+    - [`Prototipe-CLI/plantillas_registro.json`](file:///d:/PROTOTIPE/Prototipe-CLI/plantillas_registro.json) [MODIFY]
 
 * **[x] ~~Tarea CLI-450: Inyección del Estándar UI/UX en las Habilidades Operativas de la IA (Skills)~~**
   - Estatus: Completada

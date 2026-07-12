@@ -1,5 +1,23 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-451 — 2026-07-12
+**Feature: Desacoplamiento de Sandbox de Caracterización y Aislamiento de Entorno del CLI**
+
+### Cambios realizados:
+1. **Desacoplamiento de Sandbox:** Modificados `test_characterization_record.js` y `network_guard.mjs` para resolver dinámicamente sus carpetas de sandbox mediante `os.tmpdir()` y variables de entorno, eliminando la ruta fija local `D:\PROTOTIPE_CHARACTERIZATION_SANDBOX`.
+2. **Normalización Dinámica:** Refactorizado `normalize_result.js` para usar expresiones regulares dinámicas que normalizan tanto `PROTOTIPE_SANDBOX_DIR` como el directorio raíz de la aplicación sin importar la case o el drive letter de la unidad.
+3. **Autocuración del Linter y Sincronización:** Modificado el linter en `verify_library_integrity.cjs` para autocurar falsos positivos de conflicto de hash si las skills físicas y su copia de resguardo son idénticas, actualizando el archivo `sync_manifest.json` y `plantillas_registro.json`.
+
+### Archivos modificados:
+- [`Prototipe-CLI/scripts/test_characterization_record.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_characterization_record.js) [MODIFY]
+- [`Prototipe-CLI/scripts/test_support/network_guard.mjs`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_support/network_guard.mjs) [MODIFY]
+- [`Prototipe-CLI/scripts/test_support/normalize_result.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_support/normalize_result.js) [MODIFY]
+- [`.agents/skills/sync_manifest.json`](file:///d:/PROTOTIPE/.agents/skills/sync_manifest.json) [MODIFY]
+- [`Prototipe-CLI/knowledge/core-promotion/file-policy.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/core-promotion/file-policy.json) [MODIFY]
+- [`Prototipe-CLI/plantillas_registro.json`](file:///d:/PROTOTIPE/Prototipe-CLI/plantillas_registro.json) [MODIFY]
+
+---
+
 ## CLI-450 — 2026-07-12
 **Feature: Inyección del Estándar UI/UX en las Habilidades Operativas de la IA (Skills)**
 
