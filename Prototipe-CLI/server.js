@@ -24,6 +24,7 @@ import { CoreCandidateBuilder } from './lib/CoreCandidateBuilder.js';
 import { CorePromotionValidator } from './lib/CorePromotionValidator.js';
 import { BriefingDocumentMapper } from './lib/BriefingDocumentMapper.js';
 import { normalizeProvisioningEnvelope } from './lib/ProvisioningEnvelopeAdapter.js';
+import { ProvisioningStateManager } from './lib/ProvisioningStateManager.js';
 
 const execAsync = promisify(exec);
 
@@ -792,7 +793,10 @@ async function executeCreationTaskInBackground(taskId, answers) {
     });
   };
   
+  const clientId = answers.blueprint?.instanceId || answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
   try {
+    await ProvisioningStateManager.transitionTo(clientId, 'pending', { taskId });
     const finalProjectId = answers.firebaseProjectId;
     
     // Flujo de Aprovisionamiento Automático en Firebase Cloud
@@ -916,6 +920,7 @@ async function executeCreationTaskInBackground(taskId, answers) {
       log(`[Firebase Automate] Credenciales de Firebase integradas con éxito.`);
     }
 
+    await ProvisioningStateManager.transitionTo(clientId, 'provisioning', { taskId });
     log(`[API Bridge] Iniciando creación física del proyecto con plantilla: ${answers.template}`);
     const result = await runCreateProjectWorker(answers, (line) => {
       log(`[Worker] ${line}`);
@@ -923,9 +928,6 @@ async function executeCreationTaskInBackground(taskId, answers) {
     
     log(`[API Bridge] Proyecto '${answers.projectName}' creado con éxito en: ${result.targetDir}`);
     
-    const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    delete projectSyncLocks[clientId];
-
     log(`[API Bridge] Iniciando sembrado automático de base de datos para la nueva instancia...`);
     try {
       const seedRes = await seedProjectDatabase(clientId);
@@ -943,11 +945,10 @@ async function executeCreationTaskInBackground(taskId, answers) {
       }
     });
     task.listeners = [];
+
+    await ProvisioningStateManager.transitionTo(clientId, 'completed', { taskId });
   } catch (err) {
     console.error(`[API Bridge] Error durante la creación en segundo plano: ${err.message}`);
-    const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    delete projectSyncLocks[clientId];
-
     task.status = 'error';
     task.error = err.message;
     task.listeners.forEach(res => {
@@ -957,7 +958,19 @@ async function executeCreationTaskInBackground(taskId, answers) {
       }
     });
     task.listeners = [];
-  }
+
+    try {
+      await ProvisioningStateManager.transitionTo(clientId, 'failed', { taskId, metadata: { error: err.message } });
+    } catch (stateErr) {
+      console.error(`[API Bridge Error] No se pudo actualizar estado fallido: ${stateErr.message}`);
+    }
+  } finally {
+    try {
+      await ProvisioningStateManager.releaseLock(clientId);
+    } catch (lockErr) {
+      console.error(`[API Bridge Error] No se pudo liberar lock persistente: ${lockErr.message}`);
+    }
+    delete projectSyncLocks[clientId];
 }
 
 // Endpoint para iniciar el aprovisionamiento de manera asíncrona
@@ -1057,11 +1070,22 @@ app.post('/api/create-project', async (req, res) => {
 
   const clientId = answers.blueprint.instanceId || answers.blueprint.clientName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-  // Validar exclusión mutua
+  // Generamos un ID de tarea único
+  const taskId = `task-create-${clientId}-${Date.now()}`;
+
+  // 1. ProvisioningStateManager lock persistente
+  try {
+    await ProvisioningStateManager.acquireLock(clientId, taskId);
+  } catch (lockErr) {
+    return res.status(409).json({ error: lockErr.message });
+  }
+
+  // 2. projectSyncLocks temporal en memoria
   if (projectSyncLocks[clientId]) {
+    await ProvisioningStateManager.releaseLock(clientId);
     return res.status(409).json({ error: `Ya hay una tarea de aprovisionamiento activa para el cliente "${clientId}". Por favor espera a que finalice.` });
   }
-  // Adquirir bloqueo
+  // Adquirir bloqueo temporal
   projectSyncLocks[clientId] = true;
 
   const finalProjectId = answers.firebaseProjectId ? answers.firebaseProjectId.trim() : clientId;
@@ -1083,9 +1107,6 @@ app.post('/api/create-project', async (req, res) => {
     }
   }
 
-  // Generamos un ID de tarea único
-  const taskId = `task-create-${clientId}-${Date.now()}`;
-  
   activeCreationTasks[taskId] = {
     status: 'running',
     logs: [],
@@ -1150,6 +1171,25 @@ app.get('/api/create-project/stream', (req, res) => {
     clearInterval(keepAliveInterval);
     task.listeners = task.listeners.filter(l => l !== res);
   });
+});
+
+// Endpoint para obtener el estado del ciclo de vida y los bloqueos persistentes de aprovisionamiento
+app.get('/api/provisioning/status', async (req, res) => {
+  const { clientId } = req.query;
+  if (!clientId) {
+    return res.status(400).json({ error: "El parámetro 'clientId' es obligatorio." });
+  }
+  try {
+    const stateRecord = await ProvisioningStateManager.getState(clientId);
+    const isLocked = await ProvisioningStateManager.isLocked(clientId);
+    return res.json({
+      state: stateRecord ? stateRecord.state : null,
+      isLocked,
+      timestamps: stateRecord ? stateRecord.timestamps : null
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Error al consultar estado: ${err.message}` });
+  }
 });
 
 /**
