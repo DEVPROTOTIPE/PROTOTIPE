@@ -1,5 +1,21 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-422 — 2026-07-12
+**fix(p0.4): propagate taskId and isolate worker environment — Commit E**
+**Hash:** `69a4f56`
+
+### Cambios realizados:
+1. **server.js:** Se implementó la propagación del identificador único de tarea `taskId` al objeto answers (`answers.__taskId = taskId`) antes de lanzar el proceso hijo worker de aprovisionamiento en `executeCreationTaskInBackground`.
+2. **server.js:** Se aisló el entorno de ejecución del fork del worker mediante una lista blanca segura `SAFE_ENV_ALLOWLIST` de variables de entorno, evitando heredar secretos y tokens innecesarios del proceso padre.
+3. **server.js:** Se configuró el TTL de limpieza de tareas en memoria de forma dinámica a través de la variable de entorno `TASK_CLEANUP_TTL_MS` (con fallback a 1800000ms).
+4. **generator.js:** Se añadió la lectura de `answers.__taskId` para prefijar logs importantes del proceso físico (`[taskId=<id>] mensaje`), incluyendo inicio de aprovisionamiento, validación de blueprint, copia de plantillas, finalización y errores.
+
+### Archivos modificados:
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+---
+
 ## CLI-421 — 2026-07-12
 **fix(p0.4): redact admin secrets and telemetry tokens — Commit D**
 **Hash:** `6c01fa5`

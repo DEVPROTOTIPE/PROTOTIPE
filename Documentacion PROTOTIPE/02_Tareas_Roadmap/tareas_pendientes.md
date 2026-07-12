@@ -1,8 +1,18 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 421 tareas completadas de 421 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 422 tareas completadas de 422 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-422: Observabilidad y aislamiento de variables (P0.4 - Commit E)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Propagación de taskId a answers.__taskId antes de lanzar el worker de aprovisionamiento, y prefijado de taskId en logs principales del generator.js. Configuración dinámica del TTL para purgado de tareas vía la variable de entorno TASK_CLEANUP_TTL_MS. Aislamiento estricto de variables de entorno heredadas por el subproceso fork del worker utilizando un allowlist de variables seguras.
+  - Commit: `69a4f56` — `fix(p0.4): propagate taskId and isolate worker environment`
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-421: Redacción de Contraseñas de Administrador y Tokens de Telemetría (P0.4 - Commit D)~~**
   - Estatus: Completada
