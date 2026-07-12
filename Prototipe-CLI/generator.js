@@ -1034,8 +1034,10 @@ export async function createProject(answers) {
       const configDestDir = path.join(targetDir, 'src', 'config');
       await fs.ensureDir(configDestDir);
 
+      const instId = blueprint.instanceId || blueprint.clientId || clientId;
+
       await fs.writeJson(path.join(configDestDir, 'application.json'), {
-        instanceId: blueprint.clientId,
+        instanceId: instId,
         clientName: blueprint.clientName,
         vertical: blueprint.vertical,
         schemaVersion: blueprint.version || "1.0.0",
@@ -1043,14 +1045,19 @@ export async function createProject(answers) {
       }, { spaces: 2 });
 
       await fs.writeJson(path.join(configDestDir, 'tenant.json'), {
-        tenantId: `tenant-${blueprint.clientId}`,
+        tenantId: `tenant-${instId}`,
         plan: "enterprise",
         status: "active",
         featuresEnabled: blueprint.features
       }, { spaces: 2 });
 
-      await fs.writeJson(path.join(configDestDir, 'experience.json'), blueprint.experience, { spaces: 2 });
-      await fs.writeJson(path.join(configDestDir, 'branding.json'), blueprint.branding, { spaces: 2 });
+      const experienceToWrite = blueprint.experience || {
+        layout: "bento",
+        density: "comfortable",
+        typography: blueprint.branding?.googleFont || "Inter"
+      };
+      await fs.writeJson(path.join(configDestDir, 'experience.json'), experienceToWrite, { spaces: 2 });
+      await fs.writeJson(path.join(configDestDir, 'branding.json'), blueprint.branding || { paletteChoice: "emerald" }, { spaces: 2 });
       const composedDashboard = blueprint.dashboard || { widgets: [] };
       await fs.writeJson(path.join(configDestDir, 'dashboard.json'), {
         welcomeWidget: "StatsGrid",
@@ -1066,7 +1073,7 @@ export async function createProject(answers) {
       // Escribir manifiestos legacy para compatibilidad (vacíos inicialmente, se actualizarán tras copiar features reales)
       await fs.writeJson(path.join(configDestDir, 'features.json'), {
         activeFeatures: [],
-        tenantId: blueprint.clientId,
+        tenantId: instId,
         subscriptionPlan: 'enterprise'
       }, { spaces: 2 });
 
@@ -1141,7 +1148,7 @@ export default function Admin${featCamel}() {
       // Actualizar manifiestos finales únicamente con features reales físicamente instaladas
       await fs.writeJson(path.join(configDestDir, 'features.json'), {
         activeFeatures: realFeaturesInstalled,
-        tenantId: blueprint.clientId,
+        tenantId: instId,
         subscriptionPlan: 'enterprise'
       }, { spaces: 2 });
 
@@ -1183,7 +1190,7 @@ export default function Admin${featCamel}() {
       // 7. Persistir Explainability Logs en el directorio destino
       await expLogger.persist(targetDir);
 
-      stepFeatures.succeed(`Features y dependencias del Blueprint inyectadas con éxito en: App-${blueprint.clientId}.`);
+      stepFeatures.succeed(`Features y dependencias del Blueprint inyectadas con éxito en: App-${instId}.`);
     }
 
     // ─── APROVISIONAMIENTO Y COPIA PROACTIVA DE BACKGROUNDCANVAS (MULTICORE) ───
