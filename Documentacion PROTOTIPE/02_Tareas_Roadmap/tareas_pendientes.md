@@ -1,8 +1,16 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 432 tareas completadas de 432 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 433 tareas completadas de 433 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-433: Alineación de Configuración de Firebase y Persistencia Offline de Core Seed con Core Ventas~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se modificó la configuración base de Firebase en `template-core-seed` para añadir la validación activa de variables de entorno de Firebase requeridas al inicializarse la UI del cliente, previniendo errores silenciosos por falta de credenciales. Asimismo, se inicializó Firestore utilizando `persistentLocalCache` y `persistentMultipleTabManager` para dotar a la semilla de capacidades de persistencia offline, garantizando consistencia local y alineando su robustez técnica con la de la aplicación de referencia `App Ventas`.
+  - Archivos:
+    - [`Prototipe-CLI/templates/template-core-seed/src/config/firebaseConfig.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/config/firebaseConfig.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-432: Habilitación de CORS para Puertos Dinámicos de Viewports Locales en Bridge CLI~~**
   - Estatus: Completada

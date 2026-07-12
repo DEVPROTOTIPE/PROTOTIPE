@@ -349,6 +349,8 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Prototipe-CLI/templates/template-core-seed/src/core/config/PatternRegistry.js`**: Registro de patrones de interacción de alto nivel (Fase 7).
 * **`/Prototipe-CLI/templates/template-core-seed/src/core/dashboard/DashboardComposer.js`**: Compositor dinámico de la interfaz Bento del dashboard (Fase 7).
 * **`/Prototipe-CLI/templates/template-core-seed/src/core/experience/ExperienceRegistry.js`**: Orquestador central de bootstrap y branding visual (Fase 7).
+* **`/Prototipe-CLI/templates/template-core-seed/src/core/eventbus/EventBus.js`**: Bus de eventos centralizado para comunicación desacoplada entre features (Fase 8).
+* **`/Prototipe-CLI/templates/template-core-seed/src/core/events/EventRegistry.js`**: Registro y esquema de validación de contratos de eventos de la plataforma (Fase 8).
 * **`/Prototipe-CLI/templates/template-core-seed/src/components/admin/settings/DeveloperDiagnosticsModal.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
 * **`/Prototipe-CLI/templates/template-core-seed/src/services/appConfigService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
 * **`/Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).

@@ -1,5 +1,19 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-433 — 2026-07-12
+**Feature: Alineación de Configuración de Firebase y Persistencia Offline de Core Seed con Core Ventas**
+
+### Cambios realizados:
+1. **firebaseConfig.js (Core Seed):** 
+   - Se implementó la verificación estructurada de variables de entorno obligatorias (`REQUIRED_VARS`), emitiendo advertencias claras en la consola del navegador si falta alguna clave en el arranque.
+   - Se habilitó la persistencia offline local de Firestore utilizando la combinación de `persistentLocalCache` y `persistentMultipleTabManager` de Firebase SDK. Esto garantiza la alineación de la plantilla base semilla con las políticas de consistencia de datos, prevención de sobrecostos de lectura en StrictMode y resiliencia offline implementadas en `App Ventas`.
+
+### Archivos modificados:
+- [`Prototipe-CLI/templates/template-core-seed/src/config/firebaseConfig.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/config/firebaseConfig.js) [MODIFY]
+- [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+---
+
 ## CLI-432 — 2026-07-12
 **Feature: Habilitación de CORS, Bypass de App Check en Desarrollo y Saneamiento de Dependencias para Compilación**
 
