@@ -374,6 +374,22 @@ async function authenticateFirebaseToken(req, res, next) {
 
 // Middleware de verificación de Firebase App Check con traducción a Tenant
 async function verifyAppCheck(req, res, next) {
+  // Bypass de desarrollo local en el Bridge API (si NODE_ENV !== 'production' o el request es de localhost)
+  const ip = req.ip || req.connection.remoteAddress || '';
+  const isLoopback = ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' || ip.includes('127.0.0.1') || ip === 'localhost';
+
+  if (process.env.NODE_ENV !== 'production' && isLoopback) {
+    req.appCheck = { appId: 'local-dev-app-id', verified: true };
+    const bodyClientId = req.body && req.body.clientId;
+    req.tenant = {
+      appId: 'local-dev-app-id',
+      clientId: bodyClientId || 'test-client',
+      niche: (req.body && req.body.niche) || 'general',
+      status: 'active'
+    };
+    return next();
+  }
+
   // 1. Bypass estricto de pruebas locales (solo si NODE_ENV === 'test' y ALLOW_TEST_APPCHECK_BYPASS === 'true')
   if (process.env.NODE_ENV === 'test' && process.env.ALLOW_TEST_APPCHECK_BYPASS === 'true') {
     const ip = req.ip || req.connection.remoteAddress;

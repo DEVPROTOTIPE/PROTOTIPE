@@ -23,6 +23,12 @@
       "description": "Pulso periódico de actividad y salud de la instancia",
       "allowedSources": ["client-runtime"],
       "allowedSeverities": ["info"]
+    },
+    {
+      "type": "billing",
+      "description": "Reporte de facturación y comisiones de la aplicación cliente",
+      "allowedSources": ["client-runtime", "cli", "automatic", "manual"],
+      "allowedSeverities": ["info", "warning", "critical"]
     }
   ]
 }
