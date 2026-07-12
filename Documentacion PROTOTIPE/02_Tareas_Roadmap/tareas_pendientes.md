@@ -95,7 +95,7 @@
   - Archivos:
     - [`Prototipe-CLI/lib/CorePromotionService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/CorePromotionService.js) [MODIFY]
 
-* **[x] ~~Tarea CLI-397-FASE1: Pipeline de Promoción de Cores - Contratos y Seguridad~~**
+* **[x] ~~Tarea CLI-397: Pipeline de Promoción de Cores - Contratos y Seguridad~~**
   - Estatus: Completada
   - Fecha de registro: 2026-07-11
   - Fecha de finalización: 2026-07-11

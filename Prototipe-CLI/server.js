@@ -12692,7 +12692,7 @@ app.get('/api/integrity/status', async (req, res) => {
       
       // Captura IDs en cualquier formato de encabezado: ## ID:, ### [fecha] - ID, #### ID, etc.
       // Acepta cualquier prefijo alfanumérico (CORE, CLI, LINE, DASH, TPL, INST, DOC, etc.)
-      const bitacoraRegex = /^#{1,4}\s+(?:\[[^\]]+\]\s*[-–]\s*)?((?:CORE|CLI|DASH|TPL|PLT|INST|DOC|LND|BIZ|HOTFIX|CLIENTE|E2E|LINE|COMP)-[A-Z0-9_-]+)/gim;
+      const bitacoraRegex = /^#{1,4}\s+(?:\[[^\]]+\]\s*[-–]\s*)?((?:CORE|CLI|BUG|DASH|TPL|PLT|INST|DOC|LND|BIZ|HOTFIX|CLIENTE|E2E|LINE|COMP)-[A-Z0-9_-]+)/gim;
       let bm;
       while ((bm = bitacoraRegex.exec(bitacoraContent)) !== null) {
         bitacoraIds.add(bm[1].toUpperCase());

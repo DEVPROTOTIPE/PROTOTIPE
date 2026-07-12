@@ -15,7 +15,7 @@
 
 ---
 
-## CLI-404-SECURITY-ROBUSTNESS-CERTIFICATION — 2026-07-11
+## CLI-404 — 2026-07-11
 **Feature: Auditoría de Robustez, Certificación de Reglas Firestore y Spark-first Policy**
 
 ### Cambios realizados:
@@ -51,7 +51,7 @@
 
 ---
 
-## CLI-403-CERTIFICATION-ROBUSTEZ — 2026-07-11
+## CLI-403 — 2026-07-11
 **Feature: Suite de Robustez, Hardening de Bypass Auth y Comando Unificado de Certificación E2E**
 
 ### Cambios realizados:
