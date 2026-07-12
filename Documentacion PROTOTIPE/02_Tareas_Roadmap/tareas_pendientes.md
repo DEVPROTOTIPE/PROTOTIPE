@@ -1,8 +1,18 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 451 tareas completadas de 451 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 452 tareas completadas de 452 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-452: Remediación del Motor de Respaldos y Sincronización del .gitignore Maestro~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Remediamos el motor de respaldos eliminando las exclusiones de subproyectos del `.gitignore` raíz para permitir el respaldo físico completo del monorepo. Refactorizamos la estrategia de auto-merge en `git_backup.ps1` y `subproject_backup.ps1` para realizar un push directo `develop:main` a origin en lugar de forzar a ciegas la rama local, mitigando bloqueos y divergencias.
+  - Archivos:
+    - [`.gitignore`](file:///d:/PROTOTIPE/.gitignore) [MODIFY]
+    - [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+    - [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
 
 * **[x] ~~Tarea CLI-451: Desacoplamiento de Sandbox de Caracterización y Aislamiento de Entorno del CLI~~**
   - Estatus: Completada

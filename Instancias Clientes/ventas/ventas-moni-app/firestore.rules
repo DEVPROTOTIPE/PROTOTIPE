@@ -1,0 +1,148 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── HELPERS GLOBALES DE ACCESO ──────────────────────────────────
+    
+    // Verifica si la sesión pertenece al Administrador del sistema consultando Firestore
+    function isAdmin() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ─── REGLAS CORE POR COLECCIÓN ──────────────────────────────────
+
+    // 0. Aislamiento Multitenant de la Telemetría (Clientes Control)
+    // Evita lecturas abiertas no deseadas. Filtro estricto por matching de clientId y claims.
+    match /clientes_control/{clientId} {
+      allow read: if request.auth != null && (clientId == request.auth.token.clientId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // 1. Configuración Global de la Aplicación
+    match /config/{document} {
+      allow read: if true; // Lectura pública para inicializar la UI (temas, marca)
+      allow write: if isAdmin(); // Solo admin puede alterar configuraciones de marca
+    }
+
+    // 2. Base de Datos de Clientes y Perfiles
+    match /users/{userId} {
+      // Permitir la creación de perfil inicial para registros
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // Proteger lecturas y actualizaciones: solo el dueño o admin
+      allow read, update: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+      allow list: if isAdmin(); // Protege contra descargas masivas de números/nombres
+      allow delete: if isAdmin();
+
+      // Subcolecciones privadas (ej: Favoritos)
+      match /favorites/{favoriteId} {
+        allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+      }
+    }
+  }
+
+
+    // ─── FEATURE ORDERS (PEDIDOS RETAIL & MAYORISTAS) ────────────────
+    // ⚠️ CLASIFICACIÓN DE DISEÑO:
+    // Los pedidos creados directamente desde la aplicación cliente son BORRADORES NO CONFIABLES
+    // y están en estado [DISEÑADO / PENDIENTE DE BACKEND DE LA FEATURE].
+    // Mientras no exista validación server-side, no pueden considerarse pagados, aprobar créditos,
+    // descontar inventario de forma definitiva, ni certificar integridad financiera.
+    match /orders/{document} {
+      // Clientes autenticados anónima o telefónicamente crean pedidos
+      allow create: if request.auth != null 
+        && request.resource.data.keys().hasAll(['items', 'cliente', 'total', 'metodoPago', 'estado', 'ownerUid', 'createdAt', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['items', 'cliente', 'total', 'metodoPago', 'estado', 'ownerUid', 'createdAt', 'updatedAt', 'ocultoCliente'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.estado == 'pendiente'
+        && request.resource.data.total is number 
+        && request.resource.data.total > 0
+        && request.resource.data.items is list
+        && request.resource.data.items.size() > 0
+        && request.resource.data.items.size() <= 100 // Límite de ítems
+        && request.resource.data.createdAt == request.time;
+
+      // Lectura permitida solo para el dueño del pedido o administrador
+      allow read: if isAdmin() || (request.auth != null && resource.data.ownerUid == request.auth.uid);
+
+      // Actualización restringida: el cliente solo puede cancelar el pedido si está pendiente, o marcarlo como oculto
+      allow update: if isAdmin() || (
+        request.auth != null 
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.total == resource.data.total
+        && request.resource.data.items == resource.data.items
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'ocultoCliente', 'updatedAt'])
+        && (
+          (request.resource.data.estado == 'cancelado' && resource.data.estado == 'pendiente')
+          || (request.resource.data.ocultoCliente == true)
+        )
+      );
+
+      allow delete: if isAdmin();
+    }
+
+
+    // ─── FEATURE CREDITS (CRÉDITOS Y FIADOS) ──────────────────────────
+    match /credits/{document} {
+      allow read: if isAdmin() || (
+        request.auth != null && 
+        resource.data.clienteCelular != null &&
+        request.auth.token.phone_number == resource.data.clienteCelular
+      );
+      allow write, delete: if isAdmin();
+    }
+
+
+    // ─── FEATURE INVENTORY (PRODUCTOS Y CATEGORÍAS) ─────────────────
+    match /products/{document} {
+      allow read: if true; // Catálogo público
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['variantes', 'salesCount', 'updatedAt'])
+      );
+    }
+    match /categories/{document} {
+      allow read: if true;
+      allow write, delete: if isAdmin();
+    }
+
+
+    // ─── FEATURE NOTIFICATIONS (CENTRO DE NOTIFICACIONES) ────────────
+    match /notifications/{document} {
+      allow create: if true;
+      allow read: if isAdmin() || resource.data.recipientRole == 'client';
+      allow update: if isAdmin()
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+      allow delete: if isAdmin() 
+        || resource.data.recipientRole == 'client' 
+        || resource.data.recipientRole == 'vendedor' 
+        || resource.data.recipientRole == 'bodeguero' 
+        || resource.data.recipientRole == 'mensajero';
+    }
+
+    match /fcmTokens/{document} {
+      allow read: if isAdmin();
+      allow create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    match /clientNotifications/{document} {
+      allow read: if isAdmin() || (
+        request.auth != null && 
+        resource.data.clienteCelular != null &&
+        request.auth.token.phone_number == resource.data.clienteCelular
+      );
+      allow create: if true;
+      allow update: if isAdmin() || (
+        request.auth != null && 
+        resource.data.clienteCelular != null &&
+        request.auth.token.phone_number == resource.data.clienteCelular
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt'])
+      );
+      allow delete: if isAdmin();
+    }
+
+}

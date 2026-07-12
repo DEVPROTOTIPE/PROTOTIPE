@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "activeFeatures": [
+    "inventory",
+    "sales",
+    "orders",
+    "credits",
+    "billing",
+    "delivery"
+  ]
+}

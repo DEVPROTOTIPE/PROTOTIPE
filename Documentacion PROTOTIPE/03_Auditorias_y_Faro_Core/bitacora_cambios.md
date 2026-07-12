@@ -1,5 +1,19 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-452 — 2026-07-12
+**Feature: Remediación del Motor de Respaldos y Sincronización del .gitignore Maestro**
+
+### Cambios realizados:
+1. **Remoción de Exclusiones de Subproyectos:** Eliminadas las exclusiones de `Plantillas Core/`, `Instancias Clientes/`, `Central PROTOTIPE/`, y las plantillas en `templates/` del archivo `.gitignore` en la raíz de `PROTOTIPE`. Esto habilita al Git Maestro para indexar, respaldar y subir todos los archivos físicos de estos subproyectos cuando sus carpetas `.git` locales están temporalmente inactivas (ocultas como `.git-backup-temp`).
+2. **Refactorización de Auto-Merge a main:** Modificado el bloque de auto-merge en `git_backup.ps1` y `subproject_backup.ps1` para realizar un push directo `develop:main` en lugar de forzar localmente `main` y empujar con `-u`. Esto evita rechazos por divergencia local y previene fallos silenciosos. La rama local `main` sólo se actualiza a `develop` tras confirmarse el éxito del push remoto en GitHub.
+
+### Archivos modificados:
+- [`.gitignore`](file:///d:/PROTOTIPE/.gitignore) [MODIFY]
+- [`git_backup.ps1`](file:///d:/PROTOTIPE/git_backup.ps1) [MODIFY]
+- [`subproject_backup.ps1`](file:///d:/PROTOTIPE/subproject_backup.ps1) [MODIFY]
+
+---
+
 ## CLI-451 — 2026-07-12
 **Feature: Desacoplamiento de Sandbox de Caracterización y Aislamiento de Entorno del CLI**
 

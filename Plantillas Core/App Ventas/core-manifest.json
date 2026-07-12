@@ -1,0 +1,194 @@
+{
+  "coreKey": "ventas",
+  "coreName": "App Ventas",
+  "version": "1.0.0",
+  "categoryDocSection": "## 📂 Sección 5 — Estrategia Comercial y Levantamiento",
+  "featureFlags": [
+    {
+      "id": "creditsEnabled",
+      "label": "Créditos y Fiado",
+      "description": "Permite a los clientes fiar y abonar deudas mediante un timeline interactivo.",
+      "default": false
+    },
+    {
+      "id": "couponsEnabled",
+      "label": "Cupones de Descuento",
+      "description": "Sistema de cupones de descuento con confetti animado y validaciones.",
+      "default": false
+    },
+    {
+      "id": "claimsEnabled",
+      "label": "Garantías y Reclamaciones",
+      "description": "Habilita bandeja técnica para reportar daños y productos defectuosos.",
+      "default": false
+    },
+    {
+      "id": "wholesaleEnabled",
+      "label": "Precios de Mayoreo",
+      "description": "Descuentos automáticos al sobrepasar topes de cantidad por artículo.",
+      "default": false
+    },
+    {
+      "id": "deliveryEnabled",
+      "label": "Seguimiento de Domicilios",
+      "description": "Stepper dinámico de 4 estados con geolocalización de mensajeros.",
+      "default": false
+    },
+    {
+      "id": "commissionsEnabled",
+      "label": "Comisiones por Vendedor",
+      "description": "Cálculo comisional automático por cada ticket de venta concretado.",
+      "default": false
+    },
+    {
+      "id": "enableDianBilling",
+      "label": "Facturación Electrónica DIAN",
+      "description": "Módulo de conexión directa para reportes fiscales en caliente.",
+      "default": false
+    },
+    {
+      "id": "reservasEnabled",
+      "label": "Citas y Reservas",
+      "description": "Agenda interactiva con bloqueo de franjas horarias y asignación de técnicos.",
+      "default": false
+    },
+    {
+      "id": "posExpressScanner",
+      "label": "POS Express Scanner",
+      "description": "Lectura acelerada de códigos de barras integrada al panel de caja.",
+      "default": false
+    },
+    {
+      "id": "ordenesTrabajo",
+      "label": "Órdenes de Trabajo",
+      "description": "Seguimiento y control de equipos ingresados a servicio técnico.",
+      "default": false
+    }
+  ],
+  "scoringRules": {
+    "modules": {
+      "pos": 8,
+      "inventario": 6,
+      "credito": 5,
+      "agenda": 5,
+      "dian": 8
+    },
+    "integrations": {
+      "whatsapp": 3,
+      "pasarela": 5,
+      "dian": 6,
+      "impresora": 3
+    },
+    "offlinePoints": 5
+  },
+  "flagRecommendationRules": [
+    { "flag": "creditsEnabled", "field": "seccion15.obligatorios", "includes": "credito" },
+    { "flag": "couponsEnabled", "field": "seccion15.obligatorios", "includes": ["cupones", "fidelizacion"] },
+    { "flag": "claimsEnabled", "field": "seccion15.obligatorios", "includes": ["garantias", "reclamaciones"] },
+    { "flag": "wholesaleEnabled", "field": "seccion15.obligatorios", "includes": "mayoreo" },
+    { "flag": "wholesaleEnabled", "field": "seccion4.canales", "includes": "b2b" },
+    { "flag": "deliveryEnabled", "field": "seccion15.obligatorios", "includes": ["domicilio", "delivery"] },
+    { "flag": "commissionsEnabled", "field": "seccion15.obligatorios", "includes": "comisiones" },
+    { "flag": "commissionsEnabled", "field": "seccion6.roles.rol", "matchSub": "vendedor" },
+    { "flag": "enableDianBilling", "field": "seccion15.obligatorios", "includes": "dian" },
+    { "flag": "reservasEnabled", "field": "seccion15.obligatorios", "includes": ["agenda", "citas"] },
+    { "flag": "posExpressScanner", "field": "seccion15.obligatorios", "includes": "pos", "andIntegration": "impresora" },
+    { "flag": "ordenesTrabajo", "field": "seccion15.obligatorios", "includes": "ordenes" },
+    { "flag": "ordenesTrabajo", "field": "seccion3.sector", "matchSub": "servicio tecnico" }
+  ],
+  "componentMappings": [
+    {
+      "flag": "creditsEnabled",
+      "components": [
+        { "name": "Tarjeta de Pedido Admin", "technicalName": "OrderCard", "link": "Pedidos_y_Gestion/Tarjeta_Pedido_Admin/tarjeta_pedido_admin.md" },
+        { "name": "Sistema de Transacciones Atómicas", "technicalName": "InventoryTransactionService", "link": "Servicios_y_Firebase/Transacciones_Atomicas_Inventario/transacciones_atomicas_inventario.md" }
+      ]
+    },
+    {
+      "flag": "couponsEnabled",
+      "components": [
+        { "name": "Aplicador Animado de Cupones", "technicalName": "InteractiveCouponBadge", "link": "Formularios_y_UI/Interactive_Coupon_Badge/interactive_coupon_badge.md" },
+        { "name": "Motor Dinámico de Cupones", "technicalName": "couponService", "link": "Servicios_y_Firebase/Motor_Cupones/motor_cupones.md" }
+      ]
+    },
+    {
+      "flag": "deliveryEnabled",
+      "components": [
+        { "name": "Servicio de Gestión de Domicilios", "technicalName": "deliveryService", "link": "Servicios_y_Firebase/Gestion_Domicilios/gestion_domicilios.md" },
+        { "name": "Panel de Reparto de Domicilios", "technicalName": "DeliveryPanel", "link": "Paginas/Panel_Domicilio/panel_domicilio.md" }
+      ]
+    },
+    {
+      "flag": "reservasEnabled",
+      "components": [
+        { "name": "Selector de Fecha y Rangos", "technicalName": "DatePickerPremium", "link": "Formularios_y_UI/Calendario_Premium/calendario_premium.md" }
+      ]
+    },
+    {
+      "flag": "posExpressScanner",
+      "components": [
+        { "name": "POS Express Scanner", "technicalName": "posExpressScanner", "link": "Pedidos_y_Gestion/pos_express_scanner.md" }
+      ]
+    }
+  ],
+  "wizardSteps": [
+    {
+      "step": 7,
+      "title": "Problemas y Dolores",
+      "description": "Dolores operativos de retail y control de flujos físicos.",
+      "fields": [
+        { "id": "doloresCaja", "label": "Dolores en Caja y Cuadre", "type": "textarea", "placeholder": "Ej: descuadres constantes, falta de registro diario..." },
+        { "id": "doloresInventario", "label": "Dolores en Inventario y Stock", "type": "textarea", "placeholder": "Ej: mercancía perdida, desfases entre físico y sistema..." }
+      ]
+    },
+    {
+      "step": 13,
+      "title": "Integraciones Requeridas",
+      "description": "Conexiones externas del punto de venta.",
+      "fields": [
+        {
+          "id": "integraciones",
+          "label": "Selecciona las integraciones obligatorias",
+          "type": "checkbox_group",
+          "options": [
+            { "value": "whatsapp", "label": "WhatsApp Web / Cloud API" },
+            { "value": "pasarela", "label": "Pasarela de Pagos (Wompi/Bold)" },
+            { "value": "dian", "label": "Facturación Electrónica DIAN" },
+            { "value": "impresora", "label": "Impresora Térmica (POS)" },
+            { "value": "maps", "label": "Google Maps API (Domicilios)" }
+          ]
+        }
+      ]
+    },
+    {
+      "step": 15,
+      "title": "Requerimientos Técnicos Core",
+      "description": "Módulos y capacidades del Core de ventas a habilitar.",
+      "fields": [
+        {
+          "id": "obligatorios",
+          "label": "Módulos Core requeridos para la operación del cliente",
+          "type": "checkbox_group",
+          "options": [
+            { "value": "pos", "label": "Módulo POS Caja Express" },
+            { "value": "inventario", "label": "Gestor de Inventarios / Kárdex" },
+            { "value": "credito", "label": "Línea de Crédito & Saldos (Fiados)" },
+            { "value": "agenda", "label": "Agenda & Citas (Servicios)" },
+            { "value": "dian", "label": "Módulo DIAN Fiscal" },
+            { "value": "domicilio", "label": "Seguimiento de Reparto (Domicilios)" },
+            { "value": "cupones", "label": "Fidelización y Cupones" }
+          ]
+        }
+      ]
+    },
+    {
+      "step": 16,
+      "title": "Parametrización del Negocio",
+      "description": "Reglas comerciales específicas de retail y flujos monetarios.",
+      "fields": [
+        { "id": "minCompra", "label": "Monto de Compra Mínima (e-commerce)", "type": "number", "placeholder": "Ej: 50000" },
+        { "id": "requiereCreditos", "label": "¿Ofrece sistema de fiado/crédito?", "type": "select", "options": ["si", "no"] }
+      ]
+    }
+  ]
+}

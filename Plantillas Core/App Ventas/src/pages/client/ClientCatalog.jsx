@@ -1,0 +1,719 @@
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Search, SlidersHorizontal, PackageX, Sparkles, X, Tag, Loader2 } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useProducts, useProductsInfinite, useCategories } from '../../features/inventory'
+import { getCategoryIconComponent } from '../../constants/categoryIcons'
+import { useAds } from '../../hooks/useAds'
+import useAppConfigStore from '../../store/appConfigStore'
+import SmartHint from '../../components/client/guided/SmartHint'
+import ProductCard from '../../components/client/catalog/ProductCard'
+import WholesaleRequestModal from '../../components/client/catalog/WholesaleRequestModal'
+import ClientFilterModal from '../../components/client/catalog/ClientFilterModal'
+import CatalogBanner from '../../components/client/catalog/CatalogBanner'
+import Pagination from '../../components/ui/Pagination'
+import { SUPPORT_WHATSAPP } from '../../constants'
+import { fuzzyMatch } from '../../utils/search'
+import LazyImage from '../../components/ui/LazyImage'
+import ProductCardSkeleton from '../../components/ui/ProductCardSkeleton'
+
+/**
+ * Retorna el botón de acción secundaria (al por mayor / por encargo) de una tarjeta de producto.
+ * - Si wholesaleSettings.enabled === false: no se muestra ningún botón.
+ * - Si el producto está agotado: muestra "Pedir por encargo" (independiente del flag de mayoreo).
+ * - Si hay stock: muestra "Solicitar al por mayor".
+ */
+function WholesaleButton({ product, wholesaleSettings, onRequest }) {
+  if (product.isTemporal) return null
+
+  const wholesaleEnabled = wholesaleSettings?.enabled ?? true
+  const totalStock = product.variantes?.reduce((sum, v) => sum + (v.stock || 0), 0) ?? 0
+  const isOutOfStock = totalStock <= 0
+
+  // Si no hay stock ni el módulo está activo: nada
+  if (!wholesaleEnabled && !isOutOfStock) return null
+  // Si está agotado pero el módulo está desactivado: tampoco (no queremos encargos si el admin lo deshabilitó)
+  if (!wholesaleEnabled) return null
+
+  const isEncargo = isOutOfStock
+
+  return (
+    <button
+      onClick={() => onRequest({ product, type: isEncargo ? 'encargo' : 'mayorista' })}
+      className={`mt-2 text-xs font-bold transition-all py-1.5 text-center bg-surface rounded-xl border hover:scale-102 active:scale-98 cursor-pointer ${
+        isEncargo
+          ? 'text-orange-500 border-orange-200 hover:border-orange-500 hover:bg-orange-50/10'
+          : 'text-primary border-app hover:border-primary/50'
+      }`}
+      style={{ borderRadius: 'var(--radius-base)' }}
+    >
+      {isEncargo ? 'Pedir por encargo' : 'Solicitar al por mayor'}
+    </button>
+  )
+}
+
+export default function ClientCatalog() {
+  const navigate = useNavigate()
+  const { catalogFilters, catalogLayout, wholesaleSettings, whatsappAdmin } = useAppConfigStore()
+  
+  // Estado local
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategoryId, setSelectedCategoryId] = useState('all')
+  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
+  // Modales
+  const [wholesaleRequest, setWholesaleRequest] = useState(null) // { product, type: 'mayorista' | 'encargo' }
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
+  const [activeFilters, setActiveFilters] = useState({})
+  const [promoModalAd, setPromoModalAd] = useState(null)
+
+  const hasActiveFilters = useMemo(() => {
+    return Object.values(activeFilters).some(arr => arr && arr.length > 0)
+  }, [activeFilters])
+
+  // Datos paginados y perezosos de Firestore
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isLoadingProducts
+  } = useProductsInfinite({
+    onlyActive: true,
+    categoryId: selectedCategoryId,
+    pageSize: 12
+  })
+
+  // Aplanar todos los productos de las distintas páginas cargadas y remover duplicados
+  const allProducts = useMemo(() => {
+    const products = data?.pages?.flatMap(page => page.products) ?? []
+    const seen = new Set()
+    return products.filter(p => {
+      if (!p?.id || seen.has(p.id)) return false
+      seen.add(p.id)
+      return true
+    })
+  }, [data])
+
+  const { data: allCategories = [] } = useCategories()
+  const { data: ads = [] } = useAds()
+
+  // Intersection Observer para scroll infinito
+  const observerRef = useRef(null)
+  const loadMoreRef = useCallback(
+    (node) => {
+      if (isLoadingProducts) return
+      if (observerRef.current) observerRef.current.disconnect()
+
+      const isSearchingOrFiltering = searchTerm.trim() !== '' || hasActiveFilters
+
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage && !isSearchingOrFiltering) {
+          fetchNextPage()
+        }
+      })
+
+      if (node) observerRef.current.observe(node)
+    },
+    [isLoadingProducts, hasNextPage, isFetchingNextPage, fetchNextPage, searchTerm, hasActiveFilters]
+  )
+
+
+
+  // Filtrar anuncios activos en tiempo real en el frontend
+  const activeAds = useMemo(() => {
+    return ads.filter(ad => {
+      if (!ad.active) return false
+      const today = new Date().toISOString().split('T')[0]
+      return today >= ad.startDate && today <= ad.endDate
+    })
+  }, [ads])
+
+  // Procesar productos reales (aplicar descuentos) e inyectar productos temporales
+  const processedProducts = useMemo(() => {
+    // 1. Mapear productos reales y aplicarles descuento de promoción vinculada activa
+    const realProductsMapped = allProducts.map(p => {
+      const matchedCat = allCategories.find(c => c.id === p.categoriaId)
+      const baseProduct = {
+        ...p,
+        categoria: matchedCat ? matchedCat.nombre : p.categoria
+      }
+
+      const ad = activeAds.find(a => a.type === 'inventory' && a.productId === p.id)
+      if (ad) {
+        const discountValue = Number(ad.discountValue)
+        let precioPromocional = baseProduct.precioBase
+        if (ad.discountType === 'percentage') {
+          precioPromocional = baseProduct.precioBase - (baseProduct.precioBase * discountValue) / 100
+        } else {
+          precioPromocional = baseProduct.precioBase - discountValue
+        }
+        precioPromocional = Math.max(0, precioPromocional)
+        
+        return {
+          ...baseProduct,
+          precioPromo: precioPromocional,
+          tienePromocion: true,
+          promocion: ad,
+        }
+      }
+
+      // Fallback: Descuento directo del producto
+      if (p.discountActive && Number(p.discountValue) > 0) {
+        const dVal = Number(p.discountValue)
+        let precioPromocional = baseProduct.precioBase
+        if (p.discountType === 'percentage') {
+          precioPromocional = baseProduct.precioBase - (baseProduct.precioBase * dVal) / 100
+        } else {
+          precioPromocional = baseProduct.precioBase - dVal
+        }
+        precioPromocional = Math.max(0, precioPromocional)
+
+        return {
+          ...baseProduct,
+          precioPromo: precioPromocional,
+          tienePromocion: true,
+          promocion: {
+            discountType: p.discountType || 'percentage',
+            discountValue: dVal,
+            title: 'Descuento Especial'
+          }
+        }
+      }
+
+      return baseProduct
+    })
+
+    // 2. Crear productos temporales de promociones personalizadas
+    const temporalProducts = activeAds
+      .filter(ad => ad.type === 'custom' && ad.isTemporalProduct)
+      .map(ad => ({
+        id: `temp-${ad.id}`,
+        nombre: ad.title,
+        descripcion: ad.description,
+        categoria: ad.category || 'Combos',
+        categoriaId: 'combos-temporales',
+        precioBase: ad.price || 0,
+        precioPromo: ad.promoPrice || 0,
+        tienePromocion: true,
+        imageUrl: ad.image || ad.banner,
+        activo: true,
+        destacado: true,
+        isTemporal: true,
+        promocion: ad,
+        variantes: [{ id: `var-temp-${ad.id}`, stock: 9999, talla: '', color: '' }] // dummy variant
+      }))
+
+    // Unir productos y combos
+    const combined = [...realProductsMapped, ...temporalProducts]
+
+    // 3. Ordenar para dar prioridad visual a promociones
+    return combined.sort((a, b) => {
+      const aPromo = a.tienePromocion ? 1 : 0
+      const bPromo = b.tienePromocion ? 1 : 0
+      return bPromo - aPromo
+    })
+  }, [allProducts, activeAds, allCategories])
+
+  // Categorías activas para el grid de navegación (todas las que el admin creó y activó)
+  const activeCategories = useMemo(() => {
+    const cats = allCategories.filter(c => c.activa)
+    const hasTemp = processedProducts.some(p => p.isTemporal)
+    if (hasTemp) {
+      return [...cats, { id: 'combos-temporales', nombre: 'Ofertas y Combos', activa: true }]
+    }
+    return cats
+  }, [processedProducts, allCategories])
+
+  // Determinar categorías visibles para mantener el grid compacto por defecto
+  const visibleCategories = useMemo(() => {
+    if (isCategoriesExpanded || activeCategories.length <= 3) {
+      return activeCategories
+    }
+    return activeCategories.slice(0, 3)
+  }, [activeCategories, isCategoriesExpanded])
+
+  // Filtrado final de productos (por término de búsqueda y categoría seleccionada)
+  const filteredProducts = useMemo(() => {
+    let result = processedProducts
+
+    if (selectedCategoryId !== 'all') {
+      result = result.filter(p => p.categoriaId === selectedCategoryId)
+    }
+
+    if (searchTerm.trim()) {
+      result = result.filter(p => {
+        const inName = fuzzyMatch(p.nombre, searchTerm)
+        const inDesc = fuzzyMatch(p.descripcion, searchTerm)
+        let inAttrs = false
+        if (p.atributos) {
+          inAttrs = Object.values(p.atributos).some(val => 
+            fuzzyMatch(String(val), searchTerm)
+          )
+        }
+        return inName || inDesc || inAttrs
+      })
+    }
+
+    // Aplicación de Filtros Avanzados y Variantes con Lógica OR Global Absoluto
+    const hasFiltersActive = Object.values(activeFilters).some(arr => arr && arr.length > 0)
+    if (hasFiltersActive) {
+      result = result.filter(p => {
+        // 1. Coincidencia en atributos dinámicos (Marca, etc.)
+        let matchAttr = false
+        catalogFilters.customAttributes?.forEach(attr => {
+          if (activeFilters[attr.id]?.length > 0) {
+            const val = p.atributos?.[attr.id]
+            if (val && activeFilters[attr.id].includes(val)) {
+              matchAttr = true
+            }
+          }
+        })
+
+        // 2. Coincidencia en tallas de variante
+        let matchSize = false
+        if (activeFilters.sizes?.length > 0 && p.variantes && p.variantes.length > 0) {
+          matchSize = p.variantes.some(v => activeFilters.sizes.includes(v.talla))
+        }
+
+        // 3. Coincidencia en colores de variante
+        let matchColor = false
+        if (activeFilters.colors?.length > 0 && p.variantes && p.variantes.length > 0) {
+          matchColor = p.variantes.some(v => activeFilters.colors.includes(v.color))
+        }
+
+        // El producto pasa si cumple AL MENOS UNO de los filtros seleccionados (OR Absoluto)
+        return matchAttr || matchSize || matchColor
+      })
+    }
+
+    return result
+  }, [processedProducts, searchTerm, selectedCategoryId, catalogFilters, activeFilters])
+
+  // Manejar clics de CTA y banners
+  const handleAdAction = (action) => {
+    if (!action) return
+    console.log("[ClientCatalog] handleAdAction invoked with action:", action)
+
+    // Si es un producto real o vinculación del inventario, abrimos su detalle de catálogo directo
+    if (action.type === 'product' || action.type === 'modal' || (action.ad && action.ad.type === 'inventory')) {
+      const targetProductId = action.value?.id || action.ad?.productId
+      const prod = processedProducts.find(p => p.id === targetProductId)
+      if (prod) {
+        if (prod.isTemporal) {
+          console.log("[ClientCatalog] Opening temporal product promo modal")
+          setPromoModalAd(prod.promocion)
+        } else {
+          console.log("[ClientCatalog] Navigating to normal product detail page:", prod.nombre)
+          navigate('/tienda/producto/' + prod.id)
+        }
+        return
+      } else {
+        console.warn("[ClientCatalog] Product not found for ID:", targetProductId)
+      }
+    }
+
+    // Si viene del banner y es un anuncio personalizado o modal, forzamos abrir el modal de anuncio/promoción
+    if (action.fromBanner && action.ad && action.ad.type !== 'inventory') {
+      console.log("[ClientCatalog] Ad clicked from banner: forcing promo modal view")
+      setPromoModalAd(action.ad)
+      return
+    }
+    
+    if (action.type === 'whatsapp') {
+      const cleanPhone = action.value ? action.value.replace(/\D/g, '') : (whatsappAdmin || SUPPORT_WHATSAPP).replace(/\D/g, '')
+      const message = encodeURIComponent(`¡Hola! Estoy interesado en la promoción: *${action.ad?.title || 'Anuncio'}*`)
+      window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank')
+    } else if (action.type === 'url') {
+      if (action.value) {
+        const url = action.value.startsWith('http') ? action.value : `https://${action.value}`
+        window.open(url, '_blank')
+      }
+    } else if (action.type === 'category') {
+      const searchVal = (action.value || '').trim().toLowerCase()
+      const cat = activeCategories.find(c => 
+        c.id === action.value || 
+        c.id === searchVal || 
+        c.nombre.toLowerCase().trim() === searchVal
+      )
+      if (cat) {
+        setSelectedCategoryId(cat.id)
+      } else {
+        setSelectedCategoryId('all')
+      }
+    } else {
+      // Acción por defecto (modal, vacía, none, etc.): abrimos el modal promocional para máxima interactividad
+      if (action.ad) {
+        console.log("[ClientCatalog] Default action matches: opening promo modal for ad")
+        setPromoModalAd(action.ad)
+      }
+    }
+  }
+
+  return (
+    <div className="pb-6">
+
+      {/* ─── HEADER / BUSCADOR (Sticky Glassmorphic) ─────────────────── */}
+      <div className="sticky top-0 z-20 md:z-40 bg-app md:bg-app/85 md:backdrop-blur-xl border-none pt-3 pb-3 md:py-3 px-4 md:px-8 transition-all duration-300 shadow-sm md:shadow-none">
+        <div className="max-w-7xl mx-auto">
+          
+          {/* Barra de búsqueda */}
+          <div className="relative flex items-center w-full">
+            <div className="absolute left-4 flex items-center justify-center pointer-events-none text-muted">
+              <Search size={18} className="opacity-75" />
+            </div>
+            <input
+              id="search-input"
+              name="search"
+              type="text"
+              placeholder="¿Qué estás buscando hoy?"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full h-12 pl-11 pr-14 rounded-2xl bg-surface/90 border border-app shadow-inner text-app placeholder-muted/60 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 focus:shadow-[0_0_20px_rgba(var(--color-primary-rgb),0.05)] transition-all duration-300 text-sm font-medium"
+            />
+            {/* Botón de filtros avanzado */}
+            <div className="absolute right-2.5 flex items-center justify-center">
+              <button 
+                onClick={() => setIsFilterModalOpen(true)}
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-muted hover:bg-surface-2 transition-colors relative hover:scale-105 active:scale-95"
+              >
+                <SlidersHorizontal size={16} className={hasActiveFilters ? "text-primary" : ""} />
+                {hasActiveFilters && (
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary border-2 border-surface" />
+                )}
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ─── BANNER DEL CATÁLOGO ────────────────────────────────────── */}
+      <CatalogBanner onAction={handleAdAction} />
+
+      {/* ─── GRILLA DE PRODUCTOS ────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-6">
+
+        {/* ─── CATEGORÍAS COMPACTAS (antes de los productos) ─────── */}
+        {activeCategories.length > 0 && (
+          <div className="mb-5">
+            {/* Header de categorías */}
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-bold text-muted uppercase tracking-widest">Categorías</h3>
+              <div className="flex items-center gap-3">
+                {selectedCategoryId !== 'all' && (
+                  <button
+                    onClick={() => setSelectedCategoryId('all')}
+                    className="text-[11px] font-semibold text-primary flex items-center gap-1 active:scale-95 transition-transform"
+                  >
+                    Limpiar <X size={11} />
+                  </button>
+                )}
+                {activeCategories.length > 3 && (
+                  <button
+                    onClick={() => setIsCategoriesExpanded(v => !v)}
+                    className="text-[11px] font-semibold text-muted hover:text-primary transition-colors sm:hidden"
+                  >
+                    {isCategoriesExpanded ? 'Ver menos' : `Ver todas (${activeCategories.length})`}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Grid de tarjetas cuadradas de categorías en mobile / chips horizontales en desktop */}
+            <div className="flex overflow-x-auto pb-3 pt-1 scrollbar-none w-full gap-2 sm:gap-2.5 sm:flex-wrap items-center">
+              {/* Tarjeta "Todos" */}
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedCategoryId('all')}
+                className={`relative h-10 px-5 shrink-0 flex items-center justify-center gap-2 rounded-full border text-xs font-extrabold transition-colors duration-300 select-none z-10 cursor-pointer ${
+                  selectedCategoryId === 'all'
+                    ? 'text-white border-transparent'
+                    : 'bg-surface text-muted hover:text-app border-app hover:bg-surface-2'
+                }`}
+              >
+                {selectedCategoryId === 'all' && (
+                  <motion.div
+                    layoutId="activeCategoryBg"
+                    className="absolute inset-0 bg-primary rounded-full -z-10 shadow-xs shadow-primary/20"
+                    transition={{ type: 'spring', stiffness: 350, damping: 26 }}
+                  />
+                )}
+                <Tag 
+                  className={`w-3.5 h-3.5 transition-colors duration-300 ${
+                    selectedCategoryId === 'all' ? 'text-white' : 'text-primary'
+                  }`} 
+                />
+                <span>Todos</span>
+              </motion.button>
+
+              {/* Tarjetas por categoría */}
+              {activeCategories.map((cat) => {
+                const IconComponent = getCategoryIconComponent(cat.iconName)
+                const isSelected = selectedCategoryId === cat.id
+                return (
+                  <motion.button
+                    key={cat.id}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSelectedCategoryId(cat.id)}
+                    className={`relative h-10 px-5 shrink-0 flex items-center justify-center gap-2 rounded-full border text-xs font-extrabold transition-colors duration-300 select-none z-10 cursor-pointer ${
+                      isSelected
+                        ? 'text-white border-transparent'
+                        : 'bg-surface text-muted hover:text-app border-app hover:bg-surface-2'
+                    }`}
+                  >
+                    {isSelected && (
+                      <motion.div
+                        layoutId="activeCategoryBg"
+                        className="absolute inset-0 bg-primary rounded-full -z-10 shadow-xs shadow-primary/20"
+                        transition={{ type: 'spring', stiffness: 350, damping: 26 }}
+                      />
+                    )}
+                    <IconComponent 
+                      className={`w-3.5 h-3.5 transition-colors duration-300 ${
+                        isSelected ? 'text-white' : 'text-primary'
+                      }`} 
+                    />
+                    <span>{cat.nombre}</span>
+                  </motion.button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {isLoadingProducts ? (
+          <div className={
+            catalogLayout === 'list' 
+              ? "flex flex-col gap-3" 
+              : catalogLayout === 'grid3' 
+                ? "grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-4" 
+                : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"
+          }>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          hasNextPage ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+              <div className="w-16 h-16 bg-surface-2 rounded-full flex items-center justify-center mb-4">
+                <Search size={24} className="text-muted" />
+              </div>
+              <h3 className="text-base font-bold text-app mb-1">Sin coincidencias en esta página</h3>
+              <p className="text-muted text-xs max-w-sm mb-4">
+                No hay productos cargados que coincidan con tu búsqueda o filtros. Puedes buscar en el resto del catálogo.
+              </p>
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="px-6 h-11 bg-primary text-white font-bold text-xs rounded-xl hover:opacity-90 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                style={{ borderRadius: 'var(--radius-base)' }}
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Buscando...
+                  </>
+                ) : (
+                  'Buscar en el resto del catálogo'
+                )}
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+              <div className="w-20 h-20 bg-surface-2 rounded-full flex items-center justify-center mb-4">
+                <PackageX size={32} className="text-muted" />
+              </div>
+              <h3 className="text-lg font-bold text-app mb-1">No encontramos productos</h3>
+              <p className="text-muted text-sm max-w-sm">
+                Intenta buscar con otras palabras o selecciona una categoría diferente.
+              </p>
+            </div>
+          )
+        ) : (
+          <>
+            <div className={
+              catalogLayout === 'list' 
+                ? "flex flex-col gap-3 md:gap-4" 
+                : catalogLayout === 'grid3' 
+                  ? "grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-4" 
+                  : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"
+            }>
+              {filteredProducts.map(product => (
+                <div
+                  key={product.id}
+                  className="flex flex-col animate-fade-in"
+                >
+                  <ProductCard 
+                    product={product} 
+                    onOpenDetail={(prod) => {
+                      if (prod.isTemporal) {
+                        setPromoModalAd(prod.promocion)
+                      } else {
+                        navigate('/tienda/producto/' + prod.id)
+                      }
+                    }} 
+                    layout={catalogLayout}
+                  />
+                  <WholesaleButton
+                    product={product}
+                    wholesaleSettings={wholesaleSettings}
+                    onRequest={setWholesaleRequest}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Elemento centinela para scroll infinito */}
+            {hasNextPage && (
+              (searchTerm.trim() !== '' || hasActiveFilters) ? (
+                <div className="flex flex-col items-center justify-center py-6 gap-2">
+                  <button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    className="px-6 h-11 bg-surface border border-primary text-primary font-bold text-xs rounded-xl hover:bg-primary/5 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                    style={{ borderRadius: 'var(--radius-base)' }}
+                  >
+                    {isFetchingNextPage ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Buscando en la siguiente página...
+                      </>
+                    ) : (
+                      'Buscar más en el catálogo completo'
+                    )}
+                  </button>
+                  <p className="text-[10px] text-muted font-medium">
+                    Las búsquedas y filtros se aplican sobre los productos cargados. Haz clic para cargar más.
+                  </p>
+                </div>
+              ) : (
+                <div ref={loadMoreRef} className="flex justify-center items-center py-10 gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <span className="text-sm text-muted font-medium">Cargando más productos...</span>
+                </div>
+              )
+            )}
+
+            {!hasNextPage && filteredProducts.length > 0 && (
+              <div className="text-center py-12 text-xs text-muted font-medium tracking-wide">
+                ✨ Has llegado al final del catálogo
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* ─── MODALES ────────────────────────────────────────────────── */}
+      <WholesaleRequestModal
+        product={wholesaleRequest?.product}
+        type={wholesaleRequest?.type}
+        isOpen={!!wholesaleRequest}
+        onClose={() => setWholesaleRequest(null)}
+      />
+
+      <ClientFilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        allProducts={allProducts}
+        currentFilters={activeFilters}
+        onApplyFilters={setActiveFilters}
+      />
+
+      {/* ─── MODAL PROMOCIONAL PERSONALIZADO (CTA MODAL / PRODUCTO TEMPORAL) ─── */}
+      <AnimatePresence>
+        {promoModalAd && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setPromoModalAd(null)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-surface rounded-3xl shadow-2xl overflow-hidden border border-app z-10"
+              style={promoModalAd.colors?.bg ? { background: promoModalAd.colors.bg } : {}}
+            >
+              {/* Imagen/Banner */}
+              {(promoModalAd.banner || promoModalAd.image) && (
+                <div className="w-full h-48 bg-surface-2 relative">
+                  <LazyImage
+                    src={promoModalAd.banner || promoModalAd.image}
+                    alt={promoModalAd.title}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                </div>
+              )}
+
+              {/* Botón Cerrar */}
+              <button
+                onClick={() => setPromoModalAd(null)}
+                className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md hover:bg-black/60 transition-colors z-20"
+              >
+                <X size={18} />
+              </button>
+
+              {/* Contenido */}
+              <div className="p-6 space-y-4" style={promoModalAd.colors?.text ? { color: promoModalAd.colors.text } : {}}>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-primary/20 text-primary-soft px-2.5 py-1 rounded-full w-max border border-primary/20">
+                    {promoModalAd.category || 'Promoción'}
+                  </span>
+                  <h3 className="text-xl font-extrabold text-app mt-3">
+                    {promoModalAd.title}
+                  </h3>
+                </div>
+
+                <p className="text-sm text-muted leading-relaxed">
+                  {promoModalAd.description}
+                </p>
+
+                {/* Precios si es producto temporal */}
+                {promoModalAd.isTemporalProduct && (
+                  <div className="flex items-center gap-3 p-3 bg-surface-2/40 backdrop-blur-sm rounded-2xl border border-app w-max">
+                    <p className="text-sm text-muted line-through font-semibold">
+                      ${promoModalAd.price?.toLocaleString()}
+                    </p>
+                    <p className="text-base font-black text-primary">
+                      ${promoModalAd.promoPrice?.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+
+                {/* Botón de Acción CTA */}
+                <button
+                  onClick={() => {
+                    handleAdAction({
+                      type: promoModalAd.ctaAction,
+                      value: promoModalAd.ctaValue,
+                      ad: promoModalAd
+                    })
+                    setPromoModalAd(null)
+                  }}
+                  className="w-full h-12 bg-primary text-white rounded-2xl font-bold text-sm shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2"
+                  style={{ borderRadius: 'var(--radius-base)' }}
+                >
+                  {promoModalAd.ctaText || 'Aprovechar Oferta'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}

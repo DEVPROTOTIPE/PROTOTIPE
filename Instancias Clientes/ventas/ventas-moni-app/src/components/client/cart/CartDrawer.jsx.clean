@@ -1,0 +1,500 @@
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
+import { X, Trash2, ShoppingBag, ShoppingCart, ArrowRight, Image as ImageIcon, Minus, Plus } from 'lucide-react'
+import { formatCurrency, truncate } from '../../../utils/formatters'
+import useCartStore from '../../../store/cartStore'
+import useGuidedStore from '../../../store/guidedStore'
+import CheckoutModal from '../checkout/CheckoutModal'
+import SmartHint from '../guided/SmartHint'
+import useAppConfigStore from '../../../store/appConfigStore'
+import useAuthStore from '../../../store/authStore'
+import ProductDetailModal from '../catalog/ProductDetailModal'
+import QuantitySelector from '../../ui/QuantitySelector'
+
+export default function CartDrawer() {
+  const { isOpen, closeCart, items, addItem, removeItem, deleteItem, getTotal } = useCartStore()
+  const { hasCompletedStep, markStepCompleted } = useGuidedStore()
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
+  const navigate = useNavigate()
+
+  // Estados del recomendador comercial
+  const { commercialOptimization } = useAppConfigStore()
+  const { user, role } = useAuthStore()
+  const [recommendedProducts, setRecommendedProducts] = useState([])
+  const [loadingRecs, setLoadingRecs] = useState(false)
+  const [selectedProductDetail, setSelectedProductDetail] = useState(null)
+
+  const optEnabled = commercialOptimization?.enabled === true
+  const cartRecsEnabled = optEnabled && commercialOptimization?.tools?.cartRecommendations?.enabled !== false
+  const historyRecsEnabled = optEnabled && commercialOptimization?.tools?.historyRecommendations?.enabled !== false
+  const recsTitle = commercialOptimization?.tools?.cartRecommendations?.title || 'Recomendado para ti'
+  
+  const isClient = role === 'client'
+  const clientPhone = isClient && user?.celular
+
+  useEffect(() => {
+    if (!isOpen) {
+      // Solo limpiar al CERRAR, no al inicio de un re-fetch
+      setRecommendedProducts([])
+      return
+    }
+    if (!cartRecsEnabled && !historyRecsEnabled) return
+
+    let isMounted = true
+    const fetchRecs = async () => {
+      // NO se limpia recommendedProducts aquÃ­ para evitar el parpadeo/desapariciÃ³n
+      setLoadingRecs(true)
+      try {
+        const { getProducts } = await import('../../../features/inventory/services/inventoryService')
+        const allProducts = await getProducts(true)
+
+        if (!isMounted) return
+
+        const currentItems = useCartStore.getState().items
+        const cartProductIds = currentItems.map(item => item.productId)
+
+        let historyCategories = []
+        if (historyRecsEnabled && clientPhone) {
+          const { getClientOrders } = await import('../../../services/orderService')
+          const orders = await getClientOrders(clientPhone)
+          const categories = new Set()
+          orders.forEach(order => {
+            order.items?.forEach(item => {
+              const prod = allProducts.find(p => p.id === item.productId)
+              if (prod?.categoria) categories.add(prod.categoria)
+            })
+          })
+          historyCategories = Array.from(categories)
+        }
+
+        const candidates = allProducts.filter(p => {
+          if (cartProductIds.includes(p.id)) return false
+          const isOutOfStock = (p.variantes || []).length > 0
+            ? (p.variantes || []).every(v => (v.stock || 0) <= 0)
+            : (p.stock !== undefined ? p.stock <= 0 : true)
+          return !isOutOfStock
+        })
+
+        const cartCategories = Array.from(new Set(
+          currentItems.map(item => {
+            const prod = allProducts.find(p => p.id === item.productId)
+            return prod?.categoria
+          }).filter(Boolean)
+        ))
+
+        const scoredCandidates = candidates.map(p => {
+          let score = 0
+          if (cartCategories.includes(p.categoria)) score += 100
+          if (historyCategories.includes(p.categoria)) score += 50
+          if (p.salesCount && p.salesCount > 0) score += Math.min(p.salesCount, 30)
+          if (p.tienePromocion && p.precioPromo < p.precioBase) score += 20
+          if (p.destacado === true) score += 10
+          return { product: p, score }
+        })
+
+        scoredCandidates.sort((a, b) => b.score - a.score)
+        if (isMounted) setRecommendedProducts(scoredCandidates.slice(0, 6).map(sc => sc.product))
+      } catch (err) {
+        console.error('Error fetching recommendations:', err)
+      } finally {
+        if (isMounted) setLoadingRecs(false)
+      }
+    }
+
+    fetchRecs()
+    return () => { isMounted = false }
+  }, [isOpen, cartRecsEnabled, historyRecsEnabled, clientPhone])
+
+  const handleContinueShopping = () => {
+    closeCart()
+    navigate('/tienda/catalogo')
+  }
+
+  const handleCheckoutClick = () => {
+    // Guided Mode
+    markStepCompleted('view_cart')
+    
+    closeCart()
+    setIsCheckoutOpen(true)
+  }
+
+  const handleViewDetail = (product) => {
+    if (product.isTemporal) {
+      setSelectedProductDetail(product)
+    } else {
+      closeCart()
+      navigate(`/tienda/producto/${product.id}`, { state: { fromCart: true } })
+    }
+  }
+
+  return (
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <div className="fixed inset-0 z-50 flex justify-end">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              onClick={closeCart}
+              className="absolute inset-0 bg-black/50"
+            />
+
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ ease: [0.25, 1, 0.5, 1], duration: 0.35 }}
+              className="relative w-full max-w-md bg-surface h-[100dvh] shadow-2xl flex flex-col will-change-transform overflow-hidden"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b-2 border-gray-100 bg-surface z-10 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                    <ShoppingBag size={20} />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">Tu Carrito</h2>
+                </div>
+                <button
+                  onClick={closeCart}
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Contenido */}
+              <div className="flex-1 overflow-y-auto p-6 bg-app pb-[172px]">
+                {items.length === 0 ? (
+                  <div className="py-8 flex flex-col items-center justify-center text-center">
+                    <div className="w-24 h-24 bg-surface rounded-full flex items-center justify-center mb-6 border border-app shadow-sm">
+                      <ShoppingBag size={40} className="text-muted opacity-50" />
+                    </div>
+                    <h3 className="text-xl font-bold text-app mb-2">Tu carrito estÃ¡ vacÃ­o</h3>
+                    <p className="text-muted max-w-xs">
+                      AÃºn no has agregado productos. Explora nuestro catÃ¡logo y encuentra algo que te guste.
+                    </p>
+
+                    <div className="relative w-full max-w-[280px] mt-2">
+                      <SmartHint 
+                        stepId="cart_empty" 
+                        message="Agrega productos para comenzar tu pedido." 
+                        position="bottom" 
+                        delay={500} 
+                      />
+                    </div>
+                    <button
+                      onClick={handleContinueShopping}
+                      className="mt-8 bg-transparent border-none text-gray-400 font-bold text-sm tracking-wide uppercase transition-colors hover:text-gray-700 active:scale-95"
+                    >
+                      Seguir Comprando
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {items.map((item) => (
+                      <div key={`${item.productId}-${item.variantId}`} className="bg-white rounded-2xl p-2.5 pr-3.5 border border-gray-500/5 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.04)] flex gap-3.5 items-center relative">
+                        {/* Img */}
+                        <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-gray-50 border border-gray-100">
+                          {item.imageUrl ? (
+                            <img src={item.imageUrl} alt={item.nombre} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted"><ImageIcon size={18} /></div>
+                          )}
+                        </div>
+                        
+                        {/* Info */}
+                        <div className="flex-1 flex flex-col gap-0.5">
+                          <div>
+                            <h4 className="font-bold text-gray-900 text-sm leading-snug pr-6">{truncate(item.nombre, 32)}</h4>
+                            <p className="text-[10px] text-muted mt-0.5 font-medium">
+                              {item.talla && `Talla ${item.talla}`} {item.talla && item.color && 'Â·'} {item.color && item.color}
+                            </p>
+                          </div>
+                          
+                          <div className="flex justify-between items-end mt-1.5">
+                            <p className="text-primary font-black text-sm leading-none">
+                              {formatCurrency(item.precio * item.cantidad)}
+                            </p>
+                            
+                            {/* Contador de Cantidad Refinado */}
+                            <QuantitySelector
+                              value={item.cantidad}
+                              size="sm"
+                              onChange={(newQty) => {
+                                const diff = newQty - item.cantidad
+                                if (diff > 0) {
+                                  addItem({ productId: item.productId, variantId: item.variantId }, diff)
+                                } else if (diff < 0) {
+                                  removeItem(item.productId, item.variantId, Math.abs(diff))
+                                }
+                              }}
+                              min={1}
+                              max={item.maxStock || 10}
+                              className="shrink-0"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Eliminar TODO el stack de esa variante */}
+                        <button
+                          onClick={() => deleteItem(item.productId, item.variantId)}
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all opacity-50 hover:opacity-100 absolute top-2 right-2"
+                          title="Eliminar"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Recomendaciones en Carrito / Historial */}
+                {cartRecsEnabled && (recommendedProducts.length > 0 || loadingRecs) && (
+                  <div className="mt-6 border-t border-app pt-4 shrink-0">
+                    <h3 className="text-sm font-extrabold text-app mb-4 flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <span className="relative flex">
+                          <span className="w-2 h-2 rounded-full bg-primary animate-ping absolute" />
+                          <span className="w-2 h-2 rounded-full bg-primary relative" />
+                        </span>
+                        {recsTitle}
+                      </span>
+                      <span className="text-[10px] bg-gradient-to-r from-primary/20 to-primary/10 text-primary px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border border-primary/20">
+                        Solo para ti
+                      </span>
+                    </h3>
+
+                    {loadingRecs && recommendedProducts.length === 0 ? (
+                      /* Skeleton Loader */
+                      <div className="flex gap-3 pb-2">
+                        {[1, 2, 3].map(i => (
+                          <div key={i} className="w-36 shrink-0 rounded-2xl overflow-hidden bg-surface animate-pulse">
+                            <div className="w-full h-28 bg-gray-200 dark:bg-gray-700" />
+                            <div className="p-2.5 space-y-2">
+                              <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full w-4/5" />
+                              <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full w-3/5" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <PairedCarousel
+                        products={recommendedProducts}
+                        onAddToCart={(product) => {
+                          const isPromo = product.tienePromocion && product.precioPromo < product.precioBase
+                          const price = isPromo ? product.precioPromo : product.precioBase
+                          const vars = product.variantes?.filter(v => v.stock > 0) || []
+                          const variant = vars[0] || (product.variantes && product.variantes[0])
+                          if (variant) {
+                            addItem({ productId: product.id, variantId: variant.id, nombre: product.nombre, precio: price, talla: variant.talla || null, color: variant.color || null, imageUrl: variant.imageUrl || product.imageUrl, maxStock: variant.stock }, 1)
+                          } else {
+                            addItem({ productId: product.id, variantId: 'default', nombre: product.nombre, precio: price, talla: null, color: null, imageUrl: product.imageUrl, maxStock: product.stock || 10 }, 1)
+                          }
+                        }}
+                        onSelectDetail={(product) => handleViewDetail(product)}
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Controles Flotantes Premium sin Fondo Completo */}
+              {items.length > 0 && (
+                <div className="absolute bottom-[65px] inset-x-0 h-14 z-30 pointer-events-none">
+                  {/* Total Estimado: Cuadrado a la izquierda (contra el borde del drawer) y redondo a la derecha */}
+                  <div className="absolute left-0 bottom-0 pl-6 pr-6 py-2.5 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md border-y border-r border-black/5 dark:border-white/10 rounded-r-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex flex-col justify-center pointer-events-auto transition-all">
+                    <span className="text-[9px] uppercase font-black tracking-widest text-muted">Total</span>
+                    <span className="text-base font-black text-gray-900 dark:text-gray-100 leading-tight">
+                      {formatCurrency(getTotal())}
+                    </span>
+                  </div>
+
+                  {/* BotÃ³n de Pago: Burbuja Flotante a la derecha */}
+                  <div className="absolute right-6 bottom-0 flex items-center pointer-events-auto">
+                    <div className="relative">
+                      <SmartHint 
+                        stepId="cart_checkout" 
+                        message="Â¡Todo listo! Pulsa aquÃ­ para finalizar tu pedido." 
+                        position="left" 
+                        delay={1000} 
+                      />
+                    </div>
+                    
+                    <button
+                      onClick={handleCheckoutClick}
+                      className="px-6 h-14 rounded-full bg-action text-white font-black uppercase text-[11px] tracking-widest hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_8px_24px_color-mix(in_srgb,var(--color-action)_30%,transparent)] border-none cursor-pointer"
+                    >
+                      <span>Ir a pedir</span>
+                      <ArrowRight size={16} className="stroke-[3]" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+      />
+
+      {selectedProductDetail && (
+        <ProductDetailModal
+          product={selectedProductDetail}
+          isOpen={!!selectedProductDetail}
+          onClose={() => setSelectedProductDetail(null)}
+        />
+      )}
+     </>
+  )
+}
+
+function PairedCarousel({ products = [], onAddToCart, onSelectDetail }) {
+  const CARDS_PER_PAGE = 2
+  const [page, setPage] = useState(0)
+  const [dragX, setDragX] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStart = useRef(0)
+  const containerRef = useRef(null)
+  const THRESHOLD = 55
+
+  const totalPages = Math.ceil(products.length / CARDS_PER_PAGE)
+  const currentPair = products.slice(page * CARDS_PER_PAGE, page * CARDS_PER_PAGE + CARDS_PER_PAGE)
+
+  const goTo = (dir) => {
+    setDragX(0)
+    setPage(prev => Math.max(0, Math.min(totalPages - 1, prev + dir)))
+  }
+
+  const handlePointerDown = (e) => {
+    setIsDragging(true)
+    dragStart.current = e.clientX
+    containerRef.current?.setPointerCapture(e.pointerId)
+  }
+  const handlePointerMove = (e) => {
+    if (!isDragging) return
+    setDragX(e.clientX - dragStart.current)
+  }
+  const handlePointerUp = (e) => {
+    if (!isDragging) return
+    setIsDragging(false)
+    containerRef.current?.releasePointerCapture(e.pointerId)
+    if (dragX < -THRESHOLD && page < totalPages - 1) goTo(1)
+    else if (dragX > THRESHOLD && page > 0) goTo(-1)
+    else setDragX(0)
+  }
+
+  if (products.length === 0) return null
+
+  return (
+    <div className="space-y-2.5">
+      {/* Carrusel */}
+      <div
+        ref={containerRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className="overflow-hidden cursor-grab active:cursor-grabbing touch-none select-none"
+      >
+        <div
+          style={{
+            transform: `translateX(${dragX}px)`,
+            transition: isDragging ? 'none' : 'transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)'
+          }}
+          className="grid grid-cols-2 gap-2.5"
+        >
+          {currentPair.map((p) => {
+            const isPromo = p.tienePromocion && p.precioPromo < p.precioBase
+            const pPrice = isPromo ? p.precioPromo : p.precioBase
+            return (
+              <div
+                key={p.id}
+                className="bg-white dark:bg-neutral-900 rounded-2xl border border-gray-100 dark:border-neutral-800 shadow-sm overflow-hidden flex flex-col"
+              >
+                {/* Imagen cuadrada */}
+                <div
+                  className="relative aspect-square bg-gray-50 dark:bg-neutral-800 overflow-hidden cursor-pointer"
+                  onClick={() => onSelectDetail(p)}
+                >
+                  {p.imageUrl ? (
+                    <img src={p.imageUrl} alt={p.nombre} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted"><ImageIcon size={22} /></div>
+                  )}
+                  {isPromo && (
+                    <span className="absolute top-1.5 left-1.5 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md shadow-sm leading-none">
+                      {p.promocion?.discountType === 'percentage' ? `${p.promocion.discountValue}% OFF` : 'OFERTA'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="p-2 flex flex-col gap-1.5 flex-1">
+                  <div>
+                    <span className="text-[8px] text-primary font-black uppercase tracking-widest leading-none block">
+                      {p.categoria || 'Sugerido'}
+                    </span>
+                    <p className="text-[11px] font-bold text-gray-900 dark:text-gray-100 leading-snug line-clamp-2 mt-0.5">
+                      {p.nombre}
+                    </p>
+                  </div>
+
+                  {/* Precio */}
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-sm font-black text-primary leading-none">{formatCurrency(pPrice)}</span>
+                    {isPromo && <span className="text-[9px] text-gray-400 line-through font-medium">{formatCurrency(p.precioBase)}</span>}
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="flex gap-1.5 mt-auto pt-1">
+                    <button
+                      type="button"
+                      onClick={() => onSelectDetail(p)}
+                      className="flex-1 h-7 text-[9px] font-bold rounded-lg border border-primary/30 text-primary bg-primary/5 hover:bg-primary/10 active:scale-95 transition-all cursor-pointer border-solid"
+                    >
+                      Ver mÃ¡s
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onAddToCart(p)}
+                      className="flex-1 h-7 text-[9px] font-bold rounded-lg bg-primary hover:bg-primary/90 text-white active:scale-95 transition-all cursor-pointer border-none flex items-center justify-center gap-1 shadow-sm shadow-primary/20"
+                    >
+                      <ShoppingCart size={10} className="stroke-[3]" />
+                      Agregar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* PaginaciÃ³n */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1.5">
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setPage(i)}
+              className={`rounded-full transition-all duration-200 border-none cursor-pointer ${
+                i === page
+                  ? 'w-4 h-1.5 bg-primary'
+                  : 'w-1.5 h-1.5 bg-gray-300 dark:bg-neutral-600 hover:bg-gray-400'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+  }, [items])

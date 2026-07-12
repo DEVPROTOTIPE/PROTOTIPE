@@ -1,0 +1,51 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencias
+node_modules/
+
+# Build output - NUNCA subir al repositorio
+dist/
+dist-ssr/
+
+# Variables de entorno - SECRETOS: NUNCA subir
+.env
+.env.*
+!.env.example
+
+# Firebase CLI cache y builds locales - NUNCA subir
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Vite cache
+.vite/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Scratch folder
+scratch/
+
+# Testing reports and results
+playwright-report/
+test-results/
+
+# Carpeta administrativa temporal Git
+.git-backup-temp/
+.git-backup-temp
+

@@ -1,0 +1,5 @@
+export * from './services/inventoryService'
+export * from './services/inventoryInterface'
+export * from './hooks/useInventory'
+export { default as ProductFormModal } from './components/ProductFormModal'
+export { default as CategoryManager } from './components/CategoryManager'

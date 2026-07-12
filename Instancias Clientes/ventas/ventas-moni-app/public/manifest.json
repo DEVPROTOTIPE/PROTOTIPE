@@ -1,0 +1,10 @@
+{
+  "name": "Ventas SmartFix",
+  "short_name": "SmartFix",
+  "description": "Catálogo de compras inteligente",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/"
+}

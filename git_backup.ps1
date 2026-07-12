@@ -335,12 +335,10 @@ try {
                 Write-Host ""
                 Write-Host " [Merge] Auto-Merge activado (Zero-Checkout). Fusionando [$branchName] -> [$mainBranch]..." -ForegroundColor Yellow
                 
-                # Actualizar la rama local master/main para apuntar a develop/branchName sin realizar checkout
-                git branch -f $mainBranch $branchName 2>&1 | Out-Null
-                
-                Write-Host " [Merge] Subiendo consolidacion a GitHub (git push -u origin $mainBranch --no-verify)..." -ForegroundColor Cyan
+                # Intentar merge fast-forward remoto empujando la rama de desarrollo directamente a la rama principal
+                Write-Host " [Merge] Subiendo consolidacion a GitHub (git push origin $($branchName):$($mainBranch) --no-verify)..." -ForegroundColor Cyan
                 Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
-                git push -u origin $mainBranch --no-verify
+                git push origin "${branchName}:${mainBranch}" --no-verify
                 $mergePushExitCode = $LASTEXITCODE
                 Write-Host "----------------------------------------------------------------------" -ForegroundColor DarkGray
                 
@@ -348,6 +346,8 @@ try {
                     Write-Host " [ERROR] Fallo al subir la consolidacion a GitHub (git push origin $mainBranch)." -ForegroundColor Red
                     Write-BackupLog -Status "WARN" -Target "Maestro" -Message "Snapshot de desarrollo OK, pero fallo el push de fusion a $mainBranch (Exit Code: $mergePushExitCode)"
                 } else {
+                    # Si el push remoto fue exitoso, actualizamos también la rama local main de forma segura
+                    git branch -f $mainBranch $branchName 2>&1 | Out-Null
                     Write-BackupLog -Status "SUCCESS" -Target "Maestro" -Message "Sincronizado y fusionado en $mainBranch con exito."
                     Write-Host " [OK] Proceso completado. Cambios sincronizados en [$branchName] y [$mainBranch]." -ForegroundColor Green
                 }
