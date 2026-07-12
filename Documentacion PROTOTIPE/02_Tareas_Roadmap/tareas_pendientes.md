@@ -1,8 +1,18 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 422 tareas completadas de 422 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 423 tareas completadas de 423 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-423: Rollback de Git y Recursos Cloud (P0.4 - Commit F)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Implementación de rollback seguro para re-aprovisionamientos donde existedBefore === true. Se agregaron variables de control en generator.js (gitExistedBefore, nodeModulesExistedBefore, packageLockExistedBefore, y gitInitialized) para detectar y eliminar únicamente el .git parcial, node_modules incompleto y package-lock.json generados durante el intento fallido, preservando los archivos preexistentes del usuario. Se implementó la trazabilidad de recursos cloud en server.js, actualizando el estado del ProvisioningStateManager a provisioning con metadata cloudResourcesCreated en cada paso exitoso, y a failed/rollback conservando toda la telemetría en caso de error.
+  - Commit: `03b6bb4` — `fix(p0.4): implement provisioning rollback tracking`
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-422: Observabilidad y aislamiento de variables (P0.4 - Commit E)~~**
   - Estatus: Completada

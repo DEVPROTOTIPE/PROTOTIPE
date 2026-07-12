@@ -1,5 +1,21 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-423 — 2026-07-12
+**fix(p0.4): implement provisioning rollback tracking — Commit F**
+**Hash:** `03b6bb4`
+
+### Cambios realizados:
+1. **generator.js:** Retorno de `gitInitialized` en la función `setupGitHub`.
+2. **generator.js:** Implementación de rollback en el catch de `createProject` cuando la carpeta ya existía (`existedBefore === true`). Se limpian exclusivamente el `.git` parcial (si fue inicializado en este intento y no existía antes), `node_modules` incompleto y `package-lock.json` parcial.
+3. **server.js:** Actualización de `executeCreationTaskInBackground` para persistir la metadata `cloudResourcesCreated` al ProvisioningStateManager al registrar e inicializar cada recurso de Firebase en la nube (Proyecto Firebase, Base de Datos Firestore y Aplicación Web).
+4. **server.js:** Manejo de fallos en segundo plano para cambiar el estado a `failed` con metadata que conserva los recursos creados, error, `rollbackStatus` y `rollbackErrors`.
+
+### Archivos modificados:
+- [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+---
+
 ## CLI-422 — 2026-07-12
 **fix(p0.4): propagate taskId and isolate worker environment — Commit E**
 **Hash:** `69a4f56`
