@@ -1,5 +1,52 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-417 — 2026-07-12
+**docs(p0.3): finalize scaffolding security certification record — Cierre Documental P0.3**
+
+### Cambios realizados:
+1. **[NEW] informe_certificacion_p0_3.md:** Informe final de la fase con matriz antes/después, 9 controles verificados, 6 hashes de commit y declaración `P0.3 STATUS: CERTIFIED`.
+2. **Sincronización documental:** `tareas_pendientes.md`, `bitacora_cambios.md`, `mapa_documentacion_ia.md` actualizados.
+
+### Archivos modificados:
+- [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_3.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_3.md) [NEW]
+- [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+- [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+- [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
+## CLI-416 — 2026-07-12
+**fix(p0.3): normalize drive letter case in PathSecurity for Windows compatibility**
+**Hash:** `e5d4a8f`
+
+### Cambios realizados:
+1. **[MODIFY] PathSecurity.js:** `path.resolve()` en Windows preserva la case de la letra de unidad del input (`d:` vs `D:`), causando falsos negativos en `startsWith`. Se normaliza ambos paths a `toLowerCase()` antes de comparar en `validateContainedPath` e `isPathContained`. Impacto: P0.2 pasa de 68/70 a 70/70 PASSED con este fix.
+
+### Archivos modificados:
+- [`Prototipe-CLI/lib/PathSecurity.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/PathSecurity.js) [MODIFY]
+
+---
+
+## CLI-415 — 2026-07-12
+**fix(p0.3): redact secrets from worker IPC and provisioning logs — Commit C**
+**Hash:** `9cacd7d`
+
+### Cambios realizados:
+1. **[NEW] SecretRedactor.js:** Módulo centralizado con `buildSecretMap(answers)` (recursivo sobre objetos anidados + `process.env`), `redactSecrets(value, answers)` y `containsSecret(text, answers)`.
+2. **[MODIFY] worker_create_project.js:** Variable global `_activeAnswers` que se actualiza al recibir `START`. Overrides de `console.log` y `console.error` filtran todo a través de `redactSecrets` antes del `process.send`. Errores IPC (`ERROR`) sanitizados.
+3. **[MODIFY] test_scaffolding_security.js:** 4 sub-casos reales de aislamiento de secretos reemplazando el mock trivial previo.
+
+### Resultado de pruebas:
+- P0.3: 9/9 PASSED
+- P0.2: 70/70 PASSED (sin regresión)
+
+### Archivos modificados:
+- [`Prototipe-CLI/lib/SecretRedactor.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/SecretRedactor.js) [NEW]
+- [`Prototipe-CLI/worker_create_project.js`](file:///d:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+- [`Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js) [MODIFY]
+
+---
+
 ## CLI-413 — 2026-07-12
 **fix(p0.3): harden scaffolding paths against traversal and TOCTOU — Commit B**
 **Hash:** `df76567`

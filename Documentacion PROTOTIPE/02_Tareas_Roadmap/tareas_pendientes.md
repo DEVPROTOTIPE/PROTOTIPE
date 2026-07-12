@@ -4,6 +4,36 @@
 * **Estado del Roadmap:** `100.00%` de completitud en base a 417 tareas completadas de 417 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
 
+* **[x] ~~Tarea CLI-417: Cierre Documental y Certificación Final de la Fase P0.3 (Scaffolding Security)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se creó el informe de certificación `informe_certificacion_p0_3.md` con objetivo, vulnerabilidades encontradas, controles implementados, matriz antes/después, 9 pruebas verificadas, 6 hashes de commit y declaración `P0.3 STATUS: CERTIFIED`. Se sincronizaron tareas_pendientes, bitacora_cambios y mapa_documentacion_ia.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_3.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_3.md) [NEW]
+    - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-416: Fix Regresión — Case-Sensitivity de Letra de Unidad en PathSecurity (Windows)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se detectó que `path.resolve()` en Windows preserva la case del drive letter del path de entrada (`d:` vs `D:`), causando que `startsWith` fallara y rechazara paths legítimos de los tests P0.2. Se normalizó a `toLowerCase()` en ambos métodos de `PathSecurity`. Resultado: P0.2 pasó de 68/70 a 70/70 PASSED.
+  - Commit: `e5d4a8f` — `fix(p0.3): normalize drive letter case in PathSecurity for Windows compatibility`
+  - Archivos:
+    - [`Prototipe-CLI/lib/PathSecurity.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/PathSecurity.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-415: Protección de Secretos en Subprocesos y Logs IPC (P0.3 - Commit C)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se creó `SecretRedactor.js` con redacción recursiva combinando `process.env` y objeto `answers` (incluyendo objetos anidados). Se hardeneó `worker_create_project.js` con variable `_activeAnswers` y overrides de `console.log/error` + canal `IPC:ERROR` filtrados por `redactSecrets`. Suite de pruebas actualizada con 4 sub-casos reales de aislamiento de secretos. Resultado: 9/9 PASSED.
+  - Commit: `9cacd7d` — `fix(p0.3): redact secrets from worker IPC and provisioning logs`
+  - Archivos:
+    - [`Prototipe-CLI/lib/SecretRedactor.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/SecretRedactor.js) [NEW]
+    - [`Prototipe-CLI/worker_create_project.js`](file:///d:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+    - [`Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js) [MODIFY]
+
 * **[x] ~~Tarea CLI-413: Hardening de Paths del Scaffolding contra Directory Traversal y TOCTOU (P0.3 - Commit B)~~**
   - Estatus: Completada
   - Fecha de registro: 2026-07-12
