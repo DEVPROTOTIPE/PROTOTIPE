@@ -803,7 +803,7 @@ async function executeCreationTaskInBackground(taskId, answers) {
     });
   };
   
-  const clientId = answers.blueprint?.instanceId || answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const clientId = answers.blueprint?.instanceId || (answers.blueprint?.clientName || answers.projectName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
   try {
     const finalProjectId = answers.firebaseProjectId;
@@ -1047,6 +1047,13 @@ app.post('/api/create-project', async (req, res) => {
 
   if (answers.blueprint.clientName) {
     answers.blueprint.clientName = answers.blueprint.clientName.trim().replace(/[^a-zA-Z0-9\s\-_]/g, '');
+  }
+  // Coerción y compatibilidad para propiedades planas
+  if (!answers.projectName && answers.blueprint?.clientName) {
+    answers.projectName = answers.blueprint.clientName;
+  }
+  if (!answers.clientId && answers.blueprint?.instanceId) {
+    answers.clientId = answers.blueprint.instanceId;
   }
   if (answers.firebaseProjectId) {
     answers.firebaseProjectId = answers.firebaseProjectId.trim().replace(/[^a-z0-9\-]/g, '');
@@ -15016,7 +15023,7 @@ await runPreflightChecks();
 // Inicializar la cola de aprovisionamiento con sus callbacks de ejecución y difusión SSE
 await ProvisioningQueue.initialize(
   async (taskId, answers) => {
-    executeCreationTaskInBackground(taskId, answers);
+    await executeCreationTaskInBackground(taskId, answers);
   },
   (taskId, eventPayload) => {
     const task = activeCreationTasks[taskId];
