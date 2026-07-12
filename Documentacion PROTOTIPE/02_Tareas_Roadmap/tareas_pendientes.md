@@ -1,8 +1,17 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 454 tareas completadas de 454 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 455 tareas completadas de 455 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-455: Corrección de Resolución de Puertos en el Inicio de Servidores Locales de Clientes en el Bridge CLI~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Corregimos de raíz el bug en el endpoint `/api/project/dev/start` del Bridge CLI. Anteriormente, el backend forzaba a ciegas un puerto determinista (`forcedPort`) de rango `3100-3199` calculado dinámicamente a partir del ID del cliente, ignorando el puerto personalizado (`customPort`) que el usuario configuró en el Wizard de aprovisionamiento. Ahora, el backend intenta leer prioritariamente el puerto asignado en el archivo `vite.config.js` físico local de la instancia y utiliza el puerto hash dinámico determinista únicamente como fallback de seguridad, garantizando que la aplicación se levante y se abra siempre en el puerto configurado por el usuario.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
 
 * **[x] ~~Tarea CLI-454: Refactorización y Soporte Completo para Purga de Desvíos de Archivos Obsoletos en el CLI y Saneamiento del Roadmap~~**
   - Estatus: Completada
@@ -14,8 +23,6 @@
     - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
     - [`Prototipe-CLI/scripts/prune_drifts_local.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/prune_drifts_local.js) [NEW]
     - [`Prototipe-CLI/scripts/link_tasks_local.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/link_tasks_local.js) [NEW]
-    - [`Prototipe-CLI/scripts/test_status.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_status.js) [NEW]
-    - [`Prototipe-CLI/scripts/test_link.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_link.js) [NEW]
 
 * **[x] ~~Tarea CLI-453: Rediseño de la Arquitectura de Ramas Git para Aprovisionamiento de Clientes y Blindaje a Futuro~~**
   - Estatus: Completada

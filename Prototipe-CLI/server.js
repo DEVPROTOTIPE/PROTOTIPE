@@ -8981,7 +8981,23 @@ app.post('/api/project/dev/start', async (req, res) => {
     // Determinar el puerto único de forma dinámica y determinista para evitar colisiones (rango 3100-3199 para no colisionar con Vite 5173/5174)
     const forcedPort = 3100 + (clientId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 100);
 
-    const child = spawn('npm', ['run', 'dev', '--', '--port', forcedPort.toString()], {
+    // Intentar leer el puerto configurado en el archivo vite.config.js del proyecto (físico local)
+    let customPort = null;
+    try {
+      const viteConfigPath = path.join(projectDir, 'vite.config.js');
+      if (await fs.pathExists(viteConfigPath)) {
+        const content = await fs.readFile(viteConfigPath, 'utf8');
+        const match = content.match(/port\s*:\s*(\d+)/);
+        if (match) {
+          customPort = parseInt(match[1], 10);
+        }
+      }
+    } catch (err) {
+      console.warn(`[API /project/dev/start] No se pudo leer el puerto de vite.config.js para ${clientId}:`, err.message);
+    }
+    const portToUse = customPort || forcedPort;
+
+    const child = spawn('npm', ['run', 'dev', '--', '--port', portToUse.toString()], {
       cwd: projectDir,
       shell: true,
       env: { ...process.env, FORCE_COLOR: '0' }
@@ -9014,7 +9030,7 @@ app.post('/api/project/dev/start', async (req, res) => {
       const timeout = setTimeout(() => {
         if (!urlResolved) {
           urlResolved = true;
-          resolve(`http://localhost:${forcedPort}`); 
+          resolve(`http://localhost:${portToUse}`);
         }
       }, 10000);
 

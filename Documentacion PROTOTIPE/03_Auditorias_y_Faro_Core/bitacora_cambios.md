@@ -1,5 +1,17 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-455 — 2026-07-12
+**Feature: Corrección de Resolución de Puertos en el Inicio de Servidores Locales de Clientes en el Bridge CLI**
+
+### Cambios realizados:
+1. **Resolución de Puertos Configurados en /api/project/dev/start:** Corregido el bug en el endpoint de arranque de servidores de desarrollo en `server.js`. Ahora, el backend intenta leer el puerto asignado en el archivo `vite.config.js` físico de la instancia del cliente de forma prioritaria en lugar de forzar a ciegas el puerto determinista (`forcedPort`) de rango `3100-3199`. El puerto determinista se mantiene únicamente como fallback de seguridad si no existe o no se puede leer la configuración del cliente.
+
+### Archivos modificados:
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+
+---
+
 ## CLI-454 — 2026-07-12
 **Feature: Soporte Completo para Purga de Desvíos de Archivos Obsoletos y Saneamiento de Roadmap**
 
@@ -13,8 +25,6 @@
 - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
 - [`Prototipe-CLI/scripts/prune_drifts_local.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/prune_drifts_local.js) [NEW]
 - [`Prototipe-CLI/scripts/link_tasks_local.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/link_tasks_local.js) [NEW]
-- [`Prototipe-CLI/scripts/test_status.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_status.js) [NEW]
-- [`Prototipe-CLI/scripts/test_link.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_link.js) [NEW]
 
 ---
 
