@@ -1,5 +1,21 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-420 — 2026-07-12
+**fix(p0.4): cleanup temp uploads and validate logo extensions — Commit C**
+**Hash:** `48cbd9c`
+
+### Cambios realizados:
+1. **server.js:** Se implementó una whitelist de extensiones permitidas (`.png`, `.jpg`, `.jpeg`, `.svg`, `.webp`, `.gif`) en el endpoint `/api/upload-logo` antes de guardar el archivo en disco, previniendo la carga de archivos no deseados o potencialmente maliciosos.
+2. **generator.js:** Se envolvió el proceso de copiado del logo y generación de favores e iconos PWA en un bloque `try/finally` para garantizar la ejecución de `fs.remove(answers.logoPath)` inmediatamente después de procesarse, liberando el directorio temporal.
+3. **worker_create_project.js:** Se añadió una limpieza de seguridad redundante en el bloque `finally` del proceso hijo.
+
+### Archivos modificados:
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+- [`Prototipe-CLI/worker_create_project.js`](file:///d:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+
+---
+
 ## CLI-419 — 2026-07-12
 **feat(p0.4): implement persistent provisioning state and file lock — Commit B**
 **Hash:** `27293af`

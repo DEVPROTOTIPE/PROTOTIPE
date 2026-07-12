@@ -1,8 +1,19 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 419 tareas completadas de 419 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 420 tareas completadas de 420 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-420: Limpieza de uploads y validación de extensiones de logo (P0.4 - Commit C)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementó una whitelist de extensiones permitidas (`.png`, `.jpg`, `.jpeg`, `.svg`, `.webp`, `.gif`) en el endpoint `/api/upload-logo` antes de guardar el archivo en disco, previniendo la carga de scripts maliciosos. Se garantizó la limpieza del archivo de logo original en `temp_uploads` utilizando un bloque `try/finally` en `generator.js` una vez copiado y procesado con Jimp. Se añadió una limpieza redundante en el bloque `finally` de `worker_create_project.js`. Se validó que las pruebas P04-05 y P04-06 pasen a VERDE.
+  - Commit: `48cbd9c` — `fix(p0.4): cleanup temp uploads and validate logo extensions`
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/worker_create_project.js`](file:///d:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-419: Persistencia de Estado y Lock Físico de Aprovisionamiento (P0.4 - Commit B)~~**
   - Estatus: Completada
