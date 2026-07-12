@@ -1,5 +1,24 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-418 — 2026-07-12
+**test(p0.4): add lifecycle and observability RED tests — Commit A**
+**Hash:** `8dd6180`
+
+### Cambios realizados:
+1. **[NEW] test_lifecycle_observability.js:** Suite de pruebas estáticas que verifican los 9 riesgos identificados en P0.4: lock volátil en RAM, ausencia de lifecycle persistente, rollback incompleto en re-provisión, rollback Firebase ausente, falta de limpieza de temporales, falta de validación de extensión en upload, exposición de password en result, falta de correlación de taskId y TTL de tareas hardcoded.
+2. **[NEW] run_p0_4_lifecycle_tests.js:** Runner de las pruebas P0.4 que reporta el consolidado y devuelve código de salida `1` en caso de fallos esperados RED (comportamientos incorrectos a ser remediados).
+3. **[MODIFY] package.json:** Añadido el script `"test:p0.4": "node scripts/tests/p0_4/run_p0_4_lifecycle_tests.js"`.
+
+### Resultado de pruebas:
+- P0.4: 9/10 PRODUCT_BEHAVIOR_FAILURE (Fase RED confirmada con éxito).
+
+### Archivos modificados:
+- [`Prototipe-CLI/scripts/tests/p0_4/test_lifecycle_observability.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_4/test_lifecycle_observability.js) [NEW]
+- [`Prototipe-CLI/scripts/tests/p0_4/run_p0_4_lifecycle_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_4/run_p0_4_lifecycle_tests.js) [NEW]
+- [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
+
+---
+
 ## CLI-417 — 2026-07-12
 **docs(p0.3): finalize scaffolding security certification record — Cierre Documental P0.3**
 

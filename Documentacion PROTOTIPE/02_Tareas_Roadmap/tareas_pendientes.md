@@ -1,8 +1,19 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 417 tareas completadas de 417 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 418 tareas completadas de 418 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-418: Suite de Pruebas de Ciclo de Vida y Observabilidad en Estado RED (P0.4 - Commit A)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementaron las pruebas estáticas RED en `scripts/tests/p0_4/test_lifecycle_observability.js` y el runner en `scripts/tests/p0_4/run_p0_4_lifecycle_tests.js`. Las pruebas confirman las deficiencias del aprovisionamiento: lock volátil en RAM, ausencia de lifecycle persistente, rollback incompleto en re-provisión, rollback Firebase ausente, falta de limpieza de temporales, falta de validación de extensión en upload, exposición de password en result, falta de correlación de taskId y TTL de tareas hardcoded. Se agregó el comando `npm run test:p0.4`.
+  - Commit: `8dd6180` — `test(p0.4): add lifecycle and observability RED tests`
+  - Archivos:
+    - [`Prototipe-CLI/scripts/tests/p0_4/test_lifecycle_observability.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_4/test_lifecycle_observability.js) [NEW]
+    - [`Prototipe-CLI/scripts/tests/p0_4/run_p0_4_lifecycle_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_4/run_p0_4_lifecycle_tests.js) [NEW]
+    - [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
 
 * **[x] ~~Tarea CLI-417: Cierre Documental y Certificación Final de la Fase P0.3 (Scaffolding Security)~~**
   - Estatus: Completada
