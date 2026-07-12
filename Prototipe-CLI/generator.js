@@ -1051,13 +1051,57 @@ export async function createProject(answers) {
         featuresEnabled: blueprint.features
       }, { spaces: 2 });
 
-      const experienceToWrite = blueprint.experience || {
-        layout: "bento",
-        density: "comfortable",
-        typography: blueprint.branding?.googleFont || "Inter"
+      const experienceToWrite = {
+        layout: blueprint.experience?.layout || "sidebar",
+        density: blueprint.experience?.density || "comfortable",
+        themeMode: blueprint.experience?.themeMode || "dark-detect",
+        typography: blueprint.experience?.typography || blueprint.branding?.googleFont || "Inter"
       };
+
+      const allowedLayouts = ["sidebar", "topbar", "dual-panel", "tabs-mobile"];
+      if (!allowedLayouts.includes(experienceToWrite.layout)) {
+        experienceToWrite.layout = "sidebar";
+      }
+
+      const allowedDensities = ["compact", "comfortable", "spacious"];
+      if (!allowedDensities.includes(experienceToWrite.density)) {
+        experienceToWrite.density = "comfortable";
+      }
+
+      const allowedThemeModes = ["dark", "light", "dark-detect"];
+      if (!allowedThemeModes.includes(experienceToWrite.themeMode)) {
+        experienceToWrite.themeMode = "dark-detect";
+      }
+
       await fs.writeJson(path.join(configDestDir, 'experience.json'), experienceToWrite, { spaces: 2 });
-      await fs.writeJson(path.join(configDestDir, 'branding.json'), blueprint.branding || { paletteChoice: "emerald" }, { spaces: 2 });
+
+      const clientNameInitials = (blueprint.clientName || answers.projectName || "APP")
+        .split(/\s+/)
+        .map(w => w[0])
+        .join('')
+        .substring(0, 3)
+        .toUpperCase() || "APP";
+
+      const brandingToWrite = {
+        paletteChoice: blueprint.branding?.paletteChoice || "custom",
+        initials: blueprint.branding?.initials || clientNameInitials
+      };
+
+      if (blueprint.branding?.colors) {
+        brandingToWrite.colors = {
+          primary: blueprint.branding.colors.primary || "126 6% 32%",
+          secondary: blueprint.branding.colors.secondary || "2 15% 59%",
+          surface: blueprint.branding.colors.surface || "0 0% 100%"
+        };
+      } else if (blueprint.branding?.primaryColor || blueprint.branding?.secondaryColor || blueprint.branding?.surfaceColor) {
+        brandingToWrite.colors = {
+          primary: blueprint.branding.primaryColor || "hsl(126, 6%, 32%)",
+          secondary: blueprint.branding.secondaryColor || "hsl(2, 15%, 59%)",
+          surface: blueprint.branding.surfaceColor || "hsl(0, 0%, 100%)"
+        };
+      }
+
+      await fs.writeJson(path.join(configDestDir, 'branding.json'), brandingToWrite, { spaces: 2 });
       const composedDashboard = blueprint.dashboard || { widgets: [] };
       await fs.writeJson(path.join(configDestDir, 'dashboard.json'), {
         welcomeWidget: "StatsGrid",
