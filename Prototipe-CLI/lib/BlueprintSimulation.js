@@ -41,10 +41,15 @@ export class BlueprintSimulation {
     console.log(`    - 🚚  NPM Deps unificadas (${uniqueNpmDeps.length}): ${uniqueNpmDeps.join(', ') || 'Ninguna adicional'}`);
 
     console.log('\n🎨  EXPERIENCIA Y BRANDING:');
-    console.log(`    - Layout:         ${blueprint.experience.layout}`);
-    console.log(`    - Densidad UI:    ${blueprint.experience.density}`);
-    console.log(`    - Paleta Color:   ${blueprint.branding.paletteChoice}`);
-    console.log(`    - Tipografía:     ${blueprint.experience.typography}`);
+    const experience = blueprint.experience || {
+      layout: 'bento',
+      density: 'comfortable',
+      typography: blueprint.branding?.googleFont || 'Inter'
+    };
+    console.log(`    - Layout:         ${experience.layout}`);
+    console.log(`    - Densidad UI:    ${experience.density}`);
+    console.log(`    - Paleta Color:   ${blueprint.branding?.paletteChoice || 'custom'}`);
+    console.log(`    - Tipografía:     ${experience.typography}`);
 
     // Estimación del bundle
     const estimatedFeaturesWeight = blueprint.features.length * 15; // 15 KB por feature estimada
