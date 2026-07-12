@@ -1,8 +1,18 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `99.76%` de completitud en base a 413 tareas completadas de 414 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 414 tareas completadas de 414 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-409: Adapter de Salida y Certificación de Payload en Dashboard (P0.2 - Punto 5.2)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se creó el modulo `provisioningPayload.js` en el Dashboard para transformar el payload legacy del wizard a la estructura de contrato canónico (`blueprint` + `execution` + root params), clasificando las recomendaciones del usuario a través de `mapRecommendationsToBlueprint()` en sus correspondientes categorías de features, components y patterns. Se implementó la suite de pruebas `test_dashboard_payload_contract.js` y se integró en el runner principal para certificar la normalización, la correcta clasificación semántica y el aislamiento de variables de infraestructura.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/utils/provisioningPayload.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/utils/provisioningPayload.js) [NEW]
+    - [`Prototipe-CLI/scripts/tests/p0_2/test_dashboard_payload_contract.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/test_dashboard_payload_contract.js) [NEW]
+    - [`Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-408: Migración del Bridge y Frontera Contractual (P0.2 - Punto 5.1)~~**
   - Estatus: Completada

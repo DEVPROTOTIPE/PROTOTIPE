@@ -1,5 +1,20 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-409 — 2026-07-12
+**Feature: Adapter de Salida y Certificación de Payload en Dashboard (P0.2 - Punto 5.2)**
+
+### Cambios realizados:
+1. **Creado provisioningPayload.js en el Dashboard:** Implementado un adaptador de salida independiente que normaliza el payload plano generado en el formulario del Wizard del Dashboard a un sobre canónico estructurado (`blueprint` + `execution`), manteniendo desacoplados en la raíz del payload los parámetros de infraestructura y facturación.
+2. **Clasificación de Recomendaciones (UI a Backend):** Integrada la función `mapRecommendationsToBlueprint()` que mapea la lista plana de recomendaciones seleccionadas por el usuario a sus dominios correspondientes (features, components y patterns) en base a sets de identificadores fijos de catálogos.
+3. **Suite de Pruebas test_dashboard_payload_contract.js:** Creada una suite de pruebas normativas para certificar la normalización de campos, la clasificación semántica en arrays independientes de recomendación y la total inmunidad del blueprint contra la contaminación de variables de infraestructura.
+
+### Archivos modificados:
+- [`Central PROTOTIPE/dev-dashboard/src/utils/provisioningPayload.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/utils/provisioningPayload.js) [NEW]
+- [`Prototipe-CLI/scripts/tests/p0_2/test_dashboard_payload_contract.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/test_dashboard_payload_contract.js) [NEW]
+- [`Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js) [MODIFY]
+
+---
+
 ## CLI-408 — 2026-07-12
 **Feature: Migración del Bridge y Frontera Contractual (P0.2 - Punto 5.1)**
 
