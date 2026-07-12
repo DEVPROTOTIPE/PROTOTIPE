@@ -1,5 +1,20 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-412 — 2026-07-12
+**Feature: Suite de Pruebas de Seguridad Scaffolding en Estado RED (P0.3 - Commit A)**
+
+### Cambios realizados:
+1. **Creada la Suite de Pruebas de Seguridad (test_scaffolding_security.js):** Se implementó una suite dedicada a verificar y documentar las vulnerabilidades activas en la generación física de proyectos: traversals en `targetPath`, el bypass de logoPath fuera del directorio temporal, la ventana de carrera TOCTOU en symlinks, y el filtrado de secretos en los logs IPC del worker.
+2. **Creado el Orquestador y Runner (run_p0_3_security_tests.js):** Se diseñó el runner de la suite P0.3 que genera automáticamente el reporte JSON estructurado `p0_3_run_report.json` con el total de pruebas, passed y fallos de comportamiento de producto.
+3. **Integrado Comando NPM:** Se integró `"test:p0.3"` en `package.json` para ejecutar de forma unificada la suite.
+
+### Archivos modificados:
+- [`Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js) [NEW]
+- [`Prototipe-CLI/scripts/tests/p0_3/run_p0_3_security_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_3/run_p0_3_security_tests.js) [NEW]
+- [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
+
+---
+
 ## CLI-411 — 2026-07-12
 **Feature: Cierre Documental e Informe de Certificación de la Fase P0.2 (P0.2 - Cierre)**
 

@@ -1,8 +1,18 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 416 tareas completadas de 416 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 417 tareas completadas de 417 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-412: Suite de Pruebas de Seguridad Scaffolding en Estado RED (P0.3 - Commit A)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementó la suite de pruebas `test_scaffolding_security.js` y su orquestador `run_p0_3_security_tests.js` en `Prototipe-CLI/scripts/tests/p0_3/`, configurando el comando `npm run test:p0.3`. La suite verifica preventivamente (RED) la vulnerabilidad a traversals en `targetPath`, el bypass de logoPath fuera de la carpeta temporal, el riesgo de TOCTOU y enlaces simbólicos, y la filtración de secretos a través de los logs IPC del worker.
+  - Archivos:
+    - [`Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js) [NEW]
+    - [`Prototipe-CLI/scripts/tests/p0_3/run_p0_3_security_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_3/run_p0_3_security_tests.js) [NEW]
+    - [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
 
 * **[x] ~~Tarea CLI-411: Cierre Documental e Informe de Certificación de la Fase P0.2 (P0.2 - Cierre)~~**
   - Estatus: Completada
