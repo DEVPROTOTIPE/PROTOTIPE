@@ -325,6 +325,10 @@ app.use(cors({
     // Sin Origin = petición server-to-server (PowerShell, Node, curl) → permitir
     if (!origin) return callback(null, true);
     if (CORS_ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    // Permitir cualquier puerto local en desarrollo (localhost/127.0.0.1)
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+      return callback(null, true);
+    }
     callback(new Error(`[CORS] Origen no autorizado: ${origin}`));
   },
   credentials: true,

@@ -1,5 +1,16 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-432 — 2026-07-12
+**Feature: Habilitación de CORS para Puertos Dinámicos de Viewports Locales en Bridge CLI**
+
+### Cambios realizados:
+1. **server.js (Bridge CLI):** Se configuró una validación de origen flexible basada en una expresión regular (`/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/`) en el middleware de CORS de Express. Esto permite que cualquier viewport de cliente o panel de desarrollo que corra localmente en un puerto asignado dinámicamente por Vite (ej. `http://localhost:3131`) pueda enviar telemetría u operaciones de control al servidor Bridge API en el puerto `3001` sin ser bloqueado por políticas CORS.
+
+### Archivos modificados:
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+---
+
 ## CLI-431 — 2026-07-12
 **Feature: Mitigación de Warnings de Permisos en Sincronización de Facturación para Clientes**
 

@@ -1,8 +1,16 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 431 tareas completadas de 431 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 432 tareas completadas de 432 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-432: Habilitación de CORS para Puertos Dinámicos de Viewports Locales en Bridge CLI~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se inyectó una regla de validación de origen mediante expresión regular en la configuración de CORS del servidor Bridge express.js para admitir dinámicamente peticiones HTTP desde cualquier puerto local ejecutándose en localhost o 127.0.0.1. Esto previene el bloqueo de peticiones de telemetría o control cuando los viewports de clientes se ejecutan localmente en puertos dinámicos asignados por Vite.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-431: Mitigación de Warnings de Permisos en BillingSync para Sesiones Cliente~~**
   - Estatus: Completada
