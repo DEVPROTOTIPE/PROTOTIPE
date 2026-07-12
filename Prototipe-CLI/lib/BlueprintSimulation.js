@@ -23,7 +23,8 @@ export class BlueprintSimulation {
 
     console.log('✨  COMPOSICIÓN PROPUESTA:');
     console.log(`    - 📦  Features (${blueprint.features.length}):      ${blueprint.features.join(', ') || 'Ninguna (Semilla limpia)'}`);
-    console.log(`    - 🧠  Capabilities (${blueprint.capabilities.length}):  ${blueprint.capabilities.join(', ') || 'Ninguna'}`);
+    const blueprintCapabilities = blueprint.capabilities || [];
+    console.log(`    - 🧠  Capabilities (${blueprintCapabilities.length}):  ${blueprintCapabilities.join(', ') || 'Ninguna'}`);
     console.log(`    - 🧩  Components (${blueprint.components.length}):    ${blueprint.components.join(', ') || 'Ninguno'}`);
     console.log(`    - 📐  Patterns (${blueprint.patterns.length}):      ${blueprint.patterns.join(', ') || 'Ninguno'}`);
     
