@@ -9,6 +9,7 @@
 import fs from 'fs-extra';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { normalizeResult } from './test_support/normalize_result.js';
@@ -17,7 +18,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..');
 
-const HISTORICAL_SANDBOX_DIR = 'D:\\PROTOTIPE_CHARACTERIZATION_SANDBOX';
+const HISTORICAL_SANDBOX_DIR = process.env.PROTOTIPE_SANDBOX_DIR || path.join(os.tmpdir(), 'PROTOTIPE_CHARACTERIZATION_SANDBOX');
 const EXPECTED_BASELINE_COMMIT = '7251cf16eb7ee5ce248fb54cee12b55968ace253';
 
 async function getGitCommit(dir) {
