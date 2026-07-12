@@ -1,0 +1,33 @@
+{
+  "invariants": {
+    "core_files_copied": {
+      "packageJsonExists": true,
+      "viteConfigExists": true,
+      "srcExists": true,
+      "publicExists": true
+    }
+  },
+  "defects": {
+    "vite_dev_pin_exposure": {
+      "hasHardcodedPin": false,
+      "detail": "El PIN de desarrollo \"SECRET_PIN_01\" se inyecta literalmente en src/constants/index.js"
+    },
+    "scaffolded_features_installed": {
+      "featuresInstalledInManifest": [],
+      "detail": "Features scaffolded (que no existen físicamente) se marcan como instaladas"
+    },
+    "malformed_blueprint_validation": {
+      "success": false,
+      "errorSnippet": "ERROR_SHOWN",
+      "detail": "Blueprints malformados no disparan validaciones de esquema estrictas"
+    }
+  },
+  "guardStats": {
+    "allowedControlProcesses": 0,
+    "unexpectedExternalProcesses": 0,
+    "unexpectedNetworkCalls": 0,
+    "firebaseCliInvocations": 0,
+    "githubApiInvocations": 0,
+    "centralApiInvocations": 0
+  }
+}

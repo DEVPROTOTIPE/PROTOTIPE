@@ -16,9 +16,15 @@
     "test:verbose": "node test_templates.js --verbose",
     "validate:knowledge": "node scripts/validate-knowledge.js",
     "test:core-promotion": "node scripts/run_full_certification.js",
-    "test:core-promotion-certification": "node scripts/run_full_certification.js --strict"
+    "test:core-promotion-certification": "node scripts/run_full_certification.js --strict",
+    "test:p0.2": "node scripts/tests/p0_2/run_p0_2_contract_tests.js",
+    "test:p0.2:report": "node scripts/tests/p0_2/run_p0_2_contract_tests.js --write-report",
+    "test:p0.3": "node scripts/tests/p0_3/run_p0_3_security_tests.js",
+    "test:p0.4": "node scripts/tests/p0_4/run_p0_4_lifecycle_tests.js",
+    "test:p0.6": "node scripts/tests/p0_6/run_p0_6_queue_tests.js"
   },
   "dependencies": {
+    "ajv": "^8.20.0",
     "cors": "^2.8.5",
     "diff": "^9.0.0",
     "express": "^4.19.2",
@@ -29,12 +35,11 @@
     "jimp": "^1.6.1",
     "ora": "^9.4.0",
     "picocolors": "^1.0.0",
+    "semver": "^7.8.5",
     "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.1",
-    "ajv": "^8.20.0",
-    "playwright": "^1.61.1",
-    "semver": "^7.8.5"
+    "playwright": "^1.61.1"
   }
 }

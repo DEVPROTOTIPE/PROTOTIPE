@@ -1,8 +1,434 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `99.27%` de completitud en base a 410 tareas completadas de 413 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 450 tareas completadas de 450 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-450: Inyección del Estándar UI/UX en las Habilidades Operativas de la IA (Skills)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Modificamos las instrucciones físicas de las skills operativas del agente (`component-creator`, `component-extractor`, `portar-componente`, y `crear-skill-prototipe`) en el directorio activo `.agents/skills/` para incorporar las directivas del estándar de maquetación, accesibilidad y diseño táctil (touch target 44px, elevación tonal en Dark Mode, no hover pegajoso en móvil, React Portals en dropdowns, inputmode en formularios). Adicionalmente, el linter de integridad del monorepo (`verify_library_integrity.cjs`) sincronizó automáticamente los cambios hacia el directorio de resguardo en la documentación del proyecto y actualizó el manifiesto `sync_manifest.json` de forma atómica.
+  - Archivos:
+    - [`.agents/skills/component-creator/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/component-creator/SKILL.md) [MODIFY]
+    - [`.agents/skills/component-extractor/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/component-extractor/SKILL.md) [MODIFY]
+    - [`.agents/skills/portar-componente/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/portar-componente/SKILL.md) [MODIFY]
+    - [`.agents/skills/crear-skill-prototipe/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/crear-skill-prototipe/SKILL.md) [MODIFY]
+    - [`.agents/skills/sync_manifest.json`](file:///d:/PROTOTIPE/.agents/skills/sync_manifest.json) [MODIFY]
+
+* **[x] ~~Tarea CLI-449: Expansión del Estándar de Diseño Premium y Visual de Vanguardia~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Expandimos el estándar visual `estandar_disenio_premium.md` incorporando las reglas de estructuración tonal de fondos en Modo Oscuro (Niveles 0 al 3), el estándar de animaciones fluidas optimizadas para GPU (transform y opacity) con will-change, la prevención de hovers pegajosos en dispositivos táctiles (`@media (hover: hover)`), y la especificación de efectos avanzados de marca (glow dinámico HSL y shimmer skeleton).
+  - Archivos:
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_disenio_premium.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/estandar_disenio_premium.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-448: Propagación e Inyección del Estándar UI/UX en Reglas de IA (AGENTS.md y GEMINI.md)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Sincronizamos e inyectamos las nuevas pautas del estándar de maquetación y UI/UX directamente en las reglas centrales de la IA (`.agents/AGENTS.md`) y en todas las copias de `GEMINI.md` en el monorepo (usando el script de propagación `sync_rules.js` para actualizar de forma inteligente y automatizada el motor del CLI, plantillas core, dashboard y el entorno del cliente).
+  - Archivos:
+    - [`.agents/AGENTS.md`](file:///d:/PROTOTIPE/.agents/AGENTS.md) [MODIFY]
+    - [`Prototipe-CLI/GEMINI.md`](file:///d:/PROTOTIPE/Prototipe-CLI/GEMINI.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md) [MODIFY]
+    - [`Plantillas Core/App Ventas/GEMINI.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/GEMINI.md) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/GEMINI.md`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/GEMINI.md) [MODIFY]
+    - [`Instancias Clientes/ventas/ventas-moni-app/GEMINI.md`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/GEMINI.md) [MODIFY]
+    - [`Prototipe-CLI/templates/template-core-seed/GEMINI.md`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/GEMINI.md) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/GEMINI.md`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/GEMINI.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-447: Expansión del Estándar de Maquetación y UX para Botones, Sombras y Desplegables Custom~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Expandimos el estándar oficial de maquetación `estandar_maquetacion_alineacion_ui.md` tras una investigación exhaustiva de mejores prácticas (WCAG 2.2, Nielsen Norman Group y Material Design 3). Anexamos reglas estrictas para el tamaño y área interactiva de botones (touch target de 44x44px), la especificación de sus 5 estados visuales (incluyendo deshabilitado semántico), pautas para elevación y sombras suavizadas (tonal en modo oscuro), accesibilidad y prevención de clipping (React Portals / Floating UI) en dropdowns customizados, y la usabilidad de formularios (asociaciones label-input y inputmode móvil). Actualizamos el mapa de documentación semántica.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_maquetacion_alineacion_ui.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/estandar_maquetacion_alineacion_ui.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-446: Blindaje de Seguridad, Aprovisionamiento Recursivo de Dependencias e Integridad de Sandbox~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Implementación de mejoras y auditorías del ecosistema. Refactorizamos el motor `generator.js` de Prototype CLI para realizar escaneos dinámicos en la biblioteca de componentes y resolver recursivamente el grafo de dependencias internas (`dependencies.internal`), inyectando de forma transitiva todos los átomos asociados (como `CustomSelect` o `BrandIcons`). Protegimos los paneles administrativos de `App Ventas` (`OrderDeliveryPanel.jsx` y `DeliveryCustomMessengerPanel.jsx`) con validaciones de rol administrador (`user.role === 'admin'`) y ajustamos la sintaxis para pasar el linter de seguridad estricto del monorepo a 0 advertencias. Corregimos colores rígidos oscuros en los playgrounds `LeafletMapPickerSandbox.jsx` y `ProgramadorRutasDomicilioSandbox.jsx` para alinearse con el Modo Claro/Oscuro del tema HSL. Adicionalmente, realizamos una auditoría técnica completa del Feature Flags Manager y el Feature Marketplace.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/components/admin/orders/OrderDeliveryPanel.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/orders/OrderDeliveryPanel.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/components/admin/settings/DeliveryCustomMessengerPanel.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/settings/DeliveryCustomMessengerPanel.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LeafletMapPickerSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LeafletMapPickerSandbox.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ProgramadorRutasDomicilioSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ProgramadorRutasDomicilioSandbox.jsx) [MODIFY]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_integridad_y_criterios_aprovisionamiento.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_integridad_y_criterios_aprovisionamiento.md) [NEW]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_feature_flags_y_marketplace.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_feature_flags_y_marketplace.md) [NEW]
+
+* **[x] ~~Tarea CLI-445: Estandarización e Implementación del Hub de Iconos Atómicos de Marca (BrandIcons)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se estructuró y desarrolló la propuesta de la iconografía del sistema. Para resolver los fallos de empaquetado de Vite por la ausencia de logos de marcas en lucide-react y mantener el código de negocio libre de vectores pesados, creamos el Hub de Iconos de Marca (`BrandIcons.jsx`) con exportaciones nombradas para logotipos e isotipos optimizados (GitHub, WhatsApp, Google, Firebase, Stripe, DIAN, Visa, MasterCard, Apple) con el uso de props `className` y classes `fill-current`. Se documentó en el catálogo de marca blanca en `/06_Biblioteca_Componentes/Formularios_y_UI/Iconos_Marca/iconos_marca.md`, se indexó en el README y en el mapa semántico, y se reemplazó el SVG inline de GitHub del Dashboard Central por el nuevo componente `<GithubIcon />`. Se creó un Sandbox interactivo para su testeo.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Iconos_Marca/iconos_marca.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Iconos_Marca/iconos_marca.md) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/ui/BrandIcons.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/ui/BrandIcons.jsx) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/BrandIconsSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/BrandIconsSandbox.jsx) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-444: Sincronización e Integración de Repositorio GitHub de Clientes en Firestore y CRM~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se mejoró el flujo de aprovisionamiento de repositorios en GitHub. Modificamos la función `setupGitHub` y `createProject` en el backend del generador (`generator.js`) para que, una vez empujado el scaffolding a GitHub mediante `gh repo create`, retorne un estado estructurado que incluya `githubUploaded` y `githubUrl`. En el Dashboard Central (`App.jsx`), interceptamos este resultado al recibir la respuesta SSE de éxito y guardamos de forma estructurada la URL de GitHub (`github: { uploaded: true, url: ... }`) en el documento de `clientes_control` del cliente. Finalmente, inyectamos un botón visual de acceso directo a GitHub (usando el icono SVG oficial en línea para garantizar 100% de compatibilidad con lucide-react) en la tarjeta de cada cliente en el CRM.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-443: Panel de Gestión e Integración Visual de Cuentas Firebase en Dashboard y Perfil Administrador~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se integró de forma visual la gestión de cuentas Firebase en el Dashboard Central. Para ello, se crearon endpoints en `server.js` (`GET /api/firebase/accounts`, `POST /api/firebase/accounts/use`, `POST /api/firebase/accounts/add`, `POST /api/firebase/accounts/logout` y `GET /api/firebase/accounts/status`). Se desarrolló el componente `FirebaseAccountsModal.jsx` con interfaz premium para listar, rotar y desvincular cuentas con animaciones de carga, alertas y barra de límite de proyectos Spark. Se corrigió un error de parseo JSON (`Unexpected token '<', "<!doctype "...`) al parametrizar de forma absoluta las llamadas fetch de React con la prop `cliUrl={CLI_URL}` para evitar el fallback SPA del servidor Vite local. Se añadió tolerancia en `/api/firebase/accounts/use` para evitar reportar como error 500 el comportamiento de Firebase CLI al activar una cuenta que ya era la activa de forma predeterminada (`Already using account`). Se resolvió el error de entorno no interactivo (`Cannot run "login:add" in non-interactive mode`) en `/api/firebase/accounts/add` al lanzar en Windows una terminal flotante del sistema (`start cmd.exe /k "firebase login:add"`) que sí hereda el contexto TTY e interactivo necesario para que Firebase abra el navegador web predeterminado del desarrollador. Finalmente, se inyectó el botón de acceso rápido "Cuentas Firebase (Rotación)" con icono `Flame` en el modal de perfil de administrador en `App.jsx`, y se habilitó un botón de rescate "Gestionar Firebase" en el modal de progreso del aprovisionador en caso de fallos.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/FirebaseAccountsModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FirebaseAccountsModal.jsx) [NEW]
+
+* **[x] ~~Tarea CLI-442: Gestor Interactivo de Cuentas Firebase para Rotación de Identidades Google~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementó la utilidad interactiva de consola `firebase_account_manager.js` para simplificar la rotación y administración de múltiples cuentas de Firebase en la máquina host de desarrollo. El script provee comandos guiados para: ver la cuenta activa para el aprovisionamiento, listar todas las cuentas locales vinculadas, agregar nuevas cuentas mediante el navegador (`login:add`), alternar de cuenta activa de forma interactiva (`login:use`), cerrar sesión en cuentas específicas y realizar comprobaciones rápidas de conectividad y credenciales.
+  - Archivos:
+    - [`Prototipe-CLI/scripts/firebase_account_manager.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/firebase_account_manager.js) [NEW]
+
+* **[x] ~~Tarea CLI-441: Sincronización de Progreso en Aprovisionamiento y Transición de Resumen de Credenciales~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se amplió la lista de etapas del modal de progreso agregando "Registrando cliente en la nube" (paso 13) e "Inyectando componentes inteligentes" (paso 14), cubriendo los eventos de fin de ciclo cliente que se ejecutan asíncronamente en el frontend. Se inyectó soporte para la prop `isCompleted` en el modal de progreso y se modificó `App.jsx` para pasar este indicador una vez guardados los datos de onboarding. Adicionalmente, se corrigió una violación a las reglas de hooks de React (retorno anticipado condicional antes de declaraciones de useEffect) refactorizando el renderizado condicional de `ProvisioningProgressModal` al final del componente. Finalmente, se inyectó un `useEffect` en `App.jsx` que detecta la finalización, mantiene el modal de progreso en 100% y éxito por 1.5 segundos, y realiza la transición automática cerrando el modal de progreso y abriendo directamente el panel de credenciales de Onboarding del cliente.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-440: Robustez en Detección de Errores y Visualización de Progreso en Aprovisionamiento (Evitación de Falsos Positivos)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se refinó el detector `isError` del modal de progreso para evitar falsos positivos cuando la palabra "error" aparece en parámetros de comandos inofensivos (como `--loglevel=error`). Adicionalmente, se modificó el cálculo de progreso global (`progressPercent`) para representar el avance exacto de hitos sin saltar artificialmente al 100% en caso de error, y se actualizó `execAsyncCommand` en el generador CLI para capturar la salida combinada de stdout y stderr en el mensaje de error de salida, permitiendo interceptar advertencias fatales del motor de despliegue de Firebase de manera inequívoca.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-439: Activación Automática de APIs de GCP y Robustez en Despliegue de Firebase para Proyectos Nuevos~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementó en el Bridge CLI (`server.js`) la activación programática de los servicios Firestore (`firestore.googleapis.com`), Firebase Storage (`firebasestorage.googleapis.com`) y Storage (`storage.googleapis.com`) en GCP usando tokens OAuth2 del usuario, agregando un delay de 5 segundos para su propagación. En el generador (`generator.js`), se inyectó un catch defensivo al comando de deploy de Firebase de modo que, si falla a causa de no tener aprovisionado Cloud Storage o el plan Blaze, capture el error, muestre un warning y reintente el deploy omitiendo Storage (`--only firestore:rules,firestore:indexes,hosting`). Esto garantiza la continuidad del despliegue en Spark sin generar rollbacks.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-438: Solución a Fugas de Importación de Features y Mitigación de Fallas en Compilación del Template Seed~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se creó un stub de indexación para la feature `billing` en la plantilla de semilla `template-core-seed` (en `src/features/billing/index.js`) que exporta un suscriptor no-op `subscribeToBillingData`. Esto soluciona los fallos de compilación durante el aprovisionamiento de clientes usando el core agnóstico de la semilla, donde Rollup arrojaba el error `Could not resolve "../features/billing" from "src/hooks/useAppConfigSync.js"`. Además, se eliminó la instancia huérfana de `ProvisioningProgressModal` en `App.jsx` fuera del wizard y se sincronizó el flujo de resiliencia del submit.
+  - Archivos:
+    - [`Prototipe-CLI/templates/template-core-seed/src/features/billing/index.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/features/billing/index.js) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-437: Integración del Modal de Progreso dentro del Layout del Wizard de Onboarding y Resiliencia de Estados de Carga~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se inyectó la instancia del `<ProvisioningProgressModal>` dentro de la vista activa de onboarding (`isOnboardingActive === true`) en `Central PROTOTIPE/dev-dashboard/src/App.jsx`. Esto resuelve el problema de renderizado donde el modal quedaba en el bloque de retorno principal e inaccesible debido al return anticipado del wizard. Además, se adaptaron las acciones del botón de cierre (`onClose`) y el bloque catch del submit para asegurar el restablecimiento de los estados `isProvisioning` y `isRegistering` en caso de fallos del motor de aprovisionamiento o de compilación, desbloqueando la UI.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-436: Modulación del Modal de Progreso de Aprovisionamiento Premium e Integración en Dashboard Central~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se extrajo el overlay de carga estático del Dashboard Central (`App.jsx`) y se implementó como un componente de UI modular independiente e interactivo llamado `ProvisioningProgressModal` (`components/admin/ProvisioningProgressModal.jsx`). Este modal incorpora el estado de la máquina de tareas persistente en tiempo real (consultando `/api/provisioning/status` mediante polling de seguridad con delay), mostrando al operador el estado real de la tarea (queued, waiting_lock, processing, completed, failed, rollback), la posición en cola actual, y alertas sobre el resultado. Permite al administrador cerrar el modal o continuar de forma interactiva una vez finalizada la tarea, previniendo regresiones de interfaz y desacoplando el código de `App.jsx`.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-435: Reparación del Bloqueo de Inyección de Branding, Solución de Duplicidad de :root en index.css y Consistencia de Configuración Inicial en Zustand/Firestore~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se envolvió el bloque de variables base del `:root` en `template-core-seed/src/index.css` con marcadores `BRANDING_VARS_START` / `BRANDING_VARS_END`, permitiendo que el generador reemplace por completo las variables base sin duplicarlas al principio de `:root`. Se agregaron variables de entorno iniciales (`VITE_INITIAL_FONT`, `VITE_INITIAL_RADIUS`) en `.env.local` generados por `generator.js`, y se adaptaron los archivos `appConfigService.js` (para `DEFAULT_SETTINGS`) y `appConfigStore.js` (para Zustand) del template de forma que se sincronicen de manera consistente con la configuración inicial de branding del asistente en el primer arranque de la base de datos Firestore y del LocalStorage.
+  - Archivos:
+    - [`Prototipe-CLI/templates/template-core-seed/src/index.css`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/index.css) [MODIFY]
+    - [`Prototipe-CLI/templates/template-core-seed/src/services/appConfigService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/appConfigService.js) [MODIFY]
+    - [`Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-434: Reparación del Test de Aprovisionamiento y Corrección de Alias de Contrato Canónico en Generator~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se reestructuró el payload del test de aprovisionamiento al formato canónico `{ blueprint, execution }`, se corrigió la ruta de salida `targetDir`, y se eliminó el check obsoleto de `VITE_DEV_PIN`. Adicionalmente, se corrigió un alias mismatch en `generator.js` donde `execution.firebaseDeploy` no era propagado a `answers.enableFirebaseDeploy`, causando que el guard de deploy ignorara el contrato canónico. Resultado final: **31/31 assertions PASS**.
+  - Archivos:
+    - [`Prototipe-CLI/scripts/test_provision.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_provision.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-433: Alineación de Configuración de Firebase y Persistencia Offline de Core Seed con Core Ventas~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se modificó la configuración base de Firebase en `template-core-seed` para añadir la validación activa de variables de entorno de Firebase requeridas al inicializarse la UI del cliente, previniendo errores silenciosos por falta de credenciales. Asimismo, se inicializó Firestore utilizando `persistentLocalCache` y `persistentMultipleTabManager` para dotar a la semilla de capacidades de persistencia offline, garantizando consistencia local y alineando su robustez técnica con la de la aplicación de referencia `App Ventas`.
+  - Archivos:
+    - [`Prototipe-CLI/templates/template-core-seed/src/config/firebaseConfig.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/config/firebaseConfig.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-432: Habilitación de CORS para Puertos Dinámicos de Viewports Locales en Bridge CLI~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se inyectó una regla de validación de origen mediante expresión regular en la configuración de CORS del servidor Bridge express.js para admitir dinámicamente peticiones HTTP desde cualquier puerto local ejecutándose en localhost o 127.0.0.1. Esto previene el bloqueo de peticiones de telemetría o control cuando los viewports de clientes se ejecutan localmente en puertos dinámicos asignados por Vite.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-431: Mitigación de Warnings de Permisos en BillingSync para Sesiones Cliente~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se inyectó la validación del rol de administrador (user && role === 'admin') y verificación de cambios (hasChanges) en useAppConfigSync.js antes de intentar propagar las tarifas de facturación a config/settings local. Esto evita que los usuarios con rol de cliente o no administradores disparen peticiones de escritura a colecciones protegidas, eliminando el error de "Missing or insufficient permissions" en la consola del navegador.
+  - Archivos:
+    - [`Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-430: Corrección de Bootstrap del Core del Cliente y Validación Zod de Manifiestos~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Corrección de los errores de validación de Zod (layout inválido bento y themeMode/initials faltantes) que bloqueaban el arranque de la app en la pantalla de carga del spinner. Asegurada compatibilidad total con ExperienceSchemas.js y saneamiento del preflight.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/lib/BlueprintSimulation.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/BlueprintSimulation.js) [MODIFY]
+    - [`Prototipe-CLI/lib/ExperienceComposer.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ExperienceComposer.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-429: Auditoría de Hardening de Producción y Diseño SaaS (P0.7)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Evaluación exhaustiva de seguridad externa (endpoints desprotegidos, RBAC, rate limiting), trazabilidad (identidad de operadores, logs JSON estructurados), observabilidad técnica (métricas, diccionario de errores), ciclo de vida cloud (rollback y purga de recursos en la nube) y escalabilidad en el Bridge de PROTOTIPE. Generación del informe oficial correspondiente.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_7_production_hardening.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_7_production_hardening.md) [NEW]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-428: Implementación de Provisioning Queue & Job Management (P0.6)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Implementación del gestor de colas de aprovisionamiento persistente (ProvisioningQueue.js) con control de concurrencia secuencial estricta (maxConcurrency = 1). Incorporación de la máquina de estados completa (queued -> acquiring_lock -> waiting_lock -> processing -> completed/failed/cancelled), persistencia física de la cola en disco de forma atómica mediante renombrado temporal, y crash recovery de tareas pendientes al arranque. Integración completa del control de flujo en server.js (POST /api/create-project y GET /api/create-project/stream) enviando la posición en cola por SSE.
+  - Archivos:
+    - [`Prototipe-CLI/lib/ProvisioningQueue.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningQueue.js) [NEW]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-427: Suite de pruebas RED para Provisioning Queue & Job Management (P0.6)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Creación de la suite de pruebas RED para Provisioning Queue & Job Management. Implementación de los scripts de prueba test_provisioning_queue.js y el runner run_p0_6_queue_tests.js, verificando de forma aislada y estática la persistencia atómica, máquina de estados, límites de concurrencia secuenciales, gobernanza de locks físicos, crash recovery y emisión SSE. Ejecución de la suite validando el estado esperado PRODUCT_BEHAVIOR_FAILURE de 7 fallos de comportamiento en el producto.
+  - Archivos:
+    - [`Prototipe-CLI/scripts/tests/p0_6/test_provisioning_queue.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_6/test_provisioning_queue.js) [NEW]
+    - [`Prototipe-CLI/scripts/tests/p0_6/run_p0_6_queue_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_6/run_p0_6_queue_tests.js) [NEW]
+    - [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
+
+* **[x] ~~Tarea CLI-426: Diseño y Arquitectura de la Cola de Aprovisionamiento (P0.6)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Diseño y definición de la arquitectura para el gestor de colas y control de concurrencia secuencial en el motor de aprovisionamiento de PROTOTIPE. Incorporación de transiciones de bloqueo seguras (queued -> acquiring_lock -> processing), persistencia atómica mediante rename, delimitación de responsabilidades entre Queue y ProvisioningStateManager, diagrama de estados revisado y flujo detallado de recuperación síncrona ante caídas.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_6_queue_architecture.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_6_queue_architecture.md) [NEW]
+
+* **[x] ~~Tarea CLI-425: Auditoría de Madurez y Análisis de Robustez del Ecosistema PROTOTIPE~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Evaluación profunda del estado de madurez de la arquitectura del Bridge API y el motor de aprovisionamiento de PROTOTIPE. Análisis de la separación de responsabilidades, SPOFs, readiness de producción frente a escalabilidad de clientes simultáneos, auditoría de seguridad e ingeniería, identificación de cuellos de botella técnicos en filesystem/procesos y diseño del roadmap evolutivo recomendado.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_madurez_prototipe.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_madurez_prototipe.md) [NEW]
+
+* **[x] ~~Tarea CLI-424: Certificación E2E y Validación Productiva de Aprovisionamiento (P0.5)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Auditoría y validación E2E completa del flujo de aprovisionamiento de PROTOTIPE CLI. Análisis y verificación de escenarios de éxito, rollback automático, control de re-aprovisionamiento sobre carpetas preexistentes, trazabilidad de recursos Firebase cloud y resiliencia ante caídas del servidor mediante locks basados en archivo. Consolidado de resultados y documentación del informe de certificación oficial.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_5.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_5.md) [NEW]
+
+* **[x] ~~Tarea CLI-423: Rollback de Git y Recursos Cloud (P0.4 - Commit F)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Implementación de rollback seguro para re-aprovisionamientos donde existedBefore === true. Se agregaron variables de control en generator.js (gitExistedBefore, nodeModulesExistedBefore, packageLockExistedBefore, y gitInitialized) para detectar y eliminar únicamente el .git parcial, node_modules incompleto y package-lock.json generados durante el intento fallido, preservando los archivos preexistentes del usuario. Se implementó la trazabilidad de recursos cloud en server.js, actualizando el estado del ProvisioningStateManager a provisioning con metadata cloudResourcesCreated en cada paso exitoso, y a failed/rollback conservando toda la telemetría en caso de error.
+  - Commit: `03b6bb4` — `fix(p0.4): implement provisioning rollback tracking`
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-422: Observabilidad y aislamiento de variables (P0.4 - Commit E)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Propagación de taskId a answers.__taskId antes de lanzar el worker de aprovisionamiento, y prefijado de taskId en logs principales del generator.js. Configuración dinámica del TTL para purgado de tareas vía la variable de entorno TASK_CLEANUP_TTL_MS. Aislamiento estricto de variables de entorno heredadas por el subproceso fork del worker utilizando un allowlist de variables seguras.
+  - Commit: `69a4f56` — `fix(p0.4): propagate taskId and isolate worker environment`
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-421: Redacción de Contraseñas de Administrador y Tokens de Telemetría (P0.4 - Commit D)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se modificó la firma de retorno de la función `createProject` en `generator.js` para no exponer `adminPassword` en plaintext en el objeto literal devuelto, reemplazándola por `adminPasswordSet: true`. Para mantener compatibilidad con los consumidores locales (ej: `cli.js`), se definió `adminPassword` como una propiedad no-enumerable mediante `Object.defineProperty()`. Esto evita la serialización automática del secreto sobre el canal IPC, logs o respuestas HTTP de la API REST. Además, se reemplazó el token generado en `antigravity_bootstrap_prompt.md` por el placeholder seguro `[TOKEN_DE_TELEMETRIA]`.
+  - Commit: `6c01fa5` — `fix(p0.4): redact admin secrets and telemetry tokens`
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-420: Limpieza de uploads y validación de extensiones de logo (P0.4 - Commit C)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementó una whitelist de extensiones permitidas (`.png`, `.jpg`, `.jpeg`, `.svg`, `.webp`, `.gif`) en el endpoint `/api/upload-logo` antes de guardar el archivo en disco, previniendo la carga de scripts maliciosos. Se garantizó la limpieza del archivo de logo original en `temp_uploads` utilizando un bloque `try/finally` en `generator.js` una vez copiado y procesado con Jimp. Se añadió una limpieza redundante en el bloque `finally` de `worker_create_project.js`. Se validó que las pruebas P04-05 y P04-06 pasen a VERDE.
+  - Commit: `48cbd9c` — `fix(p0.4): cleanup temp uploads and validate logo extensions`
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/worker_create_project.js`](file:///d:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-419: Persistencia de Estado y Lock Físico de Aprovisionamiento (P0.4 - Commit B)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementó `ProvisioningStateManager.js` para gestionar el ciclo de vida de aprovisionamiento persistente (`pending | provisioning | completed | failed | rollback`). Se implementó un control de exclusión mutua atómico file-based con la bandera `wx` en `artifacts/provisioning-lock/{clientId}.lock`. Se integró en `server.js` coordinando `ProvisioningStateManager` y el lock en memoria `projectSyncLocks`. Se añadió el endpoint `/api/provisioning/status` y se validó que las pruebas de concurrencia y ciclo de vida pasen a VERDE.
+  - Commit: `27293af` — `feat(p0.4): implement persistent provisioning state and file lock`
+  - Archivos:
+    - [`Prototipe-CLI/lib/ProvisioningStateManager.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningStateManager.js) [NEW]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-418: Suite de Pruebas de Ciclo de Vida y Observabilidad en Estado RED (P0.4 - Commit A)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementaron las pruebas estáticas RED en `scripts/tests/p0_4/test_lifecycle_observability.js` y el runner en `scripts/tests/p0_4/run_p0_4_lifecycle_tests.js`. Las pruebas confirman las deficiencias del aprovisionamiento: lock volátil en RAM, ausencia de lifecycle persistente, rollback incompleto en re-provisión, rollback Firebase ausente, falta de limpieza de temporales, falta de validación de extensión en upload, exposición de password en result, falta de correlación de taskId y TTL de tareas hardcoded. Se agregó el comando `npm run test:p0.4`.
+  - Commit: `8dd6180` — `test(p0.4): add lifecycle and observability RED tests`
+  - Archivos:
+    - [`Prototipe-CLI/scripts/tests/p0_4/test_lifecycle_observability.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_4/test_lifecycle_observability.js) [NEW]
+    - [`Prototipe-CLI/scripts/tests/p0_4/run_p0_4_lifecycle_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_4/run_p0_4_lifecycle_tests.js) [NEW]
+    - [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
+
+* **[x] ~~Tarea CLI-417: Cierre Documental y Certificación Final de la Fase P0.3 (Scaffolding Security)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se creó el informe de certificación `informe_certificacion_p0_3.md` con objetivo, vulnerabilidades encontradas, controles implementados, matriz antes/después, 9 pruebas verificadas, 6 hashes de commit y declaración `P0.3 STATUS: CERTIFIED`. Se sincronizaron tareas_pendientes, bitacora_cambios y mapa_documentacion_ia.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_3.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_3.md) [NEW]
+    - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-416: Fix Regresión — Case-Sensitivity de Letra de Unidad en PathSecurity (Windows)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se detectó que `path.resolve()` en Windows preserva la case del drive letter del path de entrada (`d:` vs `D:`), causando que `startsWith` fallara y rechazara paths legítimos de los tests P0.2. Se normalizó a `toLowerCase()` en ambos métodos de `PathSecurity`. Resultado: P0.2 pasó de 68/70 a 70/70 PASSED.
+  - Commit: `e5d4a8f` — `fix(p0.3): normalize drive letter case in PathSecurity for Windows compatibility`
+  - Archivos:
+    - [`Prototipe-CLI/lib/PathSecurity.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/PathSecurity.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-415: Protección de Secretos en Subprocesos y Logs IPC (P0.3 - Commit C)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se creó `SecretRedactor.js` con redacción recursiva combinando `process.env` y objeto `answers` (incluyendo objetos anidados). Se hardeneó `worker_create_project.js` con variable `_activeAnswers` y overrides de `console.log/error` + canal `IPC:ERROR` filtrados por `redactSecrets`. Suite de pruebas actualizada con 4 sub-casos reales de aislamiento de secretos. Resultado: 9/9 PASSED.
+  - Commit: `9cacd7d` — `fix(p0.3): redact secrets from worker IPC and provisioning logs`
+  - Archivos:
+    - [`Prototipe-CLI/lib/SecretRedactor.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/SecretRedactor.js) [NEW]
+    - [`Prototipe-CLI/worker_create_project.js`](file:///d:/PROTOTIPE/Prototipe-CLI/worker_create_project.js) [MODIFY]
+    - [`Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-413: Hardening de Paths del Scaffolding contra Directory Traversal y TOCTOU (P0.3 - Commit B)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementaron las defensas de seguridad de filesystem para la fase P0.3. Se creó `PathSecurity.js` con validación centralizada de contención de rutas. Se reforzó `ProvisioningEnvelopeAdapter.js` con validación temprana de `logoPath` y `execution.targetPath` en ambas ramas (isNested y legacy). Se añadió validación TOCTOU post-`ensureDir` en `generator.js` mediante `fs.realpath`. Resultado: 5/6 tests del scope Commit B en PASSED (1 falla IPC de secretos diferida al Commit C).
+  - Commit: `df76567` — `fix(p0.3): harden scaffolding paths against traversal and TOCTOU`
+  - Archivos:
+    - [`Prototipe-CLI/lib/PathSecurity.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/PathSecurity.js) [NEW]
+    - [`Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-412: Suite de Pruebas de Seguridad Scaffolding en Estado RED (P0.3 - Commit A)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementó la suite de pruebas `test_scaffolding_security.js` y su orquestador `run_p0_3_security_tests.js` en `Prototipe-CLI/scripts/tests/p0_3/`, configurando el comando `npm run test:p0.3`. La suite verifica preventivamente (RED) la vulnerabilidad a traversals en `targetPath`, el bypass de logoPath fuera de la carpeta temporal, el riesgo de TOCTOU y enlaces simbólicos, y la filtración de secretos a través de los logs IPC del worker.
+  - Archivos:
+    - [`Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_3/test_scaffolding_security.js) [NEW]
+    - [`Prototipe-CLI/scripts/tests/p0_3/run_p0_3_security_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_3/run_p0_3_security_tests.js) [NEW]
+    - [`Prototipe-CLI/package.json`](file:///d:/PROTOTIPE/Prototipe-CLI/package.json) [MODIFY]
+
+* **[x] ~~Tarea CLI-411: Cierre Documental e Informe de Certificación de la Fase P0.2 (P0.2 - Cierre)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se redactó el Informe Final de Certificación de la Fase P0.2 (`informe_certificacion_p0_2.md`), documentando el resumen ejecutivo, la lista de commits, la matriz de archivos modificados, el consolidado de pruebas y el estado Git de los repositorios.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_2.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_certificacion_p0_2.md) [NEW]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-410: Conexión del Adapter al Flujo Real de Aprovisionamiento en Dashboard (P0.2 - Punto 5.3)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se conectó el adaptador `buildProvisioningPayload` en el flujo real del Wizard del Dashboard (`App.jsx`), interceptando la construcción manual del `cliPayload` y normalizándolo al sobre canónico estructurado antes del envío HTTP `POST` al Bridge local. Compilación de producción validada sin fallos.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-409: Adapter de Salida y Certificación de Payload en Dashboard (P0.2 - Punto 5.2)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se creó el modulo `provisioningPayload.js` en el Dashboard para transformar el payload legacy del wizard a la estructura de contrato canónico (`blueprint` + `execution` + root params), clasificando las recomendaciones del usuario a través de `mapRecommendationsToBlueprint()` en sus correspondientes categorías de features, components y patterns. Se implementó la suite de pruebas `test_dashboard_payload_contract.js` y se integró en el runner principal para certificar la normalización, la correcta clasificación semántica y el aislamiento de variables de infraestructura.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/utils/provisioningPayload.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/utils/provisioningPayload.js) [NEW]
+    - [`Prototipe-CLI/scripts/tests/p0_2/test_dashboard_payload_contract.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/test_dashboard_payload_contract.js) [NEW]
+    - [`Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-408: Migración del Bridge y Frontera Contractual (P0.2 - Punto 5.1)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se creó el adaptador `ProvisioningEnvelopeAdapter.js` encargado de normalizar las peticiones HTTP del Bridge (`req.body`) al envelope canónico (`blueprint` + `execution`), manteniendo las variables de infraestructura adicionales en el objeto root para no contaminar el blueprint. Se integró en `server.js` bajo el endpoint `/api/create-project` para actuar como frontera contractual. Se implementó la suite de pruebas `test_bridge_contract.js` y se integró en el runner para certificar el soporte dual de payloads (legacy planos y canónicos anidados) y la detección de conflictos de alias.
+  - Archivos:
+    - [`Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningEnvelopeAdapter.js) [NEW]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/scripts/tests/p0_2/test_bridge_contract.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/test_bridge_contract.js) [NEW]
+    - [`Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/run_p0_2_contract_tests.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-407: Integración y Desvío de Flujo Físico de Aprovisionamiento (P0.2 - Punto 4B)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se integró la normalización y pre-validación del Application Blueprint al inicio de `createProject` en `generator.js`. Se postergó la creación del directorio `targetDir` y la copia de la plantilla base (`fs.copy`) de forma que ocurra exclusivamente después de que la validación del blueprint (tanto inyectado como generado dinámicamente) haya concluido con éxito. Esto asegura el cumplimiento del contrato "Zero-write" frente a blueprints inválidos. Se actualizó el test `test_blueprint_no_write.js` para realizar una validación real y dinámica de efectos físicos en disco, y se corrigió el esquema AJV en `blueprint.schema.json` y `ProvisioningValidator.js` de acuerdo con las especificaciones.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/knowledge/schema/blueprint.schema.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/schema/blueprint.schema.json) [MODIFY]
+    - [`Prototipe-CLI/lib/ProvisioningValidator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningValidator.js) [MODIFY]
+    - [`Prototipe-CLI/scripts/tests/p0_2/test_blueprint_no_write.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/test_blueprint_no_write.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-406: Remediación del Generador contra Exposición de PIN de Desarrollo y features Scaffolded (P0.1, P0.2, P0.3, P0.4)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-11
+  - Fecha de finalización: 2026-07-11
+  - Descripción: Corrección de los 3 defectos de seguridad y estructuración del Generator del CLI: remoción del PIN de desarrollo (`VITE_DEV_PIN`) y su validación; filtrado estricto en manifiestos y package.json de features que realmente se copiaron de un origen físico, excluyendo features scaffolded/mock; y validación rigurosa de tipo y esquema de Application Blueprint en `ProvisioningValidator` para prevenir crashes sintácticos inesperados.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/lib/ProvisioningValidator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningValidator.js) [MODIFY]
 
 * **[x] ~~Tarea BUG-405: Corrección de Sincronización del Core, Escaneo de Subcarpetas en Windows y Purga de Instancias de Prueba~~**
   - Estatus: Completada

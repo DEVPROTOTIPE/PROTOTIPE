@@ -103,11 +103,12 @@ export class ExperienceComposer {
 
     // 4. Resolver y Organizar Widgets del Bento Dashboard con Match de Capacidades y Calidad
     const resolvedWidgets = [];
+    const blueprintCapabilities = blueprint.capabilities || [];
     
     for (const widget of widgetsData.widgets) {
       // Un widget es compatible si sus capacidades requeridas están en el blueprint (o no requiere ninguna)
       const hasCap = widget.requiredCapabilities.length === 0 || 
-                     widget.requiredCapabilities.every(c => blueprint.capabilities.includes(c));
+                     widget.requiredCapabilities.every(c => blueprintCapabilities.includes(c));
 
       if (hasCap) {
         let bestComponent = null;
@@ -122,7 +123,7 @@ export class ExperienceComposer {
             const compMeta = await fs.readJson(compPath);
             
             // A) Calcular superposición de capabilities (Bono de Capability Match)
-            const matchedCaps = compMeta.capabilities.filter(c => blueprint.capabilities.includes(c));
+            const matchedCaps = compMeta.capabilities.filter(c => blueprintCapabilities.includes(c));
             const capabilityMatchFactor = 1.0 + (matchedCaps.length * 0.2); // +20% por cada capacidad resuelta en común
 
             // B) Calcular base score por calidad

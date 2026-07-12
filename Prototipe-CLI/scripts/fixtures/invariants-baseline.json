@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "sourceCommit": "7251cf16eb7ee5ce248fb54cee12b55968ace253",
+    "snapshotSha256": "982e10a0234ecc9006b1b6313f46c8e4d7a9fc9b6abb504ea1582147a5a7d6cb",
+    "harnessCommit": "4ee0ff92828a7e01473bae2099defa4986047f95",
+    "nodeVersion": "v24.14.1",
+    "npmVersion": "unknown",
+    "platform": "win32",
+    "arch": "x64",
+    "capturedAt": "2026-07-11T00:00:00.000Z",
+    "artifactHashes": {
+      "generator": "c135e213b8e21d9c3f4d14a201523bb0ac349ee2d4211d7ef291137042f04df5",
+      "packageJson": "62937a93381f0ab45a293986e091a47ed5b41f31248d66173530c32cf16b6f34",
+      "packageLockJson": "f234a9bee4a87f03c3102e0d683696fa589fc2c354f7f99516d9582b9bacd63e",
+      "templateVentasPackageJson": "13a6d6ad65c32e784102e5afc96a2d364d3781c029a013b70ce4d9d26db66800",
+      "templateCoreSeedPackageJson": "d8af50f86e6566f0297be7efefd56cb44b5c6c4bfa1a2bef9ee9812c940ee84f",
+      "templateVentasDir": "a3e2932e201cd4d95ef25c43dbb9da0f51cadf47c255a8e242292d4819973826",
+      "templateCoreSeedDir": "ae7e302aac581bcf2f495d9ba2cbb465a5da1ec4c5492041fefa0e4b310ffe60"
+    },
+    "fixtureHashes": {
+      "answers1": "14d4e4f348f2c943ec37a5a3a74bbd0338d4652ac8141d736a8692e55eefbb50",
+      "answers2": "210309e82f74114fcac4376df46c40f4f0cc998d63712a64212cd52be8e2cb18"
+    }
+  },
+  "invariants": {
+    "core_files_copied": {
+      "packageJsonExists": true,
+      "viteConfigExists": true,
+      "srcExists": true,
+      "publicExists": true
+    }
+  }
+}

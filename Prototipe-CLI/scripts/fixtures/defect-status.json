@@ -1,0 +1,11 @@
+{
+  "metadata": {
+    "sourceCommit": "7251cf16eb7ee5ce248fb54cee12b55968ace253",
+    "lastUpdatedAt": "2026-07-11T00:00:00.000Z"
+  },
+  "statuses": {
+    "vite_dev_pin_exposure": "OBSERVED",
+    "scaffolded_features_installed": "OBSERVED",
+    "malformed_blueprint_validation": "OBSERVED"
+  }
+}

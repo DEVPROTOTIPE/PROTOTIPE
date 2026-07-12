@@ -1,0 +1,47 @@
+{
+  "manifestVersion": "1.0.0",
+  "sourceCommit": "7251cf16eb7ee5ce248fb54cee12b55968ace253",
+  "generatedAt": "2026-07-12T01:17:15.000Z",
+  "evidenceFiles": [
+    {
+      "path": "Prototipe-CLI/scripts/fixtures/invariants-baseline.json",
+      "sizeBytes": 1465,
+      "sha256": "725a411261ca478f22de25623a560c44f36369cb9c2142e114419200b573cc20",
+      "evidenceType": "HISTORICAL_INVARIANTS_BASELINE",
+      "fase": "P0.1",
+      "description": "Baseline de los invariants de scaffolding del Generator original (Commit 7251cf16)"
+    },
+    {
+      "path": "Prototipe-CLI/scripts/fixtures/defect-baseline.json",
+      "sizeBytes": 1864,
+      "sha256": "02c70c4b449eb92422384063071e4390b8aa9b982b2e51b9e36ec684f4269391",
+      "evidenceType": "HISTORICAL_DEFECTS_BASELINE",
+      "fase": "P0.1",
+      "description": "Baseline de los defectos históricos de seguridad en el Generator original (Commit 7251cf16)"
+    },
+    {
+      "path": "Prototipe-CLI/scripts/fixtures/defect-status.json",
+      "sizeBytes": 296,
+      "sha256": "aaff223e445371c98f289ac2c61bbacaf58a2fbdeeeb8a2b92ba493ba9be2f4a",
+      "evidenceType": "DEFECTS_STATE_TRACKING",
+      "fase": "P0.1",
+      "description": "Rastreo de estado de los defectos (OBSERVED/CORRECTED) a lo largo del pipeline de auditoría"
+    },
+    {
+      "path": "Prototipe-CLI/scripts/temp_runs/historical-run-1.normalized.json",
+      "sizeBytes": 971,
+      "sha256": "e796e26179dff3c697eaf7a530b549b1c50b944739699882df2c1a62557ec2e9",
+      "evidenceType": "HISTORICAL_RUN_OUTPUT_1",
+      "fase": "P0.1",
+      "description": "Salida normalizada de la primera ejecución del test sobre el snapshot histórico"
+    },
+    {
+      "path": "Prototipe-CLI/scripts/temp_runs/historical-run-2.normalized.json",
+      "sizeBytes": 971,
+      "sha256": "e796e26179dff3c697eaf7a530b549b1c50b944739699882df2c1a62557ec2e9",
+      "evidenceType": "HISTORICAL_RUN_OUTPUT_2",
+      "fase": "P0.1",
+      "description": "Salida normalizada de la segunda ejecución del test sobre el snapshot histórico, confirmando repetibilidad"
+    }
+  ]
+}

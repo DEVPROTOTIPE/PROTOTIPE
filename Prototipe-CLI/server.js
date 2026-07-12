@@ -23,6 +23,9 @@ import { PromotionBlueprintBuilder } from './lib/PromotionBlueprintBuilder.js';
 import { CoreCandidateBuilder } from './lib/CoreCandidateBuilder.js';
 import { CorePromotionValidator } from './lib/CorePromotionValidator.js';
 import { BriefingDocumentMapper } from './lib/BriefingDocumentMapper.js';
+import { normalizeProvisioningEnvelope } from './lib/ProvisioningEnvelopeAdapter.js';
+import { ProvisioningStateManager } from './lib/ProvisioningStateManager.js';
+import { ProvisioningQueue } from './lib/ProvisioningQueue.js';
 
 const execAsync = promisify(exec);
 
@@ -322,6 +325,10 @@ app.use(cors({
     // Sin Origin = petición server-to-server (PowerShell, Node, curl) → permitir
     if (!origin) return callback(null, true);
     if (CORS_ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    // Permitir cualquier puerto local en desarrollo (localhost/127.0.0.1)
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+      return callback(null, true);
+    }
     callback(new Error(`[CORS] Origen no autorizado: ${origin}`));
   },
   credentials: true,
@@ -367,6 +374,22 @@ async function authenticateFirebaseToken(req, res, next) {
 
 // Middleware de verificación de Firebase App Check con traducción a Tenant
 async function verifyAppCheck(req, res, next) {
+  // Bypass de desarrollo local en el Bridge API (si NODE_ENV !== 'production' o el request es de localhost)
+  const ip = req.ip || req.connection.remoteAddress || '';
+  const isLoopback = ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' || ip.includes('127.0.0.1') || ip === 'localhost';
+
+  if (process.env.NODE_ENV !== 'production' && isLoopback) {
+    req.appCheck = { appId: 'local-dev-app-id', verified: true };
+    const bodyClientId = req.body && req.body.clientId;
+    req.tenant = {
+      appId: 'local-dev-app-id',
+      clientId: bodyClientId || 'test-client',
+      niche: (req.body && req.body.niche) || 'general',
+      status: 'active'
+    };
+    return next();
+  }
+
   // 1. Bypass estricto de pruebas locales (solo si NODE_ENV === 'test' y ALLOW_TEST_APPCHECK_BYPASS === 'true')
   if (process.env.NODE_ENV === 'test' && process.env.ALLOW_TEST_APPCHECK_BYPASS === 'true') {
     const ip = req.ip || req.connection.remoteAddress;
@@ -710,6 +733,120 @@ app.post('/api/firebase/validate', async (req, res) => {
   }
 });
 
+// Endpoints para gestión de cuentas de Firebase (Rotación de identidades)
+app.get('/api/firebase/accounts', async (req, res) => {
+  try {
+    const { stdout } = await execAsync('firebase login:list --json');
+    const data = JSON.parse(stdout);
+    const accounts = data.result || [];
+
+    // Obtener la cuenta activa actual (sin --json para que muestre solo el email)
+    let activeEmail = null;
+    try {
+      const { stdout: activeOut } = await execAsync('firebase login:list');
+      const match = activeOut.match(/Logged in as\s+([^\s\r\n]+)/i);
+      if (match) activeEmail = match[1].trim();
+    } catch (_) {}
+
+    // Marcar la cuenta activa
+    const enriched = accounts.map(acc => ({
+      ...acc,
+      active: acc.user?.email === activeEmail
+    }));
+
+    res.json({ success: true, accounts: enriched });
+  } catch (err) {
+    try {
+      const { stdout: textStdout } = await execAsync('firebase login:list');
+      res.json({ success: true, accounts: [], warning: 'No se pudieron parsear las cuentas en formato JSON.', raw: textStdout });
+    } catch (innerErr) {
+      res.json({ success: true, accounts: [], error: innerErr.message });
+    }
+  }
+});
+
+app.post('/api/firebase/accounts/use', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ success: false, error: 'El email es requerido.' });
+  }
+  const sanitizedEmail = email.replace(/[^a-zA-Z0-9@._+-]/g, '');
+  try {
+    const { stdout, stderr } = await execAsync(`firebase login:use ${sanitizedEmail}`);
+    res.json({ success: true, output: stdout || stderr });
+  } catch (err) {
+    const fullMsg = `${err.message || ''} ${err.stderr || ''}`;
+    // Cuenta ya estaba activa — no es un error real
+    if (fullMsg.includes('Already using account')) {
+      return res.json({ success: true, output: `Ya estás usando la cuenta ${sanitizedEmail} como activa.` });
+    }
+    // La cuenta no tiene contexto de 'login:use' válido — aún así responder con éxito
+    // si el error es solo de contexto global (la cuenta puede usarse con --account flag)
+    if (fullMsg.includes('Command failed') && !fullMsg.includes('not found') && !fullMsg.includes('unknown')) {
+      // Intentar verificar si la cuenta existe en la lista
+      try {
+        const { stdout: listOut } = await execAsync('firebase login:list --json');
+        const parsed = JSON.parse(listOut);
+        const exists = (parsed.users || parsed || []).some(u => {
+          const userEmail = typeof u === 'string' ? u : (u.email || u.user?.email || '');
+          return userEmail === sanitizedEmail;
+        });
+        if (exists) {
+          return res.json({ success: true, output: `La cuenta ${sanitizedEmail} está vinculada. Puede necesitar re-autenticación para ser usada como activa predeterminada.` });
+        }
+      } catch (_) {}
+    }
+    res.status(500).json({ success: false, error: `Fallo al cambiar a la cuenta ${sanitizedEmail}: ${err.stderr || err.message}` });
+  }
+});
+
+app.post('/api/firebase/accounts/add', async (req, res) => {
+  try {
+    let command = '';
+    const platform = process.platform;
+    if (platform === 'win32') {
+      command = 'start cmd.exe /k "firebase login:add"';
+    } else if (platform === 'darwin') {
+      command = `osascript -e 'tell app "Terminal" to do script "firebase login:add"'`;
+    } else {
+      command = 'x-terminal-emulator -e firebase login:add || gnome-terminal -e "firebase login:add" || konsole -e "firebase login:add"';
+    }
+
+    exec(command, (err, stdout, stderr) => {
+      if (err) {
+        logger.error(`Error al iniciar terminal interactiva de Firebase login:add: ${err.message}`);
+      }
+    });
+    res.json({ success: true, message: 'Se ha abierto una ventana de terminal interactiva para la vinculación.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: `Fallo al iniciar el login: ${err.message}` });
+  }
+});
+
+app.post('/api/firebase/accounts/logout', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ success: false, error: 'El email es requerido.' });
+  }
+  const sanitizedEmail = email.replace(/[^a-zA-Z0-9@._+-]/g, '');
+  try {
+    const { stdout } = await execAsync(`firebase logout ${sanitizedEmail}`);
+    res.json({ success: true, output: stdout });
+  } catch (err) {
+    res.status(500).json({ success: false, error: `Fallo al cerrar sesión en ${sanitizedEmail}: ${err.message}` });
+  }
+});
+
+app.get('/api/firebase/accounts/status', async (req, res) => {
+  try {
+    const { stdout } = await execAsync('firebase projects:list --json');
+    const data = JSON.parse(stdout);
+    res.json({ success: true, projects: data.result || [] });
+  } catch (err) {
+    res.json({ success: false, error: `No se pudieron listar los proyectos de Firebase: ${err.message}` });
+  }
+});
+
 // Endpoint para generar un par de claves VAPID en caliente (Mejora de Pulido)
 app.get('/api/vapid/generate', (req, res) => {
   try {
@@ -726,8 +863,14 @@ app.post('/api/upload-logo', async (req, res) => {
   if (!filename || !base64) {
     return res.status(400).json({ error: 'filename y base64 son requeridos.' });
   }
+  const safeFilename = path.basename(filename);
+  const ext = path.extname(safeFilename).toLowerCase();
+  const allowedExt = ['.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif'];
+  if (!allowedExt.includes(ext)) {
+    return res.status(400).json({ error: `La extensión del archivo '${ext}' no está permitida.` });
+  }
+
   try {
-    const safeFilename = path.basename(filename);
     const buffer = Buffer.from(base64, 'base64');
     const uploadDir = path.join(CLI_ROOT, 'temp_uploads');
     await fs.ensureDir(uploadDir);
@@ -768,19 +911,45 @@ app.post('/api/upload-logo', async (req, res) => {
   }
 });
 
-// Clean up task after 30 minutes
+// Clean up task after dynamic TTL or 30 minutes
 function registerTaskCleanup(taskId) {
+  const TASK_CLEANUP_TTL_MS = Number(process.env.TASK_CLEANUP_TTL_MS || 1800000);
   setTimeout(() => {
     delete activeCreationTasks[taskId];
     console.log(`[Task Monitor] Tarea de aprovisionamiento '${taskId}' purgada de memoria.`);
-  }, 1800000);
+  }, TASK_CLEANUP_TTL_MS);
+}
+
+// Auxiliar para habilitar APIs de GCP de forma programática usando Service Usage API
+async function enableGcpService(projectId, serviceName, accessToken) {
+  try {
+    const url = `https://serviceusage.googleapis.com/v1/projects/${projectId}/services/${serviceName}:enable`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: '{}'
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`HTTP Error ${res.status}: ${errText}`);
+    }
+    return await res.json();
+  } catch (err) {
+    console.error(`[GCP Service Enable Error] ${serviceName}:`, err.message);
+    throw err;
+  }
 }
 
 // Lógica de ejecución en segundo plano para el aprovisionamiento
 async function executeCreationTaskInBackground(taskId, answers) {
   const task = activeCreationTasks[taskId];
   if (!task) return;
-  
+
+  answers.__taskId = taskId;
+
   const log = (line) => {
     console.log(`[Creation Task ${taskId}] ${line}`);
     task.logs.push(line);
@@ -791,11 +960,22 @@ async function executeCreationTaskInBackground(taskId, answers) {
     });
   };
   
+  const clientId = answers.blueprint?.instanceId || (answers.blueprint?.clientName || answers.projectName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  let cloudResourcesCreated = [];
   try {
     const finalProjectId = answers.firebaseProjectId;
-    
+
+    await ProvisioningStateManager.transitionTo(clientId, 'pending', { taskId });
+
     // Flujo de Aprovisionamiento Automático en Firebase Cloud
     if (answers.autoProvisionFirebase) {
+      // Registrar estado inicial antes de crear recursos
+      await ProvisioningStateManager.transitionTo(clientId, 'provisioning', {
+        taskId,
+        metadata: { cloudResourcesCreated }
+      });
+
       log(`[Firebase Automate] Iniciando automatización Firebase para: ${finalProjectId}`);
       
       const safeProjectId = finalProjectId.replace(/[^a-z0-9\-]/gi, '');
@@ -820,6 +1000,15 @@ async function executeCreationTaskInBackground(taskId, answers) {
           log(`[Firebase Automate] Creando proyecto Firebase "${safeProjectName}" con ID "${safeProjectId}"...`);
           await execAsync(`firebase projects:create ${safeProjectId} --display-name "${safeProjectName}"`, { timeout: 180000 });
           log(`[Firebase Automate] Proyecto Firebase creado exitosamente.`);
+          cloudResourcesCreated.push({
+            type: 'firebaseProject',
+            id: safeProjectId,
+            createdAt: new Date().toISOString()
+          });
+          await ProvisioningStateManager.transitionTo(clientId, 'provisioning', {
+            taskId,
+            metadata: { cloudResourcesCreated }
+          });
         } catch (createErr) {
           log(`[Firebase Automate Warning] projects:create falló. Comprobando si el proyecto ya tiene recursos Firebase habilitados...`);
           try {
@@ -836,43 +1025,70 @@ async function executeCreationTaskInBackground(taskId, answers) {
         }
       }
 
-      // 2 y 3. Crear base de datos Firestore default (nam5) y Web App en paralelo
-      log(`[Firebase Automate] Creando base de datos Firestore y registrando aplicación Web en paralelo...`);
-      const createDbPromise = (async () => {
-        try {
-          log(`[Firebase Automate] Inicializando Firestore (default) en nam5...`);
-          await execAsync(`firebase firestore:databases:create "(default)" --project ${safeProjectId} --location nam5`, { timeout: 120000 });
-          log(`[Firebase Automate] Firestore (default) creado con éxito.`);
-        } catch (dbErr) {
-          const errorText = (dbErr.message || '') + (dbErr.stderr || '');
-          if (
-            errorText.includes('already exists') ||
-            errorText.includes('Conflict') ||
-            errorText.includes('409') ||
-            errorText.includes('ALREADY_EXISTS')
-          ) {
-            log(`[Firebase Automate] Firestore ya está inicializado.`);
-          } else {
-            log(`[Firebase Automate Warning] No se pudo inicializar la BD default: ${dbErr.message}`);
-          }
-        }
-      })();
+      // Habilitar APIs de GCP de forma proactiva (Firestore y Storage)
+      try {
+        log(`[Firebase Automate] Habilitando APIs críticas de Google Cloud (Firestore, Storage)...`);
+        const token = await getFirebaseAccessToken();
+        await Promise.all([
+          enableGcpService(safeProjectId, 'firestore.googleapis.com', token),
+          enableGcpService(safeProjectId, 'firebasestorage.googleapis.com', token),
+          enableGcpService(safeProjectId, 'storage.googleapis.com', token)
+        ]);
+        log(`[Firebase Automate] APIs de Google Cloud habilitadas con éxito. Esperando propagación...`);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      } catch (apiErr) {
+        log(`[Firebase Automate Warning] No se pudieron habilitar algunas APIs de Google Cloud: ${apiErr.message}. Continuando de todos modos...`);
+      }
 
-      const createAppPromise = (async () => {
-        try {
-          log(`[Firebase Automate] Registrando Web App "${safeProjectName}"...`);
-          await execAsync(`firebase apps:create web "${safeProjectName}" --project ${safeProjectId}`, { timeout: 90000 });
-          log(`[Firebase Automate] Web App registrada con éxito.`);
-        } catch (appErr) {
-          if (appErr.message.includes('already exists') || appErr.stderr?.includes('already exists')) {
-            log(`[Firebase Automate] La Web App ya está registrada.`);
-          } else {
-            throw appErr;
-          }
+      // 2. Crear base de datos Firestore default (nam5)
+      try {
+        log(`[Firebase Automate] Inicializando Firestore (default) en nam5...`);
+        await execAsync(`firebase firestore:databases:create "(default)" --project ${safeProjectId} --location nam5`, { timeout: 120000 });
+        log(`[Firebase Automate] Firestore (default) creado con éxito.`);
+        cloudResourcesCreated.push({
+          type: 'firestoreDatabase',
+          id: '(default)',
+          createdAt: new Date().toISOString()
+        });
+        await ProvisioningStateManager.transitionTo(clientId, 'provisioning', {
+          taskId,
+          metadata: { cloudResourcesCreated }
+        });
+      } catch (dbErr) {
+        const errorText = (dbErr.message || '') + (dbErr.stderr || '');
+        if (
+          errorText.includes('already exists') ||
+          errorText.includes('Conflict') ||
+          errorText.includes('409') ||
+          errorText.includes('ALREADY_EXISTS')
+        ) {
+          log(`[Firebase Automate] Firestore ya está inicializado.`);
+        } else {
+          log(`[Firebase Automate Warning] No se pudo inicializar la BD default: ${dbErr.message}`);
         }
-      })();
+      }
 
-      await Promise.all([createDbPromise, createAppPromise]);
+      // 3. Registrar aplicación Web
+      try {
+        log(`[Firebase Automate] Registrando Web App "${safeProjectName}"...`);
+        await execAsync(`firebase apps:create web "${safeProjectName}" --project ${safeProjectId}`, { timeout: 90000 });
+        log(`[Firebase Automate] Web App registrada con éxito.`);
+        cloudResourcesCreated.push({
+          type: 'webApp',
+          id: safeProjectName,
+          createdAt: new Date().toISOString()
+        });
+        await ProvisioningStateManager.transitionTo(clientId, 'provisioning', {
+          taskId,
+          metadata: { cloudResourcesCreated }
+        });
+      } catch (appErr) {
+        if (appErr.message.includes('already exists') || appErr.stderr?.includes('already exists')) {
+          log(`[Firebase Automate] La Web App ya está registrada.`);
+        } else {
+          throw appErr;
+        }
+      }
 
       // 4. Extraer credenciales SDK
       log(`[Firebase Automate] Extrayendo SDK Config...`);
@@ -915,16 +1131,14 @@ async function executeCreationTaskInBackground(taskId, answers) {
       log(`[Firebase Automate] Credenciales de Firebase integradas con éxito.`);
     }
 
-    log(`[API Bridge] Iniciando creación física del proyecto con plantilla: ${answers.template}`);
+    await ProvisioningStateManager.transitionTo(clientId, 'provisioning', { taskId });
+    log(`[API Bridge] Iniciando creación física del proyecto con plantilla: ${answers.template || answers.blueprint?.coreType}`);
     const result = await runCreateProjectWorker(answers, (line) => {
       log(`[Worker] ${line}`);
     });
     
     log(`[API Bridge] Proyecto '${answers.projectName}' creado con éxito en: ${result.targetDir}`);
     
-    const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    delete projectSyncLocks[clientId];
-
     log(`[API Bridge] Iniciando sembrado automático de base de datos para la nueva instancia...`);
     try {
       const seedRes = await seedProjectDatabase(clientId);
@@ -942,11 +1156,11 @@ async function executeCreationTaskInBackground(taskId, answers) {
       }
     });
     task.listeners = [];
+
+    await ProvisioningStateManager.transitionTo(clientId, 'completed', { taskId });
+    await ProvisioningQueue.completeJob(taskId);
   } catch (err) {
     console.error(`[API Bridge] Error durante la creación en segundo plano: ${err.message}`);
-    const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    delete projectSyncLocks[clientId];
-
     task.status = 'error';
     task.error = err.message;
     task.listeners.forEach(res => {
@@ -956,13 +1170,46 @@ async function executeCreationTaskInBackground(taskId, answers) {
       }
     });
     task.listeners = [];
+
+    // [P04-03c] Conservar los recursos creados en la nube, IDs, timestamp y error en la metadata.
+    // No eliminar recursos automáticamente sin una función explícita de rollback segura.
+    try {
+      await ProvisioningStateManager.transitionTo(clientId, 'failed', {
+        taskId,
+        metadata: {
+          error: err.message,
+          cloudResourcesCreated,
+          rollbackStatus: 'pending',
+          rollbackErrors: []
+        }
+      });
+      // Mantenemos este comentario técnico dentro de la función para el diseño del rollback en la nube:
+      // Si el usuario invoca explícitamente rollbackCloud o la purga de recursos huérfanos:
+      // await rollbackCloud(clientId, cloudResourcesCreated); // firebase projects:delete
+    } catch (stateErr) {
+      console.error(`[API Bridge Error] No se pudo actualizar estado fallido: ${stateErr.message}`);
+    }
+    await ProvisioningQueue.failJob(taskId, err.message);
+  } finally {
+    try {
+      await ProvisioningStateManager.releaseLock(clientId);
+    } catch (lockErr) {
+      console.error(`[API Bridge Error] No se pudo liberar lock persistente: ${lockErr.message}`);
+    }
+    delete projectSyncLocks[clientId];
   }
 }
 
 // Endpoint para iniciar el aprovisionamiento de manera asíncrona
 app.post('/api/create-project', async (req, res) => {
   projectDirCache.clear();
-  const answers = req.body;
+  
+  let answers;
+  try {
+    answers = normalizeProvisioningEnvelope(req.body);
+  } catch (err) {
+    return res.status(400).json({ error: `Formato de petición inválido: ${err.message}` });
+  }
   
   // Capturar token OAuth enviado desde la sesión web del dashboard
   const devToken = req.headers['x-developer-google-token'];
@@ -970,19 +1217,24 @@ app.post('/api/create-project', async (req, res) => {
     answers.developerGoogleToken = devToken;
   }
 
-  if (answers.projectName) {
-    answers.projectName = answers.projectName.trim().replace(/[^a-zA-Z0-9\s\-_]/g, '');
+  if (answers.blueprint.clientName) {
+    answers.blueprint.clientName = answers.blueprint.clientName.trim().replace(/[^a-zA-Z0-9\s\-_]/g, '');
+  }
+  // Coerción y compatibilidad para propiedades planas
+  if (!answers.projectName && answers.blueprint?.clientName) {
+    answers.projectName = answers.blueprint.clientName;
+  }
+  if (!answers.clientId && answers.blueprint?.instanceId) {
+    answers.clientId = answers.blueprint.instanceId;
   }
   if (answers.firebaseProjectId) {
     answers.firebaseProjectId = answers.firebaseProjectId.trim().replace(/[^a-z0-9\-]/g, '');
   }
-  if (answers.template) {
-    answers.template = answers.template.trim().replace(/[^a-zA-Z0-9\-_]/g, '');
+  if (answers.blueprint.coreType) {
+    answers.blueprint.coreType = answers.blueprint.coreType.trim().replace(/[^a-zA-Z0-9\-_]/g, '');
   }
   
   // [BLIND-1] Coerción defensiva de tipos antes de cualquier validación.
-  // Un payload malformado (ej. comisionPorcentaje como string) provoca crashes
-  // crípticos dentro del generator.js, lejos del punto de origen real.
   const numericFields = ['comisionPorcentaje', 'pagoMensualFijo', 'montoFijoServicio', 'costoPorFacturaDian', 'setupFee'];
   for (const field of numericFields) {
     if (answers[field] !== undefined) {
@@ -996,65 +1248,67 @@ app.post('/api/create-project', async (req, res) => {
       answers[field] = answers[field] === 'true' || answers[field] === true || answers[field] === 1;
     }
   }
-  if (answers.branding && typeof answers.branding !== 'object') {
-    answers.branding = {};
+  if (answers.blueprint.branding && typeof answers.blueprint.branding !== 'object') {
+    answers.blueprint.branding = {};
   }
   if (answers.flags && typeof answers.flags !== 'object') {
     answers.flags = {};
   }
 
   // Validaciones básicas de campos requeridos
-  const requiredFields = [
-    'template',
-    'projectName',
-    'targetPath',
-    'paletteChoice',
-    'centralApiKey',
-    'centralAppId'
-  ];
-
-  for (const field of requiredFields) {
-    if (!answers[field]) {
-      return res.status(400).json({ error: `El campo '${field}' es obligatorio para el aprovisionamiento.` });
-    }
+  if (!answers.blueprint.coreType) {
+    return res.status(400).json({ error: "El campo 'coreType' (template) es obligatorio." });
+  }
+  if (!answers.blueprint.clientName) {
+    return res.status(400).json({ error: "El campo 'clientName' (projectName) es obligatorio." });
+  }
+  if (!answers.execution.targetPath) {
+    return res.status(400).json({ error: "El campo 'targetPath' es obligatorio." });
+  }
+  if (!answers.blueprint.branding?.paletteChoice) {
+    return res.status(400).json({ error: "El campo 'paletteChoice' es obligatorio." });
+  }
+  if (!answers.centralApiKey) {
+    return res.status(400).json({ error: "El campo 'centralApiKey' es obligatorio." });
+  }
+  if (!answers.centralAppId) {
+    return res.status(400).json({ error: "El campo 'centralAppId' es obligatorio." });
   }
 
   // [BLIND-2] Normalización de colores Hex a HSL antes de la validación y aprovisionamiento
   if (answers.customPrimary) answers.customPrimary = ensureHsl(answers.customPrimary);
   if (answers.customBg) answers.customBg = ensureHsl(answers.customBg);
-  if (answers.branding) {
+  if (answers.blueprint.branding) {
     const colorFields = [
       'primaryColor', 'secondaryColor', 'bgColor', 'textColor', 
       'surfaceColor', 'surface2Color', 'borderColor', 'textMutedColor'
     ];
     for (const field of colorFields) {
-      if (answers.branding[field]) {
-        answers.branding[field] = ensureHsl(answers.branding[field]);
+      if (answers.blueprint.branding[field]) {
+        answers.blueprint.branding[field] = ensureHsl(answers.blueprint.branding[field]);
       }
     }
   }
 
   // Validar contraste de colores HSL si la paleta elegida es custom
-  if (answers.paletteChoice === 'custom') {
-    const primaryColor = answers.customPrimary || (answers.branding && answers.branding.primaryColor);
-    const bgColor = answers.customBg || (answers.branding && answers.branding.bgColor) || 'hsl(224, 71%, 6%)';
+  if (answers.blueprint.branding?.paletteChoice === 'custom') {
+    const primaryColor = answers.blueprint.branding.primaryColor || answers.customPrimary;
+    const bgColor = answers.blueprint.branding.bgColor || answers.customBg || 'hsl(224, 71%, 6%)';
     if (primaryColor) {
       const validation = validateHSLColors(primaryColor, bgColor);
       if (!validation.valid) {
         console.warn(`[API Bridge Warning] Contraste HSL bajo detectado: ${validation.error}`);
-        // Registramos la advertencia pero no bloqueamos el aprovisionamiento
       }
     }
   }
 
-  const clientId = answers.projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-
-  // Validar exclusión mutua
-  if (projectSyncLocks[clientId]) {
-    return res.status(409).json({ error: `Ya hay una tarea de aprovisionamiento activa para el cliente "${clientId}". Por favor espera a que finalice.` });
+  const clientId = answers.blueprint.instanceId || answers.blueprint.clientName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  if (!answers.blueprint.instanceId) {
+    answers.blueprint.instanceId = clientId;
   }
-  // Adquirir bloqueo
-  projectSyncLocks[clientId] = true;
+
+  // Generamos un ID de tarea único
+  const taskId = `task-create-${clientId}-${Date.now()}`;
 
   const finalProjectId = answers.firebaseProjectId ? answers.firebaseProjectId.trim() : clientId;
   answers.firebaseProjectId = finalProjectId;
@@ -1075,9 +1329,6 @@ app.post('/api/create-project', async (req, res) => {
     }
   }
 
-  // Generamos un ID de tarea único
-  const taskId = `task-create-${clientId}-${Date.now()}`;
-  
   activeCreationTasks[taskId] = {
     status: 'running',
     logs: [],
@@ -1086,13 +1337,13 @@ app.post('/api/create-project', async (req, res) => {
     error: null
   };
 
-  // Disparar en background
-  executeCreationTaskInBackground(taskId, answers);
+  // Encolar en el gestor de colas de aprovisionamiento (delega ProvisioningStateManager.acquireLock)
+  await ProvisioningQueue.enqueue(taskId, clientId, answers);
   registerTaskCleanup(taskId);
 
   res.json({
     success: true,
-    message: 'Aprovisionamiento iniciado en segundo plano.',
+    message: 'Aprovisionamiento iniciado en segundo plano y encolado.',
     taskId
   });
 });
@@ -1116,6 +1367,12 @@ app.get('/api/create-project/stream', (req, res) => {
   task.logs.forEach(line => {
     res.write(`data: ${JSON.stringify({ type: 'log', line })}\n\n`);
   });
+
+  // Si está encolada/procesándose/esperando lock, enviar posición actual en la cola
+  const currentPos = ProvisioningQueue.getQueuePosition(taskId);
+  if (currentPos > 0) {
+    res.write(`data: ${JSON.stringify({ type: 'queue', position: currentPos })}\n\n`);
+  }
 
   if (task.status === 'success') {
     res.write(`data: ${JSON.stringify({ type: 'success', data: task.data })}\n\n`);
@@ -1144,6 +1401,25 @@ app.get('/api/create-project/stream', (req, res) => {
   });
 });
 
+// Endpoint para obtener el estado del ciclo de vida y los bloqueos persistentes de aprovisionamiento
+app.get('/api/provisioning/status', async (req, res) => {
+  const { clientId } = req.query;
+  if (!clientId) {
+    return res.status(400).json({ error: "El parámetro 'clientId' es obligatorio." });
+  }
+  try {
+    const stateRecord = await ProvisioningStateManager.getState(clientId);
+    const isLocked = await ProvisioningStateManager.isLocked(clientId);
+    return res.json({
+      state: stateRecord ? stateRecord.state : null,
+      isLocked,
+      timestamps: stateRecord ? stateRecord.timestamps : null
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Error al consultar estado: ${err.message}` });
+  }
+});
+
 /**
  * Lanza worker_create_project.js como proceso hijo y espera su resultado.
  * Resuelve con el objeto `data` en caso de éxito o rechaza con el mensaje de error.
@@ -1153,9 +1429,37 @@ app.get('/api/create-project/stream', (req, res) => {
  */
 function runCreateProjectWorker(answers, onLog) {
   return new Promise((resolve, reject) => {
+    // Aislamiento del fork: no heredar variables innecesarias del proceso padre.
+    const SAFE_ENV_ALLOWLIST = new Set([
+      'PATH', 'Path', 'PATHEXT',
+      'SYSTEMROOT', 'SystemRoot', 'SYSTEMDRIVE', 'SystemDrive',
+      'COMSPEC', 'ComSpec',
+      'TEMP', 'TMP',
+      'APPDATA', 'LOCALAPPDATA',
+      'USERPROFILE', 'HOMEDRIVE', 'HOMEPATH', 'USERNAME', 'USER',
+      'OS', 'PROCESSOR_ARCHITECTURE', 'ALLUSERSPROFILE', 'PUBLIC',
+      'PROGRAMDATA', 'ProgramData',
+      'PROGRAMFILES', 'ProgramFiles', 'PROGRAMFILES(X86)', 'ProgramFiles(x86)',
+      'COMMONPROGRAMFILES', 'CommonProgramFiles', 'COMMONPROGRAMFILES(X86)', 'CommonProgramFiles(x86)',
+      'PROTOTIPE_WORKSPACE_ROOT', 'PROTOTIPE_DOCS_ROOT',
+      'ALLOW_CMD_COMPAT_FALLBACK', 'BYPASS_PREFLIGHT',
+      'VITE_DEVELOPER_CENTRAL_API_KEY', 'VITE_DEVELOPER_CENTRAL_PROJECT_ID', 'VITE_DEVELOPER_CENTRAL_APP_ID',
+      'PORT', 'NODE_ENV', 'FIREBASE_TOKEN', 'ALLOW_TEST_AUTH_BYPASS', 'TEST_AUTH_BYPASS_TOKEN',
+      'TASK_CLEANUP_TTL_MS'
+    ]);
+
+    const childEnv = {};
+    for (const [key, value] of Object.entries(process.env)) {
+      const matchedKey = Array.from(SAFE_ENV_ALLOWLIST).find(
+        k => k.toLowerCase() === key.toLowerCase()
+      );
+      if (matchedKey) {
+        childEnv[key] = value;
+      }
+    }
+
     const child = fork(WORKER_PATH, [], {
-      // El worker hereda el env del padre (incluye PROTOTIPE_WORKSPACE_ROOT, etc.)
-      env: { ...process.env },
+      env: childEnv,
       // Silenciar stdio del hijo en el padre; el hijo imprime directamente a consola y manda LOG por IPC
       silent: false
     });
@@ -14890,4 +15194,22 @@ process.on('uncaughtException', (err) => {
 
 // Ejecutar diagnósticos de dependencias del PATH una sola vez al arranque
 await runPreflightChecks();
+
+// Inicializar la cola de aprovisionamiento con sus callbacks de ejecución y difusión SSE
+await ProvisioningQueue.initialize(
+  async (taskId, answers) => {
+    await executeCreationTaskInBackground(taskId, answers);
+  },
+  (taskId, eventPayload) => {
+    const task = activeCreationTasks[taskId];
+    if (task && task.listeners) {
+      task.listeners.forEach(res => {
+        if (!res.writableEnded) {
+          res.write(`data: ${JSON.stringify(eventPayload)}\n\n`);
+        }
+      });
+    }
+  }
+);
+
 startServer(PORT);
