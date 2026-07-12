@@ -13159,7 +13159,7 @@ app.get('/api/integrity/status', async (req, res) => {
         
         commitsList = logLines.map(line => {
           const [hash, subject, author, date] = line.split('\t');
-          const taskIdsFound = (subject || '').match(/((?:CORE|CLI|DASH|TPL|PLT|INST|DOC|LND|BIZ|HOTFIX|CLIENTE|E2E|LINE)-[A-Z0-9_-]+)/gi) || [];
+          const taskIdsFound = (subject || '').match(/((?:CORE|CLI|BUG|DASH|TPL|PLT|INST|DOC|LND|BIZ|HOTFIX|CLIENTE|E2E|LINE)-[A-Z0-9_-]+)/gi) || [];
           taskIdsFound.forEach(id => allCommittedTaskIds.add(id.toUpperCase()));
           const taskId = taskIdsFound[0] ? taskIdsFound[0].toUpperCase() : null;
           return {

@@ -8,10 +8,14 @@
   - Estatus: Completada
   - Fecha de registro: 2026-07-12
   - Fecha de finalización: 2026-07-12
-  - Descripción: Corregimos de raíz el endpoint `/api/integrity/prune-drifts` de `server.js` para admitir la purga de desvíos de archivos declarados en formato de lista de viñetas (bullets) individuales (adicional al formato original inline con prefijo `- Archivos:`). Ejecutamos un script de saneamiento local para purgar de inmediato las 17 referencias rotas obsoletas (`FILE_NOT_FOUND`) en `tareas_pendientes.md`, restableciendo la consistencia del Roadmap a verde (cero advertencias físicas de disco).
+  - Descripción: Corregimos de raíz el endpoint `/api/integrity/prune-drifts` de `server.js` para admitir la purga de desvíos de archivos declarados en formato de lista de viñetas (bullets) individuales (adicional al formato original inline con prefijo `- Archivos:`). Ejecutamos un script de saneamiento local para purgar de inmediato las 17 referencias rotas obsoletas (`FILE_NOT_FOUND`) en `tareas_pendientes.md`. Asimismo, solucionamos el validador de consistencia de Git en `server.js` agregando el prefijo de tareas `BUG` al regex extractor de IDs para evitar desvíos falsos en el historial, y enlazamos de forma automatizada las 32 tareas huérfanas en Git, restableciendo la consistencia del ecosistema a verde absoluto (0 advertencias).
   - Archivos:
     - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
     - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [`Prototipe-CLI/scripts/prune_drifts_local.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/prune_drifts_local.js) [NEW]
+    - [`Prototipe-CLI/scripts/link_tasks_local.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/link_tasks_local.js) [NEW]
+    - [`Prototipe-CLI/scripts/test_status.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_status.js) [NEW]
+    - [`Prototipe-CLI/scripts/test_link.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_link.js) [NEW]
 
 * **[x] ~~Tarea CLI-453: Rediseño de la Arquitectura de Ramas Git para Aprovisionamiento de Clientes y Blindaje a Futuro~~**
   - Estatus: Completada
