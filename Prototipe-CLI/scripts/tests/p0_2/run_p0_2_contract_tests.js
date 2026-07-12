@@ -14,6 +14,7 @@ import { run as runKnowledge } from './test_blueprint_knowledge.js';
 import { run as runNoWrite } from './test_blueprint_no_write.js';
 import { run as runCatalog } from './test_catalog_id_compatibility.js';
 import { run as runBridge } from './test_bridge_contract.js';
+import { run as runDashboard } from './test_dashboard_payload_contract.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,6 +34,7 @@ async function main() {
   await runNoWrite(results);
   await runCatalog(results);
   await runBridge(results);
+  await runDashboard(results);
 
   console.log('\n========================================================');
   console.log('📊 CONSOLIDADO DE RESULTADOS DE PRUEBAS P0.2');
