@@ -1133,8 +1133,32 @@ async function executeCreationTaskInBackground(taskId, answers) {
 
       // Habilitar el proveedor de Email/Password en Firebase Auth e inyectar el usuario admin
       try {
-        log(`[Firebase Automate] Activando proveedor de Email/Password en Firebase Auth...`);
+        log(`[Firebase Automate] Inicializando Identity Platform (Firebase Auth)...`);
         const token = await getFirebaseAccessToken();
+        
+        // 1. Inicializar configuración por defecto de Identity Platform en el proyecto GCP
+        const initUrl = `https://identitytoolkit.googleapis.com/v2/projects/${safeProjectId}/identityPlatform:initializeAuth`;
+        try {
+          const initRes = await fetch(initUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({})
+          });
+          if (initRes.ok) {
+            log(`[Firebase Automate] Identity Platform inicializado con éxito.`);
+          } else {
+            const initErr = await initRes.text();
+            log(`[Firebase Automate] Nota de inicialización: ${initErr}. Continuando con la configuración...`);
+          }
+        } catch (initErr) {
+          log(`[Firebase Automate Warning] No se pudo inicializar Identity Platform explícitamente: ${initErr.message}. Continuando...`);
+        }
+
+        // 2. Activar proveedor de Email/Password
+        log(`[Firebase Automate] Activando proveedor de Email/Password en Firebase Auth...`);
         const configUrl = `https://identitytoolkit.googleapis.com/admin/v2/projects/${safeProjectId}/config?updateMask=signIn`;
         const configRes = await fetch(configUrl, {
           method: 'PATCH',
