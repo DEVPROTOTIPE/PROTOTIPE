@@ -18,10 +18,11 @@ export function normalizeProvisioningRequest(payload) {
   const warnings = [];
 
   // 1. Determinar si viene en formato anidado { blueprint, execution } o plano legacy
+  const isNestedFormat = !!(payload.blueprint && typeof payload.blueprint === 'object');
   let rawBlueprint = {};
   let rawExecution = {};
 
-  if (payload.blueprint && typeof payload.blueprint === 'object') {
+  if (isNestedFormat) {
     rawBlueprint = { ...payload.blueprint };
     rawExecution = { ...payload.execution };
   } else {
@@ -36,10 +37,20 @@ export function normalizeProvisioningRequest(payload) {
     };
   }
 
-  // 2. Extraer y estructurar branding de forma limpia
+  // 2. Validar que execution no contenga campos desconocidos
+  const allowedExecutionKeys = new Set([
+    'targetPath', 'force', 'enableGithub', 'firebaseDeploy', 'centralRegistration'
+  ]);
+  for (const key of Object.keys(rawExecution)) {
+    if (rawExecution[key] !== undefined && !allowedExecutionKeys.has(key)) {
+      throw new Error(`REJECTED: Campo desconocido en ejecución: "${key}".`);
+    }
+  }
+
+  // 3. Extraer branding de forma limpia
   const branding = rawBlueprint.branding ? { ...rawBlueprint.branding } : {};
 
-  // 3. Resolver alias: paletteChoice (raíz) -> branding.paletteChoice
+  // 4. Resolver alias: paletteChoice (raíz) -> branding.paletteChoice
   if (rawBlueprint.paletteChoice !== undefined) {
     if (branding.paletteChoice !== undefined) {
       if (rawBlueprint.paletteChoice !== branding.paletteChoice) {
@@ -60,12 +71,12 @@ export function normalizeProvisioningRequest(payload) {
     }
   }
 
-  // 4. Resolver aliases legacy principales
+  // 5. Resolver aliases legacy principales
   const resolveAlias = (canonicalKey, legacyKey) => {
     let canonicalVal = rawBlueprint[canonicalKey];
     let legacyVal = rawBlueprint[legacyKey];
 
-    // Tratar casos de trim enprojectName/clientName antes de comparar
+    // Tratar casos de trim en projectName/clientName antes de comparar
     if (canonicalKey === 'clientName' || legacyKey === 'projectName') {
       if (typeof canonicalVal === 'string') canonicalVal = canonicalVal.trim();
       if (typeof legacyVal === 'string') legacyVal = legacyVal.trim();
@@ -116,28 +127,48 @@ export function normalizeProvisioningRequest(payload) {
     });
   }
 
-  // 5. Construir el Blueprint canónico limpio
-  const blueprint = {};
+  // 6. Construir el Blueprint canónico preservando campos desconocidos (evitando lavado de propiedades)
+  const blueprint = { ...rawBlueprint };
 
+  // Eliminar únicamente las propiedades legacy y execution que han sido mapeadas/extraídas
+  const keysToDelete = new Set([
+    'clientId', 'projectName', 'version', 'niche', 'paletteChoice', 'template'
+  ]);
+  if (!isNestedFormat) {
+    keysToDelete.add('targetPath');
+    keysToDelete.add('force');
+    keysToDelete.add('enableGithub');
+    keysToDelete.add('firebaseDeploy');
+    keysToDelete.add('centralRegistration');
+  }
+
+  for (const key of keysToDelete) {
+    delete blueprint[key];
+  }
+
+  // Sobrescribir/establecer con los valores canónicos resueltos
   if (blueprintVersion !== undefined) blueprint.blueprintVersion = blueprintVersion;
   if (instanceId !== undefined) blueprint.instanceId = instanceId;
   if (clientName !== undefined) blueprint.clientName = clientName;
   if (coreType !== undefined) blueprint.coreType = coreType;
   if (vertical !== undefined) blueprint.vertical = vertical;
 
-  // Solo inyectar branding si tiene propiedades definidas (excluyendo initials que no pertenece)
-  if (Object.keys(branding).length > 0) {
-    // initials no debe ser copiado ni insertado en el blueprint canónico
-    const { initials, ...cleanBranding } = branding;
-    blueprint.branding = cleanBranding;
+  // Manejar branding preservando cualquier otra propiedad interna (y eliminando initials)
+  if (rawBlueprint.branding && typeof rawBlueprint.branding === 'object') {
+    blueprint.branding = { ...rawBlueprint.branding };
+    delete blueprint.branding.initials;
+  }
+  if (branding.paletteChoice !== undefined) {
+    blueprint.branding = blueprint.branding || {};
+    blueprint.branding.paletteChoice = branding.paletteChoice;
   }
 
-  // Features, componentes y patrones
+  // Asegurar arrays de features, components y patterns
   blueprint.features = Array.isArray(rawBlueprint.features) ? [...rawBlueprint.features] : [];
   blueprint.components = Array.isArray(rawBlueprint.components) ? [...rawBlueprint.components] : [];
   blueprint.patterns = Array.isArray(rawBlueprint.patterns) ? [...rawBlueprint.patterns] : [];
 
-  // 6. Construir objeto de Execution canónico
+  // 7. Construir objeto de Execution canónico
   const execution = {
     targetPath: rawExecution.targetPath,
     force: !!rawExecution.force,
