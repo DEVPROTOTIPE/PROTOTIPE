@@ -1025,14 +1025,15 @@ async function executeCreationTaskInBackground(taskId, answers) {
         }
       }
 
-      // Habilitar APIs de GCP de forma proactiva (Firestore y Storage)
+      // Habilitar APIs de GCP de forma proactiva (Firestore, Storage y Auth)
       try {
-        log(`[Firebase Automate] Habilitando APIs críticas de Google Cloud (Firestore, Storage)...`);
+        log(`[Firebase Automate] Habilitando APIs críticas de Google Cloud (Firestore, Storage, Identity Toolkit)...`);
         const token = await getFirebaseAccessToken();
         await Promise.all([
           enableGcpService(safeProjectId, 'firestore.googleapis.com', token),
           enableGcpService(safeProjectId, 'firebasestorage.googleapis.com', token),
-          enableGcpService(safeProjectId, 'storage.googleapis.com', token)
+          enableGcpService(safeProjectId, 'storage.googleapis.com', token),
+          enableGcpService(safeProjectId, 'identitytoolkit.googleapis.com', token)
         ]);
         log(`[Firebase Automate] APIs de Google Cloud habilitadas con éxito. Esperando propagación...`);
         await new Promise(resolve => setTimeout(resolve, 5000));
@@ -1129,6 +1130,64 @@ async function executeCreationTaskInBackground(taskId, answers) {
       answers.firebaseAppId = config.appId;
 
       log(`[Firebase Automate] Credenciales de Firebase integradas con éxito.`);
+
+      // Habilitar el proveedor de Email/Password en Firebase Auth e inyectar el usuario admin
+      try {
+        log(`[Firebase Automate] Activando proveedor de Email/Password en Firebase Auth...`);
+        const token = await getFirebaseAccessToken();
+        const configUrl = `https://identitytoolkit.googleapis.com/admin/v2/projects/${safeProjectId}/config?updateMask=signIn`;
+        const configRes = await fetch(configUrl, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            signIn: {
+              email: {
+                enabled: true,
+                passwordRequired: true
+              }
+            }
+          })
+        });
+        if (!configRes.ok) {
+          const errTxt = await configRes.text();
+          throw new Error(`Fallo al configurar Auth: ${errTxt}`);
+        }
+        log(`[Firebase Automate] Proveedor de Email/Password activado con éxito.`);
+
+        // Crear usuario administrador en Firebase Auth
+        const adminEmail = answers.adminEmail || answers.blueprint?.adminEmail || `admin@${clientId}.com`;
+        const adminPassword = answers.adminPassword || answers.blueprint?.adminPassword || 'Admin2026!';
+        log(`[Firebase Automate] Creando usuario administrador (${adminEmail}) en Firebase Auth...`);
+        const userUrl = `https://identitytoolkit.googleapis.com/v1/projects/${safeProjectId}/accounts`;
+        const userRes = await fetch(userUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            email: adminEmail,
+            password: adminPassword,
+            emailVerified: true
+          })
+        });
+        
+        if (userRes.ok) {
+          log(`[Firebase Automate] Usuario administrador creado con éxito en Firebase Auth.`);
+        } else {
+          const userErrTxt = await userRes.text();
+          if (userErrTxt.includes('EMAIL_EXISTS')) {
+            log(`[Firebase Automate] El usuario administrador ya existe en Firebase Auth.`);
+          } else {
+            log(`[Firebase Automate Warning] No se pudo crear el usuario administrador en Firebase Auth: ${userErrTxt}`);
+          }
+        }
+      } catch (authErr) {
+        log(`[Firebase Automate Warning] Error configurando Firebase Auth o inyectando admin: ${authErr.message}. Continuando...`);
+      }
     }
 
     await ProvisioningStateManager.transitionTo(clientId, 'provisioning', { taskId });
@@ -1139,6 +1198,22 @@ async function executeCreationTaskInBackground(taskId, answers) {
     
     log(`[API Bridge] Proyecto '${answers.projectName}' creado con éxito en: ${result.targetDir}`);
     
+    // Desplegar de forma proactiva reglas e índices de Firebase
+    const finalFirebaseProjectId = answers.firebaseProjectId || (typeof safeProjectId !== 'undefined' ? safeProjectId : '');
+    if (finalFirebaseProjectId) {
+      log(`[Firebase Automate] Desplegando reglas e índices de Firebase (Firestore y Storage) en la nube...`);
+      try {
+        const tokenSuffix = process.env.FIREBASE_TOKEN ? ` --token "${process.env.FIREBASE_TOKEN}"` : '';
+        const { stdout } = await execAsync(
+          `firebase deploy --only firestore:rules,firestore:indexes,storage -P ${finalFirebaseProjectId}${tokenSuffix}`,
+          { cwd: result.targetDir, timeout: 120000 }
+        );
+        log(`[Firebase Automate] Reglas e índices de seguridad desplegados con éxito ✓.`);
+      } catch (deployErr) {
+        log(`[Firebase Automate Warning] No se pudieron desplegar las reglas/índices automáticos de Firebase: ${deployErr.message}. Continuando...`);
+      }
+    }
+
     log(`[API Bridge] Iniciando sembrado automático de base de datos para la nueva instancia...`);
     try {
       const seedRes = await seedProjectDatabase(clientId);

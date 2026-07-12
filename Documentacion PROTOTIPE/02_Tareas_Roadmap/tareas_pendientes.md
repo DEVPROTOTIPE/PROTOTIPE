@@ -1,8 +1,20 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 456 tareas completadas de 456 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 457 tareas completadas de 457 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-457: Soporte para Habilitación de Firebase Auth, Despliegue de Reglas e Índices y Descarga Individual de Logs~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Implementamos el aprovisionamiento completo y blindado de Firebase Authentication. Durante la creación del proyecto en la nube se habilita proactivamente la API `identitytoolkit.googleapis.com` en GCP, se activa el proveedor de Correo/Contraseña vía REST API y se crea la cuenta del usuario administrador. Adicionalmente, añadimos el despliegue automático de las reglas (`firestore.rules`) y los índices (`firestore.indexes.json`) en la nube antes de realizar el sembrado de base de datos. En el frontend, eliminamos el cierre automático ciego de la ventana de progreso del aprovisionamiento, y agregamos un botón de descarga para exportar el log de forma individual como un archivo `.txt`.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [MODIFY]
+    - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
 
 * **[x] ~~Tarea CLI-456: Blindaje Total de URLs Hardcodeadas en Componentes Admin del Dashboard Central~~**
   - Estatus: Completada

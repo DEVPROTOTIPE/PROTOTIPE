@@ -2619,33 +2619,6 @@ export default function App() {
     setIsRegistering(false);
   };
 
-  // Transición automática a la ventana de resumen de credenciales tras 1.5 segundos de completarse con éxito
-  useEffect(() => {
-    if (pendingOnboardingResult) {
-      const timer = setTimeout(() => {
-        setOnboardingData(pendingOnboardingResult);
-        setIsOnboardingActive(false);
-        setPendingOnboardingResult(null);
-        setNewClientName('');
-        localStorage.removeItem('prototipe_wizard_draft');
-        setFbApiKey('');
-        setFbAuthDomain('');
-        setFbProjectId('');
-        setFbStorageBucket('');
-        setFbMessagingSenderId('');
-        setFbAppId('');
-        setFbVapidKey('');
-        setCustomRequirements('');
-        setSeoDescription('');
-        setSeoKeywords('');
-        setRecommendationsSearchQuery('');
-        setIsProvisioning(false);
-        setIsRegistering(false);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [pendingOnboardingResult]);
-
   const [isBriefingSelectModalOpen, setIsBriefingSelectModalOpen] = useState(false)
   const [briefingSessions, setBriefingSessions] = useState([])
   const [loadingBriefings, setLoadingBriefings] = useState(false)

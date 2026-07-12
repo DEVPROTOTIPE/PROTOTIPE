@@ -1,0 +1,284 @@
+# 🗺️ Mapa de Arquitectura Física del Código
+
+Este mapa se autogenera para orientar a la IA sobre la estructura de archivos.
+
+- 📄 [.env.development](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/.env.development)
+- 📄 [.env.example](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/.env.example)
+- 📄 [.env.local](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/.env.local)
+- 📄 [.env.production](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/.env.production)
+- 📄 [.firebaserc](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/.firebaserc)
+- 📁 **.github**/
+  - 📁 **workflows**/
+    - 📄 [ci.yml](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/.github/workflows/ci.yml)
+- 📄 [.gitignore](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/.gitignore)
+- 📄 [.prettierrc](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/.prettierrc)
+- 📄 [.prototipe-audit-trail.jsonl](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/.prototipe-audit-trail.jsonl)
+- 📄 [.prototipe.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/.prototipe.json)
+- 📄 [antigravity_bootstrap_prompt.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/antigravity_bootstrap_prompt.md)
+- 📁 **Documentacion APPP310300r**/
+  - 📄 [bitacora_cambios.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/Documentacion APPP310300r/bitacora_cambios.md)
+  - 📄 [contexto_negocio.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/Documentacion APPP310300r/contexto_negocio.md)
+  - 📄 [esquema_colecciones.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/Documentacion APPP310300r/esquema_colecciones.md)
+  - 📄 [flujos_aplicacion.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/Documentacion APPP310300r/flujos_aplicacion.md)
+  - 📄 [guia_estilos_ui.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/Documentacion APPP310300r/guia_estilos_ui.md)
+  - 📄 [manual_migracion.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/Documentacion APPP310300r/manual_migracion.md)
+  - 📄 [mapa_aplicacion.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/Documentacion APPP310300r/mapa_aplicacion.md)
+  - 📄 [mapa_arquitectura.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/Documentacion APPP310300r/mapa_arquitectura.md)
+  - 📄 [mapa_arquitectura_ia.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/Documentacion APPP310300r/mapa_arquitectura_ia.md)
+  - 📄 [plan_implementacion_ia.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/Documentacion APPP310300r/plan_implementacion_ia.md)
+  - 📄 [restricciones_tecnicas.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/Documentacion APPP310300r/restricciones_tecnicas.md)
+  - 📄 [tareas_pendientes.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/Documentacion APPP310300r/tareas_pendientes.md)
+- 📄 [eslint.config.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/eslint.config.js)
+- 📄 [firebase.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/firebase.json)
+- 📄 [firestore.indexes.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/firestore.indexes.json)
+- 📄 [firestore.rules](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/firestore.rules)
+- 📄 [GEMINI.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/GEMINI.md)
+- 📄 [historial_appp310300r.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/historial_appp310300r.md)
+- 📄 [index.html](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/index.html)
+- 📄 [jsconfig.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/jsconfig.json)
+- 📄 [mapa_arquitectura_ia.md](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/mapa_arquitectura_ia.md)
+- 📄 [package-lock.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/package-lock.json)
+- 📄 [package.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/package.json)
+- 📄 [playwright.config.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/playwright.config.js)
+- 📁 **public**/
+  - 📄 [apple-touch-icon.png](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/public/apple-touch-icon.png)
+  - 📄 [favicon.svg](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/public/favicon.svg)
+  - 📄 [icons.svg](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/public/icons.svg)
+  - 📄 [manifest.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/public/manifest.json)
+  - 📄 [masked-icon.svg](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/public/masked-icon.svg)
+  - 📄 [pwa-192x192.png](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/public/pwa-192x192.png)
+  - 📄 [pwa-512x512.png](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/public/pwa-512x512.png)
+- 📁 **scratch**/
+  - 📄 [generate_ia_map.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/scratch/generate_ia_map.js)
+- 📁 **scripts**/
+  - 📄 [audit-core-agnostic.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/scripts/audit-core-agnostic.js)
+  - 📄 [seed_admin.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/scripts/seed_admin.js)
+  - 📄 [seed_data.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/scripts/seed_data.json)
+  - 📄 [validate-core-integrity.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/scripts/validate-core-integrity.js)
+- 📄 [seed.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/seed.json)
+- 📁 **src**/
+  - 📄 [App.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/App.jsx)
+  - 📁 **assets**/
+    - 📄 [logo.svg](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/assets/logo.svg)
+  - 📁 **components**/
+    - 📁 **admin**/
+      - 📁 **inventory**/
+      - 📁 **orders**/
+        - 📄 [OrderDeliveryPanel.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/admin/orders/OrderDeliveryPanel.jsx)
+        - 📄 [OrderShareModal.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/admin/orders/OrderShareModal.jsx)
+      - 📁 **settings**/
+        - 📄 [DeliveryCustomMessengerPanel.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/admin/settings/DeliveryCustomMessengerPanel.jsx)
+        - 📄 [DeveloperDiagnosticsModal.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/admin/settings/DeveloperDiagnosticsModal.jsx)
+    - 📁 **client**/
+      - 📁 **cart**/
+        - 📄 [CartDrawer.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/client/cart/CartDrawer.jsx)
+        - 📄 [CartDrawer.jsx.clean](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/client/cart/CartDrawer.jsx.clean)
+      - 📁 **catalog**/
+        - 📄 [CatalogBanner.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/client/catalog/CatalogBanner.jsx)
+        - 📄 [ClientFilterModal.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/client/catalog/ClientFilterModal.jsx)
+        - 📄 [ProductCard.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/client/catalog/ProductCard.jsx)
+        - 📄 [ProductDetailModal.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/client/catalog/ProductDetailModal.jsx)
+        - 📄 [WholesaleRequestModal.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/client/catalog/WholesaleRequestModal.jsx)
+      - 📁 **checkout**/
+        - 📄 [CheckoutModal.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/client/checkout/CheckoutModal.jsx)
+      - 📁 **claims**/
+        - 📄 [ClaimRequestModal.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/client/claims/ClaimRequestModal.jsx)
+      - 📁 **coupons**/
+        - 📄 [ClientCouponsModal.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/client/coupons/ClientCouponsModal.jsx)
+      - 📁 **guided**/
+        - 📄 [SmartHint.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/client/guided/SmartHint.jsx)
+    - 📁 **common**/
+      - 📄 [AccordionInteractiveFilter.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/AccordionInteractiveFilter.jsx)
+      - 📄 [AlertConfirmContext.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/AlertConfirmContext.jsx)
+      - 📄 [AnimatedNavbarMobile.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/AnimatedNavbarMobile.jsx)
+      - 📄 [AnimatedNotificationBadge.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/AnimatedNotificationBadge.jsx)
+      - 📄 [BorderBeamBadge.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/BorderBeamBadge.jsx)
+      - 📄 [DualSliderRange.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/DualSliderRange.jsx)
+      - 📄 [InlineChipPickerInput.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/InlineChipPickerInput.jsx)
+      - 📄 [MagneticParallaxButton.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/MagneticParallaxButton.jsx)
+      - 📄 [ModalTemplate.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/ModalTemplate.jsx)
+      - 📄 [NCToastContainer.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/NCToastContainer.jsx)
+      - 📄 [NotificationHistoryTray.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/NotificationHistoryTray.jsx)
+      - 📄 [PinCodeInput.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/PinCodeInput.jsx)
+      - 📄 [PlaceholderVanishInput.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/PlaceholderVanishInput.jsx)
+      - 📄 [ProgressCircleRing.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/ProgressCircleRing.jsx)
+      - 📄 [ProtectedRoute.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/ProtectedRoute.jsx)
+      - 📄 [ScrollToTop.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/ScrollToTop.jsx)
+      - 📄 [SliderNumericInput.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/SliderNumericInput.jsx)
+      - 📄 [SparkQuotaBanner.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/SparkQuotaBanner.jsx)
+      - 📄 [ToastProvider.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/common/ToastProvider.jsx)
+    - 📁 **portal**/
+      - 📄 [RequirePortalAuth.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/portal/RequirePortalAuth.jsx)
+    - 📁 **ui**/
+      - 📄 [AnimatedPasswordInput.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/AnimatedPasswordInput.jsx)
+      - 📄 [AppLoader.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/AppLoader.jsx)
+      - 📄 [BackButton.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/BackButton.jsx)
+      - 📄 [BackgroundCanvas.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/BackgroundCanvas.jsx)
+      - 📄 [Button.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/Button.jsx)
+      - 📄 [CategoryManager.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/CategoryManager.jsx)
+      - 📄 [ConnectivityToast.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/ConnectivityToast.jsx)
+      - 📄 [CurrencyInput.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/CurrencyInput.jsx)
+      - 📄 [CustomSelect.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/CustomSelect.jsx)
+      - 📄 [DatePicker.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/DatePicker.jsx)
+      - 📄 [EmptyState.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/EmptyState.jsx)
+      - 📁 **feedback**/
+        - 📄 [ErrorBoundaryFallback.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/feedback/ErrorBoundaryFallback.jsx)
+      - 📄 [GuidedToast.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/GuidedToast.jsx)
+      - 📄 [HolographicTiltCard.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/HolographicTiltCard.jsx)
+      - 📄 [InteractiveTiltCard.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/InteractiveTiltCard.jsx)
+      - 📄 [LazyImage.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/LazyImage.jsx)
+      - 📄 [LeafletMapPicker.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/LeafletMapPicker.jsx)
+      - 📄 [Modal.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/Modal.jsx)
+      - 📄 [NumberInput.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/NumberInput.jsx)
+      - 📄 [OrderTrackingSkeleton.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/OrderTrackingSkeleton.jsx)
+      - 📄 [Pagination.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/Pagination.jsx)
+      - 📄 [particlesIcons.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/particlesIcons.js)
+      - 📄 [ProductCardSkeleton.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/ProductCardSkeleton.jsx)
+      - 📄 [PWAInstallBanner.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/PWAInstallBanner.jsx)
+      - 📄 [QuantitySelector.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/QuantitySelector.jsx)
+      - 📄 [SeasonalOverlay.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/SeasonalOverlay.jsx)
+      - 📄 [SwipeableCardStack.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/SwipeableCardStack.jsx)
+      - 📄 [ToastNotification.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/components/ui/ToastNotification.jsx)
+  - 📁 **config**/
+    - 📄 [application.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/config/application.json)
+    - 📄 [billing.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/config/billing.json)
+    - 📄 [branding.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/config/branding.json)
+    - 📄 [build-manifest.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/config/build-manifest.json)
+    - 📄 [dashboard.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/config/dashboard.json)
+    - 📄 [experience.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/config/experience.json)
+    - 📄 [features.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/config/features.json)
+    - 📄 [firebaseConfig.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/config/firebaseConfig.js)
+    - 📄 [niche.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/config/niche.json)
+    - 📄 [patterns.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/config/patterns.json)
+    - 📄 [tenant.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/config/tenant.json)
+  - 📁 **constants**/
+    - 📄 [categoryIcons.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/constants/categoryIcons.js)
+    - 📄 [fonts.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/constants/fonts.js)
+    - 📄 [index.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/constants/index.js)
+    - 📄 [palettes.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/constants/palettes.js)
+  - 📁 **core**/
+    - 📁 **config**/
+      - 📄 [ComponentRegistry.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/config/ComponentRegistry.js)
+      - 📄 [NavigationRegistry.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/config/NavigationRegistry.js)
+      - 📄 [PatternRegistry.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/config/PatternRegistry.js)
+    - 📁 **contracts**/
+      - 📄 [telemetryContract.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/contracts/telemetryContract.js)
+    - 📁 **dashboard**/
+      - 📄 [DashboardComposer.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/dashboard/DashboardComposer.js)
+    - 📁 **eventbus**/
+      - 📄 [EventBus.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/eventbus/EventBus.js)
+      - 📄 [EventRegistry.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/eventbus/EventRegistry.js)
+    - 📁 **events**/
+      - 📁 **orderCompleted**/
+        - 📄 [v1.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/events/orderCompleted/v1.js)
+      - 📁 **saleCompleted**/
+        - 📄 [v1.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/events/saleCompleted/v1.js)
+    - 📁 **experience**/
+      - 📄 [ExperienceRegistry.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/experience/ExperienceRegistry.js)
+      - 📄 [ExperienceResolver.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/experience/ExperienceResolver.js)
+      - 📄 [ExperienceSchemas.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/experience/ExperienceSchemas.js)
+    - 📁 **kernel**/
+      - 📄 [FeatureLifecycleManager.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/kernel/FeatureLifecycleManager.js)
+      - 📄 [FeatureLoader.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/kernel/FeatureLoader.js)
+    - 📁 **permissions**/
+      - 📄 [PermissionRegistry.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/core/permissions/PermissionRegistry.js)
+  - 📁 **features**/
+    - 📁 **billing**/
+      - 📄 [index.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/features/billing/index.js)
+    - 📁 **common**/
+      - 📁 **services**/
+        - 📄 [pdfGenerationService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/features/common/services/pdfGenerationService.js)
+  - 📁 **hooks**/
+    - 📄 [useAds.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useAds.js)
+    - 📄 [useAppConfigSync.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useAppConfigSync.js)
+    - 📄 [useAuth.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useAuth.js)
+    - 📄 [useAuthInit.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useAuthInit.js)
+    - 📄 [useBilling.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useBilling.js)
+    - 📄 [useCartRecommendations.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useCartRecommendations.js)
+    - 📄 [useColorContrast.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useColorContrast.js)
+    - 📄 [useCopyToClipboard.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useCopyToClipboard.js)
+    - 📄 [useCoupons.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useCoupons.js)
+    - 📄 [useInactivityTimer.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useInactivityTimer.js)
+    - 📄 [useNotificationCenter.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useNotificationCenter.js)
+    - 📄 [useProductVariants.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useProductVariants.js)
+    - 📄 [usePWAInstall.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/usePWAInstall.js)
+    - 📄 [useWholesale.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/hooks/useWholesale.js)
+  - 📄 [index.css](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/index.css)
+  - 📁 **layouts**/
+    - 📄 [MainLayout.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/layouts/MainLayout.jsx)
+  - 📄 [main.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/main.jsx)
+  - 📁 **pages**/
+    - 📁 **admin**/
+      - 📄 [AdminSettings.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/pages/admin/AdminSettings.jsx)
+      - 📁 **settings**/
+        - 📁 **sections**/
+          - 📄 [AppearanceSettings.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/pages/admin/settings/sections/AppearanceSettings.jsx)
+          - 📄 [DeveloperBillingPanel.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/pages/admin/settings/sections/DeveloperBillingPanel.jsx)
+          - 📄 [DeveloperSettings.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/pages/admin/settings/sections/DeveloperSettings.jsx)
+    - 📄 [LoginPage.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/pages/LoginPage.jsx)
+    - 📄 [NotFoundPage.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/pages/NotFoundPage.jsx)
+    - 📄 [WelcomePage.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/pages/WelcomePage.jsx)
+  - 📁 **routes**/
+    - 📄 [AppRoutes.jsx](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/routes/AppRoutes.jsx)
+  - 📁 **schemas**/
+    - 📄 [appConfigSchema.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/schemas/appConfigSchema.js)
+    - 📄 [creditSchemas.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/schemas/creditSchemas.js)
+    - 📄 [inventorySchemas.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/schemas/inventorySchemas.js)
+    - 📄 [orderSchemas.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/schemas/orderSchemas.js)
+  - 📁 **services**/
+    - 📄 [accessLogService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/accessLogService.js)
+    - 📄 [adService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/adService.js)
+    - 📄 [alertService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/alertService.js)
+    - 📄 [appConfigService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/appConfigService.js)
+    - 📄 [authService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/authService.js)
+    - 📄 [billingService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/billingService.js)
+    - 📄 [centralFirebaseService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/centralFirebaseService.js)
+    - 📄 [claimsService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/claimsService.js)
+    - 📄 [clientNotificationService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/clientNotificationService.js)
+    - 📄 [couponService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/couponService.js)
+    - 📄 [deliveryService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/deliveryService.js)
+    - 📄 [employeeService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/employeeService.js)
+    - 📄 [favoritesService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/favoritesService.js)
+    - 📄 [notificationCenterService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/notificationCenterService.js)
+    - 📄 [notificationService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/notificationService.js)
+    - 📄 [offlineDB.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/offlineDB.js)
+    - 📄 [pdfService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/pdfService.js)
+    - 📄 [qrAnalyticsService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/qrAnalyticsService.js)
+    - 📄 [stockMovementService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/stockMovementService.js)
+    - 📄 [telemetryOutboxDb.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/telemetryOutboxDb.js)
+    - 📄 [telemetryService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/telemetryService.js)
+    - 📄 [trackingAnalyticsService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/trackingAnalyticsService.js)
+    - 📄 [uploadService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/uploadService.js)
+    - 📄 [userService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/userService.js)
+    - 📄 [whatsappService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/whatsappService.js)
+    - 📄 [wholesaleService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/services/wholesaleService.js)
+  - 📁 **store**/
+    - 📄 [appConfigStore.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/store/appConfigStore.js)
+    - 📄 [authStore.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/store/authStore.js)
+    - 📄 [cartStore.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/store/cartStore.js)
+    - 📄 [connectivityStore.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/store/connectivityStore.js)
+    - 📄 [favoritesStore.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/store/favoritesStore.js)
+    - 📄 [guidedStore.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/store/guidedStore.js)
+    - 📄 [portalStore.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/store/portalStore.js)
+    - 📄 [uiStore.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/store/uiStore.js)
+  - 📁 **utils**/
+    - 📄 [audio.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/utils/audio.js)
+    - 📄 [cn.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/utils/cn.js)
+    - 📄 [colors.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/utils/colors.js)
+    - 📄 [dynamicManifest.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/utils/dynamicManifest.js)
+    - 📄 [firestoreAuthGuard.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/utils/firestoreAuthGuard.js)
+    - 📄 [formatters.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/utils/formatters.js)
+    - 📄 [imageCompression.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/utils/imageCompression.js)
+    - 📄 [PdfService.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/utils/PdfService.js)
+    - 📄 [search.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/utils/search.js)
+    - 📄 [swHealthCheck.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/utils/swHealthCheck.js)
+    - 📄 [validators.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/src/utils/validators.js)
+- 📄 [storage.rules](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/storage.rules)
+- 📄 [template.json](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/template.json)
+- 📁 **tests**/
+  - 📁 **e2e**/
+    - 📄 [app-health.spec.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/tests/e2e/app-health.spec.js)
+  - 📁 **unit**/
+    - 📄 [smoke.spec.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/tests/unit/smoke.spec.js)
+- 📄 [vite.config.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/vite.config.js)
+- 📄 [vitest.config.js](file:///D:/PROTOTIPE/Instancias Clientes/App-appp310300r/vitest.config.js)

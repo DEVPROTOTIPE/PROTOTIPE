@@ -10,7 +10,8 @@ import {
   Sparkles,
   Check,
   Flame,
-  AlertTriangle
+  AlertTriangle,
+  Download
 } from 'lucide-react';
 
 const STAGES = [
@@ -44,6 +45,27 @@ export default function ProvisioningProgressModal({
   const [isMinimized, setIsMinimized] = useState(false);
   const [activeTab, setActiveTab] = useState('stages'); // 'stages' | 'console'
   const terminalEndRef = useRef(null);
+
+  const handleDownloadLog = () => {
+    if (!logs || logs.length === 0) return;
+    const textContent = logs.map(line => {
+      if (typeof line !== 'string') return '';
+      return line.replace(/\u001b\[[0-9;]*[a-zA-Z]/g, ''); // Limpiar códigos de escape ANSI
+    }).join('\n');
+    
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    const cleanClientName = (clientName || clientId || 'cliente').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    link.href = url;
+    link.download = `log-aprovisionamiento-${cleanClientName}-${dateStr}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   // Analizar logs para determinar el paso actual
   const getActiveStepIndex = () => {
@@ -470,38 +492,52 @@ export default function ProvisioningProgressModal({
                 </div>
               </div>
 
-              {/* Botón de Cierre / Continuar al finalizar */}
+              {/* Botón de Cierre / Continuar al finalizar / Descargar Logs */}
               {(hasFinishedSuccess || isError || !isRegistering) && (
-                <div className="flex justify-end gap-2.5 animate-fade-in pt-1">
-                  {hasFinishedSuccess && (
-                    <button
-                      onClick={onClose}
-                      className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white rounded-xl text-xs font-extrabold cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all flex items-center gap-1.5 hover:scale-105 active:scale-95"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-200 animate-pulse" />
-                      Completado / Ir a Onboarding
-                    </button>
-                  )}
-                   {(isError || (!hasFinishedSuccess && !isRegistering)) && (
-                    <div className="flex gap-2">
-                      {isError && onOpenAccountsManager && (
-                        <button
-                          onClick={onOpenAccountsManager}
-                          className="px-5 py-2.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-xl text-xs font-extrabold cursor-pointer transition-all flex items-center gap-1.5 hover:scale-105 active:scale-95"
-                        >
-                          <Flame className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
-                          Gestionar Firebase
-                        </button>
-                      )}
+                <div className="flex justify-between items-center gap-4 animate-fade-in pt-1">
+                  <div>
+                    {logs && logs.length > 0 && (
+                      <button
+                        onClick={handleDownloadLog}
+                        className="px-4.5 py-2.5 bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-indigo-400 hover:text-indigo-300 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-1.5 hover:scale-105 active:scale-95 shadow-inner"
+                        title="Descargar registro completo en un archivo .txt"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Descargar Registro (Log)
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex gap-2.5">
+                    {hasFinishedSuccess && (
                       <button
                         onClick={onClose}
-                        className="px-6 py-2.5 bg-rose-950/20 border border-rose-500/30 hover:border-rose-500/50 hover:bg-rose-900/10 text-rose-300 rounded-xl text-xs font-extrabold cursor-pointer transition-all flex items-center gap-1.5 shadow-[0_0_15px_rgba(244,63,94,0.1)] hover:scale-105 active:scale-95"
+                        className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white rounded-xl text-xs font-extrabold cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all flex items-center gap-1.5 hover:scale-105 active:scale-95"
                       >
-                        <AlertTriangle className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
-                        Cerrar y Revisar Logs
+                        <Sparkles className="w-3.5 h-3.5 text-amber-200 animate-pulse" />
+                        Completado / Ir a Onboarding
                       </button>
-                    </div>
-                  )}
+                    )}
+                    {(isError || (!hasFinishedSuccess && !isRegistering)) && (
+                      <div className="flex gap-2">
+                        {isError && onOpenAccountsManager && (
+                          <button
+                            onClick={onOpenAccountsManager}
+                            className="px-5 py-2.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-xl text-xs font-extrabold cursor-pointer transition-all flex items-center gap-1.5 hover:scale-105 active:scale-95"
+                          >
+                            <Flame className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
+                            Gestionar Firebase
+                          </button>
+                        )}
+                        <button
+                          onClick={onClose}
+                          className="px-6 py-2.5 bg-rose-950/20 border border-rose-500/30 hover:border-rose-500/50 hover:bg-rose-900/10 text-rose-300 rounded-xl text-xs font-extrabold cursor-pointer transition-all flex items-center gap-1.5 shadow-[0_0_15px_rgba(244,63,94,0.1)] hover:scale-105 active:scale-95"
+                        >
+                          <AlertTriangle className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
+                          Cerrar y Revisar Logs
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
