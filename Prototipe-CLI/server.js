@@ -1137,6 +1137,7 @@ async function executeCreationTaskInBackground(taskId, answers) {
 
       try {
         const token = await getFirebaseAccessToken();
+        let authActivated = false;
         
         // FASE 1: Inicializar configuración por defecto de Identity Platform en GCP
         log(`[Firebase Automate] FASE 1/3: Inicializando Identity Platform (Firebase Auth)...`);
@@ -1152,9 +1153,13 @@ async function executeCreationTaskInBackground(taskId, answers) {
           });
           if (initRes.ok) {
             log(`[Firebase Automate] Identity Platform inicializado con éxito en GCP.`);
+            authActivated = true;
           } else {
             const initErr = await initRes.text();
             log(`[Firebase Automate Info] Nota de inicialización: ${initErr}. Continuando...`);
+            if (initErr.includes('BILLING_NOT_ENABLED')) {
+              log(`[Firebase Automate] ℹ️  Identity Platform completo requiere facturación (Blaze). Se requerirá activación manual de Auth básico gratuito.`);
+            }
           }
         } catch (initErr) {
           log(`[Firebase Automate Warning] FASE 1 falló (no crítico): ${initErr.message}. Continuando...`);
@@ -1162,6 +1167,7 @@ async function executeCreationTaskInBackground(taskId, answers) {
 
         // FASE 2: Activar proveedor de Email/Password (SignIn Config)
         log(`[Firebase Automate] FASE 2/3: Activando proveedor de Email/Password en Firebase Auth...`);
+        let configSuccess = false;
         try {
           const configUrl = `https://identitytoolkit.googleapis.com/admin/v2/projects/${safeProjectId}/config?updateMask=signIn`;
           const configRes = await fetch(configUrl, {
@@ -1181,12 +1187,80 @@ async function executeCreationTaskInBackground(taskId, answers) {
           });
           if (configRes.ok) {
             log(`[Firebase Automate] Proveedor de Email/Password activado con éxito.`);
+            configSuccess = true;
           } else {
             const configErr = await configRes.text();
-            log(`[Firebase Automate Warning] FASE 2 falló: ${configErr}. Continuando con el sembrado de usuario de todas formas...`);
+            if (configErr.includes('CONFIGURATION_NOT_FOUND')) {
+              log(`[Firebase Automate Warning] ⚠️  Firebase Auth no inicializado en la nube (Plan Spark).`);
+            } else {
+              log(`[Firebase Automate Warning] FASE 2 falló: ${configErr}`);
+            }
           }
         } catch (configErr) {
-          log(`[Firebase Automate Warning] FASE 2 falló por error de red/fetch: ${configErr.message}. Continuando...`);
+          log(`[Firebase Automate Warning] FASE 2 falló por error de red/fetch: ${configErr.message}`);
+        }
+
+        // FASE DE PAUSA INTERACTIVA (Si no se ha activado Auth en la nube por falta de billing)
+        if (!configSuccess) {
+          log(`[Firebase Automate] ⏸️  APROVISIONAMIENTO PAUSADO.`);
+          log(`👉  Por favor, abre la consola de Firebase: https://console.firebase.google.com/project/${safeProjectId}/authentication`);
+          log(`👉  Presiona el botón "Comenzar" (Get Started) para activar la Autenticación Gratuita.`);
+          log(`👉  Una vez activado en tu navegador, regresa aquí y presiona "YA LO HE HABILITADO, CONTINUAR".`);
+          
+          const task = activeCreationTasks[taskId];
+          if (task) {
+            task.status = 'paused';
+            task.pausedReason = 'auth_activation_required';
+            
+            // Notificar a los listeners del stream SSE que estamos esperando activación de Auth
+            task.listeners.forEach(res => {
+              if (!res.writableEnded) {
+                res.write(`data: ${JSON.stringify({ 
+                  type: 'auth_activation_required', 
+                  projectId: safeProjectId,
+                  taskId
+                })}\n\n`);
+              }
+            });
+
+            // Esperar a que el desarrollador haga clic en "Continuar" y reanude la tarea
+            await new Promise((resolveResume) => {
+              task.resume = () => {
+                task.status = 'running';
+                delete task.pausedReason;
+                resolveResume();
+              };
+            });
+
+            log(`[Firebase Automate] ▶️  Reanudando flujo de aprovisionamiento de Auth...`);
+            log(`[Firebase Automate] Reintentando FASE 2/3: Activando proveedor de Email/Password...`);
+            try {
+              const configUrl = `https://identitytoolkit.googleapis.com/admin/v2/projects/${safeProjectId}/config?updateMask=signIn`;
+              const configRes = await fetch(configUrl, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                  signIn: {
+                    email: {
+                      enabled: true,
+                      passwordRequired: true
+                    }
+                  }
+                })
+              });
+              if (configRes.ok) {
+                log(`[Firebase Automate] Proveedor de Email/Password activado con éxito ✓.`);
+              } else {
+                const configErr = await configRes.text();
+                log(`[Firebase Automate Warning] FASE 2 falló incluso tras reanudación manual: ${configErr}`);
+              }
+            } catch (retryConfigErr) {
+              log(`[Firebase Automate Warning] FASE 2 falló por error de red en reintento: ${retryConfigErr.message}`);
+            }
+          }
         }
 
         // FASE 3: Crear usuario administrador en Firebase Auth
@@ -1509,6 +1583,31 @@ app.get('/api/create-project/stream', (req, res) => {
     clearInterval(keepAliveInterval);
     task.listeners = task.listeners.filter(l => l !== res);
   });
+});
+
+// Endpoint para reanudar el aprovisionamiento pausado por activación manual de Auth
+app.post('/api/create-project/resume', (req, res) => {
+  const { taskId } = req.body;
+  if (!taskId) {
+    return res.status(400).json({ error: 'El parámetro "taskId" es obligatorio.' });
+  }
+  
+  const task = activeCreationTasks[taskId];
+  if (!task) {
+    return res.status(404).json({ error: 'Tarea de creación no encontrada o ya expirada.' });
+  }
+
+  if (task.status !== 'paused') {
+    return res.json({ success: true, message: 'La tarea no se encuentra en estado pausado.' });
+  }
+
+  if (typeof task.resume === 'function') {
+    log(`[API Bridge] Petición de reanudación recibida para taskId: ${taskId}. Desbloqueando hilo...`);
+    task.resume();
+    res.json({ success: true, message: 'Aprovisionamiento reanudado exitosamente.' });
+  } else {
+    res.status(500).json({ error: 'La tarea no tiene registrada una función de reanudación.' });
+  }
 });
 
 // Endpoint para obtener el estado del ciclo de vida y los bloqueos persistentes de aprovisionamiento

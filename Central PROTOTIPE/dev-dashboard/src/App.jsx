@@ -2595,8 +2595,36 @@ export default function App() {
   // Onboarding & Branding premium states
   const [isOnboardingActive, setIsOnboardingActive] = useState(false)
   const [pendingOnboardingResult, setPendingOnboardingResult] = useState(null)
+  const [isAuthActivationRequired, setIsAuthActivationRequired] = useState(false)
+  const [authProjectId, setAuthProjectId] = useState('')
+  const [authTaskId, setAuthTaskId] = useState('')
+
+  const handleResumeAuthProvisioning = async () => {
+    try {
+      addLog(`[CLI API] Enviando señal de reanudación al Bridge CLI...`, "info");
+      setProvisioningLogs(prev => [...prev, `[CLI API] ⏳ Reanudando aprovisionamiento tras activación manual...`]);
+      const res = await fetch(`${CLI_URL}/api/create-project/resume`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ taskId: authTaskId })
+      });
+      if (res.ok) {
+        setIsAuthActivationRequired(false);
+      } else {
+        const err = await res.json();
+        showToast(`Error al reanudar aprovisionamiento: ${err.error}`, { type: 'error' });
+      }
+    } catch (err) {
+      showToast(`Error de conexión al reanudar: ${err.message}`, { type: 'error' });
+    }
+  };
 
   const handleCloseProvisioningModal = () => {
+    setIsAuthActivationRequired(false);
+    setAuthProjectId('');
+    setAuthTaskId('');
     if (pendingOnboardingResult) {
       setOnboardingData(pendingOnboardingResult);
       setIsOnboardingActive(false);
@@ -8775,6 +8803,12 @@ export default function App() {
 
                               showToast(`Cliente ${newClientName} registrado y proyecto creado en disco`, { type: 'success' })
                               resolve()
+                            } else if (data.type === 'auth_activation_required') {
+                              setIsAuthActivationRequired(true);
+                              setAuthProjectId(data.projectId);
+                              setAuthTaskId(data.taskId);
+                              addLog(`[Firebase Automate] Aprovisionamiento pausado. Requiere activar Auth en consola: https://console.firebase.google.com/project/${data.projectId}/authentication`, "warning");
+                              setProvisioningLogs(prev => [...prev, `[Firebase Automate] ⏸️  Aprovisionamiento pausado. Requiere activación manual de Auth en la consola de Firebase.`]);
                             } else if (data.type === 'error') {
                               eventSource.close()
                               setProvisioningLogs(prev => [...prev, `[CLI API Error] ❌ Error: ${data.message || 'Error en el motor de aprovisionamiento del CLI.'}`])
@@ -10429,6 +10463,9 @@ export default function App() {
           clientName={newClientName || ''}
           onClose={handleCloseProvisioningModal}
           onOpenAccountsManager={() => setIsFirebaseAccountsModalOpen(true)}
+          isAuthActivationRequired={isAuthActivationRequired}
+          authProjectId={authProjectId}
+          onResumeAuth={handleResumeAuthProvisioning}
         />
       </div>
     )
@@ -16303,6 +16340,9 @@ VITE_DEVELOPER_CLIENT_ID=${onboardingData.clientId}`}
         clientName={newClientName || ''}
         onClose={handleCloseProvisioningModal}
         onOpenAccountsManager={() => setIsFirebaseAccountsModalOpen(true)}
+        isAuthActivationRequired={isAuthActivationRequired}
+        authProjectId={authProjectId}
+        onResumeAuth={handleResumeAuthProvisioning}
       />
 
       {/* Toast de Notificaciones */}

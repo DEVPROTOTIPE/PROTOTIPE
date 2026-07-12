@@ -1,8 +1,20 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 459 tareas completadas de 459 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 460 tareas completadas de 460 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-460: Pausa interactiva y confirmación de activación manual de Firebase Auth en el aprovisionamiento de proyectos Spark (gratuitos)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Implementamos un flujo interactivo de pausa en caliente en el Bridge CLI (`server.js`) si falla la inicialización automática de Auth por falta de facturación (Spark Plan). El Bridge envía un evento SSE `auth_activation_required` y se pausa temporalmente. El frontend (`App.jsx` y `ProvisioningProgressModal.jsx`) muestra una tarjeta de alerta con el enlace a la consola del proyecto de Firebase y un botón "Ya lo he habilitado, continuar", el cual realiza un POST al Bridge para reanudar el flujo. Esto garantiza la inyección correcta del usuario administrador y el sembrado de base de datos antes de finalizar el aprovisionamiento.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [MODIFY]
+    - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
 
 * **[x] ~~Tarea CLI-459: Desacoplamiento total y try/catch independientes en el aprovisionamiento de Firebase Auth~~**
   - Estatus: Completada

@@ -4192,12 +4192,12 @@
       "autoProvisionFirebase": true,
       "customPrimary": "hsl(126, 6%, 32%)",
       "customAccent": "#a68786",
-      "firebaseApiKey": "",
-      "firebaseAuthDomain": "",
+      "firebaseApiKey": "AIzaSyAeMDR5QzgsHSVt4NhLJEsx8Y8PQzjEEIk",
+      "firebaseAuthDomain": "pruebaccc34531.firebaseapp.com",
       "firebaseProjectId": "pruebaccc34531",
-      "firebaseStorageBucket": "",
+      "firebaseStorageBucket": "pruebaccc34531.firebasestorage.app",
       "firebaseMessagingSenderId": "",
-      "firebaseAppId": "",
+      "firebaseAppId": "1:819427705003:web:e6c81413cfa02da75a77ee",
       "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
       "centralMessagingSenderId": "703542009613",
       "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
@@ -4318,11 +4318,12 @@
         "enableBilling": false,
         "enableDianBilling": false
       },
-      "projectName": "PRUEBACCC34531"
+      "projectName": "PRUEBACCC34531",
+      "__taskId": "task-create-pruebaccc34531-1783894752682"
     },
-    "status": "processing",
+    "status": "completed",
     "createdAt": "2026-07-12T22:19:12.682Z",
-    "updatedAt": "2026-07-12T22:19:12.702Z",
+    "updatedAt": "2026-07-12T22:21:44.889Z",
     "error": null
   }
 ]

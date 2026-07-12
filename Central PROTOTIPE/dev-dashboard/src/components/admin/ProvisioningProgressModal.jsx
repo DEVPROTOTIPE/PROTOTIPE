@@ -40,10 +40,14 @@ export default function ProvisioningProgressModal({
   clientName = '',
   isRegistering = false,
   isCompleted = false,
-  onOpenAccountsManager
+  onOpenAccountsManager,
+  isAuthActivationRequired = false,
+  authProjectId = '',
+  onResumeAuth
 }) {
   const [isMinimized, setIsMinimized] = useState(false);
   const [activeTab, setActiveTab] = useState('stages'); // 'stages' | 'console'
+  const [isResumingAuth, setIsResumingAuth] = useState(false);
   const terminalEndRef = useRef(null);
 
   const handleDownloadLog = () => {
@@ -111,6 +115,11 @@ export default function ProvisioningProgressModal({
     // Ignorar específicamente parámetros de configuración, flags e inicializadores de loglevel comunes
     if (text.includes('--loglevel=error')) return false;
     
+    // Ignorar advertencias/limitaciones de configuración en la nube (no impiden el build físico local)
+    if (text.includes('configuration_not_found') || text.includes('billing_not_enabled') || text.includes('failed_precondition')) {
+      return false;
+    }
+    
     // Si contiene marcas explícitas de fallo fatal del Bridge/CLI
     if (text.includes('❌') || text.includes('[cli api error]') || text.includes('[cli error]') || text.includes('failed to deploy') || text.includes('build failed')) {
       return true;
@@ -122,7 +131,9 @@ export default function ProvisioningProgressModal({
                          !text.includes('ignorar') && 
                          !text.includes('warn') &&
                          !text.includes('info') &&
-                         !text.includes('debug');
+                         !text.includes('debug') &&
+                         !text.includes('configuration_not_found') &&
+                         !text.includes('billing_not_enabled');
                          
     return hasErrorWord;
   });
@@ -473,6 +484,53 @@ export default function ProvisioningProgressModal({
                   <span className="typing-cursor pr-1">
                     {developerLines[currentLineIdx]}
                   </span>
+                </div>
+              )}
+
+              {/* Tarjeta de Activación de Firebase Auth (Spark Plan Pausa) */}
+              {isAuthActivationRequired && (
+                <div className="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-4.5 space-y-4 shadow-[0_0_30px_rgba(99,102,241,0.15)] select-none">
+                  <div className="flex gap-3">
+                    <AlertTriangle className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-extrabold text-white uppercase tracking-wider">
+                        Activación de Firebase Auth Requerida
+                      </h4>
+                      <p className="text-[10px] text-slate-300 leading-relaxed">
+                        Google requiere la inicialización física del servicio de Autenticación para proyectos nuevos en el plan Spark (gratuito). Por favor, abre la consola del proyecto, presiona el botón <span className="font-bold text-indigo-300">"Comenzar"</span> (Get Started) y regresa para continuar.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                    <a
+                      href={`https://console.firebase.google.com/project/${authProjectId}/authentication`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-center text-xs font-black tracking-wider uppercase transition-all shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:scale-[1.02] active:scale-[0.98] select-none cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+                      1. Ir a Consola Firebase
+                    </a>
+                    <button
+                      onClick={async () => {
+                        if (isResumingAuth) return;
+                        setIsResumingAuth(true);
+                        if (onResumeAuth) {
+                          await onResumeAuth();
+                        }
+                        setIsResumingAuth(false);
+                      }}
+                      disabled={isResumingAuth}
+                      className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl text-xs font-black tracking-wider uppercase transition-all flex items-center justify-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                    >
+                      {isResumingAuth ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                      ) : (
+                        <Check className="w-3.5 h-3.5 text-white" />
+                      )}
+                      2. Ya lo he habilitado, continuar
+                    </button>
+                  </div>
                 </div>
               )}
 
