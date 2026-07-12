@@ -43,6 +43,37 @@
         "secondaryColor": {
           "type": "string",
           "format": "hsl-color"
+        },
+        "bgColor": { "type": "string" },
+        "textColor": { "type": "string" },
+        "surfaceColor": { "type": "string" },
+        "surface2Color": { "type": "string" },
+        "borderColor": { "type": "string" },
+        "textMutedColor": { "type": "string" },
+        "radiusBase": { "type": "string" },
+        "googleFont": { "type": "string" },
+        "shadowStyle": { "type": "string" },
+        "glassmorphism": { "type": "boolean" },
+        "animationSpeed": { "type": "string" },
+        "radiusMode": { "type": "string" },
+        "borderBeam": { "type": "boolean" },
+        "tilt3d": { "type": "boolean" },
+        "background": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bgType": { "type": "string" },
+            "bgMouseTracking": { "type": "boolean" },
+            "bgParticlesCount": { "type": "integer" },
+            "bgParticlesSpeed": { "type": "string" },
+            "bgParticlesSize": { "type": "integer" },
+            "bgParticlesColor": { "type": "string" },
+            "bgParticlesOpacity": { "type": "number" },
+            "bgParticlesDirection": { "type": "string" },
+            "bgParticlesShape": { "type": "string" },
+            "bgOrbsCount": { "type": "integer" },
+            "bgOrbsOpacity": { "type": "number" }
+          }
         }
       },
       "required": ["paletteChoice"],

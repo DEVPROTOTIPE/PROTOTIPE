@@ -1131,6 +1131,9 @@ app.post('/api/create-project', async (req, res) => {
   }
 
   const clientId = answers.blueprint.instanceId || answers.blueprint.clientName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  if (!answers.blueprint.instanceId) {
+    answers.blueprint.instanceId = clientId;
+  }
 
   // Generamos un ID de tarea único
   const taskId = `task-create-${clientId}-${Date.now()}`;
