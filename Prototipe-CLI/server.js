@@ -805,9 +805,9 @@ async function executeCreationTaskInBackground(taskId, answers) {
   
   const clientId = answers.blueprint?.instanceId || (answers.blueprint?.clientName || answers.projectName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
+  let cloudResourcesCreated = [];
   try {
     const finalProjectId = answers.firebaseProjectId;
-    const cloudResourcesCreated = [];
 
     await ProvisioningStateManager.transitionTo(clientId, 'pending', { taskId });
 
