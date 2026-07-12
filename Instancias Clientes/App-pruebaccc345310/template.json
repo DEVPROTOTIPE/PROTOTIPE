@@ -1,0 +1,10 @@
+{
+  "name": "template-core-seed",
+  "version": "1.0.0",
+  "architecture": "React 19 + Tailwind v4 + Firebase SDK v12 + Zustand v5",
+  "testing": {
+    "unit": "Vitest",
+    "e2e": "Playwright",
+    "ci_cd": "GitHub Actions"
+  }
+}

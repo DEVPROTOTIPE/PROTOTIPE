@@ -1,8 +1,18 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 458 tareas completadas de 458 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 459 tareas completadas de 459 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-459: Desacoplamiento total y try/catch independientes en el aprovisionamiento de Firebase Auth~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Desacoplamos la habilitación de Firebase Auth en tres fases aisladas mediante bloques try/catch independientes (inicialización de Identity Platform, activación del proveedor de Email/Password mediante PATCH y creación de la cuenta del usuario administrador). Esto previene que una restricción de facturación o una latencia en la propagación de APIs de Google Cloud impida intentar inyectar las credenciales administrativas de Firebase Auth, y además, garantiza logs sumamente descriptivos de cada paso.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
 
 * **[x] ~~Tarea CLI-458: Incorporación de inicialización automática de Identity Platform en el Aprovisionamiento de Auth~~**
   - Estatus: Completada

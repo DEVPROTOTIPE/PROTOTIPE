@@ -1131,12 +1131,15 @@ async function executeCreationTaskInBackground(taskId, answers) {
 
       log(`[Firebase Automate] Credenciales de Firebase integradas con éxito.`);
 
-      // Habilitar el proveedor de Email/Password en Firebase Auth e inyectar el usuario admin
+      // Habilitar el proveedor de Email/Password en Firebase Auth e inyectar el usuario admin de forma 100% aislada
+      const adminEmail = answers.adminEmail || answers.blueprint?.adminEmail || `admin@${clientId}.com`;
+      const adminPassword = answers.adminPassword || answers.blueprint?.adminPassword || 'Admin2026!';
+
       try {
-        log(`[Firebase Automate] Inicializando Identity Platform (Firebase Auth)...`);
         const token = await getFirebaseAccessToken();
         
-        // 1. Inicializar configuración por defecto de Identity Platform en el proyecto GCP
+        // FASE 1: Inicializar configuración por defecto de Identity Platform en GCP
+        log(`[Firebase Automate] FASE 1/3: Inicializando Identity Platform (Firebase Auth)...`);
         const initUrl = `https://identitytoolkit.googleapis.com/v2/projects/${safeProjectId}/identityPlatform:initializeAuth`;
         try {
           const initRes = await fetch(initUrl, {
@@ -1148,69 +1151,77 @@ async function executeCreationTaskInBackground(taskId, answers) {
             body: JSON.stringify({})
           });
           if (initRes.ok) {
-            log(`[Firebase Automate] Identity Platform inicializado con éxito.`);
+            log(`[Firebase Automate] Identity Platform inicializado con éxito en GCP.`);
           } else {
             const initErr = await initRes.text();
-            log(`[Firebase Automate] Nota de inicialización: ${initErr}. Continuando con la configuración...`);
+            log(`[Firebase Automate Info] Nota de inicialización: ${initErr}. Continuando...`);
           }
         } catch (initErr) {
-          log(`[Firebase Automate Warning] No se pudo inicializar Identity Platform explícitamente: ${initErr.message}. Continuando...`);
+          log(`[Firebase Automate Warning] FASE 1 falló (no crítico): ${initErr.message}. Continuando...`);
         }
 
-        // 2. Activar proveedor de Email/Password
-        log(`[Firebase Automate] Activando proveedor de Email/Password en Firebase Auth...`);
-        const configUrl = `https://identitytoolkit.googleapis.com/admin/v2/projects/${safeProjectId}/config?updateMask=signIn`;
-        const configRes = await fetch(configUrl, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            signIn: {
-              email: {
-                enabled: true,
-                passwordRequired: true
+        // FASE 2: Activar proveedor de Email/Password (SignIn Config)
+        log(`[Firebase Automate] FASE 2/3: Activando proveedor de Email/Password en Firebase Auth...`);
+        try {
+          const configUrl = `https://identitytoolkit.googleapis.com/admin/v2/projects/${safeProjectId}/config?updateMask=signIn`;
+          const configRes = await fetch(configUrl, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              signIn: {
+                email: {
+                  enabled: true,
+                  passwordRequired: true
+                }
               }
-            }
-          })
-        });
-        if (!configRes.ok) {
-          const errTxt = await configRes.text();
-          throw new Error(`Fallo al configurar Auth: ${errTxt}`);
-        }
-        log(`[Firebase Automate] Proveedor de Email/Password activado con éxito.`);
-
-        // Crear usuario administrador en Firebase Auth
-        const adminEmail = answers.adminEmail || answers.blueprint?.adminEmail || `admin@${clientId}.com`;
-        const adminPassword = answers.adminPassword || answers.blueprint?.adminPassword || 'Admin2026!';
-        log(`[Firebase Automate] Creando usuario administrador (${adminEmail}) en Firebase Auth...`);
-        const userUrl = `https://identitytoolkit.googleapis.com/v1/projects/${safeProjectId}/accounts`;
-        const userRes = await fetch(userUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            email: adminEmail,
-            password: adminPassword,
-            emailVerified: true
-          })
-        });
-        
-        if (userRes.ok) {
-          log(`[Firebase Automate] Usuario administrador creado con éxito en Firebase Auth.`);
-        } else {
-          const userErrTxt = await userRes.text();
-          if (userErrTxt.includes('EMAIL_EXISTS')) {
-            log(`[Firebase Automate] El usuario administrador ya existe en Firebase Auth.`);
+            })
+          });
+          if (configRes.ok) {
+            log(`[Firebase Automate] Proveedor de Email/Password activado con éxito.`);
           } else {
-            log(`[Firebase Automate Warning] No se pudo crear el usuario administrador en Firebase Auth: ${userErrTxt}`);
+            const configErr = await configRes.text();
+            log(`[Firebase Automate Warning] FASE 2 falló: ${configErr}. Continuando con el sembrado de usuario de todas formas...`);
           }
+        } catch (configErr) {
+          log(`[Firebase Automate Warning] FASE 2 falló por error de red/fetch: ${configErr.message}. Continuando...`);
         }
-      } catch (authErr) {
-        log(`[Firebase Automate Warning] Error configurando Firebase Auth o inyectando admin: ${authErr.message}. Continuando...`);
+
+        // FASE 3: Crear usuario administrador en Firebase Auth
+        log(`[Firebase Automate] FASE 3/3: Creando cuenta de usuario administrador (${adminEmail}) en Firebase Auth...`);
+        try {
+          const userUrl = `https://identitytoolkit.googleapis.com/v1/projects/${safeProjectId}/accounts`;
+          const userRes = await fetch(userUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              email: adminEmail,
+              password: adminPassword,
+              emailVerified: true
+            })
+          });
+          
+          if (userRes.ok) {
+            log(`[Firebase Automate] Cuenta de usuario administrador creada de forma exitosa en Firebase Auth ✓.`);
+          } else {
+            const userErrTxt = await userRes.text();
+            if (userErrTxt.includes('EMAIL_EXISTS')) {
+              log(`[Firebase Automate] La cuenta de usuario administrador ya se encuentra registrada.`);
+            } else {
+              log(`[Firebase Automate Warning] FASE 3 falló: ${userErrTxt}`);
+            }
+          }
+        } catch (userErr) {
+          log(`[Firebase Automate Warning] FASE 3 falló por error de red/fetch: ${userErr.message}`);
+        }
+
+      } catch (tokenErr) {
+        log(`[Firebase Automate Warning] No se pudo obtener el token de acceso de Firebase para configurar la autenticación: ${tokenErr.message}`);
       }
     }
 

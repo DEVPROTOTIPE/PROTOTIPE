@@ -1,0 +1,123 @@
+{
+  "collections": {
+    "config": [
+      {
+        "id": "settings",
+        "fields": {
+          "appName": "Prototype Demo App",
+          "slogan": "Impulsado por Prototype CLI",
+          "sellerName": "Administrador",
+          "contactPhone": "+57 300 000 0000",
+          "whatsappAdmin": "",
+          "developerPhone": "",
+          "developerBillingMode": "percentage",
+          "developerCommissionPercent": 5,
+          "developerFixedServiceFee": 0,
+          "developerFlatMonthlyFee": 0,
+          "enableDianBilling": false,
+          "costoPorFacturaDian": 0,
+          "creditsEnabled": true,
+          "claimsEnabled": true,
+          "couponsEnabled": true,
+          "activeSeasonalEvent": "none",
+          "primaryColor": "{{COLOR_PRIMARY}}",
+          "secondaryColor": "{{COLOR_SECONDARY}}",
+          "bgColor": "{{COLOR_BG}}",
+          "appFont": "inter",
+          "appRadius": "rounded",
+          "catalogBanner": { "type": "none", "value": "" },
+          "catalogLayout": "grid2",
+          "animationsEnabled": true,
+          "actionColor": "",
+          "adminRegistered": false,
+          "triggerTelemetryReport": null,
+          "triggerPing": null,
+          "lastPingResponse": null,
+          "updatedAt": "{{CURRENT_ISO_DATE}}"
+        }
+      }
+    ],
+    "categories": [
+      {
+        "id": "cat_calzado",
+        "fields": {
+          "nombre": "Calzado y Moda",
+          "activo": true,
+          "updatedAt": "{{CURRENT_ISO_DATE}}"
+        }
+      },
+      {
+        "id": "cat_tecnologia",
+        "fields": {
+          "nombre": "Tecnología y Gadgets",
+          "activo": true,
+          "updatedAt": "{{CURRENT_ISO_DATE}}"
+        }
+      }
+    ],
+    "products": [
+      {
+        "id": "prod_tenis_run",
+        "fields": {
+          "nombre": "Tenis Run Ultra",
+          "precio": 180000,
+          "categoriaId": "cat_calzado",
+          "stock": 15,
+          "referencia": "REF-RUN-01",
+          "activo": true,
+          "destacado": true,
+          "descripcion": "Tenis deportivos ergonómicos con amortiguación premium.",
+          "genero": "unisex",
+          "imagen": "",
+          "variantes": [],
+          "tags": ["deporte", "calzado"],
+          "updatedAt": "{{CURRENT_ISO_DATE}}"
+        }
+      },
+      {
+        "id": "prod_reloj_smart",
+        "fields": {
+          "nombre": "Reloj Inteligente V2",
+          "precio": 320000,
+          "categoriaId": "cat_tecnologia",
+          "stock": 8,
+          "referencia": "REF-SMART-02",
+          "activo": true,
+          "destacado": true,
+          "descripcion": "Smartwatch con sensor cardíaco y pantalla AMOLED.",
+          "genero": "unisex",
+          "imagen": "",
+          "variantes": [],
+          "tags": ["reloj", "tech"],
+          "updatedAt": "{{CURRENT_ISO_DATE}}"
+        }
+      }
+    ],
+    "employees": [
+      {
+        "id": "emp_admin",
+        "fields": {
+          "nombre": "Administrador",
+          "pin": "1234",
+          "rol": "admin",
+          "estado": "Disponible",
+          "salarioBase": 1500000,
+          "frecuenciaPago": "quincenal",
+          "updatedAt": "{{CURRENT_ISO_DATE}}"
+        }
+      },
+      {
+        "id": "emp_cajero",
+        "fields": {
+          "nombre": "Vendedor Caja",
+          "pin": "0000",
+          "rol": "vendedor",
+          "estado": "Disponible",
+          "salarioBase": 1300000,
+          "frecuenciaPago": "quincenal",
+          "updatedAt": "{{CURRENT_ISO_DATE}}"
+        }
+      }
+    ]
+  }
+}
