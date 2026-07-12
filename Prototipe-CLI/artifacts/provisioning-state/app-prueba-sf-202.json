@@ -1,0 +1,29 @@
+{
+  "clientId": "app-prueba-sf-202",
+  "state": "completed",
+  "taskId": "task-create-app-prueba-sf-202-1783834895410",
+  "pid": 10300,
+  "createdAt": "2026-07-12T05:41:35.424Z",
+  "updatedAt": "2026-07-12T05:43:32.789Z",
+  "timestamps": {
+    "pending": "2026-07-12T05:41:35.424Z",
+    "provisioning": "2026-07-12T05:42:19.777Z",
+    "completed": "2026-07-12T05:43:32.789Z",
+    "failed": null,
+    "rollback": null
+  },
+  "metadata": {
+    "cloudResourcesCreated": [
+      {
+        "type": "firebaseProject",
+        "id": "app-prueba-sf-202",
+        "createdAt": "2026-07-12T05:42:01.810Z"
+      },
+      {
+        "type": "webApp",
+        "id": "app-prueba-sf-202",
+        "createdAt": "2026-07-12T05:42:17.502Z"
+      }
+    ]
+  }
+}

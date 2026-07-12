@@ -1,0 +1,32 @@
+{
+  "clientId": "appp3103lasc",
+  "state": "failed",
+  "taskId": "task-create-appp3103lasc-1783869481728",
+  "pid": 26004,
+  "createdAt": "2026-07-12T15:18:01.736Z",
+  "updatedAt": "2026-07-12T15:20:26.245Z",
+  "timestamps": {
+    "pending": "2026-07-12T15:18:01.736Z",
+    "provisioning": "2026-07-12T15:18:45.518Z",
+    "completed": null,
+    "failed": "2026-07-12T15:20:26.245Z",
+    "rollback": null
+  },
+  "metadata": {
+    "cloudResourcesCreated": [
+      {
+        "type": "firebaseProject",
+        "id": "appp3103lasc",
+        "createdAt": "2026-07-12T15:18:31.638Z"
+      },
+      {
+        "type": "webApp",
+        "id": "APPP3103LASC",
+        "createdAt": "2026-07-12T15:18:43.377Z"
+      }
+    ],
+    "error": "El comando \"C:\\Program Files\\nodejs\\node.exe C:\\Users\\Sergio\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\bin\\firebase.js deploy --only firestore:rules,firestore:indexes,storage,hosting -P [REDACTED:firebaseProjectId]\" falló con código 1.\n",
+    "rollbackStatus": "pending",
+    "rollbackErrors": []
+  }
+}

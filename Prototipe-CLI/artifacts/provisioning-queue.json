@@ -1,0 +1,3149 @@
+[
+  {
+    "taskId": "task-create-app-prueba-1783833075535",
+    "clientId": "app-prueba",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "App prueba",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(211, 99%, 27%)",
+          "secondaryColor": "hsl(346, 36%, 62%)",
+          "bgColor": "hsl(330, 43%, 5%)",
+          "textColor": "hsl(240, 10%, 96%)",
+          "surfaceColor": "hsl(224, 19%, 12%)",
+          "surface2Color": "hsl(223, 17%, 16%)",
+          "borderColor": "hsl(222, 20%, 23%)",
+          "textMutedColor": "hsl(215, 20%, 65%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": []
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\ventas\\app-prueba",
+        "force": false,
+        "enableGithub": false,
+        "firebaseDeploy": false,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "app-prueba-token-1783833075228",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "2333",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(211, 99%, 27%)",
+      "customAccent": "#c17b8b",
+      "firebaseApiKey": "",
+      "firebaseAuthDomain": "",
+      "firebaseProjectId": "app-prueba",
+      "firebaseStorageBucket": "",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "Requerimientos del Briefing:",
+      "seoTitle": "App prueba",
+      "seoDescription": "App prueba — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "percentage",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": false,
+        "enableFirebaseDeploy": false,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      }
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T05:11:15.535Z",
+    "updatedAt": "2026-07-12T05:16:44.368Z",
+    "error": "system_restart_recovery"
+  },
+  {
+    "taskId": "task-create-app-prueba-1783833528722",
+    "clientId": "app-prueba",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "App prueba",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": []
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\ventas\\app-prueba",
+        "force": false,
+        "enableGithub": false,
+        "firebaseDeploy": false,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "app-prueba-token-1783833528391",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "",
+      "firebaseAuthDomain": "",
+      "firebaseProjectId": "app-prueba",
+      "firebaseStorageBucket": "",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "Requerimientos del Briefing:",
+      "seoTitle": "App prueba",
+      "seoDescription": "App prueba — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "percentage",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": false,
+        "enableFirebaseDeploy": false,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "App prueba",
+      "__taskId": "task-create-app-prueba-1783833528722"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T05:18:48.722Z",
+    "updatedAt": "2026-07-12T05:18:58.889Z",
+    "error": "Command failed: firebase apps:create web \"App prueba\" --project app-prueba\n- Creating your Web app\n× Creating your Web app\n"
+  },
+  {
+    "taskId": "task-create-app-prueba-dev-7092-1783833716692",
+    "clientId": "app-prueba-dev-7092",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "app-prueba-dev-7092",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": []
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\App-app-prueba-dev-7092",
+        "force": false,
+        "enableGithub": false,
+        "firebaseDeploy": false,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "app-prueba-dev-7092-token-1783833716357",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "AIzaSyDB5kc1cU4XMbYUzBpX3bziWV7FtzUVYtI",
+      "firebaseAuthDomain": "app-prueba-dev-7092.firebaseapp.com",
+      "firebaseProjectId": "app-prueba-dev-7092",
+      "firebaseStorageBucket": "app-prueba-dev-7092.firebasestorage.app",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "1:445430611043:web:4838d2a67093b5a168cc56",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "Requerimientos del Briefing:",
+      "seoTitle": "app-prueba-dev-7092",
+      "seoDescription": "app-prueba-dev-7092 — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "percentage",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": false,
+        "enableFirebaseDeploy": false,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "app-prueba-dev-7092",
+      "__taskId": "task-create-app-prueba-dev-7092-1783833716692"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T05:21:56.692Z",
+    "updatedAt": "2026-07-12T05:22:31.098Z",
+    "error": "BLUEPRINT_SCHEMA_INVALID: [schema] /: required - must have required property 'instanceId' | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties | [schema] /branding: additionalProperties - must NOT have additional properties"
+  },
+  {
+    "taskId": "task-create-app-prueba-dev-7092-1783834134637",
+    "clientId": "app-prueba-dev-7092",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "app-prueba-dev-7092",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "app-prueba-dev-7092"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\ventas\\app-prueba-dev-7092",
+        "force": false,
+        "enableGithub": false,
+        "firebaseDeploy": false,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "app-prueba-dev-7092-token-1783834134320",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "AIzaSyDB5kc1cU4XMbYUzBpX3bziWV7FtzUVYtI",
+      "firebaseAuthDomain": "app-prueba-dev-7092.firebaseapp.com",
+      "firebaseProjectId": "app-prueba-dev-7092",
+      "firebaseStorageBucket": "app-prueba-dev-7092.firebasestorage.app",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "1:445430611043:web:168fe528bf4f5fd768cc56",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "Requerimientos del Briefing:",
+      "seoTitle": "app-prueba-dev-7092",
+      "seoDescription": "app-prueba-dev-7092 — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "percentage",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": false,
+        "enableFirebaseDeploy": false,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "app-prueba-dev-7092",
+      "__taskId": "task-create-app-prueba-dev-7092-1783834134637"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T05:28:54.637Z",
+    "updatedAt": "2026-07-12T05:29:13.910Z",
+    "error": "Cannot read properties of undefined (reading 'length')"
+  },
+  {
+    "taskId": "task-create-app-prueba-sf-2026-1783834433457",
+    "clientId": "app-prueba-sf-2026",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "app-prueba-sf-2026",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "app-prueba-sf-2026"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\app-prueba-sf-2026",
+        "force": false,
+        "enableGithub": false,
+        "firebaseDeploy": false,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "app-prueba-sf-2026-token-1783834433452",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "AIzaSyB5XoYjozFdMivalLnmVGc4vivczGbkSXI",
+      "firebaseAuthDomain": "app-prueba-sf-2026.firebaseapp.com",
+      "firebaseProjectId": "app-prueba-sf-2026",
+      "firebaseStorageBucket": "app-prueba-sf-2026.firebasestorage.app",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "1:492341337247:web:ca26ded7e9feb55bdf96aa",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "Requerimientos del Briefing:",
+      "seoTitle": "app-prueba-sf-2026",
+      "seoDescription": "app-prueba-sf-2026 — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "percentage",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": false,
+        "enableFirebaseDeploy": false,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "app-prueba-sf-2026",
+      "__taskId": "task-create-app-prueba-sf-2026-1783834433457"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T05:33:53.457Z",
+    "updatedAt": "2026-07-12T05:34:28.377Z",
+    "error": "Cannot read properties of undefined (reading 'layout')"
+  },
+  {
+    "taskId": "task-create-app-prueba-sf-2026-1783834555789",
+    "clientId": "app-prueba-sf-2026",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "app-prueba-sf-2026",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "app-prueba-sf-2026"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\ventas\\app-prueba-sf-2026",
+        "force": false,
+        "enableGithub": false,
+        "firebaseDeploy": false,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "app-prueba-sf-2026-token-1783834555466",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "AIzaSyB5XoYjozFdMivalLnmVGc4vivczGbkSXI",
+      "firebaseAuthDomain": "app-prueba-sf-2026.firebaseapp.com",
+      "firebaseProjectId": "app-prueba-sf-2026",
+      "firebaseStorageBucket": "app-prueba-sf-2026.firebasestorage.app",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "1:492341337247:web:ca26ded7e9feb55bdf96aa",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "Requerimientos del Briefing:",
+      "seoTitle": "app-prueba-sf-2026",
+      "seoDescription": "app-prueba-sf-2026 — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "percentage",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": false,
+        "enableFirebaseDeploy": false,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "app-prueba-sf-2026",
+      "__taskId": "task-create-app-prueba-sf-2026-1783834555789"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T05:35:55.789Z",
+    "updatedAt": "2026-07-12T05:36:14.122Z",
+    "error": "Converting undefined value to JSON is not supported"
+  },
+  {
+    "taskId": "task-create-app-prueba-sf-202-1783834895410",
+    "clientId": "app-prueba-sf-202",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "app-prueba-sf-202",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "app-prueba-sf-202"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\App-app-prueba-sf-202",
+        "force": false,
+        "enableGithub": false,
+        "firebaseDeploy": false,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "app-prueba-sf-202-token-1783834895086",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "AIzaSyDqXJD73WbNPRQqtvEXjrL7dySFnBpYlLg",
+      "firebaseAuthDomain": "app-prueba-sf-202.firebaseapp.com",
+      "firebaseProjectId": "app-prueba-sf-202",
+      "firebaseStorageBucket": "app-prueba-sf-202.firebasestorage.app",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "1:807291114933:web:743385a2177bc68b32f5fc",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "Requerimientos del Briefing:",
+      "seoTitle": "app-prueba-sf-202",
+      "seoDescription": "app-prueba-sf-202 — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "percentage",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": false,
+        "enableFirebaseDeploy": false,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "app-prueba-sf-202",
+      "__taskId": "task-create-app-prueba-sf-202-1783834895410"
+    },
+    "status": "completed",
+    "createdAt": "2026-07-12T05:41:35.410Z",
+    "updatedAt": "2026-07-12T05:43:32.792Z",
+    "error": null
+  },
+  {
+    "taskId": "task-create-app-ok-2026-1783835538696",
+    "clientId": "app-ok-2026",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "app-ok-2026",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "app-ok-2026"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\App-app-ok-2026",
+        "force": false,
+        "enableGithub": false,
+        "firebaseDeploy": false,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "app-ok-2026-token-1783835538359",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "AIzaSyDetiaJ8kmZzNeCMiUoUbuAH-SCiWtzwfA",
+      "firebaseAuthDomain": "app-ok-2026.firebaseapp.com",
+      "firebaseProjectId": "app-ok-2026",
+      "firebaseStorageBucket": "app-ok-2026.firebasestorage.app",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "1:244647191259:web:3f31ce32cc8931dc4522fe",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "",
+      "seoTitle": "app-ok-2026",
+      "seoDescription": "app-ok-2026 — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "percentage",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": false,
+        "enableFirebaseDeploy": false,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "app-ok-2026",
+      "__taskId": "task-create-app-ok-2026-1783835538696"
+    },
+    "status": "completed",
+    "createdAt": "2026-07-12T05:52:18.697Z",
+    "updatedAt": "2026-07-12T05:54:16.649Z",
+    "error": null
+  },
+  {
+    "taskId": "task-create-appp310300-1783868039963",
+    "clientId": "appp310300",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "APPP310300",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "appp310300"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\App-appp310300",
+        "force": false,
+        "enableGithub": true,
+        "firebaseDeploy": true,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "appp310300-token-1783868039647",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "AIzaSyD2J81iAaLi6VXtifBFvcpphWvz90nPrUY",
+      "firebaseAuthDomain": "appp310300.firebaseapp.com",
+      "firebaseProjectId": "appp310300",
+      "firebaseStorageBucket": "appp310300.firebasestorage.app",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "1:11956365070:web:9c4afd25575e3d78d4195f",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "",
+      "seoTitle": "APPP310300",
+      "seoDescription": "APPP310300 — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "flat_monthly",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": true,
+        "enableFirebaseDeploy": true,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "APPP310300",
+      "__taskId": "task-create-appp310300-1783868039963"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T14:53:59.963Z",
+    "updatedAt": "2026-07-12T14:55:38.998Z",
+    "error": "El comando \"C:\\Program Files\\nodejs\\node.exe C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js run build\" falló con código 1.\n\u001b[31m✗\u001b[39m Build failed in 1.09s\n\u001b[31merror during build:\n\u001b[31m[vite-plugin-pwa:build] [plugin vite-plugin-pwa:build] src/hooks/useAppConfigSync.js: There was an error during the build:\n  Could not resolve \"../features/billing\" from \"src/hooks/useAppConfigSync.js\"\nAdditionally, handling the error in the 'buildEnd' hook caused the following error:\n  Could not resolve \"../features/billing\" from \"src/hooks/useAppConfigSync.js\"\u001b[31m\nfile: \u001b[36mD:/PROTOTIPE/Instancias Clientes/App-[REDACTED:firebaseProjectId]/src/hooks/useAppConfigSync.js\u001b[31m\n    at getRollupError (file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/rollup/dist/es/shared/parseAst.js:317:41)\n    at file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/rollup/dist/es/shared/node-entry.js:23924:39\n    at async catchUnfinishedHookActions (file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/rollup/dist/es/shared/node-entry.js:23380:16)\n    at async rollupInternal (file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/rollup/dist/es/shared/node-entry.js:23907:5)\n    at async buildEnvironment (file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:46365:14)\n    at async Object.defaultBuildApp [as buildApp] (file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:46843:5)\n    at async CAC.<anonymous> (file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/vite/dist/node/cli.js:863:7)\u001b[39m\n"
+  },
+  {
+    "taskId": "task-create-appp3103la-1783868810454",
+    "clientId": "appp3103la",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "APPP3103LA",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "appp3103la"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\App-appp3103la",
+        "force": false,
+        "enableGithub": true,
+        "firebaseDeploy": true,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "appp3103la-token-1783868810134",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "AIzaSyDDSbf-tdFkTXtEv8aw1r80yJ1EkI8Dltg",
+      "firebaseAuthDomain": "appp3103la.firebaseapp.com",
+      "firebaseProjectId": "appp3103la",
+      "firebaseStorageBucket": "appp3103la.firebasestorage.app",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "1:841221068532:web:07743e0aebe85e107d30a1",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "",
+      "seoTitle": "APPP3103LA",
+      "seoDescription": "APPP3103LA — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "flat_monthly",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": true,
+        "enableFirebaseDeploy": true,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "APPP3103LA",
+      "__taskId": "task-create-appp3103la-1783868810454"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T15:06:50.454Z",
+    "updatedAt": "2026-07-12T15:09:19.587Z",
+    "error": "El comando \"C:\\Program Files\\nodejs\\node.exe C:\\Users\\Sergio\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\bin\\firebase.js deploy --only firestore:rules,firestore:indexes,storage,hosting -P [REDACTED:firebaseProjectId]\" falló con código 1.\n"
+  },
+  {
+    "taskId": "task-create-appp3103lasa-1783868990033",
+    "clientId": "appp3103lasa",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "APPP3103LASA",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "appp3103lasa"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\App-appp3103lasa",
+        "force": false,
+        "enableGithub": true,
+        "firebaseDeploy": true,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "appp3103lasa-token-1783868989715",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "AIzaSyD04FhXzJ2s218D8cbh6LWp05Dnhry3lCI",
+      "firebaseAuthDomain": "appp3103lasa.firebaseapp.com",
+      "firebaseProjectId": "appp3103lasa",
+      "firebaseStorageBucket": "appp3103lasa.firebasestorage.app",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "1:526771459371:web:cc2c8eb48d48d42818216e",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "",
+      "seoTitle": "APPP3103LASA",
+      "seoDescription": "APPP3103LASA — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "flat_monthly",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": true,
+        "enableFirebaseDeploy": true,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "APPP3103LASA",
+      "__taskId": "task-create-appp3103lasa-1783868990033"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T15:09:50.033Z",
+    "updatedAt": "2026-07-12T15:12:13.828Z",
+    "error": "El comando \"C:\\Program Files\\nodejs\\node.exe C:\\Users\\Sergio\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\bin\\firebase.js deploy --only firestore:rules,firestore:indexes,storage,hosting -P [REDACTED:firebaseProjectId]\" falló con código 1.\n"
+  },
+  {
+    "taskId": "task-create-appp3103lasc-1783869481728",
+    "clientId": "appp3103lasc",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "APPP3103LASC",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "appp3103lasc"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\App-appp3103lasc",
+        "force": false,
+        "enableGithub": true,
+        "firebaseDeploy": true,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "appp3103lasc-token-1783869481725",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "AIzaSyD8qVK56qiIR4cQAcztT_hULIeMio-9UhM",
+      "firebaseAuthDomain": "appp3103lasc.firebaseapp.com",
+      "firebaseProjectId": "appp3103lasc",
+      "firebaseStorageBucket": "appp3103lasc.firebasestorage.app",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "1:234104804368:web:b211188b24b039a1092695",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "",
+      "seoTitle": "APPP3103LASC",
+      "seoDescription": "APPP3103LASC — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "flat_monthly",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": true,
+        "enableFirebaseDeploy": true,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "APPP3103LASC",
+      "__taskId": "task-create-appp3103lasc-1783869481728"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T15:18:01.728Z",
+    "updatedAt": "2026-07-12T15:20:26.246Z",
+    "error": "El comando \"C:\\Program Files\\nodejs\\node.exe C:\\Users\\Sergio\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\bin\\firebase.js deploy --only firestore:rules,firestore:indexes,storage,hosting -P [REDACTED:firebaseProjectId]\" falló con código 1.\n"
+  },
+  {
+    "taskId": "task-create-appp3103lasgg-1783873489622",
+    "clientId": "appp3103lasgg",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "APPP3103LASGG",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "appp3103lasgg"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\App-appp3103lasgg",
+        "force": false,
+        "enableGithub": true,
+        "firebaseDeploy": true,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "appp3103lasgg-token-1783873489307",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "AIzaSyDPJZ0Cbm2TNwuh9DKE_It0j5B4KWtX9hU",
+      "firebaseAuthDomain": "appp3103lasgg.firebaseapp.com",
+      "firebaseProjectId": "appp3103lasgg",
+      "firebaseStorageBucket": "appp3103lasgg.firebasestorage.app",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "1:947230454903:web:a060eccfe0d7a7852b0272",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "",
+      "seoTitle": "APPP3103LASGG",
+      "seoDescription": "APPP3103LASGG — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "flat_monthly",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": true,
+        "enableFirebaseDeploy": true,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "APPP3103LASGG",
+      "__taskId": "task-create-appp3103lasgg-1783873489622"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T16:24:49.622Z",
+    "updatedAt": "2026-07-12T16:27:33.038Z",
+    "error": "El comando \"C:\\Program Files\\nodejs\\node.exe C:\\Users\\Sergio\\AppData\\Roaming\\npm\\node_modules\\firebase-tools\\lib\\bin\\firebase.js deploy --only firestore:rules,firestore:indexes,storage,hosting -P [REDACTED:firebaseProjectId]\" falló con código 1.\n"
+  },
+  {
+    "taskId": "task-create-appp3103lasgh-1783877901424",
+    "clientId": "appp3103lasgh",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "APPP3103LASGH",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "appp3103lasgh"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\App-appp3103lasgh",
+        "force": false,
+        "enableGithub": true,
+        "firebaseDeploy": true,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "appp3103lasgh-token-1783877901083",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "",
+      "firebaseAuthDomain": "",
+      "firebaseProjectId": "appp3103lasgh",
+      "firebaseStorageBucket": "",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "",
+      "seoTitle": "APPP3103LASGH",
+      "seoDescription": "APPP3103LASGH — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "flat_monthly",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": true,
+        "enableFirebaseDeploy": true,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "APPP3103LASGH",
+      "__taskId": "task-create-appp3103lasgh-1783877901424"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T17:38:21.424Z",
+    "updatedAt": "2026-07-12T17:38:27.146Z",
+    "error": "Command failed: firebase projects:create appp3103lasgh --display-name \"APPP3103LASGH\"\n- Creating Google Cloud Platform project\n× Creating Google Cloud Platform project\n"
+  },
+  {
+    "taskId": "task-create-appp3103lvo-1783878031058",
+    "clientId": "appp3103lvo",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "APPP3103LVO",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "appp3103lvo"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\App-appp3103lvo",
+        "force": false,
+        "enableGithub": true,
+        "firebaseDeploy": true,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "appp3103lvo-token-1783878031053",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "",
+      "firebaseAuthDomain": "",
+      "firebaseProjectId": "appp3103lvo",
+      "firebaseStorageBucket": "",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "",
+      "seoTitle": "APPP3103LVO",
+      "seoDescription": "APPP3103LVO — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "flat_monthly",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": true,
+        "enableFirebaseDeploy": true,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "APPP3103LVO",
+      "__taskId": "task-create-appp3103lvo-1783878031058"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T17:40:31.058Z",
+    "updatedAt": "2026-07-12T17:40:37.627Z",
+    "error": "Command failed: firebase projects:create appp3103lvo --display-name \"APPP3103LVO\"\n- Creating Google Cloud Platform project\n× Creating Google Cloud Platform project\n"
+  },
+  {
+    "taskId": "task-create-appp3103lvo-1783878232152",
+    "clientId": "appp3103lvo",
+    "answers": {
+      "blueprint": {
+        "blueprintVersion": "1.0.0",
+        "clientName": "APPP3103LVO",
+        "coreType": "template-core-seed",
+        "vertical": "contractors",
+        "branding": {
+          "paletteChoice": "custom",
+          "primaryColor": "hsl(126, 6%, 32%)",
+          "secondaryColor": "hsl(2, 15%, 59%)",
+          "bgColor": "hsl(197, 54%, 97%)",
+          "textColor": "hsl(255, 10%, 8%)",
+          "surfaceColor": "hsl(0, 0%, 100%)",
+          "surface2Color": "hsl(210, 40%, 96%)",
+          "borderColor": "hsl(213, 27%, 84%)",
+          "textMutedColor": "hsl(215, 19%, 35%)",
+          "radiusBase": "0.75rem",
+          "googleFont": "Inter",
+          "shadowStyle": "none",
+          "glassmorphism": true,
+          "animationSpeed": "normal",
+          "radiusMode": "rounded",
+          "borderBeam": false,
+          "tilt3d": false,
+          "background": {
+            "bgType": "grid",
+            "bgMouseTracking": false,
+            "bgParticlesCount": 40,
+            "bgParticlesSpeed": "normal",
+            "bgParticlesSize": 2,
+            "bgParticlesColor": "primary",
+            "bgParticlesOpacity": 0.35,
+            "bgParticlesDirection": "random",
+            "bgParticlesShape": "circle",
+            "bgOrbsCount": 3,
+            "bgOrbsOpacity": 0.16
+          }
+        },
+        "features": [],
+        "components": [],
+        "patterns": [],
+        "instanceId": "appp3103lvo"
+      },
+      "execution": {
+        "targetPath": "D:\\PROTOTIPE\\Instancias Clientes\\App-appp3103lvo",
+        "force": false,
+        "enableGithub": true,
+        "firebaseDeploy": true,
+        "centralRegistration": true
+      },
+      "logoPath": "",
+      "telemetryToken": "appp3103lvo-token-1783878231833",
+      "adminEmail": "",
+      "adminPassword": "",
+      "customPort": "3103",
+      "whatsappAdmin": "",
+      "storeAddress": "",
+      "autoProvisionFirebase": true,
+      "customPrimary": "hsl(126, 6%, 32%)",
+      "customAccent": "#a68786",
+      "firebaseApiKey": "",
+      "firebaseAuthDomain": "",
+      "firebaseProjectId": "appp3103lvo",
+      "firebaseStorageBucket": "",
+      "firebaseMessagingSenderId": "",
+      "firebaseAppId": "",
+      "centralApiKey": "AIzaSyCBkdokIpGqWlfFiU_i83o7GmV1ZTqXYJE",
+      "centralMessagingSenderId": "703542009613",
+      "centralAppId": "1:703542009613:web:00f9363de11a908c991a44",
+      "customRequirements": "",
+      "seoTitle": "APPP3103LVO",
+      "seoDescription": "APPP3103LVO — Plataforma de ventas, inventario y pedidos en línea",
+      "seoKeywords": "",
+      "billingMode": "flat_monthly",
+      "comisionPorcentaje": 1.5,
+      "montoFijoServicio": 500,
+      "pagoMensualFijo": 50000,
+      "setupFee": 1500000,
+      "enableDianBilling": false,
+      "costoPorFacturaDian": 150,
+      "selectedRecomendations": [
+        {
+          "name": "Accordion Premium Elástico",
+          "technicalName": "AccordionInteractiveFilter",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Accordion_Interactive_Filter/accordion_interactive_filter.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Alerta Toast Flotante Interactiva",
+          "technicalName": "ToastNotification",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Toast_Notification/toast_notification.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Anillo de Progreso Circular",
+          "technicalName": "ProgressCircleRing",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Progress_Circle_Ring/progress_circle_ring.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge con Haz Láser",
+          "technicalName": "BorderBeamBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Border_Beam_Badge/border_beam_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Badge de Notificaciones Animado",
+          "technicalName": "AnimatedNotificationBadge",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Animated_Notification_Badge/animated_notification_badge.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Barra de Navegación Animada Móvil",
+          "technicalName": "AnimatedNavbarMobile",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Ecommerce_y_Ventas/Barra_Navegacion_Animada_Movil/barra_navegacion_animada_movil.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Exportador Centralizado PDF",
+          "technicalName": "PdfService",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Utilidades/Exportador_PDF/pdf_service.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Servicio de Generación PDF Dinámico",
+          "technicalName": "GeneracionPdf",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Servicios_y_Firebase/Generacion_PDF/generacion_pdf.md",
+          "resourceType": "component"
+        },
+        {
+          "name": "Botón Magnético de Paralaje",
+          "technicalName": "MagneticParallaxButton",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Magnetic_Parallax_Button/magnetic_parallax_button.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Entrada de Pin Código",
+          "technicalName": "PinCodeInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Pin_Code_Input/pin_code_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Contraseña con Medidor de Seguridad",
+          "technicalName": "AnimatedPasswordInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/AnimatedPasswordInput/animated_password_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Desaparición de Marcador",
+          "technicalName": "PlaceholderVanishInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Placeholder_Vanish_Input/placeholder_vanish_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input Numérico Deslizable",
+          "technicalName": "SliderNumericInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Slider_Numeric_Input/slider_numeric_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Input de Selección de Chip Integrado",
+          "technicalName": "InlineChipPickerInput",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Inline_Chip_Picker_Input/inline_chip_picker_input.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector de Rango Doble",
+          "technicalName": "DualSliderRange",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Dual_Slider_Range/dual_slider_range.md",
+          "resourceType": "atom"
+        },
+        {
+          "name": "Selector Desplegable Animado Premium",
+          "technicalName": "CustomSelect",
+          "link": "file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Componentes_Atomicos/Selector_Desplegable/custom_select.md",
+          "resourceType": "atom"
+        }
+      ],
+      "flags": {
+        "enableGithub": true,
+        "enableFirebaseDeploy": true,
+        "enablePwa": true,
+        "enablePush": false,
+        "enableBilling": false,
+        "enableDianBilling": false
+      },
+      "projectName": "APPP3103LVO",
+      "__taskId": "task-create-appp3103lvo-1783878232152"
+    },
+    "status": "failed",
+    "createdAt": "2026-07-12T17:43:52.152Z",
+    "updatedAt": "2026-07-12T17:43:58.320Z",
+    "error": "Command failed: firebase projects:create appp3103lvo --display-name \"APPP3103LVO\"\n- Creating Google Cloud Platform project\n× Creating Google Cloud Platform project\n"
+  }
+]

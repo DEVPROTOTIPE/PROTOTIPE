@@ -1,0 +1,29 @@
+{
+  "clientId": "app-ok-2026",
+  "state": "completed",
+  "taskId": "task-create-app-ok-2026-1783835538696",
+  "pid": 26924,
+  "createdAt": "2026-07-12T05:52:18.710Z",
+  "updatedAt": "2026-07-12T05:54:16.647Z",
+  "timestamps": {
+    "pending": "2026-07-12T05:52:18.710Z",
+    "provisioning": "2026-07-12T05:53:04.330Z",
+    "completed": "2026-07-12T05:54:16.647Z",
+    "failed": null,
+    "rollback": null
+  },
+  "metadata": {
+    "cloudResourcesCreated": [
+      {
+        "type": "firebaseProject",
+        "id": "app-ok-2026",
+        "createdAt": "2026-07-12T05:52:49.645Z"
+      },
+      {
+        "type": "webApp",
+        "id": "app-ok-2026",
+        "createdAt": "2026-07-12T05:53:02.089Z"
+      }
+    ]
+  }
+}

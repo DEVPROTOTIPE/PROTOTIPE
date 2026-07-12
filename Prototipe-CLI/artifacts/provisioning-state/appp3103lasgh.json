@@ -1,0 +1,21 @@
+{
+  "clientId": "appp3103lasgh",
+  "state": "failed",
+  "taskId": "task-create-appp3103lasgh-1783877901424",
+  "pid": 25424,
+  "createdAt": "2026-07-12T17:38:21.441Z",
+  "updatedAt": "2026-07-12T17:38:27.144Z",
+  "timestamps": {
+    "pending": "2026-07-12T17:38:21.441Z",
+    "provisioning": "2026-07-12T17:38:21.442Z",
+    "completed": null,
+    "failed": "2026-07-12T17:38:27.144Z",
+    "rollback": null
+  },
+  "metadata": {
+    "cloudResourcesCreated": [],
+    "error": "Command failed: firebase projects:create appp3103lasgh --display-name \"APPP3103LASGH\"\n- Creating Google Cloud Platform project\n× Creating Google Cloud Platform project\n",
+    "rollbackStatus": "pending",
+    "rollbackErrors": []
+  }
+}

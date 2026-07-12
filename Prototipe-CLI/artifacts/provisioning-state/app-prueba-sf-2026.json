@@ -1,0 +1,27 @@
+{
+  "clientId": "app-prueba-sf-2026",
+  "state": "failed",
+  "taskId": "task-create-app-prueba-sf-2026-1783834555789",
+  "pid": 3212,
+  "createdAt": "2026-07-12T05:33:53.467Z",
+  "updatedAt": "2026-07-12T05:36:14.120Z",
+  "timestamps": {
+    "pending": "2026-07-12T05:35:55.802Z",
+    "provisioning": "2026-07-12T05:36:11.308Z",
+    "completed": null,
+    "failed": "2026-07-12T05:36:14.120Z",
+    "rollback": null
+  },
+  "metadata": {
+    "cloudResourcesCreated": [
+      {
+        "type": "webApp",
+        "id": "app-prueba-sf-2026",
+        "createdAt": "2026-07-12T05:36:06.911Z"
+      }
+    ],
+    "error": "Converting undefined value to JSON is not supported",
+    "rollbackStatus": "pending",
+    "rollbackErrors": []
+  }
+}

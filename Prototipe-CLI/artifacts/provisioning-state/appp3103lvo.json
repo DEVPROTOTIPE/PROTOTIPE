@@ -1,0 +1,21 @@
+{
+  "clientId": "appp3103lvo",
+  "state": "failed",
+  "taskId": "task-create-appp3103lvo-1783878232152",
+  "pid": 25424,
+  "createdAt": "2026-07-12T17:40:31.070Z",
+  "updatedAt": "2026-07-12T17:43:58.319Z",
+  "timestamps": {
+    "pending": "2026-07-12T17:43:52.164Z",
+    "provisioning": "2026-07-12T17:43:52.165Z",
+    "completed": null,
+    "failed": "2026-07-12T17:43:58.319Z",
+    "rollback": null
+  },
+  "metadata": {
+    "cloudResourcesCreated": [],
+    "error": "Command failed: firebase projects:create appp3103lvo --display-name \"APPP3103LVO\"\n- Creating Google Cloud Platform project\n× Creating Google Cloud Platform project\n",
+    "rollbackStatus": "pending",
+    "rollbackErrors": []
+  }
+}

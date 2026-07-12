@@ -1,0 +1,19 @@
+{
+  "clientId": "app-prueba",
+  "state": "provisioning",
+  "taskId": "task-create-app-prueba-1783833528722",
+  "pid": 6748,
+  "createdAt": "2026-07-12T05:16:44.368Z",
+  "updatedAt": "2026-07-12T05:18:48.735Z",
+  "timestamps": {
+    "pending": "2026-07-12T05:18:48.734Z",
+    "provisioning": "2026-07-12T05:18:48.735Z",
+    "completed": null,
+    "failed": "2026-07-12T05:16:44.368Z",
+    "rollback": null
+  },
+  "metadata": {
+    "error": "system_restart_recovery",
+    "cloudResourcesCreated": []
+  }
+}

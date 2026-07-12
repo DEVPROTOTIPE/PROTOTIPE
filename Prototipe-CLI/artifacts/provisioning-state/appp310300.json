@@ -1,0 +1,32 @@
+{
+  "clientId": "appp310300",
+  "state": "failed",
+  "taskId": "task-create-appp310300-1783868039963",
+  "pid": 26004,
+  "createdAt": "2026-07-12T14:53:59.973Z",
+  "updatedAt": "2026-07-12T14:55:38.996Z",
+  "timestamps": {
+    "pending": "2026-07-12T14:53:59.973Z",
+    "provisioning": "2026-07-12T14:54:39.256Z",
+    "completed": null,
+    "failed": "2026-07-12T14:55:38.996Z",
+    "rollback": null
+  },
+  "metadata": {
+    "cloudResourcesCreated": [
+      {
+        "type": "firebaseProject",
+        "id": "appp310300",
+        "createdAt": "2026-07-12T14:54:20.442Z"
+      },
+      {
+        "type": "webApp",
+        "id": "APPP310300",
+        "createdAt": "2026-07-12T14:54:36.640Z"
+      }
+    ],
+    "error": "El comando \"C:\\Program Files\\nodejs\\node.exe C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js run build\" falló con código 1.\n\u001b[31m✗\u001b[39m Build failed in 1.09s\n\u001b[31merror during build:\n\u001b[31m[vite-plugin-pwa:build] [plugin vite-plugin-pwa:build] src/hooks/useAppConfigSync.js: There was an error during the build:\n  Could not resolve \"../features/billing\" from \"src/hooks/useAppConfigSync.js\"\nAdditionally, handling the error in the 'buildEnd' hook caused the following error:\n  Could not resolve \"../features/billing\" from \"src/hooks/useAppConfigSync.js\"\u001b[31m\nfile: \u001b[36mD:/PROTOTIPE/Instancias Clientes/App-[REDACTED:firebaseProjectId]/src/hooks/useAppConfigSync.js\u001b[31m\n    at getRollupError (file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/rollup/dist/es/shared/parseAst.js:317:41)\n    at file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/rollup/dist/es/shared/node-entry.js:23924:39\n    at async catchUnfinishedHookActions (file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/rollup/dist/es/shared/node-entry.js:23380:16)\n    at async rollupInternal (file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/rollup/dist/es/shared/node-entry.js:23907:5)\n    at async buildEnvironment (file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:46365:14)\n    at async Object.defaultBuildApp [as buildApp] (file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/vite/dist/node/chunks/dep-Dm0c1Wj2.js:46843:5)\n    at async CAC.<anonymous> (file:///D:/PROTOTIPE/Instancias%20Clientes/App-[REDACTED:firebaseProjectId]/node_modules/vite/dist/node/cli.js:863:7)\u001b[39m\n",
+    "rollbackStatus": "pending",
+    "rollbackErrors": []
+  }
+}

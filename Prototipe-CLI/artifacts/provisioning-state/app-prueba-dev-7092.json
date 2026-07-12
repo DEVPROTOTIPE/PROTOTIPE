@@ -1,0 +1,27 @@
+{
+  "clientId": "app-prueba-dev-7092",
+  "state": "failed",
+  "taskId": "task-create-app-prueba-dev-7092-1783834134637",
+  "pid": 21496,
+  "createdAt": "2026-07-12T05:21:56.704Z",
+  "updatedAt": "2026-07-12T05:29:13.908Z",
+  "timestamps": {
+    "pending": "2026-07-12T05:28:54.645Z",
+    "provisioning": "2026-07-12T05:29:11.032Z",
+    "completed": null,
+    "failed": "2026-07-12T05:29:13.908Z",
+    "rollback": null
+  },
+  "metadata": {
+    "cloudResourcesCreated": [
+      {
+        "type": "webApp",
+        "id": "app-prueba-dev-7092",
+        "createdAt": "2026-07-12T05:29:06.594Z"
+      }
+    ],
+    "error": "Cannot read properties of undefined (reading 'length')",
+    "rollbackStatus": "pending",
+    "rollbackErrors": []
+  }
+}
