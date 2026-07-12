@@ -1,5 +1,18 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-421 — 2026-07-12
+**fix(p0.4): redact admin secrets and telemetry tokens — Commit D**
+**Hash:** `6c01fa5`
+
+### Cambios realizados:
+1. **generator.js:** Se modificó la firma de retorno de la función `createProject` para no exponer `adminPassword` en plaintext en el objeto de retorno literal, reemplazándolo por `adminPasswordSet: true`. Para mantener la compatibilidad hacia atrás con los consumidores interactivos locales (ej: `cli.js`), se declaró la propiedad `adminPassword` como no-enumerable mediante `Object.defineProperty()`. Esto previene la serialización automática del secreto sobre el canal IPC, en logs o en las respuestas HTTP de la API REST de Bridge.
+2. **generator.js:** Se reemplazó la inyección del valor real de `uniqueToken` dentro de la documentación/prompt de arranque `antigravity_bootstrap_prompt.md` por el placeholder seguro `[TOKEN_DE_TELEMETRIA]`.
+
+### Archivos modificados:
+- [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+---
+
 ## CLI-420 — 2026-07-12
 **fix(p0.4): cleanup temp uploads and validate logo extensions — Commit C**
 **Hash:** `48cbd9c`

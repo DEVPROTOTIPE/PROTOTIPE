@@ -1,8 +1,17 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 420 tareas completadas de 420 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 421 tareas completadas de 421 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-421: Redacción de Contraseñas de Administrador y Tokens de Telemetría (P0.4 - Commit D)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se modificó la firma de retorno de la función `createProject` en `generator.js` para no exponer `adminPassword` en plaintext en el objeto literal devuelto, reemplazándola por `adminPasswordSet: true`. Para mantener compatibilidad con los consumidores locales (ej: `cli.js`), se definió `adminPassword` como una propiedad no-enumerable mediante `Object.defineProperty()`. Esto evita la serialización automática del secreto sobre el canal IPC, logs o respuestas HTTP de la API REST. Además, se reemplazó el token generado en `antigravity_bootstrap_prompt.md` por el placeholder seguro `[TOKEN_DE_TELEMETRIA]`.
+  - Commit: `6c01fa5` — `fix(p0.4): redact admin secrets and telemetry tokens`
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-420: Limpieza de uploads y validación de extensiones de logo (P0.4 - Commit C)~~**
   - Estatus: Completada
