@@ -1,5 +1,20 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-426 — 2026-07-12 [MINOR]
+**docs(p0.6): register Provisioning Queue & Job Management design document**
+
+### Cambios realizados:
+1. **Documentación:** Creación de `informe_p0_6_queue_architecture.md` con el análisis del flujo de procesos fork, especificaciones técnicas de la clase ProvisioningQueue, persistencia de jobs en disk, estados y transiciones de tareas en espera, estrategias de crash recovery, impacto en la base de código actual y validación de seguridad/locks.
+2. **tareas_pendientes.md:** Registrada la tarea `CLI-426` como completada y actualizada la métrica global del roadmap.
+3. **mapa_documentacion_ia.md:** Registrado el nuevo diseño de arquitectura y actualizada la fecha de sincronización del GPS documental.
+
+### Archivos modificados:
+- [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_6_queue_architecture.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_6_queue_architecture.md) [NEW]
+- [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+- [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
 ## CLI-425 — 2026-07-12 [MINOR]
 **docs(p0.5): register Ecosystem Maturity Audit Report**
 

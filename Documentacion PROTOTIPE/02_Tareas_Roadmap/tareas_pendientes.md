@@ -1,8 +1,16 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 425 tareas completadas de 425 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 426 tareas completadas de 426 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-426: Diseño y Arquitectura de la Cola de Aprovisionamiento (P0.6)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Diseño y definición de la arquitectura para el gestor de colas y control de concurrencia secuencial en el motor de aprovisionamiento de PROTOTIPE. Auditoría de flujos de procesos fork, especificaciones técnicas de la clase ProvisioningQueue con persistencia local ligera, ciclo de vida de los Jobs, impacto detallado de cambios en servidor, worker y dashboard, y verificación de compatibilidad de seguridad.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_6_queue_architecture.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_6_queue_architecture.md) [NEW]
 
 * **[x] ~~Tarea CLI-425: Auditoría de Madurez y Análisis de Robustez del Ecosistema PROTOTIPE~~**
   - Estatus: Completada
