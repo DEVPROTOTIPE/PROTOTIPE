@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── HELPERS GLOBALES DE ACCESO ──────────────────────────────────
+    
+    // Verifica si la sesión pertenece al Administrador del sistema consultando Firestore
+    function isAdmin() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ─── REGLAS CORE POR COLECCIÓN ──────────────────────────────────
+
+    // 0. Aislamiento Multitenant de la Telemetría (Clientes Control)
+    // Evita lecturas abiertas no deseadas. Filtro estricto por matching de clientId y claims.
+    match /clientes_control/{clientId} {
+      allow read: if request.auth != null && (clientId == request.auth.token.clientId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // 1. Configuración Global de la Aplicación
+    match /config/{document} {
+      allow read: if true; // Lectura pública para inicializar la UI (temas, marca)
+      allow write: if isAdmin(); // Solo admin puede alterar configuraciones de marca
+    }
+
+    // 2. Base de Datos de Clientes y Perfiles
+    match /users/{userId} {
+      // Permitir la creación de perfil inicial para registros
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // Proteger lecturas y actualizaciones: solo el dueño o admin
+      allow read, update: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+      allow list: if isAdmin(); // Protege contra descargas masivas de números/nombres
+      allow delete: if isAdmin();
+
+      // Subcolecciones privadas (ej: Favoritos)
+      match /favorites/{favoriteId} {
+        allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+      }
+    }
+  }
+}

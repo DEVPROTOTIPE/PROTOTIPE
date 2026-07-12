@@ -1602,7 +1602,8 @@ app.post('/api/create-project/resume', (req, res) => {
   }
 
   if (typeof task.resume === 'function') {
-    log(`[API Bridge] Petición de reanudación recibida para taskId: ${taskId}. Desbloqueando hilo...`);
+    console.log(`[API Bridge] Petición de reanudación recibida para taskId: ${taskId}. Desbloqueando hilo...`);
+    task.logs.push(`[API Bridge] Petición de reanudación recibida. Continuando...`);
     task.resume();
     res.json({ success: true, message: 'Aprovisionamiento reanudado exitosamente.' });
   } else {

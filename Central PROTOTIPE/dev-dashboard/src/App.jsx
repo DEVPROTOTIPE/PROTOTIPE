@@ -4461,6 +4461,9 @@ export default function App() {
     const { clientId, nombre, comisionPorcentaje, telemetryToken, payload } = pendingCliProvisioning
 
     addLog(`[Reintento] Volviendo a contactar el daemon CLI para provisionar: ${clientId}...`, 'warning')
+    setIsAuthActivationRequired(false)
+    setAuthProjectId('')
+    setAuthTaskId('')
     setIsProvisioning(true)
 
     try {
@@ -8473,6 +8476,9 @@ export default function App() {
                       `[Iniciando] Iniciando aprovisionamiento para el cliente "${newClientName.trim()}"...`,
                       `[Pre-vuelo] Configurando payload y validando parámetros locales...`
                     ])
+                    setIsAuthActivationRequired(false)
+                    setAuthProjectId('')
+                    setAuthTaskId('')
                     setIsRegistering(true)
                     setIsProvisioning(true)
                     const clientId = newClientName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
