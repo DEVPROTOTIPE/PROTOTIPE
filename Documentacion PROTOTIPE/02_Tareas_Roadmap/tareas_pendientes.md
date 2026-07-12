@@ -8,7 +8,7 @@
   - Estatus: Completada
   - Fecha de registro: 2026-07-12
   - Fecha de finalización: 2026-07-12
-  - Descripción: Diseño y definición de la arquitectura para el gestor de colas y control de concurrencia secuencial en el motor de aprovisionamiento de PROTOTIPE. Auditoría de flujos de procesos fork, especificaciones técnicas de la clase ProvisioningQueue con persistencia local ligera, ciclo de vida de los Jobs, impacto detallado de cambios en servidor, worker y dashboard, y verificación de compatibilidad de seguridad.
+  - Descripción: Diseño y definición de la arquitectura para el gestor de colas y control de concurrencia secuencial en el motor de aprovisionamiento de PROTOTIPE. Incorporación de transiciones de bloqueo seguras (queued -> acquiring_lock -> processing), persistencia atómica mediante rename, delimitación de responsabilidades entre Queue y ProvisioningStateManager, diagrama de estados revisado y flujo detallado de recuperación síncrona ante caídas.
   - Archivos:
     - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_6_queue_architecture.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/informe_p0_6_queue_architecture.md) [NEW]
 

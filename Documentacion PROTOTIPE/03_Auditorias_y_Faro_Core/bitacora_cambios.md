@@ -4,7 +4,7 @@
 **docs(p0.6): register Provisioning Queue & Job Management design document**
 
 ### Cambios realizados:
-1. **Documentación:** Creación de `informe_p0_6_queue_architecture.md` con el análisis del flujo de procesos fork, especificaciones técnicas de la clase ProvisioningQueue, persistencia de jobs en disk, estados y transiciones de tareas en espera, estrategias de crash recovery, impacto en la base de código actual y validación de seguridad/locks.
+1. **Documentación:** Creación y refinamiento (V2) de `informe_p0_6_queue_architecture.md` con el análisis del flujo de procesos fork, especificaciones técnicas de la clase ProvisioningQueue, persistencia atómica (tmp -> rename), estados y transiciones de tareas en espera (incluyendo queued -> acquiring_lock -> processing y waiting_lock), estrategias de crash recovery síncronas tras reinicio, división clara de responsabilidades con ProvisioningStateManager e impacto en la base de código actual.
 2. **tareas_pendientes.md:** Registrada la tarea `CLI-426` como completada y actualizada la métrica global del roadmap.
 3. **mapa_documentacion_ia.md:** Registrado el nuevo diseño de arquitectura y actualizada la fecha de sincronización del GPS documental.
 
