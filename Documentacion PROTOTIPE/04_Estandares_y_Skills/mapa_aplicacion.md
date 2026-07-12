@@ -5,11 +5,11 @@
 app_layout:
   Dashboard_Central:
     root: /Central PROTOTIPE/dev-dashboard/src/
-    components: [components/admin/BrandingEffectsPanel.jsx, components/admin/ClientLifecyclePanel.jsx, components/admin/VersionManagerView.jsx, components/admin/SaaSOperationsView.jsx, components/admin/BriefingStudioView.jsx, components/admin/FeatureMarketplaceView.jsx, components/admin/ComponentLibraryView.jsx, components/admin/ComponentSandbox.jsx, components/ui/, components/common/]
+    components: [components/admin/BrandingEffectsPanel.jsx, components/admin/ClientLifecyclePanel.jsx, components/admin/VersionManagerView.jsx, components/admin/SaaSOperationsView.jsx, components/admin/BriefingStudioView.jsx, components/admin/FeatureMarketplaceView.jsx, components/admin/ComponentLibraryView.jsx, components/admin/ComponentSandbox.jsx, components/admin/ProvisioningProgressModal.jsx, components/admin/FirebaseAccountsModal.jsx, components/ui/, components/common/]
     state: [store/, services/SaaSMetricsService.js, services/AlertEngine.js, config/saas_config.js]
   Prototipe_CLI:
     root: /Prototipe-CLI/
-    core_scripts: [server.js, generator.js, worker_create_project.js, sync_clients.js, notification_server.js, scripts/validate-knowledge.js, scripts/test_promotion_pipeline.js, scripts/test_robustness_specials.js, scripts/test_bridge_health.js, scripts/test_smoke_visual.js, scripts/test_firestore_emulator.js, scripts/test_multiplatform.js, scripts/run_full_certification.js, scripts/distribute_rules.js]
+    core_scripts: [server.js, generator.js, worker_create_project.js, sync_clients.js, notification_server.js, scripts/validate-knowledge.js, scripts/test_promotion_pipeline.js, scripts/test_robustness_specials.js, scripts/test_bridge_health.js, scripts/test_smoke_visual.js, scripts/test_firestore_emulator.js, scripts/test_multiplatform.js, scripts/run_full_certification.js, scripts/distribute_rules.js, scripts/firebase_account_manager.js]
     templates: [templates/template-ventas/, templates/template-core-seed/]
     knowledge: [knowledge/core-promotion/, knowledge/firestore/, knowledge/telemetry/app-registry.json, knowledge/telemetry/event-types.json, knowledge/feature-registry.json, knowledge/schema/]
     lib: [lib/CoreCandidateBuilder.js, lib/CorePromotionValidator.js, lib/BriefingDocumentMapper.js, lib/PromotionBlueprintBuilder.js, lib/CorePromotionService.js, lib/CorePromotionPublisher.js, lib/ClientLineageMigrator.js, lib/FeatureRegistry.js, lib/VersionManager.js, lib/CapabilityResolver.js, lib/FeatureRecommender.js, lib/ExplainabilityLogger.js, lib/PackageMerger.js, lib/ProvisioningValidator.js, lib/BlueprintSimulation.js, lib/ExperienceComposer.js, lib/BiResolver.js, lib/ProvisioningStateManager.js, lib/ProvisioningQueue.js]
@@ -357,6 +357,7 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Prototipe-CLI/templates/template-core-seed/src/hooks/useBilling.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
 * **`/Prototipe-CLI/templates/template-core-seed/src/services/billingService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
 * **`/Prototipe-CLI/templates/template-core-seed/src/constants/index.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
+* **`/Prototipe-CLI/templates/template-core-seed/src/features/billing/index.js`**: Stub de compilación que exporta un suscriptor no-op `subscribeToBillingData` para resolver dependencias cuando la feature no se aprovisiona (Tarea CLI-438).
 * **`/Central PROTOTIPE/dev-dashboard/src/services/pdfService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-023).
 * **`/Plantillas Core/App Ventas/tests/helpers/checkout.helpers.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea LINE-2007).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-030).
@@ -478,6 +479,7 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Prototipe-CLI/test_templates.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-254).
 * **`/Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-258).
 * **`/Central PROTOTIPE/dev-dashboard/src/App.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-260).
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`**: Modal modular premium interactivo para monitorear el estado y progreso del aprovisionamiento local en tiempo real. [NEW] CLI-436.
 * **`/.agents/AGENTS.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-265).
 
 ### 👥 Módulo Cliente (Tienda PWA)

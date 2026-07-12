@@ -1,8 +1,178 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 433 tareas completadas de 433 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 450 tareas completadas de 450 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-450: Inyección del Estándar UI/UX en las Habilidades Operativas de la IA (Skills)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Modificamos las instrucciones físicas de las skills operativas del agente (`component-creator`, `component-extractor`, `portar-componente`, y `crear-skill-prototipe`) en el directorio activo `.agents/skills/` para incorporar las directivas del estándar de maquetación, accesibilidad y diseño táctil (touch target 44px, elevación tonal en Dark Mode, no hover pegajoso en móvil, React Portals en dropdowns, inputmode en formularios). Adicionalmente, el linter de integridad del monorepo (`verify_library_integrity.cjs`) sincronizó automáticamente los cambios hacia el directorio de resguardo en la documentación del proyecto y actualizó el manifiesto `sync_manifest.json` de forma atómica.
+  - Archivos:
+    - [`.agents/skills/component-creator/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/component-creator/SKILL.md) [MODIFY]
+    - [`.agents/skills/component-extractor/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/component-extractor/SKILL.md) [MODIFY]
+    - [`.agents/skills/portar-componente/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/portar-componente/SKILL.md) [MODIFY]
+    - [`.agents/skills/crear-skill-prototipe/SKILL.md`](file:///d:/PROTOTIPE/.agents/skills/crear-skill-prototipe/SKILL.md) [MODIFY]
+    - [`.agents/skills/sync_manifest.json`](file:///d:/PROTOTIPE/.agents/skills/sync_manifest.json) [MODIFY]
+
+* **[x] ~~Tarea CLI-449: Expansión del Estándar de Diseño Premium y Visual de Vanguardia~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Expandimos el estándar visual `estandar_disenio_premium.md` incorporando las reglas de estructuración tonal de fondos en Modo Oscuro (Niveles 0 al 3), el estándar de animaciones fluidas optimizadas para GPU (transform y opacity) con will-change, la prevención de hovers pegajosos en dispositivos táctiles (`@media (hover: hover)`), y la especificación de efectos avanzados de marca (glow dinámico HSL y shimmer skeleton).
+  - Archivos:
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_disenio_premium.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/estandar_disenio_premium.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-448: Propagación e Inyección del Estándar UI/UX en Reglas de IA (AGENTS.md y GEMINI.md)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Sincronizamos e inyectamos las nuevas pautas del estándar de maquetación y UI/UX directamente en las reglas centrales de la IA (`.agents/AGENTS.md`) y en todas las copias de `GEMINI.md` en el monorepo (usando el script de propagación `sync_rules.js` para actualizar de forma inteligente y automatizada el motor del CLI, plantillas core, dashboard y el entorno del cliente).
+  - Archivos:
+    - [`.agents/AGENTS.md`](file:///d:/PROTOTIPE/.agents/AGENTS.md) [MODIFY]
+    - [`Prototipe-CLI/GEMINI.md`](file:///d:/PROTOTIPE/Prototipe-CLI/GEMINI.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md) [MODIFY]
+    - [`Plantillas Core/App Ventas/GEMINI.md`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/GEMINI.md) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/GEMINI.md`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/GEMINI.md) [MODIFY]
+    - [`Instancias Clientes/ventas/ventas-moni-app/GEMINI.md`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/GEMINI.md) [MODIFY]
+    - [`Prototipe-CLI/templates/template-core-seed/GEMINI.md`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/GEMINI.md) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/GEMINI.md`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/GEMINI.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-447: Expansión del Estándar de Maquetación y UX para Botones, Sombras y Desplegables Custom~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Expandimos el estándar oficial de maquetación `estandar_maquetacion_alineacion_ui.md` tras una investigación exhaustiva de mejores prácticas (WCAG 2.2, Nielsen Norman Group y Material Design 3). Anexamos reglas estrictas para el tamaño y área interactiva de botones (touch target de 44x44px), la especificación de sus 5 estados visuales (incluyendo deshabilitado semántico), pautas para elevación y sombras suavizadas (tonal en modo oscuro), accesibilidad y prevención de clipping (React Portals / Floating UI) en dropdowns customizados, y la usabilidad de formularios (asociaciones label-input y inputmode móvil). Actualizamos el mapa de documentación semántica.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_maquetacion_alineacion_ui.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/estandar_maquetacion_alineacion_ui.md) [MODIFY]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-446: Blindaje de Seguridad, Aprovisionamiento Recursivo de Dependencias e Integridad de Sandbox~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Implementación de mejoras y auditorías del ecosistema. Refactorizamos el motor `generator.js` de Prototype CLI para realizar escaneos dinámicos en la biblioteca de componentes y resolver recursivamente el grafo de dependencias internas (`dependencies.internal`), inyectando de forma transitiva todos los átomos asociados (como `CustomSelect` o `BrandIcons`). Protegimos los paneles administrativos de `App Ventas` (`OrderDeliveryPanel.jsx` y `DeliveryCustomMessengerPanel.jsx`) con validaciones de rol administrador (`user.role === 'admin'`) y ajustamos la sintaxis para pasar el linter de seguridad estricto del monorepo a 0 advertencias. Corregimos colores rígidos oscuros en los playgrounds `LeafletMapPickerSandbox.jsx` y `ProgramadorRutasDomicilioSandbox.jsx` para alinearse con el Modo Claro/Oscuro del tema HSL. Adicionalmente, realizamos una auditoría técnica completa del Feature Flags Manager y el Feature Marketplace.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/components/admin/orders/OrderDeliveryPanel.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/orders/OrderDeliveryPanel.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/components/admin/settings/DeliveryCustomMessengerPanel.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/admin/settings/DeliveryCustomMessengerPanel.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LeafletMapPickerSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/LeafletMapPickerSandbox.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ProgramadorRutasDomicilioSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/ProgramadorRutasDomicilioSandbox.jsx) [MODIFY]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_integridad_y_criterios_aprovisionamiento.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_integridad_y_criterios_aprovisionamiento.md) [NEW]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_feature_flags_y_marketplace.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/auditoria_feature_flags_y_marketplace.md) [NEW]
+
+* **[x] ~~Tarea CLI-445: Estandarización e Implementación del Hub de Iconos Atómicos de Marca (BrandIcons)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se estructuró y desarrolló la propuesta de la iconografía del sistema. Para resolver los fallos de empaquetado de Vite por la ausencia de logos de marcas en lucide-react y mantener el código de negocio libre de vectores pesados, creamos el Hub de Iconos de Marca (`BrandIcons.jsx`) con exportaciones nombradas para logotipos e isotipos optimizados (GitHub, WhatsApp, Google, Firebase, Stripe, DIAN, Visa, MasterCard, Apple) con el uso de props `className` y classes `fill-current`. Se documentó en el catálogo de marca blanca en `/06_Biblioteca_Componentes/Formularios_y_UI/Iconos_Marca/iconos_marca.md`, se indexó en el README y en el mapa semántico, y se reemplazó el SVG inline de GitHub del Dashboard Central por el nuevo componente `<GithubIcon />`. Se creó un Sandbox interactivo para su testeo.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Iconos_Marca/iconos_marca.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/Formularios_y_UI/Iconos_Marca/iconos_marca.md) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/ui/BrandIcons.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/ui/BrandIcons.jsx) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/BrandIconsSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/BrandIconsSandbox.jsx) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-444: Sincronización e Integración de Repositorio GitHub de Clientes en Firestore y CRM~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se mejoró el flujo de aprovisionamiento de repositorios en GitHub. Modificamos la función `setupGitHub` y `createProject` en el backend del generador (`generator.js`) para que, una vez empujado el scaffolding a GitHub mediante `gh repo create`, retorne un estado estructurado que incluya `githubUploaded` y `githubUrl`. En el Dashboard Central (`App.jsx`), interceptamos este resultado al recibir la respuesta SSE de éxito y guardamos de forma estructurada la URL de GitHub (`github: { uploaded: true, url: ... }`) en el documento de `clientes_control` del cliente. Finalmente, inyectamos un botón visual de acceso directo a GitHub (usando el icono SVG oficial en línea para garantizar 100% de compatibilidad con lucide-react) en la tarjeta de cada cliente en el CRM.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-443: Panel de Gestión e Integración Visual de Cuentas Firebase en Dashboard y Perfil Administrador~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se integró de forma visual la gestión de cuentas Firebase en el Dashboard Central. Para ello, se crearon endpoints en `server.js` (`GET /api/firebase/accounts`, `POST /api/firebase/accounts/use`, `POST /api/firebase/accounts/add`, `POST /api/firebase/accounts/logout` y `GET /api/firebase/accounts/status`). Se desarrolló el componente `FirebaseAccountsModal.jsx` con interfaz premium para listar, rotar y desvincular cuentas con animaciones de carga, alertas y barra de límite de proyectos Spark. Se corrigió un error de parseo JSON (`Unexpected token '<', "<!doctype "...`) al parametrizar de forma absoluta las llamadas fetch de React con la prop `cliUrl={CLI_URL}` para evitar el fallback SPA del servidor Vite local. Se añadió tolerancia en `/api/firebase/accounts/use` para evitar reportar como error 500 el comportamiento de Firebase CLI al activar una cuenta que ya era la activa de forma predeterminada (`Already using account`). Se resolvió el error de entorno no interactivo (`Cannot run "login:add" in non-interactive mode`) en `/api/firebase/accounts/add` al lanzar en Windows una terminal flotante del sistema (`start cmd.exe /k "firebase login:add"`) que sí hereda el contexto TTY e interactivo necesario para que Firebase abra el navegador web predeterminado del desarrollador. Finalmente, se inyectó el botón de acceso rápido "Cuentas Firebase (Rotación)" con icono `Flame` en el modal de perfil de administrador en `App.jsx`, y se habilitó un botón de rescate "Gestionar Firebase" en el modal de progreso del aprovisionador en caso de fallos.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/FirebaseAccountsModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FirebaseAccountsModal.jsx) [NEW]
+
+* **[x] ~~Tarea CLI-442: Gestor Interactivo de Cuentas Firebase para Rotación de Identidades Google~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementó la utilidad interactiva de consola `firebase_account_manager.js` para simplificar la rotación y administración de múltiples cuentas de Firebase en la máquina host de desarrollo. El script provee comandos guiados para: ver la cuenta activa para el aprovisionamiento, listar todas las cuentas locales vinculadas, agregar nuevas cuentas mediante el navegador (`login:add`), alternar de cuenta activa de forma interactiva (`login:use`), cerrar sesión en cuentas específicas y realizar comprobaciones rápidas de conectividad y credenciales.
+  - Archivos:
+    - [`Prototipe-CLI/scripts/firebase_account_manager.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/firebase_account_manager.js) [NEW]
+
+* **[x] ~~Tarea CLI-441: Sincronización de Progreso en Aprovisionamiento y Transición de Resumen de Credenciales~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se amplió la lista de etapas del modal de progreso agregando "Registrando cliente en la nube" (paso 13) e "Inyectando componentes inteligentes" (paso 14), cubriendo los eventos de fin de ciclo cliente que se ejecutan asíncronamente en el frontend. Se inyectó soporte para la prop `isCompleted` en el modal de progreso y se modificó `App.jsx` para pasar este indicador una vez guardados los datos de onboarding. Adicionalmente, se corrigió una violación a las reglas de hooks de React (retorno anticipado condicional antes de declaraciones de useEffect) refactorizando el renderizado condicional de `ProvisioningProgressModal` al final del componente. Finalmente, se inyectó un `useEffect` en `App.jsx` que detecta la finalización, mantiene el modal de progreso en 100% y éxito por 1.5 segundos, y realiza la transición automática cerrando el modal de progreso y abriendo directamente el panel de credenciales de Onboarding del cliente.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-440: Robustez en Detección de Errores y Visualización de Progreso en Aprovisionamiento (Evitación de Falsos Positivos)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se refinó el detector `isError` del modal de progreso para evitar falsos positivos cuando la palabra "error" aparece en parámetros de comandos inofensivos (como `--loglevel=error`). Adicionalmente, se modificó el cálculo de progreso global (`progressPercent`) para representar el avance exacto de hitos sin saltar artificialmente al 100% en caso de error, y se actualizó `execAsyncCommand` en el generador CLI para capturar la salida combinada de stdout y stderr en el mensaje de error de salida, permitiendo interceptar advertencias fatales del motor de despliegue de Firebase de manera inequívoca.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-439: Activación Automática de APIs de GCP y Robustez en Despliegue de Firebase para Proyectos Nuevos~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se implementó en el Bridge CLI (`server.js`) la activación programática de los servicios Firestore (`firestore.googleapis.com`), Firebase Storage (`firebasestorage.googleapis.com`) y Storage (`storage.googleapis.com`) en GCP usando tokens OAuth2 del usuario, agregando un delay de 5 segundos para su propagación. En el generador (`generator.js`), se inyectó un catch defensivo al comando de deploy de Firebase de modo que, si falla a causa de no tener aprovisionado Cloud Storage o el plan Blaze, capture el error, muestre un warning y reintente el deploy omitiendo Storage (`--only firestore:rules,firestore:indexes,hosting`). Esto garantiza la continuidad del despliegue en Spark sin generar rollbacks.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-438: Solución a Fugas de Importación de Features y Mitigación de Fallas en Compilación del Template Seed~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se creó un stub de indexación para la feature `billing` en la plantilla de semilla `template-core-seed` (en `src/features/billing/index.js`) que exporta un suscriptor no-op `subscribeToBillingData`. Esto soluciona los fallos de compilación durante el aprovisionamiento de clientes usando el core agnóstico de la semilla, donde Rollup arrojaba el error `Could not resolve "../features/billing" from "src/hooks/useAppConfigSync.js"`. Además, se eliminó la instancia huérfana de `ProvisioningProgressModal` en `App.jsx` fuera del wizard y se sincronizó el flujo de resiliencia del submit.
+  - Archivos:
+    - [`Prototipe-CLI/templates/template-core-seed/src/features/billing/index.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/features/billing/index.js) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-437: Integración del Modal de Progreso dentro del Layout del Wizard de Onboarding y Resiliencia de Estados de Carga~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se inyectó la instancia del `<ProvisioningProgressModal>` dentro de la vista activa de onboarding (`isOnboardingActive === true`) en `Central PROTOTIPE/dev-dashboard/src/App.jsx`. Esto resuelve el problema de renderizado donde el modal quedaba en el bloque de retorno principal e inaccesible debido al return anticipado del wizard. Además, se adaptaron las acciones del botón de cierre (`onClose`) y el bloque catch del submit para asegurar el restablecimiento de los estados `isProvisioning` y `isRegistering` en caso de fallos del motor de aprovisionamiento o de compilación, desbloqueando la UI.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-436: Modulación del Modal de Progreso de Aprovisionamiento Premium e Integración en Dashboard Central~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se extrajo el overlay de carga estático del Dashboard Central (`App.jsx`) y se implementó como un componente de UI modular independiente e interactivo llamado `ProvisioningProgressModal` (`components/admin/ProvisioningProgressModal.jsx`). Este modal incorpora el estado de la máquina de tareas persistente en tiempo real (consultando `/api/provisioning/status` mediante polling de seguridad con delay), mostrando al operador el estado real de la tarea (queued, waiting_lock, processing, completed, failed, rollback), la posición en cola actual, y alertas sobre el resultado. Permite al administrador cerrar el modal o continuar de forma interactiva una vez finalizada la tarea, previniendo regresiones de interfaz y desacoplando el código de `App.jsx`.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [NEW]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-435: Reparación del Bloqueo de Inyección de Branding, Solución de Duplicidad de :root en index.css y Consistencia de Configuración Inicial en Zustand/Firestore~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se envolvió el bloque de variables base del `:root` en `template-core-seed/src/index.css` con marcadores `BRANDING_VARS_START` / `BRANDING_VARS_END`, permitiendo que el generador reemplace por completo las variables base sin duplicarlas al principio de `:root`. Se agregaron variables de entorno iniciales (`VITE_INITIAL_FONT`, `VITE_INITIAL_RADIUS`) en `.env.local` generados por `generator.js`, y se adaptaron los archivos `appConfigService.js` (para `DEFAULT_SETTINGS`) y `appConfigStore.js` (para Zustand) del template de forma que se sincronicen de manera consistente con la configuración inicial de branding del asistente en el primer arranque de la base de datos Firestore y del LocalStorage.
+  - Archivos:
+    - [`Prototipe-CLI/templates/template-core-seed/src/index.css`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/index.css) [MODIFY]
+    - [`Prototipe-CLI/templates/template-core-seed/src/services/appConfigService.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/services/appConfigService.js) [MODIFY]
+    - [`Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-434: Reparación del Test de Aprovisionamiento y Corrección de Alias de Contrato Canónico en Generator~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se reestructuró el payload del test de aprovisionamiento al formato canónico `{ blueprint, execution }`, se corrigió la ruta de salida `targetDir`, y se eliminó el check obsoleto de `VITE_DEV_PIN`. Adicionalmente, se corrigió un alias mismatch en `generator.js` donde `execution.firebaseDeploy` no era propagado a `answers.enableFirebaseDeploy`, causando que el guard de deploy ignorara el contrato canónico. Resultado final: **31/31 assertions PASS**.
+  - Archivos:
+    - [`Prototipe-CLI/scripts/test_provision.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_provision.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-433: Alineación de Configuración de Firebase y Persistencia Offline de Core Seed con Core Ventas~~**
   - Estatus: Completada

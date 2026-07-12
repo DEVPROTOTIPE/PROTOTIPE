@@ -216,6 +216,24 @@ Para asegurar que todo componente sea perfectamente responsivo tanto en móvil (
       `bg-[var(--color-surface-3)] text-[var(--color-text-muted)]/50 border border-[var(--color-border)] cursor-not-allowed`
       Esto garantiza una perfecta visualización y contraste tanto en Modo Oscuro como en Modo Claro sin colisión de tonos.
 
+11. **Tamaño Mínimo de Botones y Estados Interactivos (Touch Target WCAG):**
+    - Todos los elementos interactivos o botones de acción deben tener un tamaño táctil mínimo de **44x44 CSS px** (WCAG 2.2). Si un icono mide `w-8 h-8`, se debe envolver en un botón de tamaño superior o agregar padding.
+    - Se deben declarar explícitamente en Tailwind los 5 estados interactivos: Normal, `hover:opacity-90 transition-opacity`, `focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg)] focus:outline-none`, `active:scale-[0.98] transition-all`, y Loading (deshabilitar clic + spinner con aria-live).
+
+12. **Jerarquía de Sombras y Elevación Tonal Semántica:**
+    - *Light Mode:* Utiliza sombras multi-capa sutiles translúcidas: `shadow-[0_4px_12px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.04)]` (dropdowns/menús) y `shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)]` (tarjetas).
+    - *Dark Mode:* Queda prohibido el uso de sombras negras. Se debe aplicar la elevación tonal de Material Design 3 aclarando progresivamente los fondos de superficie: base (`bg-[var(--color-bg)]`) -> tarjetas (`bg-[var(--color-surface)]`) -> popovers (`bg-[var(--color-surface-2)]`) -> modales en primer plano (`bg-[var(--color-surface-3)]`).
+
+13. **Resiliencia en Dropdowns y Prevención de Clipping:**
+    - Todo dropdown customizado debe ser accesible vía teclado (Tab, flechas, Esc, Enter) y declarar roles ARIA (`role="listbox"`, `aria-expanded`).
+    - Para evitar que los desplegables se corten visualmente en contenedores con `overflow-hidden` o `overflow-y-auto`, se deben renderizar usando **React Portals** (`createPortal`) al final del body o utilizando posicionamiento dinámico absoluto con ajuste automático (`placement: 'top'` si hay colisión inferior).
+    - En viewports móviles (`sm` o inferior), los desplegables de más de 6 opciones se deben renderizar obligatoriamente como un **Bottom Sheet** deslizable.
+
+14. **Usabilidad en Formularios y Disparadores Móviles (inputmode):**
+    - Todo input interactivo debe estar enlazado explícitamente a un `label` visible utilizando `htmlFor` e `id` coincidentes (para ocultar visualmente usar `sr-only`). Queda prohibido delegar la descripción únicamente al `placeholder`.
+    - Los inputs numéricos deben declarar obligatoriamente la propiedad `inputmode` para forzar el teclado óptimo en móviles: cantidades enteras -> `inputmode="numeric" pattern="[0-9]*"`, decimales/precios -> `inputmode="decimal"`.
+    - En viewports móviles, se prefiere `<input type="date">` nativo para aprovechar las ruletas de fecha optimizadas del SO móvil, estilizando el indicador de calendario vía `-webkit-calendar-picker-indicator` con opacidades suaves.
+
 ---
 
 ## AUTOMATIZACIÓN OBLIGATORIA DEL PROTOCOLO DE INTEGRIDAD DE CÓDIGO (POST-CHANGE)

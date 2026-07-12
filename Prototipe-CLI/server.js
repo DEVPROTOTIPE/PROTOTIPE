@@ -733,6 +733,120 @@ app.post('/api/firebase/validate', async (req, res) => {
   }
 });
 
+// Endpoints para gestión de cuentas de Firebase (Rotación de identidades)
+app.get('/api/firebase/accounts', async (req, res) => {
+  try {
+    const { stdout } = await execAsync('firebase login:list --json');
+    const data = JSON.parse(stdout);
+    const accounts = data.result || [];
+
+    // Obtener la cuenta activa actual (sin --json para que muestre solo el email)
+    let activeEmail = null;
+    try {
+      const { stdout: activeOut } = await execAsync('firebase login:list');
+      const match = activeOut.match(/Logged in as\s+([^\s\r\n]+)/i);
+      if (match) activeEmail = match[1].trim();
+    } catch (_) {}
+
+    // Marcar la cuenta activa
+    const enriched = accounts.map(acc => ({
+      ...acc,
+      active: acc.user?.email === activeEmail
+    }));
+
+    res.json({ success: true, accounts: enriched });
+  } catch (err) {
+    try {
+      const { stdout: textStdout } = await execAsync('firebase login:list');
+      res.json({ success: true, accounts: [], warning: 'No se pudieron parsear las cuentas en formato JSON.', raw: textStdout });
+    } catch (innerErr) {
+      res.json({ success: true, accounts: [], error: innerErr.message });
+    }
+  }
+});
+
+app.post('/api/firebase/accounts/use', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ success: false, error: 'El email es requerido.' });
+  }
+  const sanitizedEmail = email.replace(/[^a-zA-Z0-9@._+-]/g, '');
+  try {
+    const { stdout, stderr } = await execAsync(`firebase login:use ${sanitizedEmail}`);
+    res.json({ success: true, output: stdout || stderr });
+  } catch (err) {
+    const fullMsg = `${err.message || ''} ${err.stderr || ''}`;
+    // Cuenta ya estaba activa — no es un error real
+    if (fullMsg.includes('Already using account')) {
+      return res.json({ success: true, output: `Ya estás usando la cuenta ${sanitizedEmail} como activa.` });
+    }
+    // La cuenta no tiene contexto de 'login:use' válido — aún así responder con éxito
+    // si el error es solo de contexto global (la cuenta puede usarse con --account flag)
+    if (fullMsg.includes('Command failed') && !fullMsg.includes('not found') && !fullMsg.includes('unknown')) {
+      // Intentar verificar si la cuenta existe en la lista
+      try {
+        const { stdout: listOut } = await execAsync('firebase login:list --json');
+        const parsed = JSON.parse(listOut);
+        const exists = (parsed.users || parsed || []).some(u => {
+          const userEmail = typeof u === 'string' ? u : (u.email || u.user?.email || '');
+          return userEmail === sanitizedEmail;
+        });
+        if (exists) {
+          return res.json({ success: true, output: `La cuenta ${sanitizedEmail} está vinculada. Puede necesitar re-autenticación para ser usada como activa predeterminada.` });
+        }
+      } catch (_) {}
+    }
+    res.status(500).json({ success: false, error: `Fallo al cambiar a la cuenta ${sanitizedEmail}: ${err.stderr || err.message}` });
+  }
+});
+
+app.post('/api/firebase/accounts/add', async (req, res) => {
+  try {
+    let command = '';
+    const platform = process.platform;
+    if (platform === 'win32') {
+      command = 'start cmd.exe /k "firebase login:add"';
+    } else if (platform === 'darwin') {
+      command = `osascript -e 'tell app "Terminal" to do script "firebase login:add"'`;
+    } else {
+      command = 'x-terminal-emulator -e firebase login:add || gnome-terminal -e "firebase login:add" || konsole -e "firebase login:add"';
+    }
+
+    exec(command, (err, stdout, stderr) => {
+      if (err) {
+        logger.error(`Error al iniciar terminal interactiva de Firebase login:add: ${err.message}`);
+      }
+    });
+    res.json({ success: true, message: 'Se ha abierto una ventana de terminal interactiva para la vinculación.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: `Fallo al iniciar el login: ${err.message}` });
+  }
+});
+
+app.post('/api/firebase/accounts/logout', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ success: false, error: 'El email es requerido.' });
+  }
+  const sanitizedEmail = email.replace(/[^a-zA-Z0-9@._+-]/g, '');
+  try {
+    const { stdout } = await execAsync(`firebase logout ${sanitizedEmail}`);
+    res.json({ success: true, output: stdout });
+  } catch (err) {
+    res.status(500).json({ success: false, error: `Fallo al cerrar sesión en ${sanitizedEmail}: ${err.message}` });
+  }
+});
+
+app.get('/api/firebase/accounts/status', async (req, res) => {
+  try {
+    const { stdout } = await execAsync('firebase projects:list --json');
+    const data = JSON.parse(stdout);
+    res.json({ success: true, projects: data.result || [] });
+  } catch (err) {
+    res.json({ success: false, error: `No se pudieron listar los proyectos de Firebase: ${err.message}` });
+  }
+});
+
 // Endpoint para generar un par de claves VAPID en caliente (Mejora de Pulido)
 app.get('/api/vapid/generate', (req, res) => {
   try {
@@ -804,6 +918,29 @@ function registerTaskCleanup(taskId) {
     delete activeCreationTasks[taskId];
     console.log(`[Task Monitor] Tarea de aprovisionamiento '${taskId}' purgada de memoria.`);
   }, TASK_CLEANUP_TTL_MS);
+}
+
+// Auxiliar para habilitar APIs de GCP de forma programática usando Service Usage API
+async function enableGcpService(projectId, serviceName, accessToken) {
+  try {
+    const url = `https://serviceusage.googleapis.com/v1/projects/${projectId}/services/${serviceName}:enable`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: '{}'
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`HTTP Error ${res.status}: ${errText}`);
+    }
+    return await res.json();
+  } catch (err) {
+    console.error(`[GCP Service Enable Error] ${serviceName}:`, err.message);
+    throw err;
+  }
 }
 
 // Lógica de ejecución en segundo plano para el aprovisionamiento
@@ -886,6 +1023,21 @@ async function executeCreationTaskInBackground(taskId, answers) {
             }
           }
         }
+      }
+
+      // Habilitar APIs de GCP de forma proactiva (Firestore y Storage)
+      try {
+        log(`[Firebase Automate] Habilitando APIs críticas de Google Cloud (Firestore, Storage)...`);
+        const token = await getFirebaseAccessToken();
+        await Promise.all([
+          enableGcpService(safeProjectId, 'firestore.googleapis.com', token),
+          enableGcpService(safeProjectId, 'firebasestorage.googleapis.com', token),
+          enableGcpService(safeProjectId, 'storage.googleapis.com', token)
+        ]);
+        log(`[Firebase Automate] APIs de Google Cloud habilitadas con éxito. Esperando propagación...`);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      } catch (apiErr) {
+        log(`[Firebase Automate Warning] No se pudieron habilitar algunas APIs de Google Cloud: ${apiErr.message}. Continuando de todos modos...`);
       }
 
       // 2. Crear base de datos Firestore default (nam5)
@@ -980,7 +1132,7 @@ async function executeCreationTaskInBackground(taskId, answers) {
     }
 
     await ProvisioningStateManager.transitionTo(clientId, 'provisioning', { taskId });
-    log(`[API Bridge] Iniciando creación física del proyecto con plantilla: ${answers.template}`);
+    log(`[API Bridge] Iniciando creación física del proyecto con plantilla: ${answers.template || answers.blueprint?.coreType}`);
     const result = await runCreateProjectWorker(answers, (line) => {
       log(`[Worker] ${line}`);
     });

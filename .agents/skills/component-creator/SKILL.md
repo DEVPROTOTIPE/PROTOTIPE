@@ -325,3 +325,16 @@ useEffect(() => {
      - *Listeners:* Los listeners realtime (`onSnapshot`) deben estar controlados por `RealtimeQueryRegistry` para evitar lecturas duplicadas e idempotencia contra Strict Mode, requiriendo sesión activa.
      - *Escrituras:* Escrituras de campos calientes de stock o caja deben ejecutarse mediante transacciones concurrentes (`runTransaction`).
      - *Persistencia Offline:* Queda estrictamente prohibido usar `localStorage` para colas de outbox, registros de auditoría offline, sincronización de ventas, inventario local o telemetría. Debe emplearse Dexie.js / IndexedDB (`src/features/[featureName]/offline/[featureName]OutboxDb.js`) con estructura de transaccionalidad, `eventId` e idempotencia de clave primaria.
+ 12. **Gobernanza de Fondos y Elevación Tonal en Modo Oscuro:**
+     - Fondo base: `bg-[var(--color-bg)]`. Tarjetas/secciones: `bg-[var(--color-surface)]`. Popovers/desplegables: `bg-[var(--color-surface-2)]`. Modales en primer plano: `bg-[var(--color-surface-3)]`. Nunca uses sombras negras en modo oscuro; la elevación se expresa aclarando progresivamente los fondos.
+ 13. **Tamaño Mínimo de Botones e Interactividad (Touch Target WCAG):**
+     - Todos los botones interactivos o iconos de acción deben tener un tamaño táctil mínimo de **44x44 CSS px** (WCAG 2.2).
+     - Declara explícitamente los 5 estados en Tailwind: Normal, `hover:opacity-90`, `focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 focus:outline-none`, `active:scale-[0.98] transition-all`, y Loading (bloquear botón + spinner con aria-live).
+ 14. **Resiliencia en Dropdowns y Prevención de Clipping:**
+     - Todo selector/dropdown personalizado debe ser accesible vía teclado (Tab, flechas, Esc, Enter) y declarar roles ARIA (`role="listbox"`, `aria-expanded`).
+     - Para evitar que los desplegables se corten en contenedores con `overflow-hidden` o `overflow-y-auto`, se deben renderizar usando **React Portals** (`createPortal`) al final del body o utilizando posicionamiento dinámico absoluto. En viewports móviles (`sm`), renderízalos como un **Bottom Sheet** deslizable.
+ 15. **Usabilidad en Formularios y Disparadores Móviles (inputmode):**
+     - Todo input interactivo debe estar enlazado explícitamente a un `label` visible utilizando `htmlFor` e `id` coincidentes (para ocultar visualmente usar `sr-only`). Queda prohibido delegar la descripción únicamente al placeholder.
+     - Los inputs numéricos deben declarar la propiedad `inputmode` para forzar el teclado óptimo en móviles: cantidades enteras -> `inputmode="numeric" pattern="[0-9]*"`, decimales/precios -> `inputmode="decimal"`. En viewports móviles, se prefiere `<input type="date">` nativo.
+ 16. **Prevención de Hovers Pegajosos en Dispositivos Táctiles:**
+     - Limita las clases de hover que cambian colores de fondo o brillo a pantallas con cursor físico de precisión usando la media query `@media (hover: hover)` en Tailwind para evitar que el estado hover se quede "pegado" tras el tap en móviles. Use animaciones aceleradas por GPU (`transform` y `opacity` únicamente).

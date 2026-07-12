@@ -123,7 +123,9 @@ function execAsyncCommand(cmd, args, options = {}) {
         const lines = data.toString().split(/\r?\n/);
         lines.forEach(line => {
           if (line.trim()) {
-            console.log(redactSecrets(line));
+            const redacted = redactSecrets(line);
+            console.log(redacted);
+            errorOutput += redacted + '\n';
           }
         });
       });
@@ -819,7 +821,9 @@ export async function createProject(answers) {
     }
     answers.force = normalized.execution.force;
     answers.enableGithub = normalized.execution.enableGithub;
+    // Alias: el contrato canónico usa 'firebaseDeploy', el generator internamente evalúa 'enableFirebaseDeploy'
     answers.firebaseDeploy = normalized.execution.firebaseDeploy;
+    answers.enableFirebaseDeploy = normalized.execution.firebaseDeploy;
     answers.centralRegistration = normalized.execution.centralRegistration;
   }
 
@@ -902,6 +906,7 @@ export async function createProject(answers) {
   const nodeModulesExistedBefore = existedBefore ? await fs.pathExists(path.join(targetDir, 'node_modules')) : false;
   const packageLockExistedBefore = existedBefore ? await fs.pathExists(path.join(targetDir, 'package-lock.json')) : false;
   let gitInitialized = false;
+  let gitStatus = { initialized: false, githubUploaded: false, githubUrl: null };
   try {
     const srcTemplateDir = path.join(TEMPLATES_DIR, answers.template);
     if (!isPathContained(TEMPLATES_DIR, srcTemplateDir)) {
@@ -930,6 +935,10 @@ export async function createProject(answers) {
   if (!primaryColor) primaryColor = PALETTES.ruby.primary;
   if (!accentColor) accentColor = PALETTES.ruby.accent;
   if (!themeName) themeName = 'ruby';
+
+  const brand = answers.branding || {};
+  const brandFont = brand.googleFont || 'Inter';
+  const brandRadius = brand.radiusBase || '0.75rem';
 
   console.log('\n' + pc.yellow(`${taskIdPrefix}⚡ Iniciando aprovisionamiento automatizado en: ${targetDir}`));
 
@@ -1510,8 +1519,6 @@ export default function Admin${featCamel}() {
     if (indexPathCSS) {
       let cssContent = await fs.readFile(indexPathCSS, 'utf-8');
       
-      const brand = answers.branding || {};
-
       // [A1 FIX] Normalizar colores a formato CSS válido.
       // El briefing puede enviar colores en hex (#6366f1) o en HSL (hsl(245,58%,55%)).
       // Mixear hex con variables HSL rompe el sistema de color de Tailwind v4 que espera tokens consistentes.
@@ -1547,8 +1554,6 @@ export default function Admin${featCamel}() {
       const brandSurface2    = normalizeColor(brand.surface2Color,   '#f1f5f9');
       const brandBorder      = normalizeColor(brand.borderColor,     '#cbd5e1');
       const brandTextMuted   = normalizeColor(brand.textMutedColor,  '#475569');
-      const brandRadius      = brand.radiusBase || '0.75rem';
-      const brandFont        = brand.googleFont || 'Inter';
 
       // --- Sanitización y Normalización de Tokens de Fondo e Interactividad (WCAG / GPU) ---
       const BG_TYPES = new Set(["solid", "mesh", "aurora", "grid", "particles"]);
@@ -1842,6 +1847,8 @@ VITE_FIREBASE_PROJECT_ID=${fbProjectId}
 VITE_FIREBASE_STORAGE_BUCKET=${fbStorageBucket}
 VITE_FIREBASE_APP_ID=${fbAppId}
 VITE_INITIAL_THEME=${themeName}
+VITE_INITIAL_FONT=${brandFont}
+VITE_INITIAL_RADIUS=${brandRadius}
 VITE_DEVELOPER_EMAIL=${answers.developerEmail || ''}
 
 # Credenciales del Administrador de la Instancia (Personalizadas o Autogeneradas)
@@ -3259,7 +3266,8 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
   await installDependencies(targetDir);
 
   // 10. Git e integración con GitHub
-  gitInitialized = await setupGitHub(answers, targetDir, clientId);
+  const gitStatus = await setupGitHub(answers, targetDir, clientId);
+  gitInitialized = gitStatus.initialized;
 
   // 11. Despliegue en Firebase del Cliente
   await deployFirebase(answers, targetDir);
@@ -3333,7 +3341,11 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
     vapidPublicKey,
     adminPasswordSet: true,
     devPin: null, // Removido por directiva de seguridad
-    prompt: promptContent
+    prompt: promptContent,
+    github: {
+      uploaded: !!gitStatus?.githubUploaded,
+      url: gitStatus?.githubUrl || null
+    }
   };
 
   Object.defineProperty(result, 'adminPassword', {
@@ -3463,18 +3475,27 @@ async function setupGitHub(answers, targetDir, clientId) {
     console.warn(pc.yellow(`⚠️  No se pudo inicializar Git localmente o realizar el commit inicial: ${err.message}. Continuando.`));
   }
 
+  let githubUploaded = false;
+  let githubUrl = null;
+
   // 2. Subir a GitHub si se solicitó en el briefing
   if (answers.enableGithub && gitInitialized) {
-    console.log(pc.cyan('🐙 Creando y subiendo repositorio a GitHub...'));
+    const repoName = `app-${clientId}`;
+    console.log(pc.cyan(`🐙 Creando y subiendo repositorio a GitHub: ${repoName}...`));
     try {
-      const repoName = `app-${clientId}`;
       execSync(`gh repo create ${repoName} --private --source=. --push`, { cwd: targetDir, stdio: 'ignore' });
-      console.log(pc.green(`✅ Repositorio GitHub creado y subido con éxito: ${repoName}`));
+      githubUploaded = true;
+      githubUrl = `https://github.com/DEVPROTOTIPE/${repoName}`;
+      console.log(pc.green(`✅ Repositorio GitHub creado y subido con éxito: ${githubUrl}`));
     } catch (err) {
       console.warn(pc.yellow(`⚠️  No se pudo subir a GitHub automáticamente: ${err.message}. Asegúrate de tener gh CLI logueado.`));
     }
   }
-  return gitInitialized;
+  return {
+    initialized: gitInitialized,
+    githubUploaded,
+    githubUrl
+  };
 }
 
 /**
@@ -3496,6 +3517,11 @@ async function deployFirebase(answers, targetDir) {
         await execAsyncCommand('firebase', finalArgs, { cwd: targetDir });
         return; // éxito
       } catch (err) {
+        const errorText = err.message || '';
+        // Si el error es de Storage no configurado, propagar inmediatamente para no reintentar en vano
+        if (errorText.includes('Storage has not been set up') || (errorText.includes('storage') && errorText.includes('Get Started'))) {
+          throw err;
+        }
         if (attempt <= maxRetries) {
           console.warn(pc.yellow(`⚠️  [Firebase Deploy] Intento ${attempt} fallido. Reintentando en ${retryDelayMs / 1000}s... (${err.message.split('\n')[0]})`));
           await new Promise(r => setTimeout(r, retryDelayMs));
@@ -3525,8 +3551,19 @@ async function deployFirebase(answers, targetDir) {
   console.log(pc.green('✅ Compilación de producción generada con éxito.'));
 
   console.log(pc.cyan('🔥 Desplegando en Firebase (reglas, índices, storage y hosting)...'));
-  await execFirebaseWithRetry(['deploy', '--only', 'firestore:rules,firestore:indexes,storage,hosting', '-P', cleanProjectId]);
-  console.log(pc.green('✅ Proyecto de Firebase (Reglas, Índices, Storage y Hosting) desplegado por completo de forma exitosa.'));
+  try {
+    await execFirebaseWithRetry(['deploy', '--only', 'firestore:rules,firestore:indexes,storage,hosting', '-P', cleanProjectId]);
+    console.log(pc.green('✅ Proyecto de Firebase (Reglas, Índices, Storage y Hosting) desplegado por completo de forma exitosa.'));
+  } catch (deployErr) {
+    const errorText = (deployErr.message || '') + (deployErr.stderr || '') + (deployErr.stdout || '');
+    if (errorText.includes('Storage has not been set up') || (errorText.includes('storage') && errorText.includes('Get Started'))) {
+      console.warn(pc.yellow(`⚠️  [Firebase Deploy Warning] Cloud Storage no ha sido aprovisionado en la consola de Firebase. Reintentando deploy omitiendo Storage...`));
+      await execFirebaseWithRetry(['deploy', '--only', 'firestore:rules,firestore:indexes,hosting', '-P', cleanProjectId]);
+      console.log(pc.green('✅ Proyecto de Firebase (Reglas, Índices y Hosting) desplegado con éxito (Storage omitido).'));
+    } else {
+      throw deployErr;
+    }
+  }
 }
 
 /**
@@ -3841,78 +3878,135 @@ async function createServiceAccountIAM(projectId, targetDir, answers = {}) {
 }
 
 /**
- * Inyecta en caliente los componentes recomendados copiando los JSX de la biblioteca al Scaffold
+ * Inyecta en caliente los componentes recomendados y todas sus dependencias internas declaradas.
  */
 async function injectSelectedComponents(answers, targetDir) {
   if (!Array.isArray(answers.selectedRecomendations) || answers.selectedRecomendations.length === 0) {
     return;
   }
 
-  const stepInj = ora('Inyectar en caliente componentes recomendados de la biblioteca...').start();
-  let count = 0;
-  const injectedList = [];
+  const stepInj = ora('Inyectar en caliente componentes y dependencias de la biblioteca...').start();
+  
+  const libraryDir = path.join(getWorkspaceRoot(), 'Documentacion PROTOTIPE', '06_Biblioteca_Componentes');
+  const mdFilesMap = new Map();
 
+  // Función recursiva para escanear archivos markdown en la biblioteca
+  async function scanLibrary(dir) {
+    if (!fs.existsSync(dir)) return;
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await scanLibrary(fullPath);
+      } else if (entry.isFile() && entry.name.endsWith('.md')) {
+        try {
+          const content = await fs.readFile(fullPath, 'utf8');
+          const jsonMatch = content.match(/<!--\s*(\{[\s\S]*?\})\s*-->/);
+          if (jsonMatch) {
+            const meta = JSON.parse(jsonMatch[1]);
+            if (meta.targetPath) {
+              const normPath = meta.targetPath.replace(/\\/g, '/');
+              mdFilesMap.set(normPath, fullPath);
+            }
+          }
+        } catch (_) {}
+      }
+    }
+  }
+
+  // Escanear la biblioteca de componentes al inicio
+  try {
+    await scanLibrary(libraryDir);
+  } catch (scanErr) {
+    console.warn(pc.yellow(`  ⚠️ Falló el escaneo de la biblioteca de componentes: ${scanErr.message}`));
+  }
+
+  const injectedList = [];
+  const processedPaths = new Set();
+  let count = 0;
+
+  // Función recursiva para inyectar un componente y sus dependencias internas
+  async function injectWithDependencies(mdFilePath) {
+    const resolvedPath = path.resolve(mdFilePath);
+    if (processedPaths.has(resolvedPath)) return;
+    processedPaths.add(resolvedPath);
+
+    try {
+      const mdContent = await fs.readFile(resolvedPath, 'utf8');
+      const jsonMatch = mdContent.match(/<!--\s*(\{[\s\S]*?\})\s*-->/);
+      if (!jsonMatch) return;
+
+      const meta = JSON.parse(jsonMatch[1]);
+      const targetPath = meta.targetPath;
+      if (!targetPath) return;
+
+      // Extraer bloque de código JSX
+      let searchIndex = mdContent.indexOf('## 3. Código');
+      if (searchIndex === -1) {
+        searchIndex = 0;
+      }
+
+      const snippetToParse = mdContent.substring(searchIndex);
+      const codeMatch = snippetToParse.match(/```(?:jsx|javascript|js)\s*\n([\s\S]*?)\n```/i);
+      if (!codeMatch) return;
+
+      const codeContent = codeMatch[1];
+      const destinationPath = path.join(targetDir, targetPath);
+
+      // Escribir archivo físico en la instancia
+      await fs.ensureDir(path.dirname(destinationPath));
+      await fs.writeFile(destinationPath, codeContent, 'utf-8');
+
+      const techName = meta.technicalName || path.basename(targetPath, '.jsx');
+      const importPath = targetPath.replace('src/', '@/').replace(/\.jsx?$/, '');
+
+      if (!injectedList.some(item => item.technicalName === techName)) {
+        injectedList.push({
+          name: techName,
+          technicalName: techName,
+          importPath: importPath
+        });
+      }
+      count++;
+
+      // Resolver e inyectar dependencias internas recursivamente
+      if (meta.dependencies && Array.isArray(meta.dependencies.internal)) {
+        for (const depRelPath of meta.dependencies.internal) {
+          const normDepPath = depRelPath.replace(/\\/g, '/');
+          const depMdPath = mdFilesMap.get(normDepPath);
+          if (depMdPath && fs.existsSync(depMdPath)) {
+            await injectWithDependencies(depMdPath);
+          } else {
+            console.warn(pc.yellow(`  ⚠️ Dependencia interna "${depRelPath}" no encontrada en la biblioteca de componentes.`));
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(pc.yellow(`  ⚠️ Falló la inyección recursiva de "${path.basename(mdFilePath)}": ${err.message}`));
+    }
+  }
+
+  // Iterar por las recomendaciones seleccionadas iniciales
   for (const rec of answers.selectedRecomendations) {
     if (!rec.link) continue;
     
-    // Normalizar URL con protocolo file:// en Windows/UNIX
     let linkPath = rec.link;
     if (linkPath.startsWith('file://')) {
       try {
         linkPath = fileURLToPath(linkPath);
       } catch (urlErr) {
-        console.warn(pc.yellow(`  ⚠️ No se pudo convertir URL file:// a ruta fisica: ${rec.link}`));
+        console.warn(pc.yellow(`  ⚠️ No se pudo convertir URL file:// a ruta física: ${rec.link}`));
         continue;
       }
     }
     
     linkPath = path.resolve(linkPath);
     if (!fs.existsSync(linkPath)) {
-      console.warn(pc.yellow(`  ⚠️ El archivo de documentacion no existe fisicamente: ${linkPath}`));
+      console.warn(pc.yellow(`  ⚠️ El archivo de documentación no existe físicamente: ${linkPath}`));
       continue;
     }
 
-    try {
-      const mdContent = await fs.readFile(linkPath, 'utf8');
-
-      // 1. Extraer targetPath de metadatos JSON
-      const jsonMatch = mdContent.match(/<!--\s*(\{[\s\S]*?\})\s*-->/);
-      if (!jsonMatch) continue;
-
-      const meta = JSON.parse(jsonMatch[1]);
-      const targetPath = meta.targetPath;
-      if (!targetPath) continue;
-
-      // 2. Extraer Código React robusto (Buscar despues del titulo de codigo completo)
-      let searchIndex = mdContent.indexOf('## 3. Código');
-      if (searchIndex === -1) {
-        searchIndex = 0; // Fallback
-      }
-
-      const snippetToParse = mdContent.substring(searchIndex);
-      const codeMatch = snippetToParse.match(/```(?:jsx|javascript|js)\s*\n([\s\S]*?)\n```/i);
-      if (!codeMatch) continue;
-
-      const codeContent = codeMatch[1];
-      const destinationPath = path.join(targetDir, targetPath);
-
-      // Crear directorio e inyectar JSX
-      await fs.ensureDir(path.dirname(destinationPath));
-      await fs.writeFile(destinationPath, codeContent, 'utf-8');
-      
-      const techName = meta.technicalName || rec.technicalName || rec.name;
-      // Normalizar importPath a formato de import estándar de Vite
-      const importPath = targetPath.replace('src/', '@/').replace(/\.jsx?$/, '');
-      
-      injectedList.push({
-        name: rec.name,
-        technicalName: techName,
-        importPath: importPath
-      });
-      count++;
-    } catch (err) {
-      console.warn(pc.yellow(`  ⚠️ No se pudo inyectar en caliente el componente "${rec.name}": ${err.message}`));
-    }
+    await injectWithDependencies(linkPath);
   }
 
   // Guardar en answers para que el generador de prompts lo use
@@ -3942,9 +4036,9 @@ async function injectSelectedComponents(answers, targetDir) {
   }
 
   if (count > 0) {
-    stepInj.succeed(`Inyectados en caliente ${count} componentes recomendados directamente en el Scaffold.`);
+    stepInj.succeed(`Inyectados en caliente ${count} componentes (incluyendo dependencias) de la biblioteca en el Scaffold.`);
   } else {
-    stepInj.info('No se inyectaron componentes recomendados (no se encontró código funcional en las fichas).');
+    stepInj.info('No se inyectaron componentes (no se encontró código funcional en las fichas).');
   }
 }
 

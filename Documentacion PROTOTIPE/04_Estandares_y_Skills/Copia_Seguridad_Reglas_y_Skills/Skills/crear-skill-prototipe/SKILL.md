@@ -56,11 +56,15 @@ Todo `fs.writeFile` en endpoints de servidor debe usar `writeFileWithRetry()` (d
 ### ✅ OBLIGATORIO: Alineación de Calidad Premium y Completitud Lógica
 Cualquier skill creada o modificada que genere, extraiga, migre o integre código (sea React, HTML, JS o CSS) debe obligar de forma explícita al agente a cumplir con:
 1. **Cero Placeholders:** El código de componentes y lógica debe ser 100% completo, portable y funcional. Queda prohibida la elipsis (`// ...`).
-2. **Estética HSL y Cero select nativos:** Todo el color debe consumirse de las variables HSL (`var(--color-bg)`, `var(--color-border)`). Se prohíbe el uso de selectores nativos `<select>` (se debe guiar al uso de `CustomSelect`) y eliminaciones directas sin `useAlertConfirm`.
+2. **Estética HSL y Cero select nativos:** Todo el color debe consumirse de las variables HSL (`var(--color-bg)`, `var(--color-border)`). Se prohíbe el uso de selectores nativos `<select>` (se debe guiar al uso de `CustomSelect`) y de eliminaciones directas sin `useAlertConfirm`.
 3. **Paddings de Holgura en Scroll (Anti-Clipping):** Todo contenedor deslizable (`overflow-x-auto`, `overflow-y-auto`) con animaciones de escala/traslación debe llevar paddings internos (ej. `py-4`) para evitar truncamientos de render.
 4. **Nomenclatura Estructurada:** Las secciones de código React en documentación markdown deben titularse estrictamente como `## [Número]. Código React Completo` para que el parser del dashboard los indexe sin errores.
 5. **Arquitectura Desacoplada de 3 Capas:** Todo componente o módulo de negocio de cliente o administrador debe modularizarse en *Repository*, *Service*, y *Custom Hook/Zustand Store*.
-6. **Resiliencia Firebase y Skeletons:** Los listeners de tiempo real (`onSnapshot`) deben estar condicionados a la autenticación activa y desregistrados (`unsubscribe()`) en el desmontaje. Los estados de carga deben usar shimmer skeletons (`ProductCardSkeleton`, `OrderTrackingSkeleton`) para evitar layout shifts.
+6. **Resiliencia Firebase y Skeletons:** Los listeners de tiempo real (`onSnapshot`) deben estar condicionados a la autenticación activa y desregistrados (`unsubscribe()`) en el desmontaje. Los estados de carga deben usar shimmer skeletons para evitar layout shifts.
+7. **Diseño Táctil y Accesibilidad (Touch Target WCAG):** Los botones y elementos de acción deben tener un tamaño mínimo de **44x44 CSS px**, declarar los 5 estados en Tailwind (`resting`, `hover`, `focus`, `active:scale-[0.98]`, y `loading`), condicionar los hovers a pantallas con cursor físico (`@media (hover: hover)`) para evitar hovers pegajosos en móviles, y forzar la elevación en modo oscuro mediante elevación tonal progresiva de fondos (Niveles 0 al 3), nunca con sombras negras.
+8. **Resiliencia de Dropdowns y Clipping:** Los desplegables customizados deben ser accesibles vía teclado (roles ARIA) y renderizarse mediante **React Portals** (`createPortal`) si están dentro de contenedores con `overflow-hidden` o `overflow-y-auto`.
+9. **Form Usability e inputmode:** Enlazar inputs a labels mediante `htmlFor` e inyectar `inputmode` para optimizar el teclado numérico virtual en dispositivos móviles.
+
 
 ---
 
