@@ -28,6 +28,7 @@ const blueprintSchema = fs.readJsonSync(schemaPath);
 // 2. Compilar AJV una sola vez
 const ajv = new Ajv({
   strict: true,
+  strictSchema: true,
   allErrors: true,
   coerceTypes: false,
   removeAdditional: false,

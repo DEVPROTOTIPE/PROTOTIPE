@@ -13,7 +13,7 @@ import { BiResolver } from './lib/BiResolver.js';
 import { CapabilityResolver } from './lib/CapabilityResolver.js';
 import { FeatureRecommender } from './lib/FeatureRecommender.js';
 import { ExperienceComposer } from './lib/ExperienceComposer.js';
-import { ProvisioningValidator } from './lib/ProvisioningValidator.js';
+import { ProvisioningValidator, normalizeProvisioningRequest } from './lib/ProvisioningValidator.js';
 import { BlueprintSimulation } from './lib/BlueprintSimulation.js';
 import { ExplainabilityLogger } from './lib/ExplainabilityLogger.js';
 import { PackageMerger } from './lib/PackageMerger.js';
@@ -791,9 +791,35 @@ function resolveNicheCatalog(niche) {
  * @param {Object} answers Datos recolectados del Briefing
  */
 export async function createProject(answers) {
+  // 1. Normalizar y validar de inmediato el Blueprint si viene pre-inyectado
+  const isPresetBlueprint = !!(answers.blueprint || answers.clientId || answers.instanceId || answers.projectName || answers.clientName);
+  let presetValidationResult = null;
+
+  if (isPresetBlueprint) {
+    const normalized = normalizeProvisioningRequest(answers);
+    presetValidationResult = await ProvisioningValidator.validate(normalized.blueprint);
+    if (!presetValidationResult.isValid) {
+      throw new Error(`BLUEPRINT_SCHEMA_INVALID: ${presetValidationResult.errors.join(' | ')}`);
+    }
+
+    // Inyectar el blueprint normalizado y variables de ejecución en answers
+    answers.blueprint = normalized.blueprint;
+    answers.projectName = normalized.blueprint.clientName;
+    answers.template = normalized.blueprint.coreType;
+    answers.niche = normalized.blueprint.vertical;
+    answers.paletteChoice = normalized.blueprint.branding?.paletteChoice;
+    answers.branding = normalized.blueprint.branding || {};
+    
+    if (normalized.execution.targetPath) {
+      answers.targetPath = normalized.execution.targetPath;
+    }
+    answers.force = normalized.execution.force;
+    answers.enableGithub = normalized.execution.enableGithub;
+    answers.firebaseDeploy = normalized.execution.firebaseDeploy;
+    answers.centralRegistration = normalized.execution.centralRegistration;
+  }
+
   // ─── BLINDAJE DE ENTRADAS: Normalizar todos los campos opcionales ──────────
-  // Previene TypeError/ReferenceError si el wizard envía campos faltantes o con
-  // tipos incorrectos (ej. flags: undefined, branding: null, etc.)
   answers.flags = (answers.flags && typeof answers.flags === 'object') ? answers.flags : {};
   answers.branding = (answers.branding && typeof answers.branding === 'object') ? answers.branding : {};
   answers.selectedRecomendations = Array.isArray(answers.selectedRecomendations) ? answers.selectedRecomendations : [];
@@ -804,6 +830,34 @@ export async function createProject(answers) {
   answers.pagoMensualFijo = parseFloat(answers.pagoMensualFijo) || 0;
   answers.montoFijoServicio = parseFloat(answers.montoFijoServicio) || 0;
   answers.costoPorFacturaDian = parseFloat(answers.costoPorFacturaDian) || 0;
+
+  // Declarar flags de copia de plantilla base
+  let isTemplateCopied = false;
+  const ensureBaseTemplateCopied = async (tDir, sTempDir) => {
+    if (isTemplateCopied) return;
+    const step1 = ora('Copiar estructura base de plantilla').start();
+    const EXCLUDE_FROM_GEN = new Set([
+      'node_modules', '.git', '.firebase', '.vite', '.eslintcache', '.parcel-cache',
+      '.env.local', 'firebase-debug.log', '.DS_Store', 'Thumbs.db',
+      'npm-debug.log', 'yarn-error.log', 'pnpm-debug.log'
+    ]);
+    try {
+      if (await fs.pathExists(tDir)) {
+        step1.info('La ruta de destino ya existe. Los archivos se sobrescribirán.');
+        step1.start('Copiar estructura base de plantilla');
+      }
+      await fs.ensureDir(tDir);
+      await fs.copy(sTempDir, tDir, {
+        overwrite: true,
+        filter: (src) => !EXCLUDE_FROM_GEN.has(path.basename(src))
+      });
+      step1.succeed('Estructura base de plantilla copiada correctamente.');
+      isTemplateCopied = true;
+    } catch (copyErr) {
+      step1.fail(`Fallo al copiar plantilla base: ${copyErr.message}`);
+      throw copyErr;
+    }
+  };
 
   // Validaciones de preflight
   await checkEnvironment(answers);
@@ -821,10 +875,8 @@ export async function createProject(answers) {
   answers.coreType = coreType;
 
   // [BLINDAJE-INPUTS] Validar projectName antes de derivar clientId y folderName.
-  // Un nombre con solo caracteres especiales produce clientId='-' o '' que corrompe
-  // .firebaserc, el repo de GitHub y todos los metadatos de la instancia.
   const rawName = (answers.projectName || '').trim();
-  const clientId = rawName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const clientId = isPresetBlueprint ? answers.blueprint.instanceId : rawName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   const folderName = clientId; // Mismo slug normalizado
 
   if (!clientId || clientId.length < 2) {
@@ -836,7 +888,7 @@ export async function createProject(answers) {
 
   // Declarar targetDir y srcTemplateDir después de validar clientId
   const { getInstancePath } = await import('./config.js');
-  const targetDir = getInstancePath(coreType, `App-${folderName}`);
+  const targetDir = answers.targetPath || getInstancePath(coreType, `App-${folderName}`);
   const existedBefore = await fs.pathExists(targetDir);
   try {
     const srcTemplateDir = path.join(TEMPLATES_DIR, answers.template);
@@ -869,24 +921,9 @@ export async function createProject(answers) {
 
   console.log('\n' + pc.yellow(`⚡ Iniciando aprovisionamiento automatizado en: ${targetDir}`));
 
-  // 1. Crear directorio de destino y copiar plantilla
-  const step1 = ora('Copiar estructura base de plantilla').start();
-  const EXCLUDE_FROM_GEN = new Set([
-    'node_modules', '.git', '.firebase', '.vite', '.eslintcache', '.parcel-cache',
-    '.env.local', 'firebase-debug.log', '.DS_Store', 'Thumbs.db',
-    'npm-debug.log', 'yarn-error.log', 'pnpm-debug.log'
-  ]);
+  // 1. Iniciar bloque de composición de features e inyección de plantilla (Validado primero, escrito después)
+  const step1 = ora('Copiar estructura base de plantilla');
   try {
-    if (await fs.pathExists(targetDir)) {
-      step1.info('La ruta de destino ya existe. Los archivos se sobrescribirán.');
-      step1.start('Copiar estructura base de plantilla');
-    }
-    await fs.ensureDir(targetDir);
-    await fs.copy(srcTemplateDir, targetDir, {
-      overwrite: true,
-      filter: (src) => !EXCLUDE_FROM_GEN.has(path.basename(src))
-    });
-    step1.succeed('Estructura base de plantilla copiada correctamente.');
 
     // ─── COMPOSICIÓN DINÁMICA DE VERTICAL IMPULSADA POR BLUEPRINT (Fase 8.5) ───
     if (answers.template === 'template-core-seed') {
@@ -961,16 +998,21 @@ export async function createProject(answers) {
       }
 
       // 2. Validar estáticamente el Blueprint
-      let validationResult;
-      try {
-        validationResult = await ProvisioningValidator.validate(blueprint);
-        if (!validationResult.isValid) {
-          throw new Error(validationResult.errors.join(' | '));
+      let validationResult = presetValidationResult;
+      if (!validationResult) {
+        try {
+          validationResult = await ProvisioningValidator.validate(blueprint);
+          if (!validationResult.isValid) {
+            throw new Error(validationResult.errors.join(' | '));
+          }
+        } catch (err) {
+          stepFeatures.fail(`[Fallo Validación] El Blueprint generado no cumple con las reglas físicas del ecosistema: ${err.message}`);
+          throw err;
         }
-      } catch (err) {
-        stepFeatures.fail(`[Fallo Validación] El Blueprint generado no cumple con las reglas físicas del ecosistema: ${err.message}`);
-        throw err;
       }
+
+      // 2.5 Copiar estructura base de plantilla física (Post-validación exitosa)
+      await ensureBaseTemplateCopied(targetDir, srcTemplateDir);
 
       // 3. Simular preflight
       const simulation = await BlueprintSimulation.simulate(blueprint, validationResult);
@@ -3137,6 +3179,9 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
   await fs.writeFile(path.join(targetDir, 'antigravity_bootstrap_prompt.md'), promptContent, 'utf-8');
   console.log(pc.green('✅ Archivo antigravity_bootstrap_prompt.md creado con éxito en la raíz del proyecto.'));
 
+
+  // Asegurar que la plantilla base ha sido copiada físicamente si no se ejecutó en la composición (Post-validación exitosa)
+  await ensureBaseTemplateCopied(targetDir, srcTemplateDir);
 
   // 9. Ejecutar npm install y primera indexación
   await installDependencies(targetDir);

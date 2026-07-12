@@ -1,8 +1,19 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `99.27%` de completitud en base a 411 tareas completadas de 414 tareas únicas verificables.
+* **Estado del Roadmap:** `99.51%` de completitud en base a 412 tareas completadas de 414 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-407: Integración y Desvío de Flujo Físico de Aprovisionamiento (P0.2 - Punto 4B)~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Se integró la normalización y pre-validación del Application Blueprint al inicio de `createProject` en `generator.js`. Se postergó la creación del directorio `targetDir` y la copia de la plantilla base (`fs.copy`) de forma que ocurra exclusivamente después de que la validación del blueprint (tanto inyectado como generado dinámicamente) haya concluido con éxito. Esto asegura el cumplimiento del contrato "Zero-write" frente a blueprints inválidos. Se actualizó el test `test_blueprint_no_write.js` para realizar una validación real y dinámica de efectos físicos en disco, y se corrigió el esquema AJV en `blueprint.schema.json` y `ProvisioningValidator.js` de acuerdo con las especificaciones.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+    - [`Prototipe-CLI/knowledge/schema/blueprint.schema.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/schema/blueprint.schema.json) [MODIFY]
+    - [`Prototipe-CLI/lib/ProvisioningValidator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningValidator.js) [MODIFY]
+    - [`Prototipe-CLI/scripts/tests/p0_2/test_blueprint_no_write.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/test_blueprint_no_write.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-406: Remediación del Generador contra Exposición de PIN de Desarrollo y features Scaffolded (P0.1, P0.2, P0.3, P0.4)~~**
   - Estatus: Completada

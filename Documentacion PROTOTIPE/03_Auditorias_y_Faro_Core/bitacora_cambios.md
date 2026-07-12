@@ -1,5 +1,21 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-407 — 2026-07-12
+**Feature: Integración y Desvío de Flujo Físico de Aprovisionamiento (P0.2 - Punto 4B)**
+
+### Cambios realizados:
+1. **Validación Primero, Escritura Después (Zero-write):** Modificada la función `createProject` en `generator.js` para ejecutar la normalización (`normalizeProvisioningRequest`) y pre-validación del Application Blueprint (`ProvisioningValidator.validate`) al puro inicio. Se postergó la creación del directorio físico `targetDir` y la copia de la plantilla base (`fs.copy`) de modo que ocurra exclusivamente tras una validación exitosa (tanto para blueprints inyectados como generados dinámicamente).
+2. **Correcciones del Schema y Validador (AJV):** Modificado `blueprint.schema.json` para restringir la propiedad `paletteChoice` a un enum de valores autorizados (`emerald`, `ruby`, `violet`, `amber`, `custom`), eliminando la exclusión implícita de `slate`. Añadido el parámetro `strictSchema: true` explícitamente a Ajv en `ProvisioningValidator.js`.
+3. **Prueba de Cero Escrituras Física y Dinámica:** Reescrito el test de no-write `test_blueprint_no_write.js` para realizar una validación física real en disco, intentando crear un proyecto con un blueprint inválido y comprobando que no quede ningún rastro o directorio creado tras el rechazo prematuro de la validación.
+
+### Archivos modificados:
+- [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+- [`Prototipe-CLI/knowledge/schema/blueprint.schema.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/schema/blueprint.schema.json) [MODIFY]
+- [`Prototipe-CLI/lib/ProvisioningValidator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/ProvisioningValidator.js) [MODIFY]
+- [`Prototipe-CLI/scripts/tests/p0_2/test_blueprint_no_write.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/tests/p0_2/test_blueprint_no_write.js) [MODIFY]
+
+---
+
 ## CLI-406 — 2026-07-11
 **Feature: Remediación del Generador contra Exposición de PIN de Desarrollo y features Scaffolded**
 

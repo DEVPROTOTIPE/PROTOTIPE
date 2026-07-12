@@ -28,7 +28,13 @@
       "properties": {
         "paletteChoice": {
           "type": "string",
-          "not": { "const": "slate" }
+          "enum": [
+            "emerald",
+            "ruby",
+            "violet",
+            "amber",
+            "custom"
+          ]
         },
         "primaryColor": {
           "type": "string",
