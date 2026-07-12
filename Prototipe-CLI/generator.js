@@ -2421,118 +2421,126 @@ service cloud.firestore {
 
   if (answers.logoPath && await fs.pathExists(answers.logoPath)) {
     try {
-      const ext = path.extname(answers.logoPath).toLowerCase();
-      const validExtensions = ['.svg', '.png', '.jpg', '.jpeg', '.webp'];
-      
-      if (validExtensions.includes(ext)) {
-        await fs.ensureDir(path.dirname(assetsLogoPath));
-        // Copiar logo a su ruta de assets con su extensión correspondiente
-        const targetLogoPath = path.join(targetDir, 'src', 'assets', `logo${ext}`);
-        await fs.copy(answers.logoPath, targetLogoPath, { overwrite: true });
+      try {
+        const ext = path.extname(answers.logoPath).toLowerCase();
+        const validExtensions = ['.svg', '.png', '.jpg', '.jpeg', '.webp'];
+        
+        if (validExtensions.includes(ext)) {
+          await fs.ensureDir(path.dirname(assetsLogoPath));
+          // Copiar logo a su ruta de assets con su extensión correspondiente
+          const targetLogoPath = path.join(targetDir, 'src', 'assets', `logo${ext}`);
+          await fs.copy(answers.logoPath, targetLogoPath, { overwrite: true });
 
-        // Si es SVG, se usa de favicon. Si no es SVG, copiamos de todos modos como fallback pero mantenemos el favicon SVG autogenerado
-        if (ext === '.svg') {
-          await fs.copy(answers.logoPath, publicFaviconPath, { overwrite: true });
-        } else {
-          // Generar favicon a partir de iniciales como fallback
-          await fs.ensureDir(path.dirname(publicFaviconPath));
-          await fs.writeFile(publicFaviconPath, svgContent, 'utf-8');
+          // Si es SVG, se usa de favicon. Si no es SVG, copiamos de todos modos como fallback pero mantenemos el favicon SVG autogenerado
+          if (ext === '.svg') {
+            await fs.copy(answers.logoPath, publicFaviconPath, { overwrite: true });
+          } else {
+            // Generar favicon a partir de iniciales como fallback
+            await fs.ensureDir(path.dirname(publicFaviconPath));
+            await fs.writeFile(publicFaviconPath, svgContent, 'utf-8');
 
-          // Generar favicon e iconos PWA rasterizados usando Jimp
-          const stepPwaIcons = ora('Generando iconos PWA (Jimp)...').start();
-          try {
-            const logoSrc = answers.logoPath;
-            const bgHex = hslToRgbaHex(answers.branding?.bgColor || 'hsl(224, 71%, 4%)', 255);
-            
-            const createIcon = async (size, usePadding = false) => {
-              let original;
-              try {
-                original = await Jimp.read(logoSrc);
-              } catch (readErr) {
-                // Fallback 1: Intentar leer el logo SVG de iniciales fallback autogenerado
-                try {
-                  const appName = answers.projectName || answers.clientId || 'PROTOTIPE';
-                  const brandPrimary = primaryColor;
-                  const fallbackSvg = createFallbackLogoSvg({ appName, brandPrimary });
-                  original = await Jimp.read(fallbackSvg);
-                } catch (fallbackErr) {
-                  // Fallback 2 (Fallo total): Lienzo con color de marca sólido
-                  original = new Jimp({ width: size, height: size, color: bgHex });
-                }
-              }
-              const w = original.width;
-              const h = original.height;
-              
-              if (usePadding) {
-                const maxDim = Math.round(size * 0.8);
-                const ratio = Math.min(maxDim / w, maxDim / h);
-                const newW = Math.round(w * ratio);
-                const newH = Math.round(h * ratio);
-                original.resize({ w: newW, h: newH });
-                
-                const canvas = new Jimp({ width: size, height: size, color: bgHex });
-                const x = Math.round((size - newW) / 2);
-                const y = Math.round((size - newH) / 2);
-                canvas.composite(original, x, y);
-                return canvas;
-              } else {
-                const ratio = Math.min(size / w, size / h);
-                const newW = Math.round(w * ratio);
-                const newH = Math.round(h * ratio);
-                original.resize({ w: newW, h: newH });
-                return original;
-              }
-            };
-
-            const pwa192 = await createIcon(192, false);
-            await pwa192.write(path.join(targetDir, 'public', 'pwa-192x192.png'));
-            
-            const appleIcon = await createIcon(192, true);
-            await appleIcon.write(path.join(targetDir, 'public', 'apple-touch-icon.png'));
-
-            const pwa512 = await createIcon(512, false);
-            await pwa512.write(path.join(targetDir, 'public', 'pwa-512x512.png'));
-
-            stepPwaIcons.succeed('Iconos PWA (192x192, 512x512, apple-touch-icon) redimensionados y generados con éxito.');
-          } catch (jimpErr) {
-            // Fallback total de seguridad usando el SVG de iniciales estético
+            // Generar favicon e iconos PWA rasterizados usando Jimp
+            const stepPwaIcons = ora('Generando iconos PWA (Jimp)...').start();
             try {
+              const logoSrc = answers.logoPath;
               const bgHex = hslToRgbaHex(answers.branding?.bgColor || 'hsl(224, 71%, 4%)', 255);
-              const appName = answers.projectName || answers.clientId || 'PROTOTIPE';
-              const brandPrimary = primaryColor;
-              const fallbackSvg = createFallbackLogoSvg({ appName, brandPrimary });
               
-              const makeFallback = async (size) => {
+              const createIcon = async (size, usePadding = false) => {
+                let original;
                 try {
-                  const img = await Jimp.read(fallbackSvg);
-                  img.resize({ w: size, h: size });
-                  return img;
-                } catch (_) {
-                  return new Jimp({ width: size, height: size, color: bgHex });
+                  original = await Jimp.read(logoSrc);
+                } catch (readErr) {
+                  // Fallback 1: Intentar leer el logo SVG de iniciales fallback autogenerado
+                  try {
+                    const appName = answers.projectName || answers.clientId || 'PROTOTIPE';
+                    const brandPrimary = primaryColor;
+                    const fallbackSvg = createFallbackLogoSvg({ appName, brandPrimary });
+                    original = await Jimp.read(fallbackSvg);
+                  } catch (fallbackErr) {
+                    // Fallback 2 (Fallo total): Lienzo con color de marca sólido
+                    original = new Jimp({ width: size, height: size, color: bgHex });
+                  }
+                }
+                const w = original.width;
+                const h = original.height;
+                
+                if (usePadding) {
+                  const maxDim = Math.round(size * 0.8);
+                  const ratio = Math.min(maxDim / w, maxDim / h);
+                  const newW = Math.round(w * ratio);
+                  const newH = Math.round(h * ratio);
+                  original.resize({ w: newW, h: newH });
+                  
+                  const canvas = new Jimp({ width: size, height: size, color: bgHex });
+                  const x = Math.round((size - newW) / 2);
+                  const y = Math.round((size - newH) / 2);
+                  canvas.composite(original, x, y);
+                  return canvas;
+                } else {
+                  const ratio = Math.min(size / w, size / h);
+                  const newW = Math.round(w * ratio);
+                  const newH = Math.round(h * ratio);
+                  original.resize({ w: newW, h: newH });
+                  return original;
                 }
               };
+
+              const pwa192 = await createIcon(192, false);
+              await pwa192.write(path.join(targetDir, 'public', 'pwa-192x192.png'));
               
-              const fallback192 = await makeFallback(192);
-              await fallback192.write(path.join(targetDir, 'public', 'pwa-192x192.png'));
-              await fallback192.write(path.join(targetDir, 'public', 'apple-touch-icon.png'));
-              
-              const fallback512 = await makeFallback(512);
-              await fallback512.write(path.join(targetDir, 'public', 'pwa-512x512.png'));
-              
-              stepPwaIcons.warn(`Iconos PWA generados con iniciales de marca estéticas debido a un fallo de Jimp al procesar el logo del usuario: ${jimpErr.message}`);
-            } catch (fallbackErr) {
-              stepPwaIcons.fail(`Error crítico al generar iconos PWA de fallback: ${fallbackErr.message}`);
+              const appleIcon = await createIcon(192, true);
+              await appleIcon.write(path.join(targetDir, 'public', 'apple-touch-icon.png'));
+
+              const pwa512 = await createIcon(512, false);
+              await pwa512.write(path.join(targetDir, 'public', 'pwa-512x512.png'));
+
+              stepPwaIcons.succeed('Iconos PWA (192x192, 512x512, apple-touch-icon) redimensionados y generados con éxito.');
+            } catch (jimpErr) {
+              // Fallback total de seguridad usando el SVG de iniciales estético
+              try {
+                const bgHex = hslToRgbaHex(answers.branding?.bgColor || 'hsl(224, 71%, 4%)', 255);
+                const appName = answers.projectName || answers.clientId || 'PROTOTIPE';
+                const brandPrimary = primaryColor;
+                const fallbackSvg = createFallbackLogoSvg({ appName, brandPrimary });
+                
+                const makeFallback = async (size) => {
+                  try {
+                    const img = await Jimp.read(fallbackSvg);
+                    img.resize({ w: size, h: size });
+                    return img;
+                  } catch (_) {
+                    return new Jimp({ width: size, height: size, color: bgHex });
+                  }
+                };
+                
+                const fallback192 = await makeFallback(192);
+                await fallback192.write(path.join(targetDir, 'public', 'pwa-192x192.png'));
+                await fallback192.write(path.join(targetDir, 'public', 'apple-touch-icon.png'));
+                
+                const fallback512 = await makeFallback(512);
+                await fallback512.write(path.join(targetDir, 'public', 'pwa-512x512.png'));
+                
+                stepPwaIcons.warn(`Iconos PWA generados con iniciales de marca estéticas debido a un fallo de Jimp al procesar el logo del usuario: ${jimpErr.message}`);
+              } catch (fallbackErr) {
+                stepPwaIcons.fail(`Error crítico al generar iconos PWA de fallback: ${fallbackErr.message}`);
+              }
             }
           }
-        }
 
-        stepLogo.succeed(`Logo personalizado (${ext}) copiado desde: ${answers.logoPath}`);
-        userProvidedLogo = true;
-      } else {
-        stepLogo.warn(`El logo suministrado no tiene una extensión compatible. Extensiones válidas: SVG, PNG, JPG, JPEG, WEBP.`);
+          stepLogo.succeed(`Logo personalizado (${ext}) copiado desde: ${answers.logoPath}`);
+          userProvidedLogo = true;
+        } else {
+          stepLogo.warn(`El logo suministrado no tiene una extensión compatible. Extensiones válidas: SVG, PNG, JPG, JPEG, WEBP.`);
+        }
+      } catch (err) {
+        stepLogo.fail(`Error al copiar el logo suministrado: ${err.message}`);
       }
-    } catch (err) {
-      stepLogo.fail(`Error al copiar el logo suministrado: ${err.message}`);
+    } finally {
+      try {
+        await fs.remove(answers.logoPath);
+      } catch (cleanupErr) {
+        console.error(`Error al eliminar logo temporal: ${cleanupErr.message}`);
+      }
     }
   }
 

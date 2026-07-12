@@ -211,6 +211,13 @@ process.on('message', async (msg) => {
     const safeMessage = redactSecrets(err.message || String(err), _activeAnswers);
     process.send({ type: 'ERROR', message: safeMessage });
   } finally {
+    if (answers && answers.logoPath) {
+      try {
+        await fs.remove(answers.logoPath);
+      } catch (cleanupErr) {
+        // Ignorar
+      }
+    }
     // Cierre limpio
     setImmediate(() => process.exit(0));
   }

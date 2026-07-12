@@ -728,8 +728,14 @@ app.post('/api/upload-logo', async (req, res) => {
   if (!filename || !base64) {
     return res.status(400).json({ error: 'filename y base64 son requeridos.' });
   }
+  const safeFilename = path.basename(filename);
+  const ext = path.extname(safeFilename).toLowerCase();
+  const allowedExt = ['.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif'];
+  if (!allowedExt.includes(ext)) {
+    return res.status(400).json({ error: `La extensión del archivo '${ext}' no está permitida.` });
+  }
+
   try {
-    const safeFilename = path.basename(filename);
     const buffer = Buffer.from(base64, 'base64');
     const uploadDir = path.join(CLI_ROOT, 'temp_uploads');
     await fs.ensureDir(uploadDir);
