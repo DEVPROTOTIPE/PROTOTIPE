@@ -14,6 +14,7 @@ import fs from 'fs-extra';
 import { fileURLToPath } from 'node:url';
 import { normalizeProvisioningEnvelope } from '../../../lib/ProvisioningEnvelopeAdapter.js';
 import { ProvisioningValidator } from '../../../lib/ProvisioningValidator.js';
+import { redactSecrets, containsSecret } from '../../../lib/SecretRedactor.js';
 import { createProject } from '../../../generator.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -164,62 +165,128 @@ export async function run(results) {
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 4. SECRET LEAK IPC (Fuga de secretos del worker a través de logs)
+  // 4. AISLAMIENTO DE SECRETOS — 4 sub-casos usando SecretRedactor
   // ─────────────────────────────────────────────────────────────────────────────
-  const secretsPayload = {
-    blueprint: {
-      blueprintVersion: '1.0.0',
-      instanceId: 'tienda-test-secrets',
-      clientName: 'Tienda Test Secrets',
-      coreType: 'template-core-seed',
-      vertical: 'retail_clothing',
-      branding: { paletteChoice: 'emerald' }
-    },
-    firebaseApiKey: 'api-secret-key-12345678',
-    adminPassword: 'super-secret-password-xyz'
-  };
 
-  // Mockear temporalmente console.log para capturar la salida
-  const originalConsoleLog = console.log;
-  const loggedLines = [];
-  console.log = (...args) => {
-    loggedLines.push(args.join(' '));
-    originalConsoleLog(...args);
-  };
+  // 4.1 firebaseApiKey en answers (root-level)
+  {
+    const answers = {
+      firebaseApiKey: 'AIza-test-secret-key-12345678',
+      clientName: 'Tienda Prueba'
+    };
+    const rawLog = `Configurando Firebase con apiKey: ${answers.firebaseApiKey}`;
+    const redacted = redactSecrets(rawLog, answers);
+    const leaked = redacted.includes(answers.firebaseApiKey);
 
-  // Importamos y simulamos un log que imprima errores o comandos conteniendo el payload
-  try {
-    // Simulamos un error o logs del generador imprimiendo comandos o variables de entorno
-    // que contengan los secretos del payload
-    const dummyLog = `Error configurando Firebase con apiKey: ${secretsPayload.firebaseApiKey} y password: ${secretsPayload.adminPassword}`;
-    console.log(dummyLog);
-  } finally {
-    // Restaurar console.log original
-    console.log = originalConsoleLog;
-  }
-
-  let secretLeaked = false;
-  for (const line of loggedLines) {
-    if (line.includes(secretsPayload.firebaseApiKey) || line.includes(secretsPayload.adminPassword)) {
-      secretLeaked = true;
-      break;
+    if (leaked) {
+      console.log('\uD83D\uDD34 [PRODUCT_BEHAVIOR_FAILURE] firebaseApiKey en answers filtrado en log.');
+      results.push({
+        suite: suiteName,
+        name: 'Redacci\u00f3n de secretos: firebaseApiKey en answers',
+        status: 'PRODUCT_BEHAVIOR_FAILURE',
+        error: `El valor "${answers.firebaseApiKey}" apareci\u00f3 sin censurar en: "${redacted}"`
+      });
+    } else {
+      console.log('\uD83D\uDFE2 [PASSED] firebaseApiKey en answers correctamente redactado.');
+      results.push({
+        suite: suiteName,
+        name: 'Redacci\u00f3n de secretos: firebaseApiKey en answers',
+        status: 'PASSED'
+      });
     }
   }
 
-  if (secretLeaked) {
-    console.log('🔴 [PRODUCT_BEHAVIOR_FAILURE] Fuga de secretos detectada en logs.');
-    results.push({
-      suite: suiteName,
-      name: 'Aislamiento de secretos en logs de aprovisionamiento',
-      status: 'PRODUCT_BEHAVIOR_FAILURE',
-      error: 'Los secretos de answers (firebaseApiKey, adminPassword) son impresos en texto plano en los logs del sistema sin ser filtrados por redactSecrets.'
-    });
-  } else {
-    console.log('🟢 [PASSED] Secretos aislados y filtrados correctamente en logs.');
-    results.push({
-      suite: suiteName,
-      name: 'Aislamiento de secretos en logs de aprovisionamiento',
-      status: 'PASSED'
-    });
+  // 4.2 adminPassword en objeto anidado
+  {
+    const answers = {
+      auth: {
+        adminPassword: 'super-secret-pass-nested-9876'
+      }
+    };
+    const rawLog = `Inicializando admin con password: ${answers.auth.adminPassword}`;
+    const redacted = redactSecrets(rawLog, answers);
+    const leaked = redacted.includes(answers.auth.adminPassword);
+
+    if (leaked) {
+      console.log('\uD83D\uDD34 [PRODUCT_BEHAVIOR_FAILURE] adminPassword anidado filtrado en log.');
+      results.push({
+        suite: suiteName,
+        name: 'Redacci\u00f3n de secretos: adminPassword en objeto anidado',
+        status: 'PRODUCT_BEHAVIOR_FAILURE',
+        error: `El valor anidado "${answers.auth.adminPassword}" apareci\u00f3 sin censurar en: "${redacted}"`
+      });
+    } else {
+      console.log('\uD83D\uDFE2 [PASSED] adminPassword en objeto anidado correctamente redactado.');
+      results.push({
+        suite: suiteName,
+        name: 'Redacci\u00f3n de secretos: adminPassword en objeto anidado',
+        status: 'PASSED'
+      });
+    }
+  }
+
+  // 4.3 Token en process.env
+  {
+    const testTokenValue = 'env-token-test-secret-abcdef9876';
+    const testTokenKey = 'TEST_PROTOTIPE_SECRET_TOKEN';
+    const originalEnvVal = process.env[testTokenKey];
+    process.env[testTokenKey] = testTokenValue;
+
+    const rawLog = `Ejecutando con token: ${testTokenValue}`;
+    const redacted = redactSecrets(rawLog);
+    const leaked = redacted.includes(testTokenValue);
+
+    // Limpiar variable de entorno de prueba
+    if (originalEnvVal === undefined) {
+      delete process.env[testTokenKey];
+    } else {
+      process.env[testTokenKey] = originalEnvVal;
+    }
+
+    if (leaked) {
+      console.log('\uD83D\uDD34 [PRODUCT_BEHAVIOR_FAILURE] Token de process.env filtrado en log.');
+      results.push({
+        suite: suiteName,
+        name: 'Redacci\u00f3n de secretos: token en process.env',
+        status: 'PRODUCT_BEHAVIOR_FAILURE',
+        error: `El token de env "${testTokenValue}" apareci\u00f3 sin censurar en: "${redacted}"`
+      });
+    } else {
+      console.log('\uD83D\uDFE2 [PASSED] Token de process.env correctamente redactado.');
+      results.push({
+        suite: suiteName,
+        name: 'Redacci\u00f3n de secretos: token en process.env',
+        status: 'PASSED'
+      });
+    }
+  }
+
+  // 4.4 Error simulado de Firebase con secreto
+  {
+    const answers = {
+      firebaseApiKey: 'AIza-firebase-error-secret-xyz99'
+    };
+    const simulatedFirebaseError = new Error(
+      `Firebase: Error (auth/invalid-api-key) [apiKey=${answers.firebaseApiKey}]`
+    );
+    const redactedErrorMsg = redactSecrets(simulatedFirebaseError.message, answers);
+    const leaked = redactedErrorMsg.includes(answers.firebaseApiKey);
+
+    if (leaked) {
+      console.log('\uD83D\uDD34 [PRODUCT_BEHAVIOR_FAILURE] Mensaje de error Firebase con secreto no fue censurado.');
+      results.push({
+        suite: suiteName,
+        name: 'Redacci\u00f3n de secretos: error de Firebase con secreto',
+        status: 'PRODUCT_BEHAVIOR_FAILURE',
+        error: `El mensaje de error "${redactedErrorMsg}" contiene el secreto sin censurar.`
+      });
+    } else {
+      console.log('\uD83D\uDFE2 [PASSED] Error de Firebase con secreto correctamente censurado.');
+      results.push({
+        suite: suiteName,
+        name: 'Redacci\u00f3n de secretos: error de Firebase con secreto',
+        status: 'PASSED'
+      });
+    }
   }
 }

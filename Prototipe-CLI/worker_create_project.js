@@ -15,11 +15,17 @@
  */
 
 import { createProject } from './generator.js';
+import { redactSecrets } from './lib/SecretRedactor.js';
 import { spawn, exec } from 'child_process';
 import path from 'path';
 import fs from 'fs-extra';
 import { createRequire } from 'module';
 import net from 'net';
+
+// Referencia mutable al objeto answers activo.
+// Se actualiza en el handler 'message' antes de lanzar el job
+// para que console.log/error puedan redactar con los secretos del payload.
+let _activeAnswers = {};
 
 // Guard de seguridad: este script DEBE ejecutarse como proceso hijo (fork),
 // no directamente por el usuario.
@@ -35,14 +41,18 @@ const originalError = console.error;
 console.log = (...args) => {
   originalLog(...args);
   if (process.send) {
-    process.send({ type: 'LOG', line: args.join(' ') });
+    const rawLine = args.join(' ');
+    const safeLine = redactSecrets(rawLine, _activeAnswers);
+    process.send({ type: 'LOG', line: safeLine });
   }
 };
 
 console.error = (...args) => {
   originalError(...args);
   if (process.send) {
-    process.send({ type: 'LOG', line: `❌ ${args.join(' ')}` });
+    const rawLine = `❌ ${args.join(' ')}`;
+    const safeLine = redactSecrets(rawLine, _activeAnswers);
+    process.send({ type: 'LOG', line: safeLine });
   }
 };
 
@@ -176,6 +186,10 @@ process.on('message', async (msg) => {
 
   const { answers } = msg;
 
+  // Actualizar referencia global para que los overrides de console
+  // puedan redactar correctamente con los secretos de este payload.
+  _activeAnswers = answers || {};
+
   try {
     const result = await createProject(answers);
     
@@ -184,13 +198,18 @@ process.on('message', async (msg) => {
       try {
         await runSmokeTest(result.targetDir);
       } catch (smokeErr) {
-        console.error(`[Smoke Test Warning] El test de humo no se pudo completar: ${smokeErr.message}. La app fue aprovisionada con éxito, pero te sugerimos revisar manualmente su arranque.`);
+        // Redactar el mensaje de error antes de enviarlo por IPC
+        const safeMsg = redactSecrets(smokeErr.message, _activeAnswers);
+        console.error(`[Smoke Test Warning] El test de humo no se pudo completar: ${safeMsg}. La app fue aprovisionada con éxito, pero te sugerimos revisar manualmente su arranque.`);
       }
     }
 
     process.send({ type: 'SUCCESS', data: result });
   } catch (err) {
-    process.send({ type: 'ERROR', message: err.message || String(err) });
+    // Redactar el mensaje de error antes de enviarlo por IPC para evitar
+    // fugas de credenciales Firebase, tokens o contraseñas en el canal.
+    const safeMessage = redactSecrets(err.message || String(err), _activeAnswers);
+    process.send({ type: 'ERROR', message: safeMessage });
   } finally {
     // Cierre limpio
     setImmediate(() => process.exit(0));
