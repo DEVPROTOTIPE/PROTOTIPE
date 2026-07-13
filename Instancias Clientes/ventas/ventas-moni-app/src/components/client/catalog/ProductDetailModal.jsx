@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingBag, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ShoppingBag, Image as ImageIcon, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react'
 import useAppConfigStore from '../../../store/appConfigStore'
 import { formatCurrency } from '../../../utils/formatters'
 import useCartStore from '../../../store/cartStore'
@@ -18,7 +18,7 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
   const isUnlimited = (stock) => product?.stockInfinito === true || (stock || 0) >= UNLIMITED_STOCK
   const { addItem } = useCartStore()
   const { markStepCompleted } = useGuidedStore()
-  const { commercialOptimization } = useAppConfigStore()
+  const { commercialOptimization, onlineOrdersEnabled, whatsappAdmin } = useAppConfigStore()
 
   const optEnabled = commercialOptimization?.enabled === true
   const advancedGalleryEnabled = optEnabled && commercialOptimization?.tools?.advancedGallery?.enabled !== false
@@ -190,6 +190,16 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
     }, 1200)
   }
 
+  const handleConsultWhatsApp = () => {
+    let text = `Hola, me interesa el producto *${product.nombre}*`
+    if (selectedColor) text += ` en color *${selectedColor}*`
+    if (selectedTalla) text += ` en talla *${selectedTalla}*`
+    text += `. ¿Tienen disponibilidad?`
+    
+    const waUrl = `https://wa.me/${whatsappAdmin.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`
+    window.open(waUrl, '_blank')
+  }
+
   // Guard: no renderizar ni evaluar JSX si el producto es null
   if (!product) return null
 
@@ -205,35 +215,47 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
           {error}
         </motion.p>
       )}
-      <div className="flex gap-3">
-        <QuantitySelector
-          value={cantidad}
-          onChange={setCantidad}
-          min={1}
-          max={isUnlimited(currentVariant?.stock) ? 999 : (currentVariant?.stock || 10)}
-          className="h-14"
-        />
+      {onlineOrdersEnabled ? (
+        <div className="flex gap-3">
+          <QuantitySelector
+            value={cantidad}
+            onChange={setCantidad}
+            min={1}
+            max={isUnlimited(currentVariant?.stock) ? 999 : (currentVariant?.stock || 10)}
+            className="h-14"
+          />
 
 
-        <button
-          onClick={handleAddToCart}
-          disabled={!isUnlimited(currentVariant?.stock) && currentVariant?.stock === 0}
-          className={`flex-1 h-14 rounded-2xl font-bold text-base transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 ${
-            !isUnlimited(currentVariant?.stock) && currentVariant?.stock === 0
-              ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-              : 'bg-action text-white hover:opacity-90 shadow-lg shadow-action/20'
-          }`}
-        >
-          {!isUnlimited(currentVariant?.stock) && currentVariant?.stock === 0 ? (
-            <span>Agotado</span>
-          ) : (
-            <>
-              <ShoppingBag size={20} />
-              Agregar {formatCurrency(actualPrice * cantidad)}
-            </>
-          )}
-        </button>
-      </div>
+          <button
+            onClick={handleAddToCart}
+            disabled={!isUnlimited(currentVariant?.stock) && currentVariant?.stock === 0}
+            className={`flex-1 h-14 rounded-2xl font-bold text-base transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 ${
+              !isUnlimited(currentVariant?.stock) && currentVariant?.stock === 0
+                ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                : 'bg-action text-white hover:opacity-90 shadow-lg shadow-action/20'
+            }`}
+          >
+            {!isUnlimited(currentVariant?.stock) && currentVariant?.stock === 0 ? (
+              <span>Agotado</span>
+            ) : (
+              <>
+                <ShoppingBag size={20} />
+                Agregar {formatCurrency(actualPrice * cantidad)}
+              </>
+            )}
+          </button>
+        </div>
+      ) : (
+        <div className="flex gap-3">
+          <button
+            onClick={handleConsultWhatsApp}
+            className="flex-1 h-14 rounded-2xl font-bold text-base bg-green-600 hover:bg-green-700 text-white transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 border-none"
+          >
+            <MessageCircle size={20} />
+            <span>Consultar por WhatsApp</span>
+          </button>
+        </div>
+      )}
     </div>
   )
 

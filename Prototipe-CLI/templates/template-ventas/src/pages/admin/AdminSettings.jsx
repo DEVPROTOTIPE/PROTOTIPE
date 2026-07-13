@@ -1119,8 +1119,11 @@ export default function AdminSettings() {
                     { id: 'seguimiento', label: 'Seguimiento por WhatsApp', desc: 'Personaliza notificaciones automáticas y PWA', icon: MessageSquare, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
                     { id: 'movimientos', label: 'Auditoría de Ajustes de Stock', desc: 'Registro de modificaciones de inventario por empleado', icon: Database, color: 'text-indigo-500', bg: 'bg-indigo-500/10' }
                   ].filter(sub => {
+                    if (sub.id === 'empleados') {
+                      return config.rolesOperativosEnabled === true
+                    }
                     if (sub.id === 'movimientos') {
-                      return formData.hasMultipleEmployees === true
+                      return config.rolesOperativosEnabled === true && formData.hasMultipleEmployees === true
                     }
                     return true
                   }).map(sub => {

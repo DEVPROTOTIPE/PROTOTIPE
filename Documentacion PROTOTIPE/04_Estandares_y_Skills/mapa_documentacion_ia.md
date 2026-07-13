@@ -594,6 +594,7 @@ docs_roots:
 | Archivo | Rol Técnico | Cuándo Usarlo (Criterio de Decisión IA) | Ruta de Acceso Directo |
 | :--- | :--- | :--- | :--- |
 | **caja_diaria_pos.md** | Apertura de caja, transacciones de flujo auxiliar, arqueo físico vs esperado HSL y lienzo interactivo para firmas. | React, Canvas | [Ver Caja Diaria POS](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Caja_Diaria_POS/caja_diaria_pos.md) |
+| **propuesta_portal_creacion_features.md** | Propuesta técnica y de arquitectura para transformar el Marketplace de Features en un Portal de Creación y Scaffolding. | Dashboard / CLI | [Ver Propuesta Portal Features](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/propuesta_portal_creacion_features.md) |
 | **creditos_saldos.md** | Lógica de créditos, cuentas por cobrar, abonos y estado de cuentas de clientes. | Zustand / Firebase | [Ver Créditos y Saldos](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Creditos_y_Saldos/creditos_saldos.md) |
 | **omnicanalidad.md** | Módulo de redirecciones y plantillas dinámicas de WhatsApp. | Native Web API | [Ver WhatsApp Omnicanal](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Omnicanalidad_WhatsApp/omnicanalidad.md) |
 | **reservas_agenda_citas.md** | Agenda interactiva semanal y cuadrícula de horarios asignables para servicios y reservas profesionales. | React, calendar | [Ver Reservas Agenda Citas](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/Reservas_Agenda_Citas/reservas_agenda_citas.md) |

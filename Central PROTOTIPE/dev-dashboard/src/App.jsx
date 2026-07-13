@@ -2539,6 +2539,7 @@ export default function App() {
   const [settingUpCors, setSettingUpCors] = useState(false)
   const [corsAuditResult, setCorsAuditResult] = useState(null)
   const [activeDiffFile, setActiveDiffFile] = useState(null)
+  const [diffLoading, setDiffLoading] = useState(false)
   const [syncingFile, setSyncingFile] = useState({})
   const [editComisionPorcentaje, setEditComisionPorcentaje] = useState(1.5)
   const [editMontoFijoServicio, setEditMontoFijoServicio] = useState(500)
@@ -6036,6 +6037,29 @@ export default function App() {
       setDriftLoading(false)
     }
   }
+
+  const loadDiffDetail = async (clientId, file) => {
+    setDiffLoading(true)
+    try {
+      const res = await fetch(`${CLI_URL}/api/project/drift?clientId=${encodeURIComponent(clientId)}&filePath=${encodeURIComponent(file)}`)
+      const data = await res.json()
+      if (data.success) {
+        setActiveDiffFile(prev => prev && prev.file === file ? { ...prev, diff: data.diff } : prev)
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (err) {
+      showToast(`Error al cargar diferencias de líneas: ${err.message}`, { type: 'error' })
+    } finally {
+      setDiffLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeDiffFile && activeDiffFile.diff === null && selectedCrmClientId) {
+      loadDiffDetail(selectedCrmClientId, activeDiffFile.file)
+    }
+  }, [activeDiffFile, selectedCrmClientId])
 
   const handleRunBuildAudit = async (clientId) => {
     setBuildAuditing(true)
@@ -14932,23 +14956,29 @@ export default function App() {
                 ✕
               </button>
             </div>
-
-            <div className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 overflow-auto font-mono text-[10px] whitespace-pre-wrap leading-relaxed max-h-[50vh]">
-              {activeDiffFile.diff ? (
-                activeDiffFile.diff.map((part, idx) => (
-                  <span 
-                    key={idx} 
-                    className={
-                      part.added 
-                        ? 'text-emerald-400 bg-emerald-500/10 block w-full px-1 border-l-2 border-emerald-500' 
-                        : part.removed 
-                        ? 'text-red-400 bg-red-500/10 block w-full px-1 border-l-2 border-red-500' 
-                        : 'text-slate-400 block w-full px-1'
-                    }
-                  >
-                    {part.value}
-                  </span>
-                ))
+            <div className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 overflow-auto font-mono text-[10px] whitespace-pre-wrap leading-relaxed max-h-[50vh] flex flex-col justify-center items-center min-h-[200px]">
+              {diffLoading ? (
+                <div className="flex flex-col items-center justify-center space-y-2 py-8">
+                  <RefreshCw size={20} className="animate-spin text-indigo-500" />
+                  <span className="text-[10px] text-slate-500 italic">Cargando diferencias del Core...</span>
+                </div>
+              ) : activeDiffFile.diff ? (
+                <div className="w-full text-left">
+                  {activeDiffFile.diff.map((part, idx) => (
+                    <span 
+                      key={idx} 
+                      className={
+                        part.added 
+                          ? 'text-emerald-400 bg-emerald-500/10 block w-full px-1 border-l-2 border-emerald-500' 
+                          : part.removed 
+                          ? 'text-red-400 bg-red-500/10 block w-full px-1 border-l-2 border-red-500' 
+                          : 'text-slate-400 block w-full px-1'
+                      }
+                    >
+                      {part.value}
+                    </span>
+                  ))}
+                </div>
               ) : (
                 <p className="text-slate-400">Archivo nuevo (sin diferencias de líneas).</p>
               )}

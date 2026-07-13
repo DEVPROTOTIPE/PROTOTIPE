@@ -2,78 +2,62 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ─── HELPERS GLOBALES DE ACCESO ──────────────────────────────────
-
+    // Helper para verificar si la petición viene de un Administrador autenticado en Firebase Auth
     function isAdmin() {
-      return request.auth != null &&
+      return request.auth != null && 
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // ─── REGLAS CORE POR COLECCIÓN ──────────────────────────────────
-
-    // 0. Telemetría Multitenant
-    match /clientes_control/{clientId} {
-      allow read: if request.auth != null && (clientId == request.auth.token.clientId || isAdmin());
-      allow write: if isAdmin();
+    // Helper para verificar si la base de datos está vacía (primer arranque)
+    function isFirstStart() {
+      return !exists(/databases/$(database)/documents/config/settings);
     }
 
-    // 1. Configuración Global
+    // Valida que un pedido nuevo tenga la estructura mínima requerida
+    function validOrder() {
+      let d = request.resource.data;
+      return d.keys().hasAll(['items', 'cliente', 'total', 'metodoPago'])
+        && d.total is number
+        && d.total > 0
+        && d.items is list
+        && d.items.size() > 0;
+    }
+
+    // Configuración global y Filtros
     match /config/{document} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isFirstStart();
+    }
+    
+    // Subcolecciones de configuración
+    match /config/delivery/messengers/{messengerId} {
+      allow read: if true;
+      allow write: if isAdmin() || isFirstStart();
     }
 
-    // 2. Usuarios y Clientes
-    // userId = UID de Firebase Auth (admin) o número de celular (cliente sin auth)
+    // Perfiles de usuarios (clientes y administradores)
     match /users/{userId} {
-      allow read: if isAdmin()
-        || (request.auth != null && request.auth.uid == userId)
-        || true; // Login de cliente sin auth
-
-      allow create: if isAdmin()
-        || (request.auth != null && request.auth.uid == userId)
-        || true;
-
-      allow update: if isAdmin()
-        || (request.auth != null && request.auth.uid == userId)
-        || true;
-
-      allow list: if isAdmin();
-      allow delete: if isAdmin();
-
+      allow get: if true;
+      
+      // Permitir creación pública solo si el rol asignado es estrictamente 'client'
+      // O si la petición proviene de un administrador autenticado, o si es el primer arranque (base de datos vacía)
+      allow create: if (request.resource.data.role == 'client') || isAdmin() || isFirstStart();
+      
+      // Permitir actualización de campos personales pero impedir escalar de 'client' a 'admin'
+      allow update: if isAdmin() || (
+        request.resource.data.role == 'client' &&
+        (resource.data.role == 'client' || resource.data.role == null)
+      );
+      
+      allow list, delete: if isAdmin();
+      
       match /favorites/{favoriteId} {
-        allow read, write: if isAdmin() || true;
+        allow read, write: if true;
       }
     }
 
-    // ─── FEATURE ORDERS ────────────────────────────────────────────
-    match /orders/{document} {
-      allow read: if isAdmin() || true;
-      allow create: if true;
-      allow update: if isAdmin() || true;
-      allow delete: if isAdmin();
-    }
-
-    match /wholesaleOrders/{document} {
-      allow read: if isAdmin() || true;
-      allow create: if true;
-      allow update: if isAdmin() || true;
-      allow delete: if isAdmin();
-    }
-
-    match /order_tracking/{document} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // ─── FEATURE CREDITS ────────────────────────────────────────────
-    match /credits/{document} {
-      allow read: if isAdmin() || true;
-      allow write, delete: if isAdmin();
-    }
-
-    // ─── FEATURE INVENTORY ──────────────────────────────────────────
+    // Catálogo e Inventario
     match /products/{document} {
       allow read: if true;
       allow create, delete: if isAdmin();
@@ -81,95 +65,166 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['variantes', 'salesCount', 'updatedAt'])
       );
     }
-
     match /categories/{document} {
       allow read: if true;
       allow write, delete: if isAdmin();
     }
 
-    // ─── FEATURE ADS ────────────────────────────────────────────────
+    // Pedidos (Retail y Mayoristas)
+    // [SEGURIDAD - FASE 1] orders create ahora valida estructura mínima.
+    // [PENDIENTE MIGRACIóN] orders read sigue abierto mientras se migran pedidos
+    //  existentes a order_tracking. Restringir a isAdmin() en Fase 1.5 (post-migración).
+    match /orders/{document} {
+      allow create: if validOrder();
+      allow read: if true; // TODO: restringir a isAdmin() tras completar migración a order_tracking
+      allow update: if isAdmin() || (
+        // Permitir a repartidores/empleados operativos actualizar el estado de entrega o producción
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'deliveryInfo', 'updatedAt'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    // [NUEVO - FASE 1] Seguimiento público de pedidos (sin PII)
+    // Esta colección reemplaza la lectura pública de orders/.
+    // Contiene únicamente: estado, número de pedido, tipo de entrega,
+    //   resumen financiero e items (sin teléfono ni datos bancarios del cliente).
+    match /order_tracking/{trackingToken} {
+      allow get: if true;            // Público: página de seguimiento por token
+      allow list: if isAdmin();      // Restringido: nadie puede listar toda la colección
+      allow create: if true;         // createOrder() desde cliente escribe aquí
+      allow update: if isAdmin()     // Admin actualiza estado
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'updatedAt']);
+      allow delete: if isAdmin();
+    }
+    
+    // [NUEVO - FASE 1] Índice de pedidos por hash de celular
+    // Permite al cliente listar las referencias de sus pedidos sin auth.
+    match /user_order_index/{hashedCelular} {
+      allow get: if true;
+      allow list: if isAdmin();
+
+      match /orders/{trackingToken} {
+        allow read: if true;         // Permite al cliente listar/leer sus propios tokens
+        allow create: if request.resource.data.keys().hasAll(['trackingToken', 'orderId', 'createdAt', 'updatedAt'])
+          && request.resource.data.trackingToken == trackingToken
+          && request.resource.data.orderId.matches('^[a-zA-Z0-9_-]{20}$');
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    match /wholesaleOrders/{document} {
+      allow create: if true;
+      allow read: if isAdmin();   // Mayoristas: solo admin puede listar (dato comercial sensible)
+      allow update, delete: if isAdmin();
+    }
+
+    // Créditos / Fiados
+    match /credits/{document} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Publicidad y Promociones
     match /ads/{document} {
       allow read: if true;
       allow write, delete: if isAdmin();
     }
 
-    // ─── FEATURE COUPONS ────────────────────────────────────────────
+    // Cupones
     match /coupons/{document} {
       allow read: if true;
-      allow write, delete: if isAdmin();
+      allow write: if isAdmin();
     }
 
-    // ─── FEATURE CLAIMS ─────────────────────────────────────────────
+    // Garantías y Reclamos
     match /claims/{document} {
-      allow read: if isAdmin() || true;
       allow create: if true;
+      allow read: if isAdmin() || (request.auth != null && request.auth.token.phone_number == resource.data.clienteCelular);
       allow update, delete: if isAdmin();
     }
 
-    // ─── FEATURE EMPLOYEES & OPERATIONS ─────────────────────────────
-    match /employees/{document} {
-      allow read, write, delete: if isAdmin();
-    }
-
-    match /tables/{document} {
-      allow read: if true;
-      allow write, delete: if isAdmin();
-    }
-
-    match /production/{document} {
-      allow read, write, delete: if isAdmin();
-    }
-
-    match /deliveries/{document} {
-      allow read: if isAdmin() || true;
-      allow write, delete: if isAdmin();
-    }
-
-    match /stockMovements/{document} {
-      allow read, write, delete: if isAdmin();
-    }
-
-    match /accessLogs/{document} {
-      allow read, delete: if isAdmin();
-      allow create: if true;
-      allow update: if isAdmin();
-    }
-
-    match /deliveryAnalytics/{document} {
-      allow read, write: if isAdmin();
-    }
-
-    match /trackingAnalytics/{document} {
-      allow read: if isAdmin();
-      allow create: if true;
-      allow update, delete: if isAdmin();
-    }
-
-    // ─── FEATURE NOTIFICATIONS ───────────────────────────────────────
+    // [NUEVO] Centro de Notificaciones Centralizado
+    // - create: abierto (clientes, empleados y servicios internos crean notificaciones)
+    // - read: admins, clientes o si la notificación pertenece al rol consultado
+    // - update: admins, o cualquier usuario que solo modifique el campo 'status'
+    //           (para marcar como leída o archivar desde portales de empleados sin Auth)
+    // - delete: solo admins
     match /notifications/{document} {
       allow create: if true;
       allow read: if isAdmin() || resource.data.recipientRole == 'client';
       allow update: if isAdmin()
         || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
-      allow delete: if isAdmin()
-        || resource.data.recipientRole == 'client'
-        || resource.data.recipientRole == 'vendedor'
-        || resource.data.recipientRole == 'bodeguero'
-        || resource.data.recipientRole == 'mensajero';
+      allow delete: if isAdmin() || resource.data.recipientRole == 'client' || resource.data.recipientRole == 'vendedor' || resource.data.recipientRole == 'bodeguero' || resource.data.recipientRole == 'mensajero';
     }
 
+    // [NUEVO] Registro de Tokens FCM (Dispositivos)
     match /fcmTokens/{document} {
       allow read: if isAdmin();
       allow create, update: if true;
       allow delete: if isAdmin();
     }
 
+    // Notificaciones del Cliente (Legacy compatibility)
     match /clientNotifications/{document} {
-      allow read: if isAdmin() || true;
+      allow read: if isAdmin() || (request.auth != null && request.auth.token.phone_number == resource.data.clienteCelular);
       allow create: if true;
-      allow update: if isAdmin() || true;
+      allow update: if isAdmin() || (request.auth != null && request.auth.token.phone_number == resource.data.clienteCelular);
       allow delete: if isAdmin();
     }
 
+    // Configuración y PINs de empleados (Altamente sensible)
+    match /employees/{employeeId} {
+      allow read: if isAdmin() || (resource != null && resource.data.activo == true);
+      allow write: if isAdmin();
+
+      // Subcolección privada de secretos de empleado (PIN)
+      match /secrets/{hashedPin} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+
+    // Entregas y despachos
+    match /deliveries/{deliveryId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      // Permitir a mensajeros autenticados actualizar el estado de entrega y el historial logístico
+      allow update: if isAdmin() || (request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'history', 'updatedAt', 'deliveredAt']));
+    }
+
+    // Kardex y Movimientos de Stock
+    // [SEGURIDAD] Lectura restringida a admin: los movimientos de stock son información
+    //  comercial sensible (volúmenes, proveedores, ajustes internos).
+    match /stockMovements/{movementId} {
+      allow read: if isAdmin();
+      allow create: if true;         // El sistema escribe movimientos automáticamente
+      allow update, delete: if isAdmin();
+    }
+
+    // Historial de Accesos y Sesiones QR
+    match /accessLogs/{logId} {
+      allow read: if isAdmin();
+      allow create, update: if true;
+      allow delete: if isAdmin();
+    }
+
+    // Analíticas de Códigos QR
+    match /qrAnalytics/{analyticsId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Telemetría y Analíticas
+    match /trackingAnalytics/{analyticsId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Colección de diagnóstico temporal para desarrolladores
+    match /_diagnostics/{document} {
+      allow read, write: if isAdmin();
+    }
   }
 }

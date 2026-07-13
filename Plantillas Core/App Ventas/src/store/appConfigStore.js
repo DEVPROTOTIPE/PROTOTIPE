@@ -91,6 +91,8 @@ const useAppConfigStore = create(
       creditsEnabled: true,
       couponsEnabled: true,
       rolesOperativosEnabled: false, // Sistema de Roles Operativos y Portales (módulo avanzado)
+      posExpressScanner: false,
+      onlineOrdersEnabled: getPersistedValue('onlineOrdersEnabled', true),
       deliverySettings: {
         pickup: {
           enabled: true,
@@ -241,6 +243,7 @@ const useAppConfigStore = create(
         creditsEnabled: state.creditsEnabled,
         couponsEnabled: state.couponsEnabled,
         rolesOperativosEnabled: state.rolesOperativosEnabled,
+        posExpressScanner: state.posExpressScanner,
         adminRegistered: state.adminRegistered,
         maintenanceMode: state.maintenanceMode,
         commercialOptimization: state.commercialOptimization,

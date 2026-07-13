@@ -506,6 +506,14 @@ export default function ProductPublicDetail() {
     }
   }
 
+  const handleConsultWhatsApp = () => {
+    let text = `Hola, me interesa el producto *${product.nombre}*`
+    if (selectedColor) text += ` en color *${selectedColor}*`
+    if (selectedTalla) text += ` en talla *${selectedTalla}*`
+    text += `. ¿Tienen disponibilidad?`
+    openWhatsAppChat({ message: text })
+  }
+
   // Fallbacks de Estados del Producto
   const resolvedState = useMemo(() => {
     if (isError || !product) return 'eliminado'
@@ -1138,25 +1146,37 @@ export default function ProductPublicDetail() {
             )}
             
             {/* Controles del Carrito */}
-            <div className="flex gap-3 items-center">
-              {/* Selector de cantidad */}
-              <QuantitySelector
-                value={cantidad}
-                onChange={setCantidad}
-                min={1}
-                max={currentVariant?.stock || 99}
-                size="md"
-              />
+            {config.onlineOrdersEnabled ? (
+              <div className="flex gap-3 items-center">
+                {/* Selector de cantidad */}
+                <QuantitySelector
+                  value={cantidad}
+                  onChange={setCantidad}
+                  min={1}
+                  max={currentVariant?.stock || 99}
+                  size="md"
+                />
 
-              {/* Botón Comprar Ahora */}
-              <button
-                onClick={() => handleAddToCart(true)}
-                className="flex-1 h-14 bg-primary hover:bg-primary-hover text-white rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-all cursor-pointer border-none"
-              >
-                <ShoppingBag size={16} />
-                <span>Comprar Ahora</span>
-              </button>
-            </div>
+                {/* Botón Comprar Ahora */}
+                <button
+                  onClick={() => handleAddToCart(true)}
+                  className="flex-1 h-14 bg-primary hover:bg-primary-hover text-white rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-all cursor-pointer border-none"
+                >
+                  <ShoppingBag size={16} />
+                  <span>Comprar Ahora</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <button
+                  onClick={handleConsultWhatsApp}
+                  className="flex-1 h-14 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 active:scale-95 transition-all cursor-pointer border-none"
+                >
+                  <MessageSquare size={16} />
+                  <span>Consultar por WhatsApp</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </footer>

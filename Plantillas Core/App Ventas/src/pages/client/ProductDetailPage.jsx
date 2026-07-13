@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { 
   ShoppingBag, Image as ImageIcon, ChevronLeft, ChevronRight, 
-  Heart, Share2, MessageSquare, Check, ZoomIn 
+  Heart, Share2, MessageSquare, Check, ZoomIn, MessageCircle
 } from 'lucide-react'
 import BackButton from '../../components/ui/BackButton'
 import LazyImage from '../../components/ui/LazyImage'
@@ -33,7 +33,7 @@ export default function ProductDetailPage() {
 
   const { addItem, openCart } = useCartStore()
   const { markStepCompleted } = useGuidedStore()
-  const { commercialOptimization, catalogFilters, appName } = useAppConfigStore()
+  const { commercialOptimization, catalogFilters, appName, onlineOrdersEnabled, whatsappAdmin } = useAppConfigStore()
 
   const { scrollY } = useScroll()
   const yParallax = useTransform(scrollY, [0, 400], [0, 100])
@@ -446,6 +446,16 @@ export default function ProductDetailPage() {
         navigate(-1)
       }, 1200)
     }
+  }
+
+  const handleConsultWhatsApp = () => {
+    let text = `Hola, me interesa el producto *${product.nombre}*`
+    if (selectedColor) text += ` en color *${selectedColor}*`
+    if (selectedTalla) text += ` en talla *${selectedTalla}*`
+    text += `. ¿Tienen disponibilidad?`
+    
+    const waUrl = `https://wa.me/${whatsappAdmin.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`
+    window.open(waUrl, '_blank')
   }
 
   if (isLoadingProduct) {
@@ -945,47 +955,59 @@ export default function ProductDetailPage() {
                   {error}
                 </p>
               )}
-              <div className="flex items-center gap-4 w-full">
-                <div className="shrink-0">
-                  <QuantitySelector
-                    value={cantidad}
-                    onChange={setCantidad}
-                    min={1}
-                    max={product?.stockInfinito || (currentVariant?.stock || 0) >= 9999 ? 999 : (currentVariant?.stock || 10)}
-                    size="sm"
-                    className="h-11 shrink-0"
-                  />
-                </div>
-                <div className="flex-1 flex gap-2 h-11">
-                  <button
-                    onClick={() => handleAddToCart(false)}
-                    disabled={currentVariant?.stock === 0}
-                    className={`w-14 h-full rounded-xl font-bold transition-all duration-300 active:scale-95 flex items-center justify-center border shrink-0 ${
-                      currentVariant?.stock === 0
-                        ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
-                        : 'border-app bg-surface text-app hover:bg-surface-2 shadow-xs'
-                    }`}
-                    title="Agregar al carrito"
-                  >
-                    <div className="flex items-center gap-1 justify-center text-app">
-                      <ShoppingBag size={18} className="stroke-[2.5]" />
-                      <span className="text-xs font-black">+</span>
-                    </div>
-                  </button>
+              {onlineOrdersEnabled ? (
+                <div className="flex items-center gap-4 w-full">
+                  <div className="shrink-0">
+                    <QuantitySelector
+                      value={cantidad}
+                      onChange={setCantidad}
+                      min={1}
+                      max={product?.stockInfinito || (currentVariant?.stock || 0) >= 9999 ? 999 : (currentVariant?.stock || 10)}
+                      size="sm"
+                      className="h-11 shrink-0"
+                    />
+                  </div>
+                  <div className="flex-1 flex gap-2 h-11">
+                    <button
+                      onClick={() => handleAddToCart(false)}
+                      disabled={currentVariant?.stock === 0}
+                      className={`w-14 h-full rounded-xl font-bold transition-all duration-300 active:scale-95 flex items-center justify-center border shrink-0 ${
+                        currentVariant?.stock === 0
+                          ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
+                          : 'border-app bg-surface text-app hover:bg-surface-2 shadow-xs'
+                      }`}
+                      title="Agregar al carrito"
+                    >
+                      <div className="flex items-center gap-1 justify-center text-app">
+                        <ShoppingBag size={18} className="stroke-[2.5]" />
+                        <span className="text-xs font-black">+</span>
+                      </div>
+                    </button>
 
+                    <button
+                      onClick={() => handleAddToCart(true)}
+                      disabled={currentVariant?.stock === 0}
+                      className={`flex-1 h-full rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all duration-300 active:scale-95 flex items-center justify-center shadow-md ${
+                        currentVariant?.stock === 0
+                          ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                          : 'bg-action text-white hover:opacity-95 shadow-action/10'
+                      }`}
+                    >
+                      <span>Comprar Ahora</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center w-full h-11">
                   <button
-                    onClick={() => handleAddToCart(true)}
-                    disabled={currentVariant?.stock === 0}
-                    className={`flex-1 h-full rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all duration-300 active:scale-95 flex items-center justify-center shadow-md ${
-                      currentVariant?.stock === 0
-                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                        : 'bg-action text-white hover:opacity-95 shadow-action/10'
-                    }`}
+                    onClick={handleConsultWhatsApp}
+                    className="flex-1 h-full rounded-xl font-bold text-[10px] uppercase tracking-wider bg-green-600 hover:bg-green-700 text-white transition-all duration-300 active:scale-95 flex items-center justify-center shadow-md gap-2"
                   >
-                    <span>Comprar Ahora</span>
+                    <MessageCircle size={18} />
+                    <span>Consultar por WhatsApp</span>
                   </button>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Ayuda Asistente */}
@@ -1013,50 +1035,62 @@ export default function ProductDetailPage() {
             {error}
           </motion.p>
         )}
-        <div className="max-w-md mx-auto w-full flex items-end justify-between gap-3">
-          {/* Contador de unidades a la izquierda */}
-          <div className="shrink-0">
-            <QuantitySelector
-              value={cantidad}
-              onChange={setCantidad}
-              min={1}
-              max={product?.stockInfinito || (currentVariant?.stock || 0) >= 9999 ? 999 : (currentVariant?.stock || 10)}
-              size="sm"
-              className="h-11 shrink-0"
-            />
-          </div>
+        {onlineOrdersEnabled ? (
+          <div className="max-w-md mx-auto w-full flex items-end justify-between gap-3">
+            {/* Contador de unidades a la izquierda */}
+            <div className="shrink-0">
+              <QuantitySelector
+                value={cantidad}
+                onChange={setCantidad}
+                min={1}
+                max={product?.stockInfinito || (currentVariant?.stock || 0) >= 9999 ? 999 : (currentVariant?.stock || 10)}
+                size="sm"
+                className="h-11 shrink-0"
+              />
+            </div>
 
-          {/* Botones de acción a la derecha */}
-          <div className="flex-1 flex gap-2 h-11">
-            <button
-              onClick={() => handleAddToCart(false)}
-              disabled={currentVariant?.stock === 0}
-              className={`w-14 h-full rounded-xl font-bold transition-all duration-300 active:scale-95 flex items-center justify-center border shrink-0 ${
-                currentVariant?.stock === 0
-                  ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
-                  : 'border-app bg-surface text-app hover:bg-surface-2 shadow-xs'
-              }`}
-              title="Agregar al carrito"
-            >
-              <div className="flex items-center gap-1 justify-center text-app">
-                <ShoppingBag size={18} className="stroke-[2.5]" />
-                <span className="text-xs font-black">+</span>
-              </div>
-            </button>
+            {/* Botones de acción a la derecha */}
+            <div className="flex-1 flex gap-2 h-11">
+              <button
+                onClick={() => handleAddToCart(false)}
+                disabled={currentVariant?.stock === 0}
+                className={`w-14 h-full rounded-xl font-bold transition-all duration-300 active:scale-95 flex items-center justify-center border shrink-0 ${
+                  currentVariant?.stock === 0
+                    ? 'border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed'
+                    : 'border-app bg-surface text-app hover:bg-surface-2 shadow-xs'
+                }`}
+                title="Agregar al carrito"
+              >
+                <div className="flex items-center gap-1 justify-center text-app">
+                  <ShoppingBag size={18} className="stroke-[2.5]" />
+                  <span className="text-xs font-black">+</span>
+                </div>
+              </button>
 
+              <button
+                onClick={() => handleAddToCart(true)}
+                disabled={currentVariant?.stock === 0}
+                className={`flex-1 h-full rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all duration-300 active:scale-95 flex items-center justify-center shadow-md ${
+                  currentVariant?.stock === 0
+                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-action text-white hover:opacity-95 shadow-action/10'
+                }`}
+              >
+                <span>Comprar Ahora</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="max-w-md mx-auto w-full flex items-center h-11">
             <button
-              onClick={() => handleAddToCart(true)}
-              disabled={currentVariant?.stock === 0}
-              className={`flex-1 h-full rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all duration-300 active:scale-95 flex items-center justify-center shadow-md ${
-                currentVariant?.stock === 0
-                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                  : 'bg-action text-white hover:opacity-95 shadow-action/10'
-              }`}
+              onClick={handleConsultWhatsApp}
+              className="flex-1 h-full rounded-xl font-bold text-[10px] uppercase tracking-wider bg-green-600 hover:bg-green-700 text-white transition-all duration-300 active:scale-95 flex items-center justify-center shadow-md gap-2"
             >
-              <span>Comprar Ahora</span>
+              <MessageCircle size={18} />
+              <span>Consultar por WhatsApp</span>
             </button>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Toast de agregado al carrito */}

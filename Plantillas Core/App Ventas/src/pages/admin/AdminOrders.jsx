@@ -52,12 +52,18 @@ export default function AdminOrders() {
 
   const { data: orders = [], isLoading } = useOrders(showArchived, filterDate)
   const { mutate: updateStatus, isPending } = useUpdateOrderStatus()
-  const { appName, appIcon, whatsappAdmin, deliverySettings, claimsEnabled, creditsEnabled, couponsEnabled } = useAppConfigStore()
+  const { appName, appIcon, whatsappAdmin, deliverySettings, claimsEnabled, creditsEnabled, couponsEnabled, onlineOrdersEnabled } = useAppConfigStore()
   const { data: credits = [] } = useCredits('activo')
   const { data: wholesaleRequests = [] } = useWholesaleRequests()
   const { mutate: updateWholesaleStatus } = useUpdateWholesaleStatus()
   const navigate = useNavigate()
   const { showAlert, showConfirm } = useAlertConfirm()
+
+  useEffect(() => {
+    if (!onlineOrdersEnabled) {
+      navigate('/admin/home', { replace: true })
+    }
+  }, [onlineOrdersEnabled, navigate])
   
   // Consumir el store del portal para validación de permisos por rol de empleado
   const { portalEmployee } = usePortalStore()

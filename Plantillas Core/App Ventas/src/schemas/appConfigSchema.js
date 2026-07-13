@@ -79,6 +79,7 @@ export const appConfigSchema = z.object({
   creditsEnabled: z.boolean().default(true),
   couponsEnabled: z.boolean().default(true),
   rolesOperativosEnabled: z.boolean().default(false),
+  onlineOrdersEnabled: z.boolean().default(true),
 
   deliverySettings: z.object({
     pickup: z.object({

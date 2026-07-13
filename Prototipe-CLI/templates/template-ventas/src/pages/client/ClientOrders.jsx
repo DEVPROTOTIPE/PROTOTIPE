@@ -74,7 +74,7 @@ export default function ClientOrders() {
   const { mutate: updateStatus, isPending: isUpdating } = useUpdateOrderStatus()
   const { data: activeProducts = [] } = useProducts(true)
   const { addItem, openCart } = useCartStore()
-  const { whatsappAdmin, appName, appIcon, claimsEnabled, wholesaleSettings, orderTrackingEnabled } = useAppConfigStore()
+  const { whatsappAdmin, appName, appIcon, claimsEnabled, wholesaleSettings, orderTrackingEnabled, onlineOrdersEnabled } = useAppConfigStore()
   const navigate = useNavigate()
   const location = useLocation()
   const { showAlert } = useAlertConfirm()
@@ -82,6 +82,12 @@ export default function ClientOrders() {
   const [activeTab, setActiveTab] = useState('normal') // 'normal' o 'especial'
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+
+  useEffect(() => {
+    if (!onlineOrdersEnabled) {
+      navigate('/tienda/catalogo', { replace: true })
+    }
+  }, [onlineOrdersEnabled, navigate])
 
   const [showHidden, setShowHidden] = useState(false)
   const [expandedOrderId, setExpandedOrderId] = useState(null)
@@ -837,13 +843,15 @@ export default function ClientOrders() {
               <XCircle size={16} />
               Cancelar
             </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); setConfirmRepeatOrder(order) }}
-              className="flex items-center justify-center gap-1.5 h-11 bg-primary text-white rounded-xl font-bold text-xs min-[380px]:text-sm shadow-md hover:opacity-90 transition-opacity active:scale-95 cursor-pointer animate-none"
-            >
-              <Repeat size={16} />
-              Repetir
-            </button>
+            {onlineOrdersEnabled && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setConfirmRepeatOrder(order) }}
+                className="flex items-center justify-center gap-1.5 h-11 bg-primary text-white rounded-xl font-bold text-xs min-[380px]:text-sm shadow-md hover:opacity-90 transition-opacity active:scale-95 cursor-pointer animate-none"
+              >
+                <Repeat size={16} />
+                Repetir
+              </button>
+            )}
           </div>
         </div>
       </motion.div>

@@ -136,7 +136,8 @@ const RemoteAlertModal = ({ sistemaAlerta, isAlertDismissed, handleDismissAlert 
   const location = useLocation()
   const isAdminPath = location.pathname.startsWith('/admin')
   
-  if (!isAdminPath) return null
+  // El modal de alerta remota es solo para clientes, nunca para el panel de administración
+  if (isAdminPath) return null
 
   return (
     <AnimatePresence>

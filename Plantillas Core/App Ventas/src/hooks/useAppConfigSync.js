@@ -27,6 +27,7 @@ export default function useAppConfigSync() {
   const lastPingTimestampRef = useRef(null)
   const latestMetricsRef = useRef(null)
   const pendingBillingUpdateRef = useRef(null)
+  const latestCentralFlagsRef = useRef({})
 
   useEffect(() => {
     if (user && role === 'admin' && pendingBillingUpdateRef.current && typeof updateAppConfig === 'function') {
@@ -43,15 +44,16 @@ export default function useAppConfigSync() {
     const unsubscribeSettings = subscribeToAppConfig((settings) => {
       try {
         const validated = appConfigSchema.parse(settings || {})
-        setConfig(validated)
+        // Mezclar con prioridad de las flags del CRM central para evitar sobreescrituras locales
+        setConfig({ ...validated, ...latestCentralFlagsRef.current })
       } catch (err) {
         console.warn('[ZodSync] Error al validar config local settings, aplicando fallbacks:', err.message)
         // Fallback parcial de recuperación
         try {
           const partialValidated = appConfigSchema.partial().parse(settings || {})
-          setConfig({ ...settings, ...partialValidated })
+          setConfig({ ...settings, ...partialValidated, ...latestCentralFlagsRef.current })
         } catch (_) {
-          setConfig(settings)
+          setConfig({ ...settings, ...latestCentralFlagsRef.current })
         }
       }
     })
@@ -96,6 +98,8 @@ export default function useAppConfigSync() {
     // No requiere autenticación gracias a las reglas de Firestore Central (read: true).
     let unsubscribeCentral = () => {}
 
+    console.log('[CentralSync] Inicializando hook de sincronización con CLIENT_ID:', CLIENT_ID)
+
     if (CLIENT_ID) {
       const centralDb = getCentralFirestore()
       if (centralDb) {
@@ -104,8 +108,12 @@ export default function useAppConfigSync() {
         unsubscribeCentral = onSnapshot(
           clientDocRef,
           (snapshot) => {
-            if (!snapshot.exists()) return
+            if (!snapshot.exists()) {
+              console.warn('[CentralSync] El documento de control del cliente no existe en la BD central:', CLIENT_ID)
+              return
+            }
             const data = snapshot.data()
+            console.log('[CentralSync] Snapshot recibido de la BD Central. Data:', data)
 
             // 1. Sincronizar sistemaAlerta y desactivación → Zustand (activa el bloqueo visual)
             const alerta = data.sistemaAlerta || null
@@ -136,6 +144,26 @@ export default function useAppConfigSync() {
             // Si el desarrollador actualizó los parámetros de billing o las flags, se propagan
             // automáticamente al config/settings local de la instancia.
             const centralFlags = data.flags || {}
+            
+            const flagsUpdate = {
+              ...(centralFlags.creditsEnabled !== undefined && { creditsEnabled: Boolean(centralFlags.creditsEnabled) }),
+              ...(centralFlags.couponsEnabled !== undefined && { couponsEnabled: Boolean(centralFlags.couponsEnabled) }),
+              ...(centralFlags.claimsEnabled !== undefined && { claimsEnabled: Boolean(centralFlags.claimsEnabled) }),
+              ...(centralFlags.deliveryEnabled !== undefined && { rolesOperativosEnabled: Boolean(centralFlags.deliveryEnabled) }),
+              ...(centralFlags.posExpressScanner !== undefined && { posExpressScanner: Boolean(centralFlags.posExpressScanner) }),
+              ...(centralFlags.onlineOrdersEnabled !== undefined && { onlineOrdersEnabled: Boolean(centralFlags.onlineOrdersEnabled) }),
+              // wholesaleEnabled controla el sub-objeto wholesaleSettings.enabled
+              ...(centralFlags.wholesaleEnabled !== undefined && {
+                wholesaleSettings: {
+                  ...useAppConfigStore.getState().wholesaleSettings,
+                  enabled: Boolean(centralFlags.wholesaleEnabled)
+                }
+              }),
+            }
+            
+            // Almacenar en la referencia
+            latestCentralFlagsRef.current = flagsUpdate
+
             const billingFieldsFromCentral = {
               ...(data.billingMode !== undefined && { developerBillingMode: data.billingMode }),
               ...(data.comisionPorcentaje !== undefined && { developerCommissionPercent: parseFloat(data.comisionPorcentaje) }),
@@ -143,11 +171,7 @@ export default function useAppConfigSync() {
               ...(data.pagoMensualFijo !== undefined && { developerFlatMonthlyPayment: parseFloat(data.pagoMensualFijo) }),
               ...(data.enableDianBilling !== undefined && { developerEnableDianBilling: Boolean(data.enableDianBilling) }),
               ...(data.costoPorFacturaDian !== undefined && { developerDianInvoiceCost: parseFloat(data.costoPorFacturaDian) }),
-              
-              // Feature Flags centrales mapeadas al esquema local
-              ...(centralFlags.creditsEnabled !== undefined && { creditsEnabled: Boolean(centralFlags.creditsEnabled) }),
-              ...(centralFlags.couponsEnabled !== undefined && { couponsEnabled: Boolean(centralFlags.couponsEnabled) }),
-              ...(centralFlags.claimsEnabled !== undefined && { claimsEnabled: Boolean(centralFlags.claimsEnabled) }),
+              ...flagsUpdate
             }
 
             if (Object.keys(billingFieldsFromCentral).length > 0) {

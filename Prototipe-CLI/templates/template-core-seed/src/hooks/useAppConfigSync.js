@@ -27,6 +27,7 @@ export default function useAppConfigSync() {
   const lastPingTimestampRef = useRef(null)
   const latestMetricsRef = useRef(null)
   const pendingBillingUpdateRef = useRef(null)
+  const latestCentralFlagsRef = useRef({})
 
   useEffect(() => {
     if (user && role === 'admin' && pendingBillingUpdateRef.current && typeof updateAppConfig === 'function') {
@@ -43,15 +44,15 @@ export default function useAppConfigSync() {
     const unsubscribeSettings = subscribeToAppConfig((settings) => {
       try {
         const validated = appConfigSchema.parse(settings || {})
-        setConfig(validated)
+        setConfig({ ...validated, ...latestCentralFlagsRef.current })
       } catch (err) {
         console.warn('[ZodSync] Error al validar config local settings, aplicando fallbacks:', err.message)
         // Fallback parcial de recuperación
         try {
           const partialValidated = appConfigSchema.partial().parse(settings || {})
-          setConfig({ ...settings, ...partialValidated })
+          setConfig({ ...settings, ...partialValidated, ...latestCentralFlagsRef.current })
         } catch (_) {
-          setConfig(settings)
+          setConfig({ ...settings, ...latestCentralFlagsRef.current })
         }
       }
     })
@@ -132,7 +133,23 @@ export default function useAppConfigSync() {
               })
             }
 
-            // 2. Sincronización silenciosa de tarifas de cobro desde el CRM central
+            // 2. Sincronización silenciosa de Feature Flags desde el CRM central
+            // Si el desarrollador actualizó las flags en el CRM central, se propagan
+            // automáticamente al config/settings local de la instancia.
+            const centralFlags = data.flags || {}
+            
+            // Feature Flags centrales mapeadas al esquema local
+            const flagsUpdate = {
+              ...(centralFlags.creditsEnabled !== undefined && { creditsEnabled: Boolean(centralFlags.creditsEnabled) }),
+              ...(centralFlags.couponsEnabled !== undefined && { couponsEnabled: Boolean(centralFlags.couponsEnabled) }),
+              ...(centralFlags.claimsEnabled !== undefined && { claimsEnabled: Boolean(centralFlags.claimsEnabled) }),
+              ...(centralFlags.deliveryEnabled !== undefined && { rolesOperativosEnabled: Boolean(centralFlags.deliveryEnabled) }),
+              ...(centralFlags.posExpressScanner !== undefined && { posExpressScanner: Boolean(centralFlags.posExpressScanner) }),
+            }
+            
+            latestCentralFlagsRef.current = flagsUpdate
+
+            // 3. Sincronización silenciosa de tarifas de cobro desde el CRM central
             // Si el desarrollador actualizó los parámetros de billing, se propagan
             // automáticamente al config/settings local de la instancia.
             const billingFieldsFromCentral = {

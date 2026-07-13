@@ -8,13 +8,14 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
   Bike, ArrowLeft, TrendingUp, CheckCircle2, AlertTriangle, Clock,
-  User, Calendar, Loader2, BarChart3, RefreshCw,
+  User, Calendar, Loader2, BarChart3, RefreshCw, Shield
 } from 'lucide-react'
 import { getDeliveriesForAnalytics, getExternalMessengers } from '../../services/deliveryService'
 import { getEmployeesByRole } from '../../services/employeeService'
 import { ROLES, DELIVERY_STATES, DELIVERY_STATE_LABELS } from '../../constants'
 import { formatCurrency } from '../../utils/formatters'
 import BackButton from '../../components/ui/BackButton'
+import useAppConfigStore from '../../store/appConfigStore'
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 function KpiCard({ icon: Icon, label, value, sub, color = 'primary' }) {
@@ -58,10 +59,26 @@ function rangeStart(days) {
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function AdminDeliveryPerformance() {
+  const rolesOperativosEnabled = useAppConfigStore(state => state.rolesOperativosEnabled)
   const navigate = useNavigate()
 
   const [range, setRange]         = useState(7) // días
   const [deliveries, setDeliveries] = useState([])
+
+  if (!rolesOperativosEnabled) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 bg-surface rounded-3xl border border-app shadow-sm max-w-md mx-auto my-12 space-y-4">
+        <div className="w-16 h-16 rounded-2xl bg-amber-500/15 flex items-center justify-center text-amber-500">
+          <Shield size={32} className="animate-pulse" />
+        </div>
+        <h2 className="text-lg font-bold text-app">Módulo Desactivado</h2>
+        <p className="text-xs text-muted leading-relaxed">
+          El panel de analítica de rendimiento de entregas se encuentra deshabilitado temporalmente por el administrador.
+        </p>
+        <BackButton />
+      </div>
+    )
+  }
   const [employees, setEmployees] = useState([])
   const [externals, setExternals] = useState([])
   const [loading, setLoading]     = useState(true)

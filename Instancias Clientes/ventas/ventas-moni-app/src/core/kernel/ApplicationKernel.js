@@ -132,7 +132,8 @@ class ApplicationKernelClass {
 
     // 3. Cargar y validar manifiestos en disco de las features activas
     for (const path in modulesGlob) {
-      const featureId = path.split('/')[4];
+      const parts = path.split('/');
+      const featureId = parts[parts.length - 2] || 'unknown';
       if (FeatureRegistry.isEnabled(featureId)) {
         try {
           const modDefinition = (await modulesGlob[path]()).default;

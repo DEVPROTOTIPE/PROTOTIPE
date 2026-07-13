@@ -1,8 +1,117 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 469 tareas completadas de 469 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 478 tareas completadas de 478 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-478: Implementación de Feature Flag onlineOrdersEnabled en Core Ventas y Generador~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Implementamos la feature flag onlineOrdersEnabled para permitir conmutar dinámicamente entre Tienda Online e-commerce y Catálogo Vitrina de solo lectura con cotización vía WhatsApp. Inyectamos la flag en core-manifest.json, Zustand appConfigStore, esquemas Zod appConfigSchema y la sincronización useAppConfigSync desde Firestore. Filtramos la pestaña Pedidos en layouts de cliente y administrador. Modificamos ProductDetailPage, ProductPublicDetail y ProductDetailModal para ocultar controles de compra/carro e integrar botones de "Consultar por WhatsApp" dinámicos en base al producto, color y talla seleccionados. Ocultamos el botón Repetir en ClientOrders. Ocultamos la tarjeta "Mis Pedidos" en ClientProfile y agregamos guards de redirección URL (seguridad de acceso) en ClientOrders.jsx y AdminOrders.jsx para evitar ingresos manuales por ruta directa.
+  - Archivos:
+    - [`Plantillas Core/App Ventas/core-manifest.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/core-manifest.json) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/core-manifest.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/core-manifest.json) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/schemas/appConfigSchema.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/schemas/appConfigSchema.js) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/src/schemas/appConfigSchema.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/schemas/appConfigSchema.js) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/layouts/AdminLayout.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/AdminLayout.jsx) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/src/layouts/AdminLayout.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/layouts/AdminLayout.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/layouts/ClientLayout.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/ClientLayout.jsx) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/src/layouts/ClientLayout.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/layouts/ClientLayout.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/pages/client/ProductDetailPage.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/src/pages/client/ProductDetailPage.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/client/ProductDetailPage.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/pages/client/ProductPublicDetail.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/src/pages/client/ProductPublicDetail.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/client/ProductPublicDetail.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/components/client/catalog/ProductDetailModal.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/components/client/catalog/ProductDetailModal.jsx) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/src/components/client/catalog/ProductDetailModal.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/components/client/catalog/ProductDetailModal.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/pages/client/ClientOrders.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientOrders.jsx) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/src/pages/client/ClientOrders.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/client/ClientOrders.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/pages/client/ClientProfile.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/client/ClientProfile.jsx) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/src/pages/client/ClientProfile.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/client/ClientProfile.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/pages/admin/AdminOrders.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminOrders.jsx) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/src/pages/admin/AdminOrders.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/admin/AdminOrders.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-477: Reducción del Tamaño del Bundle mediante Tree-Shaking en Importación de Iconos~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Optimizamos la importación de lucide-react en AdminLayout.jsx de App Ventas y template-ventas de la base del generador CLI. Reemplazamos la importación masiva por importaciones selectivas de los 14 iconos específicos requeridos y definimos una constante local LucideIcons para preservar compatibilidad. Esto reduce el bundle de iconos de 899.9 KB a tan solo 71.78 KB (reducción del 92%), resolviendo las advertencias del build de producción y maximizando el puntaje de PWA a 100/100.
+  - Archivos:
+    - [`Plantillas Core/App Ventas/src/layouts/AdminLayout.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/AdminLayout.jsx) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/src/layouts/AdminLayout.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/layouts/AdminLayout.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-476: Optimización Asíncrona de Carga de Diffs en Drift Detector~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Optimizamos el cálculo de desviación del Core en server.js del CLI eliminando diffLines del bucle del listado de archivos (retornando diff: null) y agregando soporte asíncrono detallado bajo demanda mediante filePath. En dev-dashboard/src/App.jsx, añadimos loadDiffDetail y un useEffect para cargar el diff al abrir el modal, e inyectamos un spinner RefreshCw con animación spin en la UI del visor.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-475: Modularización Reactiva de Feature Flags en Plantilla Core Seed~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Integrada la sincronización reactiva en vivo de feature flags desde la BD central en la plantilla base Core Seed. Declarada la flag posExpressScanner y agregada la hidratación de flagsUpdate (creditsEnabled, couponsEnabled, claimsEnabled, rolesOperativosEnabled y posExpressScanner) mediante latestCentralFlagsRef. Esto asegura que cualquier nueva vertical o core desarrollado a partir de esta plantilla herede nativamente y por defecto el canal de feature flags dinámicas sincronizadas en tiempo real.
+  - Archivos:
+    - [`Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js) [MODIFY]
+    - [`Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-474: Eliminación Definitiva de la Feature Flag de Órdenes de Trabajo en Core Ventas~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Eliminada la feature flag ordenesTrabajo del listado de feature flags y removidas sus correspondientes reglas de recomendación en core-manifest.json. Revertida la declaración y el mapeo de ordenesTrabajoEnabled en Zustand y Firestore, eliminando código huérfano y preservando el core base limpio.
+  - Archivos:
+    - [`Plantillas Core/App Ventas/core-manifest.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/core-manifest.json) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-473: Sincronización en Caliente de la Feature Flag de Órdenes de Trabajo~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Declarado el estado global ordenesTrabajoEnabled en Zustand (inicializado en false) y mapeada su sincronización reactiva en vivo desde la propiedad ordenesTrabajo del objeto de flags centrales de Firestore en useAppConfigSync.js. Esto asegura que la aplicación cliente reciba y registre el estado de esta feature en caliente, previniendo incoherencias y permitiendo su activación en cascada una vez que se inyecte el módulo físico respectivo.
+  - Archivos:
+    - [`Plantillas Core/App Ventas/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-472: Unificación de Terminología en Dashboard Central para Módulo Operativo~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Renombrada la flag de control central deliveryEnabled en el Dashboard Central a "Gestión de Empleados & Domicilios", actualizando su descripción para reflejar que controla de forma coherente los accesos QR, login de operarios y el stepper de entregas en la app ventas.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-471: Cohesión de Feature Flags para Portales QR y Gestión de Empleados~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Unificada la visibilidad y accesibilidad de todas las vistas, menús y subsecciones relacionadas con el módulo de operarios bajo la flag rolesOperativosEnabled. Se ocultó la pestaña "Portales QR" en el menú, las tarjetas de "Gestión de Empleados" y "Auditoría de Stock" en Ajustes, y se blindaron con un layout estético de "Módulo Desactivado" las páginas de AdminPortalQR, PortalAuth y AdminDeliveryPerformance para evitar accesos indebidos vía URL.
+  - Archivos:
+    - [`Plantillas Core/App Ventas/src/layouts/AdminLayout.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/AdminLayout.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/pages/admin/AdminSettings.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminSettings.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/pages/admin/AdminPortalQR.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminPortalQR.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/pages/portal/PortalAuth.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/portal/PortalAuth.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/pages/admin/AdminDeliveryPerformance.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminDeliveryPerformance.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-470: Estabilización de Feature Flags y Acoplamiento de POS Express Scanner~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Corregido bug de desincronización de switches del Dashboard Central mediante onSnapshot reactivo continuo. Implementada la prioridad absoluta de feature flags centrales en useAppConfigSync.js con una referencia persistente. Añadido el filtrado condicional dinámico en AdminLayout.jsx para reclamos y entregas. Integrado y soportado el lector de códigos de barras (POS Express Scanner) en la caja registradora de AdminSales.jsx y appConfigStore.js con sonidos sintéticos de bip usando la API Web Audio de HTML5. Implementamos búsqueda recursiva en variantes para agregar variantes específicas por SKU de forma directa y corregimos el modal de alerta para admitir títulos dinámicos coherentes (como "Producto no encontrado").
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/layouts/AdminLayout.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/AdminLayout.jsx) [MODIFY]
+    - [`Plantillas Core/App Ventas/src/pages/admin/AdminSales.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/pages/admin/AdminSales.jsx) [MODIFY]
 
 * **[x] ~~Tarea CLI-469: Sincronización en Caliente de Feature Flags desde Firestore Central a App Ventas~~**
   - Estatus: Completada

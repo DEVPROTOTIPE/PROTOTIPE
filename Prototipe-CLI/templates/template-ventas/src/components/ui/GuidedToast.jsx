@@ -4,16 +4,25 @@ import { Sparkles, X } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import useGuidedStore from '../../store/guidedStore'
 import useCartStore from '../../store/cartStore'
+import useAppConfigStore from '../../store/appConfigStore'
 import { GUIDED_MESSAGES } from '../../constants'
 
 export default function GuidedToast() {
   const { isAssistanceMode, completedSteps, disableAssistance } = useGuidedStore()
-  const { items } = useCartStore()
+  const { items, clearCart } = useCartStore()
+  const { onlineOrdersEnabled } = useAppConfigStore()
   const location = useLocation()
   
   const [currentMessage, setCurrentMessage] = useState(null)
   const [isVisible, setIsVisible] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+
+  // Si onlineOrdersEnabled se desactiva y quedaron ítems huérfanos en caché, limpiar el carrito
+  useEffect(() => {
+    if (!onlineOrdersEnabled && items.length > 0) {
+      clearCart()
+    }
+  }, [onlineOrdersEnabled, items.length, clearCart])
 
   useEffect(() => {
     // Si el modo asistencia no está activo, no mostramos nada
@@ -24,12 +33,13 @@ export default function GuidedToast() {
 
     let message = null
 
-    // LÓGICA DE PASOS (Sección 22 del Informe)
+    // LÓGICA DE PASOS
     // Aseguramos que las notificaciones de compra solo salgan dentro de la tienda
     if (location.pathname === '/tienda/catalogo') {
       if (items.length === 0 && !completedSteps['catalog']) {
         message = GUIDED_MESSAGES.CATALOG_ENTRY
-      } else if (items.length > 0 && !completedSteps['view_cart']) {
+      } else if (items.length > 0 && onlineOrdersEnabled && !completedSteps['view_cart']) {
+        // Solo sugerir revisar el carrito si la feature de pedidos está activa
         message = GUIDED_MESSAGES.PRODUCT_ADDED
       }
     }
@@ -42,7 +52,7 @@ export default function GuidedToast() {
     } else {
       setIsVisible(false)
     }
-  }, [isAssistanceMode, location.pathname, items.length, completedSteps])
+  }, [isAssistanceMode, location.pathname, items.length, completedSteps, onlineOrdersEnabled])
 
   const handleDismiss = () => {
     setIsVisible(false)

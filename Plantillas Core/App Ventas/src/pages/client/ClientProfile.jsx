@@ -30,7 +30,7 @@ const itemVariants = {
 export default function ClientProfile() {
   const { user, logout, updateClient } = useAuthStore()
   const { isAssistanceMode, enableAssistance, disableAssistance, resetProgress } = useGuidedStore()
-  const { guidedModeEnabled, developerPhone, appName, creditsEnabled, isDarkMode, toggleDarkMode } = useAppConfigStore()
+  const { guidedModeEnabled, developerPhone, appName, creditsEnabled, isDarkMode, toggleDarkMode, onlineOrdersEnabled } = useAppConfigStore()
   const { rawInstallable, handleInstall } = usePWAInstall()
   const navigate = useNavigate()
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
@@ -156,26 +156,31 @@ export default function ClientProfile() {
       >
         
         {/* ─── TARJETAS PRINCIPALES CON MICRO-RESÚMENES ─────────────────── */}
-        <motion.div variants={itemVariants} className="bg-surface rounded-2xl p-2 border border-app shadow-sm">
-          <Link to="/tienda/pedidos" className="flex items-center justify-between px-3 py-3 hover:bg-surface-2 rounded-xl transition-all group active:scale-[0.99]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-surface border border-app text-app flex items-center justify-center group-hover:border-primary/30 group-hover:text-primary transition-all">
-                <Package size={20} />
-              </div>
-              <div>
-                <span className="font-bold text-sm text-app block">Mis Pedidos</span>
-                <span className="text-[10px] text-muted font-medium">Ver historial y estados de entrega</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded-full">Historial</span>
-              <ChevronRight size={18} className="text-muted group-hover:text-primary transition-all group-hover:translate-x-0.5" />
-            </div>
-          </Link>
-          
-          {creditsEnabled && (
-            <>
+        {(onlineOrdersEnabled || creditsEnabled) && (
+          <motion.div variants={itemVariants} className="bg-surface rounded-2xl p-2 border border-app shadow-sm">
+            {onlineOrdersEnabled && (
+              <Link to="/tienda/pedidos" className="flex items-center justify-between px-3 py-3 hover:bg-surface-2 rounded-xl transition-all group active:scale-[0.99]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-surface border border-app text-app flex items-center justify-center group-hover:border-primary/30 group-hover:text-primary transition-all">
+                    <Package size={20} />
+                  </div>
+                  <div>
+                    <span className="font-bold text-sm text-app block">Mis Pedidos</span>
+                    <span className="text-[10px] text-muted font-medium">Ver historial y estados de entrega</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded-full">Historial</span>
+                  <ChevronRight size={18} className="text-muted group-hover:text-primary transition-all group-hover:translate-x-0.5" />
+                </div>
+              </Link>
+            )}
+            
+            {onlineOrdersEnabled && creditsEnabled && (
               <div className="h-[0.5px] bg-app/50 mx-2" />
+            )}
+            
+            {creditsEnabled && (
               <Link to="/tienda/creditos" className="flex items-center justify-between px-3 py-3 hover:bg-surface-2 rounded-xl transition-all group active:scale-[0.99]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-surface border border-app text-app flex items-center justify-center group-hover:border-primary/30 group-hover:text-primary transition-all">
@@ -191,9 +196,9 @@ export default function ClientProfile() {
                   <ChevronRight size={18} className="text-muted group-hover:text-primary transition-all group-hover:translate-x-0.5" />
                 </div>
               </Link>
-            </>
-          )}
-        </motion.div>
+            )}
+          </motion.div>
+        )}
 
         {/* ─── DESCARGAR APLICACIÓN ─────────────────────────────────────── */}
         {!isStandalone && (rawInstallable || isIOS) && (

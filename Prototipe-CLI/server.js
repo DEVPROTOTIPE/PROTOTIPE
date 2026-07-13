@@ -8688,6 +8688,32 @@ app.get('/api/project/drift', async (req, res) => {
       return res.status(404).json({ error: `No se encontró el directorio del Core de referencia: ${coreId}` });
     }
 
+    // Calcular diff individual bajo demanda para evitar congelar el event loop en el listado de drift
+    const { filePath } = req.query;
+    if (filePath) {
+      const normalizedPath = filePath.replace(/\\/g, '/');
+      const coreFileAbs = path.join(coreDir, normalizedPath);
+      const clientFileAbs = path.join(projectDir, normalizedPath);
+
+      if (!await fs.pathExists(coreFileAbs) || !await fs.pathExists(clientFileAbs)) {
+        return res.status(404).json({ error: `El archivo ${normalizedPath} no existe en el Core o en el Cliente.` });
+      }
+
+      const coreContent = await fs.readFile(coreFileAbs, 'utf-8');
+      const clientContent = await fs.readFile(clientFileAbs, 'utf-8');
+      const diffResult = Diff.diffLines(clientContent, coreContent);
+
+      return res.json({
+        success: true,
+        file: filePath,
+        diff: diffResult.map(part => ({
+          value: part.value,
+          added: part.added,
+          removed: part.removed
+        }))
+      });
+    }
+
     const coreFiles = await getFilesRecursively(coreDir);
     const clientFiles = await getFilesRecursively(projectDir);
 
@@ -8733,22 +8759,16 @@ app.get('/api/project/drift', async (req, res) => {
         } else {
           const coreContent = await fs.readFile(coreFile.absolutePath, 'utf-8');
           const clientContent = await fs.readFile(clientFile.absolutePath, 'utf-8');
-          
           if (coreFile.relativePath === 'index.html') {
             const normalizedCore = normalizeIndexHtmlForDiff(coreContent);
             const normalizedClient = normalizeIndexHtmlForDiff(clientContent);
             
             if (normalizedCore !== normalizedClient) {
-              const diffResult = Diff.diffLines(clientContent, coreContent);
               differences.push({
                 file: coreFile.relativePath,
                 status: 'modified',
                 message: 'El archivo HTML difiere estructuralmente de la plantilla del Core (excluyendo SEO/branding y scripts de cliente).',
-                diff: diffResult.map(part => ({
-                  value: part.value,
-                  added: part.added,
-                  removed: part.removed
-                }))
+                diff: null
               });
             } else {
               matchingCount++;
@@ -8758,16 +8778,11 @@ app.get('/api/project/drift', async (req, res) => {
             const normalizedClient = normalizeViteConfigForDiff(clientContent);
 
             if (normalizedCore !== normalizedClient) {
-              const diffResult = Diff.diffLines(clientContent, coreContent);
               differences.push({
                 file: coreFile.relativePath,
                 status: 'modified',
                 message: 'El archivo de configuración de Vite difiere estructuralmente de la plantilla del Core (excluyendo puertos y nombres de PWA).',
-                diff: diffResult.map(part => ({
-                  value: part.value,
-                  added: part.added,
-                  removed: part.removed
-                }))
+                diff: null
               });
             } else {
               matchingCount++;
@@ -8785,22 +8800,16 @@ app.get('/api/project/drift', async (req, res) => {
             }
           } else {
             if (coreContent !== clientContent) {
-              const diffResult = Diff.diffLines(clientContent, coreContent);
               differences.push({
                 file: coreFile.relativePath,
                 status: 'modified',
                 message: 'El archivo local difiere de la plantilla del Core.',
-                diff: diffResult.map(part => ({
-                  value: part.value,
-                  added: part.added,
-                  removed: part.removed
-                }))
+                diff: null
               });
             } else {
               matchingCount++;
             }
           }
-        }
       }
     }
 

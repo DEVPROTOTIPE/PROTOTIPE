@@ -37,19 +37,23 @@ const ALL_NAV_ITEMS = [
 export default function ClientLayout() {
   const location = useLocation()
   const isProductDetail = location.pathname.includes('/producto/')
-  const { appName, appIcon, creditsEnabled, couponsEnabled } = useAppConfigStore()
+  const { appName, appIcon, creditsEnabled, couponsEnabled, onlineOrdersEnabled } = useAppConfigStore()
   const { getCount, openCart, isOpen: isCartOpen } = useCartStore()
   const { user } = useAuthStore()
   const { subscribe, unsubscribe } = useFavoritesStore()
   const navigate = useNavigate()
 
   const navItemsRight = useMemo(() => {
-    return NAV_ITEMS_RIGHT.filter(item => item.path !== '/tienda/creditos' || creditsEnabled)
-  }, [creditsEnabled])
+    return NAV_ITEMS_RIGHT
+      .filter(item => item.path !== '/tienda/creditos' || creditsEnabled)
+      .filter(item => item.path !== '/tienda/pedidos' || onlineOrdersEnabled)
+  }, [creditsEnabled, onlineOrdersEnabled])
 
   const allNavItems = useMemo(() => {
-    return ALL_NAV_ITEMS.filter(item => item.path !== '/tienda/creditos' || creditsEnabled)
-  }, [creditsEnabled])
+    return ALL_NAV_ITEMS
+      .filter(item => item.path !== '/tienda/creditos' || creditsEnabled)
+      .filter(item => item.path !== '/tienda/pedidos' || onlineOrdersEnabled)
+  }, [creditsEnabled, onlineOrdersEnabled])
 
   const [isCouponsOpen, setIsCouponsOpen] = useState(false)
   const [toasts, setToasts] = useState([])
@@ -208,43 +212,45 @@ export default function ClientLayout() {
             </div>
           </div>
 
-          {/* Fila 2: Centro de Control / Panel Rápido (3 columnas uniformes) */}
-          <div className="grid grid-cols-3 gap-2 w-full mt-1">
+          {/* Fila 2: Centro de Control / Panel Rápido (columnas uniformes adaptativas) */}
+          <div className={`grid gap-2 w-full mt-1 ${onlineOrdersEnabled ? 'grid-cols-3' : 'grid-cols-2'}`}>
             {/* Carrito de Compras Permanente */}
-            <button
-              onClick={openCart}
-              className={`relative h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-xs w-full ${
-                cartCount > 0
-                  ? 'bg-primary/5 border-primary text-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.15)]'
-                  : 'bg-surface hover:bg-surface-2 border-app text-muted hover:text-app'
-              }`}
-              aria-label="Carrito de compras"
-            >
-              <motion.div
-                animate={
+            {onlineOrdersEnabled && (
+              <button
+                onClick={openCart}
+                className={`relative h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-xs w-full ${
                   cartCount > 0
-                    ? {
-                        scale: [1, 1.15, 1, 1.15, 1],
-                        rotate: [0, -8, 8, -8, 0],
-                      }
-                    : {}
-                }
-                transition={{
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                  duration: 2.5,
-                  ease: "easeInOut",
-                  repeatDelay: 3
-                }}
+                    ? 'bg-primary/5 border-primary text-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.15)]'
+                    : 'bg-surface hover:bg-surface-2 border-app text-muted hover:text-app'
+                }`}
+                aria-label="Carrito de compras"
               >
-                <ShoppingCart size={18} />
-              </motion.div>
-              {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-surface animate-bounce [animation-duration:3s]">
-                  {cartCount}
-                </span>
-              )}
-            </button>
+                <motion.div
+                  animate={
+                    cartCount > 0
+                      ? {
+                          scale: [1, 1.15, 1, 1.15, 1],
+                          rotate: [0, -8, 8, -8, 0],
+                        }
+                      : {}
+                  }
+                  transition={{
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    duration: 2.5,
+                    ease: "easeInOut",
+                    repeatDelay: 3
+                  }}
+                >
+                  <ShoppingCart size={18} />
+                </motion.div>
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-surface animate-bounce [animation-duration:3s]">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* Campana de notificaciones */}
             <div className="relative w-full">
@@ -481,41 +487,43 @@ export default function ClientLayout() {
               {/* Lado derecho: Botones de Acción (Grandes, centrados y alineados) */}
               <div className="flex items-center gap-2.5 h-full">
                 {/* Carrito de Compras */}
-                <button
-                  onClick={openCart}
-                  className={`relative w-10 h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-xs cursor-pointer ${
-                    cartCount > 0
-                      ? 'bg-white/20 border-white text-white shadow-sm'
-                      : 'bg-white/10 border-white/20 text-white/90 hover:bg-white/15'
-                  }`}
-                  aria-label="Carrito de compras"
-                >
-                  <motion.div
-                    className="flex items-center justify-center"
-                    animate={
+                {onlineOrdersEnabled && (
+                  <button
+                    onClick={openCart}
+                    className={`relative w-10 h-10 rounded-xl border flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-xs cursor-pointer ${
                       cartCount > 0
-                        ? {
-                            scale: [1, 1.12, 1, 1.12, 1],
-                            rotate: [0, -6, 6, -6, 0],
-                          }
-                        : {}
-                    }
-                    transition={{
-                      repeat: Infinity,
-                      repeatType: "reverse",
-                      duration: 2.5,
-                      ease: "easeInOut",
-                      repeatDelay: 3
-                    }}
+                        ? 'bg-white/20 border-white text-white shadow-sm'
+                        : 'bg-white/10 border-white/20 text-white/90 hover:bg-white/15'
+                    }`}
+                    aria-label="Carrito de compras"
                   >
-                    <ShoppingCart size={19} />
-                  </motion.div>
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center border-2 border-primary animate-bounce [animation-duration:3s]">
-                      {cartCount}
-                    </span>
-                  )}
-                </button>
+                    <motion.div
+                      className="flex items-center justify-center"
+                      animate={
+                        cartCount > 0
+                          ? {
+                              scale: [1, 1.12, 1, 1.12, 1],
+                              rotate: [0, -6, 6, -6, 0],
+                            }
+                          : {}
+                      }
+                      transition={{
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        duration: 2.5,
+                        ease: "easeInOut",
+                        repeatDelay: 3
+                      }}
+                    >
+                      <ShoppingCart size={19} />
+                    </motion.div>
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center border-2 border-primary animate-bounce [animation-duration:3s]">
+                        {cartCount}
+                      </span>
+                    )}
+                  </button>
+                )}
 
                 {/* Campana de Notificaciones */}
                 <motion.button
@@ -708,7 +716,7 @@ export default function ClientLayout() {
       )}
 
       {/* Insinuación Inteligente del Carrito Flotante (Inactividad) */}
-      {cartCount > 0 && (
+      {onlineOrdersEnabled && cartCount > 0 && (
         <SmartHint
           isInactive={isCartInactive}
           cartCount={cartCount}

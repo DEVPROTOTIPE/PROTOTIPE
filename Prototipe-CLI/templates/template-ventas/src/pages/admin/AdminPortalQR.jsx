@@ -19,6 +19,7 @@ import { PORTAL_CONFIG, COLLECTIONS } from '../../constants'
 import { subscribeToActiveSessions, subscribeToRecentLogs, getDayStats } from '../../services/accessLogService'
 import { subscribeToEmployees } from '../../services/employeeService'
 import BackButton from '../../components/ui/BackButton'
+import useAppConfigStore from '../../store/appConfigStore'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function formatDate(ts) {
@@ -335,9 +336,25 @@ function TabMonitoreo() {
 
 // ─── Página principal ─────────────────────────────────────────────────────────
 export default function AdminPortalQR() {
+  const rolesOperativosEnabled = useAppConfigStore(state => state.rolesOperativosEnabled)
   const [tab, setTab] = useState('qr')
   const [employees, setEmployees] = useState([])
   const baseUrl = window.location.origin
+
+  if (!rolesOperativosEnabled) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6 bg-surface rounded-3xl border border-app shadow-sm max-w-md mx-auto my-12 space-y-4">
+        <div className="w-16 h-16 rounded-2xl bg-amber-500/15 flex items-center justify-center text-amber-500">
+          <Shield size={32} className="animate-pulse" />
+        </div>
+        <h2 className="text-lg font-bold text-app">Módulo Desactivado</h2>
+        <p className="text-xs text-muted leading-relaxed">
+          La gestión de portales operativos y control de empleados se encuentra deshabilitada desde el panel de control central de la aplicación.
+        </p>
+        <BackButton />
+      </div>
+    )
+  }
 
   useEffect(() => {
     const unsub = subscribeToEmployees(setEmployees)

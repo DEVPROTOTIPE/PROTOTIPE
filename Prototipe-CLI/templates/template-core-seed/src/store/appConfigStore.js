@@ -91,6 +91,7 @@ const useAppConfigStore = create(
       creditsEnabled: true,
       couponsEnabled: true,
       rolesOperativosEnabled: false, // Sistema de Roles Operativos y Portales (módulo avanzado)
+      posExpressScanner: false,
       deliverySettings: {
         pickup: {
           enabled: true,

@@ -57,7 +57,23 @@ export default function PortalAuth() {
   const [secondsLeft, setSecondsLeft] = useState(0)
 
   const { setPortalEmployee } = usePortalStore()
-  const { appName, appIcon, hasMultipleEmployees } = useAppConfigStore()
+  const { appName, appIcon, hasMultipleEmployees, rolesOperativosEnabled } = useAppConfigStore()
+
+  if (!rolesOperativosEnabled) {
+    return (
+      <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center p-4">
+        <div className="relative bg-surface rounded-3xl shadow-2xl p-6 max-w-sm w-full flex flex-col items-center gap-4 text-center border border-[var(--color-border)]/50">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/15 flex items-center justify-center text-amber-500">
+            <Users size={32} className="animate-pulse" />
+          </div>
+          <h2 className="text-lg font-bold text-app">Portales Inactivos</h2>
+          <p className="text-xs text-muted leading-relaxed">
+            El ingreso a los portales de trabajo para empleados está deshabilitado temporalmente por el administrador.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   // Suscribirse a todos los empleados de la base de datos para filtrado condicional en el step 0
   useEffect(() => {

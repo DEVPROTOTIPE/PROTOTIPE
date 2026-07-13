@@ -1,7 +1,39 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import * as LucideIcons from 'lucide-react'
-const { LogOut, Bell, X, ShieldAlert, Store, QrCode } = LucideIcons
+import { 
+  LogOut, 
+  Bell, 
+  X, 
+  ShieldAlert, 
+  Store, 
+  QrCode, 
+  LayoutDashboard, 
+  Settings, 
+  HelpCircle, 
+  CreditCard, 
+  Truck, 
+  Package, 
+  ListOrdered, 
+  ShoppingCart 
+} from 'lucide-react'
+
+const LucideIcons = {
+  LogOut,
+  Bell,
+  X,
+  ShieldAlert,
+  Store,
+  QrCode,
+  LayoutDashboard,
+  Settings,
+  HelpCircle,
+  CreditCard,
+  Truck,
+  Package,
+  ListOrdered,
+  ShoppingCart
+}
+
 import { NavigationRegistry } from '../core/config/NavigationRegistry'
 import { PermissionRegistry } from '../core/auth/PermissionRegistry'
 import { signOut } from 'firebase/auth'
@@ -15,14 +47,13 @@ import NotificationHistoryTray from '../components/common/NotificationHistoryTra
 import NCToastContainer from '../components/common/NCToastContainer'
 
 import { useConnectivityStore } from '../store/connectivityStore'
-import { useLocation } from 'react-router-dom'
 
 const getIconComponent = (iconName) => {
   return LucideIcons[iconName] || LucideIcons.HelpCircle;
 };
 
 export default function AdminLayout() {
-  const { appName, appIcon, creditsEnabled } = useAppConfigStore()
+  const { appName, appIcon, creditsEnabled, claimsEnabled, rolesOperativosEnabled, onlineOrdersEnabled } = useAppConfigStore()
   const { logout, user } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
@@ -98,7 +129,6 @@ export default function AdminLayout() {
   }, [notifications])
 
   // Navegación adaptativa según feature flags de módulos y estado de conexión
-  // Navegación adaptativa según feature flags de módulos y estado de conexión
   const filteredNavItems = useMemo(() => {
     const role = user?.role || 'admin';
     const dynamicItems = NavigationRegistry.getAdminMenuForRole(role, PermissionRegistry)
@@ -123,9 +153,12 @@ export default function AdminLayout() {
     }
     return allItems.filter(item => {
       if (item.path.includes('credito') && !creditsEnabled) return false
+      if (item.path.includes('reclamos') && !claimsEnabled) return false
+      if ((item.path.includes('entregas') || item.path.includes('portales')) && !rolesOperativosEnabled) return false
+      if (item.path.includes('pedidos') && !onlineOrdersEnabled) return false
       return true
     })
-  }, [creditsEnabled, isOnline, user?.role])
+  }, [creditsEnabled, claimsEnabled, rolesOperativosEnabled, onlineOrdersEnabled, isOnline, user?.role])
 
   const handleLogout = async () => {
     try {

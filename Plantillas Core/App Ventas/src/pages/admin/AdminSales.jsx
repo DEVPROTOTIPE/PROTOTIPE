@@ -6,6 +6,7 @@ import LazyImage from '../../components/ui/LazyImage'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
+  Scan,
   ShoppingCart,
   User,
   Plus,
@@ -60,7 +61,7 @@ export default function AdminSales() {
   const { data: products = [], isLoading: loadingProducts } = useProducts(true)
   const { data: categories = [] } = useCategories()
   const { user: currentAdmin } = useAuthStore()
-  const { appName, appIcon, whatsappAdmin, bankInfo, bankInfo2, creditsEnabled } = useAppConfigStore()
+  const { appName, appIcon, whatsappAdmin, bankInfo, bankInfo2, creditsEnabled, posExpressScanner } = useAppConfigStore()
 
   // Respaldo de datos offline
   const [offlineProducts, setOfflineProducts] = useState([])
@@ -105,6 +106,7 @@ export default function AdminSales() {
   // Selector de Categorías y Buscador
   const [selectedCategory, setSelectedCategory] = useState('Todos')
   const [searchTerm, setSearchTerm] = useState('')
+  const [barcodeInput, setBarcodeInput] = useState('')
   const [activeTab, setActiveTab] = useState('products') // 'products' o 'cart' en mobile
   
   // Cliente
@@ -297,6 +299,86 @@ export default function AdminSales() {
       addToCart(product, variant, 1, setStockAlert)
     }
   }
+
+  const playBeep = (freq = 800, dur = 0.08) => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + dur);
+    } catch (e) {
+      console.warn('Audio Context block:', e.message);
+    }
+  };
+
+  const handleBarcodeSubmit = (e) => {
+    e.preventDefault();
+    const code = barcodeInput.trim();
+    if (!code) return;
+
+    let matchedProduct = null;
+    let matchedVariant = null;
+
+    for (const p of displayProducts) {
+      // 1. Buscar coincidencia exacta en las variantes (prioridad)
+      if (Array.isArray(p.variantes)) {
+        const foundVar = p.variantes.find(v => v.barcode === code || v.sku === code);
+        if (foundVar) {
+          matchedProduct = p;
+          matchedVariant = foundVar;
+          break;
+        }
+      }
+      // 2. Buscar coincidencia a nivel raíz si no se encontró en variantes
+      if (p.barcode === code || p.sku === code) {
+        matchedProduct = p;
+        matchedVariant = p.variantes?.[0] || null;
+        break;
+      }
+    }
+
+    if (matchedProduct) {
+      playBeep(880, 0.08); // Bip de éxito
+      
+      // Si se encontró variante específica por SKU, agregar esa variante directamente
+      if (matchedVariant) {
+        const stockNum = parseInt(matchedVariant.stock);
+        if (stockNum <= 0) {
+          setStockAlert({ 
+            title: 'Stock insuficiente', 
+            message: `La variante del producto "${matchedProduct.nombre}" no tiene stock disponible.` 
+          });
+          return;
+        }
+        addToCart(matchedProduct, matchedVariant, 1, setStockAlert);
+      } else if (hasMultipleVariants(matchedProduct)) {
+        setSelectedProductForModal(matchedProduct);
+      } else {
+        const defaultVariant = matchedProduct.variantes?.[0] || { id: 'default', stock: 9999, talla: null, color: null };
+        if (defaultVariant.stock <= 0) {
+          setStockAlert({ 
+            title: 'Stock insuficiente', 
+            message: `El producto "${matchedProduct.nombre}" no tiene stock disponible.` 
+          });
+          return;
+        }
+        addToCart(matchedProduct, defaultVariant, 1, setStockAlert);
+      }
+    } else {
+      playBeep(220, 0.25); // Sonido grave de error
+      setStockAlert({ 
+        title: 'Producto no encontrado', 
+        message: `El código de barras o SKU "${code}" no corresponde a ningún producto registrado.` 
+      });
+    }
+    setBarcodeInput('');
+  };
 
   const handleUpdateCartQty = (idx, delta) => {
     updateCartQty(idx, delta, setStockAlert)
@@ -624,24 +706,52 @@ export default function AdminSales() {
           {saleMode !== 'custom' && (
             <>
               <div className="bg-surface rounded-3xl p-5 border border-app shadow-sm space-y-4">
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted">
-                    <Search size={18} />
-                  </span>
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Escribe nombre, talla o color para buscar"
-                    className="w-full h-11 pl-10 pr-4 rounded-2xl bg-surface-2 border border-app text-sm text-app placeholder-muted focus:outline-none focus:border-primary transition-colors"
-                  />
-                  {searchTerm && (
-                    <button
-                      onClick={() => setSearchTerm('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-lg bg-surface-2 flex items-center justify-center text-muted hover:text-app"
-                    >
-                      <X size={14} />
-                    </button>
+                <div className={`grid ${posExpressScanner ? 'grid-cols-1 md:grid-cols-3 gap-3' : 'grid-cols-1'}`}>
+                  {/* Buscador normal */}
+                  <div className={`relative ${posExpressScanner ? 'md:col-span-2' : ''}`}>
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted">
+                      <Search size={18} />
+                    </span>
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Escribe nombre, talla o color para buscar"
+                      className="w-full h-11 pl-10 pr-4 rounded-2xl bg-surface-2 border border-app text-sm text-app placeholder-muted focus:outline-none focus:border-primary transition-colors"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-lg bg-surface-2 flex items-center justify-center text-muted hover:text-app"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Input de Escáner Dedicado */}
+                  {posExpressScanner && (
+                    <form onSubmit={handleBarcodeSubmit} className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-500 animate-pulse">
+                        <Scan size={18} />
+                      </span>
+                      <input
+                        type="text"
+                        value={barcodeInput}
+                        onChange={(e) => setBarcodeInput(e.target.value)}
+                        placeholder="Escanear código [Bip]"
+                        className="w-full h-11 pl-10 pr-4 rounded-2xl bg-surface-2 border border-emerald-500/20 focus:border-emerald-500 text-sm text-app placeholder-muted focus:outline-none transition-colors"
+                      />
+                      {barcodeInput && (
+                        <button
+                          type="button"
+                          onClick={() => setBarcodeInput('')}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-lg bg-surface-2 flex items-center justify-center text-muted hover:text-app"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </form>
                   )}
                 </div>
 
@@ -1137,7 +1247,7 @@ export default function AdminSales() {
                 <Package size={28} className="text-amber-500" />
               </div>
               <div className="text-center space-y-1">
-                <p className="text-sm font-bold text-app">Stock insuficiente</p>
+                <p className="text-sm font-bold text-app">{stockAlert.title || 'Stock insuficiente'}</p>
                 <p className="text-xs text-muted leading-relaxed">{stockAlert.message}</p>
               </div>
               <button
