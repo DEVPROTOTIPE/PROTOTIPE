@@ -1117,5 +1117,11 @@
       "appliedHash": "4466bdacca18c9d612b2c0277615ce8e62b5eefa26016c1b505a30e4b6f598ff",
       "lastSyncedAt": "2026-07-13T03:51:06.274Z"
     }
+  },
+  "featuresInstalled": {
+    "orders": {
+      "version": "1.0.0",
+      "installedAt": "2026-07-13T16:06:32.739Z"
+    }
   }
 }

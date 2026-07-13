@@ -1,0 +1,54 @@
+{
+  "generatorVersion": "1.0.0",
+  "registryVersion": "1.0.0",
+  "generatedAt": "2026-07-13T15:26:39.148Z",
+  "features": {
+    "sales": {
+      "id": "sales",
+      "enabledByDefault": true,
+      "legacyRemoteKeys": []
+    },
+    "inventory": {
+      "id": "inventory",
+      "enabledByDefault": true,
+      "legacyRemoteKeys": []
+    },
+    "orders": {
+      "id": "orders",
+      "enabledByDefault": true,
+      "legacyRemoteKeys": [
+        "onlineOrdersEnabled"
+      ]
+    },
+    "billing": {
+      "id": "billing",
+      "enabledByDefault": true,
+      "legacyRemoteKeys": []
+    },
+    "appointments": {
+      "id": "appointments",
+      "enabledByDefault": true,
+      "legacyRemoteKeys": []
+    },
+    "patients": {
+      "id": "patients",
+      "enabledByDefault": true,
+      "legacyRemoteKeys": []
+    },
+    "crm": {
+      "id": "crm",
+      "enabledByDefault": true,
+      "legacyRemoteKeys": []
+    },
+    "hello-module": {
+      "id": "hello-module",
+      "enabledByDefault": true,
+      "legacyRemoteKeys": []
+    },
+    "customer-loyalty": {
+      "id": "customer-loyalty",
+      "enabledByDefault": true,
+      "legacyRemoteKeys": []
+    }
+  }
+}

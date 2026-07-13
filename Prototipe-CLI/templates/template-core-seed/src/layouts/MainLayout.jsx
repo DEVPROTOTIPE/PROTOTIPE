@@ -6,7 +6,8 @@ import useUiStore from '../store/uiStore'
 import { signOutAdmin } from '../services/authService'
 import useAuthStore from '../store/authStore'
 import useAppConfigStore from '../store/appConfigStore'
-import { NavigationRegistry } from '../core/config/NavigationRegistry'
+import featureCatalog from '../core/generated/feature-catalog.generated.json'
+import { FeatureAvailabilityResolver } from '../core/features/featureAvailability'
 
 /**
  * MainLayout — Layout de administración central.
@@ -29,14 +30,36 @@ export default function MainLayout() {
     }
   }
 
-  // Menú dinámico inyectado por features + sección de Ajustes del Core
-  const dynamicItems = NavigationRegistry.getAdminMenu()
+  // Menú dinámico inyectado por catálogo de features + sección de Ajustes del Core
+  const isFeatureEnabled = useAppConfigStore((state) => state.isFeatureEnabled)
+  const featureFlags = useAppConfigStore((state) => state.featureFlags || {})
+
+  const dynamicItems = []
+  if (featureCatalog && Array.isArray(featureCatalog)) {
+    featureCatalog.forEach(feat => {
+      // Filtrar disponibilidades mediante el resolvedor centralizado
+      const isAvailable = isFeatureEnabled(feat.id) && FeatureAvailabilityResolver.canUseFeature(feat.id, {
+        featureFlags,
+        userPermissions: [],
+        tenantEntitlements: []
+      })
+
+      if (isAvailable && feat.navigation?.adminMenu) {
+        dynamicItems.push({
+          label: feat.navigation.adminMenu.label,
+          path: feat.navigation.adminMenu.path,
+          icon: feat.navigation.adminMenu.icon
+        })
+      }
+    })
+  }
+
   const menuItems = [
     ...dynamicItems,
     { label: 'Ajustes', path: '/admin', icon: 'Settings' }
   ]
 
-  const activeItem = menuItems.find(item => item.path === location.pathname) || menuItems[0]
+  const activeItem = menuItems.find(item => item.path === location.pathname) || { label: 'Administración', path: '/admin' }
 
   return (
     <div className="min-h-screen bg-app flex" style={{ color: 'var(--color-text)' }}>

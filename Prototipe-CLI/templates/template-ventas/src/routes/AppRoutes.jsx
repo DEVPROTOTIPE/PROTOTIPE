@@ -5,7 +5,8 @@ import { ROLES } from '../constants'
 import AppLoader from '../components/ui/AppLoader'
 import RequirePortalAuth from '../components/portal/RequirePortalAuth'
 import { ErrorBoundaryFallback } from '../components/ui/feedback/ErrorBoundaryFallback'
-import { FeatureRegistry } from '../core/config/FeatureRegistry'
+import useAppConfigStore from '../store/appConfigStore'
+import { getAvailableFeatureModules } from '../core/features/featureModuleLoader'
 
 // ─── Lazy loading de layouts y páginas del Core ────────────────────────────
 const WelcomePage = lazy(() => import('../pages/WelcomePage'))
@@ -21,8 +22,6 @@ const AdminClaims = lazy(() => import('../pages/admin/AdminClaims'))
 
 const ClientProfile = lazy(() => import('../pages/client/ClientProfile'))
 
-// Escaneo diferido de las rutas de todas las features
-const featureRoutesLoaders = import.meta.glob('../features/*/routes.jsx');
 
 // Guard de rutas por rol
 function RequireAuth({ children, allowedRole }) {
@@ -44,16 +43,21 @@ export default function AppRoutes() {
     async function loadActiveRoutes() {
       try {
         const list = [];
-        for (const path in featureRoutesLoaders) {
-          // Extrae el ID de la feature de forma dinámica e independiente de la profundidad de la ruta
-          const parts = path.split('/');
-          const featureId = parts[parts.length - 2] || 'unknown';
-          
-          if (FeatureRegistry.isEnabled(featureId)) {
-            const module = await featureRoutesLoaders[path]();
-            const key = `${featureId}Routes`;
-            if (module[key]) {
-              list.push(...module[key]);
+        const isFeatureEnabled = useAppConfigStore.getState().isFeatureEnabled;
+        const availableModules = getAvailableFeatureModules();
+
+        for (const featureId in availableModules) {
+          if (isFeatureEnabled(featureId)) {
+            const loader = availableModules[featureId];
+            const featureModule = await loader();
+
+            // Validar contrato de ID físico
+            if (featureModule?.id && featureModule.id !== featureId) {
+              console.warn(`[AppRoutes] Colisión técnica: El ID del manifiesto físico "${featureModule.id}" no coincide con el featureId del path "${featureId}"`);
+            }
+
+            if (featureModule?.routes && Array.isArray(featureModule.routes)) {
+              list.push(...featureModule.routes);
             }
           }
         }

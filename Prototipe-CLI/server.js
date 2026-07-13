@@ -14,6 +14,14 @@ import webpush from 'web-push';
 import { getWorkspaceRoot, getDocumentationRoot } from './config.js';
 import { logger } from './logger.js';
 import { FeatureRegistry } from './lib/FeatureRegistry.js';
+import { FeatureArtifactGenerator } from './lib/FeatureArtifactGenerator.js';
+import { initializeCliSecurityToken, loopbackOnlyMiddleware, authenticateCliToken } from './lib/SecurityMiddleware.js';
+import { FeatureDependencyGraph } from './lib/FeatureDependencyGraph.js';
+import { FeatureRequestValidator } from './lib/FeatureRequestValidator.js';
+import { WorkspaceLockManager } from './lib/WorkspaceLockManager.js';
+import { OperationJournalRepository, JOURNAL_STATES } from './lib/OperationJournalRepository.js';
+import { FeatureScaffolder } from './lib/FeatureScaffolder.js';
+import { FeatureVerificationRunner } from './lib/FeatureVerificationRunner.js';
 import { VersionManager } from './lib/VersionManager.js';
 import admin from 'firebase-admin';
 import { CorePromotionService } from './lib/CorePromotionService.js';
@@ -7524,7 +7532,12 @@ app.post('/api/project/features/add', async (req, res) => {
       await fs.writeJson(lockPath, lockData, { spaces: 2 });
     }
 
-    res.json({ success: true, message: `Feature "${featureId}" inyectada y registrada con éxito en la instancia.` });
+    // 4. Regenerar artefactos de catálogo y manifiestos en la instancia
+    const registryPath = path.join(__dirname, 'knowledge', 'feature-registry.json');
+    const generator = new FeatureArtifactGenerator(registryPath);
+    await generator.generate(projectDir);
+
+    res.json({ success: true, message: `Feature "${featureId}" inyectada, registrada y artefactos regenerados con éxito en la instancia.` });
   } catch (err) {
     res.status(500).json({ error: `Error al agregar feature: ${err.message}` });
   }
@@ -7560,9 +7573,211 @@ app.post('/api/project/features/remove', async (req, res) => {
       }
     }
 
-    res.json({ success: true, message: `Feature "${featureId}" removida con éxito de la instancia.` });
+    // 3. Regenerar artefactos de catálogo y manifiestos en la instancia
+    const registryPath = path.join(__dirname, 'knowledge', 'feature-registry.json');
+    const generator = new FeatureArtifactGenerator(registryPath);
+    await generator.generate(projectDir);
+
+    res.json({ success: true, message: `Feature "${featureId}" removida y artefactos regenerados con éxito de la instancia.` });
   } catch (err) {
     res.status(500).json({ error: `Error al remover feature: ${err.message}` });
+  }
+});
+
+// ==========================================
+// PORTAL DE FEATURES - ENDPOINTS TRANSACCIONALES
+// ==========================================
+
+// Helper para calcular hash del registry
+async function calculateRegistryHash() {
+  const regPath = path.join(__dirname, 'knowledge', 'feature-registry.json');
+  if (!(await fs.pathExists(regPath))) return '';
+  const data = await fs.readJson(regPath);
+  return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
+}
+
+// 1. GET /api/project/features/token - Obtener token activo (Protegido por IP Loopback únicamente)
+app.get('/api/project/features/token', loopbackOnlyMiddleware, async (req, res) => {
+  try {
+    const tokenPath = path.join(__dirname, '.prototipe', 'cli-token.json');
+    if (!(await fs.pathExists(tokenPath))) {
+      return res.status(500).json({ error: 'Token de loopback no inicializado en el servidor.' });
+    }
+    const tokenData = await fs.readJson(tokenPath);
+    res.json({ token: tokenData.token, expiresAt: tokenData.expiresAt });
+  } catch (err) {
+    res.status(500).json({ error: `Error al obtener token de seguridad: ${err.message}` });
+  }
+});
+
+// 2. POST /api/project/features/plan - Planificación y pre-validación de scaffolding
+app.post('/api/project/features/plan', loopbackOnlyMiddleware, authenticateCliToken, async (req, res) => {
+  try {
+    const payload = req.body;
+    const regPath = path.join(__dirname, 'knowledge', 'feature-registry.json');
+    const registry = await fs.readJson(regPath);
+    
+    // Validar el payload de creación
+    const validation = FeatureRequestValidator.validateCreateRequest(payload, registry.features);
+    if (!validation.valid) {
+      return res.status(validation.code === 'CONFLICT' ? 409 : 400).json({ error: validation.error });
+    }
+
+    const currentHash = await calculateRegistryHash();
+    const operationId = `op-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+
+    // Plan detallado de cambios físicos
+    const plan = [
+      { action: 'CREATE_DIR', path: `src/features/${payload.featureId}/` },
+      { action: 'CREATE_FILE', path: `src/features/${payload.featureId}/index.js` },
+      { action: 'CREATE_FILE', path: `src/features/${payload.featureId}/module.js` },
+      { action: 'CREATE_FILE', path: `src/features/${payload.featureId}/implementation.manifest.json` },
+      { action: 'CREATE_FILE', path: `src/features/${payload.featureId}/routes.jsx` },
+      { action: 'CREATE_FILE', path: `src/features/${payload.featureId}/security/feature-security.json` },
+      { action: 'CREATE_FILE', path: `src/features/${payload.featureId}/constants/index.js` },
+      { action: 'CREATE_FILE', path: `src/features/${payload.featureId}/schemas/schemas.js` },
+      { action: 'CREATE_FILE', path: `src/features/${payload.featureId}/api/repository.js` },
+      { action: 'CREATE_FILE', path: `src/features/${payload.featureId}/services/service.js` },
+      { action: 'CREATE_FILE', path: `src/features/${payload.featureId}/hooks/useFeature.js` },
+      { action: 'CREATE_FILE', path: `src/features/${payload.featureId}/components/AdminView.jsx` },
+      { action: 'CREATE_FILE', path: `src/features/${payload.featureId}/components/ClientView.jsx` },
+      { action: 'MODIFY_FILE', path: 'knowledge/feature-registry.json' },
+      { action: 'REGENERATE_ARTIFACTS', path: 'src/core/generated/' }
+    ];
+
+    // Registrar en el Journal la planificación en estado VALIDATING
+    await OperationJournalRepository.save(operationId, JOURNAL_STATES.VALIDATING, {
+      payload,
+      currentRegistryHash: currentHash,
+      plan
+    });
+
+    res.json({
+      success: true,
+      operationId,
+      currentRegistryHash: currentHash,
+      plan
+    });
+  } catch (err) {
+    res.status(500).json({ error: `Error al planificar feature: ${err.message}` });
+  }
+});
+
+// 3. POST /api/project/features/commit - Inyección transaccional y certificación en Workspace Candidato
+app.post('/api/project/features/commit', loopbackOnlyMiddleware, authenticateCliToken, async (req, res) => {
+  const { operationId, currentRegistryHash } = req.body;
+
+  if (!operationId || !currentRegistryHash) {
+    return res.status(400).json({ error: 'Parámetros operationId y currentRegistryHash son obligatorios.' });
+  }
+
+  // Cargar estado de la transacción del Journal
+  const journal = await OperationJournalRepository.get();
+  if (!journal || journal.operationId !== operationId) {
+    return res.status(404).json({ error: `No se encontró planificación activa para la operación "${operationId}".` });
+  }
+
+  // 1. Control de Concurrencia (Registry Hash Lock)
+  const freshHash = await calculateRegistryHash();
+  if (freshHash !== currentRegistryHash) {
+    await OperationJournalRepository.finalize(operationId, 'STALE_PLAN');
+    return res.status(409).json({
+      error: 'STALE_PLAN: El catálogo central de features ha cambiado desde la planificación de esta operación. Por favor re-genera el plan.'
+    });
+  }
+
+  try {
+    // 2. Adquirir bloqueo exclusivo físico del Monorepo
+    await WorkspaceLockManager.acquire(operationId);
+
+    // 3. Transicionar a STAGING y crear la estructura física en staging temporal
+    await OperationJournalRepository.save(operationId, JOURNAL_STATES.STAGING);
+    const stagingDir = path.join(__dirname, '.prototipe', 'staging', operationId);
+    
+    // Generar scaffold local de feature en staging
+    const payload = journal.metadata.payload;
+    await FeatureScaffolder.scaffold(stagingDir, payload);
+
+    // 4. Transicionar a VERIFYING_CONTRACTS y certificar build en el Workspace Candidato
+    await OperationJournalRepository.save(operationId, JOURNAL_STATES.VERIFYING_CONTRACTS);
+    
+    const verification = await FeatureVerificationRunner.verify(
+      operationId,
+      payload.featureId,
+      stagingDir,
+      payload
+    );
+
+    if (!verification.success) {
+      // Registrar el fallo de la compilación en el Journal (FAILED_NEEDS_MANUAL_REVIEW)
+      await OperationJournalRepository.save(operationId, JOURNAL_STATES.FAILED_NEEDS_MANUAL_REVIEW, {
+        error: verification.error,
+        buildOutput: verification.buildOutput
+      });
+      
+      // Liberar el lock
+      await WorkspaceLockManager.release(operationId);
+      
+      return res.status(422).json({
+        success: false,
+        error: 'Verificación de compilación fallida en el workspace candidato. Cambios revertidos.',
+        details: verification.error
+      });
+    }
+
+    // 5. Build exitoso -> Transicionar a COMMITTING e inyectar cambios reales en el monorepo
+    await OperationJournalRepository.save(operationId, JOURNAL_STATES.COMMITTING);
+
+    // Copiar la carpeta física de la feature al Core base y a la plantilla de CLI
+    const realAppVentasFeaturePath = path.join(__dirname, '..', 'Plantillas Core', 'App Ventas', 'src', 'features', payload.featureId);
+    const templateCliFeaturePath = path.join(__dirname, 'templates', 'template-ventas', 'src', 'features', payload.featureId);
+
+    await fs.copy(stagingDir, realAppVentasFeaturePath);
+    await fs.copy(stagingDir, templateCliFeaturePath);
+
+    // Registrar en el feature-registry.json central
+    const regPath = path.join(__dirname, 'knowledge', 'feature-registry.json');
+    const registry = await fs.readJson(regPath);
+    registry.features.push({
+      id: payload.featureId,
+      displayName: payload.displayName,
+      version: payload.version || '1.0.0',
+      category: payload.category || 'commerce',
+      description: payload.description || '',
+      dependencies: payload.dependencies || [],
+      tags: payload.tags || [],
+      status: 'stable'
+    });
+    await fs.writeJson(regPath, registry, { spaces: 2 });
+
+    // 6. Regenerar artefactos locales reales (Manifiesto, Catálogo y Defaults)
+    const generator = new FeatureArtifactGenerator(regPath);
+    
+    const realAppVentasRoot = path.join(__dirname, '..', 'Plantillas Core', 'App Ventas');
+    const templateCliRoot = path.join(__dirname, 'templates', 'template-ventas');
+    
+    await generator.generate(realAppVentasRoot);
+    await generator.generate(templateCliRoot);
+
+    // Limpiar staging temporal
+    await fs.remove(stagingDir);
+
+    // 7. Liberar el lock y finalizar transacción
+    await WorkspaceLockManager.release(operationId);
+    await OperationJournalRepository.finalize(operationId, 'SUCCESS');
+
+    res.json({
+      success: true,
+      message: `Feature "${payload.featureId}" creada, inyectada y compilada con éxito en el monorepo.`
+    });
+
+  } catch (err) {
+    console.error(`[Commit] Error en la operación ${operationId}:`, err);
+    await OperationJournalRepository.save(operationId, JOURNAL_STATES.FAILED_NEEDS_MANUAL_REVIEW, {
+      error: err.message
+    });
+    await WorkspaceLockManager.release(operationId);
+    res.status(500).json({ error: `Error transaccional al inyectar feature: ${err.message}` });
   }
 });
 
@@ -8810,6 +9025,7 @@ app.get('/api/project/drift', async (req, res) => {
               matchingCount++;
             }
           }
+        }
       }
     }
 
@@ -15290,6 +15506,13 @@ app.post('/api/project/firebase/cors-setup', async (req, res) => {
 });
 
 async function startServer(port) {
+  try {
+    await initializeCliSecurityToken();
+  } catch (err) {
+    console.error('❌ Error crítico al inicializar el token de seguridad loopback:', err.message);
+    process.exit(1);
+  }
+
   const server = app.listen(port, '127.0.0.1', () => {
     // Paleta de colores ANSI
     const c = {

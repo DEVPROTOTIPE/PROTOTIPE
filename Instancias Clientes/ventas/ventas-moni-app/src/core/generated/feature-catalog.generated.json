@@ -1,0 +1,188 @@
+{
+  "generatorVersion": "1.0.0",
+  "registryVersion": "1.0.0",
+  "generatedAt": "2026-07-13T16:06:32.741Z",
+  "features": [
+    {
+      "id": "sales",
+      "displayName": "Punto de Venta POS",
+      "description": "Módulo de cobro en punto de venta con soporte offline y scanner de códigos de barras.",
+      "category": "commerce",
+      "tags": [
+        "pos",
+        "caja",
+        "venta",
+        "scanner",
+        "código de barras",
+        "tienda"
+      ],
+      "navigation": {
+        "adminMenu": [
+          {
+            "label": "Vender (POS)",
+            "path": "/admin/ventas",
+            "icon": "ShoppingCart"
+          }
+        ],
+        "clientMenu": []
+      }
+    },
+    {
+      "id": "inventory",
+      "displayName": "Inventario de Productos",
+      "description": "Control de stock en tiempo real, alertas de bajo stock, categorías y variantes de productos.",
+      "category": "logistics",
+      "tags": [
+        "inventario",
+        "stock",
+        "bodega",
+        "almacén",
+        "producto",
+        "catálogo"
+      ],
+      "navigation": {
+        "adminMenu": [
+          {
+            "label": "Inventario",
+            "path": "/admin/inventario",
+            "icon": "Package"
+          }
+        ],
+        "clientMenu": []
+      }
+    },
+    {
+      "id": "orders",
+      "displayName": "Pedidos y Domicilios",
+      "description": "Gestión de pedidos en línea, estados de entrega, geolocalización y notificaciones de repartidores.",
+      "category": "logistics",
+      "tags": [
+        "pedido",
+        "order",
+        "tracking",
+        "seguimiento",
+        "domicilio",
+        "delivery",
+        "reparto"
+      ],
+      "navigation": {
+        "adminMenu": [
+          {
+            "label": "Pedidos",
+            "path": "/admin/pedidos",
+            "icon": "ListOrdered"
+          }
+        ],
+        "clientMenu": [
+          {
+            "label": "Mis Pedidos",
+            "path": "/tienda/pedidos"
+          }
+        ]
+      }
+    },
+    {
+      "id": "billing",
+      "displayName": "Facturación Electrónica DIAN",
+      "description": "Facturación fiscal electrónica, generación de facturas XML, cálculo de comisiones e integración DIAN.",
+      "category": "finance",
+      "tags": [
+        "factura",
+        "comisión",
+        "invoice",
+        "billing",
+        "dian",
+        "pdf",
+        "recaudo"
+      ],
+      "navigation": {
+        "adminMenu": [],
+        "clientMenu": []
+      }
+    },
+    {
+      "id": "appointments",
+      "displayName": "Agenda y Reservas de Turnos",
+      "description": "Calendario de citas interactivo con recordatorios por WhatsApp y asignación de profesionales.",
+      "category": "services",
+      "tags": [
+        "agenda",
+        "reserva",
+        "cita",
+        "calendario",
+        "fecha",
+        "whatsapp"
+      ],
+      "navigation": {
+        "adminMenu": [],
+        "clientMenu": []
+      }
+    },
+    {
+      "id": "patients",
+      "displayName": "Historial Clínico e Historial de Pacientes",
+      "description": "Gestión del historial clínico de pacientes, firmas de conformidad y control de tratamientos médicos.",
+      "category": "services",
+      "tags": [
+        "paciente",
+        "historial",
+        "clinica",
+        "firma",
+        "consentimiento",
+        "tratamiento"
+      ],
+      "navigation": {
+        "adminMenu": [],
+        "clientMenu": []
+      }
+    },
+    {
+      "id": "crm",
+      "displayName": "Gestión de Relaciones con Clientes (CRM)",
+      "description": "Seguimiento de prospectos, base de datos unificada de clientes, histórico de transacciones y deudas pendientes.",
+      "category": "management",
+      "tags": [
+        "crm",
+        "clientes",
+        "deudas",
+        "créditos",
+        "seguimiento"
+      ],
+      "navigation": {
+        "adminMenu": [],
+        "clientMenu": []
+      }
+    },
+    {
+      "id": "hello-module",
+      "displayName": "Hello Module",
+      "description": "Módulo minimalista de smoke test y validación del pipeline transaccional de features.",
+      "category": "utility",
+      "tags": [
+        "smoke-test",
+        "dummy"
+      ],
+      "navigation": {
+        "adminMenu": [],
+        "clientMenu": []
+      }
+    },
+    {
+      "id": "customer-loyalty",
+      "displayName": "Fidelización de Clientes",
+      "description": "Módulo de fidelización que permite administrar puntos, niveles, recompensas e historial de transacciones por cliente.",
+      "category": "commerce",
+      "tags": [
+        "loyalty",
+        "crm",
+        "rewards",
+        "points",
+        "clientes"
+      ],
+      "navigation": {
+        "adminMenu": [],
+        "clientMenu": []
+      }
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import { getCentralFirestore } from '../services/centralFirebaseService'
 import useAppConfigStore from '../store/appConfigStore'
 import useAuthStore from '../store/authStore'
 import { appConfigSchema } from '../schemas/appConfigSchema'
+import manifest from '../core/generated/core-manifest.generated.json'
 
 // Variables de entorno del cliente
 const CLIENT_ID = import.meta.env.VITE_DEVELOPER_CLIENT_ID
@@ -146,19 +147,36 @@ export default function useAppConfigSync() {
             const centralFlags = data.flags || {}
             
             const flagsUpdate = {
-              ...(centralFlags.creditsEnabled !== undefined && { creditsEnabled: Boolean(centralFlags.creditsEnabled) }),
-              ...(centralFlags.couponsEnabled !== undefined && { couponsEnabled: Boolean(centralFlags.couponsEnabled) }),
-              ...(centralFlags.claimsEnabled !== undefined && { claimsEnabled: Boolean(centralFlags.claimsEnabled) }),
-              ...(centralFlags.deliveryEnabled !== undefined && { rolesOperativosEnabled: Boolean(centralFlags.deliveryEnabled) }),
-              ...(centralFlags.posExpressScanner !== undefined && { posExpressScanner: Boolean(centralFlags.posExpressScanner) }),
-              ...(centralFlags.onlineOrdersEnabled !== undefined && { onlineOrdersEnabled: Boolean(centralFlags.onlineOrdersEnabled) }),
-              // wholesaleEnabled controla el sub-objeto wholesaleSettings.enabled
-              ...(centralFlags.wholesaleEnabled !== undefined && {
-                wholesaleSettings: {
-                  ...useAppConfigStore.getState().wholesaleSettings,
-                  enabled: Boolean(centralFlags.wholesaleEnabled)
+              featureFlags: {
+                ...useAppConfigStore.getState().featureFlags
+              }
+            }
+
+            manifest.featureFlags.forEach(flag => {
+              const primaryKey = flag.remoteKey || flag.id
+              let value = centralFlags[primaryKey]
+
+              if (value === undefined && flag.legacyRemoteKeys) {
+                for (const legacyKey of flag.legacyRemoteKeys) {
+                  if (centralFlags[legacyKey] !== undefined) {
+                    value = centralFlags[legacyKey]
+                    break
+                  }
                 }
-              }),
+              }
+
+              if (value !== undefined) {
+                const boolValue = Boolean(value)
+                flagsUpdate.featureFlags[flag.id] = boolValue
+                flagsUpdate[flag.id] = boolValue
+              }
+            })
+
+            if (centralFlags.wholesaleEnabled !== undefined) {
+              flagsUpdate.wholesaleSettings = {
+                ...useAppConfigStore.getState().wholesaleSettings,
+                enabled: Boolean(centralFlags.wholesaleEnabled)
+              }
             }
             
             // Almacenar en la referencia

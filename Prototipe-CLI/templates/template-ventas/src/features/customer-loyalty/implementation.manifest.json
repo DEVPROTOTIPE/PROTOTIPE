@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "featureId": "customer-loyalty",
+  "displayName": "Fidelización de Clientes",
+  "version": "1.0.0",
+  "entry": "./module.js",
+  "dependencies": ["crm","sales"],
+  "navigation": {
+    "adminMenu": [
+      {
+        "label": "Fidelización de Clientes",
+        "path": "/admin/customer-loyalty",
+        "icon": "HelpCircle",
+        "permissionRequired": "customer-loyalty.read"
+      }
+    ],
+    "clientMenu": [
+      {
+        "label": "Mis Fidelización de Clientes",
+        "path": "/tienda/customer-loyalty"
+      }
+    ]
+  }
+}

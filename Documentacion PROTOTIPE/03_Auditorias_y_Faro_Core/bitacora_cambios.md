@@ -1,5 +1,164 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-488 — 2026-07-13
+**Feature & Architecture: Actualización de Documentación de Arquitectura de Features SaaS y Portal de Gestión**
+
+### Cambios realizados:
+1. **Documentación:** Incorporada la Sección 10 completa en el manual consolidado, detallando el propósito, arquitectura general (con diagrama Mermaid de flujo), el feature-registry.json como fuente de verdad, el sistema de feature flags dinámicas en Zustand/Firestore (Build-Time vs Runtime), la validación de contratos, scaffolding, transaccionabilidad de CLI, aislamiento SaaS y el caso real de la feature `customer-loyalty`.
+2. **Mapa de Documentación:** Actualizado el mapa de documentación semántico para reflejar que el manual absoluto incorpora la nueva Sección 10 sobre Features SaaS.
+
+### Archivos modificados:
+- [`d:/PROTOTIPE/Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/07_Manuales_Desarrollo/manual_y_auditoria_completa_prototipe_2026.md) [MODIFY]
+- [`d:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md) [MODIFY]
+
+---
+
+## CLI-487 — 2026-07-13
+**Feature & Architecture: Implementación de Lógica Comercial y Vistas de "customer-loyalty"**
+
+### Cambios realizados:
+1. **Lógica de Persistencia y Reglas de Negocio:** Desarrollado el servicio comercial `CustomerLoyaltyService.js` con soporte para transacciones atómicas en Firestore (`runTransaction`) para acumulación (`earnPoints`) y canjes (`redeemPoints`) de puntos, previniendo saldos negativos y colisiones.
+2. **Seguridad en Códigos QR:** Implementado un sistema de tokens QR opacos de un solo uso en `CustomerLoyaltyService.js` que genera identificadores temporales guardados en `loyaltyTokens` y los consume tras su validación, eliminando la vulnerabilidad del QR base64 plano anterior.
+3. **Validación de Datos:** Definido el archivo `CustomerLoyaltySchemas.js` usando esquemas Zod robustos para tipar y validar las cuentas, transacciones y configuraciones del cliente.
+4. **Interfaces de Usuario y Hooks:** Creados los componentes de interfaz `ClientView.jsx` (tarjeta de puntos premium, código QR reactivo autogenerado y cuenta atrás) y `AdminView.jsx` (panel de caja, buscador de clientes y formularios transaccionales) consumiendo el hook unificado `useCustomerLoyalty.js` con listener en vivo.
+5. **Certificación de Build:** Ejecutado y validado el build final de producción (`npm run build`) del core de App Ventas con éxito (0 fallos).
+
+---
+
+## CLI-486 — 2026-07-13
+**Feature & Architecture: Aprovisionamiento y Scaffolding de la Feature Comercial Real "customer-loyalty"**
+
+### Cambios realizados:
+1. **Scaffolding de Feature (App Ventas):** Aprovisionado el scaffold físico completo de 12 archivos estructurados de la feature comercial real `customer-loyalty` bajo `src/features/customer-loyalty/` (manifest, module, index, routes, api/repository, services/service, hooks/useFeature, schemas/schemas, constants/index, security/feature-security y vistas de administrador y cliente).
+2. **Registro de Features (Prototipe-CLI):** Declarado el identificador, metadatos y dependencias reales (`crm`, `sales`) de la feature `customer-loyalty` en el catálogo central `knowledge/feature-registry.json`.
+3. **Pipeline transaccional y Staging:** Ejecutado y validado el plan de inyección candidate con Vite (`op-1783956340414-8a267c7b`) resolviendo e instalando la dependencia NPM `qrcode.react` en caliente.
+
+### Archivos modificados:
+- [`d:/PROTOTIPE/Prototipe-CLI/knowledge/feature-registry.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/feature-registry.json) [MODIFY]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/features/customer-loyalty/implementation.manifest.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/customer-loyalty/implementation.manifest.json) [NEW]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/features/customer-loyalty/module.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/customer-loyalty/module.js) [NEW]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/features/customer-loyalty/index.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/customer-loyalty/index.js) [NEW]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/features/customer-loyalty/routes.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/customer-loyalty/routes.jsx) [NEW]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/features/customer-loyalty/schemas/CustomerLoyaltySchemas.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/customer-loyalty/schemas/CustomerLoyaltySchemas.js) [NEW]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/features/customer-loyalty/api/CustomerLoyaltyRepository.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/customer-loyalty/api/CustomerLoyaltyRepository.js) [NEW]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/features/customer-loyalty/services/CustomerLoyaltyService.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/customer-loyalty/services/CustomerLoyaltyService.js) [NEW]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/features/customer-loyalty/hooks/useCustomerLoyalty.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/customer-loyalty/hooks/useCustomerLoyalty.js) [NEW]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/features/customer-loyalty/components/AdminCustomerLoyalty.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/customer-loyalty/components/AdminCustomerLoyalty.jsx) [NEW]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/features/customer-loyalty/components/CustomerCustomerLoyalty.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/customer-loyalty/components/CustomerCustomerLoyalty.jsx) [NEW]
+
+---
+
+## CLI-485 — 2026-07-13
+**Feature & Architecture: Modularización de Feature Loader en Core Seed y Estabilización Multiplataforma de Scaffolding**
+
+### Cambios realizados:
+1. **Feature Loader y Disponibilidad (template-core-seed):** Implementado el resolvedor centralizado de disponibilidad de features (`featureAvailability.js`) y el cargador dinámico perezoso (`featureModuleLoader.js`) en la plantilla core semilla. Generados los manifiestos dinámicos del core base, catálogo de features y valores por defecto.
+2. **Plantilla de Scaffolding (Prototipe-CLI/templates/feature-scaffold/):** Corregido el bug en `routes.jsx`, `hooks/useFeature.js` y `services/service.js` donde las importaciones estaban fijas en vez de utilizar el token dinámico de scaffolding `{{pascalName}}`.
+3. **Persistencia Física (Prototipe-CLI/templates/feature-scaffold/api/repository.js):** Actualizada la importación del SDK de Firebase para usar el alias global de importación `@/config/firebaseConfig`, eliminando errores de rutas relativas anidadas.
+4. **Subproceso de Compilación (Prototipe-CLI/lib/FeatureVerificationRunner.js):** Corregido el bug de Windows que lanzaba `spawn EINVAL` al invocar `npm.cmd` activando `shell: isWin` nativamente en el entorno.
+
+### Archivos modificados:
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/core/features/featureModuleLoader.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/core/features/featureModuleLoader.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/core/features/featureAvailability.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/core/features/featureAvailability.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/core/generated/core-manifest.generated.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/core/generated/core-manifest.generated.json) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/core/generated/feature-defaults.generated.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/core/generated/feature-defaults.generated.json) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/core/generated/feature-catalog.generated.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/src/core/generated/feature-catalog.generated.json) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/routes.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/routes.jsx) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/hooks/useFeature.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/hooks/useFeature.js) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/services/service.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/services/service.js) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/api/repository.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/api/repository.js) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/FeatureVerificationRunner.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/FeatureVerificationRunner.js) [MODIFY]
+
+---
+
+## CLI-484 — 2026-07-13
+**Feature: Scaffolding, Transaccionabilidad y Asistente Wizard en Portal de Features (Fases 1, 2, 3, 4 y 5)**
+
+### Cambios realizados:
+1. **Plantillas de Scaffolding (Prototipe-CLI/templates/feature-scaffold/):** Diseñadas las plantillas atómicas desacopladas de 12 archivos que componen una feature portable (entry, module, manifest, routes, security, constants, schemas, repository, service, hook y vistas UI de admin y cliente).
+2. **FeatureScaffolderSchemas (Prototipe-CLI/lib/):** Diseñadas las validaciones Zod estrictas para implementation.manifest.json y security/feature-security.json, asegurando aislamiento multi-tenant obligatorio.
+3. **Backend Transaccional (Prototipe-CLI/lib/):** Creadas las clases FeatureRequestValidator (colisiones), FeatureDependencyGraph (detección de ciclos con DFS), WorkspaceLockManager (bloqueos físicos monorepo.lock), OperationJournalRepository (estados journal y logs históricos) y FeatureVerificationRunner (certificación del build mediante Vite en Workspace Candidato temporal).
+4. **Seguridad Loopback (Prototipe-CLI/lib/):** Implementado SecurityMiddleware.js para restringir peticiones a la IP loopback (127.0.0.1) y verificar la cabecera criptográfica rotativa X-Prototipe-CLI-Token.
+5. **API de Features (Prototipe-CLI/server.js):** Integrada la inicialización del token de seguridad y expuestos los endpoints transaccionales /token, /plan y /commit.
+6. **FeatureMarketplaceView.jsx (dev-dashboard):** Rediseñada la interfaz de features agregando el Asistente Wizard de 6 pasos con stepper interactivo de transacciones, visor de Prompt Maestro hidratado y logs en vivo de compilación.
+
+### Archivos modificados:
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/index.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/index.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/module.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/module.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/implementation.manifest.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/implementation.manifest.json) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/routes.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/routes.jsx) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/security/feature-security.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/security/feature-security.json) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/constants/index.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/constants/index.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/schemas/schemas.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/schemas/schemas.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/api/repository.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/api/repository.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/services/service.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/services/service.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/hooks/useFeature.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/hooks/useFeature.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/components/AdminView.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/components/AdminView.jsx) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/components/ClientView.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/feature-scaffold/components/ClientView.jsx) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/FeatureScaffolderSchemas.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/FeatureScaffolderSchemas.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/FeatureDependencyGraph.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/FeatureDependencyGraph.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/FeatureRequestValidator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/FeatureRequestValidator.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/WorkspaceLockManager.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/WorkspaceLockManager.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/OperationJournalRepository.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/OperationJournalRepository.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/FeatureScaffolder.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/FeatureScaffolder.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/FeatureVerificationRunner.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/FeatureVerificationRunner.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/SecurityMiddleware.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/SecurityMiddleware.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureMarketplaceView.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureMarketplaceView.jsx) [MODIFY]
+- [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx) [MODIFY]
+- [`d:/PROTOTIPE/Documentacion PROTOTIPE/09_Modulos_Completos/propuesta_portal_creacion_features.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/09_Modulos_Completos/propuesta_portal_creacion_features.md) [MODIFY]
+- [`d:/PROTOTIPE/Documentacion PROTOTIPE/06_Biblioteca_Componentes/README.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/06_Biblioteca_Componentes/README.md) [MODIFY]
+
+---
+
+## CLI-483 — 2026-07-13
+**Feature: Cargador Modular de Features y Generador de Artefactos de Catálogo (Fases 0B y 0C)**
+
+### Cambios realizados:
+1. **`featureModuleLoader.js` (App Ventas y template-ventas):** Creado el cargador unificado de módulos lazy utilizando `import.meta.glob` de Vite. Valida que el featureId del entrypoint coincida con el ID del directorio para evitar desvíos físicos.
+2. **`AppRoutes.jsx` (App Ventas y template-ventas):** Integrado `featureModuleLoader.js` para registrar dinámicamente las rutas de cada feature activa leyendo Zustand `isFeatureEnabled(featureId)`.
+3. **`AdminLayout.jsx` & `ClientLayout.jsx` (App Ventas y template-ventas):** Desacoplados completamente los menús del bundle físico de código. Ahora renderizan el sidebar leyendo del catálogo ligero de solo lectura `feature-catalog.generated.json` filtrados en runtime por Zustand `isFeatureEnabled`.
+4. **`FeatureArtifactGenerator.js` (Prototipe-CLI/lib/):** Implementado el compilador que traduce el registry central canónico `feature-registry.json` a manifiesto, catálogo y defaults de configuración, e integrado en los endpoints de aprovisionamiento de la CLI.
+5. **`run_artifact_generator.js` (Prototipe-CLI/):** Creado el script de utilidad CLI para compilaciones y builds estáticos.
+
+### Archivos modificados:
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/core/features/featureModuleLoader.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/core/features/featureModuleLoader.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/core/features/featureModuleLoader.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/core/features/featureModuleLoader.js) [NEW]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/routes/AppRoutes.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/routes/AppRoutes.jsx) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/routes/AppRoutes.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/routes/AppRoutes.jsx) [MODIFY]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/layouts/AdminLayout.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/AdminLayout.jsx) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/layouts/AdminLayout.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/layouts/AdminLayout.jsx) [MODIFY]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/layouts/ClientLayout.jsx`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/ClientLayout.jsx) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/layouts/ClientLayout.jsx`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/layouts/ClientLayout.jsx) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/FeatureArtifactGenerator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/FeatureArtifactGenerator.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/run_artifact_generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/run_artifact_generator.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+---
+
+## CLI-482 — 2026-07-13
+**Refactor: Inicialización Dinámica y Namespace de Feature Flags (Zustand, Zod y Sync)**
+
+### Cambios realizados:
+1. **`core-manifest.generated.json` (App Ventas y template-ventas):** Creado el artefacto JSON generado como fuente única de verdades técnicas de inicialización. Renombrada la flag `deliveryEnabled` a `rolesOperativosEnabled` e inyectadas sus respectivas `legacyRemoteKeys` y propiedades.
+2. **`appConfigStore.js` (App Ventas y template-ventas):** Refactorizado el store de Zustand para inicializar dinámicamente las flags leyendo el manifiesto autogenerado. Introducido el sub-objeto `featureFlags` para estructurar la persistencia de las flags en `localStorage` (versión 3 del persist), manteniendo las variables planas en la raíz del store para conservar compatibilidad hacia atrás completa sin romper componentes. Implementados los helpers `setFeatureFlag()`, `replaceFeatureFlags()` e `isFeatureEnabled()`, además de un método `merge` para sanear flags obsoletas en caliente al rehidratar.
+3. **`appConfigSchema.js` (App Ventas y template-ventas):** Eliminada la declaración cableada de flags. Ahora se construye `featureFlagsSchema` dinámicamente con Zod desestructurando el manifiesto. Creado el helper `parseRuntimeFeatureFlags(input)` para normalizar entradas `undefined` / `null` a `{}` antes de invocar el parseo, aplicando los valores por defecto sin causar excepciones.
+4. **`useAppConfigSync.js` (App Ventas y template-ventas):** Refactorizado el hook de sincronización con Firestore Central. Se reemplazó el bloque de asignación estática por un mapeador iterativo que recorre el manifiesto dinámico, resuelves las claves remotas (`remoteKey` y aliases heredados `legacyRemoteKeys[]`) y actualiza Zustand reactivamente.
+
+### Archivos modificados:
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/core-manifest.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/core-manifest.json) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/core-manifest.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/core-manifest.json) [MODIFY]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/core/generated/core-manifest.generated.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/core/generated/core-manifest.generated.json) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/core/generated/core-manifest.generated.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/core/generated/core-manifest.generated.json) [NEW]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js) [MODIFY]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/schemas/appConfigSchema.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/schemas/appConfigSchema.js) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/schemas/appConfigSchema.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/schemas/appConfigSchema.js) [MODIFY]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+
+---
+
 ## CLI-481 — 2026-07-13
 **Limpieza: Eliminación de flags fantasma commissionsEnabled y enableDianBilling de ambos manifests**
 

@@ -1,3 +1,16 @@
+<!-- {
+  "type": "service",
+  "name": "Portal de Creación de Features",
+  "technicalName": "feature-creation-portal",
+  "category": "Core",
+  "description": "Especificación arquitectónica del Portal de Features de PROTOTIPE",
+  "dependencies": {
+    "npm": {},
+    "internal": []
+  },
+  "targetPath": "Prototipe-CLI/server.js"
+} -->
+
 # Propuesta de Arquitectura: Portal de Creación y Scaffolding de Features
 
 Este documento establece las especificaciones técnicas para transformar la vista **Feature Marketplace & Registry** del Dashboard de Desarrollo en una herramienta activa de creación de módulos (Features) portables y agnósticos en el ecosistema PROTOTIPE.

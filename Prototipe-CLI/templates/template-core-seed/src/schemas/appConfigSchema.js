@@ -1,6 +1,26 @@
 import { z } from 'zod'
+import manifest from '../core/generated/core-manifest.generated.json'
 
-export const appConfigSchema = z.object({
+// Construir la forma dinámica de feature flags a partir del catálogo modular generado
+const dynamicFeatureFlagsShape = {};
+if (manifest && manifest.features) {
+  Object.keys(manifest.features).forEach(flagId => {
+    const flag = manifest.features[flagId];
+    dynamicFeatureFlagsShape[flagId] = z.boolean().default(flag.defaultConfiguration?.enabled ?? false);
+  });
+}
+
+// Esquema de Feature Flags (Namespace estructurado)
+export const featureFlagsSchema = z.object(dynamicFeatureFlagsShape).default({});
+export const strictFeatureFlagsSchema = z.strictObject(dynamicFeatureFlagsShape);
+
+// Helper para parsear de forma compatible en runtime
+export function parseRuntimeFeatureFlags(input) {
+  return featureFlagsSchema.parse(input ?? {});
+}
+
+// Esquema base sin flags estáticas (desacoplado y modular)
+const baseConfigShape = {
   appName: z.string().default('Mi Tienda'),
   sellerName: z.string().default('Vendedor'),
   appIcon: z.string().nullable().default(null),
@@ -13,8 +33,6 @@ export const appConfigSchema = z.object({
   pwaUseBrandIcon: z.boolean().default(false),
   activeSeasonalEvent: z.string().default('none'),
   whatsappAdmin: z.string().default(''),
-  claimsEnabled: z.boolean().default(false),
-  orderTrackingEnabled: z.boolean().default(true),
   trackingWaTemplate: z.string().default(''),
   
   appPromo: z.object({
@@ -76,9 +94,6 @@ export const appConfigSchema = z.object({
   guidedModeEnabled: z.boolean().default(true),
   loginTrustMessage: z.string().default(''),
   slogan: z.string().default(''),
-  creditsEnabled: z.boolean().default(true),
-  couponsEnabled: z.boolean().default(true),
-  rolesOperativosEnabled: z.boolean().default(false),
 
   deliverySettings: z.object({
     pickup: z.object({
@@ -141,4 +156,10 @@ export const appConfigSchema = z.object({
   deactivationReason: z.string().default(''),
   maintenanceMode: z.boolean().default(false),
   degradedMode: z.boolean().default(false)
-})
+};
+
+// Combinar la base con las flags en namespace (para consistencia de appConfigStore)
+export const appConfigSchema = z.object({
+  ...baseConfigShape,
+  featureFlags: featureFlagsSchema
+});

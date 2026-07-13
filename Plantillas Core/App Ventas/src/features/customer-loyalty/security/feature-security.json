@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "featureId": "customer-loyalty",
+  "firestore": {
+    "collections": [
+      {
+        "path": "tenants/{tenantId}/customer-loyalty/{documentId}",
+        "readPermissions": ["customer-loyalty.read"],
+        "createPermissions": ["customer-loyalty.write"],
+        "updatePermissions": ["customer-loyalty.write"],
+        "deletePermissions": [],
+        "requiredFields": ["createdAt"],
+        "immutableFields": ["createdAt"]
+      }
+    ],
+    "indexes": [
+      {
+        "collectionGroup": "customer-loyalty",
+        "fields": [
+          { "fieldPath": "createdAt", "order": "DESCENDING" }
+        ]
+      }
+    ]
+  }
+}

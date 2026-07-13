@@ -7,6 +7,7 @@ import { getCentralFirestore } from '../services/centralFirebaseService'
 import useAppConfigStore from '../store/appConfigStore'
 import useAuthStore from '../store/authStore'
 import { appConfigSchema } from '../schemas/appConfigSchema'
+import coreManifest from '../core/generated/core-manifest.generated.json'
 
 // Variables de entorno del cliente
 const CLIENT_ID = import.meta.env.VITE_DEVELOPER_CLIENT_ID
@@ -138,16 +139,43 @@ export default function useAppConfigSync() {
             // automáticamente al config/settings local de la instancia.
             const centralFlags = data.flags || {}
             
-            // Feature Flags centrales mapeadas al esquema local
             const flagsUpdate = {
-              ...(centralFlags.creditsEnabled !== undefined && { creditsEnabled: Boolean(centralFlags.creditsEnabled) }),
-              ...(centralFlags.couponsEnabled !== undefined && { couponsEnabled: Boolean(centralFlags.couponsEnabled) }),
-              ...(centralFlags.claimsEnabled !== undefined && { claimsEnabled: Boolean(centralFlags.claimsEnabled) }),
-              ...(centralFlags.deliveryEnabled !== undefined && { rolesOperativosEnabled: Boolean(centralFlags.deliveryEnabled) }),
-              ...(centralFlags.posExpressScanner !== undefined && { posExpressScanner: Boolean(centralFlags.posExpressScanner) }),
+              featureFlags: {
+                ...useAppConfigStore.getState().featureFlags
+              }
+            }
+
+            if (coreManifest && coreManifest.features) {
+              Object.keys(coreManifest.features).forEach(flagId => {
+                const flag = coreManifest.features[flagId];
+                const primaryKey = flag.remoteKey || flagId;
+                let value = centralFlags[primaryKey];
+
+                if (value === undefined && flag.legacyRemoteKeys) {
+                  for (const legacyKey of flag.legacyRemoteKeys) {
+                    if (centralFlags[legacyKey] !== undefined) {
+                      value = centralFlags[legacyKey];
+                      break;
+                    }
+                  }
+                }
+
+                if (value !== undefined) {
+                  const boolValue = Boolean(value);
+                  flagsUpdate.featureFlags[flagId] = boolValue;
+                  flagsUpdate[flagId] = boolValue; // Para compatibilidad plana
+                }
+              });
+            }
+
+            if (centralFlags.wholesaleEnabled !== undefined) {
+              flagsUpdate.wholesaleSettings = {
+                ...useAppConfigStore.getState().wholesaleSettings,
+                enabled: Boolean(centralFlags.wholesaleEnabled)
+              };
             }
             
-            latestCentralFlagsRef.current = flagsUpdate
+            latestCentralFlagsRef.current = flagsUpdate;
 
             // 3. Sincronización silenciosa de tarifas de cobro desde el CRM central
             // Si el desarrollador actualizó los parámetros de billing, se propagan

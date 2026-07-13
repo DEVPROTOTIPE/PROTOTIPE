@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "featureId": "{{featureId}}",
+  "displayName": "{{displayName}}",
+  "version": "{{version}}",
+  "entry": "./module.js",
+  "dependencies": {{dependencies}},
+  "navigation": {
+    "adminMenu": [
+      {
+        "label": "{{displayName}}",
+        "path": "/admin/{{featureId}}",
+        "icon": "{{icon}}",
+        "permissionRequired": "{{featureId}}.read"
+      }
+    ],
+    "clientMenu": [
+      {
+        "label": "Mis {{displayName}}",
+        "path": "/tienda/{{featureId}}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "featureId": "hello-module",
+  "displayName": "Hello Module",
+  "version": "1.0.0",
+  "entry": "./module.js",
+  "dependencies": [],
+  "navigation": {
+    "adminMenu": [
+      {
+        "label": "Hello Module",
+        "path": "/admin/hello-module",
+        "icon": "HelpCircle",
+        "permissionRequired": "hello-module.read"
+      }
+    ],
+    "clientMenu": [
+      {
+        "label": "Mis Hello Module",
+        "path": "/tienda/hello-module"
+      }
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "onlineOrdersEnabled",
+    "displayName": "Pedidos Online",
+    "category": "commerce",
+    "description": "Permite recibir pedidos online y gestionar carrito.",
+    "version": "1.0.0",
+    "navigation": {
+      "adminMenu": {
+        "label": "Pedidos",
+        "path": "/admin/orders",
+        "icon": "ShoppingBag"
+      },
+      "clientMenu": {
+        "label": "Mis Pedidos",
+        "path": "/tienda/orders"
+      }
+    }
+  }
+]

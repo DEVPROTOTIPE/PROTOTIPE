@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "featureId": "{{featureId}}",
+  "firestore": {
+    "collections": [
+      {
+        "path": "tenants/{tenantId}/{{featureId}}/{documentId}",
+        "readPermissions": ["{{featureId}}.read"],
+        "createPermissions": ["{{featureId}}.write"],
+        "updatePermissions": ["{{featureId}}.write"],
+        "deletePermissions": [],
+        "requiredFields": ["createdAt"],
+        "immutableFields": ["createdAt"]
+      }
+    ],
+    "indexes": [
+      {
+        "collectionGroup": "{{featureId}}",
+        "fields": [
+          { "fieldPath": "createdAt", "order": "DESCENDING" }
+        ]
+      }
+    ]
+  }
+}

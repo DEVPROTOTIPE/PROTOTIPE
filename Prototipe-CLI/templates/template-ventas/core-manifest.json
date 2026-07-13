@@ -29,7 +29,9 @@
       "default": false
     },
     {
-      "id": "deliveryEnabled",
+      "id": "rolesOperativosEnabled",
+      "remoteKey": "rolesOperativosEnabled",
+      "legacyRemoteKeys": ["deliveryEnabled"],
       "label": "Gestión de Empleados & Domicilios",
       "description": "Habilita la creación de empleados, accesos QR a portales de trabajo (caja, bodega, mensajería) y seguimiento de entregas.",
       "default": false

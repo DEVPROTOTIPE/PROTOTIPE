@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "featureId": "hello-module",
+  "firestore": {
+    "collections": [
+      {
+        "path": "tenants/{tenantId}/hello-module/{documentId}",
+        "readPermissions": ["hello-module.read"],
+        "createPermissions": ["hello-module.write"],
+        "updatePermissions": ["hello-module.write"],
+        "deletePermissions": [],
+        "requiredFields": ["createdAt"],
+        "immutableFields": ["createdAt"]
+      }
+    ],
+    "indexes": [
+      {
+        "collectionGroup": "hello-module",
+        "fields": [
+          { "fieldPath": "createdAt", "order": "DESCENDING" }
+        ]
+      }
+    ]
+  }
+}

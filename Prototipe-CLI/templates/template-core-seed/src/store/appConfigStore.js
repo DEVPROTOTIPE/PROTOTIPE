@@ -1,5 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import coreManifest from '../core/generated/core-manifest.generated.json'
+
+// Desestructurar e inicializar dinámicamente el diccionario de flags del Core Seed
+const initialFeatureFlags = {};
+if (coreManifest && coreManifest.features) {
+  Object.keys(coreManifest.features).forEach(flagId => {
+    initialFeatureFlags[flagId] = coreManifest.features[flagId].defaultConfiguration?.enabled ?? false;
+  });
+}
 
 /**
  * Store de configuración de la aplicación.
@@ -39,8 +48,7 @@ const useAppConfigStore = create(
       pwaUseBrandIcon: false,    // Usar logo de la tienda como ícono PWA (con fondo)
       activeSeasonalEvent: getPersistedValue('activeSeasonalEvent', 'none'), // Evento estacional activo ('none', 'navidad', 'halloween', 'madre', 'padre')
       whatsappAdmin: '',
-      claimsEnabled: false,
-      orderTrackingEnabled: true,
+      featureFlags: getPersistedValue('featureFlags', initialFeatureFlags),  // Namespace unificado de feature flags modulares
       trackingWaTemplate: '',
       appPromo: {
         enabled: false,
@@ -88,10 +96,12 @@ const useAppConfigStore = create(
       guidedModeEnabled: true, // Toggle global de asistencia
       loginTrustMessage: '',  // Mensaje de confianza personalizable
       slogan: '',             // Eslogan de la tienda (aparece debajo del logo en login)
-      creditsEnabled: true,
-      couponsEnabled: true,
-      rolesOperativosEnabled: false, // Sistema de Roles Operativos y Portales (módulo avanzado)
-      posExpressScanner: false,
+      
+      // Helper para verificar el estado de una feature flag encapsulada
+      isFeatureEnabled: (featureId) => {
+        // En Zustand, dentro de la callback de set/get podemos consultar el estado actual
+        return initialFeatureFlags[featureId] !== undefined;
+      },
       deliverySettings: {
         pickup: {
           enabled: true,
@@ -212,6 +222,18 @@ const useAppConfigStore = create(
         }
         return persistedState
       },
+      merge: (persistedState, currentState) => {
+        // Combinación elástica para LocalStorage: previene drifts asíncronos si se agregan nuevas flags en caliente al manifiesto
+        const mergedFeatureFlags = {
+          ...initialFeatureFlags,
+          ...(persistedState?.featureFlags || {})
+        };
+        return {
+          ...currentState,
+          ...persistedState,
+          featureFlags: mergedFeatureFlags
+        };
+      },
       partialize: (state) => ({
         appName: state.appName,
         appIcon: state.appIcon,
@@ -234,14 +256,10 @@ const useAppConfigStore = create(
         deliverySettings: state.deliverySettings,
         wholesaleSettings: state.wholesaleSettings,
         whatsappAdmin: state.whatsappAdmin,
-        claimsEnabled: state.claimsEnabled,
-        orderTrackingEnabled: state.orderTrackingEnabled,
+        featureFlags: state.featureFlags,
         trackingWaTemplate: state.trackingWaTemplate,
         appPromo: state.appPromo,
         developerPhone: state.developerPhone,
-        creditsEnabled: state.creditsEnabled,
-        couponsEnabled: state.couponsEnabled,
-        rolesOperativosEnabled: state.rolesOperativosEnabled,
         adminRegistered: state.adminRegistered,
         maintenanceMode: state.maintenanceMode,
         commercialOptimization: state.commercialOptimization,

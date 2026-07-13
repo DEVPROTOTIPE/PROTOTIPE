@@ -10,12 +10,12 @@ app_layout:
   Prototipe_CLI:
     root: /Prototipe-CLI/
     core_scripts: [server.js, generator.js, worker_create_project.js, sync_clients.js, notification_server.js, scripts/validate-knowledge.js, scripts/test_promotion_pipeline.js, scripts/test_robustness_specials.js, scripts/test_bridge_health.js, scripts/test_smoke_visual.js, scripts/test_firestore_emulator.js, scripts/test_multiplatform.js, scripts/run_full_certification.js, scripts/distribute_rules.js, scripts/firebase_account_manager.js, scripts/update_moni_github.js, scripts/prune_drifts_local.js, scripts/link_tasks_local.js, scripts/test_status.js, scripts/test_link.js]
-    templates: [templates/template-ventas/, templates/template-core-seed/]
+    templates: [templates/template-ventas/, templates/template-core-seed/, templates/feature-scaffold/]
     knowledge: [knowledge/core-promotion/, knowledge/firestore/, knowledge/telemetry/app-registry.json, knowledge/telemetry/event-types.json, knowledge/feature-registry.json, knowledge/schema/]
-    lib: [lib/CoreCandidateBuilder.js, lib/CorePromotionValidator.js, lib/BriefingDocumentMapper.js, lib/PromotionBlueprintBuilder.js, lib/CorePromotionService.js, lib/CorePromotionPublisher.js, lib/ClientLineageMigrator.js, lib/FeatureRegistry.js, lib/VersionManager.js, lib/CapabilityResolver.js, lib/FeatureRecommender.js, lib/ExplainabilityLogger.js, lib/PackageMerger.js, lib/ProvisioningValidator.js, lib/BlueprintSimulation.js, lib/ExperienceComposer.js, lib/BiResolver.js, lib/ProvisioningStateManager.js, lib/ProvisioningQueue.js]
+    lib: [lib/CoreCandidateBuilder.js, lib/CorePromotionValidator.js, lib/BriefingDocumentMapper.js, lib/PromotionBlueprintBuilder.js, lib/CorePromotionService.js, lib/CorePromotionPublisher.js, lib/ClientLineageMigrator.js, lib/FeatureRegistry.js, lib/VersionManager.js, lib/CapabilityResolver.js, lib/FeatureRecommender.js, lib/ExplainabilityLogger.js, lib/PackageMerger.js, lib/ProvisioningValidator.js, lib/BlueprintSimulation.js, lib/ExperienceComposer.js, lib/BiResolver.js, lib/ProvisioningStateManager.js, lib/ProvisioningQueue.js, lib/FeatureScaffolderSchemas.js, lib/FeatureDependencyGraph.js, lib/FeatureRequestValidator.js, lib/WorkspaceLockManager.js, lib/OperationJournalRepository.js, lib/FeatureScaffolder.js, lib/FeatureVerificationRunner.js, lib/SecurityMiddleware.js]
   Plantilla_Core:
     root: /Plantillas Core/App Ventas/src/
-    layers: [features/, components/, services/, hooks/, constants/, store/]
+    layers: [features/, components/, services/, hooks/, constants/, store/, core/generated/]
     rules: [/Plantillas Core/App Ventas/firestore.rules, /Plantillas Core/App Ventas/firestore.indexes.json]
   Instancias_Clientes:
     root: /Instancias Clientes/
@@ -361,6 +361,8 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Prototipe-CLI/scripts/test_support/normalize_result.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-451).
 * **`/Prototipe-CLI/scripts/test_support/network_guard.mjs`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-451).
 * **`/Prototipe-CLI/scripts/test_characterization_record.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-451).
+* **`/Prototipe-CLI/lib/FeatureArtifactGenerator.js`**: Generador de manifiestos, catálogo y defaults a partir del registry de features (Fase 0C).
+* **`/Prototipe-CLI/run_artifact_generator.js`**: Script de utilidad para regenerar artefactos locales (Fase 0C).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/FloatingPromoGrenadeSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-359).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/common/FloatingPromoGrenade.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-359).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/InteractiveFortuneCookieSandbox.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea COMP-360).
@@ -401,31 +403,6 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Plantillas Core/App Ventas/src/services/orderService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-010).
 * **`/Plantillas Core/App Ventas/src/schemas/inventorySchemas.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-010).
 * **`/Plantillas Core/App Ventas/src/schemas/appConfigSchema.js`**: Esquema de validación Zod con fallbacks automáticos para configuraciones Firestore (Tarea CORE-328).
-* **`/Plantillas Core/App Ventas/src/components/client/catalog/ProductCard.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-011).
-* **`/Plantillas Core/App Ventas/src/services/centralFirebaseService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-016).
-* **`/Prototipe-CLI/templates/template-core-seed/src/App.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-018).
-* **`/Prototipe-CLI/templates/template-core-seed/src/hooks/useAppConfigSync.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-018).
-* **`/Prototipe-CLI/templates/template-ventas/src/App.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-018).
-* **`/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-018).
-* **`/Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-018).
-* **`/Plantillas Core/App Ventas/src/hooks/useColorContrast.js`**: Hook para calcular dinámicamente contraste de textos en botones sobre fondos HSL cromáticos (Tarea CORE-328).
-* **`/Prototipe-CLI/plantillas_registro.json`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
-* **`/Prototipe-CLI/config.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
-* **`/Prototipe-CLI/templates/template-core-seed/src/services/centralFirebaseService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
-* **`/Prototipe-CLI/templates/template-core-seed/src/core/experience/ExperienceSchemas.js`**: Esquemas de validación estricta Zod de la experiencia (Fase 7).
-* **`/Prototipe-CLI/templates/template-core-seed/src/core/experience/ExperienceResolver.js`**: Traductor lógico de briefing a especificación de UX (Fase 7).
-* **`/Prototipe-CLI/templates/template-core-seed/src/core/permissions/PermissionRegistry.js`**: Registro centralizado de roles y capacidades (Fase 7).
-* **`/Prototipe-CLI/templates/template-core-seed/src/core/config/ComponentRegistry.js`**: Registro central de inyección y gobernanza de componentes React (Fase 7).
-* **`/Prototipe-CLI/templates/template-core-seed/src/core/config/PatternRegistry.js`**: Registro de patrones de interacción de alto nivel (Fase 7).
-* **`/Prototipe-CLI/templates/template-core-seed/src/core/dashboard/DashboardComposer.js`**: Compositor dinámico de la interfaz Bento del dashboard (Fase 7).
-* **`/Prototipe-CLI/templates/template-core-seed/src/core/experience/ExperienceRegistry.js`**: Orquestador central de bootstrap y branding visual (Fase 7).
-* **`/Prototipe-CLI/templates/template-core-seed/src/core/eventbus/EventBus.js`**: Bus de eventos centralizado para comunicación desacoplada entre features (Fase 8).
-* **`/Prototipe-CLI/templates/template-core-seed/src/core/events/EventRegistry.js`**: Registro y esquema de validación de contratos de eventos de la plataforma (Fase 8).
-* **`/Prototipe-CLI/templates/template-core-seed/src/components/admin/settings/DeveloperDiagnosticsModal.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
-* **`/Prototipe-CLI/templates/template-core-seed/src/services/appConfigService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
-* **`/Prototipe-CLI/templates/template-core-seed/src/store/appConfigStore.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
-* **`/Prototipe-CLI/templates/template-core-seed/src/hooks/useBilling.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
-* **`/Prototipe-CLI/templates/template-core-seed/src/services/billingService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
 * **`/Prototipe-CLI/templates/template-core-seed/src/constants/index.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-020).
 * **`/Prototipe-CLI/templates/template-core-seed/src/features/billing/index.js`**: Stub de compilación que exporta un suscriptor no-op `subscribeToBillingData` para resolver dependencias cuando la feature no se aprovisiona (Tarea CLI-438).
 * **`/Central PROTOTIPE/dev-dashboard/src/services/pdfService.js`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-023).
@@ -681,6 +658,8 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/src/components/ui/BackgroundCanvas.jsx`** (Template Core Seed): Componente de renderizado de fondos dinámicos interactivos (mallas fluidas Mesh Gradient, auroras y partículas flotantes aceleradas por GPU) compatible con dirección fluida en 4 ejes, opacidades graduables y formas vectoriales personalizadas procedimentales (círculos, glow, estrellas e iconos SVG por nicho). [MODIFY]
 * **`/src/components/ui/particlesIcons.js`** (Template Core Seed): Biblioteca premium y organizada con 110 iconos vectoriales de Lucide distribuidos en 11 categorías temáticas para partículas flotantes personalizadas del lienzo. [NEW]
 * **`/src/components/ui/InteractiveTiltCard.jsx`** (Template Core Seed): Tarjeta interactiva con inclinación física 3D y brillo holográfico (Glare) optimizada para aceleración por hardware. [NEW]
+* **`/src/features/customer-loyalty/module.js`** (Core v2.8): Manifiesto de feature de fidelización comercial de clientes. [NEW] Tarea CLI-488.
+* **`/src/features/customer-loyalty/services/CustomerLoyaltyService.js`** (Core v2.8): Lógica transaccional de acumulación y canje de puntos de fidelidad. [NEW] Tarea CLI-488.
 * **`/src/core/kernel/ApplicationKernel.js`** (Core v2.7): Bootstrap y orquestador centralizado de la carga lineal de features activas. [NEW] Tarea CLI-378.
 * **`/src/core/kernel/FeatureLifecycleManager.js`** (Core v2.7): Máquina de estados finitos que valida transiciones de ciclo de vida en runtime. [NEW] Tarea CLI-378.
 * **`/src/core/kernel/FeatureHealthManager.js`** (Core v2.7): Administrador de diagnóstico de salud operativa en runtime. [NEW] Tarea CLI-378.
@@ -726,3 +705,4 @@ graph TD
 * **Escritura en `products`**: Requiere rol administrativo y sesión iniciada (`request.auth != null`).
 * **Escritura en `orders`**: Permitida para clientes públicos. Descuenta stock atómicamente al instante mediante transacciones (`runTransaction`).
 * **Créditos (`credits`)**: Cuando un pedido pasa a estado `credito_aprobado`, el backend atómico descuenta el stock y genera de forma automática la cuenta de cobro correspondiente en la colección de créditos.
+* **Portal de Features SaaS (Sección 10)**: Documentado en el manual absolute bajo el sprint documental de features, centralizando la gobernanza del `feature-registry.json` y el ciclo de scaffolding transaccional en la CLI.

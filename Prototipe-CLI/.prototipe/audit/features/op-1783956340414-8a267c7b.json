@@ -1,0 +1,121 @@
+{
+  "operationId": "op-1783956340414-8a267c7b",
+  "action": "FEATURE_CREATED",
+  "featureId": "customer-loyalty",
+  "user": "developer",
+  "timestamp": "2026-07-13T15:26:39.155Z",
+  "result": "SUCCESS",
+  "metadata": {
+    "payload": {
+      "featureId": "customer-loyalty",
+      "displayName": "Fidelización de Clientes",
+      "version": "1.0.0",
+      "category": "commerce",
+      "description": "Módulo de fidelización que permite administrar puntos, niveles, recompensas e historial de transacciones por cliente.",
+      "compatibleIndustries": [
+        "retail_clothing",
+        "grocery_food",
+        "distribuidoras-beauty",
+        "licores-cocteleria"
+      ],
+      "dependencies": [
+        "crm",
+        "sales"
+      ],
+      "npmDependencies": {
+        "qrcode.react": "^3.1.0"
+      },
+      "defaultConfiguration": {
+        "pointsPerCurrency": 0.01,
+        "pointsExpiryMonths": 12,
+        "minPointsToRedeem": 100
+      },
+      "tags": [
+        "loyalty",
+        "crm",
+        "rewards",
+        "points",
+        "clientes"
+      ],
+      "navigation": {
+        "adminMenu": [
+          {
+            "label": "Fidelización",
+            "path": "/admin/customer-loyalty",
+            "icon": "HeartHandshake"
+          }
+        ],
+        "clientMenu": [
+          {
+            "label": "Mis Puntos",
+            "path": "/tienda/loyalty",
+            "icon": "Gift"
+          }
+        ]
+      }
+    },
+    "currentRegistryHash": "7a04ff7319391b17a508e0f698e77b0847461c0a40b8358bb731cf2d360966c5",
+    "plan": [
+      {
+        "action": "CREATE_DIR",
+        "path": "src/features/customer-loyalty/"
+      },
+      {
+        "action": "CREATE_FILE",
+        "path": "src/features/customer-loyalty/index.js"
+      },
+      {
+        "action": "CREATE_FILE",
+        "path": "src/features/customer-loyalty/module.js"
+      },
+      {
+        "action": "CREATE_FILE",
+        "path": "src/features/customer-loyalty/implementation.manifest.json"
+      },
+      {
+        "action": "CREATE_FILE",
+        "path": "src/features/customer-loyalty/routes.jsx"
+      },
+      {
+        "action": "CREATE_FILE",
+        "path": "src/features/customer-loyalty/security/feature-security.json"
+      },
+      {
+        "action": "CREATE_FILE",
+        "path": "src/features/customer-loyalty/constants/index.js"
+      },
+      {
+        "action": "CREATE_FILE",
+        "path": "src/features/customer-loyalty/schemas/schemas.js"
+      },
+      {
+        "action": "CREATE_FILE",
+        "path": "src/features/customer-loyalty/api/repository.js"
+      },
+      {
+        "action": "CREATE_FILE",
+        "path": "src/features/customer-loyalty/services/service.js"
+      },
+      {
+        "action": "CREATE_FILE",
+        "path": "src/features/customer-loyalty/hooks/useFeature.js"
+      },
+      {
+        "action": "CREATE_FILE",
+        "path": "src/features/customer-loyalty/components/AdminView.jsx"
+      },
+      {
+        "action": "CREATE_FILE",
+        "path": "src/features/customer-loyalty/components/ClientView.jsx"
+      },
+      {
+        "action": "MODIFY_FILE",
+        "path": "knowledge/feature-registry.json"
+      },
+      {
+        "action": "REGENERATE_ARTIFACTS",
+        "path": "src/core/generated/"
+      }
+    ]
+  }
+}

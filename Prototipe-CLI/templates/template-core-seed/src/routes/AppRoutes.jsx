@@ -1,9 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState, useEffect } from 'react'
 import AppLoader from '../components/ui/AppLoader'
 import ProtectedRoute from '../components/common/ProtectedRoute'
 import MainLayout from '../layouts/MainLayout'
-import { NavigationRegistry } from '../core/config/NavigationRegistry'
+import useAppConfigStore from '../store/appConfigStore'
+import { FeatureModuleLoader } from '../core/features/featureModuleLoader'
+import { FeatureAvailabilityResolver } from '../core/features/featureAvailability'
 
 // ─── Lazy loading de páginas Core ───────────────────────────────────────────
 const WelcomePage = lazy(() => import('../pages/WelcomePage'))
@@ -16,11 +18,49 @@ const NotFoundPage = lazy(() => import('../pages/NotFoundPage'))
  * Inyecta dinámicamente las rutas registradas por las features activas en runtime.
  */
 export default function AppRoutes() {
-  const allRoutes = NavigationRegistry.getAllRoutes()
+  const [activeFeatures, setActiveFeatures] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function initFeatures() {
+      try {
+        const isFeatureEnabled = useAppConfigStore.getState().isFeatureEnabled
+        const featureFlags = useAppConfigStore.getState().featureFlags || {}
+
+        // Encontrar qué features están habilitadas en Zustand
+        const enabledIds = Object.keys(featureFlags).filter(id => isFeatureEnabled(id))
+
+        // Cargar los módulos correspondientes resolviendo importaciones lazy
+        const loaded = await FeatureModuleLoader.loadActiveFeatures(enabledIds)
+        
+        // Filtrar disponibilidades avanzadas (RBAC, licencias, beta) mediante el resolvedor
+        const validated = loaded.filter(feat => {
+          return FeatureAvailabilityResolver.canUseFeature(feat.id, {
+            featureFlags,
+            // En el seed inicial, el contexto de permisos/licencias se puede expandir aquí
+            userPermissions: [],
+            tenantEntitlements: []
+          })
+        })
+
+        setActiveFeatures(validated)
+      } catch (err) {
+        console.error('[AppRoutes] Error al inicializar módulos dinámicos:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    initFeatures()
+  }, [])
+
+  if (loading) return <AppLoader />
+
+  // Recopilar rutas dinámicas aportadas por las features
+  const featuresRoutes = activeFeatures.flatMap(feat => feat.routes || [])
 
   // Separar las rutas de administración de las rutas del portal de cliente/públicas
-  const adminRoutes = allRoutes.filter(r => r.path && r.path.startsWith('/admin/'))
-  const clientRoutes = allRoutes.filter(r => r.path && !r.path.startsWith('/admin/'))
+  const adminRoutes = featuresRoutes.filter(r => r.path && r.path.startsWith('/admin/'))
+  const clientRoutes = featuresRoutes.filter(r => r.path && !r.path.startsWith('/admin/'))
 
   return (
     <Suspense fallback={<AppLoader />}>
