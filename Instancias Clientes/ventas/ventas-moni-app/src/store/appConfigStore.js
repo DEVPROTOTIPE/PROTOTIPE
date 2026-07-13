@@ -1,15 +1,50 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import manifest from '../core/generated/core-manifest.generated.json'
+import { getNormalizedFeatures } from '../utils/featureManifestAdapter'
 
-/**
- * Store de configuración de la aplicación.
- * Refleja en tiempo real los datos cargados desde Firestore /config/settings.
- * Controla: nombre de la app, tema, modo oscuro, paleta de colores.
- */
 const clientId = import.meta.env.VITE_DEVELOPER_CLIENT_ID || 'general'
 const storageKey = `app-config-storage-${clientId}`
 
-// Obtener estado inicial persistido síncronamente para evitar FOUC de color (destello rosa inicial) en hidratación asíncrona de Zustand
+const normalizedFeatures = getNormalizedFeatures(manifest)
+
+// Helper para crear flags con sus defaults
+const createDefaultFeatureFlags = () => {
+  const flags = {};
+  normalizedFeatures.forEach(feature => {
+    const val = Boolean(feature.enabledByDefault);
+    flags[feature.id] = val;
+    if (Array.isArray(feature.legacyRemoteKeys)) {
+      feature.legacyRemoteKeys.forEach(legacyKey => {
+        flags[legacyKey] = val;
+      });
+    }
+  });
+  return flags;
+};
+
+const knownFeatureIds = new Set();
+normalizedFeatures.forEach(feature => {
+  knownFeatureIds.add(feature.id);
+  if (Array.isArray(feature.legacyRemoteKeys)) {
+    feature.legacyRemoteKeys.forEach(legacyKey => {
+      knownFeatureIds.add(legacyKey);
+    });
+  }
+});
+
+// Sanitización de flags obsoletas
+const sanitizePersistedFeatureFlags = (persistedFlags = {}) => {
+  const defaults = createDefaultFeatureFlags();
+  for (const [featureId, value] of Object.entries(persistedFlags)) {
+    if (knownFeatureIds.has(featureId)) {
+      defaults[featureId] = Boolean(value);
+    }
+  }
+  return defaults;
+};
+
+// Obtener estado inicial persistido síncronamente
 const getPersistedValue = (key, defaultValue) => {
   try {
     const raw = localStorage.getItem(storageKey)
@@ -23,21 +58,28 @@ const getPersistedValue = (key, defaultValue) => {
   return defaultValue
 }
 
+// Inicialización de flags persistidas
+const defaultFlags = createDefaultFeatureFlags();
+const initialFlags = {};
+Object.keys(defaultFlags).forEach(key => {
+  initialFlags[key] = getPersistedValue(key, defaultFlags[key]);
+});
+
 const useAppConfigStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       // ─── Estado ───────────────────────────────────────────────────────────
       appName: getPersistedValue('appName', 'Mi Tienda'),
       sellerName: getPersistedValue('sellerName', 'Vendedor'),
       appIcon: null,
       welcomeWavesEnabled: getPersistedValue('welcomeWavesEnabled', true),
-      theme: getPersistedValue('theme', import.meta.env.VITE_INITIAL_THEME || 'zafiro-moderno'),    // Paleta activa por defecto (neutral clara y elegante antes de sincronizar)
-      isDarkMode: getPersistedValue('isDarkMode', false),         // Por defecto claro para evitar forzar el modo oscuro al limpiar caché
-      adminRegistered: getPersistedValue('adminRegistered', false), // Bandera para Auth Admin
-      pwaAppName: '',            // Nombre al instalarse como app móvil
-      pwaAppIcon: null,          // Icono personalizado de instalación PWA
-      pwaUseBrandIcon: false,    // Usar logo de la tienda como ícono PWA (con fondo)
-      activeSeasonalEvent: getPersistedValue('activeSeasonalEvent', 'none'), // Evento estacional activo ('none', 'navidad', 'halloween', 'madre', 'padre')
+      theme: getPersistedValue('theme', import.meta.env.VITE_INITIAL_THEME || 'zafiro-moderno'),
+      isDarkMode: getPersistedValue('isDarkMode', false),
+      adminRegistered: getPersistedValue('adminRegistered', false),
+      pwaAppName: '',
+      pwaAppIcon: null,
+      pwaUseBrandIcon: false,
+      activeSeasonalEvent: getPersistedValue('activeSeasonalEvent', 'none'),
       whatsappAdmin: '',
       claimsEnabled: false,
       orderTrackingEnabled: true,
@@ -54,13 +96,13 @@ const useAppConfigStore = create(
       bankInfo: {
         numeroCuenta: '',
         banco: '',
-        tipoCuenta: 'ahorros',   // 'ahorros' | 'corriente'
+        tipoCuenta: 'ahorros',
         titular: '',
         cedulaNit: '',
         qrUrl: '',
       },
       bankInfo2: {
-        activa: false,           // segunda cuenta habilitada
+        activa: false,
         numeroCuenta: '',
         banco: '',
         tipoCuenta: 'ahorros',
@@ -85,14 +127,16 @@ const useAppConfigStore = create(
           { id: 'attr-genero', name: 'Género', type: 'select', options: ['Hombre', 'Mujer', 'Unisex'] }
         ]
       },
-      guidedModeEnabled: true, // Toggle global de asistencia
-      loginTrustMessage: '',  // Mensaje de confianza personalizable
-      slogan: '',             // Eslogan de la tienda (aparece debajo del logo en login)
-      creditsEnabled: true,
-      couponsEnabled: true,
-      rolesOperativosEnabled: false, // Sistema de Roles Operativos y Portales (módulo avanzado)
-      posExpressScanner: false,
-      onlineOrdersEnabled: getPersistedValue('onlineOrdersEnabled', true),
+      guidedModeEnabled: true,
+      loginTrustMessage: '',
+      slogan: '',
+
+      // Namespace estructurado de Feature Flags
+      featureFlags: initialFlags,
+
+      // Propiedades Planas en la Raíz para compatibilidad hacia atrás
+      ...initialFlags,
+
       deliverySettings: {
         pickup: {
           enabled: true,
@@ -110,15 +154,13 @@ const useAppConfigStore = create(
           instructions: 'Entrega digital o prestación de servicio presencial.'
         },
         customDelivery: {
-          enabled: false,                   // Módulo de mensajero propio activo
-          serviceLabel: 'Domicilio Propio', // Nombre visible del servicio
-          costType: 'fijo',                 // 'fijo' | 'personalizado'
-          fixedCost: 0,                     // Costo fijo cuando costType === 'fijo'
-          allowCustomCost: false,           // Permite editar el costo desde cada pedido
+          enabled: false,
+          serviceLabel: 'Domicilio Propio',
+          costType: 'fijo',
+          fixedCost: 0,
+          allowCustomCost: false,
           estimatedTime: '20 a 40 min',
-          messengerTemplate: '',            // Plantilla de mensaje; si vacía usa DEFAULT_MESSENGER_TEMPLATE
-          // Los mensajeros externos se guardan en Firestore (deliveryService)
-          // Esta configuración no los duplica, solo tiene parámetros globales del servicio
+          messengerTemplate: '',
         }
       },
       hasMultipleEmployees: false,
@@ -127,7 +169,7 @@ const useAppConfigStore = create(
       wholesaleSettings: {
         enabled: true,
         minQuantity: 12,
-        discountType: 'percentage', // 'percentage' | 'fixed'
+        discountType: 'percentage',
         discountValue: 15
       },
       commercialOptimization: {
@@ -140,22 +182,11 @@ const useAppConfigStore = create(
             lastUnit: { enabled: true, text: 'Última Unidad', bg: '#3b82f6', textCol: '#ffffff', style: 'pill', threshold: 3 },
             newProduct: { enabled: true, text: 'Nuevo', bg: '#10b981', textCol: '#ffffff', style: 'pill', daysLimit: 7 }
           },
-          advancedGallery: {
-            enabled: true
-          },
-          visualVariations: {
-            enabled: true
-          },
-          variationIndicators: {
-            enabled: true
-          },
-          cartRecommendations: {
-            enabled: true,
-            title: 'Recomendado para ti'
-          },
-          historyRecommendations: {
-            enabled: true
-          }
+          advancedGallery: { enabled: true },
+          visualVariations: { enabled: true },
+          variationIndicators: { enabled: true },
+          cartRecommendations: { enabled: true, title: 'Recomendado para ti' },
+          historyRecommendations: { enabled: true }
         }
       },
       sistemaAlerta: null,
@@ -166,24 +197,46 @@ const useAppConfigStore = create(
       isLoaded: false,
 
       // ─── Acciones ─────────────────────────────────────────────────────────
-      /**
-       * Actualiza toda la configuración desde Firestore.
-       * @param {object} config - Configuración completa de Firestore
-       */
       setConfig: (newConfig) => {
         try {
           localStorage.setItem('app_config_loaded', 'true')
         } catch (e) {}
-        set((state) => ({ ...state, ...newConfig, isLoaded: true }))
+        
+        // Si newConfig contiene featureFlags en formato de sub-objeto, resolver
+        const configFlags = newConfig.featureFlags || {};
+        const flattenedFlags = {};
+        normalizedFeatures.forEach(feature => {
+          let val = feature.enabledByDefault;
+          if (configFlags[feature.id] !== undefined) {
+            val = Boolean(configFlags[feature.id]);
+          } else if (newConfig[feature.id] !== undefined) {
+            val = Boolean(newConfig[feature.id]);
+          }
+          
+          flattenedFlags[feature.id] = val;
+          if (Array.isArray(feature.legacyRemoteKeys)) {
+            feature.legacyRemoteKeys.forEach(legacyKey => {
+              flattenedFlags[legacyKey] = val;
+            });
+          }
+        });
+
+        set((state) => ({
+          ...state,
+          ...newConfig,
+          featureFlags: {
+            ...state.featureFlags,
+            ...flattenedFlags
+          },
+          // Sincronizar propiedades planas en la raíz para compatibilidad hacia atrás
+          ...flattenedFlags,
+          isLoaded: true
+        }))
       },
       setCatalogFilters: (catalogFilters) => set({ catalogFilters }),
       setMaintenanceMode: (status) => set({ maintenanceMode: status }),
       setDegradedMode: (status) => set({ degradedMode: status }),
 
-      /**
-       * Alterna entre modo oscuro y claro.
-       * Se aplica a TODA la app mediante la clase 'dark' en el elemento raíz.
-       */
       toggleDarkMode: () => set((state) => {
         const newDark = !state.isDarkMode
         if (newDark) {
@@ -196,22 +249,70 @@ const useAppConfigStore = create(
 
       setTheme: (theme) => set({ theme }),
       setAppName: (name) => set({ appName: name }),
+
+      setFeatureFlag: (featureId, enabled) => {
+        set((state) => {
+          const nextFlags = {
+            ...state.featureFlags,
+            [featureId]: Boolean(enabled)
+          };
+          return {
+            featureFlags: nextFlags,
+            [featureId]: Boolean(enabled)
+          };
+        });
+      },
+
+      replaceFeatureFlags: (featureFlagsMap) => {
+        const defaults = createDefaultFeatureFlags();
+        const merged = { ...defaults, ...featureFlagsMap };
+        set({
+          featureFlags: merged,
+          ...merged
+        });
+      },
+
+      isFeatureEnabled: (featureId) => {
+        let key = featureId;
+        if (featureId === 'credits') key = 'creditsEnabled';
+        if (featureId === 'claims') key = 'claimsEnabled';
+        if (featureId === 'coupons') key = 'couponsEnabled';
+        if (featureId === 'delivery') key = 'rolesOperativosEnabled';
+        if (featureId === 'onlineOrdersEnabled') key = 'orders';
+        return Boolean(get().featureFlags[key] || get().featureFlags[featureId]);
+      }
     }),
     {
       name: storageKey,
-      version: 2,
-      /**
-       * Migración v1 → v2: elimina `commercialOptimization` del localStorage.
-       * Esta clave solía persistirse con `enabled: false` por defecto y causaba
-       * que el recomendador del carrito quedara desactivado aunque Firestore
-       * lo tuviera activo. Al quitarla del localStorage, el estado en memoria
-       * y Firestore siempre tienen la última palabra.
-       */
+      version: 3,
       migrate: (persistedState, version) => {
         if (version < 2) {
           delete persistedState.commercialOptimization
         }
+        // Migración a versión 3: Estructuración de featureFlags en namespace
+        if (version < 3) {
+          const defaults = createDefaultFeatureFlags();
+          const extractedFlags = {};
+          normalizedFeatures.forEach(feature => {
+            if (persistedState[feature.id] !== undefined) {
+              extractedFlags[feature.id] = Boolean(persistedState[feature.id]);
+              delete persistedState[feature.id];
+            } else {
+              extractedFlags[feature.id] = Boolean(feature.enabledByDefault);
+            }
+          });
+          persistedState.featureFlags = extractedFlags;
+        }
         return persistedState
+      },
+      merge: (persistedState, currentState) => {
+        const mergedFlags = sanitizePersistedFeatureFlags(persistedState?.featureFlags);
+        return {
+          ...currentState,
+          ...persistedState,
+          featureFlags: mergedFlags,
+          ...mergedFlags // Propagar a propiedades planas de la raíz
+        };
       },
       partialize: (state) => ({
         appName: state.appName,
@@ -240,16 +341,13 @@ const useAppConfigStore = create(
         trackingWaTemplate: state.trackingWaTemplate,
         appPromo: state.appPromo,
         developerPhone: state.developerPhone,
-        creditsEnabled: state.creditsEnabled,
-        couponsEnabled: state.couponsEnabled,
-        rolesOperativosEnabled: state.rolesOperativosEnabled,
-        posExpressScanner: state.posExpressScanner,
         adminRegistered: state.adminRegistered,
         maintenanceMode: state.maintenanceMode,
         commercialOptimization: state.commercialOptimization,
+        featureFlags: state.featureFlags,
       }),
     }
   )
-)
+);
 
 export default useAppConfigStore

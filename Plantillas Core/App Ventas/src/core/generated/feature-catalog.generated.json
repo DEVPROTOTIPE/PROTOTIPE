@@ -1,7 +1,7 @@
 {
   "generatorVersion": "1.0.0",
   "registryVersion": "1.0.0",
-  "generatedAt": "2026-07-13T15:26:39.144Z",
+  "generatedAt": "2026-07-13T19:00:14.796Z",
   "features": [
     {
       "id": "sales",
@@ -101,59 +101,6 @@
       }
     },
     {
-      "id": "appointments",
-      "displayName": "Agenda y Reservas de Turnos",
-      "description": "Calendario de citas interactivo con recordatorios por WhatsApp y asignación de profesionales.",
-      "category": "services",
-      "tags": [
-        "agenda",
-        "reserva",
-        "cita",
-        "calendario",
-        "fecha",
-        "whatsapp"
-      ],
-      "navigation": {
-        "adminMenu": [],
-        "clientMenu": []
-      }
-    },
-    {
-      "id": "patients",
-      "displayName": "Historial Clínico e Historial de Pacientes",
-      "description": "Gestión del historial clínico de pacientes, firmas de conformidad y control de tratamientos médicos.",
-      "category": "services",
-      "tags": [
-        "paciente",
-        "historial",
-        "clinica",
-        "firma",
-        "consentimiento",
-        "tratamiento"
-      ],
-      "navigation": {
-        "adminMenu": [],
-        "clientMenu": []
-      }
-    },
-    {
-      "id": "crm",
-      "displayName": "Gestión de Relaciones con Clientes (CRM)",
-      "description": "Seguimiento de prospectos, base de datos unificada de clientes, histórico de transacciones y deudas pendientes.",
-      "category": "management",
-      "tags": [
-        "crm",
-        "clientes",
-        "deudas",
-        "créditos",
-        "seguimiento"
-      ],
-      "navigation": {
-        "adminMenu": [],
-        "clientMenu": []
-      }
-    },
-    {
       "id": "hello-module",
       "displayName": "Hello Module",
       "description": "Módulo minimalista de smoke test y validación del pipeline transaccional de features.",
@@ -206,6 +153,57 @@
             "path": "/tienda/customer-loyalty"
           }
         ]
+      }
+    },
+    {
+      "id": "credits",
+      "displayName": "Crédito y Fiados",
+      "description": "Gestión de cuentas por cobrar, límites de crédito para clientes y registro de abonos.",
+      "category": "finance",
+      "tags": [
+        "crédito",
+        "fiados",
+        "cobradores",
+        "cartera",
+        "abonos"
+      ],
+      "navigation": {
+        "adminMenu": [
+          {
+            "label": "Crédito (Fiados)",
+            "path": "/admin/credito",
+            "icon": "CreditCard"
+          }
+        ],
+        "clientMenu": [
+          {
+            "label": "Mis Créditos",
+            "path": "/tienda/creditos"
+          }
+        ]
+      }
+    },
+    {
+      "id": "delivery",
+      "displayName": "Reparto y Portales Operativos",
+      "description": "Portales qr para mensajeros y personal de bodega, con despacho y asignación de despachos en ruta.",
+      "category": "logistics",
+      "tags": [
+        "delivery",
+        "reparto",
+        "mensajero",
+        "bodega",
+        "despacho"
+      ],
+      "navigation": {
+        "adminMenu": [
+          {
+            "label": "Portales Operativos",
+            "path": "/admin/portales",
+            "icon": "QrCode"
+          }
+        ],
+        "clientMenu": []
       }
     }
   ]

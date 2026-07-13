@@ -33,6 +33,11 @@ export const createFeatureSandbox = (featureId, coreContext) => {
       update: (collection, id, data) => coreContext.database.update(featureId, collection, id, data),
       delete: (collection, id) => coreContext.database.delete(featureId, collection, id),
       runTransaction: (callback) => coreContext.database.runTransaction(featureId, callback)
+    },
+
+    // 5. Registro de Permisos de Seguridad
+    permissions: {
+      registerPermissions: (role, perms) => coreContext.permissions.registerPermissions(role, perms)
     }
   };
 
@@ -41,6 +46,7 @@ export const createFeatureSandbox = (featureId, coreContext) => {
   Object.freeze(sandbox.navigation);
   Object.freeze(sandbox.router);
   Object.freeze(sandbox.database);
+  Object.freeze(sandbox.permissions);
   Object.freeze(sandbox);
 
   // Envolver en Proxy para atrapar e impedir cualquier lectura/escritura a propiedades no declaradas

@@ -18,7 +18,29 @@ export class FeatureRegistry {
         throw new Error(`Registro de features no encontrado en la ruta: ${REGISTRY_PATH}`);
       }
       const data = await fs.readJson(REGISTRY_PATH);
-      return data.features || [];
+      const allFeatures = data.features || [];
+      
+      const cliRoot = path.join(__dirname, '..');
+      
+      // Filtrar dinámicamente para retornar únicamente las features que existen físicamente en local
+      const filtered = [];
+      for (const f of allFeatures) {
+        if (!f.physicalPaths || f.physicalPaths.length === 0) {
+          continue;
+        }
+        let exists = false;
+        for (const relPath of f.physicalPaths) {
+          const absolutePath = path.join(cliRoot, relPath);
+          if (await fs.pathExists(absolutePath)) {
+            exists = true;
+            break;
+          }
+        }
+        if (exists) {
+          filtered.push(f);
+        }
+      }
+      return filtered;
     } catch (err) {
       console.error('❌ Error al cargar FeatureRegistry:', err);
       return [];

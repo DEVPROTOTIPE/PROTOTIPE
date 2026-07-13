@@ -1,0 +1,1345 @@
+{
+  "schemaVersion": 1,
+  "clientId": "ventas-smartfix",
+  "coreTemplate": "template-core-seed",
+  "coreVersion": "1.0.6",
+  "cliVersion": "1.0.0",
+  "niche": "general",
+  "generatedAt": "2026-07-03T23:06:55.371Z",
+  "files": {
+    ".prettierrc": {
+      "owner": "core",
+      "coreHash": "69acd865a393afb07dbe430cea0298aecec695695e00ace23b47ed5295a33a0a",
+      "appliedHash": "69acd865a393afb07dbe430cea0298aecec695695e00ace23b47ed5295a33a0a",
+      "lastSyncedAt": "2026-07-03T23:06:55.372Z"
+    },
+    "eslint.config.js": {
+      "owner": "core",
+      "coreHash": "4023c3ff9bf0bb68a7304168b34ebd397cbf23de7cf443b35a37cd0911e8c228",
+      "appliedHash": "4023c3ff9bf0bb68a7304168b34ebd397cbf23de7cf443b35a37cd0911e8c228",
+      "lastSyncedAt": "2026-07-03T23:06:55.376Z"
+    },
+    "index.html": {
+      "owner": "core",
+      "coreHash": "6861265045663b6b49457ea3f6e360f9ac891c83f3cb8257d25abc5cfc6ddc2a",
+      "appliedHash": "6861265045663b6b49457ea3f6e360f9ac891c83f3cb8257d25abc5cfc6ddc2a",
+      "lastSyncedAt": "2026-07-03T23:06:55.382Z"
+    },
+    "src/App.jsx": {
+      "owner": "core",
+      "coreHash": "2a960c72783356e80b55b83b753205e5acb63cb669edbb2f2656c92222577d66",
+      "appliedHash": "2a960c72783356e80b55b83b753205e5acb63cb669edbb2f2656c92222577d66",
+      "lastSyncedAt": "2026-07-13T03:51:05.929Z"
+    },
+    "src/components/client/catalog/CatalogBanner.jsx": {
+      "owner": "core",
+      "coreHash": "acdfdd392caba7dbf3f7f17e916379d19aeb7f210f4174dc907cb238186b94a3",
+      "appliedHash": "acdfdd392caba7dbf3f7f17e916379d19aeb7f210f4174dc907cb238186b94a3",
+      "lastSyncedAt": "2026-07-13T03:51:05.955Z"
+    },
+    "src/components/client/catalog/ProductDetailModal.jsx": {
+      "owner": "core",
+      "coreHash": "30378309e63eba4aff64ca552be1d8ad3dace085eee2e3c34d201893dc23cf1f",
+      "appliedHash": "30378309e63eba4aff64ca552be1d8ad3dace085eee2e3c34d201893dc23cf1f",
+      "lastSyncedAt": "2026-07-13T04:25:32.416Z"
+    },
+    "src/components/client/checkout/CheckoutModal.jsx": {
+      "owner": "core",
+      "coreHash": "2e055546779213b14b17fd9666f62d77d7b96bccdab723853515c7727bd3c1b7",
+      "appliedHash": "2e055546779213b14b17fd9666f62d77d7b96bccdab723853515c7727bd3c1b7",
+      "lastSyncedAt": "2026-07-13T03:51:05.960Z"
+    },
+    "src/components/ui/OrderTrackingSkeleton.jsx": {
+      "owner": "core",
+      "coreHash": "2204e3df95eee751fc2e5650ddb5b3ee07f1a6d4dca2085689642a587b50dbeb",
+      "appliedHash": "2204e3df95eee751fc2e5650ddb5b3ee07f1a6d4dca2085689642a587b50dbeb",
+      "lastSyncedAt": "2026-07-03T23:06:55.403Z"
+    },
+    "src/components/ui/PWAInstallBanner.jsx": {
+      "owner": "core",
+      "coreHash": "a67a10d1a36e5d0ea084530e4d668e998869a1cc0b9e4aedff8f68f2062b93fb",
+      "appliedHash": "a67a10d1a36e5d0ea084530e4d668e998869a1cc0b9e4aedff8f68f2062b93fb",
+      "lastSyncedAt": "2026-07-03T23:06:55.406Z"
+    },
+    "src/components/ui/ProductCardSkeleton.jsx": {
+      "owner": "core",
+      "coreHash": "2005f9b4e1bd5ef834e2493c1f86efac17a7951e92a86a400c8d83490f86aa1f",
+      "appliedHash": "2005f9b4e1bd5ef834e2493c1f86efac17a7951e92a86a400c8d83490f86aa1f",
+      "lastSyncedAt": "2026-07-03T23:06:55.410Z"
+    },
+    "src/constants/index.js": {
+      "owner": "core",
+      "coreHash": "86d28948a15f67d3531ebcea516e971d107d34aed5fe50708a7179fcb6871e87",
+      "appliedHash": "86d28948a15f67d3531ebcea516e971d107d34aed5fe50708a7179fcb6871e87",
+      "lastSyncedAt": "2026-07-10T21:56:56.688Z"
+    },
+    "src/constants/palettes.js": {
+      "owner": "core",
+      "coreHash": "4bb1cf86e5e0c9a7aac3c654db6c618774f4c846dd4f91e25d8fec2a064409c1",
+      "appliedHash": "4bb1cf86e5e0c9a7aac3c654db6c618774f4c846dd4f91e25d8fec2a064409c1",
+      "lastSyncedAt": "2026-07-03T23:06:55.419Z"
+    },
+    "src/index.css": {
+      "owner": "core",
+      "coreHash": "96bc1c1778b6d184f9aa9c514d2e27e6fc36fe7d8021859b6dde0fd44358b29d",
+      "appliedHash": "96bc1c1778b6d184f9aa9c514d2e27e6fc36fe7d8021859b6dde0fd44358b29d",
+      "lastSyncedAt": "2026-07-05T21:05:12.233Z"
+    },
+    "src/layouts/ClientLayout.jsx": {
+      "owner": "core",
+      "coreHash": "9995bbbb796888ed69ef99c073790c9fb33cdbfd4ad44802d73175f392096ceb",
+      "appliedHash": "9995bbbb796888ed69ef99c073790c9fb33cdbfd4ad44802d73175f392096ceb",
+      "lastSyncedAt": "2026-07-13T17:43:54.036Z"
+    },
+    "src/pages/WelcomePage.jsx": {
+      "owner": "core",
+      "coreHash": "8ca6fab5552f30ad3984c7c69c20bb46b4a5bff23a38e1c0e08a9b3621981a97",
+      "appliedHash": "8ca6fab5552f30ad3984c7c69c20bb46b4a5bff23a38e1c0e08a9b3621981a97",
+      "lastSyncedAt": "2026-07-03T23:06:55.431Z"
+    },
+    "src/pages/admin/AdminClaims.jsx": {
+      "owner": "core",
+      "coreHash": "44d2afb44f675415917646f5076677be8d91dce9a0a364daa8b7ad6e00fe604e",
+      "appliedHash": "44d2afb44f675415917646f5076677be8d91dce9a0a364daa8b7ad6e00fe604e",
+      "lastSyncedAt": "2026-07-03T23:06:55.435Z"
+    },
+    "src/pages/admin/AdminCredits.jsx": {
+      "owner": "core",
+      "coreHash": "742d142a066749840883b40ea962a278cfd37004e8e3aecdd8a1be50c2a939f5",
+      "appliedHash": "742d142a066749840883b40ea962a278cfd37004e8e3aecdd8a1be50c2a939f5",
+      "lastSyncedAt": "2026-07-13T03:51:06.202Z"
+    },
+    "src/pages/admin/AdminHome.jsx": {
+      "owner": "core",
+      "coreHash": "faec50df3f0f4bc6c1b1963877ec60065b85c2792ffe0397436a8ee7e8bf29ee",
+      "appliedHash": "faec50df3f0f4bc6c1b1963877ec60065b85c2792ffe0397436a8ee7e8bf29ee",
+      "lastSyncedAt": "2026-07-13T03:51:06.210Z"
+    },
+    "src/pages/admin/AdminInventory.jsx": {
+      "owner": "core",
+      "coreHash": "7f0afbff490a46fe1c89ae15b020168666506f26223a371d16832620833dca8a",
+      "appliedHash": "7f0afbff490a46fe1c89ae15b020168666506f26223a371d16832620833dca8a",
+      "lastSyncedAt": "2026-07-13T03:51:06.215Z"
+    },
+    "src/pages/admin/AdminOrders.jsx": {
+      "owner": "core",
+      "coreHash": "0ea098fb807c6950959ad48ff814443c562967b598bd914eaf89786a38525dc4",
+      "appliedHash": "0ea098fb807c6950959ad48ff814443c562967b598bd914eaf89786a38525dc4",
+      "lastSyncedAt": "2026-07-13T17:43:54.042Z"
+    },
+    "src/pages/admin/AdminQRPerformance.jsx": {
+      "owner": "core",
+      "coreHash": "2581048386e255712d67b1dcad572ece282b96d2a6e015fa0b23f1dcbd5c7b9d",
+      "appliedHash": "2581048386e255712d67b1dcad572ece282b96d2a6e015fa0b23f1dcbd5c7b9d",
+      "lastSyncedAt": "2026-07-13T03:51:06.230Z"
+    },
+    "src/pages/admin/AdminSalesDetail.jsx": {
+      "owner": "core",
+      "coreHash": "8f832fc0f4ada3973163c29a2390ec2189a5ea729b5e2f5743cec2fa73a97e63",
+      "appliedHash": "8f832fc0f4ada3973163c29a2390ec2189a5ea729b5e2f5743cec2fa73a97e63",
+      "lastSyncedAt": "2026-07-13T03:51:06.239Z"
+    },
+    "src/pages/admin/AdminSettings.jsx": {
+      "owner": "core",
+      "coreHash": "a55dfe77e823f36f6ae4ca5e87f76cbc50ed9a5e15f3fb19e2ed11da5c44dee7",
+      "appliedHash": "a55dfe77e823f36f6ae4ca5e87f76cbc50ed9a5e15f3fb19e2ed11da5c44dee7",
+      "lastSyncedAt": "2026-07-13T03:51:06.243Z"
+    },
+    "src/pages/admin/AdminStockAlerts.jsx": {
+      "owner": "core",
+      "coreHash": "c1fcaed60139148bce97f7c30581893bd1f8ee5e8c409825cd04aa7e816ef694",
+      "appliedHash": "c1fcaed60139148bce97f7c30581893bd1f8ee5e8c409825cd04aa7e816ef694",
+      "lastSyncedAt": "2026-07-13T03:51:06.247Z"
+    },
+    "src/pages/client/ClientCatalog.jsx": {
+      "owner": "core",
+      "coreHash": "f3dc822d33eb20722f3a1f4262d7ae5182fc4df788b597ec0d1eb0c5543eb34a",
+      "appliedHash": "f3dc822d33eb20722f3a1f4262d7ae5182fc4df788b597ec0d1eb0c5543eb34a",
+      "lastSyncedAt": "2026-07-13T03:51:06.252Z"
+    },
+    "src/pages/client/ClientCredits.jsx": {
+      "owner": "core",
+      "coreHash": "24f5e408a07ac39b8d6b5c150b90a72791ce5149e9653ceb23b4c60ffd5d8c72",
+      "appliedHash": "24f5e408a07ac39b8d6b5c150b90a72791ce5149e9653ceb23b4c60ffd5d8c72",
+      "lastSyncedAt": "2026-07-13T03:51:06.256Z"
+    },
+    "src/pages/client/OrderTracking.jsx": {
+      "owner": "core",
+      "coreHash": "4b2c09d5b7481ebc7aef367406166dfaa69e4291352988ab2df80713fbb4a874",
+      "appliedHash": "4b2c09d5b7481ebc7aef367406166dfaa69e4291352988ab2df80713fbb4a874",
+      "lastSyncedAt": "2026-07-10T21:56:56.870Z"
+    },
+    "src/pages/client/ProductDetailPage.jsx": {
+      "owner": "core",
+      "coreHash": "0771bf087dbc287a539005d3d0e4bbdd4128e3f71c8f002e02d0e17ad008ac3f",
+      "appliedHash": "0771bf087dbc287a539005d3d0e4bbdd4128e3f71c8f002e02d0e17ad008ac3f",
+      "lastSyncedAt": "2026-07-13T04:25:32.441Z"
+    },
+    "src/pages/client/ProductPublicDetail.jsx": {
+      "owner": "core",
+      "coreHash": "1e653607c34c2160b67af9f146548b906e14545b3671c600c288ed0d7e3a1846",
+      "appliedHash": "1e653607c34c2160b67af9f146548b906e14545b3671c600c288ed0d7e3a1846",
+      "lastSyncedAt": "2026-07-13T04:25:32.445Z"
+    },
+    "src/services/telemetryOutboxDb.js": {
+      "owner": "core",
+      "coreHash": "1541bbf6c54785edee8ec0702644f525683c07bee91df9c29bf64d6ccff42171",
+      "appliedHash": "1541bbf6c54785edee8ec0702644f525683c07bee91df9c29bf64d6ccff42171",
+      "lastSyncedAt": "2026-07-03T23:06:55.493Z"
+    },
+    "src/services/telemetryService.js": {
+      "owner": "core",
+      "coreHash": "d0c6ad63a27938ad5d2d247b8ef0d08e32548835beb38f855644f55ff85b5d48",
+      "appliedHash": "d0c6ad63a27938ad5d2d247b8ef0d08e32548835beb38f855644f55ff85b5d48",
+      "lastSyncedAt": "2026-07-13T03:51:06.307Z"
+    },
+    "package.json": {
+      "owner": "core",
+      "coreHash": "46e5414ea11b304bce275f37c287ac98e5ca264d6f35289c05a9beead9772eb1",
+      "appliedHash": "b58f8aa0c1b496e5f82c2a9fd344d82ae710fcdd87f228a1eb1a4151810df7c3",
+      "lastSyncedAt": "2026-07-10T21:57:03.187Z"
+    },
+    "firestore.rules": {
+      "owner": "core",
+      "coreHash": "230df7ed61156c8e981f992070ac84fe7d5321a0b5bcb31d470e3658697139c2",
+      "appliedHash": "230df7ed61156c8e981f992070ac84fe7d5321a0b5bcb31d470e3658697139c2",
+      "lastSyncedAt": "2026-07-13T03:51:05.919Z"
+    },
+    "storage.rules": {
+      "owner": "core",
+      "coreHash": "d2766ccafdbaab54a3e04aff9c02664cc493ef3a44f0da0d5738ffef932b4d9c",
+      "appliedHash": "d2766ccafdbaab54a3e04aff9c02664cc493ef3a44f0da0d5738ffef932b4d9c",
+      "lastSyncedAt": "2026-07-05T21:05:12.241Z"
+    },
+    "vite.config.js": {
+      "owner": "core",
+      "coreHash": "1e4b3c73e620a3cc6171e22f384596f402df5224aadb743f1d94529419e5ef59",
+      "appliedHash": "1e4b3c73e620a3cc6171e22f384596f402df5224aadb743f1d94529419e5ef59",
+      "lastSyncedAt": "2026-07-12T23:47:54.768Z"
+    },
+    "src/components/common/SparkQuotaBanner.jsx": {
+      "owner": "core",
+      "coreHash": "98c3b0af8e4aef6d3aad46bf718e8fb0ee2550fb179a3dd9a058a0a409457978",
+      "appliedHash": "98c3b0af8e4aef6d3aad46bf718e8fb0ee2550fb179a3dd9a058a0a409457978",
+      "lastSyncedAt": "2026-07-08T04:41:21.555Z"
+    },
+    "src/pages/admin/settings/sections/DeveloperSettings.jsx": {
+      "owner": "core",
+      "coreHash": "3ce0dc10a86c4abc315ce21570e9026eedd17f1ae577c59056ff51d15a659e90",
+      "appliedHash": "3ce0dc10a86c4abc315ce21570e9026eedd17f1ae577c59056ff51d15a659e90",
+      "lastSyncedAt": "2026-07-10T21:56:56.849Z"
+    },
+    "src/services/appConfigService.js": {
+      "owner": "core",
+      "coreHash": "fe34d5066d3b35988deb037cab01746e0a0e1f863b39ec6774eb69f1740a33a8",
+      "appliedHash": "fe34d5066d3b35988deb037cab01746e0a0e1f863b39ec6774eb69f1740a33a8",
+      "lastSyncedAt": "2026-07-10T21:56:56.895Z"
+    },
+    "src/store/appConfigStore.js": {
+      "owner": "core",
+      "coreHash": "458538072ba532dffb49437eb416813c5c07fd841486361e1c5294d386fffe15",
+      "appliedHash": "458538072ba532dffb49437eb416813c5c07fd841486361e1c5294d386fffe15",
+      "lastSyncedAt": "2026-07-13T17:43:54.064Z"
+    },
+    "src/services/centralFirebaseService.js": {
+      "owner": "core",
+      "coreHash": "cea0dd91830acea1f483cfe9cf9d7a23f1a8c94e983f3fe43f1c8c559f02df35",
+      "appliedHash": "cea0dd91830acea1f483cfe9cf9d7a23f1a8c94e983f3fe43f1c8c559f02df35",
+      "lastSyncedAt": "2026-07-09T00:31:11.880Z"
+    },
+    "coverage/base.css": {
+      "owner": "core",
+      "coreHash": "3f876e51f0a46864ffa7665b4b7a1f5fb5f6f37fb6a28f014e2b12d82962c852",
+      "appliedHash": "3f876e51f0a46864ffa7665b4b7a1f5fb5f6f37fb6a28f014e2b12d82962c852",
+      "lastSyncedAt": "2026-07-10T21:56:56.413Z"
+    },
+    "coverage/block-navigation.js": {
+      "owner": "core",
+      "coreHash": "cd8db34b1fbeb973354a93f8b4133c7c7eab34cdda9429a0434be91384783b7e",
+      "appliedHash": "cd8db34b1fbeb973354a93f8b4133c7c7eab34cdda9429a0434be91384783b7e",
+      "lastSyncedAt": "2026-07-10T21:56:56.425Z"
+    },
+    "coverage/clover.xml": {
+      "owner": "core",
+      "coreHash": "2b604552604410fd9c056a2f79797e8cf7f4f6e77d46eed9d5ee6ad66b9c0b02",
+      "appliedHash": "2b604552604410fd9c056a2f79797e8cf7f4f6e77d46eed9d5ee6ad66b9c0b02",
+      "lastSyncedAt": "2026-07-13T03:51:05.659Z"
+    },
+    "coverage/components/admin/orders/OrderDeliveryPanel.jsx.html": {
+      "owner": "core",
+      "coreHash": "10ef437f0f2c1da1b199ca5ff05325235b036e9c10b33a071f1cc322c7e2f190",
+      "appliedHash": "10ef437f0f2c1da1b199ca5ff05325235b036e9c10b33a071f1cc322c7e2f190",
+      "lastSyncedAt": "2026-07-13T03:51:05.665Z"
+    },
+    "coverage/components/admin/orders/index.html": {
+      "owner": "core",
+      "coreHash": "2c10d6adddb33ca2257119dfaa862fb7c09dee4b15f1d938f9e2b837a51f2171",
+      "appliedHash": "2c10d6adddb33ca2257119dfaa862fb7c09dee4b15f1d938f9e2b837a51f2171",
+      "lastSyncedAt": "2026-07-13T03:51:05.671Z"
+    },
+    "coverage/components/common/AlertConfirmContext.jsx.html": {
+      "owner": "core",
+      "coreHash": "e0fd2be3b9fb8c5f4dc7583ad1785ac1798bdd9e2bf6c47aba27feb98d983011",
+      "appliedHash": "e0fd2be3b9fb8c5f4dc7583ad1785ac1798bdd9e2bf6c47aba27feb98d983011",
+      "lastSyncedAt": "2026-07-13T03:51:05.677Z"
+    },
+    "coverage/components/common/ModalTemplate.jsx.html": {
+      "owner": "core",
+      "coreHash": "656a11aeaf327d8486bb11686233c6266dc48fb456579d136e4d9b47ab4de05d",
+      "appliedHash": "656a11aeaf327d8486bb11686233c6266dc48fb456579d136e4d9b47ab4de05d",
+      "lastSyncedAt": "2026-07-13T03:51:05.683Z"
+    },
+    "coverage/components/common/index.html": {
+      "owner": "core",
+      "coreHash": "02204617dffe56676fae7b4ab55d0d041a903cb5d4269338706be827533fd9fe",
+      "appliedHash": "02204617dffe56676fae7b4ab55d0d041a903cb5d4269338706be827533fd9fe",
+      "lastSyncedAt": "2026-07-13T03:51:05.688Z"
+    },
+    "coverage/components/ui/LeafletMapPicker.jsx.html": {
+      "owner": "core",
+      "coreHash": "99e2644a4f4f3ed303ce5bf1ed069318655f04f7a0de012dcd1e25356a22aa17",
+      "appliedHash": "99e2644a4f4f3ed303ce5bf1ed069318655f04f7a0de012dcd1e25356a22aa17",
+      "lastSyncedAt": "2026-07-13T03:51:05.694Z"
+    },
+    "coverage/components/ui/NumberInput.jsx.html": {
+      "owner": "core",
+      "coreHash": "ac80f0f60b7e225d25f6f7d8396bb68c13c24e96cf422c788661c8e4161073e0",
+      "appliedHash": "ac80f0f60b7e225d25f6f7d8396bb68c13c24e96cf422c788661c8e4161073e0",
+      "lastSyncedAt": "2026-07-13T03:51:05.700Z"
+    },
+    "coverage/components/ui/index.html": {
+      "owner": "core",
+      "coreHash": "0a8656426ba2068f227cd8e7bd681900e0eca0a97133dc69f08260e40722e332",
+      "appliedHash": "0a8656426ba2068f227cd8e7bd681900e0eca0a97133dc69f08260e40722e332",
+      "lastSyncedAt": "2026-07-13T03:51:05.709Z"
+    },
+    "coverage/constants/index.html": {
+      "owner": "core",
+      "coreHash": "cb53379ca8bdd28d3492e17ef695231edef5100c2e349c3cd0d8bba6fb0f31a1",
+      "appliedHash": "cb53379ca8bdd28d3492e17ef695231edef5100c2e349c3cd0d8bba6fb0f31a1",
+      "lastSyncedAt": "2026-07-13T03:51:05.719Z"
+    },
+    "coverage/constants/index.js.html": {
+      "owner": "core",
+      "coreHash": "3b8a1d7dcdd5a22e2e5ac9587cc2cc465a8662258c8fca3a95959451c16dbb8b",
+      "appliedHash": "3b8a1d7dcdd5a22e2e5ac9587cc2cc465a8662258c8fca3a95959451c16dbb8b",
+      "lastSyncedAt": "2026-07-13T03:51:05.726Z"
+    },
+    "coverage/coverage-final.json": {
+      "owner": "core",
+      "coreHash": "d9218bfde25db69c9e71d00d02a49203a553f6e86c3e71dc0d029e9d53d3db6d",
+      "appliedHash": "d9218bfde25db69c9e71d00d02a49203a553f6e86c3e71dc0d029e9d53d3db6d",
+      "lastSyncedAt": "2026-07-13T03:51:05.733Z"
+    },
+    "coverage/favicon.png": {
+      "owner": "core",
+      "coreHash": "5b0cfd52dc0bfbe544f4e1a9c77aa46b8629b0e0aad6c54f95eef457b86c2a89",
+      "appliedHash": "5b0cfd52dc0bfbe544f4e1a9c77aa46b8629b0e0aad6c54f95eef457b86c2a89",
+      "lastSyncedAt": "2026-07-10T21:56:56.483Z"
+    },
+    "coverage/features/billing/hooks/index.html": {
+      "owner": "core",
+      "coreHash": "886332264fc28a932374f5c8771b13d84a737dd8a7ca39dbbaa298edbe705205",
+      "appliedHash": "886332264fc28a932374f5c8771b13d84a737dd8a7ca39dbbaa298edbe705205",
+      "lastSyncedAt": "2026-07-13T03:51:05.740Z"
+    },
+    "coverage/features/billing/hooks/useBilling.js.html": {
+      "owner": "core",
+      "coreHash": "d5f929699672e786455533f1edfb7a4f74bc8932118bdcefd53c85aa651633a8",
+      "appliedHash": "d5f929699672e786455533f1edfb7a4f74bc8932118bdcefd53c85aa651633a8",
+      "lastSyncedAt": "2026-07-13T03:51:05.745Z"
+    },
+    "coverage/features/billing/index.html": {
+      "owner": "core",
+      "coreHash": "b37323364593b045a80272cd744af75adb09789dc08d284495d557aae8810de3",
+      "appliedHash": "b37323364593b045a80272cd744af75adb09789dc08d284495d557aae8810de3",
+      "lastSyncedAt": "2026-07-13T03:51:05.750Z"
+    },
+    "coverage/features/billing/index.js.html": {
+      "owner": "core",
+      "coreHash": "748dc711d02f678c287ac7ea12074a147ba526582487af16fefb5793cc6fdd3d",
+      "appliedHash": "748dc711d02f678c287ac7ea12074a147ba526582487af16fefb5793cc6fdd3d",
+      "lastSyncedAt": "2026-07-13T03:51:05.754Z"
+    },
+    "coverage/features/billing/services/billingService.js.html": {
+      "owner": "core",
+      "coreHash": "930631cb8f6b9bf1282bf668a7c3429e38049033ef83579d74455435d2475ae8",
+      "appliedHash": "930631cb8f6b9bf1282bf668a7c3429e38049033ef83579d74455435d2475ae8",
+      "lastSyncedAt": "2026-07-13T03:51:05.759Z"
+    },
+    "coverage/features/billing/services/index.html": {
+      "owner": "core",
+      "coreHash": "36319b1d71bc685db3e7bb72881ce3954e5ec3e8746cbcc8e594caf8dc297c55",
+      "appliedHash": "36319b1d71bc685db3e7bb72881ce3954e5ec3e8746cbcc8e594caf8dc297c55",
+      "lastSyncedAt": "2026-07-13T03:51:05.763Z"
+    },
+    "coverage/features/credits/services/creditService.js.html": {
+      "owner": "core",
+      "coreHash": "ea0320eeb1de777ca4408740b9bb11c81ec397f369cc59f4a5cf11ae650ca4de",
+      "appliedHash": "ea0320eeb1de777ca4408740b9bb11c81ec397f369cc59f4a5cf11ae650ca4de",
+      "lastSyncedAt": "2026-07-13T03:51:05.768Z"
+    },
+    "coverage/features/credits/services/index.html": {
+      "owner": "core",
+      "coreHash": "4cb0cccdc0fa7ca43738160053d43ce5677b496bd8304121e74fab0e67bbbbb3",
+      "appliedHash": "4cb0cccdc0fa7ca43738160053d43ce5677b496bd8304121e74fab0e67bbbbb3",
+      "lastSyncedAt": "2026-07-13T03:51:05.772Z"
+    },
+    "coverage/features/orders/components/OrderCard.jsx.html": {
+      "owner": "core",
+      "coreHash": "51adb3fe1f2e6d71855227c62b200037ba0c080edf534fe934352a1ea4e6016e",
+      "appliedHash": "51adb3fe1f2e6d71855227c62b200037ba0c080edf534fe934352a1ea4e6016e",
+      "lastSyncedAt": "2026-07-13T03:51:05.788Z"
+    },
+    "coverage/features/orders/components/index.html": {
+      "owner": "core",
+      "coreHash": "e1e1948566bb20df3f8e76de0f02112f3c7a8035711f50a64aee3a8a165d8cfa",
+      "appliedHash": "e1e1948566bb20df3f8e76de0f02112f3c7a8035711f50a64aee3a8a165d8cfa",
+      "lastSyncedAt": "2026-07-13T03:51:05.793Z"
+    },
+    "coverage/features/orders/hooks/index.html": {
+      "owner": "core",
+      "coreHash": "f99a0ec4babaaad4d85d4998059a2f2457349421b630d5071a41c0afa86b48db",
+      "appliedHash": "f99a0ec4babaaad4d85d4998059a2f2457349421b630d5071a41c0afa86b48db",
+      "lastSyncedAt": "2026-07-13T03:51:05.797Z"
+    },
+    "coverage/features/orders/hooks/useOrders.js.html": {
+      "owner": "core",
+      "coreHash": "b2ff0d738ae2799a0eb280ca6c5657ea136191d3615e4862cda4baebaf7d0003",
+      "appliedHash": "b2ff0d738ae2799a0eb280ca6c5657ea136191d3615e4862cda4baebaf7d0003",
+      "lastSyncedAt": "2026-07-13T03:51:05.802Z"
+    },
+    "coverage/features/orders/index.html": {
+      "owner": "core",
+      "coreHash": "aefeb22938ec24b93e3ed417d2e15c591d33897ee1ecc71080dd91ff6ef65032",
+      "appliedHash": "aefeb22938ec24b93e3ed417d2e15c591d33897ee1ecc71080dd91ff6ef65032",
+      "lastSyncedAt": "2026-07-13T03:51:05.807Z"
+    },
+    "coverage/features/orders/index.js.html": {
+      "owner": "core",
+      "coreHash": "6ff9cc870bf5491af9df6dc66453c6644f9ea9989014c6f29d317821715fd9f4",
+      "appliedHash": "6ff9cc870bf5491af9df6dc66453c6644f9ea9989014c6f29d317821715fd9f4",
+      "lastSyncedAt": "2026-07-13T03:51:05.811Z"
+    },
+    "coverage/features/orders/services/index.html": {
+      "owner": "core",
+      "coreHash": "3375d82342f5800d4f8e27c5ef8f8c9856ea901c9bd890cb352c6f95d8bafaca",
+      "appliedHash": "3375d82342f5800d4f8e27c5ef8f8c9856ea901c9bd890cb352c6f95d8bafaca",
+      "lastSyncedAt": "2026-07-13T03:51:05.816Z"
+    },
+    "coverage/features/orders/services/orderService.js.html": {
+      "owner": "core",
+      "coreHash": "9053fa0c3a551ab3a094504104f07e55dd3c1f68f2e46b38328cf00099ad50ad",
+      "appliedHash": "9053fa0c3a551ab3a094504104f07e55dd3c1f68f2e46b38328cf00099ad50ad",
+      "lastSyncedAt": "2026-07-13T03:51:05.821Z"
+    },
+    "coverage/index.html": {
+      "owner": "core",
+      "coreHash": "e4dac5c2de5ee0e30f441901ef3f19c05c98145132e9d2a339b2364ad2c78896",
+      "appliedHash": "e4dac5c2de5ee0e30f441901ef3f19c05c98145132e9d2a339b2364ad2c78896",
+      "lastSyncedAt": "2026-07-13T03:51:05.836Z"
+    },
+    "coverage/prettify.css": {
+      "owner": "core",
+      "coreHash": "ea3fe433f9450698ca8a230271688e7aeec12f99c8a7ef6c94379abb38f27823",
+      "appliedHash": "ea3fe433f9450698ca8a230271688e7aeec12f99c8a7ef6c94379abb38f27823",
+      "lastSyncedAt": "2026-07-10T21:56:56.565Z"
+    },
+    "coverage/prettify.js": {
+      "owner": "core",
+      "coreHash": "fa1b1e1b906ddcfa08b46f161c0f924f506e1a31b4f3e09b8caaa2463ef52c18",
+      "appliedHash": "fa1b1e1b906ddcfa08b46f161c0f924f506e1a31b4f3e09b8caaa2463ef52c18",
+      "lastSyncedAt": "2026-07-10T21:56:56.570Z"
+    },
+    "coverage/services/alertService.js.html": {
+      "owner": "core",
+      "coreHash": "20d81fe6891aef203776d20b181368a2090937bb87d62a76c9f625583c257ca1",
+      "appliedHash": "20d81fe6891aef203776d20b181368a2090937bb87d62a76c9f625583c257ca1",
+      "lastSyncedAt": "2026-07-13T03:51:05.841Z"
+    },
+    "coverage/services/appConfigService.js.html": {
+      "owner": "core",
+      "coreHash": "f8424eb8352b11a9a923a2375ae8e0898622101374f697379dab41796df2be60",
+      "appliedHash": "f8424eb8352b11a9a923a2375ae8e0898622101374f697379dab41796df2be60",
+      "lastSyncedAt": "2026-07-13T03:51:05.846Z"
+    },
+    "coverage/services/centralFirebaseService.js.html": {
+      "owner": "core",
+      "coreHash": "927534d9052e3a6358c44cd8cf2dd5c5d0c6e164763cd0e681d5fcd743b054dd",
+      "appliedHash": "927534d9052e3a6358c44cd8cf2dd5c5d0c6e164763cd0e681d5fcd743b054dd",
+      "lastSyncedAt": "2026-07-13T03:51:05.851Z"
+    },
+    "coverage/services/deliveryService.js.html": {
+      "owner": "core",
+      "coreHash": "ae0c834bdbdb149addd2d1dcf753c99e19fdd042a101e1e266b149167f6401d0",
+      "appliedHash": "ae0c834bdbdb149addd2d1dcf753c99e19fdd042a101e1e266b149167f6401d0",
+      "lastSyncedAt": "2026-07-13T03:51:05.856Z"
+    },
+    "coverage/services/employeeService.js.html": {
+      "owner": "core",
+      "coreHash": "e0198152f34a5be8ac7757b136dfb233db0469f651402507b50b0ca1aa9dae31",
+      "appliedHash": "e0198152f34a5be8ac7757b136dfb233db0469f651402507b50b0ca1aa9dae31",
+      "lastSyncedAt": "2026-07-13T03:51:05.861Z"
+    },
+    "coverage/services/index.html": {
+      "owner": "core",
+      "coreHash": "35b00efd3853963934c7d52cafcee65015110a8eb9c3c75085be6ef414d942e5",
+      "appliedHash": "35b00efd3853963934c7d52cafcee65015110a8eb9c3c75085be6ef414d942e5",
+      "lastSyncedAt": "2026-07-13T03:51:05.866Z"
+    },
+    "coverage/services/notificationCenterService.js.html": {
+      "owner": "core",
+      "coreHash": "a1a9c91293e9f38473f40c14f05cd45bef5967f041c3f346334970e430f7c15e",
+      "appliedHash": "a1a9c91293e9f38473f40c14f05cd45bef5967f041c3f346334970e430f7c15e",
+      "lastSyncedAt": "2026-07-13T03:51:05.871Z"
+    },
+    "coverage/services/telemetryOutboxDb.js.html": {
+      "owner": "core",
+      "coreHash": "e9689aaf08a1717c523d51d851691345b3f9eb0851daedaf797b876c3933a30a",
+      "appliedHash": "e9689aaf08a1717c523d51d851691345b3f9eb0851daedaf797b876c3933a30a",
+      "lastSyncedAt": "2026-07-13T03:51:05.875Z"
+    },
+    "coverage/services/telemetryService.js.html": {
+      "owner": "core",
+      "coreHash": "4845817dea013c248d4c137d5c3841f9ac7191e7507400e190af9078430696a4",
+      "appliedHash": "4845817dea013c248d4c137d5c3841f9ac7191e7507400e190af9078430696a4",
+      "lastSyncedAt": "2026-07-13T03:51:05.880Z"
+    },
+    "coverage/services/userService.js.html": {
+      "owner": "core",
+      "coreHash": "1077507c2dc8f6d3da8b5c0b194c8062fc9ef45bc8b732141ca440ef64527c33",
+      "appliedHash": "1077507c2dc8f6d3da8b5c0b194c8062fc9ef45bc8b732141ca440ef64527c33",
+      "lastSyncedAt": "2026-07-13T03:51:05.886Z"
+    },
+    "coverage/sort-arrow-sprite.png": {
+      "owner": "core",
+      "coreHash": "42c895355f9838ede83fdfdca90127d8471aefed5ecf5342374f65ec7c3f10ab",
+      "appliedHash": "42c895355f9838ede83fdfdca90127d8471aefed5ecf5342374f65ec7c3f10ab",
+      "lastSyncedAt": "2026-07-10T21:56:56.619Z"
+    },
+    "coverage/sorter.js": {
+      "owner": "core",
+      "coreHash": "f8cc5d157379d844fd695ad567b6c29b3c1f0812964ddf6f95c26327e434bab5",
+      "appliedHash": "f8cc5d157379d844fd695ad567b6c29b3c1f0812964ddf6f95c26327e434bab5",
+      "lastSyncedAt": "2026-07-10T21:56:56.623Z"
+    },
+    "coverage/store/appConfigStore.js.html": {
+      "owner": "core",
+      "coreHash": "13f2df2564c21fe9fde253ab2d0d49839b1c7d98fb35eba8c19ffbe426231301",
+      "appliedHash": "13f2df2564c21fe9fde253ab2d0d49839b1c7d98fb35eba8c19ffbe426231301",
+      "lastSyncedAt": "2026-07-13T03:51:05.891Z"
+    },
+    "coverage/store/authStore.js.html": {
+      "owner": "core",
+      "coreHash": "3f71fcb5c5e4c550e1dd906775f2caeda39f5bdfc0e69b52a1c05d67468ee4e4",
+      "appliedHash": "3f71fcb5c5e4c550e1dd906775f2caeda39f5bdfc0e69b52a1c05d67468ee4e4",
+      "lastSyncedAt": "2026-07-13T03:51:05.896Z"
+    },
+    "coverage/store/index.html": {
+      "owner": "core",
+      "coreHash": "d40ca56ca0b84a10c0e9dccbe50577422f65ab1964ab467d198b5b9a59d7e328",
+      "appliedHash": "d40ca56ca0b84a10c0e9dccbe50577422f65ab1964ab467d198b5b9a59d7e328",
+      "lastSyncedAt": "2026-07-13T03:51:05.901Z"
+    },
+    "coverage/store/portalStore.js.html": {
+      "owner": "core",
+      "coreHash": "53e0cb1b585fa96ed774d228b9abd1f4476e73ef73809ea88f5f516395e3cb63",
+      "appliedHash": "53e0cb1b585fa96ed774d228b9abd1f4476e73ef73809ea88f5f516395e3cb63",
+      "lastSyncedAt": "2026-07-13T03:51:05.905Z"
+    },
+    "coverage/utils/formatters.js.html": {
+      "owner": "core",
+      "coreHash": "5c61d0f6abed0d2d7e577501db50fc6f8db753509f2b95244335a6a1baef43fc",
+      "appliedHash": "5c61d0f6abed0d2d7e577501db50fc6f8db753509f2b95244335a6a1baef43fc",
+      "lastSyncedAt": "2026-07-13T03:51:05.910Z"
+    },
+    "coverage/utils/index.html": {
+      "owner": "core",
+      "coreHash": "45400a812a9d61ddbd42f08f2a774fd01432f6833125eda1d631637d893683cc",
+      "appliedHash": "45400a812a9d61ddbd42f08f2a774fd01432f6833125eda1d631637d893683cc",
+      "lastSyncedAt": "2026-07-13T03:51:05.915Z"
+    },
+    "firestore.indexes.json": {
+      "owner": "core",
+      "coreHash": "989fcbfa133acf9f8a86c58299e6b0f84a91ec57075733a25dbc500d25c59398",
+      "appliedHash": "989fcbfa133acf9f8a86c58299e6b0f84a91ec57075733a25dbc500d25c59398",
+      "lastSyncedAt": "2026-07-10T21:56:56.654Z"
+    },
+    "playwright.config.js": {
+      "owner": "core",
+      "coreHash": "52128d234ed43c18cd192bfa57c77a506183d37b547993f777482d3a2854d24a",
+      "appliedHash": "52128d234ed43c18cd192bfa57c77a506183d37b547993f777482d3a2854d24a",
+      "lastSyncedAt": "2026-07-10T21:56:56.662Z"
+    },
+    "src/components/client/cart/CartDrawer.jsx": {
+      "owner": "core",
+      "coreHash": "f4c6f0d583f5bc7f105bd2bae53678a26b66f4e8f1a47cfdcc921c23e8011bd3",
+      "appliedHash": "f4c6f0d583f5bc7f105bd2bae53678a26b66f4e8f1a47cfdcc921c23e8011bd3",
+      "lastSyncedAt": "2026-07-13T03:51:05.946Z"
+    },
+    "src/components/client/cart/CartDrawer.jsx.clean": {
+      "owner": "core",
+      "coreHash": "f7720832fdf74b36aa55b46ddb41199e2306860de41a7562256b3407ea33a288",
+      "appliedHash": "f7720832fdf74b36aa55b46ddb41199e2306860de41a7562256b3407ea33a288",
+      "lastSyncedAt": "2026-07-13T03:51:05.951Z"
+    },
+    "src/features/billing/hooks/useBilling.js": {
+      "owner": "core",
+      "coreHash": "f3332c94cf5e7f2410a89b1da6661ac6b0580ddae6beb6efb5eb03fa285268a2",
+      "appliedHash": "f3332c94cf5e7f2410a89b1da6661ac6b0580ddae6beb6efb5eb03fa285268a2",
+      "lastSyncedAt": "2026-07-10T21:56:56.694Z"
+    },
+    "src/features/billing/index.js": {
+      "owner": "core",
+      "coreHash": "8029a7cebde742d2a58258924efd9c1269a9a0a32440d8e90a9dc9bc406235e1",
+      "appliedHash": "8029a7cebde742d2a58258924efd9c1269a9a0a32440d8e90a9dc9bc406235e1",
+      "lastSyncedAt": "2026-07-10T21:56:56.699Z"
+    },
+    "src/features/billing/services/billingService.js": {
+      "owner": "core",
+      "coreHash": "29ca5169fb591d22e4c4dc183f3cfa19ac8db781da19248b121a9db03933cc79",
+      "appliedHash": "29ca5169fb591d22e4c4dc183f3cfa19ac8db781da19248b121a9db03933cc79",
+      "lastSyncedAt": "2026-07-10T21:56:56.704Z"
+    },
+    "src/features/credits/hooks/useCredits.js": {
+      "owner": "core",
+      "coreHash": "94934aa7703e70869863f2c2fa05a49c7312e8ae29f352a3230c0259727c839f",
+      "appliedHash": "94934aa7703e70869863f2c2fa05a49c7312e8ae29f352a3230c0259727c839f",
+      "lastSyncedAt": "2026-07-13T03:51:06.075Z"
+    },
+    "src/features/credits/index.js": {
+      "owner": "core",
+      "coreHash": "ab4b0249bbb878db0e57ffdc1d0798b515dcb3b5e2d81ff839126b944b691936",
+      "appliedHash": "ab4b0249bbb878db0e57ffdc1d0798b515dcb3b5e2d81ff839126b944b691936",
+      "lastSyncedAt": "2026-07-13T03:51:06.079Z"
+    },
+    "src/features/credits/services/creditService.js": {
+      "owner": "core",
+      "coreHash": "73cc289764ef7d2e70c6a213a5825466dce7185454210921fbbc079eacdbe74e",
+      "appliedHash": "73cc289764ef7d2e70c6a213a5825466dce7185454210921fbbc079eacdbe74e",
+      "lastSyncedAt": "2026-07-13T03:51:06.094Z"
+    },
+    "src/features/inventory/components/CategoryManager.jsx": {
+      "owner": "core",
+      "coreHash": "9b3ba33e3cbbce0b8003225b07f3706a9fd2395d0889aa8678909aab8935fca8",
+      "appliedHash": "9b3ba33e3cbbce0b8003225b07f3706a9fd2395d0889aa8678909aab8935fca8",
+      "lastSyncedAt": "2026-07-13T03:51:06.108Z"
+    },
+    "src/features/inventory/components/ProductFormModal.jsx": {
+      "owner": "core",
+      "coreHash": "07c11952668ef4b328578d873e8f6529d44617cbe4179671f6a8234b1f044041",
+      "appliedHash": "07c11952668ef4b328578d873e8f6529d44617cbe4179671f6a8234b1f044041",
+      "lastSyncedAt": "2026-07-13T03:51:06.113Z"
+    },
+    "src/features/inventory/hooks/useInventory.js": {
+      "owner": "core",
+      "coreHash": "7b0fa462948b99c358f578cc288aabfeb5d6ed9c58ba1011705ee7c1754fad2d",
+      "appliedHash": "7b0fa462948b99c358f578cc288aabfeb5d6ed9c58ba1011705ee7c1754fad2d",
+      "lastSyncedAt": "2026-07-13T03:51:06.118Z"
+    },
+    "src/features/inventory/index.js": {
+      "owner": "core",
+      "coreHash": "d7c20f957d5adcf59706208c5459c897bdb8cfceae9ed12813f28d0c7d5b76d5",
+      "appliedHash": "d7c20f957d5adcf59706208c5459c897bdb8cfceae9ed12813f28d0c7d5b76d5",
+      "lastSyncedAt": "2026-07-13T03:51:06.123Z"
+    },
+    "src/features/inventory/services/inventoryService.js": {
+      "owner": "core",
+      "coreHash": "ee88777e289cde59700aec8aacf95ce85ab9e914e03dac5e302e5028f554b7c7",
+      "appliedHash": "ee88777e289cde59700aec8aacf95ce85ab9e914e03dac5e302e5028f554b7c7",
+      "lastSyncedAt": "2026-07-13T03:51:06.144Z"
+    },
+    "src/features/orders/components/OrderCard.jsx": {
+      "owner": "core",
+      "coreHash": "4f71b39aa97e8ca98566c56e0add9336fe397d667bee87ba94ee2ad9f19d6f92",
+      "appliedHash": "4f71b39aa97e8ca98566c56e0add9336fe397d667bee87ba94ee2ad9f19d6f92",
+      "lastSyncedAt": "2026-07-10T21:56:56.743Z"
+    },
+    "src/features/orders/hooks/useOrders.js": {
+      "owner": "core",
+      "coreHash": "e5d08b6d17349e755e965df770acd79b9c4df659b293f4bacad92b35421948a5",
+      "appliedHash": "e5d08b6d17349e755e965df770acd79b9c4df659b293f4bacad92b35421948a5",
+      "lastSyncedAt": "2026-07-10T21:56:56.747Z"
+    },
+    "src/features/orders/index.js": {
+      "owner": "core",
+      "coreHash": "7f61eaa043bc096cabc080d445a1aacb0b1b3767a5a580f451e4f6a83cda9b8c",
+      "appliedHash": "7f61eaa043bc096cabc080d445a1aacb0b1b3767a5a580f451e4f6a83cda9b8c",
+      "lastSyncedAt": "2026-07-10T21:56:56.751Z"
+    },
+    "src/features/orders/services/orderService.js": {
+      "owner": "core",
+      "coreHash": "618e59966fa9d5ee953c7f8d5dbeadb88cbdcab00fcb1432bf2b9e202d9faa69",
+      "appliedHash": "618e59966fa9d5ee953c7f8d5dbeadb88cbdcab00fcb1432bf2b9e202d9faa69",
+      "lastSyncedAt": "2026-07-13T03:51:06.160Z"
+    },
+    "src/features/sales/components/POSCustomItemForm.jsx": {
+      "owner": "core",
+      "coreHash": "c8c1d9f22a7f9c738b7fad6c111807b9d08c6138b91d8afae99e16d0136db05b",
+      "appliedHash": "c8c1d9f22a7f9c738b7fad6c111807b9d08c6138b91d8afae99e16d0136db05b",
+      "lastSyncedAt": "2026-07-10T21:56:56.760Z"
+    },
+    "src/features/sales/components/POSReceiptModal.jsx": {
+      "owner": "core",
+      "coreHash": "cea63aca5999e08afc098d3ab65901b53a0e572c6f1d2e67e69054ebc41116a5",
+      "appliedHash": "cea63aca5999e08afc098d3ab65901b53a0e572c6f1d2e67e69054ebc41116a5",
+      "lastSyncedAt": "2026-07-10T21:56:56.765Z"
+    },
+    "src/features/sales/components/POSVariantModal.jsx": {
+      "owner": "core",
+      "coreHash": "1a89ef3bece280675ed658eb3d1c11cdf9ae3d86b8299228b2b887f044fbe379",
+      "appliedHash": "1a89ef3bece280675ed658eb3d1c11cdf9ae3d86b8299228b2b887f044fbe379",
+      "lastSyncedAt": "2026-07-10T21:56:56.769Z"
+    },
+    "src/features/sales/hooks/useOfflineSaleSync.js": {
+      "owner": "core",
+      "coreHash": "97e5f6175917fcdba9afef6dbca944e8b9d5af0d67c92a76d707c65fcabc1764",
+      "appliedHash": "97e5f6175917fcdba9afef6dbca944e8b9d5af0d67c92a76d707c65fcabc1764",
+      "lastSyncedAt": "2026-07-10T21:56:56.773Z"
+    },
+    "src/features/sales/hooks/usePOSCart.js": {
+      "owner": "core",
+      "coreHash": "53c442bbd649395faf3ef663b319fe4b910ac3885aabdfc07f2ef81b7b1d884d",
+      "appliedHash": "53c442bbd649395faf3ef663b319fe4b910ac3885aabdfc07f2ef81b7b1d884d",
+      "lastSyncedAt": "2026-07-10T21:56:56.777Z"
+    },
+    "src/features/sales/hooks/usePOSCheckout.js": {
+      "owner": "core",
+      "coreHash": "63a7cf6353fc3c983002eb869963655fc1dfc071f3846dad13d623917e850bf9",
+      "appliedHash": "63a7cf6353fc3c983002eb869963655fc1dfc071f3846dad13d623917e850bf9",
+      "lastSyncedAt": "2026-07-10T21:56:56.781Z"
+    },
+    "src/features/sales/index.js": {
+      "owner": "core",
+      "coreHash": "1491cb9f01afcb081724b832f45fbcafe30d553307ddcdaa2bb7026c8a1e358f",
+      "appliedHash": "1491cb9f01afcb081724b832f45fbcafe30d553307ddcdaa2bb7026c8a1e358f",
+      "lastSyncedAt": "2026-07-10T21:56:56.786Z"
+    },
+    "src/features/sales/services/salesService.js": {
+      "owner": "core",
+      "coreHash": "ae8c6eca236d8cb178c8ba7bfae246f0061c24466d7ab8e46d3ea3afb955ddbf",
+      "appliedHash": "ae8c6eca236d8cb178c8ba7bfae246f0061c24466d7ab8e46d3ea3afb955ddbf",
+      "lastSyncedAt": "2026-07-13T03:51:06.174Z"
+    },
+    "src/hooks/useAppConfigSync.js": {
+      "owner": "core",
+      "coreHash": "e259ca55694b05e00cb31b81f421108c90ab8eba446812c578d3ecd8f0b16c33",
+      "appliedHash": "e259ca55694b05e00cb31b81f421108c90ab8eba446812c578d3ecd8f0b16c33",
+      "lastSyncedAt": "2026-07-13T17:43:54.027Z"
+    },
+    "src/hooks/useCartRecommendations.js": {
+      "owner": "core",
+      "coreHash": "095e968b536e216406e26c7d0edb371d59be683827441e7b2be107c42267593b",
+      "appliedHash": "095e968b536e216406e26c7d0edb371d59be683827441e7b2be107c42267593b",
+      "lastSyncedAt": "2026-07-13T03:51:06.183Z"
+    },
+    "src/hooks/useNotificationCenter.js": {
+      "owner": "core",
+      "coreHash": "7594126e96d9d194eba898d564be4fe09da0f1ce4330fd09e25035a29d84ccf9",
+      "appliedHash": "7594126e96d9d194eba898d564be4fe09da0f1ce4330fd09e25035a29d84ccf9",
+      "lastSyncedAt": "2026-07-13T03:51:06.188Z"
+    },
+    "src/pages/admin/AdminSales.jsx": {
+      "owner": "core",
+      "coreHash": "5b36d0997490d9c85187160de557154d3fd0aa62788e0560323cb58fd3b015e8",
+      "appliedHash": "5b36d0997490d9c85187160de557154d3fd0aa62788e0560323cb58fd3b015e8",
+      "lastSyncedAt": "2026-07-13T03:51:06.234Z"
+    },
+    "src/pages/admin/settings/sections/DeveloperBillingPanel.jsx": {
+      "owner": "core",
+      "coreHash": "33e49eef164b6d5c8f30962bf81b78072c6bfe47997f08e172b3dbfdbe469ad7",
+      "appliedHash": "33e49eef164b6d5c8f30962bf81b78072c6bfe47997f08e172b3dbfdbe469ad7",
+      "lastSyncedAt": "2026-07-10T21:56:56.844Z"
+    },
+    "src/pages/client/ClientFavorites.jsx": {
+      "owner": "core",
+      "coreHash": "82b95960784e657a6c20e684b147c97e4bae97b04d633c14213136b56d90fe43",
+      "appliedHash": "82b95960784e657a6c20e684b147c97e4bae97b04d633c14213136b56d90fe43",
+      "lastSyncedAt": "2026-07-13T03:51:06.260Z"
+    },
+    "src/pages/client/ClientOrders.jsx": {
+      "owner": "core",
+      "coreHash": "ca3effae28afd9e18e02af7ade26fec982f77db7c1154d713c93a5ae897652af",
+      "appliedHash": "ca3effae28afd9e18e02af7ade26fec982f77db7c1154d713c93a5ae897652af",
+      "lastSyncedAt": "2026-07-13T17:43:54.047Z"
+    },
+    "src/pages/portal/PortalBodega.jsx": {
+      "owner": "core",
+      "coreHash": "5c1121be7ab38eacb0a775fef1c4d450a586755c2d60de9bc34efc9e0a401763",
+      "appliedHash": "5c1121be7ab38eacb0a775fef1c4d450a586755c2d60de9bc34efc9e0a401763",
+      "lastSyncedAt": "2026-07-13T03:51:06.278Z"
+    },
+    "src/pages/portal/PortalVendedor.jsx": {
+      "owner": "core",
+      "coreHash": "5aeca321707a1f52338a17a924467e8ecdea0b03b3fd20d22bc21c2e1f2c3f43",
+      "appliedHash": "5aeca321707a1f52338a17a924467e8ecdea0b03b3fd20d22bc21c2e1f2c3f43",
+      "lastSyncedAt": "2026-07-13T03:51:06.283Z"
+    },
+    "src/schemas/appConfigSchema.js": {
+      "owner": "core",
+      "coreHash": "3e58fbde4fdc9a99655f08180935883caac27a1cafd9633149e270fcdac0e1cd",
+      "appliedHash": "3e58fbde4fdc9a99655f08180935883caac27a1cafd9633149e270fcdac0e1cd",
+      "lastSyncedAt": "2026-07-13T17:43:54.060Z"
+    },
+    "src/services/notificationCenterService.js": {
+      "owner": "core",
+      "coreHash": "e5b7a3c72a7b6c33ae7e4c76b9964c3cc84c939e37f100e1ee6797a20870d5cb",
+      "appliedHash": "e5b7a3c72a7b6c33ae7e4c76b9964c3cc84c939e37f100e1ee6797a20870d5cb",
+      "lastSyncedAt": "2026-07-13T03:51:06.302Z"
+    },
+    "tests/config/app-ventas.config.js": {
+      "owner": "core",
+      "coreHash": "e5f2915713fc21845dc4aad2c76f43edf9eda5a86b2a74f9cc8df3046f5df78f",
+      "appliedHash": "e5f2915713fc21845dc4aad2c76f43edf9eda5a86b2a74f9cc8df3046f5df78f",
+      "lastSyncedAt": "2026-07-13T03:51:06.319Z"
+    },
+    "tests/criticalServices.spec.js": {
+      "owner": "core",
+      "coreHash": "114eab505e2ffdac1b872519628c62f2d1d1066574679754138af75677ef3543",
+      "appliedHash": "114eab505e2ffdac1b872519628c62f2d1d1066574679754138af75677ef3543",
+      "lastSyncedAt": "2026-07-10T21:56:56.913Z"
+    },
+    "tests/helpers/checkout.helpers.js": {
+      "owner": "core",
+      "coreHash": "314e63d690a958f341c2de78f4d9c827f52738843b841ab17232cb656f79ba51",
+      "appliedHash": "314e63d690a958f341c2de78f4d9c827f52738843b841ab17232cb656f79ba51",
+      "lastSyncedAt": "2026-07-13T03:51:06.323Z"
+    },
+    "tests/orderSecurity.spec.js": {
+      "owner": "core",
+      "coreHash": "38cff0287fb981ef9f80ab647251ce85d5713e01958e79c010d29f3872a88768",
+      "appliedHash": "38cff0287fb981ef9f80ab647251ce85d5713e01958e79c010d29f3872a88768",
+      "lastSyncedAt": "2026-07-10T21:56:56.922Z"
+    },
+    "tests/unit/billingService.spec.js": {
+      "owner": "core",
+      "coreHash": "11dedde8f545fdd14414e0d973c1406523b5eda09624e6d808b75714054060a4",
+      "appliedHash": "11dedde8f545fdd14414e0d973c1406523b5eda09624e6d808b75714054060a4",
+      "lastSyncedAt": "2026-07-10T21:56:56.926Z"
+    },
+    "tests/unit/creditService.spec.js": {
+      "owner": "core",
+      "coreHash": "06abf513e52c37e63b5ccbd2f7dde56d07932711bb179d47da5b178bea5247f9",
+      "appliedHash": "06abf513e52c37e63b5ccbd2f7dde56d07932711bb179d47da5b178bea5247f9",
+      "lastSyncedAt": "2026-07-13T03:51:06.328Z"
+    },
+    "tests/unit/orderService.extended.spec.js": {
+      "owner": "core",
+      "coreHash": "5dbabf17d68628ad58171c6d1e47e1d15d88d2ee6371e748fc741a1b580fcc22",
+      "appliedHash": "5dbabf17d68628ad58171c6d1e47e1d15d88d2ee6371e748fc741a1b580fcc22",
+      "lastSyncedAt": "2026-07-13T03:51:06.337Z"
+    },
+    "tests/unit/orderService.spec.js": {
+      "owner": "core",
+      "coreHash": "938fa40a5af65db9159ebe376b3b9bcadf58f25a07c0ea580067079cb8782b24",
+      "appliedHash": "938fa40a5af65db9159ebe376b3b9bcadf58f25a07c0ea580067079cb8782b24",
+      "lastSyncedAt": "2026-07-10T21:56:56.938Z"
+    },
+    "vitest.config.js": {
+      "owner": "core",
+      "coreHash": "d0975c6a8aba7761907a4727435d2733af3ea964fa328e651b1957f199c29989",
+      "appliedHash": "d0975c6a8aba7761907a4727435d2733af3ea964fa328e651b1957f199c29989",
+      "lastSyncedAt": "2026-07-10T21:56:56.942Z"
+    },
+    ".github/workflows/ci.yml": {
+      "owner": "core",
+      "coreHash": "a3d7db6d3d4af481291d8f01ecfdaca92550bdd109302711194f29e7cd9ce506",
+      "appliedHash": "a3d7db6d3d4af481291d8f01ecfdaca92550bdd109302711194f29e7cd9ce506",
+      "lastSyncedAt": "2026-07-13T03:51:05.653Z"
+    },
+    "coverage/features/inventory/services/index.html": {
+      "owner": "core",
+      "coreHash": "a7604b3a8c95bb85f28c840df1e9ee311ba95adf74be3b6c10f6a9992646471b",
+      "appliedHash": "a7604b3a8c95bb85f28c840df1e9ee311ba95adf74be3b6c10f6a9992646471b",
+      "lastSyncedAt": "2026-07-13T03:51:05.776Z"
+    },
+    "coverage/features/inventory/services/inventoryService.js.html": {
+      "owner": "core",
+      "coreHash": "dcbdb5f003057263f74345a8c11457d68493363b9fe18fd267ab332b069f57f6",
+      "appliedHash": "dcbdb5f003057263f74345a8c11457d68493363b9fe18fd267ab332b069f57f6",
+      "lastSyncedAt": "2026-07-13T03:51:05.783Z"
+    },
+    "coverage/features/sales/services/index.html": {
+      "owner": "core",
+      "coreHash": "2a24976e3376241ee0982c4356ffb64fdc7456e81629c6581d7f2c411705cd2d",
+      "appliedHash": "2a24976e3376241ee0982c4356ffb64fdc7456e81629c6581d7f2c411705cd2d",
+      "lastSyncedAt": "2026-07-13T03:51:05.825Z"
+    },
+    "coverage/features/sales/services/salesService.js.html": {
+      "owner": "core",
+      "coreHash": "a78db62ba86f98c222bb9ada68d291111f3c164861fc193ffdedf2ad78338f39",
+      "appliedHash": "a78db62ba86f98c222bb9ada68d291111f3c164861fc193ffdedf2ad78338f39",
+      "lastSyncedAt": "2026-07-13T03:51:05.831Z"
+    },
+    "src/config/features.json": {
+      "owner": "core",
+      "coreHash": "93f1e5610020c4b127163b6e982bd548a1b5e678b8711a9140d74fc949b3637c",
+      "appliedHash": "93f1e5610020c4b127163b6e982bd548a1b5e678b8711a9140d74fc949b3637c",
+      "lastSyncedAt": "2026-07-13T03:51:05.965Z"
+    },
+    "src/core/auth/PermissionRegistry.js": {
+      "owner": "core",
+      "coreHash": "f71a803dfdaa817e4aac9293bdb580502155f284a1207fa51cb880aa4be93f64",
+      "appliedHash": "f71a803dfdaa817e4aac9293bdb580502155f284a1207fa51cb880aa4be93f64",
+      "lastSyncedAt": "2026-07-13T03:51:05.971Z"
+    },
+    "src/core/config/FeatureRegistry.js": {
+      "owner": "core",
+      "coreHash": "fbddabb0577d33684d26c69344542ab9240c431af92881112c5b01c99b9ba310",
+      "appliedHash": "fbddabb0577d33684d26c69344542ab9240c431af92881112c5b01c99b9ba310",
+      "lastSyncedAt": "2026-07-13T03:51:05.975Z"
+    },
+    "src/core/config/NavigationRegistry.js": {
+      "owner": "core",
+      "coreHash": "0b5d2e0ed8341cb84e2f1fc3770ebbd5550670fd25f0e46aea69d1f46d93c59d",
+      "appliedHash": "0b5d2e0ed8341cb84e2f1fc3770ebbd5550670fd25f0e46aea69d1f46d93c59d",
+      "lastSyncedAt": "2026-07-13T03:51:05.980Z"
+    },
+    "src/core/contracts/dbContract.js": {
+      "owner": "core",
+      "coreHash": "72979a20be131cf0b2ac3adc2af8f4934d043f4aa8ecae59785f89c769aee015",
+      "appliedHash": "72979a20be131cf0b2ac3adc2af8f4934d043f4aa8ecae59785f89c769aee015",
+      "lastSyncedAt": "2026-07-13T03:51:05.985Z"
+    },
+    "src/core/contracts/notificationsContract.js": {
+      "owner": "core",
+      "coreHash": "e53711be1612812175f8a77c3145c601f49682fd3a08b14d3124e67342d88606",
+      "appliedHash": "e53711be1612812175f8a77c3145c601f49682fd3a08b14d3124e67342d88606",
+      "lastSyncedAt": "2026-07-13T03:51:05.991Z"
+    },
+    "src/core/contracts/permissionsContract.js": {
+      "owner": "core",
+      "coreHash": "14766b2fd0299bf892b95a5c1d798d5f383ac682c5f1c7c91dec2334c6ede077",
+      "appliedHash": "14766b2fd0299bf892b95a5c1d798d5f383ac682c5f1c7c91dec2334c6ede077",
+      "lastSyncedAt": "2026-07-13T03:51:05.995Z"
+    },
+    "src/core/contracts/telemetryContract.js": {
+      "owner": "core",
+      "coreHash": "3b1f1440646520348ac4903f5ff64ce6336bacc5d2b33ffb02e6b2124df03e2a",
+      "appliedHash": "3b1f1440646520348ac4903f5ff64ce6336bacc5d2b33ffb02e6b2124df03e2a",
+      "lastSyncedAt": "2026-07-13T03:51:06.000Z"
+    },
+    "src/core/eventbus/EventBus.js": {
+      "owner": "core",
+      "coreHash": "30ef00e27ea23d435e39983468855bc48ee98d92642e655bf51a445ddf1506f6",
+      "appliedHash": "30ef00e27ea23d435e39983468855bc48ee98d92642e655bf51a445ddf1506f6",
+      "lastSyncedAt": "2026-07-13T03:51:06.005Z"
+    },
+    "src/core/eventbus/EventRegistry.js": {
+      "owner": "core",
+      "coreHash": "84414c10d039a860472f3001bb4c00f2e13652a19260593754a8a3be5eb6e6a7",
+      "appliedHash": "84414c10d039a860472f3001bb4c00f2e13652a19260593754a8a3be5eb6e6a7",
+      "lastSyncedAt": "2026-07-13T03:51:06.014Z"
+    },
+    "src/core/events/orderCompleted/v1.js": {
+      "owner": "core",
+      "coreHash": "38be300d992f23a323834fea5b6fa9d6948c55f805b4725532b72fc8c2d1e6e6",
+      "appliedHash": "38be300d992f23a323834fea5b6fa9d6948c55f805b4725532b72fc8c2d1e6e6",
+      "lastSyncedAt": "2026-07-13T03:51:06.020Z"
+    },
+    "src/core/events/saleCompleted/v1.js": {
+      "owner": "core",
+      "coreHash": "aa52b904c86b0dbe8d06145eadfa05e6fdeb24a18695ce082516a494542323d3",
+      "appliedHash": "aa52b904c86b0dbe8d06145eadfa05e6fdeb24a18695ce082516a494542323d3",
+      "lastSyncedAt": "2026-07-13T03:51:06.026Z"
+    },
+    "src/core/kernel/ApplicationKernel.js": {
+      "owner": "core",
+      "coreHash": "778f373eb9c41c39f75d0df36322d06e439fb97579933e9b069d621072823eb6",
+      "appliedHash": "778f373eb9c41c39f75d0df36322d06e439fb97579933e9b069d621072823eb6",
+      "lastSyncedAt": "2026-07-13T03:51:06.041Z"
+    },
+    "src/core/kernel/FeatureHealthManager.js": {
+      "owner": "core",
+      "coreHash": "ff67fba8127c5b7e5f8d6e1c3bf44e906535894ecc0ee6b63d3351aa43831ea3",
+      "appliedHash": "ff67fba8127c5b7e5f8d6e1c3bf44e906535894ecc0ee6b63d3351aa43831ea3",
+      "lastSyncedAt": "2026-07-13T03:51:06.046Z"
+    },
+    "src/core/kernel/FeatureLifecycleManager.js": {
+      "owner": "core",
+      "coreHash": "d1111fc869298a77d68864d757b06b6d0cdca0c459f09deb2e44f7a07d2e476f",
+      "appliedHash": "d1111fc869298a77d68864d757b06b6d0cdca0c459f09deb2e44f7a07d2e476f",
+      "lastSyncedAt": "2026-07-13T03:51:06.052Z"
+    },
+    "src/core/kernel/FeatureManifestSchema.js": {
+      "owner": "core",
+      "coreHash": "ec47d0a5651ce0cc6719852e2ec0850a7c281f6eb01c46aa19edfdbda1bc00f7",
+      "appliedHash": "ec47d0a5651ce0cc6719852e2ec0850a7c281f6eb01c46aa19edfdbda1bc00f7",
+      "lastSyncedAt": "2026-07-13T03:51:06.056Z"
+    },
+    "src/core/kernel/FeatureSandboxContext.js": {
+      "owner": "core",
+      "coreHash": "1417af1c0abae89587f38c248d4fdc9a033e853948f51a6b4b1c34e888deea48",
+      "appliedHash": "1417af1c0abae89587f38c248d4fdc9a033e853948f51a6b4b1c34e888deea48",
+      "lastSyncedAt": "2026-07-13T03:51:06.061Z"
+    },
+    "src/core/providers/firestoreDbProvider.js": {
+      "owner": "core",
+      "coreHash": "a27526ac0f863a70deef2e36462c82170657e2aba293683201ddf4d16a2aeccc",
+      "appliedHash": "a27526ac0f863a70deef2e36462c82170657e2aba293683201ddf4d16a2aeccc",
+      "lastSyncedAt": "2026-07-13T03:51:06.065Z"
+    },
+    "src/features/billing/module.js": {
+      "owner": "core",
+      "coreHash": "75968a6164d2ca1d3e41bed0f26474bf5b5c464a86f2751849e37585e7dcbd6b",
+      "appliedHash": "75968a6164d2ca1d3e41bed0f26474bf5b5c464a86f2751849e37585e7dcbd6b",
+      "lastSyncedAt": "2026-07-13T03:51:06.070Z"
+    },
+    "src/features/credits/module.js": {
+      "owner": "core",
+      "coreHash": "2c4353fe31b594025c8914c501715c1bac63efc434a2f91830cb92415f301a8e",
+      "appliedHash": "2c4353fe31b594025c8914c501715c1bac63efc434a2f91830cb92415f301a8e",
+      "lastSyncedAt": "2026-07-13T03:51:06.084Z"
+    },
+    "src/features/credits/routes.jsx": {
+      "owner": "core",
+      "coreHash": "2b804ff2d494cf57ccff662d3d1f66e64530f3a6d1ba8ea18de699ef86f78339",
+      "appliedHash": "2b804ff2d494cf57ccff662d3d1f66e64530f3a6d1ba8ea18de699ef86f78339",
+      "lastSyncedAt": "2026-07-13T03:51:06.088Z"
+    },
+    "src/features/delivery/module.js": {
+      "owner": "core",
+      "coreHash": "9c50784ae09e7ec581afb02a5db35b698127d55e1c0b8edb544fad511883ade8",
+      "appliedHash": "9c50784ae09e7ec581afb02a5db35b698127d55e1c0b8edb544fad511883ade8",
+      "lastSyncedAt": "2026-07-13T03:51:06.099Z"
+    },
+    "src/features/delivery/routes.jsx": {
+      "owner": "core",
+      "coreHash": "6e7bbcb1323871d999bcb43940104123be28a31899dea4cfd54b0f2074e7c37e",
+      "appliedHash": "6e7bbcb1323871d999bcb43940104123be28a31899dea4cfd54b0f2074e7c37e",
+      "lastSyncedAt": "2026-07-13T03:51:06.104Z"
+    },
+    "src/features/inventory/module.js": {
+      "owner": "core",
+      "coreHash": "86cdd3cb03975f6b63569664c714fa7ee3fe7f408611792b4c9e3f8e51c90e43",
+      "appliedHash": "86cdd3cb03975f6b63569664c714fa7ee3fe7f408611792b4c9e3f8e51c90e43",
+      "lastSyncedAt": "2026-07-13T03:51:06.128Z"
+    },
+    "src/features/inventory/routes.jsx": {
+      "owner": "core",
+      "coreHash": "43080010707e91817b3bbbd4e3cc127e38af2c77403464989d440256f7028cdf",
+      "appliedHash": "43080010707e91817b3bbbd4e3cc127e38af2c77403464989d440256f7028cdf",
+      "lastSyncedAt": "2026-07-13T03:51:06.132Z"
+    },
+    "src/features/inventory/services/inventoryInterface.js": {
+      "owner": "core",
+      "coreHash": "507addebbf45d6656269652bf75be5e57e89ef560879be6d3fcacb1675212a22",
+      "appliedHash": "507addebbf45d6656269652bf75be5e57e89ef560879be6d3fcacb1675212a22",
+      "lastSyncedAt": "2026-07-13T03:51:06.138Z"
+    },
+    "src/features/orders/module.js": {
+      "owner": "core",
+      "coreHash": "f49ab53a59136ef3852ce69476278a4febe908cbb6c4cb5d6e06f8887dba7922",
+      "appliedHash": "f49ab53a59136ef3852ce69476278a4febe908cbb6c4cb5d6e06f8887dba7922",
+      "lastSyncedAt": "2026-07-13T03:51:06.150Z"
+    },
+    "src/features/orders/routes.jsx": {
+      "owner": "core",
+      "coreHash": "2e19261cf01f0c033abf90ac89227209c63a3b732892d46c7009c1e6405af8f5",
+      "appliedHash": "2e19261cf01f0c033abf90ac89227209c63a3b732892d46c7009c1e6405af8f5",
+      "lastSyncedAt": "2026-07-13T03:51:06.155Z"
+    },
+    "src/features/sales/module.js": {
+      "owner": "core",
+      "coreHash": "4fca5e6a4c5bfbb8f947ce467d886aa28503ea10e32424f813a49eb728d5cdb3",
+      "appliedHash": "4fca5e6a4c5bfbb8f947ce467d886aa28503ea10e32424f813a49eb728d5cdb3",
+      "lastSyncedAt": "2026-07-13T03:51:06.164Z"
+    },
+    "src/features/sales/routes.jsx": {
+      "owner": "core",
+      "coreHash": "5dc2a93cbee1b6c9cfa78d78d2dbea9330f749d4ba9c2bf4de1a7ef57576acb3",
+      "appliedHash": "5dc2a93cbee1b6c9cfa78d78d2dbea9330f749d4ba9c2bf4de1a7ef57576acb3",
+      "lastSyncedAt": "2026-07-13T03:51:06.170Z"
+    },
+    "src/layouts/AdminLayout.jsx": {
+      "owner": "core",
+      "coreHash": "ecaa838023df90b919c8af082b1ca090345d0ccb7802811a08e34319764ea479",
+      "appliedHash": "ecaa838023df90b919c8af082b1ca090345d0ccb7802811a08e34319764ea479",
+      "lastSyncedAt": "2026-07-13T17:43:54.031Z"
+    },
+    "src/main.jsx": {
+      "owner": "core",
+      "coreHash": "b5f776dc49bcee7ac9d0cfda957934fdb8476be7682f42d366ee7ecd66960f0a",
+      "appliedHash": "b5f776dc49bcee7ac9d0cfda957934fdb8476be7682f42d366ee7ecd66960f0a",
+      "lastSyncedAt": "2026-07-13T03:51:06.197Z"
+    },
+    "src/routes/AppRoutes.jsx": {
+      "owner": "core",
+      "coreHash": "18ac8b04b37f236b24616954180929c69afc574fd1d7fc77bf1780e43d12eda9",
+      "appliedHash": "18ac8b04b37f236b24616954180929c69afc574fd1d7fc77bf1780e43d12eda9",
+      "lastSyncedAt": "2026-07-13T17:43:54.056Z"
+    },
+    "template.json": {
+      "owner": "core",
+      "coreHash": "3d124cd5135f682fed333a914ceab9cbf9aa30ad578eed890bae806e73ab6ab9",
+      "appliedHash": "3d124cd5135f682fed333a914ceab9cbf9aa30ad578eed890bae806e73ab6ab9",
+      "lastSyncedAt": "2026-07-13T03:51:06.315Z"
+    },
+    "tests/unit/inventoryService.spec.js": {
+      "owner": "core",
+      "coreHash": "6a669597b913b3d36f2c94b0ea2fa8c86bad88edadf97e50e529143fbb069b7f",
+      "appliedHash": "6a669597b913b3d36f2c94b0ea2fa8c86bad88edadf97e50e529143fbb069b7f",
+      "lastSyncedAt": "2026-07-13T03:51:06.333Z"
+    },
+    "tests/unit/salesService.spec.js": {
+      "owner": "core",
+      "coreHash": "c41d15d6252153c11d6941fe78192cd48642af092afa16b891916968a102db6c",
+      "appliedHash": "c41d15d6252153c11d6941fe78192cd48642af092afa16b891916968a102db6c",
+      "lastSyncedAt": "2026-07-13T03:51:06.342Z"
+    },
+    "src/components/admin/orders/OrderDeliveryPanel.jsx": {
+      "owner": "core",
+      "coreHash": "f704ca1cb72717ea3277443d831239819a449f45ee3ae3a1df8f2a7cd62dcab4",
+      "appliedHash": "f704ca1cb72717ea3277443d831239819a449f45ee3ae3a1df8f2a7cd62dcab4",
+      "lastSyncedAt": "2026-07-13T03:51:05.935Z"
+    },
+    "src/components/admin/settings/DeliveryCustomMessengerPanel.jsx": {
+      "owner": "core",
+      "coreHash": "ad2f58b1a869b222ce393468876b5886e01a53b1fbe40fa3ee9e19f7889e0c5f",
+      "appliedHash": "ad2f58b1a869b222ce393468876b5886e01a53b1fbe40fa3ee9e19f7889e0c5f",
+      "lastSyncedAt": "2026-07-13T03:51:05.941Z"
+    },
+    "src/pages/admin/AdminDeliveryPerformance.jsx": {
+      "owner": "core",
+      "coreHash": "28db3f73a58e373fd1df8cecb3410de72bc60049295e32c17b6770365bc8350f",
+      "appliedHash": "28db3f73a58e373fd1df8cecb3410de72bc60049295e32c17b6770365bc8350f",
+      "lastSyncedAt": "2026-07-13T03:51:06.206Z"
+    },
+    "src/pages/admin/AdminPortalQR.jsx": {
+      "owner": "core",
+      "coreHash": "8598b1158735118ea5067268b88e0c10efbe578645bbc48f272ea613a10e90eb",
+      "appliedHash": "8598b1158735118ea5067268b88e0c10efbe578645bbc48f272ea613a10e90eb",
+      "lastSyncedAt": "2026-07-13T03:51:06.226Z"
+    },
+    "src/pages/portal/PortalAuth.jsx": {
+      "owner": "core",
+      "coreHash": "4466bdacca18c9d612b2c0277615ce8e62b5eefa26016c1b505a30e4b6f598ff",
+      "appliedHash": "4466bdacca18c9d612b2c0277615ce8e62b5eefa26016c1b505a30e4b6f598ff",
+      "lastSyncedAt": "2026-07-13T03:51:06.274Z"
+    },
+    "src/components/ui/GuidedToast.jsx": {
+      "owner": "core",
+      "coreHash": "f70f1d93d482b9c9b8b11afc57c55a38fa6be95d46d49acbe3c0aa4a488653f2",
+      "appliedHash": "f70f1d93d482b9c9b8b11afc57c55a38fa6be95d46d49acbe3c0aa4a488653f2",
+      "lastSyncedAt": "2026-07-13T17:43:53.884Z"
+    },
+    "src/core/features/featureModuleLoader.js": {
+      "owner": "core",
+      "coreHash": "b4d14bd731b39035aba8330ea1c1a1cb47d4b3e96688023e98ce0c4fef13a218",
+      "appliedHash": "b4d14bd731b39035aba8330ea1c1a1cb47d4b3e96688023e98ce0c4fef13a218",
+      "lastSyncedAt": "2026-07-13T17:43:53.889Z"
+    },
+    "src/core/generated/core-manifest.generated.json": {
+      "owner": "core",
+      "coreHash": "104943aed379477dfda8f9621792a722a1ca5b1126a3fd6579758b9dbdaaa67a",
+      "appliedHash": "104943aed379477dfda8f9621792a722a1ca5b1126a3fd6579758b9dbdaaa67a",
+      "lastSyncedAt": "2026-07-13T17:43:53.894Z"
+    },
+    "src/core/generated/feature-catalog.generated.json": {
+      "owner": "core",
+      "coreHash": "681212bfbc548e3d6300c6e7de4571e1d7f29f98f8d54338aaf0fd81573d70c0",
+      "appliedHash": "681212bfbc548e3d6300c6e7de4571e1d7f29f98f8d54338aaf0fd81573d70c0",
+      "lastSyncedAt": "2026-07-13T17:43:53.900Z"
+    },
+    "src/core/generated/feature-defaults.generated.json": {
+      "owner": "core",
+      "coreHash": "0ad83d1d89051661e657b57beb642eca6f25f56afa11ab569610efbf4f6e2dbe",
+      "appliedHash": "0ad83d1d89051661e657b57beb642eca6f25f56afa11ab569610efbf4f6e2dbe",
+      "lastSyncedAt": "2026-07-13T17:43:53.904Z"
+    },
+    "src/features/customer-loyalty/api/CustomerLoyaltyRepository.js": {
+      "owner": "core",
+      "coreHash": "1df3d797ff3218663b00cd056034e401d2bf4fcf4a6358b739acb1ddc6692ead",
+      "appliedHash": "1df3d797ff3218663b00cd056034e401d2bf4fcf4a6358b739acb1ddc6692ead",
+      "lastSyncedAt": "2026-07-13T17:43:53.911Z"
+    },
+    "src/features/customer-loyalty/components/AdminCustomerLoyalty.jsx": {
+      "owner": "core",
+      "coreHash": "0bd3545dc7ee7be0072a9fee4d4f6a31b473896bc80dd27e06d08e4f4d84bf8e",
+      "appliedHash": "0bd3545dc7ee7be0072a9fee4d4f6a31b473896bc80dd27e06d08e4f4d84bf8e",
+      "lastSyncedAt": "2026-07-13T17:43:53.915Z"
+    },
+    "src/features/customer-loyalty/components/AdminView.jsx": {
+      "owner": "core",
+      "coreHash": "11b45cb66013bfe01e22d66137cf519e039ba5a69a74b4b974e7885b1539d903",
+      "appliedHash": "11b45cb66013bfe01e22d66137cf519e039ba5a69a74b4b974e7885b1539d903",
+      "lastSyncedAt": "2026-07-13T17:43:53.919Z"
+    },
+    "src/features/customer-loyalty/components/ClientCustomerLoyalty.jsx": {
+      "owner": "core",
+      "coreHash": "871cf4e71c2ccc7665ac10dd79510f6b91c3d57d219c7b16d2cfcb36a6a3e896",
+      "appliedHash": "871cf4e71c2ccc7665ac10dd79510f6b91c3d57d219c7b16d2cfcb36a6a3e896",
+      "lastSyncedAt": "2026-07-13T17:43:53.923Z"
+    },
+    "src/features/customer-loyalty/components/ClientView.jsx": {
+      "owner": "core",
+      "coreHash": "54c91cb8362913a6c5861bf8e3858624d55f34907d15c26be98edd7d7cda2af2",
+      "appliedHash": "54c91cb8362913a6c5861bf8e3858624d55f34907d15c26be98edd7d7cda2af2",
+      "lastSyncedAt": "2026-07-13T17:43:53.928Z"
+    },
+    "src/features/customer-loyalty/constants/index.js": {
+      "owner": "core",
+      "coreHash": "10917f20c2ee738b326aadb36c8b8cc80fe3c0018db07077cbac87d5ff4f90c5",
+      "appliedHash": "10917f20c2ee738b326aadb36c8b8cc80fe3c0018db07077cbac87d5ff4f90c5",
+      "lastSyncedAt": "2026-07-13T17:43:53.933Z"
+    },
+    "src/features/customer-loyalty/hooks/useCustomerLoyalty.js": {
+      "owner": "core",
+      "coreHash": "cf4e624a78769acca3cd9c29f804002ff33fc49187b25f32cbe5f3272ff69090",
+      "appliedHash": "cf4e624a78769acca3cd9c29f804002ff33fc49187b25f32cbe5f3272ff69090",
+      "lastSyncedAt": "2026-07-13T17:43:53.937Z"
+    },
+    "src/features/customer-loyalty/implementation.manifest.json": {
+      "owner": "core",
+      "coreHash": "4f98a4976a6cd8a8216b626a31632f2bea59517d89c79503afce2679a8b511fb",
+      "appliedHash": "4f98a4976a6cd8a8216b626a31632f2bea59517d89c79503afce2679a8b511fb",
+      "lastSyncedAt": "2026-07-13T17:43:53.941Z"
+    },
+    "src/features/customer-loyalty/index.js": {
+      "owner": "core",
+      "coreHash": "b1be2f30adcb73ff60362e0ded4c0fcfa2f9cdaabec0324bc6e540530072d0f8",
+      "appliedHash": "b1be2f30adcb73ff60362e0ded4c0fcfa2f9cdaabec0324bc6e540530072d0f8",
+      "lastSyncedAt": "2026-07-13T17:43:53.945Z"
+    },
+    "src/features/customer-loyalty/module.js": {
+      "owner": "core",
+      "coreHash": "520b8d89e0ee0d8fd278f0233696bef96e44b2ca138a919bb50c5b3e133222a8",
+      "appliedHash": "520b8d89e0ee0d8fd278f0233696bef96e44b2ca138a919bb50c5b3e133222a8",
+      "lastSyncedAt": "2026-07-13T17:43:53.951Z"
+    },
+    "src/features/customer-loyalty/routes.jsx": {
+      "owner": "core",
+      "coreHash": "51f210b1afdf39939a553276f39a8f3f4771c00e90434c9580c6059fd95c1bfb",
+      "appliedHash": "51f210b1afdf39939a553276f39a8f3f4771c00e90434c9580c6059fd95c1bfb",
+      "lastSyncedAt": "2026-07-13T17:43:53.955Z"
+    },
+    "src/features/customer-loyalty/schemas/CustomerLoyaltySchemas.js": {
+      "owner": "core",
+      "coreHash": "002cff3a6703c57e21dc7196abbe9c333fbfebd3397f46d9925cebb2862479e8",
+      "appliedHash": "002cff3a6703c57e21dc7196abbe9c333fbfebd3397f46d9925cebb2862479e8",
+      "lastSyncedAt": "2026-07-13T17:43:53.959Z"
+    },
+    "src/features/customer-loyalty/security/feature-security.json": {
+      "owner": "core",
+      "coreHash": "a1e837b2ea063491287623613f30ae95b7c75f527e7c5a72cecf6e57d7fdaf9d",
+      "appliedHash": "a1e837b2ea063491287623613f30ae95b7c75f527e7c5a72cecf6e57d7fdaf9d",
+      "lastSyncedAt": "2026-07-13T17:43:53.963Z"
+    },
+    "src/features/customer-loyalty/services/CustomerLoyaltyService.js": {
+      "owner": "core",
+      "coreHash": "9b8b85eee85f1f5157a7456f0e8e0eafdd4fbb5f7cd97054ab427cf7ce8e1066",
+      "appliedHash": "9b8b85eee85f1f5157a7456f0e8e0eafdd4fbb5f7cd97054ab427cf7ce8e1066",
+      "lastSyncedAt": "2026-07-13T17:43:53.968Z"
+    },
+    "src/features/hello-module/api/HelloModuleRepository.js": {
+      "owner": "core",
+      "coreHash": "ff2edb5927d6c9a86e8aa34049354871cc3481b34d39038e6a6776679e1be11e",
+      "appliedHash": "ff2edb5927d6c9a86e8aa34049354871cc3481b34d39038e6a6776679e1be11e",
+      "lastSyncedAt": "2026-07-13T17:43:53.974Z"
+    },
+    "src/features/hello-module/components/AdminHelloModule.jsx": {
+      "owner": "core",
+      "coreHash": "e41b4d1c9e69e5d690d1887e19da0e133c1c51d91eb972d33f173ac2781e7357",
+      "appliedHash": "e41b4d1c9e69e5d690d1887e19da0e133c1c51d91eb972d33f173ac2781e7357",
+      "lastSyncedAt": "2026-07-13T17:43:53.978Z"
+    },
+    "src/features/hello-module/components/ClientHelloModule.jsx": {
+      "owner": "core",
+      "coreHash": "c2b7c3685c32b6dc1cd92365d1d255993c8a01a71ab6d4a2217091cee08d757b",
+      "appliedHash": "c2b7c3685c32b6dc1cd92365d1d255993c8a01a71ab6d4a2217091cee08d757b",
+      "lastSyncedAt": "2026-07-13T17:43:53.982Z"
+    },
+    "src/features/hello-module/constants/index.js": {
+      "owner": "core",
+      "coreHash": "031622be98a31d95c3bf29e4f5f93d36e215aaf3b670da0ee9e21f52b0233300",
+      "appliedHash": "031622be98a31d95c3bf29e4f5f93d36e215aaf3b670da0ee9e21f52b0233300",
+      "lastSyncedAt": "2026-07-13T17:43:53.986Z"
+    },
+    "src/features/hello-module/hooks/useHelloModule.js": {
+      "owner": "core",
+      "coreHash": "35317c1a080b376f85bdea53bdf15e924756c861df1cce29706c5783039d9bd9",
+      "appliedHash": "35317c1a080b376f85bdea53bdf15e924756c861df1cce29706c5783039d9bd9",
+      "lastSyncedAt": "2026-07-13T17:43:53.990Z"
+    },
+    "src/features/hello-module/implementation.manifest.json": {
+      "owner": "core",
+      "coreHash": "f8b8fb3644293cdb766561dbbb869d5c7b32cf9f571a57c027317d52b7212351",
+      "appliedHash": "f8b8fb3644293cdb766561dbbb869d5c7b32cf9f571a57c027317d52b7212351",
+      "lastSyncedAt": "2026-07-13T17:43:53.995Z"
+    },
+    "src/features/hello-module/index.js": {
+      "owner": "core",
+      "coreHash": "5b69d13cecbefd6a74694db03ef9455214d85759a151ee536051b8c20ec9a19f",
+      "appliedHash": "5b69d13cecbefd6a74694db03ef9455214d85759a151ee536051b8c20ec9a19f",
+      "lastSyncedAt": "2026-07-13T17:43:53.999Z"
+    },
+    "src/features/hello-module/module.js": {
+      "owner": "core",
+      "coreHash": "520b8d89e0ee0d8fd278f0233696bef96e44b2ca138a919bb50c5b3e133222a8",
+      "appliedHash": "520b8d89e0ee0d8fd278f0233696bef96e44b2ca138a919bb50c5b3e133222a8",
+      "lastSyncedAt": "2026-07-13T17:43:54.004Z"
+    },
+    "src/features/hello-module/routes.jsx": {
+      "owner": "core",
+      "coreHash": "fbf69d44d62c3321e130228adec014a677a2dc4e1a2e0c8345e871822d2ec0be",
+      "appliedHash": "fbf69d44d62c3321e130228adec014a677a2dc4e1a2e0c8345e871822d2ec0be",
+      "lastSyncedAt": "2026-07-13T17:43:54.009Z"
+    },
+    "src/features/hello-module/schemas/HelloModuleSchemas.js": {
+      "owner": "core",
+      "coreHash": "c15fc9ea7a85eb3d8796a978698aba93c9244d930246a205f714efaeae2da4fc",
+      "appliedHash": "c15fc9ea7a85eb3d8796a978698aba93c9244d930246a205f714efaeae2da4fc",
+      "lastSyncedAt": "2026-07-13T17:43:54.013Z"
+    },
+    "src/features/hello-module/security/feature-security.json": {
+      "owner": "core",
+      "coreHash": "636526bf742bd5d55fb0bc116eb72a7cea1469d22dbd730f3858c63e729a7ae9",
+      "appliedHash": "636526bf742bd5d55fb0bc116eb72a7cea1469d22dbd730f3858c63e729a7ae9",
+      "lastSyncedAt": "2026-07-13T17:43:54.018Z"
+    },
+    "src/features/hello-module/services/HelloModuleService.js": {
+      "owner": "core",
+      "coreHash": "0ee72daf2b7305402869384ae5475986685f0c3eeda0f2a9f5a9e9e960113d41",
+      "appliedHash": "0ee72daf2b7305402869384ae5475986685f0c3eeda0f2a9f5a9e9e960113d41",
+      "lastSyncedAt": "2026-07-13T17:43:54.022Z"
+    },
+    "src/pages/client/ClientProfile.jsx": {
+      "owner": "core",
+      "coreHash": "a2beb5e2d39ecab21e818832aecab48af84b2408e78b64042e3340f023e85606",
+      "appliedHash": "a2beb5e2d39ecab21e818832aecab48af84b2408e78b64042e3340f023e85606",
+      "lastSyncedAt": "2026-07-13T17:43:54.051Z"
+    },
+    "src/utils/featureManifestAdapter.js": {
+      "owner": "core",
+      "coreHash": "90796610e3f95384776481c297602fd3da8af7a09ecc1ee8222d36617a7f0cdc",
+      "appliedHash": "90796610e3f95384776481c297602fd3da8af7a09ecc1ee8222d36617a7f0cdc",
+      "lastSyncedAt": "2026-07-13T17:43:54.069Z"
+    }
+  },
+  "featuresInstalled": {
+    "orders": {
+      "version": "1.0.0",
+      "installedAt": "2026-07-13T17:46:27.937Z"
+    },
+    "sales": {
+      "version": "1.0.0",
+      "installedAt": "2026-07-13T17:46:34.019Z"
+    },
+    "inventory": {
+      "version": "1.0.0",
+      "installedAt": "2026-07-13T17:46:38.885Z"
+    },
+    "hello-module": {
+      "version": "1.0.0",
+      "installedAt": "2026-07-13T17:46:36.785Z"
+    },
+    "billing": {
+      "version": "1.0.0",
+      "installedAt": "2026-07-13T17:46:40.607Z"
+    },
+    "customer-loyalty": {
+      "version": "1.0.0",
+      "installedAt": "2026-07-13T18:20:09.735Z"
+    }
+  }
+}

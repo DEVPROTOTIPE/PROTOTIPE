@@ -1,10 +1,13 @@
 import { z } from 'zod'
 import manifest from '../core/generated/core-manifest.generated.json'
+import { getNormalizedFeatures } from '../utils/featureManifestAdapter'
 
-// Construir la forma dinámica de feature flags
+// Construir la forma dinámica de feature flags a partir del catálogo modular generado y normalizado
 const dynamicFeatureFlagsShape = {};
-manifest.featureFlags.forEach(flag => {
-  dynamicFeatureFlagsShape[flag.id] = z.boolean().default(Boolean(flag.default));
+const normalizedFeatures = getNormalizedFeatures(manifest);
+
+normalizedFeatures.forEach(feature => {
+  dynamicFeatureFlagsShape[feature.id] = z.boolean().default(feature.enabledByDefault ?? false);
 });
 
 // Esquema de Feature Flags (Namespace estructurado)

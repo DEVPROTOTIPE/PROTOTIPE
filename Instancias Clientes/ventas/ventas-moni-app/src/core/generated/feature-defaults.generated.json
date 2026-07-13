@@ -1,16 +1,15 @@
 {
   "generatorVersion": "1.0.0",
   "registryVersion": "1.0.0",
-  "generatedAt": "2026-07-13T16:06:32.741Z",
+  "generatedAt": "2026-07-13T19:00:14.796Z",
   "defaults": {
     "sales": {},
     "inventory": {},
     "orders": {},
     "billing": {},
-    "appointments": {},
-    "patients": {},
-    "crm": {},
     "hello-module": {},
-    "customer-loyalty": {}
+    "customer-loyalty": {},
+    "credits": {},
+    "delivery": {}
   }
 }

@@ -110,6 +110,14 @@ export async function processOfflineQueue() {
     return;
   }
 
+  // Si estamos en desarrollo y el endpoint es remoto (producción), omitir transmisión
+  const isDevelopment = import.meta.env.DEV;
+  const isEndpointRemote = !isEndpointLocal;
+  if (isDevelopment && isEndpointRemote) {
+    console.debug('[Telemetry] Desarrollo activo: telemetría local omitida para endpoints remotos de producción.');
+    return;
+  }
+
   try {
     const now = Date.now();
     const pending = await telemetryDb.outbox
@@ -147,6 +155,10 @@ export async function processOfflineQueue() {
         });
 
         if (response.ok) {
+          await telemetryDb.outbox.delete(item.eventId);
+        } else if (response.status === 401 || response.status === 403) {
+          // Descartar si el token de App Check o API Key es inválido/no autorizado
+          console.warn(`[Telemetry] Reporte descartado debido a error de autorización (${response.status}) en el servidor.`);
           await telemetryDb.outbox.delete(item.eventId);
         } else {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);

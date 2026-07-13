@@ -1,22 +1,39 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import manifest from '../core/generated/core-manifest.generated.json'
+import { getNormalizedFeatures } from '../utils/featureManifestAdapter'
 
 const clientId = import.meta.env.VITE_DEVELOPER_CLIENT_ID || 'general'
 const storageKey = `app-config-storage-${clientId}`
 
+const normalizedFeatures = getNormalizedFeatures(manifest)
+
 // Helper para crear flags con sus defaults
 const createDefaultFeatureFlags = () => {
-  const flags = {};
-  manifest.featureFlags.forEach(flag => {
-    flags[flag.id] = Boolean(flag.default);
+  const flags = {
+    couponsEnabled: true
+  };
+  normalizedFeatures.forEach(feature => {
+    const val = Boolean(feature.enabledByDefault);
+    flags[feature.id] = val;
+    if (Array.isArray(feature.legacyRemoteKeys)) {
+      feature.legacyRemoteKeys.forEach(legacyKey => {
+        flags[legacyKey] = val;
+      });
+    }
   });
   return flags;
 };
 
-const knownFeatureIds = new Set(
-  manifest.featureFlags.map(flag => flag.id)
-);
+const knownFeatureIds = new Set(['couponsEnabled']);
+normalizedFeatures.forEach(feature => {
+  knownFeatureIds.add(feature.id);
+  if (Array.isArray(feature.legacyRemoteKeys)) {
+    feature.legacyRemoteKeys.forEach(legacyKey => {
+      knownFeatureIds.add(legacyKey);
+    });
+  }
+});
 
 // Sanitización de flags obsoletas
 const sanitizePersistedFeatureFlags = (persistedFlags = {}) => {
@@ -190,11 +207,19 @@ const useAppConfigStore = create(
         // Si newConfig contiene featureFlags en formato de sub-objeto, resolver
         const configFlags = newConfig.featureFlags || {};
         const flattenedFlags = {};
-        manifest.featureFlags.forEach(flag => {
-          if (configFlags[flag.id] !== undefined) {
-            flattenedFlags[flag.id] = Boolean(configFlags[flag.id]);
-          } else if (newConfig[flag.id] !== undefined) {
-            flattenedFlags[flag.id] = Boolean(newConfig[flag.id]);
+        normalizedFeatures.forEach(feature => {
+          let val = feature.enabledByDefault;
+          if (configFlags[feature.id] !== undefined) {
+            val = Boolean(configFlags[feature.id]);
+          } else if (newConfig[feature.id] !== undefined) {
+            val = Boolean(newConfig[feature.id]);
+          }
+          
+          flattenedFlags[feature.id] = val;
+          if (Array.isArray(feature.legacyRemoteKeys)) {
+            feature.legacyRemoteKeys.forEach(legacyKey => {
+              flattenedFlags[legacyKey] = val;
+            });
           }
         });
 
@@ -255,6 +280,7 @@ const useAppConfigStore = create(
         if (featureId === 'claims') key = 'claimsEnabled';
         if (featureId === 'coupons') key = 'couponsEnabled';
         if (featureId === 'delivery') key = 'rolesOperativosEnabled';
+        if (featureId === 'onlineOrdersEnabled') key = 'orders';
         return Boolean(get().featureFlags[key] || get().featureFlags[featureId]);
       }
     }),
@@ -269,12 +295,12 @@ const useAppConfigStore = create(
         if (version < 3) {
           const defaults = createDefaultFeatureFlags();
           const extractedFlags = {};
-          manifest.featureFlags.forEach(flag => {
-            if (persistedState[flag.id] !== undefined) {
-              extractedFlags[flag.id] = Boolean(persistedState[flag.id]);
-              delete persistedState[flag.id];
+          normalizedFeatures.forEach(feature => {
+            if (persistedState[feature.id] !== undefined) {
+              extractedFlags[feature.id] = Boolean(persistedState[feature.id]);
+              delete persistedState[feature.id];
             } else {
-              extractedFlags[flag.id] = Boolean(flag.default);
+              extractedFlags[feature.id] = Boolean(feature.enabledByDefault);
             }
           });
           persistedState.featureFlags = extractedFlags;

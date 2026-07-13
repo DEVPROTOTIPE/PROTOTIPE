@@ -1,6 +1,26 @@
 import { z } from 'zod'
+import manifest from '../core/generated/core-manifest.generated.json'
+import { getNormalizedFeatures } from '../utils/featureManifestAdapter'
 
-export const appConfigSchema = z.object({
+// Construir la forma dinámica de feature flags a partir del catálogo modular generado y normalizado
+const dynamicFeatureFlagsShape = {};
+const normalizedFeatures = getNormalizedFeatures(manifest);
+
+normalizedFeatures.forEach(feature => {
+  dynamicFeatureFlagsShape[feature.id] = z.boolean().default(feature.enabledByDefault ?? false);
+});
+
+// Esquema de Feature Flags (Namespace estructurado)
+export const featureFlagsSchema = z.object(dynamicFeatureFlagsShape).default({});
+export const strictFeatureFlagsSchema = z.strictObject(dynamicFeatureFlagsShape);
+
+// Helper para parsear de forma compatible runtime
+export function parseRuntimeFeatureFlags(input) {
+  return featureFlagsSchema.parse(input ?? {});
+}
+
+// Esquema base sin flags estáticas
+const baseConfigShape = {
   appName: z.string().default('Mi Tienda'),
   sellerName: z.string().default('Vendedor'),
   appIcon: z.string().nullable().default(null),
@@ -76,10 +96,6 @@ export const appConfigSchema = z.object({
   guidedModeEnabled: z.boolean().default(true),
   loginTrustMessage: z.string().default(''),
   slogan: z.string().default(''),
-  creditsEnabled: z.boolean().default(true),
-  couponsEnabled: z.boolean().default(true),
-  rolesOperativosEnabled: z.boolean().default(false),
-  onlineOrdersEnabled: z.boolean().default(true),
 
   deliverySettings: z.object({
     pickup: z.object({
@@ -142,4 +158,11 @@ export const appConfigSchema = z.object({
   deactivationReason: z.string().default(''),
   maintenanceMode: z.boolean().default(false),
   degradedMode: z.boolean().default(false)
-})
+};
+
+// Combinar la base con las flags en namespace y las flags planas en la raíz (para compatibilidad de formularios)
+export const appConfigSchema = z.object({
+  ...baseConfigShape,
+  ...dynamicFeatureFlagsShape,
+  featureFlags: featureFlagsSchema
+});

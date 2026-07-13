@@ -34,8 +34,7 @@ const LucideIcons = {
   ShoppingCart
 }
 
-import { NavigationRegistry } from '../core/config/NavigationRegistry'
-import { PermissionRegistry } from '../core/auth/PermissionRegistry'
+import catalog from '../core/generated/feature-catalog.generated.json'
 import { signOut } from 'firebase/auth'
 import { auth } from '../config/firebaseConfig'
 import useAppConfigStore from '../store/appConfigStore'
@@ -53,7 +52,7 @@ const getIconComponent = (iconName) => {
 };
 
 export default function AdminLayout() {
-  const { appName, appIcon, creditsEnabled, claimsEnabled, rolesOperativosEnabled, onlineOrdersEnabled } = useAppConfigStore()
+  const { appName, appIcon } = useAppConfigStore()
   const { logout, user } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
@@ -130,13 +129,20 @@ export default function AdminLayout() {
 
   // Navegación adaptativa según feature flags de módulos y estado de conexión
   const filteredNavItems = useMemo(() => {
-    const role = user?.role || 'admin';
-    const dynamicItems = NavigationRegistry.getAdminMenuForRole(role, PermissionRegistry)
-      .map(item => ({
-        path: item.path,
-        icon: getIconComponent(item.icon),
-        label: item.label
-      }));
+    const dynamicItems = [];
+    const isFeatureEnabled = useAppConfigStore.getState().isFeatureEnabled;
+
+    catalog.features.forEach(feature => {
+      if (isFeatureEnabled(feature.id) && feature.navigation?.adminMenu) {
+        feature.navigation.adminMenu.forEach(item => {
+          dynamicItems.push({
+            path: item.path,
+            icon: getIconComponent(item.icon),
+            label: item.label
+          });
+        });
+      }
+    });
 
     const coreItems = [
       { path: '/admin/inicio', icon: LucideIcons.LayoutDashboard, label: 'Inicio' }
@@ -151,14 +157,8 @@ export default function AdminLayout() {
     if (!isOnline) {
       return allItems.filter(item => item.path === '/admin/ventas')
     }
-    return allItems.filter(item => {
-      if (item.path.includes('credito') && !creditsEnabled) return false
-      if (item.path.includes('reclamos') && !claimsEnabled) return false
-      if ((item.path.includes('entregas') || item.path.includes('portales')) && !rolesOperativosEnabled) return false
-      if (item.path.includes('pedidos') && !onlineOrdersEnabled) return false
-      return true
-    })
-  }, [creditsEnabled, claimsEnabled, rolesOperativosEnabled, onlineOrdersEnabled, isOnline, user?.role])
+    return allItems;
+  }, [isOnline])
 
   const handleLogout = async () => {
     try {

@@ -114,7 +114,7 @@ service cloud.firestore {
 
     match /wholesaleOrders/{document} {
       allow create: if true;
-      allow read: if isAdmin();   // Mayoristas: solo admin puede listar (dato comercial sensible)
+      allow read: if true;   // Mayoristas: permite consultar solicitudes al cliente
       allow update, delete: if isAdmin();
     }
 

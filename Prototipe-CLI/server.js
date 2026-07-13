@@ -34,6 +34,7 @@ import { BriefingDocumentMapper } from './lib/BriefingDocumentMapper.js';
 import { normalizeProvisioningEnvelope } from './lib/ProvisioningEnvelopeAdapter.js';
 import { ProvisioningStateManager } from './lib/ProvisioningStateManager.js';
 import { ProvisioningQueue } from './lib/ProvisioningQueue.js';
+import { getNormalizedFeatures } from './lib/featureManifestAdapter.js';
 
 const execAsync = promisify(exec);
 
@@ -6027,7 +6028,10 @@ const projectDirCache = new Map();
 const CACHE_TTL_MS = 10000; // 10 segundos
 
 async function findProjectDir(clientId) {
-  if (!clientId) return null;
+  const lowerClientId = clientId.toLowerCase();
+  if (lowerClientId === 'ventas-smartfix' || lowerClientId === 'ventas-smart') {
+    return 'D:/PROTOTIPE/Plantillas Core/App Ventas';
+  }
 
   // Sanitización de seguridad temprana contra Path Traversal
   const sanitizedId = clientId.replace(/\\/g, '/');
@@ -6036,7 +6040,7 @@ async function findProjectDir(clientId) {
   }
 
   const baseAppsDir = getWorkspaceRoot(); // D:\PROTOTIPE\Instancias Clientes
-  const lowerClientId = sanitizedId.toLowerCase();
+  // lowerClientId ya está declarado al inicio de la función
 
   // 1. Intentar recuperación desde el caché en memoria para evitar ráfagas de E/S
   const cached = projectDirCache.get(lowerClientId);
@@ -7519,6 +7523,7 @@ app.post('/api/project/features/add', async (req, res) => {
 
     // 3. Actualizar prototipe.lock.json (Instance Manifest)
     const lockPath = path.join(projectDir, 'prototipe.lock.json');
+    let installedList = [];
     if (await fs.pathExists(lockPath)) {
       const lockData = await fs.readJson(lockPath);
       if (!lockData.featuresInstalled) {
@@ -7530,6 +7535,32 @@ app.post('/api/project/features/add', async (req, res) => {
         installedAt: new Date().toISOString()
       };
       await fs.writeJson(lockPath, lockData, { spaces: 2 });
+      installedList = Object.keys(lockData.featuresInstalled || {});
+    }
+
+    // 3.5. Sincronizar con Firestore
+    try {
+      const clientDocRef = admin.firestore().collection('clientes_control').doc(clientId);
+      const clientDoc = await clientDocRef.get();
+      if (clientDoc.exists) {
+        const clientData = clientDoc.data() || {};
+        const currentFlags = clientData.flags || {};
+        
+        // Activar el toggle de la feature por defecto
+        const updatedFlags = {
+          ...currentFlags,
+          [featureId]: true
+        };
+        
+        await clientDocRef.set({
+          installedFeatures: installedList,
+          flags: updatedFlags
+        }, { merge: true });
+        
+        console.log(`[Firestore] Sincronización exitosa tras inyección de feature "${featureId}" para el cliente "${clientId}".`);
+      }
+    } catch (dbErr) {
+      console.warn(`[Firestore] Error al sincronizar inyección de feature: ${dbErr.message}`);
     }
 
     // 4. Regenerar artefactos de catálogo y manifiestos en la instancia
@@ -7565,12 +7596,37 @@ app.post('/api/project/features/remove', async (req, res) => {
 
     // 2. Actualizar prototipe.lock.json
     const lockPath = path.join(projectDir, 'prototipe.lock.json');
+    let installedList = [];
     if (await fs.pathExists(lockPath)) {
       const lockData = await fs.readJson(lockPath);
       if (lockData.featuresInstalled && lockData.featuresInstalled[featureId]) {
         delete lockData.featuresInstalled[featureId];
         await fs.writeJson(lockPath, lockData, { spaces: 2 });
       }
+      installedList = Object.keys(lockData.featuresInstalled || {});
+    }
+
+    // 2.5. Sincronizar con Firestore
+    try {
+      const clientDocRef = admin.firestore().collection('clientes_control').doc(clientId);
+      const clientDoc = await clientDocRef.get();
+      if (clientDoc.exists) {
+        const clientData = clientDoc.data() || {};
+        const currentFlags = clientData.flags || {};
+        
+        // Apagar y remover el toggle de la feature
+        const updatedFlags = { ...currentFlags };
+        delete updatedFlags[featureId];
+        
+        await clientDocRef.set({
+          installedFeatures: installedList,
+          flags: updatedFlags
+        }, { merge: true });
+        
+        console.log(`[Firestore] Sincronización exitosa tras remoción de feature "${featureId}" para el cliente "${clientId}".`);
+      }
+    } catch (dbErr) {
+      console.warn(`[Firestore] Error al sincronizar remoción de feature: ${dbErr.message}`);
     }
 
     // 3. Regenerar artefactos de catálogo y manifiestos en la instancia
@@ -7746,7 +7802,11 @@ app.post('/api/project/features/commit', loopbackOnlyMiddleware, authenticateCli
       description: payload.description || '',
       dependencies: payload.dependencies || [],
       tags: payload.tags || [],
-      status: 'stable'
+      status: 'stable',
+      physicalPaths: [
+        `templates/template-ventas/src/features/${payload.featureId}`,
+        `templates/template-core-seed/src/features/${payload.featureId}`
+      ]
     });
     await fs.writeJson(regPath, registry, { spaces: 2 });
 
@@ -8882,6 +8942,33 @@ app.get('/api/project/drift', async (req, res) => {
   if (!projectDir) return res.status(404).json({ error: `No se encontró el proyecto para: ${clientId}` });
 
   try {
+    const lockPath = path.join(projectDir, 'prototipe.lock.json');
+    let lockData = await fs.pathExists(lockPath) ? await fs.readJson(lockPath) : { featuresInstalled: {} };
+    if (!lockData || typeof lockData !== 'object') {
+      lockData = { featuresInstalled: {} };
+    }
+    if (!lockData.featuresInstalled || typeof lockData.featuresInstalled !== 'object') {
+      lockData.featuresInstalled = {};
+    }
+
+    // Escanear físicamente src/features para añadir cualquier feature instalada en disco que falte en el lockData (features del Core base)
+    const featuresDir = path.join(projectDir, 'src', 'features');
+    if (await fs.pathExists(featuresDir)) {
+      const folders = await fs.readdir(featuresDir);
+      for (const folder of folders) {
+        const stat = await fs.stat(path.join(featuresDir, folder)).catch(() => null);
+        if (stat && stat.isDirectory()) {
+          if (!lockData.featuresInstalled[folder]) {
+            lockData.featuresInstalled[folder] = {
+              version: '1.0.0',
+              installedAt: new Date().toISOString(),
+              isPreinstalled: true
+            };
+          }
+        }
+      }
+    }
+
     const metaPath = path.join(projectDir, '.prototipe.json');
     let meta = await fs.pathExists(metaPath) ? await fs.readJson(metaPath) : {};
     meta = validatePrototipeMetadata(meta, path.basename(projectDir));
@@ -9097,6 +9184,7 @@ app.get('/api/project/drift', async (req, res) => {
       success: true,
       clientId,
       coreId,
+      lockData,
       parityPercent,
       differences,
       dependenciesOutOfSync,
@@ -14985,9 +15073,10 @@ app.post('/api/briefing/analyze', async (req, res) => {
 
     // 3. Recomendar Feature Flags
     const recommendedFlags = {};
-    if (manifest && manifest.featureFlags) {
-      for (const flag of manifest.featureFlags) {
-        recommendedFlags[flag.id] = false;
+    const normalizedFeatures = getNormalizedFeatures(manifest);
+    if (normalizedFeatures.length > 0) {
+      for (const feature of normalizedFeatures) {
+        recommendedFlags[feature.id] = false;
       }
 
       if (manifest.flagRecommendationRules) {

@@ -29,6 +29,7 @@ class FeatureLifecycleManagerClass {
    */
   validateTransition(current, target) {
     if (!current) return true; // Primera transición
+    if (current === target) return true; // Transición al mismo estado (tolerante a re-entradas)
     const allowed = VALID_TRANSITIONS[current] || [];
     return allowed.includes(target);
   }

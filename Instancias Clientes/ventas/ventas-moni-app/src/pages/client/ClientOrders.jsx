@@ -83,6 +83,12 @@ export default function ClientOrders() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
+  useEffect(() => {
+    if (!onlineOrdersEnabled) {
+      navigate('/tienda/catalogo', { replace: true })
+    }
+  }, [onlineOrdersEnabled, navigate])
+
   const [showHidden, setShowHidden] = useState(false)
   const [expandedOrderId, setExpandedOrderId] = useState(null)
   const [expandedWholesaleId, setExpandedWholesaleId] = useState(null)

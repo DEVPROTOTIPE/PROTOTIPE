@@ -1,5 +1,99 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-494 — 2026-07-13
+**FEATURE_FLAGS_PHYSICAL_LOGICAL_ALIGNMENT: Saneamiento y Alineación Físico-Lógica de Módulos y Feature Flags en Firestore**
+
+### Cambios realizados:
+1. **server.js (Bridge CLI):** 
+   - Modificada la función `findProjectDir` para mapear explícitamente el clientId `ventas-smartfix` (la instancia del Core) a la ruta física de la plantilla core en disco: `D:/PROTOTIPE/Plantillas Core/App Ventas`.
+   - Modificados los endpoints de inyección física (`/api/project/features/add`) y desinstalación (`/api/project/features/remove`) para actualizar atómicamente la lista de `installedFeatures` y la activación por defecto en el objeto de `flags` del inquilino correspondiente en Firestore (`clientes_control/[clientId]`).
+   - Modificado el endpoint `/api/project/drift` para **mezclar atómicamente** la verdad lógica (lockfile) con la verdad física (escanear `src/features` del cliente). Así, si un módulo existe físicamente en el disco del inquilino (caso de features preinstaladas o del core), se reportará siempre como instalado, unificando y garantizando 100% de simetría entre Ventas Moni y Ventas SmartFix.
+2. **ClientLifecyclePanel.jsx (Dashboard - CRM):** Modificado el manejador `handleToggleFeature` para inyectar/remover la feature reactivamente en el documento Firestore del inquilino en tiempo real tras la confirmación de éxito de la CLI local, sirviendo como fuente de verdad secundaria para otros entornos.
+3. **FeatureFlagManager.jsx (Dashboard - Flags):** 
+   - **Saneamiento de Flags Fantasmas:** Removido el hardcodeo de flags genéricas fantasmas de otras verticales del objeto `CORE_FLAGS`. Se redefinieron únicamente las 7 flags oficiales reales de la plantilla de Ventas.
+   - **Mapeo de Legacy Keys:** Implementada la normalización automática del id `rolesOperativosEnabled` del core-manifest a `deliveryEnabled` de Firestore al cargar las flags de la metadata de cores, garantizando reactividad.
+   - Modificada la inicialización y el selector de cliente `handleSelectClient` para cargar y mezclar reactivamente la lista de `installedFeatures` registrada en Firestore Central con la del disco de la CLI local, ofreciendo resiliencia a viewports y máquinas sin clonado de disco (fallback determinista).
+   - Rediseñado el grid visual de flags dividiéndolo en dos bloques semánticos independientes: "Módulos de Aplicación Instalados" (Features inyectadas en disco/base de datos) y "Configuración Operativa" (Feature Flags granulares de la aplicación).
+   - Blindada la acción masiva "Habilitar/Desactivar Todas" para actuar única y exclusivamente sobre el bloque de flags operativas del Core, previniendo crashes de runtime por carga de módulos físicos ausentes.
+4. **Saneamiento y Alineación Core-Cliente (Auditoría Drift):**
+   - **Lógica de Fidelidad (customer-loyalty):** La versión del Core era la correcta (lógica real de puntos, QR y esquemas Zod), mientras que el Cliente tenía el esqueleto vacío autogenerado. Promovimos todo el código fuente de fidelización del Core al Cliente.
+   - **Manifiestos Autogenerados (src/core/generated/):** La versión del Cliente era la correcta/limpia, mientras que el Core tenía residuos huérfanos de la vertical clínica (features `appointments` y `patients`). Promovimos los manifiestos limpios del Cliente al Core para purgar la basura del Core.
+5. **ClientLayout.jsx (Core y Cliente):** Solucionado un error fatal en runtime (`ReferenceError: onlineOrdersEnabled is not defined`). Se declararon e inicializaron de forma segura `onlineOrdersEnabled` y `couponsEnabled` mediante la función de validación de tema `isFeatureEnabled` para evitar caídas de UI por variables no importadas.
+
+### Archivos modificados:
+- [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/ClientLifecyclePanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ClientLifecyclePanel.jsx) [MODIFY]
+- [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx) [MODIFY]
+- [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+- [`D:/PROTOTIPE/Plantillas Core/App Ventas/prototipe.lock.json`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/prototipe.lock.json) [NEW]
+- Archivos en [`D:/PROTOTIPE/Plantillas Core/App Ventas/src/core/generated/`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/core/generated/) [MODIFY]
+- Archivos en [`D:/PROTOTIPE/Instancias Clientes/ventas/ventas-moni-app/src/features/customer-loyalty/`](file:///D:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/features/customer-loyalty/) [MODIFY]
+- [`src/layouts/ClientLayout.jsx`](file:///D:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/layouts/ClientLayout.jsx) (Core y Cliente) [MODIFY]
+
+---
+
+## CLI-493 — 2026-07-13
+**FEATURE_FLAGS_DYNAMIC_VINDICATION: Vinculación Reactiva de Flags de Features Instaladas en Caliente**
+
+### Cambios realizados:
+1. **FeatureFlagManager.jsx (Dashboard):** Refactorizada la propiedad `activeFlagsList` para calcularse mediante un `useMemo` dinámico. Ahora consulta mediante el Bridge CLI qué features están instaladas físicamente en la instancia del cliente seleccionado (`/api/project/drift`). Si una feature modular (como `customer-loyalty` o `hello-module`) ha sido inyectada físicamente, agrega automáticamente su interruptor lógico de control de flags en la interfaz de usuario en caliente, garantizando que el administrador siempre pueda encenderla o apagarla lógicamente.
+
+### Archivos modificados:
+- [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx) [MODIFY]
+
+---
+
+## CLI-492 — 2026-07-13
+**FEATURE_CREATION_PROVISIONING_AUDIT: Auditoría del Generador de Features y Sincronización de Rutas en Caliente**
+
+### Cambios realizados:
+1. **server.js (Bridge CLI):** Corregido el endpoint de commit de features modulares en caliente (`/api/project/features/commit`) para inyectar determinísticamente la propiedad `physicalPaths` al registrar una nueva feature en `feature-registry.json`. Esto previene fallos latentes de "Origen físico no encontrado" al intentar inyectar posteriormente las features creadas modularmente desde la UI.
+2. **FeatureArtifactGenerator.js:** Corregida la recolección de features locales para que los manifiestos locales del inquilino solo indexen las features que existen físicamente en su disco, eliminando discrepancias y clics rotos en la UI de navegación de las instancias cliente.
+
+### Archivos modificados:
+- [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/FeatureArtifactGenerator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/FeatureArtifactGenerator.js) [MODIFY]
+
+---
+
+## CLI-491 — 2026-07-13
+**FEATURE_REGISTRY_SYNCHRONIZATION: Sincronización del Feature Registry y Mapeo Físico del Catálogo**
+
+### Cambios realizados:
+1. **FeatureRegistry.js:** Modificado el método `getAll()` para validar dinámicamente en el disco local la existencia física de las carpetas de origen de cada feature. Excluye del catálogo del Dashboard las features no implementadas físicamente (como `appointments`, `patients` y `crm`).
+2. **feature-registry.json:** Añadidas las rutas físicas locales (`physicalPaths`) para `customer-loyalty` y `hello-module` para permitir su inyección desde la UI. Removida la dependencia fantasma de `crm` en `customer-loyalty`.
+3. **implementation.manifest.json (customer-loyalty):** Removida la dependencia redundante de `crm` tanto en el template como en la plantilla Core de Ventas.
+
+### Archivos modificados:
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/FeatureRegistry.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/FeatureRegistry.js) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/knowledge/feature-registry.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/feature-registry.json) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/features/customer-loyalty/implementation.manifest.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/features/customer-loyalty/implementation.manifest.json) [MODIFY]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/features/customer-loyalty/implementation.manifest.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/customer-loyalty/implementation.manifest.json) [MODIFY]
+
+---
+
+## CLI-490 — 2026-07-13
+**FEATURE_MANIFEST_SCHEMA_MIGRATION: Migración de Contrato de Feature Flags e Integración del FeatureManifestAdapter**
+
+### Cambios realizados:
+1. **FeatureManifestAdapter:** Creado e integrado en frontend y CLI para normalizar la estructura de feature flags, soportando tanto `features{}` moderno como `featureFlags[]` legacy de manera transparente.
+2. **appConfigStore / appConfigSchema / useAppConfigSync:** Refactorizados en `template-ventas` y `App Ventas` para consumir la salida normalizada del Adapter, previniendo crashes por drift del manifiesto.
+3. **Bridge CLI (server.js):** Actualizado el endpoint de briefing para utilizar la normalización del Adapter al recomendar feature flags.
+
+### Archivos modificados:
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/utils/featureManifestAdapter.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/utils/featureManifestAdapter.js) [NEW]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/utils/featureManifestAdapter.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/utils/featureManifestAdapter.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/lib/featureManifestAdapter.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/featureManifestAdapter.js) [NEW]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/schemas/appConfigSchema.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/schemas/appConfigSchema.js) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/schemas/appConfigSchema.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/schemas/appConfigSchema.js) [MODIFY]
+- [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+- [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+
+---
+
 ## CLI-488 — 2026-07-13
 **Feature & Architecture: Actualización de Documentación de Arquitectura de Features SaaS y Portal de Gestión**
 
@@ -574,8 +668,16 @@ El flujo de login de cliente en `template-ventas` identifica a los usuarios por 
 
 ---
 
-## CLI-455 — 2026-07-12
-**Feature: Corrección de Resolución de Puertos en el Inicio de Servidores Locales de Clientes en el Bridge CLI**
+## [2026-07-13] - CORE-279: Corrección de Redirección Automática de Pedidos, Visibilidad de Carrito y Habilitación de Créditos, Reparto y Cupones
+- **Tipo:** Bugfix / Calidad / Seguridad
+- **Firma:** CORE-ORDERS-REDIRECT-AND-CART-FIX-2026
+- **Descripcion:**
+  - **Mapeo de Feature Flags:** Corregido el mapeo de feature flags en `appConfigStore.js` de `App Ventas` y `template-ventas`. Se expandió `createDefaultFeatureFlags` y `setConfig` para registrar y sincronizar automáticamente las `legacyRemoteKeys` de cada feature flag (como `orders` -> `onlineOrdersEnabled`), evitando que el estado en Zustand sea `undefined` y ocultara el carrito o redirigiera al catálogo.
+  - **Registro Central de Features:** Registrados los módulos de `credits` (Crédito y Fiados) y `delivery` (Reparto y Portales Operativos) en el `feature-registry.json` central del CLI. Al no estar en el registro central, el generador de artefactos los omitía de `core-manifest.generated.json`, provocando que el sistema los considerara inexistentes e invisibilizara todo lo relacionado con créditos y repartos en la app cliente.
+  - **Habilitación de Cupones Integrados:** Corregida la inicialización de la flag `couponsEnabled` en el store. Al no ser un módulo modularizado (es un hook/vista central en la base), se incluyó de forma nativa en los valores por defecto de `createDefaultFeatureFlags` y en `knownFeatureIds` para evitar que el cliente de la app la evaluara como deshabilitada (`false`) por defecto.
+  - **Permisos de Firestore:** Modificada la regla de lectura en la colección `/wholesaleOrders` en `firestore.rules` de `App Ventas` y `template-ventas` de `allow read: if isAdmin();` a `allow read: if true;`, permitiendo que clientes no-administradores se suscriban y listen sus propias solicitudes de pedidos especiales sin errores de Firebase.
+
+## [2026-07-07] - CORE-278: Implementación de Deshidratación de Plantillas y Logo Upload de Marcavidores Locales de Clientes en el Bridge CLI**
 
 ### Cambios realizados:
 1. **Resolución de Puertos Configurados en /api/project/dev/start:** Corregido el bug en el endpoint de arranque de servidores de desarrollo en `server.js`. Ahora, el backend intenta leer el puerto asignado en el archivo `vite.config.js` físico de la instancia del cliente de forma prioritaria en lugar de forzar a ciegas el puerto determinista (`forcedPort`) de rango `3100-3199`. El puerto determinista se mantiene únicamente como fallback de seguridad si no existe o no se puede leer la configuración del cliente.

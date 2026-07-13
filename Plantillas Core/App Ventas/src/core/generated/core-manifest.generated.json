@@ -1,7 +1,7 @@
 {
   "generatorVersion": "1.0.0",
   "registryVersion": "1.0.0",
-  "generatedAt": "2026-07-13T15:26:39.144Z",
+  "generatedAt": "2026-07-13T19:00:14.796Z",
   "features": {
     "sales": {
       "id": "sales",
@@ -25,21 +25,6 @@
       "enabledByDefault": true,
       "legacyRemoteKeys": []
     },
-    "appointments": {
-      "id": "appointments",
-      "enabledByDefault": true,
-      "legacyRemoteKeys": []
-    },
-    "patients": {
-      "id": "patients",
-      "enabledByDefault": true,
-      "legacyRemoteKeys": []
-    },
-    "crm": {
-      "id": "crm",
-      "enabledByDefault": true,
-      "legacyRemoteKeys": []
-    },
     "hello-module": {
       "id": "hello-module",
       "enabledByDefault": true,
@@ -49,6 +34,20 @@
       "id": "customer-loyalty",
       "enabledByDefault": true,
       "legacyRemoteKeys": []
+    },
+    "credits": {
+      "id": "credits",
+      "enabledByDefault": true,
+      "legacyRemoteKeys": [
+        "creditsEnabled"
+      ]
+    },
+    "delivery": {
+      "id": "delivery",
+      "enabledByDefault": true,
+      "legacyRemoteKeys": [
+        "rolesOperativosEnabled"
+      ]
     }
   }
 }

@@ -98,6 +98,12 @@ export class FeatureArtifactGenerator {
 
     for (const feature of registryData.features || []) {
       const featureId = feature.id;
+      const featureDir = path.join(targetProjectDir, 'src', 'features', featureId);
+
+      // Si la feature no está instalada físicamente en la instancia cliente, omitirla de los manifiestos locales
+      if (!(await fs.pathExists(featureDir))) {
+        continue;
+      }
 
       // 1. Construir core-manifest
       manifest.features[featureId] = {
@@ -108,8 +114,6 @@ export class FeatureArtifactGenerator {
 
       // 2. Construir catálogo de navegación
       let navigation = legacyNavigationFallbacks[featureId] || { adminMenu: [], clientMenu: [] };
-      
-      const featureDir = path.join(targetProjectDir, 'src', 'features', featureId);
       const manifestLocalPath = path.join(featureDir, 'implementation.manifest.json');
 
       if (await fs.pathExists(manifestLocalPath)) {

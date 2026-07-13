@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingCart, Heart, Package, CreditCard, User, Tag, X, Bell } from 'lucide-react'
 import useAppConfigStore from '../store/appConfigStore'
+import catalog from '../core/generated/feature-catalog.generated.json'
 import useCartStore from '../store/cartStore'
 import useAuthStore from '../store/authStore'
 import useFavoritesStore from '../store/favoritesStore'
@@ -21,39 +22,47 @@ const NAV_ITEMS_LEFT = [
   { path: '/tienda/favoritos', icon: Heart, label: 'Favoritos' },
 ]
 
-const NAV_ITEMS_RIGHT = [
-  { path: '/tienda/pedidos', icon: Package, label: 'Pedidos' },
-  { path: '/tienda/creditos', icon: CreditCard, label: 'Créditos' },
-]
-
-const ALL_NAV_ITEMS = [
-  { path: '/tienda/catalogo', icon: ShoppingCart, label: 'Catálogo' },
-  { path: '/tienda/favoritos', icon: Heart, label: 'Favoritos' },
-  { path: '/tienda/pedidos', icon: Package, label: 'Pedidos' },
-  { path: '/tienda/creditos', icon: CreditCard, label: 'Créditos' },
-  { path: '/tienda/perfil', icon: User, label: 'Perfil' },
-]
-
 export default function ClientLayout() {
   const location = useLocation()
   const isProductDetail = location.pathname.includes('/producto/')
-  const { appName, appIcon, creditsEnabled, couponsEnabled, onlineOrdersEnabled } = useAppConfigStore()
+  const { appName, appIcon, isFeatureEnabled } = useAppConfigStore()
+  const onlineOrdersEnabled = isFeatureEnabled('onlineOrdersEnabled')
+  const couponsEnabled = isFeatureEnabled('couponsEnabled')
   const { getCount, openCart, isOpen: isCartOpen } = useCartStore()
   const { user } = useAuthStore()
   const { subscribe, unsubscribe } = useFavoritesStore()
   const navigate = useNavigate()
 
+  const dynamicClientMenu = useMemo(() => {
+    const list = [];
+    catalog.features.forEach(feature => {
+      if (isFeatureEnabled(feature.id) && feature.navigation?.clientMenu) {
+        feature.navigation.clientMenu.forEach(item => {
+          let icon = Package;
+          if (item.path.includes('credito') || item.path.includes('credits')) icon = CreditCard;
+          list.push({
+            path: item.path,
+            icon,
+            label: item.label
+          });
+        });
+      }
+    });
+    return list;
+  }, [isFeatureEnabled]);
+
   const navItemsRight = useMemo(() => {
-    return NAV_ITEMS_RIGHT
-      .filter(item => item.path !== '/tienda/creditos' || creditsEnabled)
-      .filter(item => item.path !== '/tienda/pedidos' || onlineOrdersEnabled)
-  }, [creditsEnabled, onlineOrdersEnabled])
+    return dynamicClientMenu;
+  }, [dynamicClientMenu])
 
   const allNavItems = useMemo(() => {
-    return ALL_NAV_ITEMS
-      .filter(item => item.path !== '/tienda/creditos' || creditsEnabled)
-      .filter(item => item.path !== '/tienda/pedidos' || onlineOrdersEnabled)
-  }, [creditsEnabled, onlineOrdersEnabled])
+    return [
+      { path: '/tienda/catalogo', icon: ShoppingCart, label: 'Catálogo' },
+      { path: '/tienda/favoritos', icon: Heart, label: 'Favoritos' },
+      ...dynamicClientMenu,
+      { path: '/tienda/perfil', icon: User, label: 'Perfil' },
+    ];
+  }, [dynamicClientMenu])
 
   const [isCouponsOpen, setIsCouponsOpen] = useState(false)
   const [toasts, setToasts] = useState([])

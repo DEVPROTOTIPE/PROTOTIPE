@@ -8,6 +8,7 @@ import useAppConfigStore from '../store/appConfigStore'
 import useAuthStore from '../store/authStore'
 import { appConfigSchema } from '../schemas/appConfigSchema'
 import manifest from '../core/generated/core-manifest.generated.json'
+import { getNormalizedFeatures } from '../utils/featureManifestAdapter'
 
 // Variables de entorno del cliente
 const CLIENT_ID = import.meta.env.VITE_DEVELOPER_CLIENT_ID
@@ -152,12 +153,14 @@ export default function useAppConfigSync() {
               }
             }
 
-            manifest.featureFlags.forEach(flag => {
-              const primaryKey = flag.remoteKey || flag.id
+            const normalizedFeatures = getNormalizedFeatures(manifest)
+
+            normalizedFeatures.forEach(feature => {
+              const primaryKey = feature.remoteKey || feature.id
               let value = centralFlags[primaryKey]
 
-              if (value === undefined && flag.legacyRemoteKeys) {
-                for (const legacyKey of flag.legacyRemoteKeys) {
+              if (value === undefined && feature.legacyRemoteKeys) {
+                for (const legacyKey of feature.legacyRemoteKeys) {
                   if (centralFlags[legacyKey] !== undefined) {
                     value = centralFlags[legacyKey]
                     break
@@ -167,8 +170,8 @@ export default function useAppConfigSync() {
 
               if (value !== undefined) {
                 const boolValue = Boolean(value)
-                flagsUpdate.featureFlags[flag.id] = boolValue
-                flagsUpdate[flag.id] = boolValue
+                flagsUpdate.featureFlags[feature.id] = boolValue
+                flagsUpdate[feature.id] = boolValue
               }
             })
 

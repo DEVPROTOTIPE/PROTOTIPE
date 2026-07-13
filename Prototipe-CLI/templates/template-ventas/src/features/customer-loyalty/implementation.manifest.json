@@ -4,7 +4,7 @@
   "displayName": "Fidelización de Clientes",
   "version": "1.0.0",
   "entry": "./module.js",
-  "dependencies": ["crm","sales"],
+  "dependencies": ["sales"],
   "navigation": {
     "adminMenu": [
       {

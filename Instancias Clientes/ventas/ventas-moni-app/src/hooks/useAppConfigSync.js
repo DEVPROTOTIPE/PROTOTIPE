@@ -7,6 +7,8 @@ import { getCentralFirestore } from '../services/centralFirebaseService'
 import useAppConfigStore from '../store/appConfigStore'
 import useAuthStore from '../store/authStore'
 import { appConfigSchema } from '../schemas/appConfigSchema'
+import manifest from '../core/generated/core-manifest.generated.json'
+import { getNormalizedFeatures } from '../utils/featureManifestAdapter'
 
 // Variables de entorno del cliente
 const CLIENT_ID = import.meta.env.VITE_DEVELOPER_CLIENT_ID
@@ -146,12 +148,38 @@ export default function useAppConfigSync() {
             const centralFlags = data.flags || {}
             
             const flagsUpdate = {
-              ...(centralFlags.creditsEnabled !== undefined && { creditsEnabled: Boolean(centralFlags.creditsEnabled) }),
-              ...(centralFlags.couponsEnabled !== undefined && { couponsEnabled: Boolean(centralFlags.couponsEnabled) }),
-              ...(centralFlags.claimsEnabled !== undefined && { claimsEnabled: Boolean(centralFlags.claimsEnabled) }),
-              ...(centralFlags.deliveryEnabled !== undefined && { rolesOperativosEnabled: Boolean(centralFlags.deliveryEnabled) }),
-              ...(centralFlags.posExpressScanner !== undefined && { posExpressScanner: Boolean(centralFlags.posExpressScanner) }),
-              ...(centralFlags.onlineOrdersEnabled !== undefined && { onlineOrdersEnabled: Boolean(centralFlags.onlineOrdersEnabled) }),
+              featureFlags: {
+                ...useAppConfigStore.getState().featureFlags
+              }
+            }
+
+            const normalizedFeatures = getNormalizedFeatures(manifest)
+
+            normalizedFeatures.forEach(feature => {
+              const primaryKey = feature.remoteKey || feature.id
+              let value = centralFlags[primaryKey]
+
+              if (value === undefined && feature.legacyRemoteKeys) {
+                for (const legacyKey of feature.legacyRemoteKeys) {
+                  if (centralFlags[legacyKey] !== undefined) {
+                    value = centralFlags[legacyKey]
+                    break
+                  }
+                }
+              }
+
+              if (value !== undefined) {
+                const boolValue = Boolean(value)
+                flagsUpdate.featureFlags[feature.id] = boolValue
+                flagsUpdate[feature.id] = boolValue
+              }
+            })
+
+            if (centralFlags.wholesaleEnabled !== undefined) {
+              flagsUpdate.wholesaleSettings = {
+                ...useAppConfigStore.getState().wholesaleSettings,
+                enabled: Boolean(centralFlags.wholesaleEnabled)
+              }
             }
             
             // Almacenar en la referencia

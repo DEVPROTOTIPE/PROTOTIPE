@@ -2176,7 +2176,62 @@ El procedimiento estandarizado para introducir una nueva característica modular
 8.  **Implementar Lógica de Negocio:** El desarrollador edita el código dentro de la carpeta `src/features/[featureId]/` implementando los controladores de UI de cliente/admin, los hooks personalizados, las llamadas al repositorio Firestore y las validaciones de Zod necesarias.
 9.  **Ejecutar Certificación:** Correr la validación final del compilador de integridad local (`npm run build` en el proyecto cliente) para garantizar la consistencia de tipos y empaquetado antes de versionar y subir a GitHub.
 
-### 12. Estado actual del sistema
+### 12. Capa de Normalización de Contratos (FeatureManifestAdapter)
+
+Para aislar el runtime de las aplicaciones frontend y el motor de análisis de la CLI Bridge frente a evoluciones en el esquema de manifiestos físicos de features, se ha interpuesto un adaptador de abstracción centralizado (`FeatureManifestAdapter`).
+
+#### A. Arquitectura de Desacoplamiento
+
+El flujo de normalización de datos e hidratación de componentes funciona bajo el siguiente diseño:
+
+```mermaid
+flowchart TD
+    A[core-manifest.generated.json] --> B[FeatureManifestAdapter]
+    B -->|getNormalizedFeatures| C[Array de FeatureDefinition]
+    C --> D[appConfigStore Zustand]
+    C --> E[appConfigSchema Zod]
+    C --> F[useAppConfigSync Firebase]
+    C --> G[server.js CLI Bridge]
+```
+
+#### B. Contrato de Salida Obligatorio (`FeatureDefinition`)
+
+El adaptador expone la firma `getNormalizedFeatures(manifest)`. Devuelve de forma predecible un array fuertemente tipado de objetos con la siguiente estructura de tipos:
+
+```typescript
+interface FeatureDefinition {
+  id: string;               // Identificador único (o fallback a la key del diccionario)
+  enabledByDefault: boolean; // Estado de activación inicial para la plantilla
+  remoteKey: string | null;  // Clave primaria de mapeo remoto en Firestore
+  legacyRemoteKeys: string[]; // Aliases históricos para compatibilidad hacia atrás
+}
+```
+
+Esto encapsula y normaliza las siguientes variaciones en el origen físico:
+- **Estructura Moderna (features{}):** Lee el objeto indexado, resolviendo fallbacks de identificador (`feature.id ?? featureKey`).
+- **Estructura Legacy (featureFlags[]):** Parsea el array plano mapeando la propiedad antigua `default` hacia `enabledByDefault`.
+- **Estructura Vacía o Indefinida:** Protege la ejecución devolviendo un array vacío `[]` para prevenir crashes.
+
+---
+
+### 13. Certificación de la Migración (CLI-490)
+
+El sprint de migración de contrato **`FEATURE_MANIFEST_SCHEMA_MIGRATION`** ha sido cerrado y certificado con éxito.
+
+#### A. Suite de Pruebas Unitarias del Adapter
+Se han diseñado e integrado los siguientes escenarios de aserciones en el runner:
+1. **Validación de Manifiesto Moderno:** Aserta la correcta extracción del objeto, inyección de fallbacks de claves y aliases en `legacyRemoteKeys`.
+2. **Validación de Manifiesto Legacy:** Aserta el mapeo compatible hacia atrás de arreglos planos e inicialización semántica de variables.
+3. **Validación Defensiva:** Aserta el comportamiento ante nulos o diccionarios vacíos sin lanzar excepciones fatales.
+- **Resultado:** `PASS` (100% de aserciones exitosas).
+
+#### B. Smoke Test de Aprovisionamiento (Integridad de Clientes)
+Se ejecutó la prueba de generación física completa de un nuevo cliente (`test_provision.js`) evaluando el pipeline de bootstrapping de la CLI:
+- **Resultado:** `30 de 30` pruebas de integridad superadas con éxito (`PASS`), validando que la inyección, configuración y deploy local de Firebase funcionan sin regresiones.
+
+---
+
+### 14. Estado actual del sistema
 
 La madurez técnica de los diferentes bloques del portal de features y la inyección SaaS se resume en la siguiente matriz de control:
 
@@ -2191,4 +2246,6 @@ La madurez técnica de los diferentes bloques del portal de features y la inyecc
 | **Feature `customer-loyalty`** | Implementado | Certificado | Primera feature comercial certificada exitosamente con Golden Path. |
 | **Generador de Artefactos** | Implementado | Aprobado | Autogenera manifiestos y defaults dinámicos al inyectar/remover módulos. |
 | **Cargador Dinámico (Vite Glob)** | Implementado | Aprobado | Carga y mapea en caliente las rutas de features activas usando `FeatureModuleLoader`. |
+| **FeatureManifestAdapter** | Implementado | Certificado | Capa de normalización de contratos y resiliencia para CLI y frontend. |
+
 

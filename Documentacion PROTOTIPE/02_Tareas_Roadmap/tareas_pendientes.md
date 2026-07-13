@@ -1,8 +1,74 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-279: Corrección de Redirección Automática de Pedidos, Visibilidad de Carrito y Habilitación de Créditos, Reparto y Cupones~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-13
+  - Descripción: Corrección de feature flags legacy (mapping de `orders` -> `onlineOrdersEnabled`, `credits` -> `creditsEnabled`, `delivery` -> `rolesOperativosEnabled` en `appConfigStore.js`), registro central de los módulos `credits` y `delivery` en `feature-registry.json`, inicialización de la flag de cupones `couponsEnabled`, y asignación de permisos de lectura públicos en la colección `wholesaleOrders` en `firestore.rules`.
+  - Archivos: [Plantillas Core/App Ventas/src/store/appConfigStore.js](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY], [Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js) [MODIFY], [Plantillas Core/App Ventas/firestore.rules](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/firestore.rules) [MODIFY], [Prototipe-CLI/templates/template-ventas/firestore.rules](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/firestore.rules) [MODIFY], [Prototipe-CLI/knowledge/feature-registry.json](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/feature-registry.json) [MODIFY]
+
+* **[x] ~~Tarea CORE-278: Implementación de Deshidratación de Plantillas y Logo Upload de Marca~~**
+  - Estatus: Completado.
+  - Fecha: 2026-07-07
+
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100%` de completitud en base a 482 tareas completadas de 482 tareas únicas verificables.
+* **Estado del Roadmap:** `100%` de completitud en base a 486 tareas completadas de 486 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-494: FEATURE_FLAGS_PHYSICAL_LOGICAL_ALIGNMENT: Saneamiento y Alineación Físico-Lógica de Módulos y Feature Flags en Firestore~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Modificados endpoints de features add/remove en server.js para sincronizar installedFeatures y flags con Firestore. Refactorizado ClientLifecyclePanel para actualizar Firestore reactivamente tras inyecciones exitosas. Adaptado FeatureFlagManager para combinar Firestore y Drift (como fallback robusto en viewports sin disco clonado) y rediseñada la interfaz dividida en "Módulos de Aplicación Instalados" (Features) y "Configuración Operativa" (Feature Flags), blindando la acción masiva "Habilitar Todas".
+  - Archivos:
+    - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/ClientLifecyclePanel.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ClientLifecyclePanel.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx) [MODIFY]
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-493: FEATURE_FLAGS_DYNAMIC_VINDICATION: Vinculación Reactiva de Flags de Features Instaladas en Caliente~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Refacturada la propiedad activeFlagsList en FeatureFlagManager.jsx para calcularse reactivamente con useMemo a partir de las features instaladas en caliente en el disco del inquilino (consultando /api/project/drift), inyectando el switch de control en la UI en caliente.
+  - Archivos:
+    - [`d:/PROTOTIPE/Central PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FeatureFlagManager.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-492: FEATURE_CREATION_PROVISIONING_AUDIT: Auditoría del Generador de Features y Sincronización de Rutas en Caliente~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Corregido el endpoint de commit de features modulares en caliente (/api/project/features/commit) para inyectar determinísticamente la propiedad physicalPaths al registrar una nueva feature en feature-registry.json. Corregido FeatureArtifactGenerator.js para registrar en el catálogo local del inquilino únicamente las features físicamente existentes en su disco local.
+  - Archivos:
+    - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/lib/FeatureArtifactGenerator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/FeatureArtifactGenerator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-491: FEATURE_REGISTRY_SYNCHRONIZATION: Sincronización del Feature Registry y Mapeo Físico del Catálogo~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Corregida la desconexión física de fidelización de clientes (customer-loyalty) y Hello módulo añadiendo sus physicalPaths al feature-registry.json. Modificado FeatureRegistry.js para filtrar dinámicamente y ocultar del catálogo del dashboard aquellas features cuyas carpetas físicas no existan en local (appointments, patients, crm).
+  - Archivos:
+    - [`d:/PROTOTIPE/Prototipe-CLI/lib/FeatureRegistry.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/FeatureRegistry.js) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/knowledge/feature-registry.json`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/feature-registry.json) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/features/customer-loyalty/implementation.manifest.json`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/features/customer-loyalty/implementation.manifest.json) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/features/customer-loyalty/implementation.manifest.json`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/features/customer-loyalty/implementation.manifest.json) [MODIFY]
+
+* **[x] ~~Tarea CLI-490: FEATURE_MANIFEST_SCHEMA_MIGRATION: Migración de Contrato de Feature Flags e Integración de Adapter~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Implementada la capa FeatureManifestAdapter en CLI y plantillas. Refactorizados los componentes de lectura de manifiesto en Zustand, Zod y Firebase Sync en template-ventas y App Ventas para consumir la salida normalizada, previniendo crashes por drift de contrato. Corregida la CLI (server.js) para el análisis de briefing.
+  - Archivos:
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/utils/featureManifestAdapter.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/utils/featureManifestAdapter.js) [NEW]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/utils/featureManifestAdapter.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/utils/featureManifestAdapter.js) [NEW]
+    - [`d:/PROTOTIPE/Prototipe-CLI/lib/featureManifestAdapter.js`](file:///d:/PROTOTIPE/Prototipe-CLI/lib/featureManifestAdapter.js) [NEW]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/store/appConfigStore.js) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/schemas/appConfigSchema.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/schemas/appConfigSchema.js) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/store/appConfigStore.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/store/appConfigStore.js) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/schemas/appConfigSchema.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/schemas/appConfigSchema.js) [MODIFY]
+    - [`d:/PROTOTIPE/Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [`d:/PROTOTIPE/Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
 
 * **[x] ~~Tarea CLI-489: Documentación Arquitectónica del Portal de Creación, Inyección y Gestión de Features SaaS (Fase Documental)~~**
   - Estatus: Completada
