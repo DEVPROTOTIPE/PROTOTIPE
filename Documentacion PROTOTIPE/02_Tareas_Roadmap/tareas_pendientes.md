@@ -1,16 +1,103 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
 ## Métrica de Avance del Ecosistema (Cálculo Analítico)
-* **Estado del Roadmap:** `100.00%` de completitud en base a 460 tareas completadas de 460 tareas únicas verificables.
+* **Estado del Roadmap:** `100.00%` de completitud en base a 469 tareas completadas de 469 tareas únicas verificables.
 * **Porcentajes anteriores (HISTÓRICO / SUPERSEDED):** 100% (declaraciones teóricas previas obsoletas por normalización documental).
+
+* **[x] ~~Tarea CLI-469: Sincronización en Caliente de Feature Flags desde Firestore Central a App Ventas~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-13
+  - Fecha de finalización: 2026-07-13
+  - Descripción: Modificado el hook `useAppConfigSync.js` tanto en la plantilla base (`App Ventas`) como en la instancia activa del cliente (`ventas-moni-app`) para extraer `data.flags` de Firestore Central (`clientes_control`), sincronizando flags de créditos, cupones y reclamos en el store global y en el config/settings local persistente de forma reactiva en caliente.
+  - Archivos:
+    - [`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+    - [`Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-468: Bugfix — Reglas de Firestore bloqueaban login de cliente por celular~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: El flujo de autenticación de cliente en `template-ventas` usa el número de celular como `userId` y realiza `getDoc`/`setDoc` sin Firebase Auth activa. Las reglas anteriores exigían `request.auth != null`, lo cual bloqueaba esas operaciones con `Missing or insufficient permissions`. Se actualizaron las reglas de `/users/{userId}` para permitir `read` y `create` sin autenticación (el ID del documento = número de celular actúa como control). Se desplegaron en producción sobre `ventas-moni-app`.
+  - Archivos:
+    - [`Prototipe-CLI/templates/template-ventas/firestore.rules`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/firestore.rules) [MODIFY]
+    - [`Instancias Clientes/ventas/ventas-moni-app/firestore.rules`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/firestore.rules) [MODIFY + DEPLOY]
+
+* **[x] ~~Tarea CLI-467: Blindaje de Arranque Inicial y Auto-siembra de Administrador en Aprovisionamiento~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Solucionamos el bug de base de datos vacía al primer arranque de los clientes creados. Descubrimos que el paso de auto-siembra de administrador y de configuración en Firestore (`runSeedAdmin`) estaba comentado por defecto en `generator.js`. Activamos la llamada nativa e incondicional a `runSeedAdmin` en [`generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js), garantizando que todo aprovisionamiento registre de inmediato la cuenta en Firebase Auth, su perfil en la colección `/users` y la configuración `/config/settings`. Esto previene de forma definitiva las excepciones `Configuración no encontrada en Firestore` y `Acceso no autorizado` en el cliente.
+  - Archivos:
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-466: Gestor Visual de Cola e Historial de Aprovisionamientos en Tiempo Real~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Desarrollamos un panel interactivo premium de historial y cola de aprovisionamiento en caliente. Implementamos los endpoints `GET /api/provisioning/queue` (para retornar el listado completo persistente en disco) y `POST /api/provisioning/queue/cancel` (para abortar tareas activas llamando a `ProvisioningQueue.cancelJob`) en `server.js`. Creamos el componente modular `ProvisioningQueueModal.jsx` estilizado con animaciones, contrastes e indicadores HSL para visualizar estados de cola (`processing`, `queued`, `waiting_lock`, `completed`, `failed`, `cancelled`) y gatillar cancelaciones confirmadas mediante `useAlertConfirm`. Integramos el botón de acceso directo "Ver Cola e Historial" y el estado reactivo en la barra de navegación del wizard en `App.jsx`.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningQueueModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningQueueModal.jsx) [NEW]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+* **[x] ~~Tarea CLI-465: Robustecimiento del Flujo de Aprovisionamiento y Mapeo Condicional de Servicios Firebase~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Corregimos fallas detectadas en el flujo de aprovisionamiento. (1) Elevamos `chunkSizeWarningLimit` a 1500 en las plantillas base (`template-core-seed`, `template-ventas`) y en la instancia activa `ventas-moni-app` para suprimir alertas de Vite. (2) Condicionamos el despliegue automático de reglas/índices en `server.js` al flag `enableFirebaseDeploy`. (3) Registramos `template-core-seed` en `plantillas_registro.json` para permitir el sembrado de base de datos. (4) Corregimos la superposición de modales elevando el `z-index` de `FirebaseAccountsModal` a `110` (estaba en `80`, quedando oculto detrás de la consola de `100`). (5) Solventamos la intercepción de bordes blancos del index.css global en la consola de logs de `ProvisioningProgressModal.jsx` cambiando a la clase `rounded-xl`.
+  - Archivos:
+    - [`Prototipe-CLI/templates/template-core-seed/vite.config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/vite.config.js) [MODIFY]
+    - [`Prototipe-CLI/templates/template-ventas/vite.config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js) [MODIFY]
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/plantillas_registro.json`](file:///d:/PROTOTIPE/Prototipe-CLI/plantillas_registro.json) [MODIFY]
+    - [`Instancias Clientes/ventas/ventas-moni-app/vite.config.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/vite.config.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/FirebaseAccountsModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FirebaseAccountsModal.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-464: Reconexión Automática, Resiliencia y Persistencia del Flujo de Aprovisionamiento~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Desarrollamos una solución de persistencia completa a prueba de fallos de recarga del navegador (refresh/F5) durante el aprovisionamiento. Implementamos el endpoint `GET /api/create-project/status` en el Bridge CLI (`server.js`) para consultar en caliente el estado detallado de una tarea de creación, recuperando su historial completo de logs en memoria y banderas de pausa de Auth. En el frontend (`App.jsx`), encolamos el `taskId` y los metadatos de configuración del cliente en `localStorage` al iniciar la tarea. Al montar la aplicación (useEffect), se verifica si hay una tarea guardada en curso y, de ser así, se consulta su estado, se restaura la UI (modal de progreso, logs e inputs) y se reabre la conexión de EventSource (SSE stream) de forma transparente y automática, limpiando el almacenamiento al finalizar con éxito o error.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-463: Selector Interactivo y Gestión Dinámica de Categorías de Instancias en el Aprovisionamiento~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Desarrollamos un selector interactivo basado en `CustomSelect` para elegir dinámicamente la carpeta de categoría base dentro de `/Instancias Clientes/` para la ruta física del proyecto (`targetPath`) en el Wizard. Implementamos endpoints REST en el Bridge CLI (`GET /api/project/instances-categories` para escanear en caliente las subcarpetas de la ruta física y `POST /api/project/instances-categories` para crear nuevas categorías en disco de forma sanitizada). En el frontend (`App.jsx`), añadimos estados reactivos y un `useEffect` que recalcula de inmediato la ruta física combinando el nombre del cliente y la categoría seleccionada, junto con un botón para sincronizar carpetas en caliente y un input inline para crear nuevas categorías directamente desde el asistente.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+* **[x] ~~Tarea CLI-462: Silenciado de Advertencias de Límite de Tamaño de Chunk (Vite) en Dashboard Central~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Ajustamos el archivo `vite.config.js` del Dashboard Central para configurar la propiedad `build.chunkSizeWarningLimit` a `3000` (3 MB). Esto previene que Vite emita advertencias visuales en la consola y en los logs de aprovisionamiento acerca de archivos grandes (index.js de 2.66 MB), ya que el Dashboard Central es una consola monolítica administrada localmente donde el tamaño del bundle inicial no representa un problema de latencia.
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/vite.config.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/vite.config.js) [MODIFY]
+
+* **[x] ~~Tarea CLI-461: Opción de Sembrado de Datos Condicional y Resiliencia de Despliegue de Reglas e Índices Firestore ante Fallos de Storage~~**
+  - Estatus: Completada
+  - Fecha de registro: 2026-07-12
+  - Fecha de finalización: 2026-07-12
+  - Descripción: Implementamos una opción interactiva (`seedDatabase` por defecto `true`) en el Wizard del Dashboard Central (`App.jsx`) para que el desarrollador pueda elegir libremente si desea sembrar o no datos de prueba en la base de datos Firestore del cliente. Modificamos el payload de aprovisionamiento en `App.jsx` y su persistencia en el borrador de localStorage. En el Bridge CLI (`server.js`), respetamos este parámetro para omitir el sembrado condicionalmente. Asimismo, robustecimos el flujo de despliegue de reglas e índices de Firebase en `server.js` haciéndolo tolerante a fallos si el servicio Firebase Storage no se encuentra inicializado en el proyecto del cliente; en este caso, se captura la excepción del comando original, se advierte al desarrollador y se reintenta automáticamente el despliegue omitiendo Storage (`--only firestore:rules,firestore:indexes`), logrando que las reglas e índices de Firestore se desplieguen exitosamente a la nube sin bloquear el aprovisionamiento.
+  - Archivos:
+    - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
 
 * **[x] ~~Tarea CLI-460: Pausa interactiva y confirmación de activación manual de Firebase Auth en el aprovisionamiento de proyectos Spark (gratuitos)~~**
   - Estatus: Completada
   - Fecha de registro: 2026-07-12
   - Fecha de finalización: 2026-07-12
-  - Descripción: Implementamos un flujo interactivo de pausa en caliente en el Bridge CLI (`server.js`) si falla la inicialización automática de Auth por falta de facturación (Spark Plan). El Bridge envía un evento SSE `auth_activation_required` y se pausa temporalmente. El frontend (`App.jsx` y `ProvisioningProgressModal.jsx`) muestra una tarjeta de alerta con el enlace a la consola del proyecto de Firebase y un botón "Ya lo he habilitado, continuar", el cual realiza un POST al Bridge para reanudar el flujo. Esto garantiza la inyección correcta del usuario administrador y el sembrado de base de datos antes de finalizar el aprovisionamiento.
+  - Descripción: Implementamos un flujo interactivo de pausa en caliente en el Bridge CLI (`server.js`) si falla la inicialización automática de Auth por falta de facturación (Spark Plan). El Bridge envía un evento SSE `auth_activation_required` y se pausa temporalmente. El frontend (`App.jsx` y `ProvisioningProgressModal.jsx`) muestra una tarjeta de alerta con el enlace a la consola del proyecto de Firebase y un botón "Ya lo he habilitado, continuar", el cual realiza un POST al Bridge para reanudar el flujo. Esto garantiza la inyección correcta del usuario administrador y el sembrado de base de datos antes de finalizar el aprovisionamiento. Adicionalmente, blindamos el despliegue (`generator.js`) contra Storage no configurado en la nube para evitar rollbacks locales, y corregimos `findClientPath` en el Bridge para resolver directorios de cliente con el prefijo `app-` garantizando el sembrado exitoso de la base de datos local.
   - Archivos:
     - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+    - [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
     - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
     - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [MODIFY]
     - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]

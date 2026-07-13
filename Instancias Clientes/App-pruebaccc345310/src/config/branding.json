@@ -1,9 +1,0 @@
-{
-  "paletteChoice": "custom",
-  "initials": "P",
-  "colors": {
-    "primary": "hsl(126, 6%, 32%)",
-    "secondary": "hsl(2, 15%, 59%)",
-    "surface": "hsl(0, 0%, 100%)"
-  }
-}

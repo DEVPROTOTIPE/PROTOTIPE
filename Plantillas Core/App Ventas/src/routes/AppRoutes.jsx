@@ -45,8 +45,9 @@ export default function AppRoutes() {
       try {
         const list = [];
         for (const path in featureRoutesLoaders) {
-          // Extrae el ID de la feature (e.g. "../features/inventory/routes.jsx" -> "inventory")
-          const featureId = path.split('/')[2];
+          // Extrae el ID de la feature de forma dinámica e independiente de la profundidad de la ruta
+          const parts = path.split('/');
+          const featureId = parts[parts.length - 2] || 'unknown';
           
           if (FeatureRegistry.isEnabled(featureId)) {
             const module = await featureRoutesLoaders[path]();

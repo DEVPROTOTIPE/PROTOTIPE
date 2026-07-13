@@ -2,6 +2,20 @@
 
 Historial de cambios, mejoras y correcciones técnicas aplicadas sobre la plantilla core de Ventas.
 
+### [2026-07-12] - Corrección Integral de Modularización (Kernel, Router, Alertas y Reglas Firestore)
+* **Tipo:** Bugfix / Refactorización Core
+* **Severidad:** Crítica
+* **Descripción de Cambios:**
+  - **`ApplicationKernel.js`:** Corregido el bug de `featureId` estático que usaba `split('/')[4]`, reemplazándolo por una extracción dinámica y universal basada en la posición penúltima del path del módulo (`parts[parts.length - 2]`).
+  - **`AppRoutes.jsx`:** Corregido el bug de `featureId` estático que usaba `split('/')[2]` en la inyección de rutas de features, reemplazándolo por la misma lógica universal robusta (`parts[parts.length - 2]`).
+  - **`App.jsx`:** Corregido condicional invertido del `RemoteAlertModal` para evitar que el aviso de prueba bloquee al administrador.
+  - **`firestore.rules`:** Restauradas las reglas de seguridad originales completas y sanas del commit `24c9908` y desplegadas al proyecto Firebase `ventas-smartfix` para habilitar el login de cliente y analíticas.
+* **Archivos modificados:**
+  - `src/core/kernel/ApplicationKernel.js`
+  - `src/routes/AppRoutes.jsx`
+  - `src/App.jsx`
+  - `firestore.rules`
+
 ### [2026-07-10] - Estabilización de E2E Checkout, Cobertura del Dominio y Configuración CI/CD
 * **Tipo:** Estabilización / Cobertura de Código / CI/CD
 * **Severidad:** Alta

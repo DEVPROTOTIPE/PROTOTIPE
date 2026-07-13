@@ -132,9 +132,10 @@ export default function useAppConfigSync() {
               })
             }
 
-            // 2. Sincronización silenciosa de tarifas de cobro desde el CRM central
-            // Si el desarrollador actualizó los parámetros de billing, se propagan
+            // 2. Sincronización silenciosa de tarifas de cobro y Feature Flags desde el CRM central
+            // Si el desarrollador actualizó los parámetros de billing o las flags, se propagan
             // automáticamente al config/settings local de la instancia.
+            const centralFlags = data.flags || {}
             const billingFieldsFromCentral = {
               ...(data.billingMode !== undefined && { developerBillingMode: data.billingMode }),
               ...(data.comisionPorcentaje !== undefined && { developerCommissionPercent: parseFloat(data.comisionPorcentaje) }),
@@ -142,6 +143,11 @@ export default function useAppConfigSync() {
               ...(data.pagoMensualFijo !== undefined && { developerFlatMonthlyPayment: parseFloat(data.pagoMensualFijo) }),
               ...(data.enableDianBilling !== undefined && { developerEnableDianBilling: Boolean(data.enableDianBilling) }),
               ...(data.costoPorFacturaDian !== undefined && { developerDianInvoiceCost: parseFloat(data.costoPorFacturaDian) }),
+              
+              // Feature Flags centrales mapeadas al esquema local
+              ...(centralFlags.creditsEnabled !== undefined && { creditsEnabled: Boolean(centralFlags.creditsEnabled) }),
+              ...(centralFlags.couponsEnabled !== undefined && { couponsEnabled: Boolean(centralFlags.couponsEnabled) }),
+              ...(centralFlags.claimsEnabled !== undefined && { claimsEnabled: Boolean(centralFlags.claimsEnabled) }),
             }
 
             if (Object.keys(billingFieldsFromCentral).length > 0) {
@@ -160,7 +166,7 @@ export default function useAppConfigSync() {
                 if (typeof updateAppConfig === 'function') {
                   if (user && role === 'admin') {
                     updateAppConfig(billingFieldsFromCentral).catch((err) => {
-                      console.warn('[BillingSync] No se pudo propagar tarifa al config local:', err.message)
+                      console.warn('[ConfigSync] No se pudo propagar tarifa/flags al config local:', err.message)
                     })
                   } else {
                     // Guardar para propagación diferida cuando la sesión esté lista

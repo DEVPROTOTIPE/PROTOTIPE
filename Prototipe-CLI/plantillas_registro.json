@@ -1,1 +1,29 @@
-{"_descripcion":"Registro central de plantillas PROTOTIPE. Cada entrada mapea una app activa a su template en el CLI. Agregar una nueva fila al crear una nueva app base.","_trigger":"@actualizar-template [nombre]","_campos":{"fuente":"Ruta absoluta de la app de referencia (produccion activa)","destino":"Ruta absoluta del template correspondiente en Prototipe-CLI","nicho":"Categoria de negocio para referencia semantica","activo":"Si esta app tiene una instancia real de cliente en produccion","version":"Version de la plantilla para control de upgrades (SemVer)"},"plantillas":{"ventas":{"coreType":"ventas","fuente":"D:/PROTOTIPE/Plantillas Core/App Ventas","destino":"D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas","nicho":"Retail / Ecommerce / POS","activo":true,"version":"1.0.6"}}}
+{
+  "_descripcion": "Registro central de plantillas PROTOTIPE. Cada entrada mapea una app activa a su template en el CLI. Agregar una nueva fila al crear una nueva app base.",
+  "_trigger": "@actualizar-template [nombre]",
+  "_campos": {
+    "fuente": "Ruta absoluta de la app de referencia (produccion activa)",
+    "destino": "Ruta absoluta del template correspondiente en Prototipe-CLI",
+    "nicho": "Categoria de negocio para referencia semantica",
+    "activo": "Si esta app tiene una instancia real de cliente en produccion",
+    "version": "Version de la plantilla para control de upgrades (SemVer)"
+  },
+  "plantillas": {
+    "ventas": {
+      "coreType": "ventas",
+      "fuente": "D:/PROTOTIPE/Plantillas Core/App Ventas",
+      "destino": "D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas",
+      "nicho": "Retail / Ecommerce / POS",
+      "activo": true,
+      "version": "1.0.6"
+    },
+    "template-core-seed": {
+      "coreType": "core-seed",
+      "fuente": "D:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed",
+      "destino": "D:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed",
+      "nicho": "Genérico / Base Universal",
+      "activo": true,
+      "version": "1.0.0"
+    }
+  }
+}

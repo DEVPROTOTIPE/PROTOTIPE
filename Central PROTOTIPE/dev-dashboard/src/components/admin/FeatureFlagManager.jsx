@@ -145,6 +145,8 @@ export default function FeatureFlagManager({ dbInstance, showToast }) {
   const handleBulkAction = async (actionType) => {
     const activeCore = selectedClientData?.template || 'ventas';
     const activeFlags = coresMetadata[activeCore]?.manifest?.featureFlags || CORE_FLAGS;
+    
+    const updatedFlags = { ...clientFlags };
     activeFlags.forEach(flag => {
       updatedFlags[flag.id] = actionType === 'enable';
     });

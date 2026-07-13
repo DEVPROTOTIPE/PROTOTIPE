@@ -1309,26 +1309,48 @@ async function executeCreationTaskInBackground(taskId, answers) {
     
     // Desplegar de forma proactiva reglas e índices de Firebase
     const finalFirebaseProjectId = answers.firebaseProjectId || (typeof safeProjectId !== 'undefined' ? safeProjectId : '');
-    if (finalFirebaseProjectId) {
+    const shouldDeployFirebase = answers.enableFirebaseDeploy !== false && answers.execution?.firebaseDeploy !== false;
+
+    if (finalFirebaseProjectId && shouldDeployFirebase) {
       log(`[Firebase Automate] Desplegando reglas e índices de Firebase (Firestore y Storage) en la nube...`);
       try {
         const tokenSuffix = process.env.FIREBASE_TOKEN ? ` --token "${process.env.FIREBASE_TOKEN}"` : '';
-        const { stdout } = await execAsync(
-          `firebase deploy --only firestore:rules,firestore:indexes,storage -P ${finalFirebaseProjectId}${tokenSuffix}`,
-          { cwd: result.targetDir, timeout: 120000 }
-        );
-        log(`[Firebase Automate] Reglas e índices de seguridad desplegados con éxito ✓.`);
+        try {
+          await execAsync(
+            `firebase deploy --only firestore:rules,firestore:indexes,storage -P ${finalFirebaseProjectId}${tokenSuffix}`,
+            { cwd: result.targetDir, timeout: 120000 }
+          );
+          log(`[Firebase Automate] Reglas e índices de seguridad (Firestore y Storage) desplegados con éxito ✓.`);
+        } catch (innerErr) {
+          const errTxt = innerErr.message || '';
+          if (errTxt.includes('Storage has not been set up') || errTxt.includes('storage') || errTxt.includes('Get Started')) {
+            log(`[Firebase Automate Warning] ⚠️  Firebase Storage no inicializado. Reintentando despliegue de reglas e índices omitiendo Storage...`);
+            await execAsync(
+              `firebase deploy --only firestore:rules,firestore:indexes -P ${finalFirebaseProjectId}${tokenSuffix}`,
+              { cwd: result.targetDir, timeout: 120000 }
+            );
+            log(`[Firebase Automate] Reglas e índices de Firestore desplegados con éxito ✓ (Storage omitido).`);
+          } else {
+            throw innerErr;
+          }
+        }
       } catch (deployErr) {
-        log(`[Firebase Automate Warning] No se pudieron desplegar las reglas/índices automáticos de Firebase: ${deployErr.message}. Continuando...`);
+        log(`[Firebase Automate Warning] No se pudieron desplegar las reglas/índices de Firebase: ${deployErr.message}. Continuando...`);
       }
+    } else if (finalFirebaseProjectId && !shouldDeployFirebase) {
+      log(`[Firebase Automate] ℹ️  Despliegue de reglas/índices en Firebase omitido por el desarrollador.`);
     }
 
-    log(`[API Bridge] Iniciando sembrado automático de base de datos para la nueva instancia...`);
-    try {
-      const seedRes = await seedProjectDatabase(clientId);
-      log(`[API Bridge] Sembrado automático de base de datos completado ✓: ${seedRes.message}`);
-    } catch (seedErr) {
-      log(`[API Bridge Warning] No se pudo realizar el sembrado automático de datos de prueba: ${seedErr.message}`);
+    if (answers.seedDatabase !== false) {
+      log(`[API Bridge] Iniciando sembrado automático de base de datos para la nueva instancia...`);
+      try {
+        const seedRes = await seedProjectDatabase(clientId);
+        log(`[API Bridge] Sembrado automático de base de datos completado ✓: ${seedRes.message}`);
+      } catch (seedErr) {
+        log(`[API Bridge Warning] No se pudo realizar el sembrado automático de datos de prueba: ${seedErr.message}`);
+      }
+    } else {
+      log(`[API Bridge] ℹ️  Sembrado de base de datos omitido a petición del desarrollador.`);
     }
 
     task.status = 'success';
@@ -1383,6 +1405,59 @@ async function executeCreationTaskInBackground(taskId, answers) {
     delete projectSyncLocks[clientId];
   }
 }
+
+// GET /api/project/instances-categories
+// Escanea dinámicamente las carpetas dentro de "D:\PROTOTIPE\Instancias Clientes"
+app.get('/api/project/instances-categories', async (req, res) => {
+  try {
+    const instancesDir = 'D:\\PROTOTIPE\\Instancias Clientes';
+    if (!fs.existsSync(instancesDir)) {
+      fs.mkdirSync(instancesDir, { recursive: true });
+    }
+    const files = fs.readdirSync(instancesDir, { withFileTypes: true });
+    const categories = files
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name);
+    
+    res.json({ categories });
+  } catch (err) {
+    console.error('[API Bridge Error] Al listar categorías de instancias:', err);
+    res.status(500).json({ error: `Error al escanear directorio de instancias: ${err.message}` });
+  }
+});
+
+// POST /api/project/instances-categories
+// Crea una nueva subcarpeta (categoría) dentro de "D:\PROTOTIPE\Instancias Clientes"
+app.post('/api/project/instances-categories', async (req, res) => {
+  try {
+    const { categoryName } = req.body;
+    if (!categoryName || typeof categoryName !== 'string') {
+      return res.status(400).json({ error: 'Nombre de categoría inválido.' });
+    }
+    const sanitizedName = categoryName.trim().replace(/[^a-zA-Z0-9-_]/g, '');
+    if (!sanitizedName) {
+      return res.status(400).json({ error: 'El nombre de categoría contiene caracteres no permitidos.' });
+    }
+    
+    const instancesDir = 'D:\\PROTOTIPE\\Instancias Clientes';
+    const targetDir = path.join(instancesDir, sanitizedName);
+    
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+    
+    // Devolver lista de categorías actualizada
+    const files = fs.readdirSync(instancesDir, { withFileTypes: true });
+    const categories = files
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name);
+      
+    res.json({ success: true, categories });
+  } catch (err) {
+    console.error('[API Bridge Error] Al crear categoría de instancias:', err);
+    res.status(500).json({ error: `Error al crear categoría de instancia: ${err.message}` });
+  }
+});
 
 // Endpoint para iniciar el aprovisionamiento de manera asíncrona
 app.post('/api/create-project', async (req, res) => {
@@ -1585,6 +1660,24 @@ app.get('/api/create-project/stream', (req, res) => {
   });
 });
 
+// GET /api/create-project/status
+// Permite consultar si un aprovisionamiento está en ejecución, pausado o finalizado, y obtener su historial de logs
+app.get('/api/create-project/status', (req, res) => {
+  const { taskId } = req.query;
+  if (!taskId || !activeCreationTasks[taskId]) {
+    return res.json({ active: false });
+  }
+
+  const task = activeCreationTasks[taskId];
+  res.json({
+    active: true,
+    status: task.status,
+    logs: task.logs,
+    pausedForAuth: task.status === 'paused' || task.pausedReason === 'auth_activation_required',
+    error: task.error
+  });
+});
+
 // Endpoint para reanudar el aprovisionamiento pausado por activación manual de Auth
 app.post('/api/create-project/resume', (req, res) => {
   const { taskId } = req.body;
@@ -1627,6 +1720,34 @@ app.get('/api/provisioning/status', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: `Error al consultar estado: ${err.message}` });
+  }
+});
+
+// GET /api/provisioning/queue — Obtener la cola completa persistente
+app.get('/api/provisioning/queue', (req, res) => {
+  try {
+    const sortedQueue = [...ProvisioningQueue.queue].reverse();
+    res.json({ success: true, queue: sortedQueue });
+  } catch (err) {
+    res.status(500).json({ error: `Error al obtener cola: ${err.message}` });
+  }
+});
+
+// POST /api/provisioning/queue/cancel — Cancelar un trabajo en cola o en ejecución
+app.post('/api/provisioning/queue/cancel', async (req, res) => {
+  const { taskId } = req.body;
+  if (!taskId) {
+    return res.status(400).json({ error: "El parámetro 'taskId' es obligatorio." });
+  }
+  try {
+    const job = ProvisioningQueue.queue.find(j => j.taskId === taskId);
+    if (!job) {
+      return res.status(404).json({ error: "No se encontró el trabajo especificado en la cola." });
+    }
+    await ProvisioningQueue.cancelJob(taskId);
+    res.json({ success: true, message: `Trabajo ${taskId} cancelado exitosamente.` });
+  } catch (err) {
+    res.status(500).json({ error: `Error al cancelar trabajo: ${err.message}` });
   }
 });
 
@@ -14058,14 +14179,18 @@ async function findClientPath(clientId) {
   const topDirs = await fs.readdir(GIT_INSTANCES_DIR).catch(() => []);
   for (const dir of topDirs) {
     const fullPath = path.join(GIT_INSTANCES_DIR, dir);
-    if (dir.toLowerCase() === clientId.toLowerCase()) {
+    const dirLower = dir.toLowerCase();
+    const clientLower = clientId.toLowerCase();
+    
+    if (dirLower === clientLower || dirLower === `app-${clientLower}`) {
       if (await fs.pathExists(path.join(fullPath, '.prototipe.json'))) {
         return fullPath;
       }
     }
     const subDirs = await fs.readdir(fullPath).catch(() => []);
     for (const subDir of subDirs) {
-      if (subDir.toLowerCase() === clientId.toLowerCase()) {
+      const subDirLower = subDir.toLowerCase();
+      if (subDirLower === clientLower || subDirLower === `app-${clientLower}`) {
         const subFullPath = path.join(fullPath, subDir);
         if (await fs.pathExists(path.join(subFullPath, '.prototipe.json'))) {
           return subFullPath;

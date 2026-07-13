@@ -445,7 +445,7 @@ export default function ProvisioningProgressModal({
 
               {/* VISTA 2: CONSOLA DE CÓDIGO */}
               {activeTab === 'console' && (
-                <div className="h-full bg-slate-950/70 border border-slate-850 p-4 font-mono text-[9px] rounded-2xl overflow-y-auto space-y-2 select-text scrollbar-premium">
+                <div className="h-full bg-slate-950/90 border border-[var(--color-border)]/50 p-4 font-mono text-[9px] rounded-xl overflow-y-auto space-y-2 select-text scrollbar-premium">
                   {logs.length === 0 ? (
                     <div className="text-slate-600 italic">Esperando logs de compilación del CLI...</div>
                   ) : (

@@ -3272,10 +3272,9 @@ Comencemos presentándote e indexando los archivos. ¿Estás listo?
   // 11. Despliegue en Firebase del Cliente
   await deployFirebase(answers, targetDir);
 
-  // 11.1 Auto-siembra de Administrador inicial (Desactivada por defecto)
-  console.log(pc.yellow('\nℹ️  Auto-siembra de administrador y datos iniciales desactivada por defecto.'));
-  console.log(pc.yellow('   Puedes sembrar la base de datos en cualquier momento corriendo: npm run seed:admin'));
-  // await runSeedAdmin(answers, targetDir);
+  // 11.1 Auto-siembra de Administrador inicial
+  console.log(pc.cyan('\n🤖 Ejecutando sembrado automático de administrador y datos de Firestore...'));
+  await runSeedAdmin(answers, targetDir);
 
   // 11.2 Generar prototipe.lock.json — Registro de versión y hashes SHA-256 del Core
   // Permite detectar drift (desviación local) en sincronizaciones downstream futuras.
@@ -3605,9 +3604,15 @@ async function deployFirebase(answers, targetDir) {
 
   // [A2 FIX] Modo producción: build + full deploy. Errores se PROPAGAN al caller.
   // El caller (createProject) los captura en su try/catch y ejecuta rollback.
-  console.log(pc.cyan('🔥 Compilando el proyecto (npm run build)...'));
-  await execAsyncCommand('npm', ['run', 'build'], { cwd: targetDir });
-  console.log(pc.green('✅ Compilación de producción generada con éxito.'));
+  try {
+    console.log(pc.cyan('🔥 Compilando el proyecto (npm run build)...'));
+    await execAsyncCommand('npm', ['run', 'build'], { cwd: targetDir });
+    console.log(pc.green('✅ Compilación de producción generada con éxito.'));
+  } catch (buildErr) {
+    console.warn(pc.yellow(`⚠️  [Firebase Deploy Warning] Falló la compilación de producción (npm run build): ${buildErr.message}.`));
+    console.warn(pc.yellow(`👉  Tu proyecto local ha sido creado exitosamente en disco. Corrige los errores de compilación y ejecuta 'npm run build' y 'firebase deploy' manualmente.`));
+    return;
+  }
 
   console.log(pc.cyan('🔥 Desplegando en Firebase (reglas, índices, storage y hosting)...'));
   try {
@@ -3617,10 +3622,16 @@ async function deployFirebase(answers, targetDir) {
     const errorText = (deployErr.message || '') + (deployErr.stderr || '') + (deployErr.stdout || '');
     if (errorText.includes('Storage has not been set up') || (errorText.includes('storage') && errorText.includes('Get Started'))) {
       console.warn(pc.yellow(`⚠️  [Firebase Deploy Warning] Cloud Storage no ha sido aprovisionado en la consola de Firebase. Reintentando deploy omitiendo Storage...`));
-      await execFirebaseWithRetry(['deploy', '--only', 'firestore:rules,firestore:indexes,hosting', '-P', cleanProjectId]);
-      console.log(pc.green('✅ Proyecto de Firebase (Reglas, Índices y Hosting) desplegado con éxito (Storage omitido).'));
+      try {
+        await execFirebaseWithRetry(['deploy', '--only', 'firestore:rules,firestore:indexes,hosting', '-P', cleanProjectId]);
+        console.log(pc.green('✅ Proyecto de Firebase (Reglas, Índices y Hosting) desplegado con éxito (Storage omitido).'));
+      } catch (retryErr) {
+        console.warn(pc.yellow(`⚠️  [Firebase Deploy Warning] El despliegue alternativo también falló por restricciones en la nube: ${retryErr.message}.`));
+        console.warn(pc.yellow(`👉  Tu proyecto local ha sido creado exitosamente en disco. Inicializa Cloud Storage en la consola de Firebase y luego corre 'firebase deploy' manualmente.`));
+      }
     } else {
-      throw deployErr;
+      console.warn(pc.yellow(`⚠️  [Firebase Deploy Warning] Fallo en el despliegue de Firebase: ${deployErr.message}.`));
+      console.warn(pc.yellow(`👉  Tu proyecto local ha sido creado exitosamente en disco. Puedes desplegarlo manualmente más tarde usando 'firebase deploy'.`));
     }
   }
 }

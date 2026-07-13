@@ -5,7 +5,7 @@
 app_layout:
   Dashboard_Central:
     root: /Central PROTOTIPE/dev-dashboard/src/
-    components: [components/admin/BrandingEffectsPanel.jsx, components/admin/ClientLifecyclePanel.jsx, components/admin/VersionManagerView.jsx, components/admin/SaaSOperationsView.jsx, components/admin/BriefingStudioView.jsx, components/admin/FeatureMarketplaceView.jsx, components/admin/ComponentLibraryView.jsx, components/admin/ComponentSandbox.jsx, components/admin/ProvisioningProgressModal.jsx, components/admin/FirebaseAccountsModal.jsx, components/ui/, components/common/]
+    components: [components/admin/BrandingEffectsPanel.jsx, components/admin/ClientLifecyclePanel.jsx, components/admin/VersionManagerView.jsx, components/admin/SaaSOperationsView.jsx, components/admin/BriefingStudioView.jsx, components/admin/FeatureMarketplaceView.jsx, components/admin/ComponentLibraryView.jsx, components/admin/ComponentSandbox.jsx, components/admin/ProvisioningProgressModal.jsx, components/admin/FirebaseAccountsModal.jsx, components/admin/ProvisioningQueueModal.jsx, components/ui/, components/common/]
     state: [store/, services/SaaSMetricsService.js, services/AlertEngine.js, config/saas_config.js]
   Prototipe_CLI:
     root: /Prototipe-CLI/
@@ -315,6 +315,7 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 ---
 
 ## 📂 Estructura de Módulos y Archivos Clave
+* **`/Central PROTOTIPE/dev-dashboard/src/components/admin/CorePromotionModal.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-456).
 * **`/Plantillas Core/App Ventas/Documentacion App Ventas/guia_multitenant.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-373).
 * **`/Plantillas Core/App Ventas/Documentacion App Ventas/estrategia_testing.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-373).
 * **`/Plantillas Core/App Ventas/Documentacion App Ventas/modelo_firestore.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-373).

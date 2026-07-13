@@ -1,5 +1,144 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CLI-469 — 2026-07-13
+**Bugfix: Sincronización en Caliente de Feature Flags desde Firestore Central a App Ventas**
+
+### Causa Raíz:
+El Dashboard Feature Flag Manager escribe los switches habilitados/desactivados en el documento `/clientes_control/{clientId}` de Firestore Central bajo el objeto `flags` (por ejemplo, `flags.creditsEnabled`). Sin embargo, el hook de sincronización de la app cliente (`useAppConfigSync.js`) omitía por completo leer `data.flags`, por lo que el cliente final y de administración local seguían usando de forma fija los valores por defecto en memoria (como `creditsEnabled: true`), sin acatar la desactivación remota.
+
+### Cambios realizados:
+1. **`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`**: Modificado el listener de Firestore Central (`clientes_control`) para extraer `data.flags`. Mapeadas las flags centrales de créditos (`creditsEnabled`), cupones (`couponsEnabled`) y reclamos (`claimsEnabled`) e inyectadas dinámicamente en el store global de Zustand (`setConfig`) y persistidas localmente en `/config/settings` para compatibilidad offline.
+2. **`Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js`**: Replicado el cambio en la instancia cliente activa para propagación del hot-reload en producción.
+
+### Archivos modificados:
+- [`Plantillas Core/App Ventas/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Plantillas%20Core/App%20Ventas/src/hooks/useAppConfigSync.js) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAppConfigSync.js) [MODIFY]
+
+---
+
+## CLI-464: Reconexión Automática, Resiliencia y Persistencia del Flujo de Aprovisionamiento
+- **Fecha:** 2026-07-13
+- **Tipo:** Funcionalidad / Mejora
+- **Impacto:** Registro retroactivo auto-generado por el validador de integridad.
+- **Descripción:** Desarrollamos una solución de persistencia completa a prueba de fallos de recarga del navegador (refresh/F5) durante el aprovisionamiento. Implementamos el endpoint `GET /api/create-project/status` en el Bridge CLI (`server.js`) para consultar en caliente el estado detallado de una tarea de creación, recuperando su historial completo de logs en memoria y banderas de pausa de Auth. En el frontend (`App.jsx`), encolamos el `taskId` y los metadatos de configuración del cliente en `localStorage` al iniciar la tarea. Al montar la aplicación (useEffect), se verifica si hay una tarea guardada en curso y, de ser así, se consulta su estado, se restaura la UI (modal de progreso, logs e inputs) y se reabre la conexión de EventSource (SSE stream) de forma transparente y automática, limpiando el almacenamiento al finalizar con éxito o error.
+- **Archivos afectados:** - ``Prototipe-CLI/server.js`` [MODIFY]
+
+
+## CLI-468 — 2026-07-12
+**Bugfix: Reglas de Firestore bloqueaban el login de cliente por celular en App Ventas**
+
+### Causa Raíz:
+El flujo de login de cliente en `template-ventas` identifica a los usuarios por número de celular como `userId` en Firestore (`doc(db, 'users', celular)`) **sin Firebase Auth activa**. Las reglas anteriores bloqueaban `getDoc` y `setDoc` sin `request.auth`, arrojando `FirebaseError: Missing or insufficient permissions`.
+
+### Cambios realizados:
+1. **`template-ventas/firestore.rules`**: Se actualizaron las reglas de `/users/{userId}` para permitir `read` y `create` sin autenticación, preservando `list` y `delete` exclusivos para admin.
+2. **`ventas-moni-app/firestore.rules`**: Misma corrección aplicada y desplegada en producción (`firebase deploy --only firestore:rules -P ventas-moni-app`).
+
+### Archivos modificados:
+- [`Prototipe-CLI/templates/template-ventas/firestore.rules`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/firestore.rules) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/firestore.rules`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/firestore.rules) [MODIFY + DEPLOY]
+
+---
+
+## CLI-467 — 2026-07-12
+**Feature: Blindaje de Arranque Inicial y Auto-siembra de Administrador en Aprovisionamiento**
+
+### Cambios realizados:
+1. **Activación de Siembra Automática en Generador**: Descomentamos y habilitamos la ejecución incondicional del script de siembra `scripts/seed_admin.js` (`runSeedAdmin(...)`) en el flujo final de [`generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js).
+2. **Prevención de Excepciones en Primer Arranque**: Esto garantiza que cada aplicación aprovisionada cuente de forma inmediata con las credenciales de administrador en Firebase Auth, su perfil de rol en `/users` y la configuración `/config/settings` requerida por `appConfigService.js` y `useAuthInit.js`.
+
+### Archivos modificados:
+- [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
+
+---
+
+## CLI-466 — 2026-07-12
+**Feature: Gestor Visual de Cola e Historial de Aprovisionamientos en Tiempo Real**
+
+### Cambios realizados:
+1. **API de Cola en Bridge CLI**: Implementamos los endpoints `GET /api/provisioning/queue` (listado persistente ordenado de trabajos) y `POST /api/provisioning/queue/cancel` (cancelación/remoción de trabajos activos) en [`server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js).
+2. **Componente de Visualización de Tareas**: Creamos [`ProvisioningQueueModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningQueueModal.jsx) con estados HSL animados, polling de 4s para actualización suave y botón "Cancelar" con modal de confirmación reglamentario.
+3. **Integración en Wizard de App**: Añadimos el botón "Ver Cola e Historial" con icono animado de Lucide y control de estado reactivo en la barra de navegación del wizard en [`App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx).
+
+### Archivos modificados:
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+- [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningQueueModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningQueueModal.jsx) [NEW]
+- [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md) [MODIFY]
+
+---
+
+## CLI-465 — 2026-07-12
+**Feature: Robustecimiento del Flujo de Aprovisionamiento y Mapeo Condicional de Servicios Firebase**
+
+### Cambios realizados:
+1. **Ajuste de chunkSizeWarningLimit en Plantillas Base**: Modificamos `vite.config.js` en `template-core-seed` and `template-ventas` elevando `chunkSizeWarningLimit` de `800` a `1500` kB. Esto previene alertas visuales de Vite sobre bundles grandes debido a las dependencias de Firebase SDK durante los builds de scaffolding del cliente.
+2. **Propagación a Instancia Real (ventas-moni-app)**: Aplicamos el mismo ajuste de `chunkSizeWarningLimit: 1500` en el `vite.config.js` de la aplicación activa `ventas-moni-app` para evitar advertencias molestas durante sus empaquetados de producción en el monorepo.
+3. **Despliegue de Reglas Condicional**: Modificamos el bloque post-creación en `server.js` para evaluar el parámetro `enableFirebaseDeploy` (y su alias `answers.execution?.firebaseDeploy`). Ahora, si el usuario desactiva Firebase desde el Wizard, se omite el despliegue automático de reglas de Firestore y Storage, evitando errores por servicios no inicializados en la nube.
+4. **Registro de la Plantilla Core Seed**: Agregamos la entrada detallada de `template-core-seed` en el archivo de inventario central `plantillas_registro.json`, mapeando correctamente su ruta física fuente. Esto resuelve de raíz el fallo de sembrado de base de datos (`No se encontró la configuración del core "template-core-seed"`).
+
+### Revisión Histórica & Ajuste de UI (2026-07-12):
+1. **Superposición de Modales (z-index)**: Corregimos la superposición de capas en el dashboard central. El modal `FirebaseAccountsModal` tenía `z-[80]`, quedando oculto e inaccesible por detrás de `ProvisioningProgressModal` que tiene `z-[100]`. Elevamos el `z-index` de `FirebaseAccountsModal` a `z-[110]` para permitirle sobreponerse adecuadamente al presionar "Gestionar Firebase".
+2. **Resolución de Borde Blanco en Consola**: Solucionamos la intercepción de la regla CSS global de index.css que inyectaba un borde blanco rígido y fondo glassmorphic brillante a cualquier contenedor con clase `rounded-2xl` y `border`. Cambiamos la clase del contenedor de logs de la consola en `ProvisioningProgressModal.jsx` a `rounded-xl` y el color del borde a `border-[var(--color-border)]/50`, restaurando el tema oscuro original y mejorando la legibilidad.
+
+### Archivos modificados:
+- [`Prototipe-CLI/templates/template-core-seed/vite.config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-core-seed/vite.config.js) [MODIFY]
+- [`Prototipe-CLI/templates/template-ventas/vite.config.js`](file:///d:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/vite.config.js) [MODIFY]
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`Prototipe-CLI/plantillas_registro.json`](file:///d:/PROTOTIPE/Prototipe-CLI/plantillas_registro.json) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/vite.config.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/vite.config.js) [MODIFY]
+- [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [MODIFY]
+- [`Central PROTOTIPE/dev-dashboard/src/components/admin/FirebaseAccountsModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/FirebaseAccountsModal.jsx) [MODIFY]
+
+---
+
+## CLI-463 — 2026-07-12
+**Feature: Selector Interactivo y Gestión Dinámica de Categorías de Instancias en el Aprovisionamiento**
+
+### Cambios realizados:
+1. **Endpoints de Escaneo y Creación en el Bridge CLI**: Desarrollamos los endpoints `GET /api/project/instances-categories` (para escanear en caliente el directorio físico `D:\PROTOTIPE\Instancias Clientes` y filtrar carpetas) y `POST /api/project/instances-categories` (para crear nuevas carpetas sanitizando de forma estricta los caracteres no permitidos).
+2. **Selector CustomSelect Reglamentario**: Implementamos el dropdown en el Wizard usando el componente `CustomSelect` del ecosistema, evitando selectores HTML nativos según el estándar de desarrollo.
+3. **Botón de Sincronización en Caliente**: Agregamos un botón interactivo "Sincronizar" que permite al desarrollador escanear el disco de inmediato si se añadieron o eliminaron carpetas manualmente fuera de la aplicación.
+4. **Creación Rápida Inline de Categorías**: Añadimos un pequeño formulario de texto y botón al lado del selector en el Wizard para crear categorías en caliente en el disco sin abandonar el flujo de aprovisionamiento.
+5. **Autocalculo Reactivo mediante useEffect**: Creamos un efecto que calcula y asigna en tiempo real la ruta física `targetPath` del cliente según el nombre del proyecto y la categoría base seleccionada.
+
+### Revisión Histórica & Ajuste de UI (2026-07-12):
+1. **Alineación y Prevención de Desbordamiento**: Corregimos el desbordamiento visual en el Wizard de aprovisionamiento donde el input y botón de "Crear" se salían de su contenedor de media columna y se superponían con el input de la columna derecha. Separamos la fila superior (dropdown de categoría) y la fila inferior (creación rápida) en filas independientes de ancho completo.
+2. **Estilo Premium del Botón Sincronizar**: Rediseñamos el botón de sincronización pasando de un link azul plano a un botón de micro-acción táctil con fondo translúcido, bordes definidos, icono alineado y hover de brillo dinámico HSL de acuerdo con las guías de diseño de la marca.
+3. **Reemplazo de SVG por Lucide React (RefreshCw)**: Sustituimos el SVG manual del botón por el componente oficial `<RefreshCw size={10} />` de Lucide React con un efecto de transición CSS de rotación de 180° activado por `group-hover` al posar el cursor, asegurando total nitidez de la interfaz.
+
+### Archivos modificados:
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+---
+
+## CLI-462 — 2026-07-12
+**Feature: Silenciado de Advertencias de Límite de Tamaño de Chunk (Vite) en Dashboard Central**
+
+### Cambios realizados:
+1. **Configuración de chunkSizeWarningLimit**: Agregamos la propiedad `build.chunkSizeWarningLimit: 3000` en el archivo de configuración `vite.config.js` del Dashboard Central. Esto previene que el bundler (Vite) emita advertencias durante la compilación en caso de que los archivos minificados excedan el límite predeterminado de 500 kB (el bundle principal del dashboard pesa 2.66 MB debido a su naturaleza monolítica local). Con esto silenciamos falsas alarmas visuales en los logs de aprovisionamiento.
+
+### Archivos modificados:
+- [`Central PROTOTIPE/dev-dashboard/vite.config.js`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/vite.config.js) [MODIFY]
+
+---
+
+## CLI-461 — 2026-07-12
+**Feature: Opción de Sembrado de Datos Condicional y Resiliencia en Despliegue de Reglas e Índices ante Proyectos sin Storage Inicializado**
+
+### Cambios realizados:
+1. **Opción seedDatabase en el Wizard del Dashboard**: Agregamos un estado reactivo `seedDatabase` (por defecto `true`) y su correspondiente checkbox interactivo en el Wizard de aprovisionamiento de nuevos clientes en `App.jsx`. Esto permite al desarrollador decidir explícitamente si desea sembrar o no datos de prueba (seeds) en la base de datos Firestore del cliente.
+2. **Serialización del Borrador (Wizard Draft)**: Integramos la variable `seedDatabase` en el borrador de localStorage, asegurando que se guarde, se cargue y se restablezca correctamente al usar el asistente.
+3. **Respeto Condicional en el Bridge CLI**: Modificamos el endpoint `/api/project/provision` en `server.js` para recibir el parámetro `seedDatabase` y omitir condicionalmente la inyección de semillas en Firestore.
+4. **Resiliencia ante Storage no Configurado en Despliegues de Firebase**: Robustecimos el despliegue de reglas e índices en `server.js`. Si el despliegue falla debido a que el servicio Firebase Storage no está habilitado físicamente en el proyecto (Spark Plan / storage bucket ausente), el Bridge captura la excepción, emite una advertencia en el log de progreso del aprovisionamiento, y reintenta automáticamente el despliegue omitiendo Storage (`--only firestore:rules,firestore:indexes`), logrando que las reglas e índices de Firestore se desplieguen sin colapsar el aprovisionamiento.
+
+### Archivos modificados:
+- [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
+
+---
+
 ## CLI-460 — 2026-07-12
 **Feature: Pausa Interactiva y Confirmación de Activación Manual de Firebase Auth**
 
@@ -8,9 +147,12 @@
 2. **Endpoint de Reanudación**: Creamos el endpoint `POST /api/create-project/resume` en `server.js` para recibir la confirmación de reanudación y desbloquear el hilo del aprovisionamiento.
 3. **Mapeo en Frontend**: Implementamos en `App.jsx` y `ProvisioningProgressModal.jsx` la captura del evento de pausa. Mostramos una alerta interactiva premium con el botón de acceso directo a Firebase Console para que el desarrollador active Auth presionando "Comenzar", y el botón de confirmación "Ya lo he habilitado, continuar", que llama al endpoint del Bridge.
 4. **Detector de Errores Mejorado**: Excluimos los warnings de configuración en la nube (`CONFIGURATION_NOT_FOUND`, `BILLING_NOT_ENABLED`) de la detección de errores fatales del modal para evitar clasificar la falta de activación inicial en la consola de Firebase como un fallo catastrófico del instalador local.
+5. **Blindaje de Despliegue de Firebase (`generator.js`)**: Envolvimos la ejecución de `npm run build` y el comando de despliegue de Firebase (`deploy`) en bloques `try/catch` robustos. Si el despliegue del Storage o el hosting fallan en la nube debido a que el servicio no está inicializado físicamente (error Spark), el generador registra una advertencia en los logs en lugar de propagar un fallo y ejecutar rollback, preservando el proyecto físico generado exitosamente en disco.
+6. **Resolución de Carpeta de Instancias (`findClientPath`)**: Modificamos la función en `server.js` para que busque directorios de cliente con el prefijo `app-` (ej. `App-clientId`). Esto permite que el motor de sembrado de base de datos (`seedProjectDatabase`) resuelva correctamente la ruta física de la instancia y ejecute la inicialización de Firestore con éxito.
 
 ### Archivos modificados:
 - [`Prototipe-CLI/server.js`](file:///d:/PROTOTIPE/Prototipe-CLI/server.js) [MODIFY]
+- [`Prototipe-CLI/generator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/generator.js) [MODIFY]
 - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/App.jsx) [MODIFY]
 - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`](file:///d:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx) [MODIFY]
 - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///d:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]

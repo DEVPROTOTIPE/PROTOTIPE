@@ -213,9 +213,9 @@
     },
     "vite.config.js": {
       "owner": "core",
-      "coreHash": "8fe2480cf9f2c47a1afc0fc9b3aad8ae3eb50b13ac446590ff540fe4a2d703de",
-      "appliedHash": "8fe2480cf9f2c47a1afc0fc9b3aad8ae3eb50b13ac446590ff540fe4a2d703de",
-      "lastSyncedAt": "2026-07-05T22:02:05.743Z"
+      "coreHash": "1e4b3c73e620a3cc6171e22f384596f402df5224aadb743f1d94529419e5ef59",
+      "appliedHash": "1e4b3c73e620a3cc6171e22f384596f402df5224aadb743f1d94529419e5ef59",
+      "lastSyncedAt": "2026-07-12T23:47:54.768Z"
     },
     "src/components/common/SparkQuotaBanner.jsx": {
       "owner": "core",

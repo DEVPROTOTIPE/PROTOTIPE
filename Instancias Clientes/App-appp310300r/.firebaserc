@@ -1,7 +1,0 @@
-{
-  "projects": {
-    "default": "appp310300r",
-    "development": "appp310300r",
-    "production": "appp310300r-prod"
-  }
-}
