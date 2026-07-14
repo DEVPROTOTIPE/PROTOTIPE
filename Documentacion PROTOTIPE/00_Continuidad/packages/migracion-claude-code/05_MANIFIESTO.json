@@ -1,0 +1,89 @@
+{
+  "formatVersion": "1.1",
+  "generator": "build-context-package.mjs v1.1",
+  "theme": "migracion-claude-code",
+  "selectionUsed": "selections/migracion-claude-code.selection.json",
+  "generatedAtUtc": "2026-07-13T19:03:16Z",
+  "commitOrigin": "f5d781fd13fb5f84aaabfba57020a0e782eebbf0",
+  "worktreeState": "dirty",
+  "hashes": {
+    "index": "9f43e352ff9a501ec6f343dddf45ba3a146d79b9376cbf4eccd376b2c2508e9b",
+    "metadata": "bbd76e0b52a84a4842d4f74e40a0e89b2b26226774e2504ff3c8669ca4d028f3",
+    "selection": "603da91d820be19885a79f0b9fb993ba333ef1c70a3e8b20cc3bb66f3be7eda6"
+  },
+  "sources": [
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "sha256": "86b8bd9f3b9cffed894935dd8d9bdd75f284e0e99a8e71562ff354c235ccae05"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_rollback_autonomo_ia.md",
+      "sha256": "ae73d3b03eb9aaa1672487bb0c342b52d357d3a236dd6c1e3de2d6cd705a5918"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/resumen_reglas_y_estandares_desarrollo.md",
+      "sha256": "fe027a81b556378cc45cbdd27634ba2d373db6822958dc7f9ab9a1163f4696e0"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md",
+      "sha256": "cd1b798a95acd3b565743e4567946bd14fb1daf444c49a4f385bc575b89332c8"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6"
+    }
+  ],
+  "outputs": {
+    "00_LEEME.md": "812a6c6525e9b7a0d5fbf6d6521bb15439e4d4cd4a3ca45fbff092b5213b2894",
+    "01_CONTEXTO_MINIMO.md": "4df95e7863aa122a45de88e65909bb360f9dd4fcd5fb53a7ef6dbdbd1ea4b592",
+    "02_FUENTES_SELECCIONADAS.md": "6f46ec466f589823c36d9b33cc18e87dd6d0f91d5f33bde8a16830fb9ab0098c",
+    "03_REFERENCIAS_NO_INCLUIDAS.md": "1176309c8e677a48505568f3ad08de591fd5bb08881e11dd4f67839185416f5e",
+    "04_ALERTAS_SEGURIDAD.md": "8a89aa03e72908a25cc72dd4969b8d33e73d5a7888a38b7572fd087788be98b5"
+  },
+  "counts": {
+    "includeFull": 74,
+    "includeBlocked": 0,
+    "referenceOnly": 112
+  },
+  "pendingIncludedReviewsCount": 74,
+  "pendingReferenceReviewsCount": 112,
+  "pendingReviewsCount": 186,
+  "securityAlertsCount": 0,
+  "duplicates": [
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "duplicateOf": "Instancias Clientes/ventas/ventas-moni-app/GEMINI.md",
+      "sha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6"
+    }
+  ],
+  "conflictGroups": [],
+  "missingExpectedFiles": [
+    "Documentacion PROTOTIPE/04_Estandares_y_Skills/estandar_repositorios_infraestructura_agnostica.md"
+  ],
+  "assembledWordCount": 23042,
+  "selfHash": null
+}

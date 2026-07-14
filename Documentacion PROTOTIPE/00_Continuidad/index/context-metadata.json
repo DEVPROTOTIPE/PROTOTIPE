@@ -1,0 +1,70 @@
+{
+  "mappings": [
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "topics": ["continuidad-recuperacion", "migracion-claude-code"],
+      "documentStatus": "INTERNAL_CLAIM",
+      "sensitivity": "CLEAR"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "topics": ["continuidad-recuperacion", "arquitectura-core-features"],
+      "documentStatus": "INTERNAL_CLAIM",
+      "sensitivity": "CLEAR"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "topics": ["migracion-claude-code", "continuidad-recuperacion"],
+      "documentStatus": "INTERNAL_CLAIM",
+      "sensitivity": "CLEAR"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "topics": ["antigravity-gemini-desarrollo", "ia-runtime", "arquitectura-core-features"],
+      "documentStatus": "INTERNAL_CLAIM",
+      "sensitivity": "CLEAR"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "topics": ["antigravity-gemini-desarrollo", "migracion-claude-code"],
+      "documentStatus": "INTERNAL_CLAIM",
+      "sensitivity": "CLEAR"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_rollback_autonomo_ia.md",
+      "topics": ["antigravity-gemini-desarrollo", "continuidad-recuperacion"],
+      "documentStatus": "INTERNAL_CLAIM",
+      "sensitivity": "CLEAR"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/resumen_reglas_y_estandares_desarrollo.md",
+      "topics": ["antigravity-gemini-desarrollo", "arquitectura-core-features"],
+      "documentStatus": "INTERNAL_CLAIM",
+      "sensitivity": "CLEAR"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md",
+      "topics": ["continuidad-recuperacion", "operacion-despliegue-soporte"],
+      "documentStatus": "INTERNAL_CLAIM",
+      "sensitivity": "CLEAR"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "topics": ["antigravity-gemini-desarrollo", "ia-runtime"],
+      "documentStatus": "INTERNAL_CLAIM",
+      "sensitivity": "CLEAR"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "topics": ["antigravity-gemini-desarrollo", "ia-runtime"],
+      "documentStatus": "INTERNAL_CLAIM",
+      "sensitivity": "CLEAR"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "topics": ["antigravity-gemini-desarrollo", "ia-runtime"],
+      "documentStatus": "INTERNAL_CLAIM",
+      "sensitivity": "CLEAR"
+    }
+  ]
+}

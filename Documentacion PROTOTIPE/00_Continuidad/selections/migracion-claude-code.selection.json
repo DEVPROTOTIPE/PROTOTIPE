@@ -1,0 +1,3157 @@
+{
+  "theme": "migracion-claude-code",
+  "generatedAtUtc": "2026-07-13T19:03:16Z",
+  "selections": [
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE"
+      ],
+      "startLine": 1,
+      "endLine": 2,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "PROHIBICIÓN ABSOLUTA DE RESTAURAR O DESCARTAR CAMBIOS FÍSICOS (CRÍTICO - OBLIGATORIO)"
+      ],
+      "startLine": 3,
+      "endLine": 6,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Regla de gobernanza o integridad del monorepo aplicable al entorno de desarrollo",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE TAGS Y FILTRABILIDAD DE BIBLIOTECA (OBLIGATORIO)"
+      ],
+      "startLine": 7,
+      "endLine": 87,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE LAYOUT — BIBLIOTECA DE COMPONENTES (DASHBOARD)"
+      ],
+      "startLine": 88,
+      "endLine": 97,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE PLAYGROUNDS Y \"STORYBOOK\" (SANDBOX DE COMPONENTES)"
+      ],
+      "startLine": 98,
+      "endLine": 107,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE MODULARIZACIÓN DEL DASHBOARD CENTRAL (`App.jsx`)"
+      ],
+      "startLine": 108,
+      "endLine": 120,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Regla de gobernanza o integridad del monorepo aplicable al entorno de desarrollo",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE CONTROLES VISUALES Y LISTAS DESPLEGABLES (DROPDOWNS)"
+      ],
+      "startLine": 121,
+      "endLine": 127,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE CONFIRMACIONES Y ACCIONES DE ELIMINACIÓN"
+      ],
+      "startLine": 128,
+      "endLine": 134,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "PROHIBICIÓN DE COMPONENTES INVENTADOS Y DEPENDENCIAS HUÉRFANAS"
+      ],
+      "startLine": 135,
+      "endLine": 141,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Regla de gobernanza o integridad del monorepo aplicable al entorno de desarrollo",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE targetPath EN MANIFIESTOS DE BIBLIOTECA"
+      ],
+      "startLine": 142,
+      "endLine": 158,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Regla de gobernanza o integridad del monorepo aplicable al entorno de desarrollo",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE PREVENCIÓN DE CONFLICTOS CSS Y CONTRASTE EN MODO CLARO (LIGHT MODE)"
+      ],
+      "startLine": 159,
+      "endLine": 174,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE DISEÑO RESPONSIVO MÓVIL Y PREVENCIÓN DE DESBORDAMIENTOS"
+      ],
+      "startLine": 175,
+      "endLine": 238,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "AUTOMATIZACIÓN OBLIGATORIA DEL PROTOCOLO DE INTEGRIDAD DE CÓDIGO (POST-CHANGE)"
+      ],
+      "startLine": 239,
+      "endLine": 255,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Regla de gobernanza o integridad del monorepo aplicable al entorno de desarrollo",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE IMPORTACIONES Y LINTER PREBUILD (React)"
+      ],
+      "startLine": 256,
+      "endLine": 264,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE ARQUITECTURA DESACOPLADA Y RESILIENCIA FIREBASE (OBLIGATORIO)"
+      ],
+      "startLine": 265,
+      "endLine": 306,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE DESIGN INTEGRITY GUARD (OBLIGATORIO)"
+      ],
+      "startLine": 307,
+      "endLine": 325,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "DISPARADOR OBLIGATORIO DE COLABORACIÓN IA (`@colaborar`)"
+      ],
+      "startLine": 326,
+      "endLine": 333,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "PROTOCOLO DE TOMA DE DECISIONES DE COMPONENTES (HÍBRIDO - PROACTIVO)"
+      ],
+      "startLine": 334,
+      "endLine": 356,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "PROTOCOLO OBLIGATORIO DE RASTREO DE TAREAS (CRÍTICO — INVIOLABLE)"
+      ],
+      "startLine": 357,
+      "endLine": 424,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR DE SEGURIDAD Y GOBERNANZA DE FIREBASE (OBLIGATORIO)"
+      ],
+      "startLine": 425,
+      "endLine": 459,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": ".agents/AGENTS.md",
+      "sourceSha256": "35d249acdb4e79173fa7e78e89eb214cdefd80e77551623b9bcbb0fd3d055aa5",
+      "headingPath": [
+        "AGENTS.md — Reglas de Proyecto: PROTOTIPE",
+        "ESTÁNDAR ARQUITECTÓNICO ZERO-HARDCODE EN CORES, TEMPLATES Y CLIENTES (CRÍTICO - OBLIGATORIO)"
+      ],
+      "startLine": 460,
+      "endLine": 485,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en AGENTS.md",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0"
+      ],
+      "startLine": 1,
+      "endLine": 2,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "PROHIBICIÃ“N ABSOLUTA DE RESTAURAR O DESCARTAR CAMBIOS FÃSICOS (CRÃTICO - OBLIGATORIO)"
+      ],
+      "startLine": 3,
+      "endLine": 11,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 1 â€” IDENTIDAD Y NIVEL TÃ‰CNICO"
+      ],
+      "startLine": 12,
+      "endLine": 19,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 2 â€” COMUNICACIÃ“N Y FORMATO"
+      ],
+      "startLine": 20,
+      "endLine": 29,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 3 â€” JERARQUÃA DE PRIORIDADES (ANTE CONFLICTO ENTRE REGLAS)"
+      ],
+      "startLine": 30,
+      "endLine": 43,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 4 â€” DESPLIEGUE Y COMANDOS"
+      ],
+      "startLine": 44,
+      "endLine": 57,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 5 â€” SEGURIDAD DE SECRETOS (CRÃTICO)"
+      ],
+      "startLine": 58,
+      "endLine": 71,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 6 â€” GESTIÃ“N DE CONTEXTO INSUFICIENTE"
+      ],
+      "startLine": 72,
+      "endLine": 84,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 7 â€” GESTIÃ“N DE PATRONES CORREGIDOS"
+      ],
+      "startLine": 85,
+      "endLine": 102,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 8 â€” PROTOCOLO DE FALLO DE BUILD"
+      ],
+      "startLine": 103,
+      "endLine": 121,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 9 â€” ORGANIZACIÃ“N Y ESTRUCTURA DE DOCUMENTACIÃ“N"
+      ],
+      "startLine": 122,
+      "endLine": 163,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 10 â€” CONTROL DE TAREAS Y BITÃCORA (CRÃTICO)"
+      ],
+      "startLine": 164,
+      "endLine": 194,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 11 â€” NAVEGACIÃ“N Y AUDITORÃA OBLIGATORIA AL INICIAR"
+      ],
+      "startLine": 195,
+      "endLine": 215,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 12 â€” TRIGGERS RÃPIDOS"
+      ],
+      "startLine": 216,
+      "endLine": 285,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 13 â€” BIBLIOTECA DE COMPONENTES REUTILIZABLES"
+      ],
+      "startLine": 286,
+      "endLine": 356,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 14 â€” MATRIZ DE SEVERIDAD (auditor_tecnico)"
+      ],
+      "startLine": 357,
+      "endLine": 375,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 15 â€” CONVENCIONES FIRESTORE EN MIGRACIONES"
+      ],
+      "startLine": 376,
+      "endLine": 388,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 16 â€” LIBRERÃAS Y REPOSITORIOS EXTERNOS"
+      ],
+      "startLine": 389,
+      "endLine": 398,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 17 â€” REGLAS ESPECIALIZADAS"
+      ],
+      "startLine": 399,
+      "endLine": 434,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 18 â€” FUNCIONALIDAD COMPLETA"
+      ],
+      "startLine": 435,
+      "endLine": 440,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 19 â€” ROBUSTEZ EN CARGA DE IMÃGENES Y CONTROL DE CACHÃ‰ (CRÃTICO)"
+      ],
+      "startLine": 441,
+      "endLine": 461,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 20 â€” TELEMETRÃA CENTRALIZADA OBLIGATORIA DEL ECOSISTEMA (MANDATORIO)"
+      ],
+      "startLine": 462,
+      "endLine": 472,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 21 â€” AUTOMATIZACIÃ“N OBLIGATORIA DEL PROTOCOLO DE INTEGRIDAD (POST-CHANGE)"
+      ],
+      "startLine": 473,
+      "endLine": 482,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 22 â€” ESTÃNDAR DE ARQUITECTURA DESACOPLADA Y RESILIENCIA FIREBASE (OBLIGATORIO)"
+      ],
+      "startLine": 483,
+      "endLine": 522,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCION 23 - PROTOCOLO OBLIGATORIO DE RASTREO DE TAREAS (CRITICO - INVIOLABLE)"
+      ],
+      "startLine": 523,
+      "endLine": 558,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Central PROTOTIPE/dev-dashboard/GEMINI.md",
+      "sourceSha256": "a6ac4738a6856582f2c8d9b0aa528374d9e6e84a98e95cdb894219bdc47f189a",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 24 â€” ESTÃ NDAR DE SEGURIDAD Y GOBERNANZA DE FIREBASE (OBLIGATORIO)"
+      ],
+      "startLine": 559,
+      "endLine": 591,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (difiere solo en finales de línea LF/CRLF)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE"
+      ],
+      "startLine": 1,
+      "endLine": 10,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "1. Cómo usar este archivo si se pierde el chat"
+      ],
+      "startLine": 11,
+      "endLine": 26,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "2. Prompt exacto para comenzar una conversación nueva"
+      ],
+      "startLine": 27,
+      "endLine": 38,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "3. Identidad y propósito del proyecto"
+      ],
+      "startLine": 39,
+      "endLine": 59,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "4. Estado ejecutivo confirmado"
+      ],
+      "startLine": 60,
+      "endLine": 100,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "5. Decisiones ya tomadas"
+      ],
+      "startLine": 101,
+      "endLine": 123,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "6. Estado actual de ejecución"
+      ],
+      "startLine": 124,
+      "endLine": 159,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "7. Hallazgos prioritarios que deben preservarse"
+      ],
+      "startLine": 160,
+      "endLine": 215,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "8. Orientación de negocio vigente"
+      ],
+      "startLine": 216,
+      "endLine": 236,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "9. Migración de desarrollo a Claude Code"
+      ],
+      "startLine": 237,
+      "endLine": 292,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "10. Controles antes de formatear"
+      ],
+      "startLine": 293,
+      "endLine": 333,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "11. Información que todavía debe aportar el fundador"
+      ],
+      "startLine": 334,
+      "endLine": 350,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "12. Archivos fuente del paquete"
+      ],
+      "startLine": 351,
+      "endLine": 379,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "13. Estrategia de respaldo recomendada"
+      ],
+      "startLine": 380,
+      "endLine": 393,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "14. Protocolo para actualizar esta memoria"
+      ],
+      "startLine": 394,
+      "endLine": 421,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md",
+      "sourceSha256": "31136bb2b3e70912a367439f8f5aa601db0036a51b13f96ad2609322b51797da",
+      "headingPath": [
+        "Paquete de continuidad y reanudación — PROTOTIPE",
+        "15. Criterio rector"
+      ],
+      "startLine": 422,
+      "endLine": 425,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex"
+      ],
+      "startLine": 1,
+      "endLine": 9,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "1. Respuesta ejecutiva"
+      ],
+      "startLine": 10,
+      "endLine": 36,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "2. Qué revisé y qué no puedo certificar"
+      ],
+      "startLine": 37,
+      "endLine": 70,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "3. Diagnóstico de madurez"
+      ],
+      "startLine": 71,
+      "endLine": 99,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "4. Lo que está bien y conviene conservar"
+      ],
+      "startLine": 100,
+      "endLine": 157,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "5. Problemas raíz y cuellos de botella"
+      ],
+      "startLine": 158,
+      "endLine": 265,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "6. Riesgos de prioridad cero antes de una producción amplia"
+      ],
+      "startLine": 266,
+      "endLine": 286,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "7. Registro de inconsistencias y corrección propuesta"
+      ],
+      "startLine": 287,
+      "endLine": 388,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "8. Ciclo de vida objetivo de punta a punta"
+      ],
+      "startLine": 389,
+      "endLine": 454,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "9. Arquitectura objetivo para escalar sin reescribir demasiado pronto"
+      ],
+      "startLine": 455,
+      "endLine": 522,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "10. Estrategia de negocio recomendada"
+      ],
+      "startLine": 523,
+      "endLine": 672,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "11. Oportunidades de mejora con mayor retorno"
+      ],
+      "startLine": 673,
+      "endLine": 768,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "12. Sistema de métricas y gobierno de decisiones"
+      ],
+      "startLine": 769,
+      "endLine": 840,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "13. Roadmap ejecutable de 0 a 24 meses"
+      ],
+      "startLine": 841,
+      "endLine": 1017,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "14. Organización, caja y capacidad"
+      ],
+      "startLine": 1018,
+      "endLine": 1070,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "15. Sistema documental que debe reemplazar el actual"
+      ],
+      "startLine": 1071,
+      "endLine": 1146,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "16. Paquete contractual y de privacidad mínimo"
+      ],
+      "startLine": 1147,
+      "endLine": 1192,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "17. Realidad externa verificada al 13 de julio de 2026"
+      ],
+      "startLine": 1193,
+      "endLine": 1218,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Contexto técnico estratégico o resumen ejecutivo de la auditoría integral",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "18. Decisiones que yo tomaría mañana como fundador"
+      ],
+      "startLine": 1219,
+      "endLine": 1233,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Contexto técnico estratégico o resumen ejecutivo de la auditoría integral",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "19. Checklist de cierre de la auditoría"
+      ],
+      "startLine": 1234,
+      "endLine": 1263,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Detalles específicos del modelo operativo o del roadmap comercial del negocio",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md",
+      "sourceSha256": "caf330958ea83a15783068fc0e534314dfc8b207ecec9a369d700f0ddaf7e88e",
+      "headingPath": [
+        "Auditoría integral del ciclo de vida y roadmap de empresa — PROTOTIPE / Facture Flex",
+        "20. Conclusión"
+      ],
+      "startLine": 1264,
+      "endLine": 1277,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Contexto técnico estratégico o resumen ejecutivo de la auditoría integral",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE"
+      ],
+      "startLine": 1,
+      "endLine": 11,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "1. Decisión ejecutiva"
+      ],
+      "startLine": 12,
+      "endLine": 31,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "2. Condiciones no negociables"
+      ],
+      "startLine": 32,
+      "endLine": 46,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "3. Alcance exacto"
+      ],
+      "startLine": 47,
+      "endLine": 82,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "4. Arquitectura objetivo de Claude Code"
+      ],
+      "startLine": 83,
+      "endLine": 139,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "5. Roadmap general"
+      ],
+      "startLine": 140,
+      "endLine": 158,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "6. Etapa -1 — Antes de formatear"
+      ],
+      "startLine": 159,
+      "endLine": 286,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "7. Etapa 0 — Instalación limpia del equipo"
+      ],
+      "startLine": 287,
+      "endLine": 326,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "8. Etapa 1 — Baseline técnico sin Claude"
+      ],
+      "startLine": 327,
+      "endLine": 363,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "9. Etapa 2 — Verdad canónica antes de Claude"
+      ],
+      "startLine": 364,
+      "endLine": 425,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "10. Etapa 3 — Instalación y fundación de Claude Code"
+      ],
+      "startLine": 426,
+      "endLine": 537,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "11. Etapa 4 — Skills y agentes piloto"
+      ],
+      "startLine": 538,
+      "endLine": 657,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "12. Etapa 5 — Migración de Antigravity y Gemini"
+      ],
+      "startLine": 658,
+      "endLine": 717,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "13. Etapa 6 — Evaluación de Claude"
+      ],
+      "startLine": 718,
+      "endLine": 760,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "14. Etapa 7 — Hardening P0 con Claude"
+      ],
+      "startLine": 761,
+      "endLine": 783,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "15. Etapa 8 — Volver al negocio"
+      ],
+      "startLine": 784,
+      "endLine": 798,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "16. Rollback de la migración"
+      ],
+      "startLine": 799,
+      "endLine": 824,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "17. Definition of Done de la migración"
+      ],
+      "startLine": 825,
+      "endLine": 848,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "18. Primer bloque de ejecución recomendado"
+      ],
+      "startLine": 849,
+      "endLine": 886,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "19. Próxima decisión requerida"
+      ],
+      "startLine": 887,
+      "endLine": 901,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/00_Continuidad/canonical/Plan_Maestro_Estabilizacion_y_Migracion_Claude_Code_PROTOTIPE.md",
+      "sourceSha256": "e1d9289c5ad7c2969e475b48fe6f4e4e06047c236d70f8fb4cf64bbdeddaa624",
+      "headingPath": [
+        "Plan Maestro de Estabilización y Migración a Claude Code — PROTOTIPE",
+        "20. Criterio rector"
+      ],
+      "startLine": 902,
+      "endLine": 908,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Fuente canónica de la continuidad del proyecto e hitos de transición 2026",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0"
+      ],
+      "startLine": 1,
+      "endLine": 2,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "PROHIBICIÃ“N ABSOLUTA DE RESTAURAR O DESCARTAR CAMBIOS FÃSICOS (CRÃTICO - OBLIGATORIO)"
+      ],
+      "startLine": 3,
+      "endLine": 11,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 1 â€” IDENTIDAD Y NIVEL TÃ‰CNICO"
+      ],
+      "startLine": 12,
+      "endLine": 19,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 2 â€” COMUNICACIÃ“N Y FORMATO"
+      ],
+      "startLine": 20,
+      "endLine": 29,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 3 â€” JERARQUÃA DE PRIORIDADES (ANTE CONFLICTO ENTRE REGLAS)"
+      ],
+      "startLine": 30,
+      "endLine": 43,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 4 â€” DESPLIEGUE Y COMANDOS"
+      ],
+      "startLine": 44,
+      "endLine": 57,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 5 â€” SEGURIDAD DE SECRETOS (CRÃTICO)"
+      ],
+      "startLine": 58,
+      "endLine": 71,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 6 â€” GESTIÃ“N DE CONTEXTO INSUFICIENTE"
+      ],
+      "startLine": 72,
+      "endLine": 84,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 7 â€” GESTIÃ“N DE PATRONES CORREGIDOS"
+      ],
+      "startLine": 85,
+      "endLine": 102,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 8 â€” PROTOCOLO DE FALLO DE BUILD"
+      ],
+      "startLine": 103,
+      "endLine": 121,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 9 â€” ORGANIZACIÃ“N Y ESTRUCTURA DE DOCUMENTACIÃ“N"
+      ],
+      "startLine": 122,
+      "endLine": 163,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 10 â€” CONTROL DE TAREAS Y BITÃCORA (CRÃTICO)"
+      ],
+      "startLine": 164,
+      "endLine": 202,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "[ID] — [YYYY-MM-DD]"
+      ],
+      "startLine": 203,
+      "endLine": 227,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÓN 11 — NAVEGACIÓN Y AUDITORÍA OBLIGATORIA AL INICIAR"
+      ],
+      "startLine": 228,
+      "endLine": 248,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 12 â€” TRIGGERS RÃPIDOS"
+      ],
+      "startLine": 249,
+      "endLine": 318,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 13 â€” BIBLIOTECA DE COMPONENTES REUTILIZABLES"
+      ],
+      "startLine": 319,
+      "endLine": 389,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 14 â€” MATRIZ DE SEVERIDAD (auditor_tecnico)"
+      ],
+      "startLine": 390,
+      "endLine": 408,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 15 â€” CONVENCIONES FIRESTORE EN MIGRACIONES"
+      ],
+      "startLine": 409,
+      "endLine": 421,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 16 â€” LIBRERÃAS Y REPOSITORIOS EXTERNOS"
+      ],
+      "startLine": 422,
+      "endLine": 431,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 17 â€” REGLAS ESPECIALIZADAS"
+      ],
+      "startLine": 432,
+      "endLine": 467,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 18 â€” FUNCIONALIDAD COMPLETA"
+      ],
+      "startLine": 468,
+      "endLine": 473,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 19 â€” ROBUSTEZ EN CARGA DE IMÃGENES Y CONTROL DE CACHÃ‰ (CRÃTICO)"
+      ],
+      "startLine": 474,
+      "endLine": 494,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 20 â€” TELEMETRÃA CENTRALIZADA OBLIGATORIA DEL ECOSISTEMA (MANDATORIO)"
+      ],
+      "startLine": 495,
+      "endLine": 505,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 21 â€” AUTOMATIZACIÃ“N OBLIGATORIA DEL PROTOCOLO DE INTEGRIDAD (POST-CHANGE)"
+      ],
+      "startLine": 506,
+      "endLine": 515,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 22 â€” ESTÃNDAR DE ARQUITECTURA DESACOPLADA Y RESILIENCIA FIREBASE (OBLIGATORIO)"
+      ],
+      "startLine": 516,
+      "endLine": 555,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCION 23 - PROTOCOLO OBLIGATORIO DE RASTREO DE TAREAS (CRITICO - INVIOLABLE)"
+      ],
+      "startLine": 556,
+      "endLine": 591,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/GEMINI.md",
+      "sourceSha256": "aecbe1fea529fc46f87658a6da1ae5f275840af53ceaab5c6b350fee86d52887",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 24 â€” ESTÃ NDAR DE SEGURIDAD Y GOBERNANZA DE FIREBASE (OBLIGATORIO)"
+      ],
+      "startLine": 592,
+      "endLine": 624,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Copia duplicada de GEMINI.md (diferencias no aplicables al entorno)",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "sourceSha256": "86b8bd9f3b9cffed894935dd8d9bdd75f284e0e99a8e71562ff354c235ccae05",
+      "headingPath": [
+        "🗺️ Protocolo de Colaboración IA Downstream-Upstream (Bucle de Peer Review)"
+      ],
+      "startLine": 1,
+      "endLine": 8,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "sourceSha256": "86b8bd9f3b9cffed894935dd8d9bdd75f284e0e99a8e71562ff354c235ccae05",
+      "headingPath": [
+        "🗺️ Protocolo de Colaboración IA Downstream-Upstream (Bucle de Peer Review)",
+        "👥 1. Definición de Roles y Autonomía"
+      ],
+      "startLine": 9,
+      "endLine": 22,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "sourceSha256": "86b8bd9f3b9cffed894935dd8d9bdd75f284e0e99a8e71562ff354c235ccae05",
+      "headingPath": [
+        "🗺️ Protocolo de Colaboración IA Downstream-Upstream (Bucle de Peer Review)",
+        "🛡️ 2. El Filtro Crítico de Antigravity (Regla de Oro)"
+      ],
+      "startLine": 23,
+      "endLine": 40,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "sourceSha256": "86b8bd9f3b9cffed894935dd8d9bdd75f284e0e99a8e71562ff354c235ccae05",
+      "headingPath": [
+        "🗺️ Protocolo de Colaboración IA Downstream-Upstream (Bucle de Peer Review)",
+        "🪜 3. El Bucle de Validación en 5 Pasos (The Closed Loop)"
+      ],
+      "startLine": 41,
+      "endLine": 95,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "sourceSha256": "86b8bd9f3b9cffed894935dd8d9bdd75f284e0e99a8e71562ff354c235ccae05",
+      "headingPath": [
+        "🗺️ Protocolo de Colaboración IA Downstream-Upstream (Bucle de Peer Review)",
+        "4. Criterios de Aceptación y Cierre de Tareas"
+      ],
+      "startLine": 96,
+      "endLine": 106,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "sourceSha256": "86b8bd9f3b9cffed894935dd8d9bdd75f284e0e99a8e71562ff354c235ccae05",
+      "headingPath": [
+        "🗺️ Protocolo de Colaboración IA Downstream-Upstream (Bucle de Peer Review)",
+        "📋 5. Tabla de Clasificación de Decisiones Técnicas"
+      ],
+      "startLine": 107,
+      "endLine": 116,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "sourceSha256": "86b8bd9f3b9cffed894935dd8d9bdd75f284e0e99a8e71562ff354c235ccae05",
+      "headingPath": [
+        "🗺️ Protocolo de Colaboración IA Downstream-Upstream (Bucle de Peer Review)",
+        "📊 6. Matriz de Selección de Modelos (LLM Matrix)"
+      ],
+      "startLine": 117,
+      "endLine": 125,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "sourceSha256": "86b8bd9f3b9cffed894935dd8d9bdd75f284e0e99a8e71562ff354c235ccae05",
+      "headingPath": [
+        "🗺️ Protocolo de Colaboración IA Downstream-Upstream (Bucle de Peer Review)",
+        "⚡ 7. Prompt de Inicialización Universal (LLM Bootstrap Prompt)"
+      ],
+      "startLine": 126,
+      "endLine": 134,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "sourceSha256": "86b8bd9f3b9cffed894935dd8d9bdd75f284e0e99a8e71562ff354c235ccae05",
+      "headingPath": [
+        "🗺️ Protocolo de Colaboración IA Downstream-Upstream (Bucle de Peer Review)",
+        "Stack Tecnológico de PROTOTIPE"
+      ],
+      "startLine": 135,
+      "endLine": 140,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "sourceSha256": "86b8bd9f3b9cffed894935dd8d9bdd75f284e0e99a8e71562ff354c235ccae05",
+      "headingPath": [
+        "🗺️ Protocolo de Colaboración IA Downstream-Upstream (Bucle de Peer Review)",
+        "Reglas Críticas del Proyecto (Debes Hacerlas Cumplir)"
+      ],
+      "startLine": 141,
+      "endLine": 156,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md",
+      "sourceSha256": "86b8bd9f3b9cffed894935dd8d9bdd75f284e0e99a8e71562ff354c235ccae05",
+      "headingPath": [
+        "🗺️ Protocolo de Colaboración IA Downstream-Upstream (Bucle de Peer Review)",
+        "Formato Obligatorio de tus Respuestas"
+      ],
+      "startLine": 157,
+      "endLine": 167,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_rollback_autonomo_ia.md",
+      "sourceSha256": "ae73d3b03eb9aaa1672487bb0c342b52d357d3a236dd6c1e3de2d6cd705a5918",
+      "headingPath": [
+        "🚨 Protocolo de Reversión y Rollback Seguro para IA (Ecosistema PROTOTIPE)"
+      ],
+      "startLine": 1,
+      "endLine": 10,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_rollback_autonomo_ia.md",
+      "sourceSha256": "ae73d3b03eb9aaa1672487bb0c342b52d357d3a236dd6c1e3de2d6cd705a5918",
+      "headingPath": [
+        "🚨 Protocolo de Reversión y Rollback Seguro para IA (Ecosistema PROTOTIPE)",
+        "🧠 1. Árbol de Decisión Cognitiva"
+      ],
+      "startLine": 11,
+      "endLine": 30,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_rollback_autonomo_ia.md",
+      "sourceSha256": "ae73d3b03eb9aaa1672487bb0c342b52d357d3a236dd6c1e3de2d6cd705a5918",
+      "headingPath": [
+        "🚨 Protocolo de Reversión y Rollback Seguro para IA (Ecosistema PROTOTIPE)",
+        "💬 2. Plantilla de Solicitud de Aprobación de Rollback"
+      ],
+      "startLine": 31,
+      "endLine": 54,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_rollback_autonomo_ia.md",
+      "sourceSha256": "ae73d3b03eb9aaa1672487bb0c342b52d357d3a236dd6c1e3de2d6cd705a5918",
+      "headingPath": [
+        "🚨 Protocolo de Reversión y Rollback Seguro para IA (Ecosistema PROTOTIPE)",
+        "🛠️ 3. Comandos de Rescate Autorizados"
+      ],
+      "startLine": 55,
+      "endLine": 73,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_rollback_autonomo_ia.md",
+      "sourceSha256": "ae73d3b03eb9aaa1672487bb0c342b52d357d3a236dd6c1e3de2d6cd705a5918",
+      "headingPath": [
+        "🚨 Protocolo de Reversión y Rollback Seguro para IA (Ecosistema PROTOTIPE)",
+        "📝 4. Registro Post-Rollback"
+      ],
+      "startLine": 74,
+      "endLine": 80,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/resumen_reglas_y_estandares_desarrollo.md",
+      "sourceSha256": "fe027a81b556378cc45cbdd27634ba2d373db6822958dc7f9ab9a1163f4696e0",
+      "headingPath": [
+        "📝 Guía Rápida de Estándares, Reglas de Interfaz y Calidad (Resumen AGENTS.md)"
+      ],
+      "startLine": 1,
+      "endLine": 6,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/resumen_reglas_y_estandares_desarrollo.md",
+      "sourceSha256": "fe027a81b556378cc45cbdd27634ba2d373db6822958dc7f9ab9a1163f4696e0",
+      "headingPath": [
+        "📝 Guía Rápida de Estándares, Reglas de Interfaz y Calidad (Resumen AGENTS.md)",
+        "🏛️ 1. Reglas Generales de Comportamiento"
+      ],
+      "startLine": 7,
+      "endLine": 12,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/resumen_reglas_y_estandares_desarrollo.md",
+      "sourceSha256": "fe027a81b556378cc45cbdd27634ba2d373db6822958dc7f9ab9a1163f4696e0",
+      "headingPath": [
+        "📝 Guía Rápida de Estándares, Reglas de Interfaz y Calidad (Resumen AGENTS.md)",
+        "🎨 2. Estándares Visuales y Prevención de Conflictos CSS (Modo Claro/Oscuro)"
+      ],
+      "startLine": 13,
+      "endLine": 20,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/resumen_reglas_y_estandares_desarrollo.md",
+      "sourceSha256": "fe027a81b556378cc45cbdd27634ba2d373db6822958dc7f9ab9a1163f4696e0",
+      "headingPath": [
+        "📝 Guía Rápida de Estándares, Reglas de Interfaz y Calidad (Resumen AGENTS.md)",
+        "📱 3. Estándar de Diseño Responsivo y Prevención de Desbordamientos"
+      ],
+      "startLine": 21,
+      "endLine": 30,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/resumen_reglas_y_estandares_desarrollo.md",
+      "sourceSha256": "fe027a81b556378cc45cbdd27634ba2d373db6822958dc7f9ab9a1163f4696e0",
+      "headingPath": [
+        "📝 Guía Rápida de Estándares, Reglas de Interfaz y Calidad (Resumen AGENTS.md)",
+        "🔌 4. Gobernanza del Dashboard y Controles Comunes"
+      ],
+      "startLine": 31,
+      "endLine": 41,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/resumen_reglas_y_estandares_desarrollo.md",
+      "sourceSha256": "fe027a81b556378cc45cbdd27634ba2d373db6822958dc7f9ab9a1163f4696e0",
+      "headingPath": [
+        "📝 Guía Rápida de Estándares, Reglas de Interfaz y Calidad (Resumen AGENTS.md)",
+        "🗄️ 5. Resiliencia de Datos y Firebase Offline"
+      ],
+      "startLine": 42,
+      "endLine": 47,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/04_Estandares_y_Skills/resumen_reglas_y_estandares_desarrollo.md",
+      "sourceSha256": "fe027a81b556378cc45cbdd27634ba2d373db6822958dc7f9ab9a1163f4696e0",
+      "headingPath": [
+        "📝 Guía Rápida de Estándares, Reglas de Interfaz y Calidad (Resumen AGENTS.md)",
+        "⚙️ 6. Estándar Arquitectónico Zero-Hardcode (Mandatorio)"
+      ],
+      "startLine": 48,
+      "endLine": 53,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md",
+      "sourceSha256": "cd1b798a95acd3b565743e4567946bd14fb1daf444c49a4f385bc575b89332c8",
+      "headingPath": [
+        "🛠️ Guía de Contribución y Configuración del Monorepo PROTOTIPE"
+      ],
+      "startLine": 1,
+      "endLine": 6,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md",
+      "sourceSha256": "cd1b798a95acd3b565743e4567946bd14fb1daf444c49a4f385bc575b89332c8",
+      "headingPath": [
+        "🛠️ Guía de Contribución y Configuración del Monorepo PROTOTIPE",
+        "1. Arquitectura del Entorno de Desarrollo Local"
+      ],
+      "startLine": 7,
+      "endLine": 23,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md",
+      "sourceSha256": "cd1b798a95acd3b565743e4567946bd14fb1daf444c49a4f385bc575b89332c8",
+      "headingPath": [
+        "🛠️ Guía de Contribución y Configuración del Monorepo PROTOTIPE",
+        "2. Instrucciones para Levantar el Entorno Local"
+      ],
+      "startLine": 24,
+      "endLine": 42,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md",
+      "sourceSha256": "cd1b798a95acd3b565743e4567946bd14fb1daf444c49a4f385bc575b89332c8",
+      "headingPath": [
+        "🛠️ Guía de Contribución y Configuración del Monorepo PROTOTIPE",
+        "3. Flujo de Trabajo y Ciclo de Desarrollo"
+      ],
+      "startLine": 43,
+      "endLine": 53,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Documentacion PROTOTIPE/07_Manuales_Desarrollo/manual_contribucion_desarrollador_monorepo.md",
+      "sourceSha256": "cd1b798a95acd3b565743e4567946bd14fb1daf444c49a4f385bc575b89332c8",
+      "headingPath": [
+        "🛠️ Guía de Contribución y Configuración del Monorepo PROTOTIPE",
+        "4. Convenciones de Commits y Versionamiento"
+      ],
+      "startLine": 54,
+      "endLine": 65,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Protocolo técnico de colaboración y rollback necesario para migración",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0"
+      ],
+      "startLine": 1,
+      "endLine": 2,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "PROHIBICIÃ“N ABSOLUTA DE RESTAURAR O DESCARTAR CAMBIOS FÃSICOS (CRÃTICO - OBLIGATORIO)"
+      ],
+      "startLine": 3,
+      "endLine": 11,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 1 â€” IDENTIDAD Y NIVEL TÃ‰CNICO"
+      ],
+      "startLine": 12,
+      "endLine": 19,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 2 â€” COMUNICACIÃ“N Y FORMATO"
+      ],
+      "startLine": 20,
+      "endLine": 29,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 3 â€” JERARQUÃA DE PRIORIDADES (ANTE CONFLICTO ENTRE REGLAS)"
+      ],
+      "startLine": 30,
+      "endLine": 43,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 4 â€” DESPLIEGUE Y COMANDOS"
+      ],
+      "startLine": 44,
+      "endLine": 57,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 5 â€” SEGURIDAD DE SECRETOS (CRÃTICO)"
+      ],
+      "startLine": 58,
+      "endLine": 71,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 6 â€” GESTIÃ“N DE CONTEXTO INSUFICIENTE"
+      ],
+      "startLine": 72,
+      "endLine": 84,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 7 â€” GESTIÃ“N DE PATRONES CORREGIDOS"
+      ],
+      "startLine": 85,
+      "endLine": 102,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 8 â€” PROTOCOLO DE FALLO DE BUILD"
+      ],
+      "startLine": 103,
+      "endLine": 121,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 9 â€” ORGANIZACIÃ“N Y ESTRUCTURA DE DOCUMENTACIÃ“N"
+      ],
+      "startLine": 122,
+      "endLine": 163,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 10 â€” CONTROL DE TAREAS Y BITÃCORA (CRÃTICO)"
+      ],
+      "startLine": 164,
+      "endLine": 194,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 11 â€” NAVEGACIÃ“N Y AUDITORÃA OBLIGATORIA AL INICIAR"
+      ],
+      "startLine": 195,
+      "endLine": 215,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 12 â€” TRIGGERS RÃPIDOS"
+      ],
+      "startLine": 216,
+      "endLine": 285,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 13 â€” BIBLIOTECA DE COMPONENTES REUTILIZABLES"
+      ],
+      "startLine": 286,
+      "endLine": 356,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 14 â€” MATRIZ DE SEVERIDAD (auditor_tecnico)"
+      ],
+      "startLine": 357,
+      "endLine": 375,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 15 â€” CONVENCIONES FIRESTORE EN MIGRACIONES"
+      ],
+      "startLine": 376,
+      "endLine": 388,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 16 â€” LIBRERÃAS Y REPOSITORIOS EXTERNOS"
+      ],
+      "startLine": 389,
+      "endLine": 398,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 17 â€” REGLAS ESPECIALIZADAS"
+      ],
+      "startLine": 399,
+      "endLine": 434,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 18 â€” FUNCIONALIDAD COMPLETA"
+      ],
+      "startLine": 435,
+      "endLine": 440,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 19 â€” ROBUSTEZ EN CARGA DE IMÃGENES Y CONTROL DE CACHÃ‰ (CRÃTICO)"
+      ],
+      "startLine": 441,
+      "endLine": 461,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 20 â€” TELEMETRÃA CENTRALIZADA OBLIGATORIA DEL ECOSISTEMA (MANDATORIO)"
+      ],
+      "startLine": 462,
+      "endLine": 472,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 21 â€” AUTOMATIZACIÃ“N OBLIGATORIA DEL PROTOCOLO DE INTEGRIDAD (POST-CHANGE)"
+      ],
+      "startLine": 473,
+      "endLine": 482,
+      "relevance": 3,
+      "handling": "include_full",
+      "reason": "Regla de gobernanza o integridad del monorepo en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 22 â€” ESTÃNDAR DE ARQUITECTURA DESACOPLADA Y RESILIENCIA FIREBASE (OBLIGATORIO)"
+      ],
+      "startLine": 483,
+      "endLine": 522,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCION 23 - PROTOCOLO OBLIGATORIO DE RASTREO DE TAREAS (CRITICO - INVIOLABLE)"
+      ],
+      "startLine": 523,
+      "endLine": 558,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "sourcePath": "Prototipe-CLI/GEMINI.md",
+      "sourceSha256": "5637f8d3185f1897435bcb66b1f03c1f5e448273757d7ca74eff365ccdc515d6",
+      "headingPath": [
+        "SYSTEM PROMPT â€” PROTOTIPE DEV AI v2.0",
+        "SECCIÃ“N 24 â€” ESTÃ NDAR DE SEGURIDAD Y GOBERNANZA DE FIREBASE (OBLIGATORIO)"
+      ],
+      "startLine": 559,
+      "endLine": 591,
+      "relevance": 1,
+      "handling": "reference_only",
+      "reason": "Regla de UI o detalles complementarios en GEMINI.md del CLI",
+      "sensitivity": "CLEAR",
+      "documentStatus": "INTERNAL_CLAIM",
+      "conflictGroup": null,
+      "classificationReviewStatus": "PENDING_HUMAN_REVIEW"
+    }
+  ]
+}
