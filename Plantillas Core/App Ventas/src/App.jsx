@@ -13,6 +13,7 @@ import ConnectivityToast from './components/ui/ConnectivityToast'
 import useAppConfigStore from './store/appConfigStore'
 import useAppConfigSync from './hooks/useAppConfigSync'
 import useAuthInit from './hooks/useAuthInit'
+import useAnonAuthInit from './hooks/useAnonAuthInit'
 import useColorContrast from './hooks/useColorContrast'
 import { reportAppFailureToDeveloper } from './services/telemetryService'
 import { getActiveColors } from './constants/palettes'
@@ -373,7 +374,9 @@ export default function App() {
 
   // Inicialización de la sesión global híbrida (LocalStorage + Firebase)
   useAuthInit()
-  
+  // SEC-014: sesión anónima real para el área de cliente (vinculación por dispositivo)
+  useAnonAuthInit()
+
   // Sincronización global Firestore <-> Zustand en tiempo real
   useAppConfigSync()
 

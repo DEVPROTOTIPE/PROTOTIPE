@@ -131,6 +131,16 @@ describe('SEC-012 — Aislamiento entre usuarios en subcolecciones (foco SEC-014
 
   test('Un cliente autenticado SÍ debe poder leer y escribir sus propios favoritos', async () => {
     const clientUid = 'client-user-id';
+    // SEC-014: favorites valida ownerUid del documento padre users/{uid},
+    // no una comparación directa de uid == doc id (en producción ese id es
+    // el celular, no el uid) — sembramos el padre con ownerUid == clientUid
+    // para probar el mecanismo real, no una coincidencia de string.
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection('users').doc(clientUid).set({
+        role: 'client',
+        ownerUid: clientUid,
+      });
+    });
     const clientDb = testEnv.authenticatedContext(clientUid).firestore();
     const favRef = clientDb.collection('users').doc(clientUid).collection('favorites').doc('fav-1');
     await assertSucceeds(favRef.set({ productId: 'prod-abc' }));

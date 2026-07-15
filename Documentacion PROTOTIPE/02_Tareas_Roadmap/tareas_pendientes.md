@@ -1,5 +1,81 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-351: Activar SEC-014 — identidad real de clientes (Anonymous Auth + vinculación por dispositivo)~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW`. Verificado con el emulador real:
+    tally exacto a lo predicho en el plan aprobado —
+    `9 passed | 2 failed (11)`. Suite de servicios existente sin regresión
+    (64/64). `npm run build` exitoso.
+  - Origen: el fundador pidió resolver de fondo la falta de identidad de
+    clientes ("si no puedes arreglarlo, reconstrúyelo bien"), eligiendo
+    explícitamente la opción gratuita (Anonymous Auth) sobre SMS OTP real
+    tras conocer su costo (~$0.06 USD/verificación fuera de EE. UU./Canadá/
+    India, verificado en firebase.google.com/docs/phone-number-verification/pricing).
+    Plan completo aprobado en modo plan, archivo conservado en
+    `C:\Users\Sergio Agudelo\.claude\plans\stateful-booping-manatee.md`.
+  - Hallazgo que originó la tarea: `LoginPage.jsx` usaba el celular
+    directamente como ID de documento sin ninguna verificación —
+    cualquiera podía suplantar a otro cliente tecleando su número.
+  - Cambio:
+    1. `src/hooks/useAnonAuthInit.js` (NUEVO): sesión anónima real de
+       Firebase Auth para el área de cliente, separada de `useAuthInit.js`
+       (admin) para no entrar en conflicto de lógica. Invocada en `App.jsx`.
+    2. `LoginPage.jsx`: `ownerUid` se estampa atómicamente en el registro
+       nuevo; en login existente se compara contra la sesión actual — coincide
+       (login normal), falta (backfill perezoso de clientes pre-SEC-014), o no
+       coincide (bloqueo total: "ya registrado en otro dispositivo").
+    3. `firestore.rules`: `users` (create/update validan `ownerUid`),
+       `users/{id}/favorites` (cross-reference a `ownerUid` del padre),
+       `credits` lectura (cross-reference vía `cliente.celular`),
+       `wholesaleOrders` (create exige sesión real, lectura restringida a
+       dueño/admin, preserva tolerancia a `clienteCelular:'Desconocido'`),
+       `orders` lectura restringida a `isAdmin()` (completa un TODO ya
+       existente — confirmado por búsqueda que `ClientOrders.jsx` no lee esa
+       colección directamente, usa `order_tracking`/`user_order_index`).
+    4. `AdminCredits.jsx`: botón "Resetear dispositivo" (solo admin) vía
+       `userService.updateClientProfile` ya existente — evitó introducir una
+       nueva violación del guard `no-restricted-syntax` (Firestore solo en
+       Repository/servicio, doctrina de `CORE-344`/`CORE-345`).
+    5. `tests/unit/firestoreRules.spec.js`: corregido el seed del test de
+       "favoritos propios" para sembrar el documento padre con `ownerUid`
+       real — el test original asumía (incorrectamente) que `request.auth.uid`
+       coincidía con el ID del documento `users`, que en producción es el
+       celular, no un uid.
+  - Evidencia literal: `npx vitest run tests/unit/firestoreRules.spec.js`
+    (emulador real en `127.0.0.1:8080`) → `Tests  2 failed | 9 passed (11)` —
+    coincide exactamente con la predicción del plan aprobado. Los 2 rojos
+    (`stockMovements`, `notifications`) son esperados y documentados como
+    bloqueados por `SEC-015` (ver hallazgo abajo), no un fallo de esta tarea.
+  - **Hallazgo crítico durante la ejecución (no buscado, documentado, no
+    resuelto aquí):** al investigar por qué `stockMovements`/`notifications`
+    no cerraban con validación de datos, se confirmó que ambas las escribe
+    `PortalBodega.jsx` (portal de **empleados**), y los empleados hoy tienen
+    el mismo problema que tenían los clientes antes de esta tarea: PIN en
+    `localStorage` (`portalStore.js`), sin sesión real de Firebase Auth. Peor
+    aún: `employeeService.js:131-147` (`authenticateEmployeeByIdAndPin`) lee
+    `employees/{id}/secrets/{hashedPin}` directamente desde el cliente, pero
+    `firestore.rules` exige `isAdmin()` para leer esa subcolección — un
+    empleado normal nunca podría tener esa sesión, por lo que ese `getDoc()`
+    debería fallar siempre con `permission-denied`, tratado silenciosamente
+    como "PIN incorrecto" por el `catch`. **Esto sugiere que el login de
+    empleados por PIN podría estar roto en producción hoy** (posible efecto
+    colateral de un endurecimiento RBAC anterior, candidato `CORE-342`). No
+    confirmado con una prueba real todavía — solo lectura de código.
+  - Cambios preexistentes preservados: sí. Deuda de lint preexistente
+    documentada, no corregida (no es el foco de esta tarea): `LoginPage.jsx`
+    ya tenía 2 violaciones de `no-restricted-syntax` (`setDoc` directo) antes
+    de esta tarea (confirmado con `git show HEAD`); esta tarea agregó una
+    tercera instancia del mismo patrón ya existente (backfill de `ownerUid`),
+    no una categoría nueva de violación.
+  - Alcance explícito respetado: solo `Plantillas Core/App Ventas`; no se
+    propagó a `template-ventas` ni a `ventas-moni-app`.
+  - Siguiente paso exacto: registrar `SEC-015` (identidad real de empleados)
+    como tarea nueva y separada — primero verificar con una prueba real si el
+    login de empleados por PIN efectivamente falla hoy, después diseñar la
+    identidad (patrón recomendado: Firebase Auth real vía Admin SDK, mismo
+    costo $0 que `SEC-013`/`SEC-014`, con el costo de UX de cambiar PIN por
+    correo+contraseña, a confirmar con el fundador). Después de eso,
+    `stockMovements`/`notifications` podrán cerrarse de verdad.
+
 * **[x] ~~Tarea CORE-350: Activar SEC-013 — retirar isFirstStart(), bootstrap server-side~~**
   - Estatus: `READY_FOR_INDEPENDENT_REVIEW`. Verificado con el emulador real
     (no asumido): las 2 pruebas de `firestoreRules.spec.js` que antes

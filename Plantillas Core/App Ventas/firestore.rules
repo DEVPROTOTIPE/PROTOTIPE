@@ -42,18 +42,35 @@ service cloud.firestore {
       // Admin SDK (ver Prototipe-CLI/scripts/bootstrap-admin.js), que ignora
       // las reglas de cliente por diseño. Ningún cliente anónimo puede volver
       // a auto-otorgarse admin escribiendo cuando la base está vacía.
-      allow create: if (request.resource.data.role == 'client') || isAdmin();
-      
-      // Permitir actualización de campos personales pero impedir escalar de 'client' a 'admin'
+      // SEC-014 (2026-07-15): la creación de un cliente exige sesión anónima
+      // real (useAnonAuthInit) y que ownerUid quede vinculado a esa sesión.
+      allow create: if (
+          request.resource.data.role == 'client' &&
+          request.auth != null &&
+          request.resource.data.ownerUid == request.auth.uid
+        ) || isAdmin();
+
+      // Permitir actualización de campos personales pero impedir escalar de 'client' a 'admin'.
+      // SEC-014: ownerUid solo puede quedar igual (auto-actualización normal) o
+      // rellenarse una vez desde null (backfill de clientes pre-SEC-014 en su
+      // primer login tras el cambio) — nunca reasignarse a otra sesión.
       allow update: if isAdmin() || (
+        request.auth != null &&
         request.resource.data.role == 'client' &&
-        (resource.data.role == 'client' || resource.data.role == null)
+        (resource.data.role == 'client' || resource.data.role == null) &&
+        (
+          request.resource.data.ownerUid == resource.data.ownerUid ||
+          (resource.data.ownerUid == null && request.resource.data.ownerUid == request.auth.uid)
+        )
       );
-      
+
       allow list, delete: if isAdmin();
-      
+
+      // SEC-014: solo la sesión vinculada (ownerUid) al perfil padre puede
+      // leer/escribir sus propios favoritos.
       match /favorites/{favoriteId} {
-        allow read, write: if true;
+        allow read, write: if request.auth != null &&
+          get(/databases/$(database)/documents/users/$(userId)).data.ownerUid == request.auth.uid;
       }
     }
 
@@ -72,11 +89,12 @@ service cloud.firestore {
 
     // Pedidos (Retail y Mayoristas)
     // [SEGURIDAD - FASE 1] orders create ahora valida estructura mínima.
-    // [PENDIENTE MIGRACIóN] orders read sigue abierto mientras se migran pedidos
-    //  existentes a order_tracking. Restringir a isAdmin() en Fase 1.5 (post-migración).
+    // SEC-014 (2026-07-15): confirmado por búsqueda que el cliente ya no lee
+    // esta colección directamente (usa order_tracking/user_order_index vía
+    // trackingToken) — se completa la migración pendiente restringiendo a admin.
     match /orders/{document} {
       allow create: if validOrder();
-      allow read: if true; // TODO: restringir a isAdmin() tras completar migración a order_tracking
+      allow read: if isAdmin();
       allow update: if isAdmin() || (
         // Permitir a repartidores/empleados operativos actualizar el estado de entrega o producción
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'deliveryInfo', 'updatedAt'])
@@ -112,15 +130,28 @@ service cloud.firestore {
       }
     }
 
+    // SEC-014 (2026-07-15): create exige sesión anónima real (accountability
+    // mínima); se preserva la tolerancia existente a clienteCelular:'Desconocido'
+    // para envíos sin login. Read restringido a admin o al dueño vinculado.
     match /wholesaleOrders/{document} {
-      allow create: if true;
-      allow read: if true;   // Mayoristas: permite consultar solicitudes al cliente
+      allow create: if request.auth != null;
+      allow read: if isAdmin() || (
+        request.auth != null &&
+        resource.data.clienteCelular is string &&
+        resource.data.clienteCelular != 'Desconocido' &&
+        get(/databases/$(database)/documents/users/$(resource.data.clienteCelular)).data.ownerUid == request.auth.uid
+      );
       allow update, delete: if isAdmin();
     }
 
     // Créditos / Fiados
+    // SEC-014 (2026-07-15): lectura restringida a admin o al cliente dueño
+    // del celular asociado (cliente.celular), vía ownerUid del perfil.
     match /credits/{document} {
-      allow read: if true;
+      allow read: if isAdmin() || (
+        request.auth != null &&
+        get(/databases/$(database)/documents/users/$(resource.data.cliente.celular)).data.ownerUid == request.auth.uid
+      );
       allow write: if isAdmin();
     }
 

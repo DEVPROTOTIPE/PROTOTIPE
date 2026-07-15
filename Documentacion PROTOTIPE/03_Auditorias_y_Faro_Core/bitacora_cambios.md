@@ -1,5 +1,75 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## [MAJOR] CORE-351 — Activar SEC-014: identidad real de clientes — 2026-07-15
+
+### Contexto:
+`CORE-349`/`SEC-012` probó que los clientes no tienen identidad real
+(`LoginPage.jsx` usaba el celular como ID de documento sin verificación). El
+fundador pidió resolverlo de fondo, eligiendo la opción gratuita (Anonymous
+Auth + vinculación por dispositivo) sobre SMS OTP real tras conocer su costo
+(~$0.06 USD/verificación fuera de EE. UU./Canadá/India). Plan completo
+diseñado y aprobado en modo plan antes de tocar código (investigación previa
+con agente Explore + agente Plan, verificación manual de los hallazgos
+críticos antes de aceptar el plan).
+
+### Cambio:
+1. `src/hooks/useAnonAuthInit.js` (NUEVO): sesión anónima real de Firebase
+   Auth, separada de `useAuthInit.js` (admin) para evitar conflicto de
+   lógica. Invocada en `App.jsx` junto a `useAuthInit()`.
+2. `LoginPage.jsx`: `ownerUid` estampado atómicamente en registro nuevo;
+   login existente compara contra la sesión actual (coincide/backfill/bloqueo).
+3. `firestore.rules`: `users` (create/update validan `ownerUid`),
+   `favorites` (cross-reference a `ownerUid` del padre), `credits` lectura,
+   `wholesaleOrders` (create+read), `orders` lectura restringida a admin
+   (completa un TODO existente, verificado que no rompe `ClientOrders.jsx`).
+4. `AdminCredits.jsx`: botón "Resetear dispositivo" vía
+   `userService.updateClientProfile` (evitó una nueva violación del guard
+   `no-restricted-syntax` de `CORE-344`/`CORE-345`).
+5. `tests/unit/firestoreRules.spec.js`: corregido el seed del test de
+   favoritos propios (asumía incorrectamente `request.auth.uid == doc id`,
+   en producción el id es el celular, no un uid).
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal).
+- **Rama / HEAD observado:** `docs/context-packaging`.
+- **Pruebas ejecutadas y resultado literal:**
+  - `npx --yes firebase-tools@latest emulators:start --only firestore --project test-prototipe-rules`
+    → `All emulators ready!` (127.0.0.1:8080).
+  - `npx vitest run tests/unit/firestoreRules.spec.js` → `Tests  2 failed | 9 passed (11)`
+    — coincide EXACTAMENTE con la predicción del plan aprobado (favoritos x3,
+    credits lectura, orders lectura, wholesaleOrders create+read, isFirstStart
+    x2 en verde; stockMovements/notifications en rojo, esperado).
+  - `npx vitest run` sobre 5 specs de servicios existentes → `64 passed`, sin
+    regresión.
+  - `npm run build` → exitoso (12.80s, PWA generado, 97 entradas precacheadas).
+  - `npx eslint` de los archivos tocados: sin violaciones nuevas de
+    `no-restricted-syntax`; `App.jsx` y `LoginPage.jsx` mantienen exactamente
+    su deuda preexistente (confirmado con `git show HEAD` antes de esta
+    tarea: 5 y 5 errores respectivamente); `LoginPage.jsx` sube a 6 por una
+    tercera instancia del mismo patrón `setDoc` ya existente (backfill de
+    `ownerUid`), no una categoría nueva.
+- **Cambios preexistentes preservados:** sí.
+- **Riesgos y bloqueos:** ninguno nuevo para el alcance cerrado. Ver hallazgo
+  crítico abajo (no es un bloqueo de esta tarea, es el origen de la siguiente).
+- **Documentación actualizada:** `tareas_pendientes.md` (`CORE-351`).
+- **Siguiente paso exacto:** registrar `SEC-015` (identidad real de
+  empleados) como tarea separada — ver hallazgo crítico.
+
+### Hallazgo crítico durante la ejecución (no buscado, no resuelto aquí):
+Al investigar por qué `stockMovements`/`notifications` no cerraban con
+validación de datos, se confirmó que las escribe `PortalBodega.jsx` (portal
+de **empleados**), y los empleados tienen el mismo problema que tenían los
+clientes antes de esta tarea: PIN en `localStorage`, sin Firebase Auth real.
+Adicionalmente, `employeeService.js:131-147` lee
+`employees/{id}/secrets/{hashedPin}` directamente del cliente, pero
+`firestore.rules` exige `isAdmin()` para esa lectura — un empleado normal no
+puede tener esa sesión, así que el login por PIN **podría estar roto en
+producción hoy** (posible efecto colateral de un endurecimiento RBAC
+anterior, candidato `CORE-342`). No confirmado con una prueba real — solo
+lectura de código. Se registra como el motivo y primer paso de `SEC-015`.
+
+---
+
 ## [MAJOR] CORE-350 — Activar SEC-013: retirar isFirstStart(), bootstrap server-side — 2026-07-15
 
 ### Contexto:
