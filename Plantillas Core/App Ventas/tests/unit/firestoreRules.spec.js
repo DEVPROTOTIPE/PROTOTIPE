@@ -147,3 +147,44 @@ describe('SEC-012 — Aislamiento entre usuarios en subcolecciones (foco SEC-014
     await assertSucceeds(favRef.get());
   });
 });
+
+// SEC-012 (completado 2026-07-15): claims, clientNotifications y fcmTokens
+// quedaron fuera del alcance original de esta suite (CORE-349) — su
+// vulnerabilidad se descubrió después, completando el alcance que el
+// ticket SEC-012 siempre declaró ("productos, tokens, notificaciones...").
+describe('SEC-012 — claims, clientNotifications y fcmTokens (completado)', () => {
+  test('Un usuario anónimo NO debe poder crear un reclamo (claims)', async () => {
+    const anon = testEnv.unauthenticatedContext().firestore();
+    await assertFails(anon.collection('claims').doc('fake-claim').set({ clientCelular: '3000000000' }));
+  });
+
+  test('Un cliente NO debe poder leer el reclamo de otro cliente', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection('users').doc('3000000000').set({ role: 'client', ownerUid: 'owner-uid-real' });
+      await ctx.firestore().collection('claims').doc('claim-1').set({ clientCelular: '3000000000' });
+    });
+    const otherClient = testEnv.authenticatedContext('otro-cliente-uid').firestore();
+    await assertFails(otherClient.collection('claims').doc('claim-1').get());
+  });
+
+  test('El dueño del reclamo SÍ puede leerlo', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection('users').doc('3000000001').set({ role: 'client', ownerUid: 'owner-uid-real-2' });
+      await ctx.firestore().collection('claims').doc('claim-2').set({ clientCelular: '3000000001' });
+    });
+    const owner = testEnv.authenticatedContext('owner-uid-real-2').firestore();
+    await assertSucceeds(owner.collection('claims').doc('claim-2').get());
+  });
+
+  test('Un usuario anónimo NO debe poder crear una notificación de cliente (clientNotifications)', async () => {
+    const anon = testEnv.unauthenticatedContext().firestore();
+    await assertFails(
+      anon.collection('clientNotifications').doc('fake-notif').set({ clienteCelular: '3000000002', message: 'hola' })
+    );
+  });
+
+  test('Un usuario anónimo NO debe poder registrar/pisar un token FCM', async () => {
+    const anon = testEnv.unauthenticatedContext().firestore();
+    await assertFails(anon.collection('fcmTokens').doc('fake-token').set({ userId: 'victima', token: 'xyz' }));
+  });
+});

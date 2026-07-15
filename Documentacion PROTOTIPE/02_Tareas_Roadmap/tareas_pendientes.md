@@ -1,5 +1,35 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-355: Completar SEC-012 — claims, clientNotifications, fcmTokens~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW`. Verificado con el emulador
+    real: `firestoreRules.spec.js` pasó de `11 passed` a **`16 passed | 0
+    failed`**. Suite existente sin regresión (64/64). `npm run build`
+    exitoso.
+  - Origen: el alcance original de `SEC-012` (`registro_riesgos_deuda_tecnica...`)
+    incluía "productos, tokens, notificaciones... analytics", pero `CORE-349`
+    solo cubrió lo que la auditoría inicial de Antigravity había señalado.
+    Auditoría propia de las colecciones restantes de `firestore.rules`
+    encontró 3 huecos reales del mismo tipo ya corregido en tareas
+    anteriores.
+  - Hallazgos: `claims` (`create: if true`; `read` dependía de
+    `request.auth.token.phone_number`, un custom claim que este proyecto
+    nunca usa — clientes usan sesión anónima + `ownerUid` desde `SEC-014`;
+    además el campo real es `clientCelular`, la regla decía
+    `clienteCelular`, mismatch confirmado en `claimsService.js:36-41`);
+    `clientNotifications` (mismo patrón de `phone_number` roto, más
+    `create: if true`); `fcmTokens` (`create, update: if true` — sin
+    llamador real todavía en el código, pero explotable por cualquiera vía
+    SDK directo).
+  - Cambio: `claims`/`clientNotifications` migrados a cross-reference de
+    `ownerUid` (mismo mecanismo de `SEC-014`); `fcmTokens` exige sesión
+    real como mínimo razonable (sin lógica de dueño, dado que no hay flujo
+    real todavía que la necesite).
+  - Cambios preexistentes preservados: sí.
+  - Alcance explícito respetado: solo `Plantillas Core/App Ventas`.
+  - Siguiente paso exacto: propagar `SEC-013/014/015` (y esta completación
+    de `SEC-012`) a `template-ventas`/`ventas-moni-app` — ver tarea asignada
+    a Antigravity abajo.
+
 * **[x] ~~Tarea CORE-354: Activar SEC-015 — identidad real de empleados (Firebase Auth email/password sintético)~~**
   - Estatus: `READY_FOR_INDEPENDENT_REVIEW`. Verificado con ambos emuladores
     reales (Firestore + Auth), no asumido: `firestoreRules.spec.js` pasó de

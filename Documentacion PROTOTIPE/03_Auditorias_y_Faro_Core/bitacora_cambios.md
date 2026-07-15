@@ -1,5 +1,36 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## [MAJOR] CORE-355 — Completar SEC-012: claims, clientNotifications, fcmTokens — 2026-07-15
+
+### Contexto:
+Auditoría propia (no pedida, iniciativa de cierre de alcance) de las
+colecciones de `firestore.rules` que el `SEC-012` original nunca cubrió.
+
+### Cambio:
+`claims`, `clientNotifications`: `create: if true` → `if request.auth !=
+null`; `read`/`update` con `request.auth.token.phone_number` (custom claim
+nunca usado en este proyecto) → cross-reference a `ownerUid` vía
+`users/{celular}` (mismo mecanismo de `SEC-014`). `claims` también corrige
+un mismatch de nombre de campo (`clienteCelular` en la regla vs
+`clientCelular` real). `fcmTokens`: `create, update: if true` → `if
+request.auth != null`.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal).
+- **Rama / HEAD observado:** `docs/context-packaging`.
+- **Pruebas ejecutadas y resultado literal:**
+  - `npx vitest run tests/unit/firestoreRules.spec.js` (emulador real) →
+    `Tests 16 passed (16)` (antes: 11 passed).
+  - `npx vitest run` sobre 5 specs existentes → `64 passed`, sin regresión.
+  - `npm run build` → exitoso.
+- **Cambios preexistentes preservados:** sí.
+- **Documentación actualizada:** `tareas_pendientes.md` (`CORE-355`).
+- **Siguiente paso exacto:** propagar todo el trabajo de `SEC-013/014/015/012`
+  a `template-ventas`/`ventas-moni-app` — asignado a Antigravity (ver
+  bitácora de asignación siguiente).
+
+---
+
 ## [MINOR] CORE-352 reverificado y cerrado — build autónomo del Dashboard (REP-011) — 2026-07-15
 
 ### Contexto:
