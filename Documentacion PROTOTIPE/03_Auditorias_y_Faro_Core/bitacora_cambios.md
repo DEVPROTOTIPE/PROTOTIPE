@@ -1,5 +1,48 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## [MINOR] 3 tareas asignadas a Antigravity para trabajo nocturno en paralelo — 2026-07-15
+
+### Contexto:
+Los créditos de la sesión de Claude Code están por agotarse. El fundador
+pidió preparar varias tareas reales y necesarias para que Antigravity
+trabaje durante la noche, cada una en una carpeta distinta para permitir
+paralelismo real sin choque de escritura (`AI_WORKFLOW.md` §2, un escritor
+por worktree físico).
+
+### Cambio:
+Tres asignaciones nuevas en `03_Auditorias_y_Faro_Core/asignaciones/`:
+- `ASIGNACION_CORE-356_2026-07-15.md`: propagar SEC-012/013/014/015 de
+  Core a `template-ventas` (`Prototipe-CLI/templates/template-ventas/`).
+  Incluye advertencia sobre `distribute_rules.js` desactualizado.
+- `ASIGNACION_CORE-357_2026-07-15.md`: SEC-017 — allowlist real de
+  operador del Dashboard Central (`Central PROTOTIPE/dev-dashboard/`).
+  Hallazgo confirmado durante la preparación: toda colección sensible
+  exige solo `request.auth != null`, sin ningún claim/allowlist — el mismo
+  patrón de vulnerabilidad ya cerrado 4 veces esta sesión en Core.
+- `ASIGNACION_CORE-358_2026-07-15.md`: REP-012 — diagnóstico y corrección
+  de falsos verdes en los scripts `test_*.js` de `Prototipe-CLI/` (no
+  `templates/`).
+
+Cada asignación declara explícitamente su carpeta exclusiva y qué otras
+tareas corren en paralelo, para que ninguna instancia de Antigravity
+toque el alcance de otra.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal), preparando las asignaciones —
+  Antigravity aún no ha ejecutado nada de estas 3 tareas al momento de
+  este registro.
+- **Rama / HEAD observado:** `docs/context-packaging` / `2d98036`.
+- **Alcance propio:** 3 archivos de asignación nuevos, 3 entradas nuevas
+  en `tareas_pendientes.md`. Ningún archivo de código tocado para estas
+  3 tareas todavía.
+- **Cambios preexistentes preservados:** sí.
+- **Siguiente paso exacto:** el fundador abre 3 chats nuevos de Antigravity
+  (uno por tarea) y pega el contenido de cada asignación. Cuando cada una
+  entregue su traspaso, quien retome ejecuta la "Reverificación rápida" de
+  cada una antes de confiar en el resultado — nunca el resumen solo.
+
+---
+
 ## [MAJOR] CORE-355 — Completar SEC-012: claims, clientNotifications, fcmTokens — 2026-07-15
 
 ### Contexto:

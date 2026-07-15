@@ -1,5 +1,39 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[ ] Tarea CORE-356: Propagar SEC-012/013/014/015 a `template-ventas`**
+  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — 2026-07-15, vía
+    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-356_2026-07-15.md`.
+    Acotada a `Prototipe-CLI/templates/template-ventas/` (sin solape con
+    `CORE-357`/`CORE-358`).
+  - Objetivo real: `template-ventas` no tiene ninguno de los cierres de
+    seguridad ya hechos en Core (`SEC-012` a `SEC-015`) — sigue con las
+    mismas vulnerabilidades. Incluye advertencia sobre
+    `Prototipe-CLI/scripts/distribute_rules.js` (mecanismo de composición
+    de reglas desactualizado, no ejecutar).
+  - Siguiente paso exacto: reverificar el traspaso antes de confiar en él.
+
+* **[ ] Tarea CORE-357: SEC-017 — claim/allowlist real de operador del Dashboard Central**
+  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — 2026-07-15, vía
+    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-357_2026-07-15.md`.
+    Acotada a `Central PROTOTIPE/dev-dashboard/`.
+  - Objetivo real: confirmado que TODA colección sensible del Dashboard
+    Central (`tokens`, `clientes_control`, `whatsappTemplates`, etc.) exige
+    solo `request.auth != null` — cualquier cuenta de Firebase Auth (incluso
+    auto-registrada) tiene control total. Se introduce `isOperator()` vía
+    colección `operators/{uid}`, mismo patrón que `isAdmin()`/`isEmployee()`
+    de Core.
+  - Siguiente paso exacto: reverificar el traspaso antes de confiar en él.
+
+* **[ ] Tarea CORE-358: REP-012 — corregir falsos verdes del CLI**
+  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — 2026-07-15, vía
+    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-358_2026-07-15.md`.
+    Acotada a `Prototipe-CLI/` (no `templates/`).
+  - Objetivo real: diagnóstico + corrección (no asumido de antemano) de
+    scripts `test_*.js` con posibles rutas absolutas, fixtures compartidas,
+    o exit codes que no reflejan fallos internos reales — confirmado cada
+    caso inyectando un fallo real antes de corregir.
+  - Siguiente paso exacto: reverificar el traspaso antes de confiar en él.
+
 * **[x] ~~Tarea CORE-355: Completar SEC-012 — claims, clientNotifications, fcmTokens~~**
   - Estatus: `READY_FOR_INDEPENDENT_REVIEW`. Verificado con el emulador
     real: `firestoreRules.spec.js` pasó de `11 passed` a **`16 passed | 0
