@@ -8,6 +8,26 @@
 
 ---
 
+> **Nota de vigencia (agregada 2026-07-15, tarea `CORE-346`):** la bitácora
+> maestra fuera de Git en
+> `D:\RESPALDO_PROTOTIPE\Continuidad\00_CONTROL_MAESTRO\00_BITACORA_MAESTRA_TAREAS_Y_CONTINUIDAD_PROTOTIPE.md`
+> (y sus copias fechadas dentro de esa misma carpeta) quedó congelada durante
+> la crisis de recuperación del 13-14 de julio de 2026 y **ya no se usa como
+> fuente para arrancar sesiones nuevas con ninguna IA** (Claude, Codex,
+> Antigravity). Sigue mostrando `CLAUDE-003` como `IN_PROGRESS` sin
+> conocimiento de `CORE-341` a `CORE-346`. La fuente de arranque vigente es:
+> este archivo + `Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`
+> (estado real de tareas) + `.agents/AI_WORKFLOW.md` (contrato operativo, que
+> además supera en rigor al protocolo de reanudación que vivía en el
+> respaldo). El contenido del respaldo que seguía siendo útil y no estaba
+> capturado aquí ya se trasladó de forma curada — ver
+> `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/registro_riesgos_deuda_tecnica_2026-07-14.md`,
+> `Documentacion PROTOTIPE/02_Tareas_Roadmap/backlog_deuda_seguridad_arquitectura_2026-07-14.md`
+> y `Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_ecosistema_flujos_objetivo_2026-07-14.md`.
+> El resto del respaldo (evidencia fechada, hashes, incidentes de seguridad
+> ya remediados) permanece en `D:\RESPALDO_PROTOTIPE` sin necesidad de
+> consultarlo para trabajo nuevo.
+
 ## 1. Cómo usar este archivo si se pierde el chat
 
 1. Abrir una conversación nueva en una cuenta personal y segura.
