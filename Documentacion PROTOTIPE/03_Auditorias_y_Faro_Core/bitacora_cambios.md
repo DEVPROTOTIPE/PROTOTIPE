@@ -1,5 +1,242 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## [MAJOR] CORE-344 — 2026-07-15
+**Arquitectura: ADR canónico de capas + piloto `customer-loyalty` (solo `Plantillas Core/App Ventas`)**
+
+### Cambios realizados:
+1. **ADR-0001 (nuevo):** creado `Documentacion PROTOTIPE/00_Continuidad/canonical/ADR-0001-arquitectura-canonica-por-capas.md`, estado `PROPOSED`, con evidencia medida del repositorio (inventario de imports de Firebase por área, contradicciones de `AGENTS.md` §22 vs código real, determinación de fuente de verdad por procedencia documental).
+2. **Tests de caracterización (antes del refactor):** `tests/unit/customerLoyaltyRepository.spec.js` y `tests/unit/customerLoyaltyService.spec.js` (nuevos), 24 pruebas escritas y ejecutadas en verde contra el código pre-refactor para fijar el comportamiento de negocio como referencia de no-regresión.
+3. **Refactor del piloto (`Plantillas Core/App Ventas/src/features/customer-loyalty`):**
+   - `api/CustomerLoyaltyRepository.js`: se agregaron `runAccountTransaction` (transacción por reducer puro, con validación Zod movida aquí), `subscribeToAccount`/`subscribeToTransactions` (listeners con cancelación) y `getConfigDoc` (relocalización literal de la lectura muerta pre-existente, sin modificar su comportamiento).
+   - `services/CustomerLoyaltyService.js`: se eliminó toda importación del SDK de Firebase; `earnPoints`/`redeemPoints` ahora delegan la mecánica transaccional al Repository vía un reducer puro que conserva intactas las reglas de negocio (validación, umbrales de nivel, mínimo de canje).
+   - `hooks/useCustomerLoyalty.js`: se eliminó toda importación del SDK de Firebase; consume las suscripciones expuestas por el Repository.
+   - `index.js`: se retiró la exportación pública del Repository (sin consumidores externos, verificado con `grep` antes del cambio).
+4. **Guard arquitectónico progresivo (`eslint.config.js`):** bloque nuevo, severidad `error`, aplicado solo a `components/`, `hooks/` y `services/` de `hello-module` y `customer-loyalty`; prohíbe importar `firebase`/`firebase/*`. Replica literalmente (sin modificarlos) los 5 selectores ya vigentes del bloque anterior, porque en el flat config de ESLint dos bloques que coinciden sobre el mismo archivo y declaran la misma regla no se fusionan — el posterior reemplaza por completo el valor del anterior. No se agregó un nivel `warn` de reporte para el resto del legado: se determinó que, dado que el bloque global ya cubre el 100% de los archivos `.js/.jsx` con `error`, no existe forma de insertar una severidad `warn` diferenciada sin degradar las reglas `error` ya vigentes para esos mismos archivos; queda documentado como brecha, no resuelta debilitando el guard existente.
+
+### Verificaciones ejecutadas (resultados literales):
+- Caracterización pre-refactor: `npm exec --offline -- vitest run tests/unit/customerLoyaltyRepository.spec.js tests/unit/customerLoyaltyService.spec.js` → 2 archivos, 24 pruebas, todas en verde.
+- Post-refactor (mismo comando, tras ajustar el seam de mocks de `firebase/firestore` a `CustomerLoyaltyRepository.runAccountTransaction`/`getConfigDoc`, y extender el Repository con pruebas de la transacción y las suscripciones nuevas): 2 archivos, 33 pruebas, todas en verde.
+- Suite completa de la app (`npm exec --offline -- vitest run`): 8 archivos, 98 pruebas, todas en verde — sin regresión en `sales`, `orders`, `inventory`, `credits`, `billing`, `checkout`.
+- ESLint de los archivos modificados/creados: `CustomerLoyaltyService.js`, `index.js` y ambos archivos de test nuevos → limpio. `CustomerLoyaltyRepository.js` → 3 errores `no-restricted-syntax` (`setDoc`/`updateDoc`), confirmados **pre-existentes** con `git show HEAD` (el `ignores` del bloque legado apunta a `src/repositories/**`, que no coincide con la carpeta real `api/**`; deuda no introducida por esta tarea).
+- `npm run lint` del proyecto completo: 637 errores y 22 advertencias pre-existentes en archivos no tocados por esta tarea (confirmado no relacionado con CORE-344).
+- `node scripts/validate-core-integrity.js` (solo lectura, sin escritura a disco) sobre los 4 archivos de código del piloto: sin violaciones críticas.
+- `npm exec --offline -- vite build`: build de producción exitoso.
+- `git diff --check`: sin errores; solo advertencias CRLF pre-existentes en archivos no tocados por esta tarea.
+
+### Deuda técnica descubierta y NO corregida (fuera de alcance, documentada en el ADR §20):
+- `CustomerLoyaltyService.getConfig` / `Repository.getConfigDoc`: la lectura de configuración persistida nunca se completa (`docRef.firestore._getDoc` no es API real del SDK); se relocalizó al Repository sin modificar su comportamiento.
+- `CustomerLoyaltyRepository.deleteToken`: invalida el token con `updateDoc` en vez de borrarlo; sin cambios.
+- Gap de guard ESLint pre-existente (`src/repositories/**` vs `api/**` real) que hace fallar lint en Repositories que escriben directamente; no introducido ni corregido por esta tarea.
+- `useCustomerLoyalty.js` tenía ya, antes de este cambio, una violación `react-hooks/set-state-in-effect` en su guarda de entrada; no tocada.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal).
+- **Rama / HEAD observado:** `docs/context-packaging` / `919bdc9`.
+- **Alcance propio:** ADR + piloto `customer-loyalty` exclusivamente en `Plantillas Core/App Ventas`. No se tocó `Prototipe-CLI/templates/template-ventas` ni `Instancias Clientes/ventas/ventas-moni-app`.
+- **Cambios preexistentes preservados:** sí; no se reclamaron, restauraron ni sobrescribieron los guards RBAC de `CORE-342` en `AdminCustomerLoyalty.jsx`, `AdminView.jsx` ni `AdminHelloModule.jsx`, ni ningún otro cambio preexistente del working tree.
+- **Estado final:** `VERIFIED_COMPLETE`. Se entregó en `READY_FOR_INDEPENDENT_REVIEW` y el fundador aprobó explícitamente el resultado ("YO LO APRUEBO", 2026-07-15). `.agents/AI_WORKFLOW.md` §6 exige revisión independiente **o** aprobación humana para decisiones de arquitectura (condición disyuntiva); el cierre se sustenta en la aprobación humana del fundador, no en una revisión independiente de otra sesión de IA — se documenta esta distinción explícitamente, sin fingir una revisión que no ocurrió.
+- **Prohibido y no ejecutado:** sin commit, push, deploy, merge, tags, REC-002, restore, reset, clean, descarte, reescritura de historial, `git add .`, instalación/actualización de dependencias o skills, lectura de secretos/`.env`, uso de recursos Firebase reales, propagación a otras copias. El commit de estos cambios requiere autorización explícita separada, todavía no solicitada.
+- **Siguiente paso exacto:** registrar como tarea nueva y separada (con su propio preflight) la Fase B del ADR-0001 §21-22 — decidir/demostrar el mecanismo `Core → template` (hoy sin flujo automatizado verificado) y, solo después, propagar el piloto validado a `template-ventas` y `ventas-moni-app` sin sincronizar a ciegas.
+
+---
+
+## [MINOR] CLAUDE-003-CLOSURE — 2026-07-14
+**Documentación: reconciliación final del criterio de cierre de `CLAUDE-003`**
+
+### Cambios realizados:
+1. **Protocolo multi‑IA:** se sustituyó la frase residual que afirmaba que `CLAUDE-003` permanecía `IN_PROGRESS`; el texto ahora presenta los seis puntos como criterios que ya fueron exigidos para el cierre, sin alterar su contenido ni estados ajenos.
+
+### Ejecución y base:
+- **Ejecutor(es):** Codex.
+- **Rama / HEAD observado:** `docs/context-packaging` / `919bdc9`.
+- **Alcance propio:** corrección documental atómica del cierre ya verificado de `CLAUDE-003`.
+- **Cambios preexistentes preservados:** Sí; se preservaron todos los cambios de `CORE-341`, `CORE-342`, `CORE-343`, `CLAUDE-003` y demás tareas visibles en el working tree.
+
+### Evidencia:
+- El registro de capacidades validó 48 entradas: 15 `INTERNAL_ACTIVE`, 3 `INTERNAL_RESTRICTED` y 2 `INTERNAL_PILOT`.
+- Las cinco consultas doradas devolvieron `Security Review`, `component-creator`, `portar-componente`, `bitacora-recorder` y `DISCOVERY_REVIEW_REQUIRED`, respectivamente.
+- El verificador integral terminó `OK` con 20 pares de skills `noop`, cero conflictos, ninguna sincronización y ninguna escritura.
+- `git diff --check` no informó errores; la advertencia estética preexistente de `propuesta_portal_creacion_features.md` fue informativa y quedó fuera de este alcance.
+- **Estado:** `VERIFIED_COMPLETE`.
+
+### Archivos modificados:
+- [`protocolo_colaboracion_ia.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md) [MODIFY]
+- [`bitacora_cambios.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+## CLAUDE-003-CYCLE-2 — 2026-07-14
+**Handoff independiente mediante Claude Desktop Code: `PASS_AFTER_CORRECTION`**
+
+### Cambios realizados:
+1. **Segunda superficie:** Claude Desktop Code abrió `D:/PROTOTIPE`, reconstruyó el estado de `CLAUDE-003` desde archivos canónicos y confirmó que no modificó, instaló, hizo commit, push ni deploy.
+2. **Comprensión verificada:** recuperó rama/HEAD, el resultado corregido del ciclo 1, los bloques preexistentes de `CORE-341`/`CORE-342`, la capacidad mínima `internal:git-strategist` y el criterio de cierre.
+3. **Corrección pendiente:** llamó “propios de CLAUDE-003” a `.agents/AGENTS.md`, `.agents/skills/bitacora-recorder/SKILL.md`, `.agents/skills/sync_manifest.json`, `.gitignore` y `protocolo_colaboracion_ia.md`. `git ls-files` confirma que ya estaban versionados; en `CLAUDE-003` fueron modificados, no creados ni adquiridos en propiedad exclusiva.
+4. **Revisión de la corrección:** Claude reclasificó correctamente esos cinco archivos, pero definió `NEW` usando `??` y puso como ejemplos `.claude/` y `CLAUDE.md`. `??` demuestra ausencia de seguimiento, no la tarea de origen: `CLAUDE.md` está documentado en `CORE-342/CORE-343`, `.claude/settings.json` en `CORE-342` y únicamente los adaptadores `.claude/skills/` fueron creados por `CLAUDE-003`.
+5. **Aceptación final:** Claude confirmó que `??` no demuestra procedencia, clasificó `CLAUDE.md` y `.claude/settings.json` como compartidos, los dos adaptadores de `.claude/skills/` como nuevos y el directorio `.claude/` como una unidad de procedencia mixta.
+
+### Ejecución y base:
+- **Ejecutores:** Claude Desktop Code realizó la inspección; Codex revisó la procedencia contra Git y documentación.
+- **Rama / HEAD observado:** `docs/context-packaging` / `919bdc9`.
+- **Alcance propio:** lectura independiente y registro documental de la evidencia del ciclo 2.
+- **Cambios preexistentes preservados:** sí; ninguna superficie modificó código de producto ni descartó cambios.
+
+### Evidencia:
+- La respuesta identifica `CLAUDE-003` como `IN_PROGRESS` y no intenta autocerrarla.
+- `git ls-files` confirma que los cinco archivos señalados existían antes de los cambios no confirmados actuales.
+- La corrección distingue adecuadamente `PREEXISTING_MODIFIED` y `SHARED_MODIFIED`; queda pendiente retirar la inferencia `??` → “creado por la tarea”.
+- La respuesta final retiró esa inferencia y confirmó las cuatro categorías con evidencia documental.
+- **Estado:** `PASS_AFTER_CORRECTION`; ciclo 2 aceptado.
+
+### Archivos modificados:
+- [`D:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+- [`D:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+## CLAUDE-003-CYCLE-1 — 2026-07-14
+**Handoff de solo lectura Claude ← Codex: `PASS_AFTER_CORRECTION`**
+
+### Cambios realizados:
+1. **Validación de continuidad:** Claude abrió la raíz canónica, recuperó rama/HEAD, restricciones, cambios preexistentes y selección mínima de capacidades sin editar, instalar, hacer commit, push ni deploy.
+2. **Corrección de procedencia:** la respuesta atribuyó `.nvmrc`, `.node-version`, `.npmrc` y `verify-runtime.mjs` a `CLAUDE-003`; la evidencia canónica en `CORE-341` demuestra que esos archivos pertenecen a la fijación del runtime. El ciclo no se acepta como `PASS` hasta que Claude reconozca la corrección.
+3. **Revisión de la corrección:** Claude reconoció formalmente el error de runtime y detectó que Codex había actualizado la bitácora durante su sesión. Persistió una desviación: clasificó `mapa_aplicacion.md` y `mapa_documentacion_ia.md` únicamente como `CORE-342`, aunque el roadmap los lista bajo `CORE-342` y `CLAUDE-003`.
+4. **Aceptación final:** Claude corrigió expresamente la clasificación de ambos mapas como documentos compartidos, mantuvo `certeza baja` al no haber revisado el diff por líneas y confirmó que no modificó archivos.
+
+### Ejecución y base:
+- **Ejecutores:** Claude realizó la inspección; Codex contrastó la respuesta con roadmap y bitácora.
+- **Rama / HEAD observado:** `docs/context-packaging` / `919bdc9`.
+- **Alcance propio:** lectura de `git status`, `git log`, `CLAUDE.md`, contrato, registro, roadmap y bitácora; registro documental del resultado.
+- **Cambios preexistentes preservados:** sí; no se modificó ni reasignó código de `CORE-341`, `CORE-342` u otras tareas.
+
+### Evidencia:
+- Claude confirmó correctamente raíz, rama/HEAD, restricciones multi‑IA y uso de `internal:git-strategist` como capacidad mínima.
+- `tareas_pendientes.md` asigna expresamente los cuatro archivos de runtime a `CORE-341`; `bitacora_cambios.md` confirma la misma procedencia.
+- La segunda respuesta corrigió esa atribución y reconoció la modificación concurrente sin sobrescribirla. Las líneas 37-38 y 96-97 del roadmap demuestran que los dos mapas son compartidos entre `CLAUDE-003` y `CORE-342`.
+- La tercera respuesta confirmó esa clasificación compartida y corrigió formalmente la tabla anterior.
+- **Estado:** `PASS_AFTER_CORRECTION`; ciclo 1 aceptado. `CLAUDE-003` continúa `IN_PROGRESS` porque falta el ciclo 2.
+
+### Archivos modificados:
+- [`D:/PROTOTIPE/Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+- [`D:/PROTOTIPE/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md) [MODIFY]
+
+---
+
+## CLAUDE-003 — 2026-07-14 — VERIFIED_COMPLETE
+**Gobernanza de capacidades y continuidad entre Fundador, Codex, Claude y Antigravity**
+
+### Cambios realizados:
+1. Se estableció un contrato operativo común: ninguna IA es dueña exclusiva del proyecto; un solo ejecutor escribe por worktree físico y debe preservar los cambios preexistentes.
+2. Se creó un registro de 48 capacidades con estados auditables. Quince skills internas quedan activas, tres de riesgo quedan restringidas y dos skills nuevas permanecen como pilotos.
+3. `route-capabilities` selecciona el conjunto mínimo permitido mediante una consulta local y determinista. `find-skills-governed` solo descubre candidatos externos, nunca instala, actualiza ni ejecuta paquetes.
+4. `CLAUDE.md` dejó de cargar íntegramente el archivo heredado de reglas y ahora importa el contrato breve; los adaptadores de `.claude/skills` apuntan a las fuentes canónicas en `.agents/skills`.
+5. Se añadieron bloqueos de permisos para operaciones mutantes del CLI externo de skills y exclusiones locales para configuraciones privadas y cuarentena.
+
+### Ejecución y base:
+- **Ejecutor:** Codex, por solicitud del fundador.
+- **Rama / HEAD observado:** `docs/context-packaging` / `919bdc9`.
+- **Alcance propio:** gobernanza IA, registro/enrutador de capacidades, adaptadores Claude y documentación de `CLAUDE-003`.
+- **Cambios preexistentes preservados:** sí; el working tree ya contenía cambios de tareas anteriores y no se reasignaron ni descartaron.
+
+### Evidencia:
+- El registro valida como JSON y enumera 48 capacidades sin IDs duplicados ni fuentes internas ausentes.
+- Golden queries: seguridad Firebase → `Security Review`; crear componente → `component-creator`; portar componente → `portar-componente`; bitácora → `bitacora-recorder`; video → `DISCOVERY_REVIEW_REQUIRED`.
+- La verificación integral posterior reportó 20 pares `noop`, cero conflictos y ninguna escritura; reconoció `CLAUDE-003` y mantuvo 60 cambios ajenos visibles como preexistentes.
+- Los ciclos 1 y 2 fueron aceptados después de correcciones explícitas de procedencia; terminal y Desktop Code retomaron el contexto sin editar código ni instalar herramientas.
+- **Estado:** `VERIFIED_COMPLETE`; cierre local sin commit, push, deploy ni instalaciones externas.
+
+### Archivos modificados:
+- [`D:/PROTOTIPE/.agents/AI_WORKFLOW.md`](file:///D:/PROTOTIPE/.agents/AI_WORKFLOW.md) [NEW]
+- [`D:/PROTOTIPE/.agents/capabilities/registry.json`](file:///D:/PROTOTIPE/.agents/capabilities/registry.json) [NEW]
+- [`D:/PROTOTIPE/.agents/skills/route-capabilities/`](file:///D:/PROTOTIPE/.agents/skills/route-capabilities/) [NEW]
+- [`D:/PROTOTIPE/.agents/skills/find-skills-governed/`](file:///D:/PROTOTIPE/.agents/skills/find-skills-governed/) [NEW]
+- [`D:/PROTOTIPE/.claude/skills/`](file:///D:/PROTOTIPE/.claude/skills/) [NEW]
+- [`D:/PROTOTIPE/CLAUDE.md`](file:///D:/PROTOTIPE/CLAUDE.md) [MODIFY]
+- [`D:/PROTOTIPE/.agents/AGENTS.md`](file:///D:/PROTOTIPE/.agents/AGENTS.md) [MODIFY]
+- [`D:/PROTOTIPE/.claude/settings.json`](file:///D:/PROTOTIPE/.claude/settings.json) [MODIFY]
+- [`D:/PROTOTIPE/.gitignore`](file:///D:/PROTOTIPE/.gitignore) [MODIFY]
+- [`D:/PROTOTIPE/Documentacion PROTOTIPE/`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/) [MODIFY]
+
+---
+
+## CORE-343 — 2026-07-14
+**Validación inicial de Claude sobre la raíz canónica**
+
+### Resultado verificado
+1. Claude Code reconoció una suscripción Claude Pro mediante el proveedor oficial; no se registraron credenciales ni identificadores de cuenta.
+2. El piloto se ejecutó desde `D:\PROTOTIPE` con `--permission-mode plan` y terminó sin modificar archivos.
+3. Claude identificó correctamente la raíz canónica, los tres clones independientes, el workspace preservado, el working tree no confirmado y las restricciones de secretos, Git, REC-002 y producción `NO-GO`.
+4. El piloto expuso una instrucción documental obsoleta que todavía pedía autenticación; se corrigió antes de iniciar cualquier trabajo real.
+
+### Estado
+- `CLAUDE-002`: `VERIFIED_COMPLETE`.
+- `CORE-343`: `VERIFIED_COMPLETE`; incorporación documental terminada.
+- `CLAUDE-003`: `VERIFIED_COMPLETE` posteriormente; consultar las entradas de cierre al inicio de esta bitácora.
+- Próximo paso vigente: seleccionar una nueva tarea real desde el roadmap; no hacer commit, push, deploy o REC-002 sin autorización.
+
+### Hallazgo de trazabilidad
+El build rechazó correctamente mantener `CORE-343` como tarea de edición activa porque el working tree todavía contiene los cambios verificados de `CORE-342`. Esos archivos no se reasignaron falsamente y no se prepararon ni confirmaron en Git.
+
+---
+
+## CORE-342 — 2026-07-14 — VERIFIED_COMPLETE
+**Remediación de fallos baseline descubiertos después de la reinstalación**
+
+### Diagnóstico de entrada:
+1. `template-core-seed`, `App Ventas_limpio` y `ventas-moni-app` pasan sus pruebas unitarias.
+2. `template-ventas` tiene una aserción desactualizada: espera el nombre base del producto y el comportamiento vigente informa nombre más variante.
+3. Functions no puede ejecutar su lint porque la configuración ignora todos los archivos alcanzados por `eslint .`.
+4. El dashboard compila directamente con Vite, pero su prebuild conserva una ruta absoluta anterior y ESLint informa 133 errores y 338 advertencias.
+
+### Límites:
+- no commit, push, deploy, emuladores ni servicios reales;
+- no aplicar REC-002;
+- no silenciar globalmente reglas de React para obtener un resultado artificialmente verde.
+
+### Resultado ejecutado:
+1. La expectativa de `template-ventas` quedó alineada con el nombre de variante vigente; sus 65 pruebas pasan.
+2. Functions migró a flat config actual, eliminó la dependencia heredada y pasa ESLint con cero errores.
+3. Dashboard quedó en cero errores de ESLint; conserva 413 advertencias visibles de reglas de React Compiler porque ese compilador no está habilitado.
+4. Los builds directos de ambas copias del dashboard pasan; CLI, plantillas e instancias también compilan.
+5. Se aprobaron 198 pruebas entre template ventas, App Ventas, ventas Moni y core seed.
+6. La validación de conocimiento registra `blueprint-semver` y `hsl-color`; cinco blueprints de ejemplo quedaron en el esquema vigente.
+7. El verificador de integridad resuelve el workspace recuperado y ya no sincroniza silenciosamente: cualquier escritura exige `PROTOTIPE_ALLOW_INTEGRITY_SYNC=1`.
+
+### Resolución de cierre:
+1. Los 18 pares de skills activa/respaldo coincidieron por SHA-256; el manifiesto se reconcilió una vez y el build posterior reportó 18 `noop`, sin escritura.
+2. `AdminCustomerLoyalty.jsx`, `AdminView.jsx` y `AdminHelloModule.jsx` recibieron guards reales de rol en las copias equivalentes.
+3. Cinco ejecuciones de 65 pruebas pasaron después del hardening RBAC.
+4. El alcance completo quedó registrado y el gate de trazabilidad pasa.
+5. La copia antigua se preservó en `D:/PROTOTIPE_PRESERVADO_ANTES_DE_RECUPERACION_2026-07-14`; el coordinador limpio quedó en `D:/PROTOTIPE` y tres clones independientes en `D:/PROTOTIPE_WORKSPACE`.
+6. Scripts de backup, consolidación, promoción y hooks resuelven su raíz dinámicamente donde corresponde. El build integral pasa desde la ruta canónica.
+
+### Estado:
+`VERIFIED_COMPLETE`; sin commit, push, deploy ni aplicación de REC-002.
+
+---
+
+## CORE-341 — 2026-07-14 — VERIFIED_COMPLETE
+**Fijación del runtime reproducible después de la reinstalación**
+
+### Cambios realizados:
+1. Se seleccionó Node `22.23.0` y npm `10.9.8` a partir de requisitos de Vite, ESLint, Vitest y Firebase Functions.
+2. Se descargó la distribución oficial de Node y se verificó su SHA-256 antes de extraerla en `D:/PROTOTIPE_TOOLS/node-v22.23.0-win-x64`.
+3. Se añadieron `.nvmrc`, `.node-version`, `.npmrc` y `verify-runtime.mjs` a las cuatro unidades Git limpias.
+4. Se declararon `engines` y `packageManager` en CLI, Dashboard, Functions, plantillas e instancia; Functions pasó de runtime Node 20 a Node 22.
+5. El verificador pasó en las cuatro unidades y falló correctamente ante Node 20 y npm 9.
+6. Los once `package.json` modificados son JSON válido y `git diff --check` pasa en las cuatro unidades.
+
+### Evidencia de cierre:
+- los once pares `package.json`/`package-lock.json` fueron reconciliados con npm `10.9.8`;
+- `npm ci` pasó en las siete superficies ejecutables revisadas;
+- el runtime exacto pasó en las cuatro unidades y las pruebas negativas rechazaron Node 20/npm 9;
+- builds, lint y pruebas posteriores quedan registrados en CORE-342 y en el baseline previo a Claude.
+
+### Estado:
+`VERIFIED_COMPLETE`; sin commit, push, deploy ni aplicación de REC-002.
+
+---
+
 ## CLI-494 — 2026-07-13
 **FEATURE_FLAGS_PHYSICAL_LOGICAL_ALIGNMENT: Saneamiento y Alineación Físico-Lógica de Módulos y Feature Flags en Firestore**
 

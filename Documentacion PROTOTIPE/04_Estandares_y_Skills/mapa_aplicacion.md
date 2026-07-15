@@ -17,6 +17,8 @@ app_layout:
     root: /Plantillas Core/App Ventas/src/
     layers: [features/, components/, services/, hooks/, constants/, store/, core/generated/]
     rules: [/Plantillas Core/App Ventas/firestore.rules, /Plantillas Core/App Ventas/firestore.indexes.json]
+    layered_architecture_adr: /Documentacion PROTOTIPE/00_Continuidad/canonical/ADR-0001-arquitectura-canonica-por-capas.md
+    layered_architecture_status: CORE-344_VERIFIED_COMPLETE (ADR APPROVED por aprobación humana del fundador, no por revisión independiente de IA; piloto customer-loyalty implementado solo en App Ventas; hello-module es la referencia; propagación a template-ventas/ventas-moni-app pendiente como tarea separada)
   Instancias_Clientes:
     root: /Instancias Clientes/
     active_instances: [ventas/ventas-moni-app/]

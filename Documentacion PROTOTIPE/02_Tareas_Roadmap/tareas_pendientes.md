@@ -1,5 +1,183 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-344: Definir e implementar la arquitectura canónica por capas de PROTOTIPE~~**
+  - Estatus: `VERIFIED_COMPLETE`. Se entregó en `READY_FOR_INDEPENDENT_REVIEW` con ADR y piloto implementados y verificados localmente; el fundador aprobó explícitamente el resultado ("YO LO APRUEBO") el 2026-07-15. Conforme a `.agents/AI_WORKFLOW.md` §6 y `.agents/capabilities/registry.json` (`independentReviewFor: ["architecture", ...]`), las decisiones de arquitectura requieren **revisión independiente o aprobación humana** (condición disyuntiva, no ambas). El cierre se sustenta en aprobación humana explícita del fundador, no en una revisión independiente de otra sesión de IA — se documenta esta distinción sin fingir una revisión que no ocurrió.
+  - Fecha de activación: 2026-07-15. Fase 1 (auditoría de solo lectura) y Fase 2 (ADR + piloto) completadas el mismo día.
+  - Objetivo real: resolver la decisión pendiente del Plan Maestro (§9.1) sobre la arquitectura de capas (`UI → Hooks → Services → Repositories`) mediante un ADR con evidencia real del repositorio, y demostrarla con un piloto acotado en `customer-loyalty`, sin migrar el resto del ecosistema.
+  - Alcance ejecutado (acotado por decisión explícita del fundador tras revisión del plan):
+    - ADR canónico creado: `Documentacion PROTOTIPE/00_Continuidad/canonical/ADR-0001-arquitectura-canonica-por-capas.md` (estado `PROPOSED`).
+    - Tests de caracterización de `customer-loyalty` escritos y ejecutados **antes** del refactor (24 pruebas, todas en verde contra el código previo).
+    - Piloto `customer-loyalty` implementado **solo en `Plantillas Core/App Ventas`**: `runTransaction` (earn/redeem) y `onSnapshot` (cuenta + transacciones) movidos al Repository; Service y Hook dejaron de importar `firebase/firestore`; `index.js` dejó de exportar el Repository (sin consumidores externos, verificado por grep).
+    - Guard arquitectónico progresivo en `eslint.config.js` (bloque nuevo, `error`, sin tocar los bloques existentes): prohíbe `firebase/*` en `components/`, `hooks/` y `services/` de `hello-module` y `customer-loyalty`. Replica literalmente los 5 selectores ya vigentes en vez de reemplazarlos, porque el flat config de ESLint no fusiona arrays de una misma regla entre bloques que coinciden sobre el mismo archivo. No se agregó un nivel `warn` para el resto del legado: técnicamente no es posible sin degradar a `warn` las reglas `error` ya vigentes en esos mismos archivos (ver el propio `eslint.config.js` para el razonamiento completo); queda como brecha documentada, no resuelta con un mecanismo que debilite el guard existente.
+    - Verificaciones locales ejecutadas (ver bitácora para resultados literales): 33 pruebas del piloto, 98/98 pruebas de toda la suite (sin regresión), ESLint de los archivos modificados (limpio salvo deuda pre-existente), build de producción, `git diff --check`, validador de integridad de diseño del Core.
+  - Explícitamente fuera de esta tarea (queda para una tarea posterior separada): propagar a `Prototipe-CLI/templates/template-ventas` y a `Instancias Clientes/ventas/ventas-moni-app`; migrar otras features; implementar `RealtimeQueryRegistry`/`queryKeyFactory`; corregir bugs preexistentes de `customer-loyalty` (`getConfig`, `deleteToken`) no relacionados con las capas — se relocalizaron sin modificar su comportamiento.
+  - Hallazgo de Fase 1: `hello-module` ya cumplía el patrón objetivo (Repository/Service/Hook desacoplados de Firebase) y sirvió de referencia; `customer-loyalty` violaba las tres capas (Service con `runTransaction`, Hook con `onSnapshot`, ambos importaban el SDK; `index.js` exponía el Repository).
+  - Fuente de verdad: `Plantillas Core/App Ventas` determinada como origen de autoría por procedencia documental (`mapa_aplicacion.md`, `distribute_rules.js`), no por hash ni antigüedad. Se registró como brecha pendiente que no existe un flujo automatizado verificable `Core → template-ventas` para código de features (el sync verificado es `template → clientes` vía `sync_clients.js`).
+  - Deuda técnica adicional descubierta durante la implementación (no introducida por esta tarea, no corregida — fuera de alcance): (1) `CustomerLoyaltyRepository.js` ya fallaba ESLint (`setDoc`/`updateDoc` directos) antes de esta tarea porque el `ignores` del bloque legado (`src/repositories/**`) no coincide con la carpeta real de Repositories (`api/**`); confirmado con `git show HEAD` que los 3 errores ya existían. (2) `useCustomerLoyalty.js` ya fallaba `react-hooks/set-state-in-effect` en su guarda de entrada (`setLoading(false)` antes del `return` temprano), presente sin cambios desde `HEAD`. (3) El proyecto completo (`npm run lint` en `Plantillas Core/App Ventas`) ya reportaba 637 errores y 22 advertencias pre-existentes en archivos no relacionados con CORE-344 antes de iniciar esta tarea.
+  - Cambios preexistentes preservados: sí; no se reclaman, restauran ni sobrescriben los guards RBAC de `CORE-342` en `AdminCustomerLoyalty.jsx`, `AdminView.jsx` y `AdminHelloModule.jsx`.
+  - Archivos:
+    - [`Documentacion PROTOTIPE/00_Continuidad/canonical/ADR-0001-arquitectura-canonica-por-capas.md`] (NEW)
+    - [`Plantillas Core/App Ventas/src/features/customer-loyalty/api/CustomerLoyaltyRepository.js`]
+    - [`Plantillas Core/App Ventas/src/features/customer-loyalty/services/CustomerLoyaltyService.js`]
+    - [`Plantillas Core/App Ventas/src/features/customer-loyalty/hooks/useCustomerLoyalty.js`]
+    - [`Plantillas Core/App Ventas/src/features/customer-loyalty/index.js`]
+    - [`Plantillas Core/App Ventas/eslint.config.js`]
+    - [`Plantillas Core/App Ventas/tests/unit/customerLoyaltyRepository.spec.js`] (NEW)
+    - [`Plantillas Core/App Ventas/tests/unit/customerLoyaltyService.spec.js`] (NEW)
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`]
+    - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`]
+  - Cierre: aprobado por el fundador el 2026-07-15. Sin commit, push ni deploy — esas acciones requieren autorización explícita separada conforme a `CLAUDE.md` y `.agents/AI_WORKFLOW.md`.
+  - Siguiente paso exacto: registrar como tarea nueva y separada (con su propio preflight) la Fase B del ADR-0001 §21-22 — decidir/demostrar el mecanismo `Core → template` (hoy sin flujo automatizado verificado) y, solo después, propagar el piloto validado a `Prototipe-CLI/templates/template-ventas` y `Instancias Clientes/ventas/ventas-moni-app` sin sincronizar a ciegas.
+
+* **[x] ~~Tarea CLAUDE-003: Gobernar capacidades y colaboración multi‑IA~~**
+  - Estatus: `VERIFIED_COMPLETE`; cierre local verificado sin commit, push, deploy ni instalaciones externas.
+  - Fecha de activación: 2026-07-14
+  - Objetivo real: permitir que Fundador, Codex, Claude y Antigravity trabajen sobre PROTOTIPE con una misma fuente operativa, selección mínima de capacidades y trazabilidad que distinga cambios propios de cambios preexistentes.
+  - Alcance actual:
+    - contrato operativo común en [`.agents/AI_WORKFLOW.md`];
+    - registro auditable en [`.agents/capabilities/registry.json`];
+    - enrutador local y determinista `route-capabilities`;
+    - descubrimiento externo controlado mediante `find-skills-governed`, sin instalación automática;
+    - adaptadores mínimos para Claude en [`.claude/skills/`];
+    - precedencia y límites alineados en [`CLAUDE.md`] y [`.agents/AGENTS.md`].
+  - Decisiones vigentes: 15 skills internas activas, 3 internas restringidas y 2 pilotos; el catálogo externo se conserva clasificado, no instalado. `Find Skills` solo puede buscar candidatos después de que el registro local no encuentre una capacidad y requiere autorización humana de red.
+  - Evidencia actual: registro JSON válido con 48 capacidades; pruebas de enrutamiento distinguen seguridad, creación, portabilidad y bitácora, y remiten una tarea fuera de alcance a revisión de descubrimiento. Los 20 pares activos/respaldo validan como `noop`, sin conflictos; el gate reconoce `CLAUDE-003` y preserva 60 cambios preexistentes sin atribuirlos a esta tarea. Claude ejecutó la primera lectura de handoff desde `D:/PROTOTIPE` sin escribir ni usar capacidades innecesarias. Corrigió formalmente que los archivos de runtime pertenecen a `CORE-341`, detectó una edición concurrente de Codex sin sobrescribirla y confirmó que `mapa_aplicacion.md` y `mapa_documentacion_ia.md` son compartidos entre `CORE-342` y `CLAUDE-003`. Ciclo 1: `PASS_AFTER_CORRECTION`.
+  - Ciclo 2: Claude Desktop Code reconstruyó de forma independiente raíz, rama/HEAD, estado, correcciones del ciclo 1, capacidad mínima y evidencia pendiente sin escribir. Tras la revisión, distinguió `NEW`, `PREEXISTING_MODIFIED`, `SHARED_MODIFIED` y `PREEXISTING_UNTOUCHED`; confirmó que `??` no demuestra procedencia y separó `.claude/settings.json` de los dos adaptadores nuevos en `.claude/skills/`. Ciclo 2: `PASS_AFTER_CORRECTION`.
+  - Cierre verificado: configuración y registro válidos; golden queries aprobadas; 20 pares de skills `noop` y sin conflictos; dos handoffs independientes aceptados; atribución de cambios corregida; integridad y diff revisados. Los dos pilotos conservan su estado propio y ninguna herramienta externa fue instalada.
+  - Prohibiciones: no instalación o actualización automática/global; no commit, push, deploy, REC-002, restauración o descarte sin autorización separada.
+  - Cambios preexistentes preservados: Sí; el working tree contiene trabajo previo de `CORE-342` y otras tareas. `CLAUDE-003` no lo reclama, restaura ni descarta.
+  - Archivos:
+    - [`.agents/AI_WORKFLOW.md`]
+    - [`.agents/AGENTS.md`]
+    - [`.agents/capabilities/registry.json`]
+    - [`.agents/skills/bitacora-recorder/SKILL.md`]
+    - [`.agents/skills/find-skills-governed/SKILL.md`]
+    - [`.agents/skills/route-capabilities/SKILL.md`]
+    - [`.agents/skills/route-capabilities/scripts/query-registry.mjs`]
+    - [`.agents/skills/sync_manifest.json`]
+    - [`.claude/settings.json`]
+    - [`.claude/skills/find-skills-governed/SKILL.md`]
+    - [`.claude/skills/route-capabilities/SKILL.md`]
+    - [`.gitignore`]
+    - [`CLAUDE.md`]
+    - [`Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`]
+    - [`Documentacion PROTOTIPE/00_Continuidad/BASELINE_ANTES_DE_CLAUDE_2026-07-14.md`]
+    - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/protocolo_colaboracion_ia.md`]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/bitacora-recorder/SKILL.md`]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/find-skills-governed/SKILL.md`]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/Skills/route-capabilities/SKILL.md`]
+
+* **[x] ~~Tarea CORE-343: Validar la fundación operativa de Claude sobre la raíz canónica~~**
+  - Estatus: `VERIFIED_COMPLETE`; autenticación, piloto de lectura y documentación verificados, sin cambios de código.
+  - Fecha: 2026-07-14
+  - Descripción: cerrar la incorporación controlada de Claude, mantener una sola fuente de instrucciones y comprobar que terminal y escritorio parten de `D:/PROTOTIPE`. No ampliar rules/hooks/skills sin una necesidad demostrada por el primer trabajo real.
+  - Archivos:
+    - [`CLAUDE.md`]
+    - [`Documentacion PROTOTIPE/00_Continuidad/BASELINE_ANTES_DE_CLAUDE_2026-07-14.md`]
+    - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`]
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`]
+  - Evidencia actual: `claude auth status` confirmó acceso mediante Claude Pro; el piloto en `--permission-mode plan` reconoció la raíz, los clones, el working tree y las restricciones sin modificar archivos.
+  - Cierre: incorporación documental verificada. `CORE-342` fue revisada y cerrada después; la tarea vigente de evolución de la fundación es `CLAUDE-003`.
+
+* **[x] ~~Tarea CORE-342: Remediar fallos baseline descubiertos después de la reinstalación~~**
+  - Estatus: `VERIFIED_COMPLETE`; cierre técnico local sin commit, push ni deploy.
+  - Fecha: 2026-07-14
+  - Descripción: Corregir la aserción desactualizada de `template-ventas`, restaurar un lint ejecutable para Functions y reducir a cero los errores de ESLint del dashboard mediante cambios de código verificables, sin ocultarlos desactivando reglas globales. Ejecutar builds, lint y pruebas unitarias locales al cierre. REC-002 permanece sin aplicar.
+  - Archivos:
+    - [`.claude/settings.json`]
+    - [`.node-version`]
+    - [`.npmrc`]
+    - [`.nvmrc`]
+    - [`CLAUDE.md`]
+    - [`consolidar_notebook.bat`]
+    - [`git_backup.ps1`]
+    - [`menu_backup.ps1`]
+    - [`subproject_backup.ps1`]
+    - [`verify-runtime.mjs`]
+    - [`Central PROTOTIPE/dev-dashboard/eslint.config.js`]
+    - [`Central PROTOTIPE/dev-dashboard/functions/eslint.config.cjs`]
+    - [`Central PROTOTIPE/dev-dashboard/functions/package-lock.json`]
+    - [`Central PROTOTIPE/dev-dashboard/functions/package.json`]
+    - [`Central PROTOTIPE/dev-dashboard/package-lock.json`]
+    - [`Central PROTOTIPE/dev-dashboard/package.json`]
+    - [`Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`]
+    - [`Central PROTOTIPE/dev-dashboard/src/App.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentLibraryView.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ComponentSandbox.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreCard.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CorePromotionModal.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/CoreSyncPanel.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/E2EPanel.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/HealthMonitorView.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/GitBackupPanel.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/SkillsRoadmapPanel.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/SearchVanishHighlightInputSandbox.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/UseLocalStorageStateSandbox.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/generacion_pdfSandbox.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/modulo_agendamiento_barberiaSandbox.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/propuesta_commits_desplieguesSandbox.jsx`]
+    - [`Central PROTOTIPE/dev-dashboard/src/components/admin/sandboxes/propuesta_dashboard_interactivoSandbox.jsx`]
+    - [`Documentacion PROTOTIPE/00_Continuidad/BASELINE_ANTES_DE_CLAUDE_2026-07-14.md`]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_aplicacion.md`]
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`]
+    - [`Instancias Clientes/ventas/ventas-moni-app/package-lock.json`]
+    - [`Instancias Clientes/ventas/ventas-moni-app/package.json`]
+    - [`Instancias Clientes/ventas/ventas-moni-app/src/features/customer-loyalty/components/AdminCustomerLoyalty.jsx`]
+    - [`Instancias Clientes/ventas/ventas-moni-app/src/features/customer-loyalty/components/AdminView.jsx`]
+    - [`Instancias Clientes/ventas/ventas-moni-app/src/features/hello-module/components/AdminHelloModule.jsx`]
+    - [`Plantillas Core/App Ventas/package-lock.json`]
+    - [`Plantillas Core/App Ventas/package.json`]
+    - [`Plantillas Core/App Ventas/src/features/customer-loyalty/components/AdminCustomerLoyalty.jsx`]
+    - [`Plantillas Core/App Ventas/src/features/customer-loyalty/components/AdminView.jsx`]
+    - [`Plantillas Core/App Ventas/src/features/hello-module/components/AdminHelloModule.jsx`]
+    - [`Prototipe-CLI/knowledge/examples/blueprint-clinica.json`]
+    - [`Prototipe-CLI/knowledge/examples/blueprint-crm.json`]
+    - [`Prototipe-CLI/knowledge/examples/blueprint-restaurante.json`]
+    - [`Prototipe-CLI/knowledge/examples/blueprint-retail.json`]
+    - [`Prototipe-CLI/knowledge/examples/blueprint-vacio.json`]
+    - [`Prototipe-CLI/package-lock.json`]
+    - [`Prototipe-CLI/package.json`]
+    - [`Prototipe-CLI/plantillas_registro.json`]
+    - [`Prototipe-CLI/save_as_core.js`]
+    - [`Prototipe-CLI/server.js`]
+    - [`Prototipe-CLI/hooks/pre-commit`]
+    - [`Prototipe-CLI/scripts/validate-knowledge.js`]
+    - [`Prototipe-CLI/templates/template-core-seed/package-lock.json`]
+    - [`Prototipe-CLI/templates/template-core-seed/package.json`]
+    - [`Prototipe-CLI/templates/template-ventas/package-lock.json`]
+    - [`Prototipe-CLI/templates/template-ventas/package.json`]
+    - [`Prototipe-CLI/templates/template-ventas/src/features/customer-loyalty/components/AdminCustomerLoyalty.jsx`]
+    - [`Prototipe-CLI/templates/template-ventas/src/features/hello-module/components/AdminHelloModule.jsx`]
+    - [`Prototipe-CLI/templates/template-ventas/tests/unit/salesService.spec.js`]
+  - Alcance ejecutado:
+    - `Prototipe-CLI/templates/template-ventas/tests/unit/salesService.spec.js`.
+    - `Prototipe-CLI/scripts/validate-knowledge.js` y cinco ejemplos `knowledge/examples/blueprint-*.json`.
+    - `Central PROTOTIPE/dev-dashboard/functions/package.json`, `package-lock.json` y `eslint.config.cjs`, además de sus equivalentes en `dev-dashboard/functions`.
+    - configuración, paquetes y 15 fuentes del dashboard enumerados por `git diff --name-only`; cambios equivalentes revisados en el clon independiente.
+    - `Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs` y su equivalente independiente, ahora en modo de solo lectura salvo autorización explícita.
+  - Evidencia: `npm ci` pasó; builds directos e integral, lint de Functions, lint del dashboard con cero errores y conocimiento válido. El baseline inicial aprobó 198 pruebas y el hardening RBAC aprobó cinco ejecuciones de 65 pruebas. Los 18 pares de skills quedaron idénticos, el build normal reporta 18 `noop` y la trazabilidad pasa desde `D:/PROTOTIPE`. Ver `Documentacion PROTOTIPE/00_Continuidad/BASELINE_ANTES_DE_CLAUDE_2026-07-14.md`.
+  - Cierre: guards administrativos reales aplicados; scripts operativos desacoplados de rutas fijas cuando corresponde; coordinador limpio establecido en `D:/PROTOTIPE`; copia anterior preservada y REC-002 sin aplicar.
+
+* **[x] ~~Tarea CORE-341: Fijar runtime Node/npm reproducible después de la reinstalación~~**
+  - Estatus: `VERIFIED_COMPLETE`; validación local terminada sin commit, push ni deploy.
+  - Fecha: 2026-07-14
+  - Descripción: Fijar Node 22.23.0 y npm 10.9.8 en las cuatro unidades Git recuperadas, declarar engines/packageManager, añadir verificación explícita de versión, alinear lockfiles con npm 10.9.8, reproducir instalaciones mediante `npm ci` y ejecutar builds/pruebas locales. REC-002 permanece sin aplicar.
+  - Archivos:
+    - [`D:/PROTOTIPE/.nvmrc`](file:///D:/PROTOTIPE/.nvmrc) [NEW]
+    - [`D:/PROTOTIPE/.node-version`](file:///D:/PROTOTIPE/.node-version) [NEW]
+    - [`D:/PROTOTIPE/.npmrc`](file:///D:/PROTOTIPE/.npmrc) [NEW]
+    - [`D:/PROTOTIPE/verify-runtime.mjs`](file:///D:/PROTOTIPE/verify-runtime.mjs) [NEW]
+    - [`package.json` de CLI, Dashboard, Functions, plantillas e instancias](file:///D:/PROTOTIPE) [MODIFY]
+    - [`package-lock.json` de CLI, Dashboard, Functions, plantillas e instancias](file:///D:/PROTOTIPE) [MODIFY]
+    - [`archivos equivalentes en dev-dashboard, App Ventas_limpio y ventas-moni-app`](file:///D:/PROTOTIPE_WORKSPACE) [NEW|MODIFY]
+  - Cierre verificado: runtime exacto aprobado en cuatro unidades; pruebas negativas rechazaron Node 20/npm 9; once pares package/lock reconciliados; `npm ci` y validaciones locales ejecutadas. REC-002 continúa sin aplicar.
+
 * **[x] ~~Tarea CORE-279: Corrección de Redirección Automática de Pedidos, Visibilidad de Carrito y Habilitación de Créditos, Reparto y Cupones~~**
   - Estatus: Completado.
   - Fecha: 2026-07-13
