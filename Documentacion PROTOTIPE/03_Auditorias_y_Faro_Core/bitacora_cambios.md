@@ -1,5 +1,45 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## [MAJOR] CORE-353 — SEC-015 (diagnóstico): bug de login de empleados confirmado — 2026-07-15
+
+### Contexto:
+`CORE-351`/`SEC-014` dejó un hallazgo sin confirmar: `employeeService.js`
+lee `employees/{id}/secrets/{hash}` directamente desde el cliente, pero
+`firestore.rules` exige `isAdmin()` para esa lectura — sospecha de que el
+login de empleados por PIN estaba roto. El fundador pidió verificarlo con
+una prueba real antes de diseñar la solución.
+
+### Cambio:
+`tests/unit/employeePinLogin.spec.js` (NUEVO): reproduce exactamente
+`authenticateEmployeeByIdAndPin` contra el emulador real — siembra un
+empleado + su hash de PIN vía `withSecurityRulesDisabled`, luego intenta
+leer el hash como lo haría el login real (sesión autenticada no-admin).
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal).
+- **Rama / HEAD observado:** `docs/context-packaging` / `4684acb`.
+- **Pruebas ejecutadas y resultado literal:**
+  - `npx --yes firebase-tools@latest emulators:start --only firestore --project test-prototipe-rules`
+    → `All emulators ready!` (127.0.0.1:8080).
+  - `npx vitest run tests/unit/employeePinLogin.spec.js` → `Tests  1 passed (1)`
+    — la lectura del hash de PIN fue denegada, **confirmando el bug**: un
+    empleado real con el PIN correcto no puede iniciar sesión hoy, porque su
+    propia verificación recibe `permission-denied`, tratado silenciosamente
+    como "PIN incorrecto" por el `catch` de `authenticateEmployeeByIdAndPin`.
+  - `npx eslint tests/unit/employeePinLogin.spec.js` → limpio.
+- **Cambios preexistentes preservados:** sí; no se tocó `employeeService.js`,
+  `portalStore.js` ni `firestore.rules` (sección `employees`) — solo se
+  agregó la prueba diagnóstica.
+- **Riesgos y bloqueos:** el login de empleados por PIN está confirmado roto
+  en producción hoy — impacto operativo real para cualquier instancia que
+  dependa de `PortalBodega`/`PortalVendedor` con empleados no-admin.
+- **Documentación actualizada:** `tareas_pendientes.md` (`CORE-353`).
+- **Siguiente paso exacto:** diseñar `SEC-015` (identidad real de
+  empleados) en modo plan antes de tocar código, mismo tratamiento que
+  `SEC-014` dado el tamaño y la criticidad.
+
+---
+
 ## [MINOR] CORE-352 asignada a Antigravity — build autónomo del Dashboard (REP-011) — 2026-07-15
 
 ### Contexto:

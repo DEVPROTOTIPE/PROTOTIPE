@@ -1,5 +1,36 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[ ] Tarea CORE-353: SEC-015 — identidad real de empleados (bug de login por PIN confirmado)**
+  - Estatus: `PENDING` — diagnóstico confirmado con prueba real el
+    2026-07-15; diseño e implementación de la solución aún no iniciados.
+  - **Bug confirmado (no ya inferencia):** `tests/unit/employeePinLogin.spec.js`
+    (nuevo) reproduce exactamente `authenticateEmployeeByIdAndPin`
+    (`src/services/employeeService.js:131-147`) contra el emulador real de
+    Firestore. Resultado: `1 passed (1)` — la lectura de
+    `employees/{id}/secrets/{hash}` es denegada para una sesión no-admin,
+    confirmando que **el login de empleados por PIN falla siempre en
+    producción hoy**, incluso con el PIN correcto. El `catch` de
+    `authenticateEmployeeByIdAndPin` trata ese `permission-denied` como "PIN
+    incorrecto" silenciosamente.
+  - Origen: hallazgo colateral de `CORE-351`/`SEC-014` al investigar por qué
+    `stockMovements`/`notifications` no podían cerrarse con validación de
+    datos (las escribe `PortalBodega.jsx`, un portal de empleados).
+  - Objetivo real: diseñar y construir identidad real de empleados —
+    reemplazar el PIN en `localStorage` (`portalStore.js`) por una sesión
+    real verificable server-side. Patrón recomendado (a confirmar con el
+    fundador antes de implementar, mismo tipo de decisión de costo/UX que
+    `SEC-014`): Firebase Auth real (email/password) vía Admin SDK, extendiendo
+    `scripts/bootstrap-admin.js` de `SEC-013` — costo $0, sin infraestructura
+    nueva, con el costo de UX de cambiar "PIN de 4 dígitos" por
+    "correo + contraseña".
+  - Una vez resuelto, permite cerrar de verdad `stockMovements`/
+    `notifications` (los 2 rojos restantes de `firestoreRules.spec.js` desde
+    `SEC-012`).
+  - Cambios preexistentes preservados: sí; no se tocó `employeeService.js`
+    ni `portalStore.js` todavía — solo se agregó la prueba de diagnóstico.
+  - Siguiente paso exacto: diseñar SEC-015 en modo plan (mismo tratamiento
+    que `SEC-014`, dado el tamaño y la criticidad) antes de tocar código.
+
 * **[ ] Tarea CORE-352: Activar REP-011 — build autónomo del Dashboard Central**
   - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — asignada 2026-07-15 vía
     `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-352_2026-07-15.md`
