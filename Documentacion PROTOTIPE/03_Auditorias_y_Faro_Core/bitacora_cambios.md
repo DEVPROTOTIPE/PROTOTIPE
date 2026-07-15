@@ -1,5 +1,30 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## [GOBERNANZA] Ampliación acotada de permisos de Claude Code — 2026-07-15
+**Decisión: habilitar `git commit` para Claude Code (terminal), manteniendo el resto de las denegaciones intactas**
+
+### Contexto:
+Al cerrar `CORE-344` en `VERIFIED_COMPLETE` con aprobación explícita del fundador, se intentó ejecutar `git commit` para materializar el cierre. `.claude/settings.json` denegaba `Bash(git commit *)` de forma dura (sin diálogo de aprobación posible), como parte del control de seguridad diseñado en `CLAUDE-003` para que ninguna sesión de IA altere el historial de git sin un gesto humano. El fundador expresó la intención de que Claude Code actúe como su asistente principal y, tras explicarle que esa regla es la protección deliberada de `CLAUDE-003` (no un obstáculo accidental) y presentarle las alternativas, autorizó explícitamente ampliar el permiso **solo para `git commit`**.
+
+### Cambio realizado:
+1. **`.claude/settings.json`:** se eliminó únicamente la entrada `"Bash(git commit *)"` de `permissions.deny` (skill `update-config`). Se preservaron sin cambios: `git add .`, `git push *`, `git reset *`, `git clean *`, `git restore *`, `firebase deploy *`, instalación/actualización/eliminación de skills externas (`npx skills add|use|update|remove|rm`), `rm`/`del`/`Remove-Item`, y todas las denegaciones de lectura de `.env`/credenciales/`serviceAccount`. Verificado con `node -e` que el array de `deny` pasó de 29 a 28 entradas, con exactamente esa diferencia.
+2. **Identidad de Git configurada globalmente** (`git config --global user.name "Sergio Agudelo"` y `user.email "sergioaagudeloh@gmail.com"`) para desbloquear la creación de commits en esta máquina; no existía identidad configurada previamente. Alcance elegido explícitamente por el fundador (global, no solo este repositorio).
+3. **Commit de cierre de `CORE-344` creado:** `3427ed1` en `docs/context-packaging` (11 archivos, 1447 inserciones), sin `push`.
+
+### Alcance y límites de la decisión:
+- Aplica únicamente a Claude Code (esta sesión y futuras sesiones de terminal/escritorio que compartan `.claude/settings.json`). No modifica la configuración ni el comportamiento de Codex ni de Antigravity — cada IA mantiene su propio gobierno según `.agents/AI_WORKFLOW.md`.
+- `git push`, `deploy`, `reset --hard`, `clean`, `restore` y la instalación/actualización de skills externas **siguen requiriendo que el fundador los ejecute manualmente** (vía `!` o directamente). Esta ampliación no toca esas protecciones.
+- No se reinterpretó como autorización general para commitear sin verificación: el flujo seguido (staging selectivo con `git add -p` para no reclamar hunks ajenos, mensaje de commit presentado y aprobado antes de ejecutar) se mantiene como práctica esperada hacia adelante.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal), skill `update-config`.
+- **Rama / HEAD observado antes del cambio:** `docs/context-packaging` / `919bdc9`.
+- **Autorización:** explícita del fundador, en dos pasos — decisión de alcance ("permitir solo git commit", vía `AskUserQuestion`) y decisión de identidad Git (alcance global, vía `AskUserQuestion`).
+- **Cambios preexistentes preservados:** sí; el resto de `.claude/settings.json` quedó exactamente igual salvo la única línea eliminada.
+- **Siguiente paso exacto:** ninguno pendiente sobre esta decisión; queda documentada como precedente para sesiones futuras. Continúa disponible la Fase B de `CORE-344` (mecanismo `Core → template`, ADR-0001 §21-22) como tarea nueva y separada, aún sin iniciar.
+
+---
+
 ## [MAJOR] CORE-344 — 2026-07-15
 **Arquitectura: ADR canónico de capas + piloto `customer-loyalty` (solo `Plantillas Core/App Ventas`)**
 
