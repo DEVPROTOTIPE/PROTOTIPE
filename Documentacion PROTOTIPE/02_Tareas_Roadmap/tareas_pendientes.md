@@ -1,5 +1,61 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[ ] Tarea CORE-348: Reestructurar `.agents/AGENTS.md` en reglas por ruta (`.claude/rules/`)**
+  - Estatus: `PENDING` — registrada 2026-07-15, deliberadamente NO ejecutada en esta
+    sesión (ya cubrió CORE-345, CORE-346, protocolo de traspaso a Antigravity y
+    revisión de CORE-347; un archivo de gobernanza que leen todos los agentes
+    merece una sesión con presupuesto completo).
+  - Origen: mensaje del fundador (co-redactado con Antigravity, confirmado
+    explícitamente por el fundador) pidiendo revisar `AGENTS.md` y estructurar
+    reglas por ámbito en `.claude/rules/`. Verificado antes de aceptar la
+    premisa: `CLAUDE.md` YA tiene 116 líneas (bajo las 200 sugeridas) y ya usa
+    `@import` a `AI_WORKFLOW.md` — esa parte de la premisa era incorrecta, no
+    requiere trabajo. Lo que sí tiene mérito real es `AGENTS.md` (474 líneas),
+    ya señalado como pendiente en el propio `CLAUDE.md` ("se conserva como
+    referencia técnica heredada... no se carga completo en cada sesión").
+  - `AGENTS.md` ya se leyó completo (2026-07-15) para este diagnóstico. Contiene
+    mezclado en un solo archivo:
+    1. Header de autoridad multiagente (líneas 3-19) — redundante, ya cubierto
+       por `AI_WORKFLOW.md`; reducir a un puntero de una línea.
+    2. Prohibición absoluta de restaurar/descartar cambios físicos (20-22) —
+       crítica, mantener, transversal a cualquier ruta.
+    3. Estándares de biblioteca de componentes/tags (24-101), layout (105-121),
+       playgrounds/sandbox (115-121), modularización de `App.jsx` (125-135),
+       `CustomSelect` (138-141) — específicos de `Central PROTOTIPE/dev-dashboard`.
+    4. Estándar de diseño responsivo móvil (192-252, 14 sub-reglas muy
+       detalladas, huelen a postmortems reales de bugs) y Design Integrity
+       Guard (324-339, atado a `validate-core-integrity.js` real) —
+       transversales a cualquier componente UI del ecosistema.
+    5. **"AUTOMATIZACIÓN OBLIGATORIA DEL PROTOCOLO... POST-CHANGE" (256-269)
+       — CONTRADICE el contrato vigente**: ordena auto-commitear y
+       auto-actualizar documentación sin pedir confirmación nunca; choca con
+       `AI_WORKFLOW.md`/`CLAUDE.md` (autorización explícita requerida para
+       varias acciones). Corregir, no solo mover.
+    6. **"PROTOCOLO OBLIGATORIO DE RASTREO DE TAREAS" (374-437) — asume un
+       endpoint HTTP `POST /api/roadmap/add`/`toggle`** que nadie ha usado en
+       ninguna tarea de esta sesión (el registro se hizo editando
+       `tareas_pendientes.md` directamente); actualizar para reflejar la
+       práctica real, no tooling aspiracional sin verificar si sigue vivo.
+    7. Arquitectura de 3 capas Firebase §22 (282-320) y seguridad/gobernanza
+       Firebase §23 (442-474) — muy relevantes y alineadas con `ADR-0001` y el
+       backlog `SEC-*`; §22.2 ya fue corregida en `CORE-345` (RealtimeQueryRegistry
+       `DEFERRED_UNTIL_MEASURED_NEED`).
+    8. `@colaborar` (343-347) y protocolo de decisión de componentes (351-370)
+       — genéricos, bajo riesgo.
+  - Alcance propuesto: dividir en archivos `.claude/rules/` por ámbito
+    (ej. `dashboard-ui.md`, `firebase-architecture.md`, `component-library.md`,
+    `task-tracking.md`) preservando el detalle técnico exacto (JSON de CORS,
+    fixes de z-index, clases Tailwind específicas) — no resumir ni perder
+    especificidad. Corregir las 2 contradicciones señaladas (punto 5 y 6) en
+    vez de solo trasladarlas. `CLAUDE.md` no necesita cambios de tamaño.
+  - Material de referencia (NO confiable sin revisión propia): el Brain de
+    Antigravity menciona `scaffold_claude_rules.md` — evaluarlo como insumo
+    posible, nunca como fuente de verdad, contrastándolo contra el `AGENTS.md`
+    real antes de aceptar cualquier sugerencia suya.
+  - Siguiente paso exacto: en sesión nueva, con presupuesto completo, ejecutar
+    el split archivo por archivo, verificando tras cada uno que ningún agente
+    pierda acceso a una regla que antes tenía.
+
 * **[ ] Tarea CORE-347: Dejar de rastrear en Git `notification_config.json`/`auth_users.json` (parte segura de SEC-010/SEC-011)**
   - Estatus: `AWAITING_REVIEW` — asignada 2026-07-15 vía
     `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-347_2026-07-15.md`
