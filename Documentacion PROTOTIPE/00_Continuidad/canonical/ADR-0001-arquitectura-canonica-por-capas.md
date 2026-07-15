@@ -163,14 +163,24 @@ Repository sin cambiar su tecnología.
 
 ## 13. Estrategia de listeners realtime
 
-AGENTS.md §22.2 exige un `RealtimeQueryRegistry` con `queryHash`/`refCount`/
+AGENTS.md §22.2 exigía un `RealtimeQueryRegistry` con `queryHash`/`refCount`/
 `subscribers`, pero **no existe físicamente en el código** (verificado por
-búsqueda: cero coincidencias). Se clasifica como `PROPOSED`, no `IMPLEMENTED`. Este
-ADR **no** implementa el registry: el piloto solo mueve los `onSnapshot` existentes
-de `useCustomerLoyalty` al Repository, conservando su comportamiento actual
-(idempotencia vía `unsubscribe` en el cleanup del `useEffect`). Implementar el
-registry compartido queda fuera de alcance de CORE-344 y se registra como trabajo
-futuro (§20).
+búsqueda exhaustiva en todo el monorepo durante CORE-344 y de nuevo en CORE-345:
+0 resultados en código real, 16 solo en documentación — `AGENTS.md` y varios
+`GEMINI.md`).
+
+**Decisión explícita (CORE-345, 2026-07-15, confirmada por el fundador):**
+`DEFERRED_UNTIL_MEASURED_NEED`, no `PROPOSED` ambiguo. No se construye
+infraestructura especulativa sin evidencia de necesidad real — no hay medición
+de costo por lecturas Firestore duplicadas en esta etapa (pre-clientes pagos).
+Criterio de reactivación: medir lecturas duplicadas por listeners concurrentes
+antes de construirlo. Hasta entonces, cada Repository expone `subscribeToX(...)`
+directo (patrón real: `CustomerLoyaltyRepository.subscribeToAccount`/
+`subscribeToTransactions`), consumido por un único Hook por dato, sin registry
+compartido — es el patrón que también documenta el scaffold de features nuevas
+(`Prototipe-CLI/templates/feature-scaffold/api/repository.js`, ejemplo
+comentado de `subscribeToRecord`). Ver `AGENTS.md` §22.2 para el texto
+actualizado.
 
 ## 14. Estrategia de transacciones
 
@@ -227,13 +237,20 @@ Repository sin consumidor externo conocido; el piloto lo retira de la API públi
 ## 20. Costos y riesgos
 
 - El guard progresivo, si se configura mal, podría generar ruido (`warn`) que se
-  ignore con el tiempo — mitigado limitando el alcance de `error` a las dos
-  features ya alineadas (`hello-module`, `customer-loyalty`) y revisando la lista de
-  excepciones periódicamente.
-- La ausencia de `RealtimeQueryRegistry` sigue siendo una brecha frente a AGENTS.md
-  §22.2; este ADR la declara `PROPOSED` en vez de fingir que está resuelta.
-- La propagación a `template-ventas` y `ventas-moni-app` queda pendiente (§21) y
-  requiere definir un mecanismo `Core → template` que hoy no existe verificado.
+  ignore con el tiempo — mitigado desde CORE-345 activando `warn` en las 8
+  features (no solo reportando para 2) mediante una regla ESLint local
+  independiente (`prototipe/no-firebase-outside-repository`, sin paquete npm),
+  subiendo a `error` cada feature al terminar su migración, y revisando la
+  lista de excepciones periódicamente.
+- **Resuelto en CORE-345:** la ausencia de `RealtimeQueryRegistry` se declara
+  explícitamente `DEFERRED_UNTIL_MEASURED_NEED` (ver §13) en vez de `PROPOSED`
+  ambiguo — decisión confirmada por el fundador, con criterio de reactivación
+  basado en evidencia medida, no en fingir que está resuelta ni en construir
+  infraestructura especulativa.
+- La propagación a `template-ventas` y `ventas-moni-app` se aborda en CORE-345
+  con `Prototipe-CLI/publish_core_to_template.js` (espejo de
+  `sync_clients.js`, mismo patrón de backup/build-validate/rollback probado),
+  con alcance inicial `src/features/<name>/` y probado primero en dry-run.
 - Bugs preexistentes en `customer-loyalty` (`getConfig`, `deleteToken`, ver
   bitácora) no se corrigen en este ADR ni en el piloto; quedan como deuda técnica
   separada.

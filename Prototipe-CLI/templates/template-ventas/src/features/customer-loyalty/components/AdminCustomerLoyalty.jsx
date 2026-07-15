@@ -3,8 +3,16 @@ import useAuthStore from '../../../store/authStore'; // Ajustar ruta de imports 
 import { useCustomerLoyalty } from '../hooks/useCustomerLoyalty';
 import { Plus, Loader2 } from 'lucide-react';
 
-export default function AdminView() {
-  const { user } = useAuthStore();
+export default function AdminCustomerLoyalty() {
+  const { user, role } = useAuthStore();
+  const isAdmin = role === 'admin';
+
+  if (!isAdmin || !user) return null;
+
+  return <AdminCustomerLoyaltyContent user={user} />;
+}
+
+function AdminCustomerLoyaltyContent({ user }) {
   const tenantId = user?.tenantId || 'demo';
   const { data, loading, error, addRecord } = useCustomerLoyalty(tenantId);
   const [form, setForm] = useState({ name: '' });

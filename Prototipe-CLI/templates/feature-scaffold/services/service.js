@@ -26,4 +26,20 @@ export const {{pascalName}}Service = {
     if (!tenantId) throw new Error('[{{pascalName}}Service] tenantId es requerido');
     return await {{pascalName}}Repository.getAll(tenantId);
   }
+
+  // ─── EJEMPLO (ADR-0001 §14): orquestar una transacción del Repository ──
+  // Descomenta y adapta si esta feature necesita actualizar un registro de
+  // forma atómica. El Service decide el nuevo estado (validaciones, reglas
+  // de negocio) dentro del reducer; el Repository ejecuta la mecánica de
+  // Firestore (ver api/{{pascalName}}Repository.js → runRecordTransaction).
+  // El Service nunca importa el SDK de Firebase directamente. Patrón real:
+  // features/customer-loyalty/services/CustomerLoyaltyService.js → earnPoints/redeemPoints.
+  //
+  // async updateRecordAtomically(tenantId, recordId, changes) {
+  //   return {{pascalName}}Repository.runRecordTransaction(tenantId, recordId, (current) => {
+  //     const updated = { ...current, ...changes, updatedAt: new Date().toISOString() };
+  //     {{pascalName}}Schema.parse(updated);
+  //     return updated;
+  //   });
+  // }
 };

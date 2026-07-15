@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 
-const AdminView = lazy(() => import('./components/AdminCustomerLoyalty'));
-const ClientView = lazy(() => import('./components/ClientCustomerLoyalty'));
+const AdminView = lazy(() => import('./components/AdminView'));
+const ClientView = lazy(() => import('./components/ClientView'));
 
 export const routes = [
   {

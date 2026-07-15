@@ -1,25 +1,5 @@
-import {
-  collection,
-  doc,
-  getDocs,
-  getDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  serverTimestamp,
-  orderBy,
-  limit,
-  startAfter
-} from 'firebase/firestore'
-import { db } from '../../../config/firebaseConfig'
-import { COLLECTIONS } from '../../../constants'
+import { InventoryRepository } from '../api/InventoryRepository'
 import { createCentralNotification, NC_TYPES } from '../../../services/notificationCenterService'
-import { deleteImage } from '../../../services/uploadService'
-
-const productsRef = collection(db, COLLECTIONS.PRODUCTS)
-const categoriesRef = collection(db, COLLECTIONS.CATEGORIES)
 
 /**
  * Realiza una auditoría proactiva sobre el stock de las variantes de un producto.
@@ -37,7 +17,7 @@ export async function auditProductStock(productId, productData) {
   for (const variant of variantes) {
     const stock = Number(variant.stock) || 0
     const label = [variant.talla, variant.color].filter(Boolean).join(' / ')
-    
+
     if (stock === 0) {
       await createCentralNotification({
         recipientId: 'admin',
@@ -67,9 +47,7 @@ export async function auditProductStock(productId, productData) {
  * @returns {Promise<Array<object>>} Listado de categorías.
  */
 export async function getCategories() {
-  const q = query(categoriesRef, orderBy('nombre', 'asc'))
-  const snap = await getDocs(q)
-  return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  return InventoryRepository.getCategories()
 }
 
 /**
@@ -78,12 +56,7 @@ export async function getCategories() {
  * @returns {Promise<string>} Identificador de la categoría creada.
  */
 export async function createCategory(categoryData) {
-  const docRef = await addDoc(categoriesRef, {
-    ...categoryData,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  })
-  return docRef.id
+  return InventoryRepository.createCategory(categoryData)
 }
 
 /**
@@ -93,11 +66,7 @@ export async function createCategory(categoryData) {
  * @returns {Promise<void>}
  */
 export async function updateCategory(id, categoryData) {
-  const docRef = doc(db, COLLECTIONS.CATEGORIES, id)
-  await updateDoc(docRef, {
-    ...categoryData,
-    updatedAt: serverTimestamp(),
-  })
+  await InventoryRepository.updateCategory(id, categoryData)
 }
 
 /**
@@ -106,7 +75,7 @@ export async function updateCategory(id, categoryData) {
  * @returns {Promise<void>}
  */
 export async function deleteCategory(id) {
-  await deleteDoc(doc(db, COLLECTIONS.CATEGORIES, id))
+  await InventoryRepository.deleteCategory(id)
 }
 
 // ─── PRODUCTOS ───────────────────────────────────────────────────────────────
@@ -117,74 +86,16 @@ export async function deleteCategory(id) {
  * @returns {Promise<Array<object>>} Listado de productos.
  */
 export async function getProducts(onlyActive = false) {
-  let q = productsRef
-  if (onlyActive) {
-    q = query(productsRef, where('activo', '==', true))
-  }
-  const snap = await getDocs(q)
-  return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  return InventoryRepository.getAll(onlyActive)
 }
 
 /**
  * Obtiene productos paginados mediante cursores de Firestore, con soporte para fallbacks.
  * @param {object} params - Parámetros de paginación.
- * @param {boolean} [params.onlyActive=true] - Si se deben filtrar por activos.
- * @param {string} [params.categoryId='all'] - ID de la categoría a filtrar o 'all'.
- * @param {object|null} [params.lastVisibleDoc=null] - Último documento visible del lote anterior.
- * @param {number} [params.pageSize=12] - Tamaño del lote de productos a retornar.
  * @returns {Promise<{ products: Array<object>, lastVisible: object|null, hasMore: boolean }>} Lote de productos paginados.
  */
-export async function getProductsPaged({ onlyActive = true, categoryId = 'all', lastVisibleDoc = null, pageSize = 12 } = {}) {
-  try {
-    let q = query(productsRef, where('activo', '==', onlyActive))
-
-    if (categoryId && categoryId !== 'all') {
-      q = query(q, where('categoriaId', '==', categoryId))
-    }
-
-    q = query(q, orderBy('createdAt', 'desc'))
-
-    if (lastVisibleDoc) {
-      q = query(q, startAfter(lastVisibleDoc))
-    }
-
-    q = query(q, limit(pageSize))
-
-    const snap = await getDocs(q)
-    const products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-    const lastDoc = snap.docs[snap.docs.length - 1] || null
-
-    return {
-      products,
-      lastVisible: lastDoc,
-      hasMore: products.length === pageSize
-    }
-  } catch (err) {
-    console.warn('[inventoryService] getProductsPaged fallback activado:', err.message)
-    const snap = await getDocs(productsRef)
-    let products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-
-    if (onlyActive) {
-      products = products.filter(p => p.activo === true)
-    }
-    if (categoryId && categoryId !== 'all') {
-      products = products.filter(p => p.categoriaId === categoryId)
-    }
-    products.sort((a, b) => {
-      const ta = a.createdAt?.seconds ?? 0
-      const tb = b.createdAt?.seconds ?? 0
-      return tb - ta
-    })
-
-    const start = lastVisibleDoc ? products.findIndex(p => p.id === lastVisibleDoc.id) + 1 : 0
-    const page = products.slice(start, start + pageSize)
-
-    return {
-      products: page,
-      lastVisible: page[page.length - 1] || null,
-      hasMore: page.length === pageSize
-    }
-  }
+export async function getProductsPaged(params = {}) {
+  return InventoryRepository.getPaged(params)
 }
 
 /**
@@ -194,9 +105,7 @@ export async function getProductsPaged({ onlyActive = true, categoryId = 'all', 
  * @throws {Error} Si el producto no es encontrado.
  */
 export async function getProductById(id) {
-  const snap = await getDoc(doc(db, COLLECTIONS.PRODUCTS, id))
-  if (!snap.exists()) throw new Error('Producto no encontrado')
-  return { id: snap.id, ...snap.data() }
+  return InventoryRepository.getById(id)
 }
 
 /**
@@ -216,15 +125,10 @@ export async function createProduct(productData) {
     }
   })
 
-  const docRef = await addDoc(productsRef, {
-    ...dataToSave,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  })
+  const id = await InventoryRepository.create(dataToSave)
+  await auditProductStock(id, dataToSave)
 
-  await auditProductStock(docRef.id, dataToSave)
-
-  return docRef.id
+  return id
 }
 
 /**
@@ -234,7 +138,6 @@ export async function createProduct(productData) {
  * @returns {Promise<void>}
  */
 export async function updateProduct(id, productData) {
-  const docRef = doc(db, COLLECTIONS.PRODUCTS, id)
   const dataToSave = { ...productData }
   delete dataToSave.id
   delete dataToSave.createdAt
@@ -246,11 +149,7 @@ export async function updateProduct(id, productData) {
     }
   })
 
-  await updateDoc(docRef, {
-    ...dataToSave,
-    updatedAt: serverTimestamp(),
-  })
-
+  await InventoryRepository.update(id, dataToSave)
   await auditProductStock(id, dataToSave)
 }
 
@@ -261,11 +160,7 @@ export async function updateProduct(id, productData) {
  * @returns {Promise<void>}
  */
 export async function toggleProductStatus(id, currentStatus) {
-  const docRef = doc(db, COLLECTIONS.PRODUCTS, id)
-  await updateDoc(docRef, {
-    activo: !currentStatus,
-    updatedAt: serverTimestamp(),
-  })
+  await InventoryRepository.toggleStatus(id, currentStatus)
 }
 
 /**
@@ -274,30 +169,5 @@ export async function toggleProductStatus(id, currentStatus) {
  * @returns {Promise<void>}
  */
 export async function deleteProduct(id) {
-  try {
-    const snap = await getDoc(doc(db, COLLECTIONS.PRODUCTS, id))
-    if (snap.exists()) {
-      const data = snap.data()
-      const imageUrls = []
-
-      if (data.imageUrl) imageUrls.push(data.imageUrl)
-
-      if (Array.isArray(data.galeria)) {
-        data.galeria.forEach(url => { if (url) imageUrls.push(url) })
-      }
-
-      if (Array.isArray(data.variantes)) {
-        data.variantes.forEach(v => { if (v?.imageUrl) imageUrls.push(v.imageUrl) })
-      }
-
-      if (imageUrls.length > 0) {
-        await Promise.allSettled(imageUrls.map(url => deleteImage(url)))
-        console.log(`[inventoryService] ${imageUrls.length} imagen(es) eliminadas de Storage para producto ${id}`)
-      }
-    }
-  } catch (err) {
-    console.warn(`[inventoryService] Limpieza de Storage parcial para producto ${id}:`, err.message)
-  }
-
-  await deleteDoc(doc(db, COLLECTIONS.PRODUCTS, id))
+  await InventoryRepository.delete(id)
 }
