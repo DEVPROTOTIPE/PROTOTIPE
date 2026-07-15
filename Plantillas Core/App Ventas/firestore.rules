@@ -4,9 +4,20 @@ service cloud.firestore {
 
     // Helper para verificar si la petición viene de un Administrador autenticado en Firebase Auth
     function isAdmin() {
-      return request.auth != null && 
+      return request.auth != null &&
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // SEC-015: helpers de identidad real de empleados (Firebase Auth email/
+    // password sintético, vía employeeAuthLinks/{authUid} -> employeeId).
+    function isEmployee() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/employeeAuthLinks/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/employeeAuthLinks/$(request.auth.uid)).data.activo == true;
+    }
+    function employeeId() {
+      return get(/databases/$(database)/documents/employeeAuthLinks/$(request.auth.uid)).data.employeeId;
     }
 
     // Valida que un pedido nuevo tenga la estructura mínima requerida
@@ -93,7 +104,14 @@ service cloud.firestore {
     // esta colección directamente (usa order_tracking/user_order_index vía
     // trackingToken) — se completa la migración pendiente restringiendo a admin.
     match /orders/{document} {
-      allow create: if validOrder();
+      // SEC-015: validOrder() sigue rigiendo la estructura; si el pedido
+      // reclama atribución de un vendedor de portal (vendedorId), esa
+      // atribución debe corresponder a la sesión real de ese empleado —
+      // no bloquea el checkout normal de clientes, que no manda ese campo.
+      allow create: if validOrder() && (
+        !('vendedorId' in request.resource.data) ||
+        (isEmployee() && request.resource.data.vendedorId == employeeId())
+      );
       allow read: if isAdmin();
       allow update: if isAdmin() || (
         // Permitir a repartidores/empleados operativos actualizar el estado de entrega o producción
@@ -181,7 +199,12 @@ service cloud.firestore {
     //           (para marcar como leída o archivar desde portales de empleados sin Auth)
     // - delete: solo admins
     match /notifications/{document} {
-      allow create: if true;
+      // SEC-015: create exige al menos una sesión real (clientes vía
+      // SEC-014, empleados vía SEC-015 ya cubren esto automáticamente).
+      // No se usa isEmployee() aquí — createCentralNotification también la
+      // llaman flujos de clientes (orderService, creditService), no solo
+      // los portales.
+      allow create: if request.auth != null;
       allow read: if isAdmin() || resource.data.recipientRole == 'client';
       allow update: if isAdmin()
         || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
@@ -208,19 +231,34 @@ service cloud.firestore {
       allow read: if isAdmin() || (resource != null && resource.data.activo == true);
       allow write: if isAdmin();
 
-      // Subcolección privada de secretos de empleado (PIN)
+      // Subcolección legacy de hashes de PIN (SEC-015: ya no se usa para
+      // login — reemplazada por Firebase Auth real vía employeeAuthLinks.
+      // Se conserva bloqueada como colección muerta, nunca se reactiva.
       match /secrets/{hashedPin} {
         allow read, write: if isAdmin();
       }
     }
 
+    // SEC-015: índice inverso authUid (Firebase Auth) -> employeeId, usado
+    // por isEmployee()/employeeId(). Solo isAdmin() escribe (provisión vía
+    // employeeAuthService/reset-employee-pin.js); el propio empleado puede
+    // leer su propio vínculo.
+    match /employeeAuthLinks/{authUid} {
+      allow read: if isAdmin() || request.auth.uid == authUid;
+      allow write: if isAdmin();
+    }
 
     // Entregas y despachos
     match /deliveries/{deliveryId} {
       allow read: if true;
       allow create, delete: if isAdmin();
-      // Permitir a mensajeros autenticados actualizar el estado de entrega y el historial logístico
-      allow update: if isAdmin() || (request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'history', 'updatedAt', 'deliveredAt']));
+      // SEC-015: antes cualquier request.auth != null podía actualizar
+      // (incluye a cualquier visitante anónimo desde SEC-014) — se acota a
+      // empleados reales o admin.
+      allow update: if isAdmin() || (
+        isEmployee() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'history', 'updatedAt', 'deliveredAt'])
+      );
     }
 
     // Kardex y Movimientos de Stock
@@ -228,14 +266,21 @@ service cloud.firestore {
     //  comercial sensible (volúmenes, proveedores, ajustes internos).
     match /stockMovements/{movementId} {
       allow read: if isAdmin();
-      allow create: if true;         // El sistema escribe movimientos automáticamente
+      // SEC-015: el sistema ya no escribe "automáticamente" sin identidad —
+      // exige que sea un empleado real (bodeguero) o un admin, y que el
+      // employeeId declarado corresponda a la sesión que escribe.
+      allow create: if isAdmin() || (isEmployee() && request.resource.data.employeeId == employeeId());
       allow update, delete: if isAdmin();
     }
 
     // Historial de Accesos y Sesiones QR
     match /accessLogs/{logId} {
       allow read: if isAdmin();
-      allow create, update: if true;
+      // SEC-015: create/update ya no aceptan cualquier request sin
+      // identidad — deben venir de la sesión real del empleado que el log
+      // declara (o de admin).
+      allow create: if isAdmin() || (isEmployee() && request.resource.data.employeeId == employeeId());
+      allow update: if isAdmin() || (isEmployee() && resource.data.employeeId == employeeId());
       allow delete: if isAdmin();
     }
 

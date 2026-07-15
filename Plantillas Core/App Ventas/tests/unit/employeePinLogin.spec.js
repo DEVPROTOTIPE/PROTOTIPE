@@ -31,12 +31,16 @@ afterAll(async () => {
   if (testEnv) await testEnv.cleanup();
 });
 
-// SEC-015 (investigación): reproduce exactamente lo que hace
-// authenticateEmployeeByIdAndPin (src/services/employeeService.js:131-147)
-// contra las reglas reales, para confirmar si el login de empleados por PIN
-// está roto en producción hoy. No es una prueba de seguridad "debería
-// fallar" — es una prueba de diagnóstico de un bug sospechado.
-describe('SEC-015 (diagnóstico) — authenticateEmployeeByIdAndPin contra reglas reales', () => {
+// SEC-015: en su momento confirmó que authenticateEmployeeByIdAndPin
+// (src/services/employeeService.js) estaba rota en producción (leía
+// employees/{id}/secrets/{hash} directamente, pero la regla exigía
+// isAdmin(), que un empleado normal nunca tiene). Ya no es esa función la
+// que hace login — se reemplazó por Firebase Auth real (ver
+// employeeAuthEmulator.spec.js) — pero esta colección de secrets legacy
+// debe seguir bloqueada PARA SIEMPRE, sin importar el mecanismo de auth
+// vigente. Esta prueba ahora es guardia de regresión de esa colección
+// muerta, no diagnóstico de un bug activo.
+describe('SEC-015 — employees/{id}/secrets legacy permanece bloqueado (guardia de regresión)', () => {
   test('Un empleado real (sesión anónima, sin rol admin) NO puede leer su propio hash de PIN', async () => {
     const employeeId = 'empleado-real-123';
     const hashedPin = 'a'.repeat(64); // formato válido de hash SHA-256 hex

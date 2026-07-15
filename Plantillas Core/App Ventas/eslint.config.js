@@ -80,9 +80,13 @@ export default defineConfig([
     },
   },
   {
-    // Restricciones de Firebase CRUD aplicadas a vistas/hooks, excluyendo servicios/repositorios legítimos
+    // Restricciones de Firebase CRUD aplicadas a vistas/hooks, excluyendo
+    // servicios/repositorios legítimos y tests (SEC-015: los tests de
+    // integración contra el emulador necesitan llamar al SDK de Firestore
+    // directamente para verificar el comportamiento real — no son "vistas
+    // ni hooks").
     files: ['**/*.{js,jsx}'],
-    ignores: ['src/services/**/*', 'src/repositories/**/*'],
+    ignores: ['src/services/**/*', 'src/repositories/**/*', 'tests/**/*'],
     rules: {
       'no-restricted-syntax': [
         'error',

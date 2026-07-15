@@ -20,7 +20,9 @@
  *   Agrega --dry-run para ver qué haría sin escribir nada.
  */
 
-import admin from 'firebase-admin';
+import { initializeApp, applicationDefault } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 
 function parseArgs(argv) {
   const args = { dryRun: false };
@@ -56,12 +58,12 @@ async function main() {
     return;
   }
 
-  admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
+  const app = initializeApp({
+    credential: applicationDefault(),
   });
 
-  const auth = admin.auth();
-  const db = admin.firestore();
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
   const settingsRef = db.collection('config').doc('settings');
   const settingsSnap = await settingsRef.get();
@@ -103,14 +105,14 @@ async function main() {
       email,
       activo: true,
       creadoPorBootstrap: true,
-      creadoEn: admin.firestore.FieldValue.serverTimestamp(),
+      creadoEn: FieldValue.serverTimestamp(),
     },
     { merge: true }
   );
 
   await settingsRef.set({
     bootstrapCompletado: true,
-    bootstrapEn: admin.firestore.FieldValue.serverTimestamp(),
+    bootstrapEn: FieldValue.serverTimestamp(),
   });
 
   console.log('Bootstrap completado. isFirstStart() ya no existe en firestore.rules: este fue el único punto de entrada.');

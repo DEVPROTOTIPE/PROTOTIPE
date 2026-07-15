@@ -1,5 +1,87 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## [MAJOR] CORE-354 — Activar SEC-015: identidad real de empleados — 2026-07-15
+
+### Contexto:
+`CORE-353` confirmó con prueba real que el login de empleados por PIN
+estaba roto (lectura de `employees/{id}/secrets/{hash}` exigía `isAdmin()`,
+que ningún empleado real tiene). El fundador pidió resolverlo de fondo. Se
+diseñó en modo plan (2 rondas de research con agentes Explore + Plan,
+verificación manual de los hallazgos críticos antes de aceptar el plan).
+
+### Cambio:
+1. `src/services/employeeAuthService.js` (NUEVO): instancia secundaria de
+   Firebase App para provisionar cuentas de empleado sin afectar la sesión
+   del admin — patrón ya probado en `centralFirebaseService.js`.
+2. `src/services/employeeService.js`: login real vía
+   `signInWithEmailAndPassword` (correo sintético `employee-<id>@internal...`
+   + PIN como contraseña); `saveEmployee` provisiona en la primera
+   asignación de PIN; reasignaciones posteriores exigen el script de reset
+   (decisión del fundador).
+3. `firestore.rules`: helpers `isEmployee()`/`employeeId()` vía
+   `employeeAuthLinks/{authUid}`; `stockMovements`, `accessLogs`,
+   `notifications`, `orders`, `deliveries` migrados de `if true`/
+   `request.auth != null` genérico a identidad real.
+4. `RequirePortalAuth.jsx`/`PortalLayout.jsx`: `auth.signOut()` en logout;
+   verificación de `authUid` como defensa en profundidad.
+5. `scripts/reset-employee-pin.js` (NUEVO): reset de PIN vía Admin SDK,
+   mismo modelo de confianza que `bootstrap-admin.js`.
+6. `firebase.json`: bloque `emulators.auth` (puerto 9099).
+7. `tests/unit/employeeAuthEmulator.spec.js` (NUEVO, 3 pruebas contra el
+   emulador de Auth real); `employeePinLogin.spec.js` reencuadrado de
+   diagnóstico de bug a guardia de regresión permanente.
+
+### Hallazgos críticos adicionales, corregidos dentro de esta misma tarea:
+- **`useAuthInit.js` sin restricción de ruta:** desloguea cualquier
+  `firebaseUser` sin `role:'admin'`, en cualquier ruta — lo que muy
+  probablemente destruía la sesión anónima de clientes de `SEC-014` (ya
+  commiteada) casi inmediatamente después de crearse, en cualquier ruta
+  fuera de `/admin`. Corregido acotando el forzado de cierre de sesión (no
+  el reconocimiento de admin) a `/admin`. Se declara como corrección
+  retroactiva de un prerrequisito compartido con `SEC-014`, no scope creep.
+- **`scripts/bootstrap-admin.js` (`SEC-013`) nunca se había ejecutado en
+  runtime** — solo `node --check` de sintaxis. Al intentar replicar su
+  patrón para `reset-employee-pin.js` y ejecutarlo de verdad contra el
+  emulador, se confirmó que usa una API de `firebase-admin`
+  (`admin.auth()`, `admin.credential.applicationDefault()`) que no existe
+  en la versión instalada (`14.1.0`, migrada a API modular). Corregido en
+  ambos scripts (`getAuth()`/`getFirestore()`/`applicationDefault()` desde
+  submódulos `firebase-admin/{app,auth,firestore}`).
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal).
+- **Rama / HEAD observado:** `docs/context-packaging`.
+- **Pruebas ejecutadas y resultado literal:**
+  - `npx --yes firebase-tools@latest emulators:start --only firestore,auth --project test-prototipe-rules`
+    → `All emulators ready!` (Firestore 127.0.0.1:8080, Auth 127.0.0.1:9099).
+  - `npx vitest run tests/unit/firestoreRules.spec.js tests/unit/employeePinLogin.spec.js tests/unit/employeeAuthEmulator.spec.js`
+    → `Test Files 3 passed (3)` / `Tests 15 passed (15)` — repetido dos
+    veces para confirmar estabilidad (no un fluke). `firestoreRules.spec.js`
+    específicamente: `11 passed / 0 failed`, exacto a la predicción del plan
+    (antes: `9 passed | 2 failed`).
+  - `npx vitest run` sobre 5 specs de servicios existentes → `64 passed`,
+    sin regresión.
+  - `npm run build` → exitoso (22.86s).
+  - `node --check` + ejecución real (dry-run parcial, hasta el punto donde
+    requiere credenciales reales que esta IA nunca debe tener) de ambos
+    scripts de Admin SDK → confirmado que ya no fallan por API incorrecta.
+  - `npx eslint` de los archivos tocados: sin violaciones nuevas fuera de
+    la categoría ya aceptada (`process is not defined` en `scripts/`/`tests/`,
+    deuda de configuración de ESLint sin entorno Node, documentada desde
+    `CORE-350`).
+- **Cambios preexistentes preservados:** sí; no se tocaron
+  `AdminCustomerLoyalty.jsx`, `AdminView.jsx`, `AdminHelloModule.jsx`
+  (cambios ajenos de sesiones/tareas anteriores, siguen sin commitear).
+- **Riesgos y bloqueos:** ninguno nuevo para el alcance cerrado.
+- **Documentación actualizada:** `tareas_pendientes.md` (`CORE-354`).
+- **Siguiente paso exacto:** propagar `SEC-013`/`SEC-014`/`SEC-015` a
+  `template-ventas`/`ventas-moni-app` cuando se decida; considerar una
+  verificación adicional de `bootstrap-admin.js`/`reset-employee-pin.js`
+  con credenciales reales antes de confiar en ellos en producción (ninguna
+  IA debe tener esas credenciales).
+
+---
+
 ## [MAJOR] CORE-353 — SEC-015 (diagnóstico): bug de login de empleados confirmado — 2026-07-15
 
 ### Contexto:
@@ -37,6 +119,30 @@ leer el hash como lo haría el login real (sesión autenticada no-admin).
 - **Siguiente paso exacto:** diseñar `SEC-015` (identidad real de
   empleados) en modo plan antes de tocar código, mismo tratamiento que
   `SEC-014` dado el tamaño y la criticidad.
+
+## [MINOR] CORE-352 en revisión — build autónomo del Dashboard Central — 2026-07-15
+
+### Contexto:
+La validación del prebuild del Dashboard Central (`verify_library_integrity.cjs`) dependía de la existencia del directorio hermano `Documentacion PROTOTIPE`, impidiendo la compilación autónoma fuera del monorepo.
+
+### Cambio:
+Se modificó `verify_library_integrity.cjs` para:
+1. Detectar de manera dinámica la presencia de `Documentacion PROTOTIPE/` en disco e introducir soporte para la variable `DASHBOARD_STANDALONE_BUILD=1`.
+2. Omitir condicionalmente las validaciones documentales (README, paridad ComponentSandbox, manifests, linter de markdown, sync de skills y roadmap) cuando no existan los documentos, sin fallar el build (código de salida 0).
+3. Mantener activos el linter estético de sandboxes locales JSX y el RBAC guard de seguridad.
+4. Adaptar los mensajes finales del prebuild para reflejar si se corrió en modo standalone o monorepo completo.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity.
+- **Rama / HEAD observado:** `docs/context-packaging` / `d247432`.
+- **Pruebas ejecutadas y resultado literal:**
+  - `node scripts/verify_library_integrity.cjs` → `INTEGRIDAD DE LA BIBLIOTECA AL 100% OK` (HECHO VERIFICADO).
+  - `$env:DASHBOARD_STANDALONE_BUILD="1"; node scripts/verify_library_integrity.cjs` → `⚠️ Documentacion PROTOTIPE no encontrada — saltando validaciones...` (HECHO VERIFICADO).
+  - `npm run build` en copia temporal standalone → Éxito, compilación de Vite completada (HECHO VERIFICADO).
+  - `npx eslint scripts/verify_library_integrity.cjs` → 0 errores, 0 warnings (HECHO VERIFICADO).
+- **Cambios preexistentes preservados:** Todos los cambios en `Plantillas Core/App Ventas/` y otros submódulos de la raíz fueron estrictamente respetados (HECHO VERIFICADO).
+- **Documentación actualizada:** `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/traspasos/TRASPASO_CORE-352_2026-07-15.md` (HECHO VERIFICADO).
+- **Siguiente paso exacto:** Quien retome debe realizar la reverificación rápida del handoff antes de cerrar formalmente a `VERIFIED_COMPLETE`.
 
 ---
 

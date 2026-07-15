@@ -1,5 +1,90 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-354: Activar SEC-015 — identidad real de empleados (Firebase Auth email/password sintético)~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW`. Verificado con ambos emuladores
+    reales (Firestore + Auth), no asumido: `firestoreRules.spec.js` pasó de
+    `9 passed | 2 failed` a **`11 passed | 0 failed`**, exacto a la
+    predicción del plan aprobado. Suite de servicios existente sin
+    regresión (64/64). `npm run build` exitoso.
+  - Origen: `CORE-353` confirmó con prueba real que el login de empleados
+    por PIN estaba roto en producción (`employees/{id}/secrets/{hash}`
+    exigía `isAdmin()`, que ningún empleado real tiene).
+  - **Hallazgo crítico adicional descubierto durante la ejecución, corregido
+    aquí:** `useAuthInit.js` (montado sin restricción de ruta en `App.jsx`)
+    desloguea a cualquier `firebaseUser` sin `role:'admin'` — lo que
+    significa que la sesión anónima de clientes (`SEC-014`, ya commiteada)
+    muy probablemente se destruía sola en cualquier ruta fuera de `/admin`,
+    antes de que el cliente llegara a usarla. Se corrigió acotando el
+    forzado de cierre de sesión (no el reconocimiento de admin) solo a
+    `/admin`. Esto es una corrección retroactiva a `SEC-014`, declarada
+    explícitamente, no scope creep.
+  - **Segundo hallazgo crítico durante la ejecución, corregido aquí:**
+    `scripts/bootstrap-admin.js` (`SEC-013`, ya commiteado) usaba
+    `admin.auth()`/`admin.firestore()`/`admin.credential.applicationDefault()`
+    — API que **no existe** en `firebase-admin@14.1.0` (paquete migrado a
+    API modular: `getAuth()`/`getFirestore()`/`applicationDefault()` desde
+    submódulos). Nunca se había ejecutado en runtime, solo `node --check`
+    (sintaxis). Confirmado roto ejecutándolo de verdad contra el emulador;
+    corregido junto con `scripts/reset-employee-pin.js` (NUEVO, mismo
+    patrón, ya escrito con la API correcta desde el inicio salvo por este
+    mismo bug, también corregido).
+  - Diseño: cada empleado obtiene una cuenta real de Firebase Auth con
+    correo sintético interno (`employee-<id>@internal.prototipe.local`,
+    nunca visto por el empleado) y el PIN de 6 dígitos como contraseña —
+    cero cambio de UX, cero costo nuevo, protecciones reales de fuerza
+    bruta del servicio de Auth (antes: solo `localStorage`, evadible
+    borrando storage).
+  - Cambios:
+    1. `src/services/employeeAuthService.js` (NUEVO): instancia secundaria
+       de Firebase App para crear cuentas de empleado sin afectar la sesión
+       del admin (mismo patrón ya usado por `centralFirebaseService.js`).
+    2. `src/services/employeeService.js`: `authenticateEmployeeByIdAndPin`
+       ahora llama `signInWithEmailAndPassword` real; `saveEmployee`
+       provisiona la cuenta en la primera asignación de PIN; cambios de PIN
+       posteriores exigen `scripts/reset-employee-pin.js` (decisión
+       explícita del fundador — el correo sintético es fijo por
+       `employeeId`, Firebase no permite recrear cuenta con el mismo correo).
+    3. `firestore.rules`: helpers `isEmployee()`/`employeeId()` (índice
+       `employeeAuthLinks/{authUid}`); `stockMovements`, `accessLogs`,
+       `notifications`, `orders` (atribución `vendedorId`), `deliveries`
+       ahora exigen identidad real en vez de `if true` o `request.auth !=
+       null` genérico (este último cerraba un hueco que `SEC-014` había
+       ampliado sin querer: cualquier visitante anónimo del portal ya
+       cumplía esa condición).
+    4. `src/components/portal/RequirePortalAuth.jsx` /
+       `src/layouts/PortalLayout.jsx`: logout llama también
+       `auth.signOut()`; verificación de defensa en profundidad
+       `auth.currentUser?.uid === portalEmployee.authUid`.
+    5. `firebase.json`: bloque `emulators.auth` (puerto 9099) agregado.
+    6. `tests/unit/employeeAuthEmulator.spec.js` (NUEVO): 3 pruebas reales
+       contra el emulador de Auth (login correcto, PIN incorrecto,
+       escritura gateada por `isEmployee()`).
+       `tests/unit/employeePinLogin.spec.js`: reencuadrado de "diagnóstico
+       de bug" a guardia de regresión (la colección `secrets` legacy debe
+       seguir bloqueada para siempre).
+  - Migración de empleados existentes: decisión del fundador — el admin
+    reingresa el PIN de cada empleado activo manualmente (mismo gesto de
+    panel que ya usa hoy), no un script masivo.
+  - Evidencia literal: `npx vitest run tests/unit/firestoreRules.spec.js
+    tests/unit/employeePinLogin.spec.js tests/unit/employeeAuthEmulator.spec.js`
+    (emuladores Firestore+Auth reales) → `Test Files 3 passed (3)`,
+    `Tests 15 passed (15)`, repetido dos veces para confirmar estabilidad.
+  - Cambios preexistentes preservados: sí. Deuda de lint preexistente
+    documentada, no corregida: `process is not defined` en `scripts/` y
+    ahora también en `tests/` (misma categoría ya aceptada desde `CORE-350`,
+    config de ESLint sin entorno Node). `eslint.config.js` ganó una entrada
+    nueva en `ignores` (`tests/**/*`) para el guard de Firebase-fuera-de-
+    servicios, justificada porque los tests de integración necesitan llamar
+    al SDK directamente — no son "vistas ni hooks".
+  - Alcance explícito respetado: solo `Plantillas Core/App Ventas`; no se
+    propagó a `template-ventas` ni a `ventas-moni-app`.
+  - Siguiente paso exacto: propagar `SEC-013`/`SEC-014`/`SEC-015` a
+    `template-ventas`/`ventas-moni-app` cuando se decida (mecanismo 4 de
+    `CORE-345`); considerar si `bootstrap-admin.js` necesita una
+    verificación adicional con credenciales reales antes de confiar en él
+    en un proyecto real (el fundador nunca compartió credenciales con
+    ninguna IA, consistente con la disciplina de todo este trabajo).
+
 * **[ ] Tarea CORE-353: SEC-015 — identidad real de empleados (bug de login por PIN confirmado)**
   - Estatus: `PENDING` — diagnóstico confirmado con prueba real el
     2026-07-15; diseño e implementación de la solución aún no iniciados.
@@ -32,7 +117,7 @@
     que `SEC-014`, dado el tamaño y la criticidad) antes de tocar código.
 
 * **[ ] Tarea CORE-352: Activar REP-011 — build autónomo del Dashboard Central**
-  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — asignada 2026-07-15 vía
+  - Estatus: `AWAITING_REVIEW` — implementada por Antigravity el 2026-07-15 vía
     `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-352_2026-07-15.md`
     bajo el protocolo de traspaso verificado (`AI_WORKFLOW.md` §7.2), en
     paralelo a `SEC-015` (que continúa Claude Code) — sin solape de archivos

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import usePortalStore from '../../store/portalStore'
 import useAppConfigStore from '../../store/appConfigStore'
 import { doc, onSnapshot } from 'firebase/firestore'
-import { db } from '../../config/firebaseConfig'
+import { db, auth } from '../../config/firebaseConfig'
 
 /**
  * Guard para rutas del portal operativo.
@@ -15,9 +15,28 @@ export default function RequirePortalAuth({ children, allowedRole }) {
   const [isValid, setIsValid] = useState(true)
   const [checking, setChecking] = useState(true)
 
+  // SEC-015: además de limpiar el estado local, cierra la sesión real de
+  // Firebase Auth del empleado.
+  const clearPortalSession = useCallback(() => {
+    clearPortalEmployee()
+    auth.signOut().catch((err) => {
+      console.error('[RequirePortalAuth] Error al cerrar sesión de Firebase:', err)
+    })
+  }, [clearPortalEmployee])
+
   // 1. Suscribirse al documento del empleado en Firestore en tiempo real para validar estado activo
   useEffect(() => {
     if (!hasMultipleEmployees || !portalEmployee?.id) {
+      setChecking(false)
+      return
+    }
+
+    // SEC-015: defensa en profundidad — si la sesión real de Firebase Auth
+    // no coincide con el authUid vinculado al empleado local, la sesión
+    // local es inválida (localStorage forjado o sesión de otro navegador).
+    if (portalEmployee.authUid && auth.currentUser?.uid !== portalEmployee.authUid) {
+      clearPortalSession()
+      setIsValid(false)
       setChecking(false)
       return
     }
@@ -26,7 +45,7 @@ export default function RequirePortalAuth({ children, allowedRole }) {
     const unsubscribe = onSnapshot(empRef, (snapshot) => {
       if (!snapshot.exists()) {
         // Empleado fue eliminado de la BD
-        clearPortalEmployee()
+        clearPortalSession()
         setIsValid(false)
       } else {
         const empData = snapshot.data()
@@ -39,25 +58,25 @@ export default function RequirePortalAuth({ children, allowedRole }) {
         
         if (isNotActivoBool || isNotActivoString || isRoleChanged) {
           // Empleado deshabilitado o con rol modificado
-          clearPortalEmployee()
+          clearPortalSession()
           setIsValid(false)
         }
       }
       setChecking(false)
     }, (error) => {
       console.error("Error validando empleado:", error)
-      clearPortalEmployee()
+      clearPortalSession()
       setIsValid(false)
       setChecking(false)
     })
 
     return () => unsubscribe()
-  }, [portalEmployee?.id, portalEmployee?.rol, hasMultipleEmployees, clearPortalEmployee])
+  }, [portalEmployee?.id, portalEmployee?.rol, portalEmployee?.authUid, hasMultipleEmployees, clearPortalSession])
 
   // 2. Validar switch global
   if (!hasMultipleEmployees) {
     if (portalEmployee) {
-      clearPortalEmployee()
+      clearPortalSession()
     }
     return <Navigate to="/portal/auth" replace />
   }
