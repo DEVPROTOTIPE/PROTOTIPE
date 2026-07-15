@@ -1,0 +1,14 @@
+{
+  "users": [
+    {
+      "localId": "example_uid_12345",
+      "email": "admin@example.com",
+      "emailVerified": true,
+      "passwordHash": "PLACEHOLDER_PASSWORD_HASH_BASE64",
+      "salt": "PLACEHOLDER_SALT_BASE64",
+      "lastSignedInAt": "1721000000000",
+      "createdAt": "1721000000000",
+      "providerUserInfo": []
+    }
+  ]
+}

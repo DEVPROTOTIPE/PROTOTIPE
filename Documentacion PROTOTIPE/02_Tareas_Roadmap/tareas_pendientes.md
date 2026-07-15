@@ -1,5 +1,72 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[ ] Tarea CORE-347: Dejar de rastrear en Git `notification_config.json`/`auth_users.json` (parte segura de SEC-010/SEC-011)**
+  - Estatus: `AWAITING_REVIEW` — asignada 2026-07-15 vía
+    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-347_2026-07-15.md`
+    bajo el protocolo de traspaso verificado (`AI_WORKFLOW.md` §7.2), primera
+    tarea ejecutada por Antigravity mientras Claude Code no está disponible.
+  - Objetivo real: cerrar la parte del hallazgo P0-E (`registro_riesgos_deuda_tecnica_2026-07-14.md`,
+    reverificado el 2026-07-15: ambos archivos siguen trackeados en el
+    índice de Git hoy) que no requiere que una IA toque el valor real de un
+    secreto ni reescriba historial — dejar de rastrear los dos archivos
+    hacia adelante y dejar plantillas saneadas equivalentes.
+  - Alcance/exclusiones exactos: ver la asignación completa. Excluye
+    explícitamente rotar el token/credenciales reales (decisión operativa
+    del fundador), reescribir historial de Git, y cualquier commit/push —
+    Antigravity deja el cambio preparado en el índice sin commitear.
+  - Evidencia esperada: `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/traspasos/TRASPASO_CORE-347_2026-07-15.md`
+    con los 4 criterios de cierre de la asignación verificados literalmente,
+    o `BLOQUEO` documentado si no cierra en 5 ciclos.
+  - Siguiente paso exacto: cuando Antigravity entregue el traspaso, quien
+    retome ejecuta la "Reverificación rápida" antes de confiar en el
+    resultado (nunca el resumen solo); después decide si commitea el `git rm
+    --cached` y activa formalmente `SEC-010`/`SEC-011` completos (rotación
+    real, escaneo de historial) como tarea separada con autorización
+    explícita del fundador.
+  - Cambios preexistentes preservados: sí
+  - Archivos:
+    - [`.gitignore`](file:///D:/PROTOTIPE/.gitignore)
+    - [`Prototipe-CLI/auth_users.example.json`](file:///D:/PROTOTIPE/Prototipe-CLI/auth_users.example.json)
+    - [`Prototipe-CLI/notification_config.example.json`](file:///D:/PROTOTIPE/Prototipe-CLI/notification_config.example.json)
+    - [`Prototipe-CLI/auth_users.json`](file:///D:/PROTOTIPE/Prototipe-CLI/auth_users.json)
+    - [`Prototipe-CLI/notification_config.json`](file:///D:/PROTOTIPE/Prototipe-CLI/notification_config.json)
+    - [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md)
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/bitacora_cambios.md)
+    - [`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/traspasos/TRASPASO_CORE-347_2026-07-15.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/03_Auditorias_y_Faro_Core/traspasos/TRASPASO_CORE-347_2026-07-15.md)
+    - [`Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/04_Estandares_y_Skills/mapa_documentacion_ia.md)
+
+
+
+
+* **[x] ~~Tarea CORE-346: Reconciliar D:\RESPALDO_PROTOTIPE\Continuidad con Documentacion PROTOTIPE~~**
+  - Estatus: cierre documental completo 2026-07-15. Tarea puramente documental (sin código, sin decisiones de arquitectura nuevas más allá de curar hallazgos de una auditoría externa ya producida) — no aplica el ciclo `READY_FOR_INDEPENDENT_REVIEW`/`VERIFIED_COMPLETE` de tareas de código.
+  - Objetivo real: el fundador identificó que la bitácora maestra fuera de Git, usada también para arrancar chats con otras IAs (Codex, Antigravity), quedó desalineada del estado real del repo (3 copias v1.9.1/v2.0/v3.5, todas mostrando `CLAUDE-003` `IN_PROGRESS` sin conocer `CORE-341` a `CORE-345`).
+  - **Tensión explícita con `CLAUDE.md`** ("nunca la copies dentro del repositorio") resuelta a favor de la instrucción explícita del fundador (`AI_WORKFLOW.md` §1), sin escribir nunca dentro de `D:\RESPALDO_PROTOTIPE` (solo lectura en todo momento). **Pendiente: decisión del fundador sobre si esa línea de `CLAUDE.md` se actualiza.**
+  - Hallazgo central: el sistema de continuidad que ya vive en Git es más maduro que el protocolo de reanudación del respaldo — se declaró el respaldo como fuente de arranque superada (nota en `00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md`) en vez de intentar mantener dos bitácoras sincronizadas para siempre.
+  - Documentos nuevos: `registro_riesgos_deuda_tecnica_2026-07-14.md` (R-001 a R-045; **P0-E reverificado el 2026-07-15: `notification_config.json` y `auth_users.json` siguen trackeados en Git hoy**), `backlog_deuda_seguridad_arquitectura_2026-07-14.md` (tickets SEC/ARC/OPS/REP/LEG/BIZ, `PROPUESTO` no activado), `mapa_ecosistema_flujos_objetivo_2026-07-14.md`, addendum en `AI_WORKFLOW.md` §7.1 (taxonomía de evidencia + plantilla de handoff), entradas nuevas en `mapa_documentacion_ia.md`.
+  - 4 verificaciones operativas independientes ejecutadas: stash sin proteger (limpio), repos anidados con doble tracking (resuelto, sin `.git` propios), integridad del zip de auditoría profunda (**mismatch confirmado, no reparable desde esta tarea**), secretos históricos PAT/`cli-token.json` (confirmado remediado).
+  - Cambios preexistentes preservados: sí; no se tocó nada de `CORE-345` (aún sin commitear) ni de otras tareas. Ningún archivo dentro de `D:\RESPALDO_PROTOTIPE` fue modificado.
+  - Siguiente paso exacto: decisión del fundador sobre la línea de `CLAUDE.md`; evaluar activar SEC-010/SEC-011 del backlog propuesto dado que el P0-E de secretos trackeados es un hallazgo vigente, no histórico.
+  - **Corrección posterior (2026-07-15):** la exclusión de `12_ROADMAP_TECNICO_Y_EMPRESARIAL_ESCALABLE.md` por "redundante" no estaba verificada línea a línea; sí aportaba estructura de fases/gates, KPIs y fórmula de precio ausentes del canónico. Importado como `roadmap_tecnico_por_fases_y_gates_2026-07-14.md` (ver bitácora). La línea de `CLAUDE.md` sobre `D:\RESPALDO_PROTOTIPE` también se actualizó ese mismo día.
+
+* **[x] ~~Tarea CORE-345: Doctrina permanente de arquitectura por features + migración de las 6 features pendientes~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW`; completada 2026-07-15 tras aprobación explícita del fundador del plan (modo plan → `ExitPlanMode` aprobado). No se declara `VERIFIED_COMPLETE` sin revisión independiente o aprobación humana explícita adicional (`.agents/AI_WORKFLOW.md` §6).
+  - Objetivo real: no fue un arreglo puntual — estableció cómo funciona **siempre** la arquitectura de features (creación, verificación continua, corrección de desviaciones, propagación Core→template, honestidad documental sobre requisitos no construidos), y aplicó esa doctrina para migrar/evaluar las 6 features que no cumplían `ADR-0001`.
+  - Continúa directamente de `CORE-344` (`VERIFIED_COMPLETE`, commit `3427ed1`); no reabrió esa tarea.
+  - Cinco mecanismos permanentes implementados y verificados (ver `ADR-0001` y bitácora para detalle completo):
+    1. **Scaffold enriquecido**: `Prototipe-CLI/templates/feature-scaffold/{api,services,hooks}` con ejemplos comentados de transacción y listener. Sintaxis validada con `node --check`.
+    2. **Guard ESLint local** (`prototipe/no-firebase-outside-repository`, sin paquete npm) activo en las 8 features desde ahora — `warn` en legado (glob `*` cubre features futuras automáticamente), `error` en migradas. Verificado con `eslint` real, no solo diseño.
+    3. **Skill `migrate-feature-to-layers`** creada en `.agents/skills/`.
+    4. **Script `publish_core_to_template.js`** creado y probado en real: `customer-loyalty` publicada a `template-ventas` (8 archivos), build del template aprobado tras la copia.
+    5. **`RealtimeQueryRegistry` marcado `DEFERRED_UNTIL_MEASURED_NEED`** en `AGENTS.md` §22.2 y `ADR-0001` §13/§20, por decisión explícita del fundador.
+  - Resultado de la migración de las 6 features: `delivery` (nada que migrar, sin services/hooks/components propios), `credits` (migrada, 14/14 tests), `billing` (migrada, 4/4 tests), `orders` (migrada, la más grande — 875 líneas, 27/27 tests), `sales` (migrada, 7/7 tests, cero hallazgos de lint), `inventory` (**parcial, documentado**: servicios de productos/categorías migrados; `inventoryInterface.js` como excepción explícita del guard —contrato transaccional cruzado con `orders`/`sales`—; `ProductFormModal.jsx` de 2399 líneas deliberadamente sin migrar por ausencia de arnés de pruebas de componentes en el proyecto).
+  - Verificaciones ejecutadas: suite completa 98/98 en verde (sin regresión); `eslint .` proyecto completo 633 errores/24 advertencias (línea base CORE-344: 637/22) — el único hallazgo del guard nuevo en todo el monorepo son las 2 declaraciones de import de `ProductFormModal.jsx`; `vite build` exitoso; `git diff --check` sin errores nuevos.
+  - Deuda técnica documentada, no corregida: `ProductFormModal.jsx` sin migrar; `inventoryInterface.js` como excepción permanente; mismo gap de `no-restricted-syntax` (`src/repositories/**` vs `api/**` real) ya visto en CORE-344, observado de nuevo en 2 Repositories nuevos.
+  - Alcance explícito respetado: sin tocar `Instancias Clientes/ventas/ventas-moni-app`; propagación real limitada a `customer-loyalty` en `template-ventas` (probada end-to-end); features fuera del nicho "ventas" no tocadas.
+  - Fuente de verdad: `Plantillas Core/App Ventas` (misma determinación que `CORE-344`).
+  - Cambios preexistentes preservados: sí; no se reclamaron los cambios ya presentes en el working tree de otras tareas (guards RBAC de CORE-342, corrección de aserción de `template-ventas/tests/unit/salesService.spec.js` de CORE-342, hunk de `AGENTS.md`/`mapa_aplicacion.md` de CLAUDE-003, etc.).
+  - Siguiente paso exacto: decisión del fundador sobre commit; después, decidir estrategia de testing de componentes antes de abordar `ProductFormModal.jsx`, y cuándo propagar `credits`/`billing`/`orders`/`sales`/`inventory` (parcial) a `template-ventas`/`ventas-moni-app` con el mecanismo 4.
+
 * **[x] ~~Tarea CORE-344: Definir e implementar la arquitectura canónica por capas de PROTOTIPE~~**
   - Estatus: `VERIFIED_COMPLETE`. Se entregó en `READY_FOR_INDEPENDENT_REVIEW` con ADR y piloto implementados y verificados localmente; el fundador aprobó explícitamente el resultado ("YO LO APRUEBO") el 2026-07-15. Conforme a `.agents/AI_WORKFLOW.md` §6 y `.agents/capabilities/registry.json` (`independentReviewFor: ["architecture", ...]`), las decisiones de arquitectura requieren **revisión independiente o aprobación humana** (condición disyuntiva, no ambas). El cierre se sustenta en aprobación humana explícita del fundador, no en una revisión independiente de otra sesión de IA — se documenta esta distinción sin fingir una revisión que no ocurrió.
   - Fecha de activación: 2026-07-15. Fase 1 (auditoría de solo lectura) y Fase 2 (ADR + piloto) completadas el mismo día.

@@ -17,6 +17,11 @@ Documentacion PROTOTIPE.zip
 **/.env.development
 **/.env.*.local
 
+# Configuración local de agentes y cuarentena no promovida
+CLAUDE.local.md
+.claude/settings.local.json
+scratch/skill-quarantine/
+
 # Logs
 **/*.log
 npm-debug.log*
@@ -43,3 +48,6 @@ Thumbs.db
 **/.git-backup-temp
 **/.git-backup-temp/
 
+# Configuraciones de CLI de PROTOTIPE (exclusiones de seguridad SEC-010/SEC-011)
+Prototipe-CLI/notification_config.json
+Prototipe-CLI/auth_users.json

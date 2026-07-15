@@ -1,5 +1,504 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## [MINOR] — 2026-07-15
+**Docs: Preparación de suite de auditorías y scaffolds físicos en el Brain para Claude Code**
+
+### Cambios realizados:
+1. **Brain de Sesión:** Creados 18 reportes de auditoría de solo lectura y 19 scaffolds físicos de código listo para producción cubriendo las epics de seguridad, reproducibilidad, arquitectura, operación y negocio/legal del backlog para que Claude Code pueda reanudar el trabajo de forma inmediata y con el mínimo esfuerzo de tokens.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity
+- **Rama / HEAD observado:** `docs/context-packaging` / `98b3304`
+- **Alcance propio:** 18 reportes de auditoría y 19 scaffolds en el directorio del Brain.
+- **Cambios preexistentes preservados:** sí.
+
+### Evidencia:
+- Inspección directa de los archivos creados en el almacenamiento persistente del Brain en `C:\Users\Sergio Agudelo\.gemini\antigravity\brain\16a824ee-17a1-4370-997a-a64be64947b9\`.
+- **Estado:** `READY`
+
+### Archivos modificados:
+- [`analisis_seguridad_firestore.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/analisis_seguridad_firestore.md) [NEW]
+- [`auditoria_recursos_seguridad_ci.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_recursos_seguridad_ci.md) [NEW]
+- [`auditoria_bridge_api.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_bridge_api.md) [NEW]
+- [`auditoria_reconciliador_sync.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_reconciliador_sync.md) [NEW]
+- [`auditoria_facturacion_ledger.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_facturacion_ledger.md) [NEW]
+- [`auditoria_onboarding_pilotos.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_onboarding_pilotos.md) [NEW]
+- [`auditoria_identidad_auth.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_identidad_auth.md) [NEW]
+- [`auditoria_dian_arqueopos.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_dian_arqueopos.md) [NEW]
+- [`auditoria_control_central.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_control_central.md) [NEW]
+- [`auditoria_token_google.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_token_google.md) [NEW]
+- [`auditoria_observabilidad_slo.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_observabilidad_slo.md) [NEW]
+- [`auditoria_apply_transaccional.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_apply_transaccional.md) [NEW]
+- [`auditoria_ci_overrides.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_ci_overrides.md) [NEW]
+- [`auditoria_offboarding_datos.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_offboarding_datos.md) [NEW]
+- [`auditoria_desacoplamiento_firebase.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_desacoplamiento_firebase.md) [NEW]
+- [`auditoria_upgrades_migraciones.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_upgrades_migraciones.md) [NEW]
+- [`auditoria_dpa_uniteconomics.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_dpa_uniteconomics.md) [NEW]
+- [`auditoria_falsosverdes_coverage.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_falsosverdes_coverage.md) [NEW]
+- [`auditoria_demo_acuerdo_comercial.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_demo_acuerdo_comercial.md) [NEW]
+- [`context_beacon_faro_core.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/context_beacon_faro_core.md) [NEW]
+- [`scaffolds_lote_10_adicionales.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffolds_lote_10_adicionales.md) [NEW]
+- [`auditoria_lote_10_adicionales.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/auditoria_lote_10_adicionales.md) [NEW]
+- [`scaffold_bootstrap_admin.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_bootstrap_admin.md) [NEW]
+- [`scaffold_auth_empleados.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_auth_empleados.md) [NEW]
+- [`scaffold_operator_claim.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_operator_claim.md) [NEW]
+- [`scaffold_dpa_consent.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_dpa_consent.md) [NEW]
+- [`scaffold_acuerdo_piloto.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_acuerdo_piloto.md) [NEW]
+- [`scaffold_context_packager.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_context_packager.md) [NEW]
+- [`scaffold_rules_testing.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_rules_testing.md) [NEW]
+- [`scaffold_test_telemetria.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_test_telemetria.md) [NEW]
+- [`scaffold_coverage_config.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_coverage_config.md) [NEW]
+- [`scaffold_precommit_integrity.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_precommit_integrity.md) [NEW]
+- [`scaffold_sync_overrides.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_sync_overrides.md) [NEW]
+- [`scaffold_staging_injector.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_staging_injector.md) [NEW]
+- [`scaffold_migration_runner.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_migration_runner.md) [NEW]
+- [`scaffold_repository_canonica.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_repository_canonica.md) [NEW]
+- [`scaffold_feature_canonica.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_feature_canonica.md) [NEW]
+- [`scaffold_ledger_consolidation.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_ledger_consolidation.md) [NEW]
+- [`scaffold_cierre_caja.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_cierre_caja.md) [NEW]
+- [`scaffold_observabilidad_agent.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_observabilidad_agent.md) [NEW]
+- [`scaffold_offboarding_cleaner.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_offboarding_cleaner.md) [NEW]
+- [`scaffold_backup_firestore.md`](file:///C:/Users/Sergio%20Agudelo/.gemini/antigravity/brain/16a824ee-17a1-4370-997a-a64be64947b9/scaffold_backup_firestore.md) [NEW]
+
+---
+
+## CORE-347 — 2026-07-15
+**Security: Dejar de rastrear en Git `notification_config.json` y `auth_users.json`**
+
+### Cambios realizados:
+1. **Prototipe-CLI:** Creadas las plantillas saneadas `Prototipe-CLI/notification_config.example.json` y `Prototipe-CLI/auth_users.example.json` con valores placeholders seguros e inertes.
+2. **Repositorio Raíz:** Modificado `.gitignore` en la raíz del repositorio para excluir permanentemente del rastreo futuro las rutas `Prototipe-CLI/notification_config.json` y `Prototipe-CLI/auth_users.json`.
+3. **Control de Versiones:** Ejecutado `git rm --cached` sobre los archivos sensibles reales para removerlos del índice de Git sin borrarlos físicamente del working tree local.
+4. **Roadmap y Documentación:** Actualizado el estatus de la tarea `CORE-347` a `AWAITING_REVIEW` en `tareas_pendientes.md` y listado el alcance de los archivos modificados.
+
+### Execution y base:
+- **Ejecutor(es):** Antigravity
+- **Rama / HEAD observado:** `docs/context-packaging` / `98b3304`
+- **Alcance propio:** Cambios al índice de git y adición de plantillas en `Prototipe-CLI`.
+- **Cambios preexistentes preservados:** sí.
+
+### Evidencia:
+- `git status --short` muestra `D  Prototipe-CLI/auth_users.json` y `D  Prototipe-CLI/notification_config.json` listados en el índice de Git (cached).
+- `git check-ignore -v` confirma que ambas rutas reales están ignoradas por `.gitignore` en las líneas 52 y 53.
+- `Get-ChildItem Prototipe-CLI/*.example.json` confirma la existencia física de las plantillas seguras.
+- `prebuild` del dashboard (`verify_library_integrity.cjs`) pasó exitosamente en verde tras agregar `- Cambios preexistentes preservados: sí` a `tareas_pendientes.md`.
+- **Estado:** `AWAITING_REVIEW`
+
+### Archivos modificados:
+- [`.gitignore`](file:///D:/PROTOTIPE/.gitignore) [MODIFY]
+- [`Documentacion PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md`](file:///D:/PROTOTIPE/Documentacion%20PROTOTIPE/02_Tareas_Roadmap/tareas_pendientes.md) [MODIFY]
+- [`Prototipe-CLI/auth_users.example.json`](file:///D:/PROTOTIPE/Prototipe-CLI/auth_users.example.json) [NEW]
+- [`Prototipe-CLI/notification_config.example.json`](file:///D:/PROTOTIPE/Prototipe-CLI/notification_config.example.json) [NEW]
+- [`Prototipe-CLI/auth_users.json`](file:///D:/PROTOTIPE/Prototipe-CLI/auth_users.json) [DELETE]
+- [`Prototipe-CLI/notification_config.json`](file:///D:/PROTOTIPE/Prototipe-CLI/notification_config.json) [DELETE]
+
+---
+
+## [MINOR] Corrección a CORE-346: importar roadmap por fases y gates del respaldo — 2026-07-15
+**`12_ROADMAP_TECNICO_Y_EMPRESARIAL_ESCALABLE.md` no era redundante**
+
+### Contexto:
+El fundador señaló que en `D:\RESPALDO_PROTOTIPE` también hay un roadmap y
+pidió alinear lo necesario. Al releer el documento origen contra el
+canónico, se encontró que el cierre de `CORE-346` lo había descartado
+("sustancialmente redundante... mismas fases 0-24 meses, misma fórmula de
+precio") sin verificar línea a línea — un `grep` de "Fase \d|Gate \d|Costo
+mensual directo" contra `Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md`
+no arrojó ningún resultado: ese documento cubre el mismo territorio
+estratégico (ICP, secuencia contener→asegurar→escalar) pero con otra
+estructura, sin la secuencia de fases con gates binarios, sin las tablas de
+KPI técnico/negocio, y sin la fórmula de precio mínimo.
+
+### Cambio:
+Nuevo `Documentacion PROTOTIPE/00_Continuidad/canonical/roadmap_tecnico_por_fases_y_gates_2026-07-14.md`,
+curado desde
+`D:\RESPALDO_PROTOTIPE\Continuidad\2026-07-14\02_DOCUMENTOS_CENTRALES\12_ROADMAP_TECNICO_Y_EMPRESARIAL_ESCALABLE.md`,
+marcado explícitamente como complementario (no sustituye ni a
+`Auditoria_Integral_y_Roadmap` ni a `Plan_Maestro_...`) y con advertencia de
+vigencia: las fechas/horizontes son los de la auditoría origen y no
+reflejan que `CORE-341` a `CORE-347` ya avanzaron buena parte de la Fase
+0/1 — se importa por su estructura de fases/gates, no por su estado de
+avance. Registrado en `mapa_documentacion_ia.md`.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal).
+- **Rama / HEAD observado:** `docs/context-packaging` / `98b3304`.
+- **Alcance propio:** 1 archivo nuevo, 2 entradas en `mapa_documentacion_ia.md`.
+  No se tocó el archivo origen en `D:\RESPALDO_PROTOTIPE` (solo lectura).
+- **Cambios preexistentes preservados:** sí.
+- **Siguiente paso exacto:** ninguna acción pendiente sobre este documento;
+  queda disponible como referencia de secuenciación gate-driven.
+
+---
+
+## [MINOR] CORE-347 asignada a Antigravity + plantilla de asignación reutilizable — 2026-07-15
+**Primera tarea real bajo el protocolo de traspaso verificado (`AI_WORKFLOW.md` §7.2)**
+
+### Contexto:
+El fundador pidió que asignar trabajo a Antigravity no requiera explicar la
+operativa manualmente en cada chat — un solo archivo de contexto debe
+bastar. También pidió activar ya la primera tarea real, aprovechando que el
+hallazgo P0-E (secretos trackeados) de `CORE-346` sigue vigente.
+
+### Cambio:
+1. Nueva plantilla reutilizable en
+   `Documentacion PROTOTIPE/00_Continuidad/templates/PLANTILLA_ASIGNACION_ANTIGRAVITY.md`:
+   archivo autocontenido (se rellena por tarea y se pega/adjunta completo en
+   un chat nuevo de Antigravity) que embebe la operativa de `AI_WORKFLOW.md`
+   §7.1/§7.2 — identificación de tarea, objetivo, alcance, exclusiones,
+   criterios de cierre verificables, loop de autocorrección, taxonomía de
+   evidencia y ruta del artefacto de traspaso obligatorio.
+2. Primera instancia rellenada: `CORE-347` — "Dejar de rastrear en Git
+   `notification_config.json`/`auth_users.json` (parte segura de
+   `SEC-010`/`SEC-011`)". Registrada en `tareas_pendientes.md` como
+   `ASSIGNED_TO_ANTIGRAVITY`. Archivo completo en
+   `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-347_2026-07-15.md`.
+3. Alcance deliberadamente acotado a la parte que una IA puede hacer sin
+   riesgo: verificar sin citar contenido, crear plantillas saneadas
+   (`*.example.json`), `.gitignore`, y `git rm --cached` sin commitear.
+   Excluido explícitamente: rotar el valor real del token/credenciales
+   (requiere al fundador con acceso al panel de Telegram — queda como
+   `DECISIÓN REQUERIDA`), reescribir historial de Git, y cualquier
+   commit/push.
+4. `mapa_documentacion_ia.md` actualizado con ambos archivos nuevos.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal), preparando la asignación —
+  Antigravity aún no ha ejecutado nada de `CORE-347` al momento de este
+  registro.
+- **Rama / HEAD observado:** `docs/context-packaging` / `98b3304`.
+- **Alcance propio:** 2 archivos nuevos (plantilla + asignación), 1 entrada
+  nueva en `tareas_pendientes.md`, 2 entradas nuevas en
+  `mapa_documentacion_ia.md`. No se tocó nada de `CORE-345`/`CORE-346` aún
+  sin commitear.
+- **Cambios preexistentes preservados:** sí.
+- **Evidencia pendiente:** el traspaso real de Antigravity
+  (`TRASPASO_CORE-347_2026-07-15.md`) todavía no existe — se crea cuando
+  Antigravity ejecute la tarea.
+- **Siguiente paso exacto:** el fundador abre un chat nuevo de Antigravity
+  apuntando a `D:\PROTOTIPE` y pega el contenido completo de
+  `ASIGNACION_CORE-347_2026-07-15.md`. Cuando Antigravity entregue el
+  traspaso, quien retome ejecuta la "Reverificación rápida" antes de
+  confiar en el resultado.
+
+---
+
+## [MINOR] Protocolo de traspaso verificado a Antigravity — 2026-07-15
+**Addendum `.agents/AI_WORKFLOW.md` §7.2 — loop de autocorrección obligatorio**
+
+### Contexto:
+Follow-up directo de `CORE-346`, por instrucción explícita del fundador: con
+el presupuesto de tokens de esta sesión por agotarse, se necesita un
+protocolo para que Antigravity ejecute tareas de forma autónoma mientras
+Claude Code no está disponible, de manera que la sesión de Claude que retome
+después pueda confiar en el resultado sin tener que reauditar todo desde
+cero — sin renunciar a la regla de "nunca confiar ciegamente" de
+`AI_WORKFLOW.md` §7.
+
+### Cambio:
+Nueva sección §7.2 en `.agents/AI_WORKFLOW.md` (aplica a las 4 partes que
+comparten ese contrato: fundador, Codex, Claude, Antigravity):
+1. Criterios de cierre objetivos y verificables por comando, definidos antes
+   de asignar la tarea.
+2. Loop de autocorrección obligatorio: implementar → correr **todos** los
+   criterios → si algo falla, corregir y volver a correr **todos** (no solo
+   el que falló) → repetir hasta pasar todo o agotar 5 ciclos, momento en el
+   que se detiene y reporta `BLOQUEO` en vez de fingir cierre.
+3. Evidencia literal (comando + salida exacta) por cada afirmación
+   `HECHO VERIFICADO`, reusando la taxonomía de 7 etiquetas de §7.1.
+4. Artefacto de traspaso nuevo en
+   `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/traspasos/TRASPASO_<ID-TAREA>_<FECHA>.md`,
+   con una sección obligatoria "Reverificación rápida para quien retome"
+   (2-5 comandos exactos con resultado esperado) — esto es lo que abarata la
+   verificación de la siguiente sesión sin eliminarla.
+5. Motivo explícito citado: el riesgo `R-022` ("CI verde sin pruebas reales")
+   del `registro_riesgos_deuda_tecnica_2026-07-14.md` recién creado en
+   `CORE-346` — este protocolo ataca ese riesgo en el origen.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal).
+- **Rama / HEAD observado:** `docs/context-packaging` / `98b3304`.
+- **Alcance propio:** un único addendum en `.agents/AI_WORKFLOW.md`; no se
+  creó todavía ningún archivo de traspaso real (se crea cuando se asigne la
+  primera tarea a Antigravity bajo este protocolo).
+- **Cambios preexistentes preservados:** sí.
+- **Siguiente paso exacto:** el fundador asigna la primera tarea a
+  Antigravity bajo este protocolo (candidato natural: `SEC-010`/`SEC-011` del
+  backlog propuesto, dado que el hallazgo de secretos trackeados fue
+  reverificado como vigente en `CORE-346`); Claude retoma leyendo únicamente
+  el archivo de traspaso correspondiente en `03_Auditorias_y_Faro_Core/traspasos/`.
+
+---
+
+## [MAJOR] CORE-346 — 2026-07-15
+**Reconciliar D:\RESPALDO_PROTOTIPE\Continuidad con Documentacion PROTOTIPE**
+
+### Contexto:
+El fundador identificó que la bitácora maestra fuera de Git (usada también
+para arrancar chats con Codex/Antigravity) estaba desalineada del estado real
+del repo, y pidió traer lo genuinamente útil sin saturar nada. Instrucción en
+tensión directa con `CLAUDE.md` (*"consúltala solo cuando la tarea lo exija y
+nunca la copies dentro del repositorio"*) — resuelta a favor de la
+instrucción explícita del fundador (`AI_WORKFLOW.md` §1), sin escribir nada
+dentro de `D:\RESPALDO_PROTOTIPE` en ningún momento (solo lectura).
+
+### Investigación (3 agentes de exploración en paralelo, solo lectura):
+- Inventario completo de las 70 entradas de `D:\RESPALDO_PROTOTIPE\Continuidad`
+  (10 archivos con nombres que sugieren secretos **no fueron abiertos**).
+- Mapeo de `Documentacion PROTOTIPE/00_Continuidad/` existente para detectar
+  solapamiento antes de traer nada.
+- Lectura profunda de los 9 documentos "centrales" del respaldo
+  (`2026-07-14/02_DOCUMENTOS_CENTRALES/`) con verificación por `grep` contra
+  los 469 archivos de `Documentacion PROTOTIPE` para confirmar qué era
+  genuinamente nuevo vs. duplicado.
+
+### Hallazgo central:
+El sistema de continuidad que ya vive en Git (`.agents/AI_WORKFLOW.md`,
+`00_REANUDAR_...md`, el sistema de context-packaging temático) es **más
+maduro** que el protocolo de reanudación del respaldo — no es que el repo
+esté atrasado, es que nadie declaró formalmente que el respaldo dejó de ser
+la fuente de arranque. La bitácora maestra del respaldo tenía 3 copias
+(v1.9.1/v2.0/v3.5), todas mostrando `CLAUDE-003` como `IN_PROGRESS`, sin
+conocimiento de `CORE-341` a `CORE-345`.
+
+### Documentos nuevos creados (curados, no copia masiva):
+1. `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/registro_riesgos_deuda_tecnica_2026-07-14.md`
+   — registro R-001 a R-045 y cuellos de botella CB-01 a CB-08. **Incluye un
+   hallazgo reverificado de forma independiente el 2026-07-15, no solo
+   citado**: `Prototipe-CLI/notification_config.json` y
+   `Prototipe-CLI/auth_users.json` **siguen trackeados en Git hoy**
+   (confirmado con `git ls-files`, sin abrir el contenido de ninguno) — es un
+   P0 de seguridad vigente, no un hallazgo obsoleto de la auditoría de julio.
+2. `Documentacion PROTOTIPE/02_Tareas_Roadmap/backlog_deuda_seguridad_arquitectura_2026-07-14.md`
+   — tickets SEC-010 a SEC-020, ARC-010 a ARC-019, REP-010 a REP-017,
+   OPS-010 a OPS-015, DOC/LEG-010/011, BIZ-010 a BIZ-015; ninguno existía en
+   `tareas_pendientes.md` (esquema `CORE-3xx` distinto). Marcado
+   explícitamente `PROPUESTO`, no activado.
+3. `Documentacion PROTOTIPE/04_Estandares_y_Skills/mapa_ecosistema_flujos_objetivo_2026-07-14.md`
+   — flujos de aprovisionamiento/actualización objetivo, ciclo de vida de
+   cliente, ownership; complementario (no duplicado) de `mapa_aplicacion.md`.
+   Se omitieron los hashes de commit ya obsoletos del documento origen.
+4. Addendum en `.agents/AI_WORKFLOW.md` §7.1: taxonomía de 7 etiquetas de
+   evidencia (`HECHO VERIFICADO`, `RESULTADO INFORMADO NO REAUDITADO`,
+   `INFERENCIA`, `RIESGO`, `PROPUESTA`, `BLOQUEO`, `DECISIÓN REQUERIDA`) y
+   plantilla de cierre de sesión — únicos dos artefactos del protocolo de
+   reanudación del respaldo sin equivalente en el contrato ya vigente.
+5. Nota de vigencia en
+   `00_Continuidad/canonical/00_REANUDAR_PROTOTIPE_CONTINUIDAD_2026-07-13.md`
+   declarando explícitamente que el respaldo dejó de ser fuente de arranque
+   para sesiones nuevas de cualquier IA.
+6. Entradas nuevas en `mapa_documentacion_ia.md` (YAML `docs_roots` + tabla
+   de la Sección 1) para los 3 documentos creados — verificado que el bloque
+   YAML sigue siendo válido tras el cambio.
+
+### Verificaciones operativas independientes ejecutadas (resultado literal):
+1. **Stash sin proteger** (advertido por el respaldo): `git stash list` en
+   raíz y en `Plantillas Core/App Ventas` — **vacío, sin stash pendiente**.
+2. **Repos anidados con doble tracking** (advertido por el respaldo):
+   ninguno de los 3 repos anidados (`dev-dashboard`, `ventas-moni-app`,
+   `App Ventas`) tiene `.git` propio hoy — **sin doble tracking**, índice
+   unificado.
+3. **Integridad del ZIP de auditoría profunda**: **confirmado el mismatch**
+   — hash real `2bd00607...`/75.770 bytes vs. certificado
+   `cbd40d2a...`/116.285 bytes. Anomalía real, no reparable desde esta tarea
+   (el zip correcto puede estar perdido); los archivos 01-09/15/16 del
+   índice de esa auditoría no están disponibles sueltos en ningún lado.
+4. **Secretos históricos** (PAT de GitHub, `cli-token.json`): `origin` limpio
+   sin PAT embebido; `cli-token.json` no trackeado; `git log` confirma el
+   commit de remediación exacto (`919bdc9 security(cli): stop tracking
+   ephemeral local token`).
+
+### Qué NO se tocó (queda igual, sin acción):
+`Plan_Maestro_...md` del respaldo (idéntico byte a byte al ya canónico),
+`13_PLAN_MIGRACION_CLAUDE_CODE.md` (versión menos rigurosa, ya superada por
+el Plan Maestro canónico), `12_ROADMAP_TECNICO...md` (redundante con
+`Auditoria_Integral_y_Roadmap_PROTOTIPE_2026-07-13.md` ya canónico),
+`18_INVENTARIO_DE_RESPALDOS...md` (checklist operativo de la carpeta de
+respaldo misma), toda la evidencia fechada de `2026-07-13/` y
+`2026-07-14/Recuperacion/`. Ningún archivo dentro de
+`D:\RESPALDO_PROTOTIPE` fue modificado — solo lectura en todo momento.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal), 3 agentes Explore en paralelo
+  para la investigación de solo lectura.
+- **Rama / HEAD observado:** `docs/context-packaging` / `98b3304` (sin
+  cambios de `CORE-345`, que sigue sin commitear).
+- **Alcance propio:** exclusivamente documentación dentro de
+  `Documentacion PROTOTIPE` y `.agents/AI_WORKFLOW.md`; solo lectura hacia
+  `D:\RESPALDO_PROTOTIPE`.
+- **Cambios preexistentes preservados:** sí; no se tocó nada de `CORE-345`
+  pendiente de commit ni de otras tareas.
+- **Estado final:** cierre documental — sin decisiones de arquitectura o
+  seguridad nuevas más allá de registrar hallazgos ya producidos por una
+  auditoría externa (curados y en un caso reverificados). No aplica
+  `VERIFIED_COMPLETE`/`READY_FOR_INDEPENDENT_REVIEW` en el mismo sentido que
+  una tarea de código — es documentación de contexto.
+- **Decisión pendiente del fundador:** si la línea de `CLAUDE.md` sobre
+  `D:\RESPALDO_PROTOTIPE` ("nunca la copies dentro del repositorio") se
+  actualiza para reflejar que el import curado y puntual es aceptable, o si
+  se conserva tal cual como principio general para el futuro.
+- **Siguiente paso exacto:** decisión del fundador sobre la línea de
+  `CLAUDE.md`; evaluar si se activa alguno de los tickets del backlog
+  propuesto (`backlog_deuda_seguridad_arquitectura_2026-07-14.md`),
+  empezando por SEC-010/SEC-011 dado que P0-E fue reverificado como vigente
+  hoy.
+
+---
+
+## [MAJOR] CORE-345 — 2026-07-15
+**Doctrina permanente de arquitectura por features (5 mecanismos) + migración de 6 features pendientes**
+
+### Contexto:
+El fundador pidió explícitamente que, tras CORE-344, no se repitiera "una feature
+a la vez con ceremonia completa" — que primero se resolvieran las causas raíz que
+hacían que el patrón no escalara (guard que solo protegía 2 de 8 features, sin
+mecanismo `Core → template`, sin `RealtimeQueryRegistry`, costo de gobernanza no
+sostenible, y sin garantía de que las features **nuevas** nacieran ya correctas).
+Plan aprobado vía modo plan (`ExitPlanMode`).
+
+### Mecanismo 1 — Scaffold de features nuevas enriquecido:
+`Prototipe-CLI/templates/feature-scaffold/{api/repository.js, services/service.js, hooks/useFeature.js}`
+ya producían el patrón correcto para CRUD básico (verificado: `hello-module` es
+ese scaffold sin editar). Se agregaron ejemplos **comentados** (no código activo)
+de transacción (`runRecordTransaction`, generalización de
+`CustomerLoyaltyRepository.runAccountTransaction`) y suscripción en tiempo real
+(`subscribeToRecord`, generalización de `subscribeToAccount`), para que una
+feature nueva que necesite algo más que CRUD tenga el patrón correcto a la vista.
+Sintaxis validada sustituyendo los tokens `{{}}` y ejecutando `node --check`.
+
+### Mecanismo 2 — Guard ESLint local en las 8 features desde el inicio:
+Nueva regla local e independiente `prototipe/no-firebase-outside-repository`
+(`plugins: { prototipe: {...} } }` inline en `eslint.config.js`, **sin paquete
+npm nuevo** — ESLint 10.x lo soporta nativamente). Al ser una clave de regla que
+ningún otro bloque usa, no colisiona con `no-restricted-imports` ni con
+`no-restricted-syntax` — se verificó que el bloque angosto de CORE-344 (que
+incluía un selector de import de Firebase ad-hoc) quedó simplificado, retirando
+ese selector porque el mecanismo nuevo lo reemplaza con cobertura completa.
+`warn` en las 8 features (glob `*` cubre automáticamente features futuras);
+`error` en las ya migradas. Verificado con `eslint` real (no solo pipe-test):
+`warn` se disparó en archivos reales sin migrar antes de migrarlos; `error` se
+mantuvo activo en `hello-module`/`customer-loyalty` sin degradar nada existente.
+
+### Mecanismo 3 — Skill repetible `migrate-feature-to-layers`:
+Nueva skill en `.agents/skills/migrate-feature-to-layers/SKILL.md` (formato de
+`crear-skill-prototipe`), codificando el proceso usado en `customer-loyalty`
+(CORE-344) para no volver a negociar arquitectura por cada feature: identificar
+imports de Firebase fuera de `api/`, tests de caracterización antes del refactor,
+patrón reducer puro para transacciones, patrón subscribe/unsubscribe para
+listeners, ajustar el seam de tests (no las aserciones de negocio), subir la
+feature al bloque `error` del guard, verificación proporcional.
+
+### Mecanismo 4 — Propagación `Core → template`:
+Nuevo script `Prototipe-CLI/publish_core_to_template.js`, espejo deliberado de
+`sync_clients.js` (reutiliza el mismo patrón probado: diff por hash MD5, backup,
+copia, **validación con `npm run build` y rollback automático si falla**), en
+sentido inverso y con alcance acotado a `src/features/<name>/`. Probado en
+dry-run sobre `customer-loyalty` y `hello-module` (ya migradas); `hello-module`
+ya estaba al día (sin cambios necesarios). Ejecutado en real para
+`customer-loyalty` con `--yes`: 8 archivos publicados a `template-ventas`
+(`api/CustomerLoyaltyRepository.js`, `hooks/useCustomerLoyalty.js`, `index.js`,
+`routes.jsx`, `schemas/CustomerLoyaltySchemas.js`,
+`services/CustomerLoyaltyService.js`, más `components/AdminView.jsx` y
+`components/ClientView.jsx` nuevos), `npm run build` del template aprobado tras
+la copia. Cierra la brecha detectada en CORE-344 (el trabajo de esa tarea no
+llegaba a `template-ventas`).
+
+### Mecanismo 5 — Honestidad documental sobre `RealtimeQueryRegistry`:
+Decisión explícita del fundador (pregunta directa, confirmada): `AGENTS.md`
+§22.2 pasa de "obligatorio" a `DEFERRED_UNTIL_MEASURED_NEED` — 0 resultados en
+código real de todo el monorepo (16 solo en documentación), sin evidencia de
+costo real de listeners duplicados en esta etapa (pre-clientes pagos). Criterio
+de reactivación: medir lecturas Firestore duplicadas antes de construirlo.
+`ADR-0001` §13 y §20 actualizados con la misma decisión.
+
+### Aplicación de la doctrina — 6 features migradas/evaluadas:
+- **`delivery`**: sin `services/hooks/components` propios (solo enruta a páginas
+  fuera de `features/`); nada que migrar, agregada al guard por consistencia.
+- **`credits`**: `CreditRepository.js` nuevo (`api/`); transacción de abono con
+  patrón reducer + helper `serverTimestamp` inyectado (preserva el sello de
+  servidor, no se normalizó a `Date.toISOString()`). 14/14 tests preexistentes
+  (`creditService.spec.js`) en verde sin modificar el test.
+- **`billing`**: `BillingRepository.js` nuevo; dos listeners (pedidos + config)
+  fusionados igual que el original; `calcMetrics` (lógica pura) sin tocar. 4/4
+  tests preexistentes en verde.
+- **`orders`**: el más grande (875 líneas). `OrderRepository.js` nuevo con el
+  cuerpo completo de las dos transacciones complejas (creación de pedido con
+  descuento de inventario cruzado a `inventory`; cambio de estado con ramas
+  CANCELLED/CREDIT_APPROVED/otros) movido tal cual — no se forzó un rediseño de
+  reducer puro donde la lectura dinámica de múltiples productos lo hacía
+  desproporcionado. Se corrigió un desvío propio antes de cerrar: había
+  hardcodeado `'pendiente'` en vez de `ORDER_STATES.PENDING`, y había agregado
+  sin pedirlo una bandera `cancelled` que corregía una fuga de listener
+  preexistente — revertida para preservar el comportamiento original exacto.
+  27/27 tests preexistentes en verde.
+- **`sales`**: `SalesRepository.js` nuevo; transacción de venta física movida
+  completa. 7/7 tests preexistentes en verde. Cero hallazgos de lint.
+- **`inventory`**: **migración parcial, documentada como tal.**
+  `InventoryRepository.js` nuevo cubre categorías y productos (CRUD + paginado +
+  limpieza de imágenes en Storage vía `deleteImage`). `inventoryInterface.js`
+  (`deductInventoryStock`) se dejó como **excepción explícita** del guard (no
+  como pendiente): es un contrato de dominio que participa en transacciones ya
+  iniciadas por `orders`/`sales` (recibe su `transaction` activa) y llama a
+  `auditProductStock` (lógica de negocio) — moverlo habría invertido la
+  dirección Repository→Service o forzado rediseñar un contrato transaccional
+  ya en uso por 2 features migradas. `ProductFormModal.jsx` (2399 líneas,
+  Storage + Firestore embebidos en callbacks de progreso de subida) **queda
+  deliberadamente sin migrar**, en `warn`: este proyecto no tiene
+  `@testing-library/react` ni entorno `jsdom` configurado, así que no hay forma
+  de caracterizar su comportamiento antes de tocarlo — refactorizarlo sin red de
+  pruebas habría sido un riesgo desproporcionado. 13/13 tests preexistentes de
+  `inventoryService` en verde.
+
+### Verificaciones ejecutadas (resultados literales):
+- Suite completa (`npm exec --offline -- vitest run`): 8 archivos, **98/98
+  pruebas en verde**, sin regresión en ninguna feature (incluye las 5 migradas
+  esta sesión más `customer-loyalty`/`hello-module` de CORE-344).
+- `eslint .` (proyecto completo): 633 errores / 24 advertencias (línea base
+  CORE-344: 637/22). El único hallazgo de `prototipe/no-firebase-outside-repository`
+  en todo el monorepo son las 2 declaraciones de import de `ProductFormModal.jsx`
+  (`firebase/storage` y `firebase/firestore`) — confirmado con `grep` sobre el
+  output completo. El descenso en errores es limpieza incidental de imports
+  muertos ocurrida al mover código, no una corrección deliberada fuera de
+  alcance.
+- `vite build`: build de producción exitoso.
+- `git diff --check`: sin errores nuevos; únicas advertencias de espacio en
+  blanco están en `template-ventas/.../CustomerLoyaltyRepository.js`,
+  confirmadas como preexistentes en el archivo fuente ya commiteado en CORE-344
+  (`git show` line-by-line), propagadas con fidelidad exacta por el script de
+  publicación — no introducidas aquí.
+
+### Deuda técnica documentada (no corregida, fuera de alcance):
+- `ProductFormModal.jsx` sin migrar (ver Mecanismo/inventory arriba) — requiere
+  primero decidir una estrategia de testing de componentes antes de tocarlo.
+- `inventoryInterface.js` como excepción permanente del guard mientras el
+  contrato transaccional de `deductInventoryStock` no se rediseñe.
+- Misma deuda de `no-restricted-syntax` (glob `src/repositories/**` vs carpeta
+  real `api/**`) ya documentada en CORE-344, observada de nuevo en
+  `OrderRepository.js` e `InventoryRepository.js` — no corregida, mismo patrón.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal).
+- **Rama / HEAD observado al iniciar:** `docs/context-packaging` / `98b3304`.
+- **Alcance propio:** los 5 mecanismos + migración/evaluación de las 6 features
+  pendientes, exclusivamente en `Plantillas Core/App Ventas` y
+  `Prototipe-CLI` (scaffold + script de publicación). Propagación real limitada
+  a `customer-loyalty` en `template-ventas` (probado end-to-end); `ventas-moni-app`
+  no se tocó.
+- **Cambios preexistentes preservados:** sí; no se reclamaron los cambios ya
+  presentes en el working tree de otras tareas (guards RBAC de CORE-342,
+  corrección de aserción de `template-ventas/tests/unit/salesService.spec.js`
+  de CORE-342, hunk de `AGENTS.md`/`mapa_aplicacion.md` de CLAUDE-003, etc.).
+- **Estado final:** `READY_FOR_INDEPENDENT_REVIEW`. No se declara
+  `VERIFIED_COMPLETE` sin aprobación humana explícita o revisión independiente
+  (`.agents/AI_WORKFLOW.md` §6).
+- **Siguiente paso exacto:** decisión del fundador sobre commit; después,
+  definir cuándo abordar `ProductFormModal.jsx` (requiere decidir estrategia de
+  testing de componentes primero) y cuándo propagar el resto de las features
+  migradas (`credits`, `billing`, `orders`, `sales`, `inventory` parcial) a
+  `template-ventas`/`ventas-moni-app` con el mecanismo 4.
+
+---
+
 ## [GOBERNANZA] Ampliación acotada de permisos de Claude Code — 2026-07-15
 **Decisión: habilitar `git commit` para Claude Code (terminal), manteniendo el resto de las denegaciones intactas**
 

@@ -1,0 +1,37 @@
+{
+  "alertsEnabled": false,
+  "telegramToken": "YOUR_TELEGRAM_BOT_TOKEN",
+  "telegramChatId": "YOUR_TELEGRAM_CHAT_ID",
+  "discordWebhookUrl": "YOUR_DISCORD_WEBHOOK_URL",
+  "auth": {
+    "allowedChatIds": [],
+    "adminChatIds": [],
+    "requireAdminCommands": []
+  },
+  "channels": {
+    "crashes": {
+      "telegramToken": "",
+      "telegramChatId": "",
+      "discordWebhookUrl": "",
+      "enabled": false
+    },
+    "briefings": {
+      "telegramToken": "",
+      "telegramChatId": "",
+      "discordWebhookUrl": "",
+      "enabled": false
+    },
+    "billing": {
+      "telegramToken": "",
+      "telegramChatId": "",
+      "discordWebhookUrl": "",
+      "enabled": false
+    },
+    "devops": {
+      "telegramToken": "",
+      "telegramChatId": "",
+      "discordWebhookUrl": "",
+      "enabled": false
+    }
+  }
+}
