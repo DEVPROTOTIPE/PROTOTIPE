@@ -9,11 +9,6 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Helper para verificar si la base de datos está vacía (primer arranque)
-    function isFirstStart() {
-      return !exists(/databases/$(database)/documents/config/settings);
-    }
-
     // Valida que un pedido nuevo tenga la estructura mínima requerida
     function validOrder() {
       let d = request.resource.data;
@@ -27,13 +22,13 @@ service cloud.firestore {
     // Configuración global y Filtros
     match /config/{document} {
       allow read: if true;
-      allow write: if isAdmin() || isFirstStart();
+      allow write: if isAdmin();
     }
     
     // Subcolecciones de configuración
     match /config/delivery/messengers/{messengerId} {
       allow read: if true;
-      allow write: if isAdmin() || isFirstStart();
+      allow write: if isAdmin();
     }
 
     // Perfiles de usuarios (clientes y administradores)
@@ -41,8 +36,13 @@ service cloud.firestore {
       allow get: if true;
       
       // Permitir creación pública solo si el rol asignado es estrictamente 'client'
-      // O si la petición proviene de un administrador autenticado, o si es el primer arranque (base de datos vacía)
-      allow create: if (request.resource.data.role == 'client') || isAdmin() || isFirstStart();
+      // O si la petición proviene de un administrador autenticado.
+      // SEC-013 (2026-07-15): se retiró isFirstStart() — el bootstrap del primer
+      // admin y de config/settings ahora se hace exclusivamente server-side vía
+      // Admin SDK (ver Prototipe-CLI/scripts/bootstrap-admin.js), que ignora
+      // las reglas de cliente por diseño. Ningún cliente anónimo puede volver
+      // a auto-otorgarse admin escribiendo cuando la base está vacía.
+      allow create: if (request.resource.data.role == 'client') || isAdmin();
       
       // Permitir actualización de campos personales pero impedir escalar de 'client' a 'admin'
       allow update: if isAdmin() || (

@@ -1,5 +1,58 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## [MAJOR] CORE-350 — Activar SEC-013: retirar isFirstStart(), bootstrap server-side — 2026-07-15
+
+### Contexto:
+`CORE-349` (`SEC-012`) probó con el emulador real que `isFirstStart()` en
+`firestore.rules` permite a cualquier cliente anónimo auto-otorgarse
+`role: 'admin'` mientras `config/settings` no exista. El fundador pidió
+resolverlo, no solo documentarlo.
+
+### Cambio:
+1. `firestore.rules`: retirada la función `isFirstStart()` y sus 3 usos
+   (`config/{document}`, `config/delivery/messengers/{messengerId}`,
+   `users/{userId}` create). Ahora solo `isAdmin()` gobierna esas escrituras.
+2. `scripts/bootstrap-admin.js` (NUEVO): script Admin SDK para crear el
+   primer administrador y `config/settings` server-side, bypassando las
+   reglas de cliente por diseño. Exige `GOOGLE_APPLICATION_CREDENTIALS`
+   explícito del fundador (nunca leído por esta IA), rehúsa correr si
+   `config/settings` ya existe, soporta `--dry-run`. No se ejecutó contra
+   ningún proyecto real en esta tarea — requiere credenciales que solo el
+   fundador debe manejar.
+3. `firebase-admin@14.1.0` agregado como devDependency de
+   `Plantillas Core/App Ventas` (antes solo tenía el SDK de cliente).
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal).
+- **Rama / HEAD observado:** `docs/context-packaging`.
+- **Pruebas ejecutadas y resultado literal:**
+  - `npx vitest run tests/unit/firestoreRules.spec.js` (emulador real en
+    `127.0.0.1:8080`) → `Tests  8 failed | 3 passed (11)`. Antes de este
+    cambio era `10 failed | 1 passed`. Los 2 tests que pasaron a verde son
+    exactamente los de `isFirstStart` (escalada a admin y sabotaje de
+    `config/settings`); los 8 restantes siguen rojos sin cambio — dependen
+    de `SEC-014`/`SEC-016`, no tocados aquí.
+  - `npx vitest run` sobre los 5 specs de servicios existentes → `64 passed`,
+    sin regresión.
+  - `node --check scripts/bootstrap-admin.js` → sin errores de sintaxis.
+  - `npx eslint scripts/bootstrap-admin.js` → 6 errores `no-undef: process`,
+    idénticos a los que ya tiene `scripts/validate-core-integrity.js`
+    preexistente en la misma carpeta (deuda de configuración ESLint del
+    directorio `scripts/`, no introducida por este cambio).
+- **Cambios preexistentes preservados:** sí.
+- **Riesgos y bloqueos:** `firebase-admin` arrastra 6 vulnerabilidades
+  moderadas transitivas (`uuid` vía `google-gax`/`gaxios`) presentes en
+  prácticamente todo el árbol actual de versiones de `firebase-admin`, no
+  exclusivas de la elegida; riesgo bajo porque el script es de ejecución
+  local del fundador, nunca se empaqueta para clientes.
+- **Documentación actualizada:** `tareas_pendientes.md` (`CORE-350`).
+- **Siguiente paso exacto:** entrar en modo plan para `SEC-014` (identidad
+  real de clientes) — bloqueante arquitectónico real de las 8 pruebas rojas
+  restantes, confirmado revisando `useAuthInit.js` (los clientes hoy no
+  tienen sesión de Firebase Auth, solo `localStorage`).
+
+---
+
 ## [MAJOR] CORE-349 — Activar SEC-012: pruebas rojas reales contra Firestore Emulator — 2026-07-15
 
 ### Contexto:

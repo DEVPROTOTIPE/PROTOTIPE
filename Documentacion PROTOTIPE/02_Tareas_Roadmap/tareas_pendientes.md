@@ -1,5 +1,41 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-350: Activar SEC-013 — retirar isFirstStart(), bootstrap server-side~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW`. Verificado con el emulador real
+    (no asumido): las 2 pruebas de `firestoreRules.spec.js` que antes
+    fallaban por esta vulnerabilidad ahora pasan en verde; las otras 8
+    (bloqueadas por `SEC-014`/`SEC-016`) siguen rojas sin cambio, como se
+    espera. Suite completa del proyecto sin regresión (64/64 en los specs
+    de servicios existentes).
+  - Objetivo real: cerrar el vector de ataque documentado en
+    `analisis_seguridad_firestore.md` y confirmado por `CORE-349`: mientras
+    `config/settings` no exista, cualquier cliente anónimo podía
+    autoasignarse `role: 'admin'` explotando `isFirstStart()`.
+  - Cambio: retirado `isFirstStart()` de `firestore.rules` (función y sus 3
+    usos en `config`, `config/delivery/messengers` y `users`). El bootstrap
+    del primer admin y de `config/settings` pasa exclusivamente por
+    `scripts/bootstrap-admin.js` (NUEVO, Admin SDK, bypassa las reglas por
+    diseño) — ningún cliente puede volver a auto-otorgarse admin.
+  - `scripts/bootstrap-admin.js`: exige `GOOGLE_APPLICATION_CREDENTIALS`
+    explícito (nunca leído por la IA), rehúsa correr si `config/settings`
+    ya existe (evita bootstrap duplicado), soporta `--dry-run`. Solo lo
+    ejecuta el fundador con sus propias credenciales — no se ejecutó en
+    esta tarea contra ningún proyecto real.
+  - `firebase-admin@14.1.0` agregado como devDependency (6 vulnerabilidades
+    moderadas transitivas vía `uuid`/`google-gax`, heredadas de todo el
+    árbol actual de `firebase-admin` — no exclusivas de esta versión;
+    aceptable porque el script es de uso local del fundador, nunca se
+    empaqueta ni se expone a clientes).
+  - Lint del script nuevo: mismo error preexistente `process is not defined`
+    que ya tiene `scripts/validate-core-integrity.js` — deuda de
+    configuración ESLint de la carpeta `scripts/`, no introducida aquí.
+  - Cambios preexistentes preservados: sí.
+  - Siguiente paso exacto: entrar en modo plan para diseñar `SEC-014`
+    (identidad real de clientes) — bloqueante real de las 8 pruebas rojas
+    restantes; no se puede resolver con un ajuste de reglas porque hoy los
+    clientes no tienen sesión de Firebase Auth (`useAuthInit.js` los
+    identifica solo por `localStorage`).
+
 * **[ ] Tarea CORE-349: Activar SEC-012 — suite de pruebas rojas Firestore Emulator**
   - Estatus: `READY_FOR_INDEPENDENT_REVIEW` (suite escrita y verificada corriendo
     contra el emulador real; las vulnerabilidades que prueba siguen sin
