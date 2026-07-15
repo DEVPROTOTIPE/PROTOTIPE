@@ -1,5 +1,47 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[ ] Tarea CORE-349: Activar SEC-012 — suite de pruebas rojas Firestore Emulator**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW` (suite escrita y verificada corriendo
+    contra el emulador real; las vulnerabilidades que prueba siguen sin
+    corregirse — eso es `SEC-013`/`SEC-014`/`SEC-016`, tareas separadas).
+  - Objetivo real: convertir los hallazgos de `analisis_seguridad_firestore.md`
+    (Brain de Antigravity) en pruebas rojas reproducibles contra el emulador
+    real de Firestore, no contra mocks — siguiendo la secuencia recomendada
+    del roadmap (`SEC-010/011` → `SEC-012` → `SEC-013..016`).
+  - Verificación previa a confiar en el material: contrasté línea por línea
+    `analisis_seguridad_firestore.md` contra `firestore.rules` real antes de
+    usarlo — exacto, incluido el comentario "El sistema escribe movimientos
+    automáticamente" citado textual. Se usó como insumo, no como verdad dada.
+  - Preparación de entorno (nueva, documentada):
+    - `@firebase/rules-unit-testing@5.0.1` instalado como devDependency
+      (0 vulnerabilidades, sin conflicto de peers).
+    - `firebase.json`: bloque `emulators.firestore` (puerto 8080) agregado.
+    - Java (Eclipse Temurin 21 JRE) instalado en la máquina del fundador —
+      requerido por el emulador, ausente antes de esta tarea.
+  - Archivo nuevo: `tests/unit/firestoreRules.spec.js` — 11 pruebas reales
+    (no mocks) contra el emulador vía `@firebase/rules-unit-testing`.
+  - **Evidencia literal (`npx vitest run tests/unit/firestoreRules.spec.js`,
+    emulador real corriendo en `127.0.0.1:8080`):** 10/11 fallan hoy con
+    `Error: Expected request to fail, but it succeeded` — confirma que las
+    10 vulnerabilidades son explotables de verdad, no teóricas: escalada a
+    admin vía `isFirstStart` (2 casos), creación pública en `stockMovements`/
+    `notifications`/`wholesaleOrders` (3 casos), lectura pública de
+    `wholesaleOrders`/`credits`/`orders` (3 casos), lectura y escritura
+    cruzada en `favorites` de otro usuario (2 casos). 1/11 pasa en verde:
+    un cliente autenticado sí puede leer/escribir sus propios favoritos
+    (confirma que el guard no está roto, solo permisivo de más).
+  - Verificaciones adicionales: `npm run test` completo → 8 archivos previos
+    siguen en verde (99/109 total, sin regresión); `eslint` del archivo
+    nuevo limpio.
+  - Cambios preexistentes preservados: sí; no se tocó `firestore.rules`
+    (las 10 vulnerabilidades quedan intencionalmente sin corregir, eso es
+    alcance de `SEC-013`/`SEC-014`/`SEC-016`).
+  - Siguiente paso exacto: priorizar y activar `SEC-013` (retirar
+    `isFirstStart`, bootstrap server-side) y `SEC-016` (deny-by-default en
+    `stockMovements`/`notifications`/`wholesaleOrders`/`credits`/`orders`/
+    `favorites`) como tareas separadas; estas 10 pruebas deben pasar a verde
+    cuando esas tareas cierren, sin modificar los tests para forzar el verde.
+
 * **[ ] Tarea CORE-348: Reestructurar `.agents/AGENTS.md` en reglas por ruta (`.claude/rules/`)**
   - Estatus: `PENDING` — registrada 2026-07-15, deliberadamente NO ejecutada en esta
     sesión (ya cubrió CORE-345, CORE-346, protocolo de traspaso a Antigravity y

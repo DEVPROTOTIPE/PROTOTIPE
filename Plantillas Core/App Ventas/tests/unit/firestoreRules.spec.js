@@ -1,0 +1,139 @@
+import { describe, test, beforeAll, beforeEach, afterAll } from 'vitest';
+import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PROJECT_ID = 'test-prototipe-rules';
+
+let testEnv;
+
+beforeAll(async () => {
+  const rulesPath = path.resolve(__dirname, '../../firestore.rules');
+  const rulesContent = fs.readFileSync(rulesPath, 'utf8');
+
+  testEnv = await initializeTestEnvironment({
+    projectId: PROJECT_ID,
+    firestore: {
+      rules: rulesContent,
+      host: '127.0.0.1',
+      port: 8080,
+    },
+  });
+});
+
+beforeEach(async () => {
+  await testEnv.clearFirestore();
+});
+
+afterAll(async () => {
+  if (testEnv) await testEnv.cleanup();
+});
+
+// SEC-012 — suite de ataques contra firestore.rules (Plantillas Core / App Ventas).
+// Cada test documenta el hallazgo verificado en analisis_seguridad_firestore.md.
+// Varios de estos tests FALLAN hoy a propósito (rojo): prueban que la regla
+// vigente permite el ataque. Pasarán (verde) cuando SEC-013/SEC-016 cierren
+// la brecha correspondiente — no se corrige la regla en esta tarea.
+
+describe('SEC-012 — Escalada de privilegios vía isFirstStart (foco SEC-013)', () => {
+  test('Un usuario anónimo NO debe poder crearse como admin cuando config/settings no existe', async () => {
+    const anon = testEnv.unauthenticatedContext().firestore();
+    const action = anon.collection('users').doc('atacante-uid').set({
+      role: 'admin',
+      activo: true,
+    });
+    await assertFails(action);
+  });
+
+  test('Un usuario anónimo NO debe poder escribir config/settings cuando la base está vacía', async () => {
+    const anon = testEnv.unauthenticatedContext().firestore();
+    const action = anon.collection('config').doc('settings').set({
+      maliciousFlag: true,
+    });
+    await assertFails(action);
+  });
+});
+
+describe('SEC-012 — Deny-by-default en colecciones mutables (foco SEC-016)', () => {
+  test('Un usuario anónimo NO debe poder crear un stockMovement (sabotaje de inventario)', async () => {
+    const anon = testEnv.unauthenticatedContext().firestore();
+    const action = anon.collection('stockMovements').doc('fake-movement').set({
+      productoId: 'prod-123',
+      cantidad: -100,
+      tipo: 'ajuste_manual',
+    });
+    await assertFails(action);
+  });
+
+  test('Un usuario anónimo NO debe poder crear una notificación falsa', async () => {
+    const anon = testEnv.unauthenticatedContext().firestore();
+    const action = anon.collection('notifications').doc('fake-notif').set({
+      recipientRole: 'client',
+      title: 'Cuenta suspendida',
+    });
+    await assertFails(action);
+  });
+
+  test('Un usuario anónimo NO debe poder crear una wholesaleOrder arbitraria', async () => {
+    const anon = testEnv.unauthenticatedContext().firestore();
+    const action = anon.collection('wholesaleOrders').doc('fake-wholesale').set({
+      empresa: 'Falsa SAS',
+    });
+    await assertFails(action);
+  });
+});
+
+describe('SEC-012 — Lectura pública de datos transaccionales (foco SEC-012/SEC-014)', () => {
+  test('Un usuario anónimo NO debe poder leer wholesaleOrders ajenas', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection('wholesaleOrders').doc('real-order').set({ empresa: 'Cliente Real SAS' });
+    });
+    const anon = testEnv.unauthenticatedContext().firestore();
+    await assertFails(anon.collection('wholesaleOrders').doc('real-order').get());
+  });
+
+  test('Un usuario anónimo NO debe poder leer credits (fiados) ajenos', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection('credits').doc('cliente-real').set({ saldo: 500000 });
+    });
+    const anon = testEnv.unauthenticatedContext().firestore();
+    await assertFails(anon.collection('credits').doc('cliente-real').get());
+  });
+
+  test('Un usuario anónimo NO debe poder leer orders (pedidos) ajenos', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection('orders').doc('pedido-real').set({ telefono: '3000000000' });
+    });
+    const anon = testEnv.unauthenticatedContext().firestore();
+    await assertFails(anon.collection('orders').doc('pedido-real').get());
+  });
+});
+
+describe('SEC-012 — Aislamiento entre usuarios en subcolecciones (foco SEC-014)', () => {
+  test('Un cliente NO debe poder leer los favoritos de otro cliente', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection('users').doc('user-target').collection('favorites').doc('fav-1').set({
+        productId: 'prod-abc',
+      });
+    });
+    const otherClient = testEnv.authenticatedContext('user-legit').firestore();
+    const targetFavRef = otherClient.collection('users').doc('user-target').collection('favorites').doc('fav-1');
+    await assertFails(targetFavRef.get());
+  });
+
+  test('Un cliente NO debe poder escribir en los favoritos de otro cliente', async () => {
+    const otherClient = testEnv.authenticatedContext('user-legit').firestore();
+    const targetFavRef = otherClient.collection('users').doc('user-target').collection('favorites').doc('fav-1');
+    await assertFails(targetFavRef.set({ productId: 'prod-abc' }));
+  });
+
+  test('Un cliente autenticado SÍ debe poder leer y escribir sus propios favoritos', async () => {
+    const clientUid = 'client-user-id';
+    const clientDb = testEnv.authenticatedContext(clientUid).firestore();
+    const favRef = clientDb.collection('users').doc(clientUid).collection('favorites').doc('fav-1');
+    await assertSucceeds(favRef.set({ productId: 'prod-abc' }));
+    await assertSucceeds(favRef.get());
+  });
+});

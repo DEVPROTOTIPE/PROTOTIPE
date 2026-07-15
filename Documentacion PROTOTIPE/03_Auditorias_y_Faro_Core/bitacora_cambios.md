@@ -1,5 +1,58 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## [MAJOR] CORE-349 — Activar SEC-012: pruebas rojas reales contra Firestore Emulator — 2026-07-15
+
+### Contexto:
+El fundador pidió usar el material de auditoría que preparó con Antigravity
+(vive fuera del repo, en su Brain privado) para ahorrar tokens de
+investigación. Antes de usarlo, se verificó `analisis_seguridad_firestore.md`
+línea por línea contra `Plantillas Core/App Ventas/firestore.rules` real —
+resultó exacto (incluido un comentario citado textual), lo que justificó
+tratarlo como insumo confiable para esta tarea. El material de "scaffolds de
+código" (auth, bootstrap admin, etc.) NO se usó ni se valida por esta tarea —
+queda como referencia sin revisar, según lo acordado con el fundador.
+
+### Cambio:
+1. `@firebase/rules-unit-testing@5.0.1` instalado (devDependency) en
+   `Plantillas Core/App Ventas` — 0 vulnerabilidades, sin conflicto de peers.
+2. `firebase.json`: bloque `emulators.firestore` (puerto 8080) agregado.
+3. Java (Eclipse Temurin 21 JRE) instalado en la máquina del fundador vía
+   `winget` (bajo su ejecución y confirmación directa) — requisito del
+   emulador de Firestore, ausente antes.
+4. `tests/unit/firestoreRules.spec.js` (NUEVO): 11 pruebas reales contra el
+   emulador (no mocks) cubriendo los hallazgos verificados: escalada de
+   privilegios vía `isFirstStart` (2), creación pública en `stockMovements`/
+   `notifications`/`wholesaleOrders` (3), lectura pública de
+   `wholesaleOrders`/`credits`/`orders` (3), aislamiento cruzado en
+   `favorites` (2), y una prueba verde de sanidad (favoritos propios).
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal); Java instalado por el fundador.
+- **Rama / HEAD observado:** `docs/context-packaging`.
+- **Pruebas ejecutadas y resultado literal:**
+  - `npx --yes firebase-tools@latest emulators:start --only firestore --project test-prototipe-rules`
+    → `All emulators ready! It is now safe to connect your app.` (Firestore en `127.0.0.1:8080`).
+  - `npx vitest run tests/unit/firestoreRules.spec.js` (con el emulador real corriendo) →
+    `Test Files  1 failed (1) / Tests  10 failed | 1 passed (11)`, cada fallo con
+    `Error: Expected request to fail, but it succeeded` — confirma que las 10
+    vulnerabilidades son reales y explotables hoy, no teóricas.
+  - `npm run test` (suite completa) → 8 archivos previos sin regresión
+    (99/109 total, la diferencia son las 10 rojas esperadas de este archivo).
+  - `npx eslint tests/unit/firestoreRules.spec.js` → limpio.
+- **Cambios preexistentes preservados:** sí; no se tocó `firestore.rules`
+  (las vulnerabilidades quedan sin corregir a propósito — eso es alcance de
+  `SEC-013`/`SEC-014`/`SEC-016`, tareas separadas).
+- **Evidencia pendiente:** ninguna para el alcance de esta tarea (verificación
+  humana estándar previa a commit, no auditoría de seguridad adicional).
+- **Riesgos y bloqueos:** ninguno para SEC-012 en sí. Persisten como riesgo
+  abierto las 10 vulnerabilidades ahora demostradas con prueba reproducible.
+- **Documentación actualizada:** `tareas_pendientes.md` (`CORE-349`).
+- **Siguiente paso exacto:** activar `SEC-013` y `SEC-016` como tareas
+  separadas para corregir `firestore.rules`; estas 10 pruebas deben virar a
+  verde cuando esas tareas cierren correctamente.
+
+---
+
 ## [MINOR] — 2026-07-15
 **Docs: Preparación de suite de auditorías y scaffolds físicos en el Brain para Claude Code**
 
