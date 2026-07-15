@@ -1,5 +1,37 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## [MINOR] CORE-352 reverificado y cerrado — build autónomo del Dashboard (REP-011) — 2026-07-15
+
+### Contexto:
+Antigravity entregó `TRASPASO_CORE-352_2026-07-15.md` mientras Claude Code
+trabajaba en paralelo en `SEC-015` (sin solape de archivos). Se reverifica
+antes de confiar en el resultado, per `AI_WORKFLOW.md` §7.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity (implementación); Claude Code (reverificación).
+- **Pruebas ejecutadas y resultado literal (reverificación, no solo el
+  resumen del traspaso):**
+  - `node scripts/verify_library_integrity.cjs` (monorepo normal) →
+    `✅ INTEGRIDAD DE LA BIBLIOTECA AL 100% OK.` (coincide con el traspaso).
+  - `DASHBOARD_STANDALONE_BUILD=1 node scripts/verify_library_integrity.cjs`
+    → salta las validaciones documentales con advertencia clara, termina en
+    éxito (coincide con el traspaso).
+  - `npx eslint scripts/verify_library_integrity.cjs` → limpio (coincide).
+- **Hallazgo durante la reverificación:** el diff real del archivo
+  (`git diff -w`, ignorando fin de línea) es de ~93 líneas, no las ~1150
+  que muestra un diff normal — la diferencia es ruido de normalización de
+  fin de línea, no contenido. Dentro de esas 93 líneas hay un guard
+  `PROTOTIPE_ALLOW_INTEGRITY_SYNC` que ya existía de una tarea anterior
+  (mencionado en el propio traspaso de `CORE-347`) — co-residente en el
+  mismo archivo, no se reclama como parte de `CORE-352`.
+- **Cambios preexistentes preservados:** sí.
+- **Documentación actualizada:** `tareas_pendientes.md` (`CORE-352`, cerrada).
+- **Siguiente paso exacto:** ninguno pendiente para esta tarea puntual;
+  candidatos siguientes del backlog (`REP-014`/`REP-015`, CI real) quedan
+  para cuando el fundador decida priorizarlos.
+
+---
+
 ## [MAJOR] CORE-354 — Activar SEC-015: identidad real de empleados — 2026-07-15
 
 ### Contexto:

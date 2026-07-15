@@ -116,8 +116,18 @@
   - Siguiente paso exacto: diseñar SEC-015 en modo plan (mismo tratamiento
     que `SEC-014`, dado el tamaño y la criticidad) antes de tocar código.
 
-* **[ ] Tarea CORE-352: Activar REP-011 — build autónomo del Dashboard Central**
-  - Estatus: `AWAITING_REVIEW` — implementada por Antigravity el 2026-07-15 vía
+* **[x] ~~Tarea CORE-352: Activar REP-011 — build autónomo del Dashboard Central~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — implementada por Antigravity,
+    reverificada por Claude Code el 2026-07-15 ejecutando los 3 comandos
+    exactos del traspaso: modo monorepo (`✅ INTEGRIDAD DE LA BIBLIOTECA AL
+    100% OK.`), modo standalone forzado
+    (`DASHBOARD_STANDALONE_BUILD=1`, advertencia clara + éxito), y lint
+    (limpio) — los 3 coinciden exactamente con lo que reportó el traspaso.
+    Nota: el diff real del archivo (ignorando diferencias de fin de línea)
+    incluye también un guard `PROTOTIPE_ALLOW_INTEGRITY_SYNC` preexistente
+    de otra tarea anterior (no de `CORE-352`) — co-residente en el mismo
+    archivo, no reclamado como propio de esta tarea.
+  - Estatus original al asignar: `AWAITING_REVIEW` — implementada por Antigravity el 2026-07-15 vía
     `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-352_2026-07-15.md`
     bajo el protocolo de traspaso verificado (`AI_WORKFLOW.md` §7.2), en
     paralelo a `SEC-015` (que continúa Claude Code) — sin solape de archivos
