@@ -1,5 +1,43 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## [MINOR] CORE-352 asignada a Antigravity — build autónomo del Dashboard (REP-011) — 2026-07-15
+
+### Contexto:
+El fundador pidió asignar una tarea larga a Antigravity para aprovecharlo
+como herramienta mientras Claude Code sigue con `SEC-015` en paralelo.
+Revisando el backlog propuesto, `REP-011` (build autónomo del Dashboard)
+resultó ser un candidato real y aún abierto: confirmado por búsqueda que
+`Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`
+(981 líneas, corre como `prebuild`) exige `Documentacion PROTOTIPE/` como
+carpeta hermana — el Dashboard no se puede construir fuera de este
+monorepo exacto hoy (confirmado también que `npm run build` en
+`Instancias Clientes/ventas/ventas-moni-app`, otro candidato inicial
+`REP-010`, ya pasa limpio — no era un candidato real).
+
+### Cambio:
+Registrada `CORE-352` en `tareas_pendientes.md` como `ASSIGNED_TO_ANTIGRAVITY`.
+Archivo de asignación completo en
+`Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-352_2026-07-15.md`,
+acotado explícitamente a `Central PROTOTIPE/dev-dashboard/` (sin solape con
+`Plantillas Core/App Ventas/`, donde Claude Code trabaja en paralelo en
+`SEC-015`). Criterios de cierre: build exitoso dentro del monorepo (sin
+regresión) + build exitoso en una copia standalone fuera del monorepo (con
+advertencia, no error fatal) + lint sin errores nuevos.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal), preparando la asignación —
+  Antigravity aún no ha ejecutado nada de `CORE-352` al momento de este
+  registro.
+- **Rama / HEAD observado:** `docs/context-packaging` / `d247432`.
+- **Alcance propio:** 1 archivo de asignación nuevo, 1 entrada nueva en
+  `tareas_pendientes.md`. No se tocó `dev-dashboard` todavía.
+- **Cambios preexistentes preservados:** sí.
+- **Siguiente paso exacto:** el fundador pasa el contenido de la asignación
+  a un chat nuevo de Antigravity. Cuando entregue el traspaso, quien retome
+  ejecuta la "Reverificación rápida" antes de confiar en el resultado.
+
+---
+
 ## [MAJOR] CORE-351 — Activar SEC-014: identidad real de clientes — 2026-07-15
 
 ### Contexto:

@@ -1,5 +1,25 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[ ] Tarea CORE-352: Activar REP-011 — build autónomo del Dashboard Central**
+  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — asignada 2026-07-15 vía
+    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-352_2026-07-15.md`
+    bajo el protocolo de traspaso verificado (`AI_WORKFLOW.md` §7.2), en
+    paralelo a `SEC-015` (que continúa Claude Code) — sin solape de archivos
+    (`Central PROTOTIPE/dev-dashboard/` vs `Plantillas Core/App Ventas/`).
+  - Objetivo real: `Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`
+    (981 líneas, corre como `prebuild`) exige que `Documentacion PROTOTIPE/`
+    exista como carpeta hermana — confirmado por búsqueda (líneas 66-68, 735).
+    El Dashboard no puede construirse hoy fuera de este monorepo exacto.
+  - Alcance/exclusiones exactos: ver la asignación completa. Excluye
+    explícitamente tocar `Plantillas Core/App Ventas`, cualquier commit/push,
+    y degradar la validación real cuando los docs SÍ están presentes.
+  - Evidencia esperada: `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/traspasos/TRASPASO_CORE-352_2026-07-15.md`
+    con los criterios de cierre verificados literalmente (build standalone
+    sin docs + build normal con docs + lint), o `BLOQUEO` documentado.
+  - Siguiente paso exacto: cuando Antigravity entregue el traspaso, quien
+    retome ejecuta la "Reverificación rápida" antes de confiar en el
+    resultado.
+
 * **[x] ~~Tarea CORE-351: Activar SEC-014 — identidad real de clientes (Anonymous Auth + vinculación por dispositivo)~~**
   - Estatus: `READY_FOR_INDEPENDENT_REVIEW`. Verificado con el emulador real:
     tally exacto a lo predicho en el plan aprobado —
