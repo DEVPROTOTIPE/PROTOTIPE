@@ -38,7 +38,7 @@ export default function MobileBottomNav({ items = [], overflowItems = [], indica
   return (
     <>
       <nav
-        className="flex md:hidden fixed bottom-0 left-0 right-0 min-h-[4rem] h-auto bg-surface border-t border-app z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-2 safe-area-bottom"
+        className="flex md:hidden fixed bottom-0 left-0 right-0 min-h-[4rem] h-auto bg-surface/85 backdrop-blur-xl border-t border-app z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-2 safe-area-bottom"
         aria-label="Navegación inferior"
       >
         {items.map((item, idx) => {
@@ -134,12 +134,12 @@ export default function MobileBottomNav({ items = [], overflowItems = [], indica
                   {isActive && (
                     <motion.div
                       layoutId={indicatorId}
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary"
+                      className="absolute inset-0 w-12 h-12 mx-auto mt-1 bg-primary/15 rounded-full"
                       transition={{ type: 'spring', stiffness: 400, damping: 25, mass: 0.8 }}
                     />
                   )}
-                  <Icon size={20} aria-hidden="true" />
-                  <span className="text-[10px] font-medium">{item.label}</span>
+                  <Icon size={20} className="z-10" strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" />
+                  <span className="text-[10px] font-medium z-10">{item.label}</span>
                 </>
               )}
             </NavLink>
