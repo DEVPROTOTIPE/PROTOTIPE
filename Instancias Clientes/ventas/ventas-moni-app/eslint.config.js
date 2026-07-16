@@ -56,7 +56,7 @@ export default defineConfig([
   {
     // Restricciones de Firebase CRUD aplicadas a vistas/hooks, excluyendo servicios/repositorios legítimos
     files: ['**/*.{js,jsx}'],
-    ignores: ['src/services/**/*', 'src/repositories/**/*'],
+    ignores: ['src/services/**/*', 'src/repositories/**/*', 'tests/**/*'],
     rules: {
       'no-restricted-syntax': [
         'error',

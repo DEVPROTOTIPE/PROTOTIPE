@@ -1,17 +1,41 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CreditCard, Search, DollarSign, History, CheckCircle, ChevronDown, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
+import { CreditCard, Search, DollarSign, History, CheckCircle, ChevronDown, Plus, ChevronLeft, ChevronRight, SmartphoneNfc } from 'lucide-react'
+import { updateClientProfile } from '../../services/userService'
 import { useAddPayment } from '../../features/credits'
 import { paymentSchema } from '../../schemas/creditSchemas'
 import { formatCurrency } from '../../utils/formatters'
 import * as creditService from '../../features/credits'
 import ModalTemplate from '../../components/common/ModalTemplate'
+import { useAlertConfirm } from '../../components/common/AlertConfirmContext'
 
 export default function AdminCredits() {
   const [activeTab, setActiveTab] = useState('activo') // activo | pagado
   const [credits, setCredits] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const { mutate: addPayment, isPending } = useAddPayment()
+  const { showAlert, showConfirm } = useAlertConfirm()
+
+  // SEC-014: permite a un admin liberar el dispositivo vinculado (ownerUid) de
+  // un cliente, p. ej. cuando cambió de celular y quedó bloqueado al intentar
+  // entrar desde uno nuevo.
+  const handleResetDevice = async (celular) => {
+    if (!celular) return
+    const ok = await showConfirm({
+      title: 'Resetear dispositivo',
+      message: `¿Liberar el dispositivo vinculado al celular ${celular}? El cliente podrá volver a iniciar sesión desde cualquier navegador la próxima vez.`,
+      confirmLabel: 'Resetear',
+      variant: 'warning',
+    })
+    if (!ok) return
+    try {
+      await updateClientProfile(celular, { ownerUid: null })
+      showAlert({ title: 'Hecho', message: 'Dispositivo del cliente reseteado correctamente.', variant: 'success' })
+    } catch (err) {
+      console.error('Error al resetear dispositivo del cliente:', err)
+      showAlert({ title: 'Error', message: 'No se pudo resetear el dispositivo. Intenta de nuevo.', variant: 'error' })
+    }
+  }
   const handleExportCreditsReportPDF = async () => {
     const { exportCreditsReportPDF } = await import('../../services/pdfService')
     exportCreditsReportPDF({})
@@ -265,9 +289,18 @@ export default function AdminCredits() {
                           className="border-t border-app bg-surface-2/30"
                         >
                           <div className="p-6">
-                            <h4 className="text-sm font-bold text-app mb-4 flex items-center gap-2">
-                              <History size={16} className="text-primary" /> Historial de Abonos
-                            </h4>
+                            <div className="flex items-center justify-between mb-4">
+                              <h4 className="text-sm font-bold text-app flex items-center gap-2">
+                                <History size={16} className="text-primary" /> Historial de Abonos
+                              </h4>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleResetDevice(credit.clienteCelular) }}
+                                className="flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-warning transition-colors px-3 py-1.5 rounded-lg border border-app hover:border-warning/40"
+                                title="Liberar el dispositivo vinculado a este cliente (SEC-014)"
+                              >
+                                <SmartphoneNfc size={14} /> Resetear dispositivo
+                              </button>
+                            </div>
                             
                             {(!credit.abonos || credit.abonos.length === 0) ? (
                               <p className="text-sm text-muted italic">Aún no se han registrado abonos a esta deuda.</p>

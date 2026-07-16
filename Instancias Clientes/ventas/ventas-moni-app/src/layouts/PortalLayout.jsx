@@ -2,6 +2,7 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { LogOut, Wifi, Bell, WifiOff } from 'lucide-react'
 import usePortalStore from '../store/portalStore'
 import { ROLES, PORTAL_CONFIG } from '../constants'
+import { auth } from '../config/firebaseConfig'
 import { useEffect, useState, useRef } from 'react'
 import { useConnectivityStore } from '../store/connectivityStore'
 
@@ -84,6 +85,10 @@ export default function PortalLayout() {
       }
     }
     clearPortalEmployee()
+    // SEC-015: cierra también la sesión real de Firebase Auth del empleado.
+    auth.signOut().catch((err) => {
+      console.error('[PortalLayout] Error al cerrar sesión de Firebase:', err)
+    })
     nav('/portal/auth', { replace: true })
   }
 

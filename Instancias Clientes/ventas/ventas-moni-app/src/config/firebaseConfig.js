@@ -32,7 +32,7 @@ try {
   db = getFirestore(app)
 }
 
-export { db }
+export { db, firebaseConfig }
 export const auth = getAuth(app)
 export const storage = getStorage(app)
 
