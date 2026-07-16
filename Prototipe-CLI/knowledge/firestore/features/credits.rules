@@ -1,9 +1,10 @@
-    // ─── FEATURE CREDITS (CRÉDITOS Y FIADOS) ──────────────────────────
+    // Créditos / Fiados
+    // SEC-014 (2026-07-15): lectura restringida a admin o al cliente dueño
+    // del celular asociado (cliente.celular), vía ownerUid del perfil.
     match /credits/{document} {
       allow read: if isAdmin() || (
-        request.auth != null && 
-        resource.data.clienteCelular != null &&
-        request.auth.token.phone_number == resource.data.clienteCelular
+        request.auth != null &&
+        get(/databases/$(database)/documents/users/$(resource.data.cliente.celular)).data.ownerUid == request.auth.uid
       );
-      allow write, delete: if isAdmin();
+      allow write: if isAdmin();
     }

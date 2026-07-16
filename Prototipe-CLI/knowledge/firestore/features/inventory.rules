@@ -1,12 +1,28 @@
-    // ─── FEATURE INVENTORY (PRODUCTOS Y CATEGORÍAS) ─────────────────
-    match /products/{document} {
-      allow read: if true; // Catálogo público
-      allow create, delete: if isAdmin();
-      allow update: if isAdmin() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['variantes', 'salesCount', 'updatedAt'])
-      );
-    }
-    match /categories/{document} {
+    // Publicidad y Promociones
+    match /ads/{document} {
       allow read: if true;
       allow write, delete: if isAdmin();
+    }
+
+    // Cupones
+    match /coupons/{document} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Garantías y Reclamos
+    // SEC-012 (completado 2026-07-15): create era `if true` (abierto); read
+    // dependía de request.auth.token.phone_number, un custom claim de
+    // Firebase Auth que este proyecto nunca usa (clientes usan sesión
+    // anónima + ownerUid desde SEC-014) — un cliente real nunca podía leer
+    // sus propios reclamos. Además el campo real que escribe
+    // createClientClaim es `clientCelular`, no `clienteCelular` como decía
+    // esta regla (confirmado en src/services/claimsService.js:36-41).
+    match /claims/{document} {
+      allow create: if request.auth != null;
+      allow read: if isAdmin() || (
+        request.auth != null &&
+        get(/databases/$(database)/documents/users/$(resource.data.clientCelular)).data.ownerUid == request.auth.uid
+      );
+      allow update, delete: if isAdmin();
     }

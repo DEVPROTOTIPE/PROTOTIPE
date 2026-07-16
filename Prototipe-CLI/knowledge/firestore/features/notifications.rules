@@ -1,34 +1,128 @@
-    // ─── FEATURE NOTIFICATIONS (CENTRO DE NOTIFICACIONES) ────────────
+    // [NUEVO] Centro de Notificaciones Centralizado
+    // - create: abierto (clientes, empleados y servicios internos crean notificaciones)
+    // - read: admins, clientes o si la notificación pertenece al rol consultado
+    // - update: admins, o cualquier usuario que solo modifique el campo 'status'
+    //           (para marcar como leída o archivar desde portales de empleados sin Auth)
+    // - delete: solo admins
     match /notifications/{document} {
-      allow create: if true;
+      // SEC-015: create exige al menos una sesión real (clientes vía
+      // SEC-014, empleados vía SEC-015 ya cubren esto automáticamente).
+      // No se usa isEmployee() aquí — createCentralNotification también la
+      // llaman flujos de clientes (orderService, creditService), no solo
+      // los portales.
+      allow create: if request.auth != null;
       allow read: if isAdmin() || resource.data.recipientRole == 'client';
       allow update: if isAdmin()
         || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
-      allow delete: if isAdmin() 
-        || resource.data.recipientRole == 'client' 
-        || resource.data.recipientRole == 'vendedor' 
-        || resource.data.recipientRole == 'bodeguero' 
-        || resource.data.recipientRole == 'mensajero';
+      allow delete: if isAdmin() || resource.data.recipientRole == 'client' || resource.data.recipientRole == 'vendedor' || resource.data.recipientRole == 'bodeguero' || resource.data.recipientRole == 'mensajero';
     }
 
+    // [NUEVO] Registro de Tokens FCM (Dispositivos)
+    // SEC-012 (completado 2026-07-15): create/update eran `if true`
+    // (abierto) — cualquiera podía registrar o pisar el token de push de
+    // cualquier destinatario. saveFCMToken() no tiene ningún llamador real
+    // todavía en el código (confirmado por búsqueda) — se exige sesión
+    // real como mínimo razonable sin inventar lógica de dueño para una
+    // función aún sin flujo que la use.
     match /fcmTokens/{document} {
       allow read: if isAdmin();
-      allow create, update: if true;
+      allow create, update: if request.auth != null;
       allow delete: if isAdmin();
     }
 
+    // Notificaciones del Cliente (Legacy compatibility)
+    // SEC-012 (completado 2026-07-15): mismo problema que claims — create
+    // era `if true`, read dependía de un custom claim (phone_number) que
+    // nunca se usa; se reemplaza por cross-reference a ownerUid (el campo
+    // clienteCelular sí coincide aquí con lo que escribe
+    // createClientNotification, confirmado en clientNotificationService.js).
     match /clientNotifications/{document} {
       allow read: if isAdmin() || (
-        request.auth != null && 
-        resource.data.clienteCelular != null &&
-        request.auth.token.phone_number == resource.data.clienteCelular
+        request.auth != null &&
+        get(/databases/$(database)/documents/users/$(resource.data.clienteCelular)).data.ownerUid == request.auth.uid
       );
-      allow create: if true;
+      allow create: if request.auth != null;
       allow update: if isAdmin() || (
-        request.auth != null && 
-        resource.data.clienteCelular != null &&
-        request.auth.token.phone_number == resource.data.clienteCelular
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt'])
+        request.auth != null &&
+        get(/databases/$(database)/documents/users/$(resource.data.clienteCelular)).data.ownerUid == request.auth.uid
       );
       allow delete: if isAdmin();
     }
+
+    // Configuración y PINs de empleados (Altamente sensible)
+    match /employees/{employeeId} {
+      allow read: if isAdmin() || (resource != null && resource.data.activo == true);
+      allow write: if isAdmin();
+
+      // Subcolección legacy de hashes de PIN (SEC-015: ya no se usa para
+      // login — reemplazada por Firebase Auth real vía employeeAuthLinks.
+      // Se conserva bloqueada como colección muerta, nunca se reactiva.
+      match /secrets/{hashedPin} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // SEC-015: índice inverso authUid (Firebase Auth) -> employeeId, usado
+    // por isEmployee()/employeeId(). Solo isAdmin() escribe (provisión vía
+    // employeeAuthService/reset-employee-pin.js); el propio empleado puede
+    // leer su propio vínculo.
+    match /employeeAuthLinks/{authUid} {
+      allow read: if isAdmin() || request.auth.uid == authUid;
+      allow write: if isAdmin();
+    }
+
+    // Entregas y despachos
+    match /deliveries/{deliveryId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      // SEC-015: antes cualquier request.auth != null podía actualizar
+      // (incluye a cualquier visitante anónimo desde SEC-014) — se acota a
+      // empleados reales o admin.
+      allow update: if isAdmin() || (
+        isEmployee() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'history', 'updatedAt', 'deliveredAt'])
+      );
+    }
+
+    // Kardex y Movimientos de Stock
+    // [SEGURIDAD] Lectura restringida a admin: los movimientos de stock son información
+    //  comercial sensible (volúmenes, proveedores, ajustes internos).
+    match /stockMovements/{movementId} {
+      allow read: if isAdmin();
+      // SEC-015: el sistema ya no escribe "automáticamente" sin identidad —
+      // exige que sea un empleado real (bodeguero) o un admin, y que el
+      // employeeId declarado corresponda a la sesión que escribe.
+      allow create: if isAdmin() || (isEmployee() && request.resource.data.employeeId == employeeId());
+      allow update, delete: if isAdmin();
+    }
+
+    // Historial de Accesos y Sesiones QR
+    match /accessLogs/{logId} {
+      allow read: if isAdmin();
+      // SEC-015: create/update ya no aceptan cualquier request sin
+      // identidad — deben venir de la sesión real del empleado que el log
+      // declara (o de admin).
+      allow create: if isAdmin() || (isEmployee() && request.resource.data.employeeId == employeeId());
+      allow update: if isAdmin() || (isEmployee() && resource.data.employeeId == employeeId());
+      allow delete: if isAdmin();
+    }
+
+    // Analíticas de Códigos QR
+    match /qrAnalytics/{analyticsId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Telemetría y Analíticas
+    match /trackingAnalytics/{analyticsId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Colección de diagnóstico temporal para desarrolladores
+    match /_diagnostics/{document} {
+      allow read, write: if isAdmin();
+    }
+  }
