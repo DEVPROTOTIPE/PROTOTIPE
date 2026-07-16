@@ -1,5 +1,63 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CORE-361 — 2026-07-15
+**Encapsular setDoc() de LoginPage.jsx en userService (Core) + asignar réplica**
+
+### Contexto:
+Al reverificar `CORE-359` (propagación de seguridad a `ventas-moni-app`),
+se descubrió que su traspaso afirmaba "archivos 100% libres de errores de
+linter" — falso: `npx eslint` mostró 3 violaciones reales de
+`no-restricted-syntax` (`setDoc` directo) en `LoginPage.jsx`. Se investigó
+antes de tratarlo como regresión: el mismo lint sobre
+`Plantillas Core/App Ventas/src/pages/LoginPage.jsx` (fuente de verdad)
+mostró las mismas 3 violaciones en las mismas líneas (126/204/249) — deuda
+preexistente heredada de Core, nunca corregida pese a que el lint la
+señalaba desde antes de `SEC-014`/`SEC-015`.
+
+### Cambio:
+Se agregaron `registerFirstAdmin(uid, {...})` y
+`registerNewClient(celular, {...})` a
+`Plantillas Core/App Ventas/src/services/userService.js`, siguiendo el
+mismo patrón que las funciones ya existentes `saveClientProfile`/
+`updateClientProfile`. `LoginPage.jsx` ya no llama `setDoc()` directamente
+en ninguno de sus 3 sitios — el backfill de `ownerUid` reutiliza
+`updateClientProfile()` ya existente en vez de duplicar lógica.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal).
+- **Rama / HEAD observado:** `docs/context-packaging`.
+- **Alcance propio:** `src/pages/LoginPage.jsx`, `src/services/userService.js`
+  (ambos en `Plantillas Core/App Ventas/`).
+- **Cambios preexistentes preservados:** sí — no se tocaron los otros 3
+  problemas de lint preexistentes de `LoginPage.jsx` (`ErrorBoundary`/
+  `DEFAULT_SETTINGS` sin usar, `set-state-in-effect`), confirmado por
+  `git diff` que esas líneas no cambiaron.
+- **Commit local:** `fc2b760` (rama `docs/context-packaging`, sin push).
+
+### Evidencia:
+- `npx eslint src/pages/LoginPage.jsx src/services/userService.js` → 0
+  ocurrencias de "setDoc() directo está prohibido" (`HECHO VERIFICADO`).
+- `npx vitest run` → `118 passed (118)` tras reiniciar los emuladores en
+  frío. **Nota honesta:** un primer intento con los emuladores de larga
+  duración (usados toda la sesión) dio un fallo real y reproducible en
+  `employeeAuthEmulator.spec.js` (`auth/user-not-found`) — no relacionado
+  a este cambio (archivo distinto, sin tocar). Se diagnosticó como estado
+  corrupto por horas de reutilización del mismo emulador, se reinició
+  Firestore+Auth desde cero, y el mismo archivo pasó limpio en el
+  siguiente intento.
+- `npm run build` → exitoso.
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW`.
+
+### Siguiente paso — asignado a Antigravity:
+`CORE-362` (réplica en `Prototipe-CLI/templates/template-ventas/`) y
+`CORE-363` (réplica en `Instancias Clientes/ventas/ventas-moni-app/`) —
+mismo fix exacto, misma deuda idéntica confirmada por `grep` en ambas
+carpetas. Cada asignación incluye una advertencia explícita sobre no
+asumir mecanismos de registro de tareas distintos a la edición manual
+(por la desviación ya corregida en `CORE-348`).
+
+---
+
 ## CORE-359 — 2026-07-15
 **Security: Propagar SEC-012/13/14/15 de Core a la instancia real ventas-moni-app**
 

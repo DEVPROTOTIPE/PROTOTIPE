@@ -1,5 +1,52 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[x] ~~Tarea CORE-361: Encapsular setDoc() de LoginPage.jsx en userService (Core)~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — implementada por Claude Code,
+    2026-07-15. Commit local `fc2b760` (rama `docs/context-packaging`, sin
+    push).
+  - Objetivo real: al reverificar `CORE-359` se descubrió que
+    `LoginPage.jsx` viola `no-restricted-syntax` (setDoc directo prohibido
+    en vistas/hooks) en 3 sitios — deuda preexistente desde antes de
+    `SEC-014`/`SEC-015`, nunca corregida pese a que el lint la señalaba.
+  - Cambio: agregadas `registerFirstAdmin()` y `registerNewClient()` a
+    `src/services/userService.js`; reutilizado `updateClientProfile()` ya
+    existente para el backfill de `ownerUid`. `LoginPage.jsx` ya no importa
+    `setDoc`/`serverTimestamp` de Firestore directamente.
+  - Evidencia literal: `npx eslint` → 0 violaciones de `setDoc` en ambos
+    archivos (los otros 3 problemas preexistentes de `LoginPage.jsx`
+    — `ErrorBoundary`/`DEFAULT_SETTINGS` sin usar, `set-state-in-effect` —
+    confirmados por `git diff` como ajenos, no tocados). `npx vitest run`
+    → `118 passed (118)` (tras reiniciar emuladores en frío: un run previo
+    con emuladores de larga duración dio un fallo real en
+    `employeeAuthEmulator.spec.js` no relacionado a este cambio). `npm run
+    build` → exitoso.
+  - Cambios preexistentes preservados: sí
+  - Siguiente paso exacto: `CORE-362` (template-ventas) y `CORE-363`
+    (ventas-moni-app) replican este mismo fix — misma deuda idéntica en
+    esas 2 carpetas (mismas 3 líneas, mismo patrón).
+
+* **[ ] Tarea CORE-362: Replicar el fix de setDoc() de LoginPage.jsx en `template-ventas`**
+  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — 2026-07-15, vía
+    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-362_2026-07-15.md`.
+    Acotada a `Prototipe-CLI/templates/template-ventas/` (sin solape con
+    `CORE-363`).
+  - Objetivo real: `template-ventas/src/pages/LoginPage.jsx` tiene la misma
+    deuda que `CORE-361` cerró en Core (mismas 3 violaciones de
+    `no-restricted-syntax`/`setDoc`, heredadas de la propagación original).
+  - Cambios preexistentes preservados: sí
+  - Siguiente paso exacto: reverificar el traspaso antes de confiar en él.
+
+* **[ ] Tarea CORE-363: Replicar el fix de setDoc() de LoginPage.jsx en `ventas-moni-app`**
+  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — 2026-07-15, vía
+    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-363_2026-07-15.md`.
+    Acotada a `Instancias Clientes/ventas/ventas-moni-app/` (sin solape con
+    `CORE-362`).
+  - Objetivo real: `ventas-moni-app/src/pages/LoginPage.jsx` tiene la misma
+    deuda encontrada al reverificar `CORE-359` (mismas 3 violaciones de
+    `no-restricted-syntax`/`setDoc`).
+  - Cambios preexistentes preservados: sí
+  - Siguiente paso exacto: reverificar el traspaso antes de confiar en él.
+
 * **[x] ~~Tarea CORE-359: Propagar SEC-012/013/014/015 a `ventas-moni-app` (cliente real)~~**
   - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — implementada por Antigravity el
     2026-07-15 (`ASIGNACION_CORE-359_2026-07-15.md`), reverificada por Claude
