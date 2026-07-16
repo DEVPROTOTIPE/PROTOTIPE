@@ -58,12 +58,16 @@ export default function AdminLayout() {
   const location = useLocation()
   const isOnline = useConnectivityStore((state) => state.isOnline)
 
-  // Redirigir al POS si se pierde la conexión mientras se está en otra pestaña
+  // Redirigir al POS si se pierde la conexión mientras se está en otra pestaña.
+  // `navigate` excluido de las dependencias a propósito (ver fix de
+  // WelcomePage.jsx/useAuthInit.js): su referencia puede cambiar entre
+  // renders sin que eso deba re-disparar este efecto.
   useEffect(() => {
     if (!isOnline && location.pathname !== '/admin/ventas') {
       navigate('/admin/ventas', { replace: true })
     }
-  }, [isOnline, location.pathname, navigate])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOnline, location.pathname])
 
   // Hook centralizado del Notification Center
   const [soundEnabled, setSoundEnabled] = useState(true)

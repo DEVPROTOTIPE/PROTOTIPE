@@ -22,7 +22,6 @@ const AdminClaims = lazy(() => import('../pages/admin/AdminClaims'))
 
 const ClientProfile = lazy(() => import('../pages/client/ClientProfile'))
 
-
 // Guard de rutas por rol
 function RequireAuth({ children, allowedRole }) {
   const { user, role, isLoading } = useAuthStore()
@@ -33,6 +32,18 @@ function RequireAuth({ children, allowedRole }) {
     return <Navigate to="/login" replace />
   }
   return children
+}
+
+// Redirección de ruta no encontrada — va directo al destino correcto sin
+// pasar por WelcomePage, evitando el loop: * → / → /tienda/catalogo → * → …
+function NotFoundRedirect() {
+  const { user, role, isLoading } = useAuthStore()
+  if (isLoading) return <AppLoader />
+  // Mismo criterio que RequireAuth: sin `user` no hay sesión real, sin
+  // importar lo que diga `role` (defensa en profundidad, mismo patrón).
+  if (user && role === ROLES.ADMIN) return <Navigate to="/admin/inicio" replace />
+  if (user && role === ROLES.CLIENT) return <Navigate to="/tienda/catalogo" replace />
+  return <Navigate to="/login" replace />
 }
 
 export default function AppRoutes() {
@@ -156,7 +167,7 @@ export default function AppRoutes() {
         ))}
 
         <Route path="/" element={<WelcomePage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundRedirect />} />
       </Routes>
     </Suspense>
   )

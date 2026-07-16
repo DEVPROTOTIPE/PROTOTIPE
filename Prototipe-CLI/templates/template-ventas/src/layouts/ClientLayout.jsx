@@ -26,6 +26,8 @@ export default function ClientLayout() {
   const location = useLocation()
   const isProductDetail = location.pathname.includes('/producto/')
   const { appName, appIcon, isFeatureEnabled } = useAppConfigStore()
+  const onlineOrdersEnabled = isFeatureEnabled('onlineOrdersEnabled')
+  const couponsEnabled = isFeatureEnabled('couponsEnabled')
   const { getCount, openCart, isOpen: isCartOpen } = useCartStore()
   const { user } = useAuthStore()
   const { subscribe, unsubscribe } = useFavoritesStore()

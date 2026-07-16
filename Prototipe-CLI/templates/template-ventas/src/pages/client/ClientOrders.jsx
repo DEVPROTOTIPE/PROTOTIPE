@@ -83,11 +83,15 @@ export default function ClientOrders() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
+  // `navigate` excluido de las dependencias a propósito (ver fix de
+  // WelcomePage.jsx/useAuthInit.js): su referencia puede cambiar entre
+  // renders sin que eso deba re-disparar este efecto.
   useEffect(() => {
     if (!onlineOrdersEnabled) {
       navigate('/tienda/catalogo', { replace: true })
     }
-  }, [onlineOrdersEnabled, navigate])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onlineOrdersEnabled])
 
   const [showHidden, setShowHidden] = useState(false)
   const [expandedOrderId, setExpandedOrderId] = useState(null)
@@ -122,15 +126,19 @@ export default function ClientOrders() {
     setCurrentPage(1)
   }, [activeTab])
 
-  // Abrir y expandir automáticamente el pedido si viene desde una notificación
+  // Abrir y expandir automáticamente el pedido si viene desde una
+  // notificación. `navigate` excluido de las dependencias a propósito (ver
+  // fix de WelcomePage.jsx/useAuthInit.js): su referencia puede cambiar
+  // entre renders sin que eso deba re-disparar este efecto.
   useEffect(() => {
     if (location.state?.highlightOrderId) {
       setExpandedOrderId(location.state.highlightOrderId)
-      
+
       // Limpiar el estado para evitar que se vuelva a abrir al recargar o navegar de vuelta
       navigate(location.pathname, { replace: true, state: {} })
     }
-  }, [location.state, navigate])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
  
   const activeFilter = 'Todos'
   const matchesFilter = () => true
