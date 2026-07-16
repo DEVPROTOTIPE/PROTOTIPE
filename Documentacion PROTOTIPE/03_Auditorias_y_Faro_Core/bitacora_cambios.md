@@ -1,5 +1,100 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CORE-365 — 2026-07-16
+**Rediseño de nav móvil (cliente y admin) + asignación de auditoría de responsividad**
+
+### Contexto:
+El fundador pidió modernizar la barra de navegación inferior móvil (mucho
+botones amontonados por features activas sin límite) y, por separado,
+señaló que algunas páginas de la app no son responsivas (ejemplo
+confirmado: Fidelización).
+
+### Cambio — rediseño de nav (ya implementado y commiteado, `5815370`):
+Nuevo componente compartido `src/components/common/MobileBottomNav.jsx`,
+extendiendo el patrón ya validado en la biblioteca de componentes del
+dashboard (`AnimatedNavbarMobileSandbox.jsx`: burbuja elástica con spring
+physics). Antes de decidir el diseño, se evaluó instalar el plugin externo
+`ui-ux-pro-max` (marketplace de GitHub, a pedido del fundador) — se hizo
+una revisión básica de higiene (MIT, sin `hooks.json`, versión madura
+2.11.0) y se usó su skill de referencia (`references/quick-reference.md`)
+para VALIDAR el patrón ya existente en vez de reemplazarlo: sus reglas
+`bottom-nav-limit` (máx. 5 ítems), `overflow-menu`, `spring-physics` y
+`scale-feedback` coinciden exactamente con lo que ya hacía el componente
+interno. Orden final: Cliente = Ofertas, Favoritos, Catálogo (centro),
+Pedidos, Menú; Admin = Inicio, Inventario, Ventas POS (centro), Pedidos,
+Menú — ambos con hamburguesa derivada de features realmente activas
+(`isFeatureEnabled`), no de una lista estática.
+
+### Cambio — asignación de auditoría de responsividad (`CORE-365` mismo ID, alcance separado):
+`ASIGNACION_CORE-365_2026-07-16.md` asigna a Antigravity auditar las ~30
+páginas de App Ventas Core (cliente, admin, portales, layouts) contra el
+estándar ya existente en `.claude/rules/component-library.md` §5 (14
+reglas de diseño responsivo) — no inventar uno nuevo. Prioridad conocida:
+`AdminCustomerLoyalty.jsx`/`AdminView.jsx` (Fidelización), ya confirmado
+roto por el fundador.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal) — nav redesign implementado y
+  verificado; auditoría de responsividad asignada a Antigravity, aún sin
+  ejecutar al momento de este registro.
+- **Rama / HEAD observado:** `docs/context-packaging` / `5815370`.
+- **Alcance propio del nav redesign:** `src/layouts/ClientLayout.jsx`,
+  `src/layouts/AdminLayout.jsx`, `src/components/common/MobileBottomNav.jsx`
+  (nuevo) — todos en `Plantillas Core/App Ventas/` únicamente (ver nota de
+  alcance en la adenda de CORE-361/362/363 arriba).
+- **Cambios preexistentes preservados:** sí.
+
+### Evidencia (nav redesign):
+- `npx eslint` → 0 errores nuevos (solo deuda preexistente ya documentada).
+- `npx vitest run` → `118 passed (118)`.
+- `npm run build` → exitoso.
+- **Pendiente:** confirmación visual del fundador en navegador real (no
+  disponible en este entorno de terminal).
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW` (nav redesign) /
+  `ASSIGNED_TO_ANTIGRAVITY` (auditoría de responsividad).
+
+---
+
+## CORE-361/362/363 (adenda) — 2026-07-15/16
+**Estado "Autorizado" persistente + verificación por WhatsApp (SEC-014)**
+
+### Cambio:
+Tras probar en vivo el botón "Autorizar este dispositivo" de `CORE-361`,
+el fundador señaló 2 mejoras reales: (1) el botón seguía diciendo
+"Autorizar" incluso después de un clic exitoso — se agregó
+`markDeviceAuthorizationResolved()` (persiste `resolved: true` en
+Firestore, no solo estado local) y el botón ahora muestra "Autorizado" de
+forma permanente; (2) se agregó una capa de verificación de identidad:
+cuando el login se bloquea por dispositivo, el cliente ve un botón "Enviar
+solicitud de autorización por WhatsApp" (deep link `wa.me` al número de la
+tienda, sin backend ni costo nuevo) con un mensaje pre-llenado que incluye
+su número exacto — el vendedor compara ese número contra el remitente real
+de WhatsApp para confirmar identidad antes de autorizar.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal).
+- **Commits locales:** `6679dc3` (Core), `63f9a58` (template-ventas),
+  `e9a8de9` (ventas-moni-app) — última propagación manual a las 2 copias
+  antes de que el fundador indicara que sincroniza él mismo desde el
+  dashboard en adelante (ver nota de alcance más abajo).
+- **Cambios preexistentes preservados:** sí.
+
+### Evidencia:
+- `npx eslint` → 0 errores nuevos en Core (solo deuda preexistente ya
+  documentada). `npm run build` → exitoso en las 3 copias.
+- `npx vitest run` (Core) → `118 passed (118)`.
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW`.
+
+### Nota de alcance (vigente desde 2026-07-16):
+El fundador indicó explícitamente que a partir de ahora Claude Code
+trabaja **solo** en `Plantillas Core/App Ventas/` — él sincroniza
+Core → `template-ventas`/`ventas-moni-app` desde el panel del Dashboard
+Central para ahorrar tokens. Guardado como memoria persistente
+(`feedback_scope_core_only`). Las tareas siguientes (nav móvil, CORE-365)
+ya se ejecutan solo en Core.
+
+---
+
 ## CORE-364 — 2026-07-15
 **Corregir bucle de navegación infinito ("Throttling navigation")**
 

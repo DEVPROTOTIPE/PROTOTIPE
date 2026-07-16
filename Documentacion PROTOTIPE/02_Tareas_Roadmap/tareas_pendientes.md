@@ -1,5 +1,22 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
+* **[ ] Tarea CORE-365: Auditoría y corrección de responsividad en toda App Ventas Core**
+  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — 2026-07-16, vía
+    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-365_2026-07-16.md`.
+    Acotada a `Plantillas Core/App Ventas/` (el fundador sincroniza a
+    `template-ventas`/`ventas-moni-app` él mismo desde el dashboard).
+  - Objetivo real: el fundador detectó en vivo que algunas páginas no son
+    responsivas (ejemplo confirmado: Fidelización —
+    `AdminCustomerLoyalty.jsx`/`AdminView.jsx`) y pidió una garantía
+    completa, página por página (~30 archivos: sesión cliente, admin,
+    portales de empleados, layouts), no un parche puntual.
+  - Estándar de referencia (ya existente, no inventar uno nuevo):
+    `.claude/rules/component-library.md` §5 (14 reglas de diseño
+    responsivo móvil) y §7 (Design Integrity Guard).
+  - Cambios preexistentes preservados: sí
+  - Siguiente paso exacto: reverificar el traspaso con los comandos de
+    "Reverificación rápida" antes de confiar en él.
+
 * **[x] ~~Tarea CORE-364: Corregir bucle de navegación infinito ("Throttling navigation")~~**
   - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — diagnosticado en vivo por el
     fundador (reporte de error real en navegador), corregido por Antigravity
