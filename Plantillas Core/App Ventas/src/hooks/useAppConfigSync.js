@@ -181,9 +181,24 @@ export default function useAppConfigSync() {
                 enabled: Boolean(centralFlags.wholesaleEnabled)
               }
             }
-            
+
             // Almacenar en la referencia
             latestCentralFlagsRef.current = flagsUpdate
+
+            // Control remoto de paleta/temporada desde el CRM (ClientLifecyclePanel →
+            // Apariencia y Colores). Cuando appearanceControlledByDashboard === true,
+            // el dashboard es la fuente de verdad: se propaga el tema/temporada elegidos
+            // y se marca appearanceLockedByDashboard para que Opciones de Desarrollador
+            // bloquee la selección local y muestre el aviso correspondiente. Si se
+            // desactiva desde el dashboard, solo se libera el bloqueo local (no se
+            // fuerza ningún tema de vuelta) para no pisar lo que el cliente ya tenía.
+            const appearanceFieldsFromCentral = data.appearanceControlledByDashboard
+              ? {
+                  theme: data.dashboardTheme || 'zafiro-moderno',
+                  activeSeasonalEvent: data.dashboardSeasonalEvent || 'none',
+                  appearanceLockedByDashboard: true
+                }
+              : { appearanceLockedByDashboard: false }
 
             const billingFieldsFromCentral = {
               ...(data.billingMode !== undefined && { developerBillingMode: data.billingMode }),
@@ -192,7 +207,8 @@ export default function useAppConfigSync() {
               ...(data.pagoMensualFijo !== undefined && { developerFlatMonthlyPayment: parseFloat(data.pagoMensualFijo) }),
               ...(data.enableDianBilling !== undefined && { developerEnableDianBilling: Boolean(data.enableDianBilling) }),
               ...(data.costoPorFacturaDian !== undefined && { developerDianInvoiceCost: parseFloat(data.costoPorFacturaDian) }),
-              ...flagsUpdate
+              ...flagsUpdate,
+              ...appearanceFieldsFromCentral
             }
 
             if (Object.keys(billingFieldsFromCentral).length > 0) {

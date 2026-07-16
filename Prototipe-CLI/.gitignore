@@ -6,6 +6,7 @@ locks/
 *.log
 node_modules/
 artifacts/
+.test-tmp/
 
 # Token efímero local de Prototipe CLI
 .prototipe/cli-token.json

@@ -70,8 +70,8 @@ service cloud.firestore {
         request.resource.data.role == 'client' &&
         (resource.data.role == 'client' || resource.data.role == null) &&
         (
-          request.resource.data.ownerUid == resource.data.ownerUid ||
-          (resource.data.ownerUid == null && request.resource.data.ownerUid == request.auth.uid)
+          request.resource.data.ownerUid == resource.data.get('ownerUid', null) ||
+          (resource.data.get('ownerUid', null) == null && request.resource.data.ownerUid == request.auth.uid)
         )
       );
 
@@ -79,9 +79,15 @@ service cloud.firestore {
 
       // SEC-014: solo la sesión vinculada (ownerUid) al perfil padre puede
       // leer/escribir sus propios favoritos.
+      // Corrección (2026-07-16): .data.ownerUid directo lanza una excepción
+      // de evaluación si el campo no existe en el doc (perfiles anteriores a
+      // SEC-014 o sin backfill exitoso todavía) — Firestore deniega el
+      // permiso ante cualquier error de evaluación, sin mensaje claro. Usar
+      // .get('ownerUid', null) trata el campo ausente como null de forma
+      // segura en vez de tumbar toda la regla.
       match /favorites/{favoriteId} {
         allow read, write: if request.auth != null &&
-          get(/databases/$(database)/documents/users/$(userId)).data.ownerUid == request.auth.uid;
+          get(/databases/$(database)/documents/users/$(userId)).data.get('ownerUid', null) == request.auth.uid;
       }
     }
 
@@ -157,7 +163,7 @@ service cloud.firestore {
         request.auth != null &&
         resource.data.clienteCelular is string &&
         resource.data.clienteCelular != 'Desconocido' &&
-        get(/databases/$(database)/documents/users/$(resource.data.clienteCelular)).data.ownerUid == request.auth.uid
+        get(/databases/$(database)/documents/users/$(resource.data.clienteCelular)).data.get('ownerUid', null) == request.auth.uid
       );
       allow update, delete: if isAdmin();
     }
@@ -168,7 +174,7 @@ service cloud.firestore {
     match /credits/{document} {
       allow read: if isAdmin() || (
         request.auth != null &&
-        get(/databases/$(database)/documents/users/$(resource.data.cliente.celular)).data.ownerUid == request.auth.uid
+        get(/databases/$(database)/documents/users/$(resource.data.cliente.celular)).data.get('ownerUid', null) == request.auth.uid
       );
       allow write: if isAdmin();
     }
@@ -197,7 +203,7 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow read: if isAdmin() || (
         request.auth != null &&
-        get(/databases/$(database)/documents/users/$(resource.data.clientCelular)).data.ownerUid == request.auth.uid
+        get(/databases/$(database)/documents/users/$(resource.data.clientCelular)).data.get('ownerUid', null) == request.auth.uid
       );
       allow update, delete: if isAdmin();
     }
@@ -243,12 +249,12 @@ service cloud.firestore {
     match /clientNotifications/{document} {
       allow read: if isAdmin() || (
         request.auth != null &&
-        get(/databases/$(database)/documents/users/$(resource.data.clienteCelular)).data.ownerUid == request.auth.uid
+        get(/databases/$(database)/documents/users/$(resource.data.clienteCelular)).data.get('ownerUid', null) == request.auth.uid
       );
       allow create: if request.auth != null;
       allow update: if isAdmin() || (
         request.auth != null &&
-        get(/databases/$(database)/documents/users/$(resource.data.clienteCelular)).data.ownerUid == request.auth.uid
+        get(/databases/$(database)/documents/users/$(resource.data.clienteCelular)).data.get('ownerUid', null) == request.auth.uid
       );
       allow delete: if isAdmin();
     }

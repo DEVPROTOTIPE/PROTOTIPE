@@ -15,7 +15,6 @@
 
 import fs from 'fs-extra';
 import path from 'path';
-import os from 'os';
 import pc from 'picocolors';
 import { execSync } from 'child_process';
 
@@ -24,6 +23,14 @@ import { execSync } from 'child_process';
 const REGISTRO_PATH = path.join(process.cwd(), 'plantillas_registro.json');
 const TEMP_PREFIX   = 'prototipe-test-';
 const TIMEOUT_MS    = 5 * 60 * 1000; // 5 min por plantilla
+// Corrección (2026-07-16): os.tmpdir() en Windows resuelve a
+// C:\Users\<nombre de usuario>\AppData\Local\Temp — si el nombre de usuario
+// contiene un espacio (caso real: "Sergio Agudelo"), el plugin de PWA de Vite
+// calcula mal la ruta relativa del index.html emitido y el build falla con
+// "must be strings that are neither absolute nor relative paths". Usar una
+// carpeta local del propio proyecto (sin espacios garantizado) evita el bug
+// de raíz en vez de depender de que la cuenta de Windows no tenga espacios.
+const LOCAL_TEMP_ROOT = path.join(process.cwd(), '.test-tmp');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -191,8 +198,19 @@ function auditarViteConfig(destino, name) {
       errors.push(`vite.config.js en "${name}" no fragmenta la librería de ruteo react-router.`);
     }
     
-    if (content.includes("return 'vendor'") || content.includes("return 'vendor';")) {
-      errors.push(`vite.config.js en "${name}" utiliza el patrón obsoleto "return 'vendor'". Debe fragmentar las utilidades pesadas de terceros.`);
+    // Corrección (2026-07-16): el check original marcaba CUALQUIER aparición
+    // de "return 'vendor'" como el patrón obsoleto (bucket único sin
+    // fragmentar), sin distinguir de un catch-all final DESPUÉS de fragmentar
+    // ya Firebase/dexie/qrcode/etc. — con ese criterio ciego, hasta el propio
+    // vite.config.js canónico de App Ventas Core (la referencia) fallaba esta
+    // misma auditoría, confirmado leyendo su contenido real. El patrón
+    // realmente obsoleto es "vendor" como ÚNICA rama (sin fragmentación
+    // previa real); si ya hay evidencia de fragmentación granular (Firebase
+    // en submódulos), un catch-all final para lo no clasificado es la
+    // práctica estándar de Vite, no un error.
+    const hasGranularSplitting = content.includes('firebase-firestore') && content.includes('firebase-auth');
+    if ((content.includes("return 'vendor'") || content.includes("return 'vendor';")) && !hasGranularSplitting) {
+      errors.push(`vite.config.js en "${name}" utiliza "return 'vendor'" como único bucket, sin fragmentar antes las utilidades pesadas de terceros.`);
     }
   } catch (err) {
     errors.push(`Error leyendo vite.config.js en "${name}": ${err.message}`);
@@ -262,7 +280,7 @@ async function testPlantilla(name, config, opts) {
   };
 
   const startTotal = Date.now();
-  const tempDir = path.join(os.tmpdir(), `${TEMP_PREFIX}${name}-${Date.now()}`);
+  const tempDir = path.join(LOCAL_TEMP_ROOT, `${TEMP_PREFIX}${name}-${Date.now()}`);
   result.tempDir = tempDir;
 
   console.log(pc.bold(pc.white(`\n  Plantilla: ${pc.cyan(name)} (${nicho}) — v${version}${activo ? '' : pc.yellow(' [INACTIVA]')}`)));

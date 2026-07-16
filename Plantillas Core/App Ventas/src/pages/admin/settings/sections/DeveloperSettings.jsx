@@ -142,7 +142,17 @@ export default function DeveloperSettings({
       if (formData.catalogFilters) {
         await updateCatalogFilters(formData.catalogFilters)
       }
-      config.setConfig(formData)
+      // Aplicar a Zustand solo los campos que esta función realmente persistió en
+      // Firestore, no el formData completo. formData es compartido entre TODAS las
+      // subsecciones (incluida Apariencia y Colores); si el usuario cambió la
+      // paleta ahí sin guardarla todavía y luego guarda Filtros/Contacto/Facturación
+      // aquí, empujar formData completo hacía parecer aplicado un tema que nunca
+      // se escribió en Firestore — y se perdía al recargar la página.
+      config.setConfig({
+        developerPhone: formData.developerPhone || '',
+        commercialOptimization: formData.commercialOptimization,
+        ...(formData.catalogFilters ? { catalogFilters: formData.catalogFilters } : {})
+      })
       setSaveMessage({ type: 'success', text: 'Configuraciones de desarrollo guardadas correctamente.' })
       setTimeout(() => setSaveMessage(null), 3000)
     } catch (error) {
@@ -644,6 +654,7 @@ export default function DeveloperSettings({
                           <label className="text-[10px] text-muted block mb-1">Ventas Mínimas</label>
                           <input
                             type="number"
+                            inputmode="numeric"
                             min="1"
                             value={formData.commercialOptimization.tools.smartTags.bestSeller?.minSales ?? 5}
                             onChange={(e) => {
@@ -651,7 +662,7 @@ export default function DeveloperSettings({
                               tags.bestSeller.minSales = Number(e.target.value)
                               setFormData({ ...formData, commercialOptimization: { ...formData.commercialOptimization, tools: { ...formData.commercialOptimization.tools, smartTags: tags } } })
                             }}
-                            className="w-full h-9 px-2 rounded-lg bg-surface border border-app text-app focus:outline-none text-xs bg-transparent"
+                            className="w-full h-9 px-2 rounded-lg bg-surface border border-app text-app focus:outline-none text-xs bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                         </div>
                         <div>
@@ -824,6 +835,7 @@ export default function DeveloperSettings({
                           <label className="text-[10px] text-muted block mb-1">Umbral Stock</label>
                           <input
                             type="number"
+                            inputmode="numeric"
                             min="1"
                             value={formData.commercialOptimization.tools.smartTags.lastUnit?.threshold ?? 3}
                             onChange={(e) => {
@@ -831,7 +843,7 @@ export default function DeveloperSettings({
                               tags.lastUnit.threshold = Number(e.target.value)
                               setFormData({ ...formData, commercialOptimization: { ...formData.commercialOptimization, tools: { ...formData.commercialOptimization.tools, smartTags: tags } } })
                             }}
-                            className="w-full h-9 px-2 rounded-lg bg-surface border border-app text-app focus:outline-none text-xs bg-transparent"
+                            className="w-full h-9 px-2 rounded-lg bg-surface border border-app text-app focus:outline-none text-xs bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                         </div>
                         <div>
@@ -921,6 +933,7 @@ export default function DeveloperSettings({
                           <label className="text-[10px] text-muted block mb-1">Límite Días</label>
                           <input
                             type="number"
+                            inputmode="numeric"
                             min="1"
                             value={formData.commercialOptimization.tools.smartTags.newProduct?.daysLimit ?? 7}
                             onChange={(e) => {
@@ -928,7 +941,7 @@ export default function DeveloperSettings({
                               tags.newProduct.daysLimit = Number(e.target.value)
                               setFormData({ ...formData, commercialOptimization: { ...formData.commercialOptimization, tools: { ...formData.commercialOptimization.tools, smartTags: tags } } })
                             }}
-                            className="w-full h-9 px-2 rounded-lg bg-surface border border-app text-app focus:outline-none text-xs bg-transparent"
+                            className="w-full h-9 px-2 rounded-lg bg-surface border border-app text-app focus:outline-none text-xs bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                         </div>
                         <div>
@@ -1326,13 +1339,14 @@ export default function DeveloperSettings({
                     <label className="block text-xs font-bold text-muted mb-1.5">IVA por defecto (%)</label>
                     <input
                       type="number"
+                      inputmode="decimal"
                       value={formData.dianSettings?.ivaPorDefecto ?? 19}
                       onChange={(e) => setFormData({
                         ...formData,
                         dianSettings: { ...formData.dianSettings, ivaPorDefecto: Number(e.target.value) }
                       })}
                       placeholder="Ingresa el porcentaje de impuesto (IVA)"
-                      className="w-full h-11 px-3.5 rounded-xl bg-surface-2 border border-app text-app text-sm focus:outline-none focus:border-primary transition-colors"
+                      className="w-full h-11 px-3.5 rounded-xl bg-surface-2 border border-app text-app text-sm focus:outline-none focus:border-primary transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 </div>

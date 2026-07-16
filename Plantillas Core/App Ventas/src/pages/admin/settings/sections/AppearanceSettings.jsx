@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Sun, Moon, Paintbrush, Save, Type, X, CheckCircle } from 'lucide-react'
+import { Sun, Moon, Paintbrush, Save, Type, X, CheckCircle, Lock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ADVANCED_PALETTES, getActiveColors } from '../../../../constants/palettes'
 import { FONTS, FONT_CATEGORIES, FONTS_BY_CATEGORY } from '../../../../constants/fonts'
@@ -106,13 +106,20 @@ export default function AppearanceSettings({
               <p className="text-xs text-muted mt-0.5">
                 Paleta: <span className="font-bold text-primary">{typeof formData.theme === 'object' ? 'Personalizado' : (ADVANCED_PALETTES[formData.theme]?.name || 'Modern Purple')}</span>
               </p>
+              {config.appearanceLockedByDashboard && (
+                <p className="text-[11px] text-amber-500 font-bold mt-1.5 flex items-center gap-1">
+                  <Lock size={11} /> Configurado desde el dashboard
+                </p>
+              )}
             </div>
             <button
               type="button"
               onClick={() => setIsThemeModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold shadow-md active:scale-95 transition-all hover:bg-slate-800 dark:hover:bg-slate-100 cursor-pointer border-0"
+              disabled={config.appearanceLockedByDashboard}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold shadow-md active:scale-95 transition-all hover:bg-slate-800 dark:hover:bg-slate-100 cursor-pointer border-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
             >
-              <Paintbrush size={16} /> Cambiar
+              {config.appearanceLockedByDashboard ? <Lock size={16} /> : <Paintbrush size={16} />}
+              {config.appearanceLockedByDashboard ? 'Bloqueado' : 'Cambiar'}
             </button>
           </div>
 

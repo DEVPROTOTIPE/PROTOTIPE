@@ -1,5 +1,48 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CORE-367 — 2026-07-16
+**Auditoría de Fase 2 (Reproducibilidad) del roadmap técnico canónico — ejecutada por Antigravity, reverificada por Claude Code**
+
+Por instrucción del fundador, se delegó a Antigravity la auditoría de los 8
+puntos de "Fase 2 — Reproducibilidad"
+(`00_Continuidad/canonical/roadmap_tecnico_por_fases_y_gates_2026-07-14.md` §5)
+para reducir la carga manual de auditoría de Claude Code (ver
+`asignaciones/ASIGNACION_CORE-367_2026-07-16.md`).
+
+### Resultado (traspaso en `traspasos/TRASPASO_CORE-367_2026-07-16.md`):
+- `RESUELTO`: Dashboard autónomo, rutas portables, runtime único (Node
+  22.23.0/npm 10.9.8 unificado), línea base de lint documentada, cobertura
+  de pruebas de riesgo (118/118 App Ventas, 9/9 Dashboard), builds sin
+  mutar fuente.
+- `PARCIAL`: lockfile de Moni (consistente, pero `npm ci` físico falló por
+  bloqueo `EPERM` de Windows en la copia local — validado con `--dry-run`).
+- `PARCIAL` / `DECISIÓN REQUERIDA`: CI existe en 4 de 7 proyectos (App
+  Ventas, Moni, template-core-seed, template-ventas) pero ninguno en Node
+  22 ni con pasos de lint/validate/rules — falta decisión del fundador
+  sobre proveedor/estrategia antes de implementar CI real para el
+  orquestador (`Prototipe-CLI`) y el Dashboard.
+
+### Reverificación independiente (Claude Code, `HECHO VERIFICADO`):
+Se re-ejecutaron comandos dirigidos (no confianza ciega en el traspaso):
+`DASHBOARD_STANDALONE_BUILD=1 npm run build` (dashboard, éxito 1.91s),
+`npx vitest run` en dashboard (9/9, exacto), existencia de
+`.github/workflows/` por proyecto (exacto), `node-version: 18` en el CI de
+App Ventas (confirmado, discrepancia real vs. runtime 22.23.0), las 2 citas
+de rutas no portables (`telemetryService.js:5`, `AdSettings.jsx:11`,
+ambas existentes tal cual), `npx eslint .` en App Ventas (670 problemas,
+647 errores — coincidencia exacta cifra por cifra), y diff de
+`package.json` entre las dos copias de Moni (confirmado: la copia local
+tiene `firebase-admin`/`@firebase/rules-unit-testing` que la de workspace
+no tiene). Todos los puntos verificados coincidieron sin discrepancias —
+a diferencia del traspaso previo de CORE-365, este no tuvo problemas de
+auto-certificación.
+
+### Hallazgo adicional (fuera del alcance pedido, solo registrado):
+`AdSettings.jsx` contiene un bloque de comentarios que parece razonamiento
+de IA dejado por error en el código de producción (líneas de tipo "Let's
+define... Wait! Is CustomDatePicker exported?..."). No afecta portabilidad
+de forma real; se deja anotado para limpieza futura, sin acción tomada.
+
 ## CORE-365 — 2026-07-16
 **Rediseño de nav móvil (cliente y admin) + asignación de auditoría de responsividad**
 

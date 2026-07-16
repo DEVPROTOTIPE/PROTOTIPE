@@ -78,10 +78,10 @@
   },
   "emulators": {
     "firestore": {
-      "port": 8085
+      "port": 8080
     },
     "auth": {
-      "port": 9195
+      "port": 9099
     },
     "ui": {
       "enabled": false

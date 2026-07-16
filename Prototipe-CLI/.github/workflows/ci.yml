@@ -1,0 +1,35 @@
+name: CI/CD Pipeline - Prototipe CLI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Prototipe-CLI
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.0
+          cache: 'npm'
+          cache-dependency-path: Prototipe-CLI/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Nota: el CLI no tiene script "lint" configurado (sin ESLint propio) —
+      # confirmado en la auditoría de Fase 2 (CORE-367). No se agrega un paso
+      # de lint aquí porque no hay linter que correr; queda pendiente como
+      # trabajo aparte si se decide configurar uno.
+      - name: Run Template Audit Suite
+        run: npm run test

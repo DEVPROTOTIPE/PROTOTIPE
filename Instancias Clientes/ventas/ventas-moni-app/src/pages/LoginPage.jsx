@@ -196,6 +196,20 @@ export default function LoginPage() {
           // anónima de ESTE navegador (ver useAnonAuthInit).
           const currentUid = auth.currentUser?.uid
 
+          // Mismo guard que ya existía en el flujo de cliente nuevo (abajo,
+          // clientStep 2): sin sesión anónima todavía no hay a quién vincular
+          // este número. Antes esta rama seguía adelante en silencio cuando
+          // currentUid era undefined (SDK de Auth aún resolviendo la sesión
+          // anónima), dejando el login "exitoso" pero sin backfill de
+          // ownerUid — causaba errores de "Missing or insufficient
+          // permissions" más adelante (favoritos, créditos, etc.) porque las
+          // reglas de Firestore comparan contra un ownerUid que nunca se guardó.
+          if (!currentUid) {
+            setError('Estamos preparando tu sesión, intenta de nuevo en un segundo.')
+            setIsLoading(false)
+            return
+          }
+
           if (userData.ownerUid && userData.ownerUid !== currentUid) {
             // Otro dispositivo/sesión ya reclamó este número. Se notifica al
             // admin/vendedor de inmediato con un botón de "Autorizar" en su

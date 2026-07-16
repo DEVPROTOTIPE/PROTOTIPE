@@ -6030,7 +6030,7 @@ const CACHE_TTL_MS = 10000; // 10 segundos
 async function findProjectDir(clientId) {
   const lowerClientId = clientId.toLowerCase();
   if (lowerClientId === 'ventas-smartfix' || lowerClientId === 'ventas-smart') {
-    return 'D:/PROTOTIPE/Plantillas Core/App Ventas';
+    return path.join(path.dirname(getWorkspaceRoot()), 'Plantillas Core', 'App Ventas');
   }
 
   // Sanitización de seguridad temprana contra Path Traversal
@@ -9639,7 +9639,27 @@ app.post('/api/project/dev/start', async (req, res) => {
     } catch (err) {
       console.warn(`[API /project/dev/start] No se pudo leer el puerto de vite.config.js para ${clientId}:`, err.message);
     }
-    const portToUse = customPort || forcedPort;
+
+    // Puertos en uso por OTROS servidores de desarrollo ya activos en este mismo
+    // proceso del CLI. Necesario porque las instancias de clientes se clonan del
+    // Core y suelen heredar el mismo vite.config.js literal (mismo "port: XXXX"),
+    // y el hash determinista de clientId también puede coincidir entre dos IDs
+    // distintos. Sin este chequeo, dos clientes distintos (ej. "App Ventas" desde
+    // Plantillas Core y "moni" desde el CRM) podían recibir el mismo puerto — el
+    // segundo servidor terminaba sirviendo silenciosamente en otro puerto real
+    // mientras el primero seguía respondiendo en el puerto que el usuario tenía
+    // abierto, dando la impresión de que ambos proyectos "se mezclaban".
+    const activePorts = new Set();
+    for (const [otherClientId, info] of devServers.entries()) {
+      if (otherClientId === clientId) continue;
+      const portMatch = (info.url || '').match(/:(\d+)\s*$/);
+      if (portMatch) activePorts.add(parseInt(portMatch[1], 10));
+    }
+
+    let portToUse = customPort || forcedPort;
+    while (activePorts.has(portToUse)) {
+      portToUse++;
+    }
 
     const child = spawn('npm', ['run', 'dev', '--', '--port', portToUse.toString()], {
       cwd: projectDir,
