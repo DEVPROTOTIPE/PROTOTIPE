@@ -35,12 +35,16 @@ export default function ClientFavorites() {
     return { id, isDeleted: true }
   })
 
-  // Redirigir a login si no hay sesión
+  // Redirigir a login si no hay sesión. `navigate` excluido de las
+  // dependencias a propósito (ver fix de WelcomePage.jsx/useAuthInit.js):
+  // su referencia puede cambiar entre renders sin que eso deba
+  // re-disparar este efecto.
   useEffect(() => {
     if (!userId) {
       navigate('/login')
     }
-  }, [userId, navigate])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId])
 
   const handleRemove = (e, productId) => {
     e.stopPropagation()

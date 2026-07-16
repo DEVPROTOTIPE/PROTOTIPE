@@ -59,11 +59,15 @@ export default function AdminOrders() {
   const navigate = useNavigate()
   const { showAlert, showConfirm } = useAlertConfirm()
 
+  // `navigate` excluido de las dependencias a propósito (ver fix de
+  // WelcomePage.jsx/useAuthInit.js): su referencia puede cambiar entre
+  // renders sin que eso deba re-disparar este efecto.
   useEffect(() => {
     if (!onlineOrdersEnabled) {
       navigate('/admin/home', { replace: true })
     }
-  }, [onlineOrdersEnabled, navigate])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onlineOrdersEnabled])
   
   // Consumir el store del portal para validación de permisos por rol de empleado
   const { portalEmployee } = usePortalStore()

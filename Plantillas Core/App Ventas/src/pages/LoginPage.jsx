@@ -60,6 +60,10 @@ export default function LoginPage() {
   }, [authStoreError])
 
   // ─── Redirección automática si ya está autenticado ───────────────────────
+  // `navigate` excluido a propósito de las dependencias — mismo fix que
+  // WelcomePage.jsx: incluirlo causaba un bucle real de navegación cuando
+  // App.jsx re-renderizaba por motivos ajenos a la sesión (ver commit del
+  // fix en WelcomePage.jsx para el detalle completo).
   useEffect(() => {
     if (!isAuthLoading) {
       if (role === ROLES.ADMIN) {
@@ -68,7 +72,8 @@ export default function LoginPage() {
         navigate('/tienda/catalogo', { replace: true })
       }
     }
-  }, [role, isAuthLoading, navigate])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role, isAuthLoading])
 
   if (isAuthLoading || !isLoaded) return null
 
