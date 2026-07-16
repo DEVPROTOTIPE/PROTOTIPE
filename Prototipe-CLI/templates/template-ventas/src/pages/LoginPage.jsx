@@ -4,12 +4,13 @@ import { motion } from 'framer-motion'
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import { ErrorBoundary } from 'react-error-boundary'
-import { Store, Smartphone, Shield, Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react'
+import { Store, Smartphone, Shield, Mail, Lock, ArrowLeft, Eye, EyeOff, MessageCircle } from 'lucide-react'
 import { auth, db } from '../config/firebaseConfig'
 import useAuthStore from '../store/authStore'
 import useAppConfigStore from '../store/appConfigStore'
 import { updateAppConfig, DEFAULT_SETTINGS } from '../services/appConfigService'
 import { registerFirstAdmin, registerNewClient, updateClientProfile } from '../services/userService'
+import { createCentralNotification, NC_TYPES } from '../services/notificationCenterService'
 import { ROLES, CLIENT_LOGIN_TRUST_MESSAGE, COLLECTIONS } from '../constants'
 import useInactivityTimer from '../hooks/useInactivityTimer'
 import SmartHint from '../components/client/guided/SmartHint'
@@ -29,9 +30,12 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [showAdminPassword, setShowAdminPassword] = useState(false)
+  // SEC-014: cuando el login se bloquea por dispositivo, guarda el celular
+  // en cuestión para poder ofrecer el botón de WhatsApp de verificación.
+  const [deviceBlockedPhone, setDeviceBlockedPhone] = useState(null)
 
   const { role, setAdmin, setClient, isLoading: isAuthLoading, error: authStoreError } = useAuthStore()
-  const { appName, appIcon, primaryColor, welcomeWavesEnabled, loginTrustMessage, slogan, isLoaded, setConfig, adminRegistered } = useAppConfigStore()
+  const { appName, appIcon, primaryColor, welcomeWavesEnabled, loginTrustMessage, slogan, isLoaded, setConfig, adminRegistered, whatsappAdmin } = useAppConfigStore()
   const navigate = useNavigate()
 
   // Leer color primario real desde CSS en runtime
@@ -60,6 +64,10 @@ export default function LoginPage() {
   }, [authStoreError])
 
   // ─── Redirección automática si ya está autenticado ───────────────────────
+  // `navigate` excluido a propósito de las dependencias — mismo fix que
+  // WelcomePage.jsx: incluirlo causaba un bucle real de navegación cuando
+  // App.jsx re-renderizaba por motivos ajenos a la sesión (ver commit del
+  // fix en WelcomePage.jsx para el detalle completo).
   useEffect(() => {
     if (!isAuthLoading) {
       if (role === ROLES.ADMIN) {
@@ -68,7 +76,8 @@ export default function LoginPage() {
         navigate('/tienda/catalogo', { replace: true })
       }
     }
-  }, [role, isAuthLoading, navigate])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role, isAuthLoading])
 
   if (isAuthLoading || !isLoaded) return null
 
@@ -188,14 +197,28 @@ export default function LoginPage() {
           const currentUid = auth.currentUser?.uid
 
           if (userData.ownerUid && userData.ownerUid !== currentUid) {
-            // Otro dispositivo/sesión ya reclamó este número.
+            // Otro dispositivo/sesión ya reclamó este número. Se notifica al
+            // admin/vendedor de inmediato con un botón de "Autorizar" en su
+            // panel de notificaciones, para que no tenga que ir a buscar al
+            // cliente manualmente en Créditos.
+            createCentralNotification({
+              recipientId: 'admin',
+              recipientRole: 'admin',
+              title: 'Dispositivo bloqueado',
+              body: `${userData.nombre || 'Un cliente'} (${cleanPhone}) intentó entrar desde un dispositivo nuevo.`,
+              type: NC_TYPES.DISPOSITIVO_BLOQUEADO,
+              extra: { celular: cleanPhone },
+            }).catch((err) => console.error('[LoginPage] Error al notificar bloqueo de dispositivo:', err))
+
             setError(
               'Este número ya está registrado en otro dispositivo. Por seguridad, ' +
-              'no podemos iniciar sesión aquí. Si eres tú, contacta al vendedor.'
+              'no podemos iniciar sesión aquí. Ya avisamos al vendedor para que autorice este dispositivo.'
             )
+            setDeviceBlockedPhone(cleanPhone)
             setIsLoading(false)
             return
           }
+          setDeviceBlockedPhone(null)
 
           if (!userData.ownerUid && currentUid) {
             // Doc pre-SEC-014 sin dueño vinculado: backfill perezoso en el primer login.
@@ -464,6 +487,27 @@ export default function LoginPage() {
                           {error}
                         </p>
                       </div>
+                    )}
+
+                    {/* SEC-014: verificación por WhatsApp cuando el login se
+                        bloqueó por dispositivo. El mensaje incluye el número
+                        exacto registrado — el vendedor lo compara contra el
+                        número real que le está escribiendo por WhatsApp
+                        (siempre visible para él) para confirmar que es la
+                        misma persona antes de autorizar. */}
+                    {deviceBlockedPhone && whatsappAdmin && (
+                      <a
+                        href={`https://wa.me/${whatsappAdmin.replace(/\D/g, '')}?text=${encodeURIComponent(
+                          `Hola, quiero autorizar mi ingreso a la tienda desde un dispositivo nuevo. ` +
+                          `Mi número registrado es: ${deviceBlockedPhone}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 w-full h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-emerald-500/25"
+                      >
+                        <MessageCircle size={18} />
+                        Enviar solicitud de autorización por WhatsApp
+                      </a>
                     )}
 
                     {/* Botón continuar */}
