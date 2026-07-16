@@ -49,21 +49,38 @@ export default function MobileBottomNav({ items = [], overflowItems = [], indica
             return (
               <div key={key} className="flex-1 flex flex-col items-center justify-start relative">
                 <div className="flex flex-col items-center justify-center -translate-y-3 relative">
+                  {/* Halo de respiración (spring/ease, sin animar layout — solo scale/opacity) */}
                   <motion.div
-                    animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.8, 0.4] }}
-                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute w-16 h-16 rounded-full pointer-events-none z-0 blur-[2px]"
+                    animate={{ scale: [1, 1.18, 1], opacity: [0.35, 0.75, 0.35] }}
+                    transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute w-[4.5rem] h-[4.5rem] rounded-full pointer-events-none z-0 blur-[3px]"
                     style={{
                       background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 55%, transparent) 0%, color-mix(in srgb, var(--color-primary) 20%, transparent) 60%, transparent 80%)'
                     }}
                   />
                   <NavLink to={item.path} aria-label={item.label} className="z-10">
                     <motion.div
-                      whileTap={{ scale: 0.94 }}
-                      className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center border-4 border-surface relative overflow-visible select-none shadow-[0_6px_16px_rgba(0,0,0,0.15)]"
+                      whileTap={{ scale: 0.9, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                      className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center border-4 border-surface relative overflow-hidden select-none shadow-[0_6px_18px_color-mix(in_srgb,var(--color-primary)_45%,transparent)]"
                       style={{ WebkitTapHighlightColor: 'transparent' }}
                     >
-                      <Icon size={28} className="text-white" />
+                      {/* Barrido de brillo diagonal en loop — solo transform, sin reflow */}
+                      <motion.span
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          background: 'linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.35) 45%, rgba(255,255,255,0.35) 55%, transparent 70%)',
+                        }}
+                        animate={{ x: ['-120%', '120%'] }}
+                        transition={{ duration: 2.6, repeat: Infinity, repeatDelay: 1.8, ease: 'easeInOut' }}
+                      />
+                      <motion.div
+                        animate={{ y: [0, -2, 0] }}
+                        transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                        className="relative z-10"
+                      >
+                        <Icon size={28} className="text-white" />
+                      </motion.div>
                       {item.badge > 0 && (
                         <span className="absolute -top-[6px] -right-[6px] bg-red-500 text-white text-[14px] font-black rounded-full w-7 h-7 flex items-center justify-center border-2 border-surface shadow-md z-20">
                           {item.badge}
@@ -85,7 +102,12 @@ export default function MobileBottomNav({ items = [], overflowItems = [], indica
                 className="flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 relative text-muted hover:text-app active:scale-95"
               >
                 <div className="relative">
-                  <Icon size={20} aria-hidden="true" />
+                  <motion.div
+                    animate={item.badge > 0 ? { rotate: [0, -12, 12, -8, 8, 0], scale: [1, 1.12, 1] } : {}}
+                    transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 2.4, ease: 'easeInOut' }}
+                  >
+                    <Icon size={20} aria-hidden="true" />
+                  </motion.div>
                   {item.badge > 0 && (
                     <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                       {item.badge}
