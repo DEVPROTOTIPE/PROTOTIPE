@@ -150,6 +150,12 @@ async function runTests() {
     }
   };
 
+  const regPath = path.join(CLI_ROOT, 'plantillas_registro.json');
+  let regBackupContent = null;
+  if (fs.existsSync(regPath)) {
+    regBackupContent = fs.readFileSync(regPath, 'utf8');
+  }
+
   try {
     // Inicializar entorno
     await setupTestEnvironment();
@@ -452,14 +458,16 @@ async function runTests() {
     const docsDir = path.join(CLI_ROOT, '..', 'Documentacion PROTOTIPE', '09_Modulos_Completos', 'Documentacion App Test Core App');
     await fs.remove(docsDir);
 
-    // Remover del registro oficial
-    const finalReg = await fs.readJson(path.join(CLI_ROOT, 'plantillas_registro.json'));
-    delete finalReg.plantillas['app-test-core'];
-    await fs.writeJson(path.join(CLI_ROOT, 'plantillas_registro.json'), finalReg, { spaces: 2 });
-
   } catch (err) {
     console.error('\n❌ ERROR INESPERADO DURANTE LA SUITE DE PRUEBAS:', err.stack);
     failed++;
+  } finally {
+    // Restaurar backup de plantillas_registro.json para aislamiento total de la suite de pruebas
+    if (regBackupContent !== null) {
+      fs.writeFileSync(regPath, regBackupContent, 'utf8');
+    } else {
+      fs.removeSync(regPath);
+    }
   }
 
   console.log('\n======================================================');
@@ -479,4 +487,7 @@ async function runTests() {
   }
 }
 
-runTests();
+runTests().catch(err => {
+  console.error('🔴 Error fatal no controlado durante el pipeline de promoción:', err);
+  process.exit(1);
+});

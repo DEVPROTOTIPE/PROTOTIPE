@@ -177,4 +177,7 @@ async function runSmokeVisual() {
   }
 }
 
-runSmokeVisual();
+runSmokeVisual().catch(err => {
+  console.error('🔴 Error fatal no controlado durante el smoke test visual:', err);
+  process.exit(1);
+});

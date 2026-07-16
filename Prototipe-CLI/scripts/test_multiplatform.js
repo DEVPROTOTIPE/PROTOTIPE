@@ -86,4 +86,7 @@ async function run() {
   }
 }
 
-run();
+run().catch(err => {
+  console.error('🔴 Error fatal no controlado durante la suite multiplataforma:', err);
+  process.exit(1);
+});

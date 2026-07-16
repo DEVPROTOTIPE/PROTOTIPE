@@ -597,4 +597,7 @@ async function runSpecials() {
   }
 }
 
-runSpecials();
+runSpecials().catch(err => {
+  console.error('🔴 Error fatal no controlado durante la suite de robustez:', err);
+  process.exit(1);
+});

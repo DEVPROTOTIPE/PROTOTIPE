@@ -290,6 +290,7 @@ async function run() {
     if (status === 'OBSERVED') {
       if (currentDefectState !== baselineDefectState) {
         console.warn(`⚠️ Comportamiento de defecto "${key}" difiere del histórico. Posible corrección en progreso.`);
+        testFailed = true;
       }
     }
   }

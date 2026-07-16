@@ -305,7 +305,7 @@ async function testPlantilla(name, config, opts) {
   if (hookErrors.length > 0) {
     hookErrors.forEach(err => console.log(pc.red(`    ✗ ERROR DE BLINDAJE: ${err}`)));
     result.passed = false;
-    result.skipped = true;
+    result.skipped = false;
     result.skipReason = `Fallo en auditoría de estándares de telemetría en useAppConfigSync.js: ${hookErrors.join('; ')}`;
     result.totalDuration = Date.now() - startTotal;
     return result;
@@ -319,7 +319,7 @@ async function testPlantilla(name, config, opts) {
   if (viteErrors.length > 0) {
     viteErrors.forEach(err => console.log(pc.red(`    ✗ ERROR DE OPTIMIZACIÓN: ${err}`)));
     result.passed = false;
-    result.skipped = true;
+    result.skipped = false;
     result.skipReason = `Fallo en auditoría de estándares de empaquetado en vite.config.js: ${viteErrors.join('; ')}`;
     result.totalDuration = Date.now() - startTotal;
     return result;

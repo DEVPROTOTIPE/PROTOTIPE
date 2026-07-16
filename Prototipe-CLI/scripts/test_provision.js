@@ -220,6 +220,15 @@ async function runTest() {
   // Limpieza del proyecto generado para no dejar basura
   console.log(`🧹 Removiendo directorio de prueba generado: ${targetDir}`);
   await fs.remove(targetDir);
+
+  if (failed.length > 0) {
+    process.exit(1);
+  } else {
+    process.exit(0);
+  }
 }
 
-runTest();
+runTest().catch(err => {
+  console.error('🔴 Error fatal no controlado durante la prueba de aprovisionamiento:', err);
+  process.exit(1);
+});

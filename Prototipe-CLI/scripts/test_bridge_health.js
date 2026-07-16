@@ -10,6 +10,8 @@ const CLI_ROOT = path.join(__dirname, '..');
 function testBridgeHealth() {
   console.log('🧪 Iniciando Test de Arranque y Health Check del Bridge CLI...');
   
+  let isCleanExit = false;
+
   // Levantar el servidor Express (server.js) de forma asíncrona
   const child = spawn('node', ['server.js'], {
     cwd: CLI_ROOT,
@@ -26,7 +28,7 @@ function testBridgeHealth() {
 
   // Intentar consultar el puerto 3001
   let attempts = 0;
-  const maxAttempts = 15;
+  const maxAttempts = 60;
   const interval = 500;
 
   const checkHealth = () => {
@@ -34,6 +36,7 @@ function testBridgeHealth() {
       console.log(`  🟢 [PASS] Health check completado. Status HTTP: ${res.statusCode}`);
       if (res.statusCode === 200) {
         // Enviar kill controlado SIGTERM
+        isCleanExit = true;
         child.kill('SIGTERM');
       } else {
         console.error(`🔴 FAILED Health check: Status HTTP ${res.statusCode}`);
@@ -57,6 +60,11 @@ function testBridgeHealth() {
   setTimeout(checkHealth, 1000);
 
   child.on('close', (code, signal) => {
+    if (!isCleanExit) {
+      console.error(`🔴 FAILED: El servidor de Bridge se cerró inesperadamente. Code: ${code}, Signal: ${signal}`);
+      console.error('Logs del servidor:\n', output);
+      process.exit(1);
+    }
     console.log(`  🟢 [PASS] Servidor cerrado de forma controlada. Signal: ${signal}, Code: ${code}`);
     console.log('======================================================');
     console.log('📊  TEST DE ARRANQUE COMPILADO CON ÉXITO (Código de salida: 0)');

@@ -495,4 +495,7 @@ async function runTests() {
   }
 }
 
-runTests();
+runTests().catch(err => {
+  console.error('🔴 Error fatal no controlado durante la suite de Firestore:', err);
+  process.exit(1);
+});
