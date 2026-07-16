@@ -1,5 +1,66 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CORE-362 — 2026-07-15
+**Encapsular setDoc() de LoginPage.jsx en userService (template-ventas)**
+
+### Cambios realizados:
+1. **LoginPage.jsx:** Reemplazadas las 3 llamadas directas a `setDoc()` por llamadas a las funciones de `userService.js` (`registerFirstAdmin()`, `updateClientProfile()`, `registerNewClient()`), y limpiadas las importaciones obsoletas de Firestore (`setDoc` y `serverTimestamp`).
+2. **userService.js:** Agregadas las funciones `registerFirstAdmin(uid, data)` y `registerNewClient(celular, data)` para encapsular las escrituras en la colección `users` en Firestore.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity
+- **Rama / HEAD observado:** `docs/context-packaging` / `91175e5`
+- **Alcance propio:** `Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx` y `src/services/userService.js`
+- **Cambios preexistentes preservados:** sí — no se tocaron los otros 3 problemas de lint preexistentes en `LoginPage.jsx` (`ErrorBoundary`, `DEFAULT_SETTINGS` sin usar, y `set-state-in-effect`), ni se afectaron otras configuraciones (como `AdminHelloModule.jsx` y `salesService.spec.js`).
+
+### Evidencia:
+- `npx eslint src/pages/LoginPage.jsx src/services/userService.js` → 0 ocurrencias del mensaje `"setDoc() directo está prohibido"` en la salida (`HECHO VERIFICADO`).
+- `npx vitest run` → `85 passed (85)` en la suite local (`HECHO VERIFICADO`).
+- `npm run build` → compilación exitosa (`HECHO VERIFICADO`).
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW` — reverificado por Claude Code
+  ejecutando los 3 comandos de "Reverificación rápida" del traspaso:
+  coinciden exactamente (0 violaciones de `setDoc`, `85 passed (85)`,
+  build exitoso). Commit local `1c591ed` (rama `docs/context-packaging`,
+  sin push), excluyendo `AdminHelloModule.jsx`/`salesService.spec.js`
+  (preexistentes, ya excluidos también en `CORE-356`).
+
+### Archivos modificados:
+- [`Prototipe-CLI/templates/template-ventas/src/services/userService.js`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/services/userService.js) [MODIFY]
+- [`Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx`](file:///D:/PROTOTIPE/Prototipe-CLI/templates/template-ventas/src/pages/LoginPage.jsx) [MODIFY]
+
+---
+
+## CORE-363 — 2026-07-15
+**Encapsular setDoc() de LoginPage.jsx en userService (ventas-moni-app)**
+
+### Cambios realizados:
+1. **LoginPage.jsx:** Reemplazadas las 3 llamadas directas a `setDoc()` por llamadas a las funciones de `userService.js` (`registerFirstAdmin()`, `updateClientProfile()`, `registerNewClient()`), y limpiadas las importaciones obsoletas de Firestore (`setDoc` y `serverTimestamp`).
+2. **userService.js:** Agregadas las funciones `registerFirstAdmin(uid, data)` y `registerNewClient(celular, data)` para encapsular las escrituras en la colección `users` en Firestore.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity
+- **Rama / HEAD observado:** `docs/context-packaging` / `91175e5`
+- **Alcance propio:** `Instancias Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx` y `src/services/userService.js`
+- **Cambios preexistentes preservados:** sí — no se tocaron los otros 3 problemas de lint preexistentes en `LoginPage.jsx` (`ErrorBoundary`, `DEFAULT_SETTINGS` sin usar, y `set-state-in-effect`), ni se afectaron otras configuraciones.
+
+### Evidencia:
+- `npx eslint src/pages/LoginPage.jsx src/services/userService.js` → 0 ocurrencias del mensaje `"setDoc() directo está prohibido"` en la salida (`HECHO VERIFICADO`).
+- `npx vitest run` → `85 passed (85)` en la suite local (`HECHO VERIFICADO`).
+- `npm run build` → compilación exitosa (`HECHO VERIFICADO`).
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW` — reverificado por Claude Code
+  ejecutando los 4 comandos de "Reverificación rápida" del traspaso:
+  coinciden exactamente (0 violaciones de `setDoc`, `85 passed (85)`,
+  build exitoso, diff acotado a 2 archivos). Commit local `fe33767` (rama
+  `docs/context-packaging`, sin push), excluyendo
+  `AdminCustomerLoyalty.jsx`/`AdminView.jsx`/`AdminHelloModule.jsx`
+  (preexistentes, ya excluidos también en `CORE-359`).
+
+### Archivos modificados:
+- [`Instancias Clientes/ventas/ventas-moni-app/src/services/userService.js`](file:///D:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/userService.js) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx`](file:///D:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx) [MODIFY]
+
+---
+
 ## CORE-361 — 2026-07-15
 **Encapsular setDoc() de LoginPage.jsx en userService (Core) + asignar réplica**
 

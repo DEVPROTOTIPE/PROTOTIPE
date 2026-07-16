@@ -25,27 +25,44 @@
     (ventas-moni-app) replican este mismo fix — misma deuda idéntica en
     esas 2 carpetas (mismas 3 líneas, mismo patrón).
 
-* **[ ] Tarea CORE-362: Replicar el fix de setDoc() de LoginPage.jsx en `template-ventas`**
-  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — 2026-07-15, vía
-    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-362_2026-07-15.md`.
+* **[x] ~~Tarea CORE-362: Replicar el fix de setDoc() de LoginPage.jsx en `template-ventas`~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — implementada por Antigravity
+    el 2026-07-15, reverificada por Claude Code con los 3 comandos exactos
+    de `TRASPASO_CORE-362_2026-07-15.md` — coinciden exactamente. Commit
+    local `1c591ed` (rama `docs/context-packaging`, sin push).
     Acotada a `Prototipe-CLI/templates/template-ventas/` (sin solape con
     `CORE-363`).
   - Objetivo real: `template-ventas/src/pages/LoginPage.jsx` tiene la misma
     deuda que `CORE-361` cerró en Core (mismas 3 violaciones de
     `no-restricted-syntax`/`setDoc`, heredadas de la propagación original).
-  - Cambios preexistentes preservados: sí
-  - Siguiente paso exacto: reverificar el traspaso antes de confiar en él.
+  - Evidencia literal (reverificación propia): `npx eslint` → 0 violaciones
+    de `setDoc`; `npx vitest run` → `85 passed (85)`, idéntico; `npm run
+    build` → exitoso, idéntico.
+  - Cambios preexistentes preservados: sí — excluidos del commit
+    `src/features/hello-module/components/AdminHelloModule.jsx` y
+    `tests/unit/salesService.spec.js` (mismos 2 archivos ya excluidos en
+    `CORE-356`).
+  - Siguiente paso exacto: ninguno pendiente de esta tarea.
 
-* **[ ] Tarea CORE-363: Replicar el fix de setDoc() de LoginPage.jsx en `ventas-moni-app`**
-  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — 2026-07-15, vía
-    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-363_2026-07-15.md`.
+* **[x] ~~Tarea CORE-363: Replicar el fix de setDoc() de LoginPage.jsx en `ventas-moni-app`~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — implementada por Antigravity
+    el 2026-07-15, reverificada por Claude Code con los 4 comandos exactos
+    de `TRASPASO_CORE-363_2026-07-15.md` — coinciden exactamente. Commit
+    local `fe33767` (rama `docs/context-packaging`, sin push).
     Acotada a `Instancias Clientes/ventas/ventas-moni-app/` (sin solape con
     `CORE-362`).
   - Objetivo real: `ventas-moni-app/src/pages/LoginPage.jsx` tiene la misma
     deuda encontrada al reverificar `CORE-359` (mismas 3 violaciones de
     `no-restricted-syntax`/`setDoc`).
-  - Cambios preexistentes preservados: sí
-  - Siguiente paso exacto: reverificar el traspaso antes de confiar en él.
+  - Evidencia literal (reverificación propia): `npx eslint` → 0 violaciones
+    de `setDoc`; `npx vitest run` → `85 passed (85)`, idéntico; `npm run
+    build` → exitoso, idéntico.
+  - Cambios preexistentes preservados: sí — excluidos del commit
+    `src/features/customer-loyalty/components/AdminCustomerLoyalty.jsx`,
+    `src/features/customer-loyalty/components/AdminView.jsx`,
+    `src/features/hello-module/components/AdminHelloModule.jsx` (mismos 3
+    archivos ya excluidos en `CORE-359`).
+  - Siguiente paso exacto: ninguno pendiente de esta tarea.
 
 * **[x] ~~Tarea CORE-359: Propagar SEC-012/013/014/015 a `ventas-moni-app` (cliente real)~~**
   - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — implementada por Antigravity el
