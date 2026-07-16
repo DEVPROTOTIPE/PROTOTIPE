@@ -2,13 +2,14 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Store, Smartphone, Shield, Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { auth, db } from '../config/firebaseConfig'
 import useAuthStore from '../store/authStore'
 import useAppConfigStore from '../store/appConfigStore'
 import { updateAppConfig, DEFAULT_SETTINGS } from '../services/appConfigService'
+import { registerFirstAdmin, registerNewClient, updateClientProfile } from '../services/userService'
 import { ROLES, CLIENT_LOGIN_TRUST_MESSAGE, COLLECTIONS } from '../constants'
 import useInactivityTimer from '../hooks/useInactivityTimer'
 import SmartHint from '../components/client/guided/SmartHint'
@@ -118,18 +119,15 @@ export default function LoginPage() {
       // el documento config/settings realmente no existe en la base de datos.
       if (!adminRegistered) {
         const user = userCredential.user
-        const userRef = doc(db, COLLECTIONS.USERS, user.uid)
         const configState = useAppConfigStore.getState()
         const finalName = configState.sellerName || 'Administrador'
         const finalWhatsapp = configState.whatsappAdmin || ''
 
-        await setDoc(userRef, {
+        await registerFirstAdmin(user.uid, {
           email: user.email,
-          role: 'admin',
           nombre: finalName,
           whatsapp: finalWhatsapp,
-          updatedAt: serverTimestamp()
-        }, { merge: true })
+        })
 
         // Sincronizar adminRegistered=true en el config (resiste futuros borrados de caché)
         const configUpdates = { adminRegistered: true }
@@ -201,7 +199,7 @@ export default function LoginPage() {
 
           if (!userData.ownerUid && currentUid) {
             // Doc pre-SEC-014 sin dueño vinculado: backfill perezoso en el primer login.
-            await setDoc(userRef, { ownerUid: currentUid, updatedAt: serverTimestamp() }, { merge: true })
+            await updateClientProfile(cleanPhone, { ownerUid: currentUid })
           }
 
           // Cliente antiguo: entra de una vez
@@ -234,7 +232,6 @@ export default function LoginPage() {
 
       try {
         const cleanPhone = celular.replace(/\D/g, '')
-        const userRef = doc(db, COLLECTIONS.USERS, cleanPhone)
 
         // SEC-014: sin sesión anónima todavía no hay a quién vincular este
         // número — mejor pedir que reintente que crear un doc sin dueño.
@@ -246,14 +243,7 @@ export default function LoginPage() {
         }
 
         // Guardar nuevo cliente
-        await setDoc(userRef, {
-          nombre: nombre.trim(),
-          celular: cleanPhone,
-          role: 'client',
-          ownerUid: currentUid,
-          fechaRegistro: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        })
+        await registerNewClient(cleanPhone, { nombre: nombre.trim(), ownerUid: currentUid })
 
         setClient({
           nombre: nombre.trim(),
