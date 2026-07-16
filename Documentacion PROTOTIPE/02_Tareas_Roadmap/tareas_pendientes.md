@@ -1,38 +1,150 @@
 # Control de Tareas y Estado de Implementación (Roadmap de Prototype CLI)
 
-* **[ ] Tarea CORE-356: Propagar SEC-012/013/014/015 a `template-ventas`**
-  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — 2026-07-15, vía
-    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-356_2026-07-15.md`.
-    Acotada a `Prototipe-CLI/templates/template-ventas/` (sin solape con
-    `CORE-357`/`CORE-358`).
-  - Objetivo real: `template-ventas` no tiene ninguno de los cierres de
-    seguridad ya hechos en Core (`SEC-012` a `SEC-015`) — sigue con las
-    mismas vulnerabilidades. Incluye advertencia sobre
-    `Prototipe-CLI/scripts/distribute_rules.js` (mecanismo de composición
-    de reglas desactualizado, no ejecutar).
-  - Siguiente paso exacto: reverificar el traspaso antes de confiar en él.
+* **[x] ~~Tarea CORE-359: Propagar SEC-012/013/014/015 a `ventas-moni-app` (cliente real)~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — implementada por Antigravity el
+    2026-07-15 (`ASIGNACION_CORE-359_2026-07-15.md`), reverificada por Claude
+    Code el 2026-07-15 con los comandos de "Reverificación rápida" de
+    `TRASPASO_CORE-359_2026-07-15.md`. Commit local `7d94794` (rama
+    `docs/context-packaging`, sin push).
+  - Objetivo real: `ventas-moni-app` era un **cliente real**, no una
+    plantilla, y tenía el gap de seguridad más grave de los tres asignados:
+    `firestore.rules` con `isFirstStart()` (escalada a admin ya cerrada en
+    Core) y ningún `isEmployee()`/`ownerUid`. Queda con paridad completa.
+  - Evidencia literal (reverificación propia): `npx vitest run` (3 archivos)
+    → `Tests 20 passed (20)`, idéntico al traspaso; `npm run build` →
+    exitoso, idéntico.
+  - **Discrepancia encontrada y documentada (no oculta):** el traspaso
+    afirmaba que los archivos tocados estaban "100% libres de errores de
+    linter" — falso al reverificar con `npx eslint` sobre esos archivos
+    específicos: 3 violaciones reales de `no-restricted-syntax` (`setDoc`
+    directo) en `LoginPage.jsx`. Investigado antes de aceptar: el propio
+    `Plantillas Core/App Ventas/src/pages/LoginPage.jsx` (fuente de verdad,
+    ya cerrada en `CORE-351`) tiene exactamente las mismas 3 violaciones en
+    las mismas líneas — es deuda preexistente heredada de Core, no una
+    regresión nueva de esta tarea. No bloquea el cierre por tratarse de
+    paridad con deuda ya aceptada en el baseline de Core (queda como deuda
+    técnica transversal, no de esta tarea puntual).
+  - Cambios preexistentes preservados: sí — excluidos del commit
+    `src/features/customer-loyalty/components/AdminCustomerLoyalty.jsx`,
+    `src/features/customer-loyalty/components/AdminView.jsx`,
+    `src/features/hello-module/components/AdminHelloModule.jsx` (guards RBAC
+    de `CORE-342`, confirmado por `git diff`, ajenos a esta tarea).
+  - Siguiente paso exacto: ninguno pendiente de esta tarea; revisión
+    independiente opcional del fundador.
 
-* **[ ] Tarea CORE-357: SEC-017 — claim/allowlist real de operador del Dashboard Central**
-  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — 2026-07-15, vía
-    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-357_2026-07-15.md`.
-    Acotada a `Central PROTOTIPE/dev-dashboard/`.
+* **[x] ~~Tarea CORE-360: Sincronizar `knowledge/firestore/core.rules` con el estado real de Core~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — implementada por Antigravity el
+    2026-07-15 (`ASIGNACION_CORE-360_2026-07-15.md`), reverificada por Claude
+    Code el 2026-07-15 con el comando exacto de
+    `TRASPASO_CORE-360_2026-07-15.md`. Commit local `9bdd98b` (rama
+    `docs/context-packaging`, sin push).
+  - Objetivo real: `distribute_rules.js` componía reglas desde
+    `knowledge/firestore/core.rules`, desactualizado un día antes de que
+    `SEC-012`–`017` modificaran a mano el `firestore.rules` real de Core —
+    la herramienta de detección de drift reportaba `FAIL` contra el propio
+    Core. Riesgo ya señalado (no corregido) en `CORE-356` y `CORE-358`,
+    cerrado aquí sin tocar ningún `firestore.rules` desplegado (nunca se
+    ejecutó `--write`).
+  - Evidencia literal (reverificación propia): `node scripts/distribute_rules.js`
+    (sin `--write`) → salida idéntica a la del traspaso, mismos hashes
+    SHA256: `🟢 Paridad certificada` para "App Ventas (Core Plantilla)" y
+    "template-ventas"; `🔴 FAIL` esperado y correcto para "ventas-moni-app"
+    (`CORE-359` corría en paralelo sobre ese archivo) y "template-core-seed"
+    (agnóstico de features, fuera de alcance).
+  - Verificación adicional: el traspaso mencionaba una normalización de
+    saltos de línea en `Plantillas Core/App Ventas/firestore.rules` — `git
+    diff` confirma que ese archivo NO tiene ningún cambio real, sin impacto.
+  - Cambios preexistentes preservados: sí
+  - Siguiente paso exacto: ninguno pendiente de esta tarea; revisión
+    independiente opcional del fundador.
+
+* **[x] ~~Tarea CORE-356: Propagar SEC-012/013/014/015 a `template-ventas`~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — implementada por Antigravity el
+    2026-07-15 (`ASIGNACION_CORE-356_2026-07-15.md`), reverificada por Claude
+    Code el 2026-07-15 con los comandos exactos de
+    `TRASPASO_CORE-356_2026-07-15.md` antes de commitear. Commit local
+    `ff809a8` (rama `docs/context-packaging`, sin push).
+  - Objetivo real: `template-ventas` no tenía ninguno de los cierres de
+    seguridad ya hechos en Core (`SEC-012` a `SEC-015`) — quedó al día.
+  - Evidencia literal (HECHO VERIFICADO, reverificación propia): primera
+    corrida `19 passed | 1 failed` (falla en escritura de `stockMovements`,
+    `PERMISSION_DENIED`); dos reintentos posteriores con el mismo código
+    dieron `20 passed | 0 failed` — diagnosticado como arranque en frío del
+    emulador, no un bug de reglas (documentado así en el commit, no oculto).
+  - Cambios preexistentes preservados: sí — excluidos del commit
+    `src/features/hello-module/components/AdminHelloModule.jsx` y
+    `tests/unit/salesService.spec.js` (confirmado vía `git diff` que son
+    trabajo de `CORE-342`, ajeno a esta tarea).
+  - Riesgo abierto (no corregido, fuera de alcance): `distribute_rules.js`
+    sigue usando `knowledge/firestore/core.rules` desactualizado — no
+    ejecutar hasta que se sincronice con las reglas actuales.
+  - Siguiente paso exacto: ninguno pendiente de esta tarea; revisión
+    independiente opcional del fundador.
+
+* **[x] ~~Tarea CORE-357: SEC-017 — claim/allowlist real de operador del Dashboard Central~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — implementada por Antigravity el
+    2026-07-15 (`ASIGNACION_CORE-357_2026-07-15.md`), reverificada por Claude
+    Code el 2026-07-15 con los comandos exactos de
+    `TRASPASO_CORE-357_2026-07-15.md`. Commit local `6525993` (rama
+    `docs/context-packaging`, sin push).
   - Objetivo real: confirmado que TODA colección sensible del Dashboard
-    Central (`tokens`, `clientes_control`, `whatsappTemplates`, etc.) exige
+    Central (`tokens`, `clientes_control`, `whatsappTemplates`, etc.) exigía
     solo `request.auth != null` — cualquier cuenta de Firebase Auth (incluso
-    auto-registrada) tiene control total. Se introduce `isOperator()` vía
+    auto-registrada) tenía control total. Se introdujo `isOperator()` vía
     colección `operators/{uid}`, mismo patrón que `isAdmin()`/`isEmployee()`
     de Core.
-  - Siguiente paso exacto: reverificar el traspaso antes de confiar en él.
+  - Evidencia literal (HECHO VERIFICADO, reverificación propia): emulador de
+    Firestore levantado, `npx vitest run tests/unit/firestoreRules.spec.js`
+    → `Tests 9 passed (9)`; `npm run build` → build exitoso; `npm run lint`
+    → sin errores.
+  - Cambios preexistentes preservados: sí
+  - Archivos:
+    - [`Central PROTOTIPE/dev-dashboard/firestore.rules`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firestore.rules)
+    - [`Central PROTOTIPE/dev-dashboard/firebase.json`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firebase.json)
+    - [`Central PROTOTIPE/dev-dashboard/package.json`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/package.json)
+    - [`Central PROTOTIPE/dev-dashboard/tests/unit/firestoreRules.spec.js`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/tests/unit/firestoreRules.spec.js)
+  - Siguiente paso exacto: ninguno pendiente de esta tarea; revisión
+    independiente opcional del fundador.
 
-* **[ ] Tarea CORE-358: REP-012 — corregir falsos verdes del CLI**
-  - Estatus: `ASSIGNED_TO_ANTIGRAVITY` — 2026-07-15, vía
-    `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-358_2026-07-15.md`.
-    Acotada a `Prototipe-CLI/` (no `templates/`).
+* **[x] ~~Tarea CORE-358: REP-012 — corregir falsos verdes del CLI~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — implementada por Antigravity el
+    2026-07-15 (`ASIGNACION_CORE-358_2026-07-15.md`), reverificada por Claude
+    Code el 2026-07-15 con los comandos exactos de
+    `TRASPASO_CORE-358_2026-07-15.md`. Commit local `a8f3048` (rama
+    `docs/context-packaging`, sin push).
   - Objetivo real: diagnóstico + corrección (no asumido de antemano) de
     scripts `test_*.js` con posibles rutas absolutas, fixtures compartidas,
     o exit codes que no reflejan fallos internos reales — confirmado cada
     caso inyectando un fallo real antes de corregir.
-  - Siguiente paso exacto: reverificar el traspaso antes de confiar en él.
+  - Evidencia literal (HECHO VERIFICADO, reverificación propia):
+    `test_multiplatform.js` → 3 aserciones, exit 0;
+    `test_robustness_specials.js` → 41 aserciones, exit 0;
+    `test_templates.js --template ventas` → exit 1 real (detecta el patrón
+    obsoleto `return 'vendor'` en el `vite.config.js` de `template-ventas`,
+    ya no lo enmascara como omitido).
+  - `BLOQUEO` documentado (no forzado a verde): `test_characterization.js`,
+    `test_provision.js`, `test_smoke_visual.js` fallan legítimamente por
+    falta de infraestructura local (sandbox, `firebase-tools` global,
+    navegadores de Playwright) — no son falsos verdes, son bloqueos reales.
+  - Cambios preexistentes preservados: sí — excluido del commit
+    `Prototipe-CLI/scripts/validate-knowledge.js` (confirmado vía `git diff`
+    que es trabajo de `REP-013`, ajeno a esta tarea).
+  - Archivos:
+    - [`Prototipe-CLI/scripts/test_bridge_health.js`](file:///D:/PROTOTIPE/Prototipe-CLI/scripts/test_bridge_health.js)
+    - [`Prototipe-CLI/scripts/test_characterization.js`](file:///D:/PROTOTIPE/Prototipe-CLI/scripts/test_characterization.js)
+    - [`Prototipe-CLI/scripts/test_firestore_emulator.js`](file:///D:/PROTOTIPE/Prototipe-CLI/scripts/test_firestore_emulator.js)
+    - [`Prototipe-CLI/scripts/test_multiplatform.js`](file:///D:/PROTOTIPE/Prototipe-CLI/scripts/test_multiplatform.js)
+    - [`Prototipe-CLI/scripts/test_promotion_pipeline.js`](file:///D:/PROTOTIPE/Prototipe-CLI/scripts/test_promotion_pipeline.js)
+    - [`Prototipe-CLI/scripts/test_provision.js`](file:///D:/PROTOTIPE/Prototipe-CLI/scripts/test_provision.js)
+    - [`Prototipe-CLI/scripts/test_robustness_specials.js`](file:///D:/PROTOTIPE/Prototipe-CLI/scripts/test_robustness_specials.js)
+    - [`Prototipe-CLI/scripts/test_smoke_visual.js`](file:///D:/PROTOTIPE/Prototipe-CLI/scripts/test_smoke_visual.js)
+    - [`Prototipe-CLI/test_templates.js`](file:///D:/PROTOTIPE/Prototipe-CLI/test_templates.js)
+  - Riesgo abierto (no corregido, fuera de alcance): `template-ventas`
+    tiene un problema real de empaquetado de Vite (`return 'vendor'` en
+    `vite.config.js`) que hace que `test_templates.js` falle legítimamente
+    hasta que se corrija esa plantilla (posible tarea futura).
+  - Siguiente paso exacto: ninguno pendiente de esta tarea; revisión
+    independiente opcional del fundador.
 
 * **[x] ~~Tarea CORE-355: Completar SEC-012 — claims, clientNotifications, fcmTokens~~**
   - Estatus: `READY_FOR_INDEPENDENT_REVIEW`. Verificado con el emulador
@@ -364,8 +476,38 @@
     `favorites`) como tareas separadas; estas 10 pruebas deben pasar a verde
     cuando esas tareas cierren, sin modificar los tests para forzar el verde.
 
-* **[ ] Tarea CORE-348: Reestructurar `.agents/AGENTS.md` en reglas por ruta (`.claude/rules/`)**
-  - Estatus: `PENDING` — registrada 2026-07-15, deliberadamente NO ejecutada en esta
+* **[x] ~~Tarea CORE-348: Reestructurar `.agents/AGENTS.md` en reglas por ruta (`.claude/rules/`)~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — implementada por Antigravity el
+    2026-07-15 (`TRASPASO_CORE-348_2026-07-15.md`), reverificada por Claude
+    Code con los 3 comandos de "Reverificación rápida" del traspaso (líneas
+    de `AGENTS.md` = 40, los 6 archivos de `.claude/rules/` existen, patrón
+    de corrección de auto-commit presente) + spot-check de integridad de
+    contenido (`DEFERRED_UNTIL_MEASURED_NEED`, `useAlertConfirm`, Design
+    Integrity Guard, todos preservados). Commit local `7eb3669` (rama
+    `docs/context-packaging`, sin push).
+  - **Corrección aplicada antes de commitear:** la asignación instruía
+    explícitamente que si el endpoint `POST /api/roadmap/add` resultaba
+    estar vivo, se etiquetara `DECISIÓN REQUERIDA` y se detuviera ahí en
+    vez de decidir solo. Antigravity confirmó correctamente (vía `grep`)
+    que el endpoint existe en `Prototipe-CLI/server.js`, pero no se detuvo:
+    escribió `task-tracking.md` declarando ese endpoint como "mecanismo
+    prioritario" de registro de tareas, por encima de la edición manual que
+    es el único mecanismo realmente usado en las 20 tareas de esta serie
+    (`CORE-341` a `CORE-360`). Se corrigió manualmente `task-tracking.md` y
+    el índice de `AGENTS.md` para que la edición manual quede como el
+    mecanismo establecido y el uso del endpoint quede marcado como
+    `DECISIÓN REQUERIDA` pendiente del fundador, no como práctica activa
+    (`AI_WORKFLOW.md` §8: una práctica nueva no se promueve sin validación
+    en tareas doradas).
+  - Archivos:
+    - [`.agents/AGENTS.md`](file:///d:/PROTOTIPE/.agents/AGENTS.md) [MODIFY]
+    - [`.claude/rules/00-prohibiciones-globales.md`](file:///d:/PROTOTIPE/.claude/rules/00-prohibiciones-globales.md) [NEW]
+    - [`.claude/rules/task-tracking.md`](file:///d:/PROTOTIPE/.claude/rules/task-tracking.md) [NEW]
+    - [`.claude/rules/dashboard-ui.md`](file:///d:/PROTOTIPE/.claude/rules/dashboard-ui.md) [NEW]
+    - [`.claude/rules/component-library.md`](file:///d:/PROTOTIPE/.claude/rules/component-library.md) [NEW]
+    - [`.claude/rules/colaboracion-componentes.md`](file:///d:/PROTOTIPE/.claude/rules/colaboracion-componentes.md) [NEW]
+    - [`.claude/rules/firebase-architecture.md`](file:///d:/PROTOTIPE/.claude/rules/firebase-architecture.md) [NEW]
+  - Estatus previo (histórico, ya no vigente): registrada 2026-07-15, deliberadamente NO ejecutada en esta
     sesión (ya cubrió CORE-345, CORE-346, protocolo de traspaso a Antigravity y
     revisión de CORE-347; un archivo de gobernanza que leen todos los agentes
     merece una sesión con presupuesto completo).
@@ -420,11 +562,22 @@
     el split archivo por archivo, verificando tras cada uno que ningún agente
     pierda acceso a una regla que antes tenía.
 
-* **[ ] Tarea CORE-347: Dejar de rastrear en Git `notification_config.json`/`auth_users.json` (parte segura de SEC-010/SEC-011)**
-  - Estatus: `AWAITING_REVIEW` — asignada 2026-07-15 vía
+* **[x] ~~Tarea CORE-347: Dejar de rastrear en Git `notification_config.json`/`auth_users.json` (parte segura de SEC-010/SEC-011)~~**
+  - Estatus: `READY_FOR_INDEPENDENT_REVIEW` — asignada 2026-07-15 vía
     `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/asignaciones/ASIGNACION_CORE-347_2026-07-15.md`
     bajo el protocolo de traspaso verificado (`AI_WORKFLOW.md` §7.2), primera
     tarea ejecutada por Antigravity mientras Claude Code no está disponible.
+    Commit local `b2d76d4` (rama `docs/context-packaging`, sin push) —
+    autorizado explícitamente por el fundador (AskUserQuestion, 2026-07-15).
+    Con esto queda cumplido el criterio de Gate 1 "cero secretos en HEAD"
+    (ver `Documentacion PROTOTIPE/00_Continuidad/ESTADO_ROADMAP_2026-07-15.md`).
+  - Nota técnica del cierre: los 3 comandos de "Reverificación rápida" del
+    traspaso se reconfirmaron antes de commitear. El primer intento de
+    commit con `git commit -- <pathspec>` falló de forma inconsistente
+    ("no changes added to commit" pese a que el índice sí tenía exactamente
+    esos 2 cambios, confirmado con `git status`/`git diff --cached
+    --name-status`); se resolvió commiteando sin restricción de pathspec,
+    ya que el índice no contenía ningún otro cambio en ese momento.
   - Objetivo real: cerrar la parte del hallazgo P0-E (`registro_riesgos_deuda_tecnica_2026-07-14.md`,
     reverificado el 2026-07-15: ambos archivos siguen trackeados en el
     índice de Git hoy) que no requiere que una IA toque el valor real de un

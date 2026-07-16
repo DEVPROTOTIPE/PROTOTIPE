@@ -1,5 +1,428 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CORE-359 — 2026-07-15
+**Security: Propagar SEC-012/13/14/15 de Core a la instancia real ventas-moni-app**
+
+### Cambios realizados:
+1. **Reglas de Firestore (firestore.rules):** Reemplazada la configuración de reglas por la del Core que implementa isEmployee(), employeeId(), validOrder(), y control de ownerUid en users, favorites, wholesaleOrders, credits, claims y clientNotifications.
+2. **Inicio de sesión anónimo (App.jsx y useAnonAuthInit.js):** Se implementó el inicio de sesión anónimo obligatorio para clientes en rutas del cliente, asociando su sesión a su dispositivo.
+3. **Autenticación real de empleados (employeeService.js y employeeAuthService.js):** Migrado el sistema de PIN local hasheado a Firebase Auth real mediante un correo electrónico sintético, cerrando la brecha de lectura expuesta de secrets.
+4. **Reseteo de Dispositivos (AdminCredits.jsx y LoginPage.jsx):** Inyectado el botón "Resetear dispositivo" para que el administrador pueda liberar el ownerUid de un cliente, permitiendo el login desde un dispositivo nuevo.
+5. **Entorno de Emulación y Test (firebase.json, eslint.config.js y tests/unit):** Se crearon y adaptaron 3 especificaciones de pruebas unitarias sobre puertos alternos libres (8085 y 9195) y se actualizó eslint para ignorar tests en las restricciones Firebase CRUD.
+6. **Scripts Administrativos (scripts/):** Se agregaron scripts de soporte bootstrap-admin.js y reset-employee-pin.js usando la API modular de firebase-admin.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity
+- **Rama / HEAD observado:** `docs/context-packaging` / `b2d76d4`
+- **Alcance propio:** `Instancias Clientes/ventas/ventas-moni-app/`
+- **Cambios preexistentes preservados:** Se respetó la configuración propia del proyecto de Firebase (firebaseConfig.js) del cliente, sin sobrescribirla con la de Core.
+
+### Evidencia:
+- Levantar emuladores locales en puertos 8085 y 9195 y ejecutar Vitest (`tests/unit/firestoreRules.spec.js tests/unit/employeePinLogin.spec.js tests/unit/employeeAuthEmulator.spec.js`) resultó exitoso con `Tests 20 passed`.
+- `npm run build` empaquetó para producción correctamente.
+- `npx eslint .` no reportó errores nuevos en archivos modificados/creados.
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW` — reverificado por Claude Code:
+  `npx vitest run` (los 3 archivos) → `Tests 20 passed (20)`, idéntico;
+  `npm run build` → exitoso, idéntico. **Discrepancia encontrada en el
+  punto de lint** (no bloquea el cierre, ver detalle completo debajo):
+  `npx eslint` sobre los archivos específicos modificados SÍ reportó 3
+  errores reales de `no-restricted-syntax` (`setDoc` directo) en
+  `LoginPage.jsx` — investigado y confirmado como deuda preexistente
+  idéntica en `Plantillas Core/App Ventas/src/pages/LoginPage.jsx` (mismas
+  3 líneas, 126/204/249), no una regresión nueva de esta tarea. Commit
+  local `7d94794` (rama `docs/context-packaging`, sin push), excluyendo 3
+  archivos preexistentes ajenos (`AdminCustomerLoyalty.jsx`,
+  `AdminView.jsx`, `AdminHelloModule.jsx` — guards RBAC de `CORE-342`).
+
+### Archivos modificados:
+- [`Instancias Clientes/ventas/ventas-moni-app/firestore.rules`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/firestore.rules) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/firebase.json`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/firebase.json) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/eslint.config.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/eslint.config.js) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/App.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/App.jsx) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAuthInit.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAuthInit.js) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/services/employeeService.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/employeeService.js) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/config/firebaseConfig.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/config/firebaseConfig.js) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/constants/index.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/constants/index.js) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/LoginPage.jsx) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/components/portal/RequirePortalAuth.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/components/portal/RequirePortalAuth.jsx) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/layouts/PortalLayout.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/layouts/PortalLayout.jsx) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/pages/admin/AdminCredits.jsx`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/pages/admin/AdminCredits.jsx) [MODIFY]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/hooks/useAnonAuthInit.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/hooks/useAnonAuthInit.js) [NEW]
+- [`Instancias Clientes/ventas/ventas-moni-app/src/services/employeeAuthService.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/src/services/employeeAuthService.js) [NEW]
+- [`Instancias Clientes/ventas/ventas-moni-app/scripts/bootstrap-admin.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/scripts/bootstrap-admin.js) [NEW]
+- [`Instancias Clientes/ventas/ventas-moni-app/scripts/reset-employee-pin.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/scripts/reset-employee-pin.js) [NEW]
+- [`Instancias Clientes/ventas/ventas-moni-app/tests/unit/firestoreRules.spec.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/tests/unit/firestoreRules.spec.js) [NEW]
+- [`Instancias Clientes/ventas/ventas-moni-app/tests/unit/employeePinLogin.spec.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/tests/unit/employeePinLogin.spec.js) [NEW]
+- [`Instancias Clientes/ventas/ventas-moni-app/tests/unit/employeeAuthEmulator.spec.js`](file:///d:/PROTOTIPE/Instancias%20Clientes/ventas/ventas-moni-app/tests/unit/employeeAuthEmulator.spec.js) [NEW]
+
+---
+
+## CORE-348 — 2026-07-15
+**Docs: Reestructurar `.agents/AGENTS.md` en reglas por ruta (`.claude/rules/`)**
+
+### Cambios realizados:
+1. **Gobernanza:** Simplificado `.agents/AGENTS.md` (475 líneas) a un índice de 41 líneas que apunta a `.agents/AI_WORKFLOW.md` y a los nuevos archivos de reglas en `.claude/rules/`.
+2. **00-prohibiciones-globales.md:** Creado el archivo global de prohibiciones, moviendo la prohibición de restore físico y el estándar de integridad post-change (este último corregido para eliminar la contradicción de auto-commits, exigiendo ahora propuesta y autorización explícita).
+3. **task-tracking.md:** Creado el estándar de rastreo de tareas — versión
+   original de Antigravity declaraba un enfoque híbrido con el endpoint
+   local del Bridge como "mecanismo prioritario"; **corregido por Claude
+   Code antes de commitear** (ver hallazgo debajo) para que la edición
+   manual quede como el único mecanismo establecido y probado.
+4. **dashboard-ui.md:** Creado el archivo de reglas específicas para el Dashboard Central (filtrabilidad, tags, layout, Storybook, modularización de `App.jsx`, dropdowns `CustomSelect`).
+5. **component-library.md:** Creado el estándar común de componentes y Design Integrity Guard (eliminaciones, manifiestos targetPath, CSS contraste, responsive móvil y restricciones DIG).
+6. **colaboracion-componentes.md:** Creado el estándar de colaboración (comando `@colaborar` y toma de decisiones).
+7. **firebase-architecture.md:** Creado el estándar de Firebase (desacoplamiento de capas, listeners realtime, caché local, transacciones, skeletons y gobernanza RBAC/multitenant).
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity
+- **Rama / HEAD observado:** `docs/context-packaging` / `b2d76d4`
+- **Alcance propio:** `.agents/AGENTS.md` y la carpeta `.claude/rules/`
+- **Cambios preexistentes preservados:** Todos los cambios del working tree de la rama se preservaron intactos (no se borró ni alteró ningún cambio preexistente).
+
+### Evidencia:
+- Grep de integridad ejecutado en `.claude/rules/` para validar el traspaso de todas las reglas sin pérdidas (todos los tests internos de grep dieron `PASS`).
+- Diff de `.agents/AGENTS.md` verificado: reducción neta de 457 líneas (41 líneas finales).
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW` — reverificado por Claude Code:
+  `wc -l .agents/AGENTS.md` → 40 líneas (coincide, bajo el límite de 60);
+  los 6 archivos de `.claude/rules/` existen; `grep "PROPUESTA OBLIGATORIA
+  DE COMMIT"` → coincide. Spot-check adicional de integridad de contenido:
+  `DEFERRED_UNTIL_MEASURED_NEED`, `useAlertConfirm`, "Design Integrity
+  Guard" — los tres preservados en sus archivos de destino.
+
+### Hallazgo — desviación de una instrucción explícita, corregida antes de commitear:
+La asignación (`ASIGNACION_CORE-348_2026-07-15.md`) instruía: "si
+encuentras el endpoint `POST /api/roadmap/add` vivo, etiqueta `DECISIÓN
+REQUERIDA` y detente, no decidas solo". Antigravity confirmó correctamente
+(vía `grep`) que el endpoint existe y funciona en `Prototipe-CLI/server.js`
+— pero no se detuvo: escribió `task-tracking.md` con ese endpoint como
+"mecanismo prioritario", relegando a "fallback" la edición manual de
+`tareas_pendientes.md` que es en realidad el único mecanismo usado y
+probado en las 20 tareas de la serie `CORE-341` a `CORE-360`. Esto habría
+promovido una práctica nueva y no validada a norma obligatoria para todos
+los agentes, violando `AI_WORKFLOW.md` §8. **Corregido por Claude Code**:
+se reescribió `task-tracking.md` (y el índice de `AGENTS.md`) para que la
+edición manual quede como mecanismo establecido y el endpoint quede
+etiquetado `DECISIÓN REQUERIDA`, pendiente del fundador.
+
+### Archivos modificados:
+- [`.agents/AGENTS.md`](file:///d:/PROTOTIPE/.agents/AGENTS.md) [MODIFY]
+- [`.claude/rules/00-prohibiciones-globales.md`](file:///d:/PROTOTIPE/.claude/rules/00-prohibiciones-globales.md) [NEW]
+- [`.claude/rules/task-tracking.md`](file:///d:/PROTOTIPE/.claude/rules/task-tracking.md) [NEW, corregido tras revisión]
+- [`.claude/rules/dashboard-ui.md`](file:///d:/PROTOTIPE/.claude/rules/dashboard-ui.md) [NEW]
+- [`.claude/rules/component-library.md`](file:///d:/PROTOTIPE/.claude/rules/component-library.md) [NEW]
+- [`.claude/rules/colaboracion-componentes.md`](file:///d:/PROTOTIPE/.claude/rules/colaboracion-componentes.md) [NEW]
+- [`.claude/rules/firebase-architecture.md`](file:///d:/PROTOTIPE/.claude/rules/firebase-architecture.md) [NEW]
+- **Commit local:** `7eb3669` (rama `docs/context-packaging`, sin push).
+
+---
+
+## CORE-360 — 2026-07-15
+**Sincronizar `knowledge/firestore/core.rules` con el estado real de Core**
+
+### Cambios realizados:
+Actualizados `Prototipe-CLI/knowledge/firestore/core.rules` y los 4
+fragmentos de `features/` (`orders.rules`, `credits.rules`,
+`inventory.rules`, `notifications.rules`) para que, compuestos por
+`distribute_rules.js`, reproduzcan byte a byte el `firestore.rules` real y
+actual de Core (post `SEC-012`–`017`). Riesgo señalado (no corregido) en
+`CORE-356`/`CORE-358` — la herramienta de detección de drift estaba ciega
+al trabajo de seguridad más importante de la serie.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity (implementación), Claude Code
+  (reverificación y commit).
+- **Rama / HEAD observado:** `docs/context-packaging` / `b2d76d4`.
+- **Alcance propio:** los 5 archivos de `Prototipe-CLI/knowledge/firestore/`.
+- **Cambios preexistentes preservados:** sí. Nunca se ejecutó
+  `distribute_rules.js --write`.
+
+### Evidencia:
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW` — reverificado por Claude
+  Code ejecutando `node scripts/distribute_rules.js` (sin `--write`):
+  salida idéntica (mismos hashes SHA256) a la reportada por Antigravity —
+  `🟢 Paridad certificada` para "App Ventas (Core Plantilla)" y
+  "template-ventas"; `🔴 FAIL` esperado para "ventas-moni-app" (`CORE-359`
+  corría en paralelo sobre ese archivo) y "template-core-seed" (agnóstico
+  de features, fuera de alcance). Se verificó que
+  `Plantillas Core/App Ventas/firestore.rules` no tiene ningún cambio real
+  en `git diff`, pese a que el traspaso mencionaba una normalización de
+  saltos de línea — sin impacto.
+- **Commit local:** `9bdd98b` (rama `docs/context-packaging`, sin push).
+
+### Archivos modificados:
+- [`Prototipe-CLI/knowledge/firestore/core.rules`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/firestore/core.rules) [MODIFY]
+- [`Prototipe-CLI/knowledge/firestore/features/orders.rules`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/firestore/features/orders.rules) [MODIFY]
+- [`Prototipe-CLI/knowledge/firestore/features/credits.rules`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/firestore/features/credits.rules) [MODIFY]
+- [`Prototipe-CLI/knowledge/firestore/features/inventory.rules`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/firestore/features/inventory.rules) [MODIFY]
+- [`Prototipe-CLI/knowledge/firestore/features/notifications.rules`](file:///d:/PROTOTIPE/Prototipe-CLI/knowledge/firestore/features/notifications.rules) [MODIFY]
+
+---
+
+## [MINOR] 3 tareas asignadas a Antigravity — segunda tanda, avanzar Fase 1 — 2026-07-15
+
+### Contexto:
+El fundador pidió, tras revisar `ESTADO_ROADMAP_2026-07-15.md`, asignar más
+tareas reales a Antigravity para avanzar Fase 1 ("Cierre P0") más rápido y
+reducir el consumo de créditos de Claude Code. Antes de asignar nada se
+verificó con `grep` que cada gap fuera real (no asumido):
+`ventas-moni-app/firestore.rules` todavía tiene `isFirstStart()` y ningún
+`isEmployee()`/`ownerUid`; `knowledge/firestore/core.rules` no refleja
+`SEC-012`–`017` (confirmado que hoy `distribute_rules.js` sin `--write`
+reportaría `FAIL` contra el propio Core).
+
+### Cambio:
+Tres asignaciones nuevas/reactivadas en `03_Auditorias_y_Faro_Core/asignaciones/`,
+cada una en carpeta exclusiva sin solape entre sí (`AI_WORKFLOW.md` §2):
+- `ASIGNACION_CORE-359_2026-07-15.md`: propagar `SEC-012`–`015` de Core a
+  `Instancias Clientes/ventas/ventas-moni-app/` — el gap más importante de
+  los tres, por tratarse de un cliente real y no una plantilla.
+- `ASIGNACION_CORE-360_2026-07-15.md`: sincronizar
+  `Prototipe-CLI/knowledge/firestore/core.rules` + fragmentos de
+  `features/` con el estado real de Core, sin tocar ningún `firestore.rules`
+  desplegado. Instrucción explícita y repetida de **jamás ejecutar
+  `distribute_rules.js --write`** (sobrescribiría el trabajo en paralelo de
+  `CORE-359` sobre `ventas-moni-app`, uno de los 4 destinos de esa
+  composición) — verificado leyendo el código del script que sin esa
+  bandera es de solo lectura/diagnóstico (calcula hash y compara, no
+  escribe salvo que el destino no exista).
+- `ASIGNACION_CORE-348_2026-07-15.md`: reactiva la tarea ya diagnosticada
+  (`AGENTS.md` → `.claude/rules/`), incluyendo el mapa línea por línea y
+  las 2 contradicciones detectadas, para que Antigravity ejecute el split
+  sin tener que re-diagnosticar desde cero.
+
+Se investigó también si el "problema de Vite" (`return 'vendor'` en
+`manualChunks`, flag de `test_templates.js`) era un buen candidato de
+tarea — se descartó: el propio `Plantillas Core/App Ventas/vite.config.js`
+(fuente de verdad) tiene el mismo patrón línea por línea, así que no es un
+atraso de plantilla sino, en el mejor caso, una regla de auditoría del CLI
+más estricta que el propio Core, o una discusión de diseño más profunda
+que una tarea mecánica — no se asignó para evitar generar trabajo confuso
+o contradictorio con Core.
+
+### Ejecución y base:
+- **Ejecutor(es):** Claude Code (terminal), preparando las asignaciones —
+  Antigravity aún no ha ejecutado nada de estas 3 tareas al momento de
+  este registro.
+- **Rama / HEAD observado:** `docs/context-packaging` / `a8f3048`.
+- **Alcance propio:** 3 archivos de asignación nuevos/actualizados, 3
+  entradas actualizadas en `tareas_pendientes.md`. Ningún archivo de código
+  tocado para estas 3 tareas todavía.
+- **Cambios preexistentes preservados:** sí.
+- **Siguiente paso exacto:** el fundador abre 3 chats nuevos de Antigravity
+  (uno por tarea) y pega el contenido de cada asignación. Cuando cada una
+  entregue su traspaso, quien retome ejecuta la "Reverificación rápida" de
+  cada una antes de confiar en el resultado — nunca el resumen solo.
+
+### Nota (ya resuelta, ver entrada `CORE-347` debajo):
+En el momento de escribir esta entrada, `CORE-347` seguía con las dos
+eliminaciones preparadas en el índice sin commitear por un fallo extraño
+de `git commit -- <pathspec>`. Se diagnosticó y cerró justo después — ver
+la entrada `CORE-347` a continuación.
+
+---
+
+## CORE-347 — 2026-07-15
+**Dejar de rastrear en Git `auth_users.json`/`notification_config.json` (cierre)**
+
+### Contexto:
+`.gitignore`, las plantillas saneadas (`*.example.json`) y la documentación
+ya se habían commiteado antes (`499acae`, "CORE-347 (parcial)"). Faltaba
+únicamente el commit de las dos eliminaciones (`git rm --cached`,
+preparadas en el índice por Antigravity) — deliberadamente separado porque
+requería autorización explícita del fundador (`CLAUDE.md`: ningún commit
+que toque archivos de secretos sin permiso separado).
+
+### Cambio:
+El fundador autorizó explícitamente el commit (`AskUserQuestion`,
+2026-07-15, opción "Cerrar CORE-347"). Antes de commitear se reconfirmaron
+los 3 comandos exactos de "Reverificación rápida" de
+`TRASPASO_CORE-347_2026-07-15.md` — coincidieron exactamente con lo
+reportado por Antigravity.
+
+**Incidente técnico durante el cierre:** `git commit -m "..." -- Prototipe-CLI/auth_users.json Prototipe-CLI/notification_config.json`
+falló repetidamente con `no changes added to commit (use "git add" and/or
+"git commit -a")`, pese a que `git diff --cached --stat`/`--name-status` y
+`git status --porcelain=v2` confirmaban que el índice sí tenía exactamente
+esas dos eliminaciones staged. Se descartaron como causa: hooks de Git
+(`.git/hooks/pre-commit` no existe), fusión/rebase/cherry-pick en curso
+(ninguno), y problemas de staging (`git status` sin acotar por pathspec sí
+mostraba la sección "Changes to be committed" completa y correcta). Se
+confirmó con `GIT_TRACE=1` que el binario real de Git se ejecutaba con los
+argumentos correctos, en el `cwd`/`worktree` correcto — el fallo era del
+propio comportamiento de `git commit -- <pathspec>` con esos dos paths
+específicos, causa raíz no identificada más allá de eso. **Resuelto**
+verificando que el índice no contenía ningún otro cambio staged en ese
+momento y commiteando sin restricción de pathspec (`git commit -F
+<mensaje>`), lo cual es equivalente y seguro cuando el índice está limpio
+de cualquier otra cosa.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity (preparación del `git rm --cached` y
+  plantillas), Claude Code (reverificación, diagnóstico del fallo de
+  commit y commit final).
+- **Rama / HEAD observado:** `docs/context-packaging`.
+- **Alcance propio:** `Prototipe-CLI/auth_users.json`,
+  `Prototipe-CLI/notification_config.json` (ambos, solo eliminación del
+  índice — archivos físicos intactos en disco, sin rotar ningún valor).
+- **Commit local:** `b2d76d4` (rama `docs/context-packaging`, sin push).
+
+### Evidencia:
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW`. `git show --stat HEAD` tras
+  el commit confirma únicamente 2 archivos eliminados, 68 líneas, sin
+  ningún archivo ajeno incluido. `git status --short --branch` posterior
+  confirma que el resto del trabajo preexistente de otras tareas siguió
+  intacto sin tocar.
+- **Impacto en el roadmap:** cierra el último criterio pendiente de Gate 1
+  ("cero secretos en HEAD" —
+  `Documentacion PROTOTIPE/00_Continuidad/ESTADO_ROADMAP_2026-07-15.md`).
+  Rotación real de credenciales/tokens sigue como decisión operativa
+  separada del fundador, no incluida en este cierre.
+
+---
+
+## CORE-358 — 2026-07-15
+**Bugfix: Corregir falsos verdes del CLI (paths relativos, fixtures propios, exit codes)**
+
+### Cambios realizados:
+1. **test_bridge_health.js:** Corregido el listener de cierre del child para validar si el exit code no es cero y detectar cierres inesperados (falsos verdes). Incrementado el timeout de arranque del servidor a 30 segundos para cold boot en Windows.
+2. **test_characterization.js:** Modificado el validador de defectos observados (Grupo B) para asignar `testFailed = true` ante discrepancias en lugar de solo advertir en consola.
+3. **test_provision.js:** Añadido `process.exit(1)` ante fallos de integridad física (`failed.length > 0`) en lugar de terminar exitosamente de forma silenciosa.
+4. **test_templates.js:** Modificada la lógica de auditorías del Hook de telemetría y del archivo de empaquetado de Vite para marcar como `passed = false` y `skipped = false` las auditorías fallidas, forzando la terminación con código de salida 1 en el test runner principal.
+5. **test_promotion_pipeline.js:** Implementado mecanismo de aislamiento total mediante backup y restauración automática de `plantillas_registro.json` de producción local al inicio y fin de la suite de pruebas.
+6. **Robustez general:** Agregado `.catch(...)` y manejadores en la raíz de llamadas asíncronas de todos los scripts principales (`test_firestore_emulator.js`, `test_multiplatform.js`, `test_robustness_specials.js`, `test_smoke_visual.js`, `test_provision.js`) para propagar correctamente cualquier rechazo de promesa como código de salida 1.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity
+- **Rama / HEAD observado:** `docs/context-packaging` / `8d5375e`
+- **Alcance propio:** `Prototipe-CLI/` (scripts de prueba y test runner).
+- **Cambios preexistentes preservados:** Sí, todas las plantillas y el orquestador principal.
+
+### Evidencia:
+- Pruebas unitarias y de integración del CLI verificadas individualmente (salida exitosa 0 normal, y salida 1 con inyección de fallo controlada).
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW` — reverificado por Claude Code el
+  2026-07-15 ejecutando literalmente los comandos de "Reverificación rápida"
+  de `TRASPASO_CORE-358_2026-07-15.md` antes de commitear (no solo el
+  resumen de Antigravity):
+  - `node scripts/test_multiplatform.js` → 3 aserciones, `exit code: 0`.
+  - `node scripts/test_robustness_specials.js` → 41 aserciones, `exit code: 0`.
+  - `node test_templates.js --template ventas` → `exit code: 1` real —
+    detecta el patrón obsoleto `return 'vendor'` en el `vite.config.js` de
+    `template-ventas` (riesgo abierto, no corregido aquí, ver más abajo).
+  - Los 3 `BLOQUEO` del traspaso (`test_characterization.js`,
+    `test_provision.js`, `test_smoke_visual.js`) se confirmaron como
+    bloqueos reales por falta de infraestructura local (sandbox,
+    `firebase-tools` global, navegadores Playwright), no falsos verdes.
+- **Commit local:** `a8f3048` (rama `docs/context-packaging`, sin push).
+  Excluido explícitamente `Prototipe-CLI/scripts/validate-knowledge.js`
+  (confirmado vía `git diff` como trabajo preexistente de `REP-013`, ajeno
+  a esta tarea).
+- **Riesgo abierto:** `template-ventas/vite.config.js` usa el patrón
+  obsoleto `return 'vendor'` — causa que `test_templates.js` falle
+  legítimamente hasta que esa plantilla se corrija (posible tarea futura,
+  no registrada aún como CORE-3xx).
+
+### Archivos modificados:
+- [`test_bridge_health.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_bridge_health.js) [MODIFY]
+- [`test_characterization.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_characterization.js) [MODIFY]
+- [`test_firestore_emulator.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_firestore_emulator.js) [MODIFY]
+- [`test_multiplatform.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_multiplatform.js) [MODIFY]
+- [`test_promotion_pipeline.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_promotion_pipeline.js) [MODIFY]
+- [`test_provision.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_provision.js) [MODIFY]
+- [`test_robustness_specials.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_robustness_specials.js) [MODIFY]
+- [`test_smoke_visual.js`](file:///d:/PROTOTIPE/Prototipe-CLI/scripts/test_smoke_visual.js) [MODIFY]
+- [`test_templates.js`](file:///d:/PROTOTIPE/Prototipe-CLI/test_templates.js) [MODIFY]
+
+---
+
+## CORE-356 — 2026-07-15
+**Propagar SEC-012/013/014/015 de Core a `template-ventas`**
+
+### Contexto:
+Tarea asignada a Antigravity para trabajo nocturno en paralelo
+(`ASIGNACION_CORE-356_2026-07-15.md`). `template-ventas` no tenía ninguno
+de los cierres de seguridad ya hechos en Core (`SEC-012` a `SEC-015`).
+
+### Cambio:
+Propagación manual archivo por archivo (no vía `publish_core_to_template.js`,
+confirmado que su alcance se limita a `src/features/<name>/**` y ninguno de
+los archivos tocados por `SEC-012`–`015` — reglas, hooks, servicios,
+componentes de portal — vive ahí) de la cadena completa de cierres de
+seguridad a `Prototipe-CLI/templates/template-ventas/`.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity (implementación), Claude Code (reverificación
+  y commit).
+- **Rama / HEAD observado:** `docs/context-packaging`.
+- **Alcance propio:** `Prototipe-CLI/templates/template-ventas/` (23 archivos).
+- **Cambios preexistentes preservados:** sí — excluidos del commit
+  `src/features/hello-module/components/AdminHelloModule.jsx` y
+  `tests/unit/salesService.spec.js` (confirmado vía `git diff` como trabajo
+  de `CORE-342`, ajeno a esta tarea).
+
+### Evidencia:
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW` — reverificado por Claude Code
+  ejecutando la suite combinada de `firestoreRules.spec.js` +
+  `employeeAuthEmulator.spec.js` contra emuladores reales (Firestore + Auth):
+  primera corrida `19 passed | 1 failed` (falla puntual en escritura de
+  `stockMovements`, `PERMISSION_DENIED`); dos reintentos posteriores con el
+  mismo código, sin cambios, dieron `20 passed | 0 failed` — diagnosticado
+  como arranque en frío del emulador (condición de carrera), no un bug de
+  reglas ni de test. Documentado honestamente en el commit, no re-corrido
+  en silencio hasta ocultar el fallo inicial.
+- **Riesgo abierto (no corregido, fuera de alcance):**
+  `Prototipe-CLI/scripts/distribute_rules.js` sigue componiendo
+  `firestore.rules` desde `knowledge/firestore/core.rules`, que está
+  desactualizado (no contiene ninguna regla de `SEC-012`–`015`) — no
+  ejecutar ese script hasta sincronizarlo, o sobrescribiría este trabajo.
+- **Commit local:** `ff809a8` (rama `docs/context-packaging`, sin push).
+
+---
+
+## CORE-357 — 2026-07-15
+**SEC-017 — claim/allowlist real de operador del Dashboard Central**
+
+### Contexto:
+Tarea asignada a Antigravity para trabajo nocturno en paralelo
+(`ASIGNACION_CORE-357_2026-07-15.md`). Confirmado que toda colección
+sensible del Dashboard Central (`tokens`, `clientes_control`,
+`whatsappTemplates`, `configuracion_sistema`, `briefings`, `cotizaciones`,
+`dashboard_config`, `health_checks`, `reportesBilling`, `app_failures`)
+exigía solo `request.auth != null` — cualquier cuenta de Firebase Auth,
+incluso auto-registrada, tenía control total.
+
+### Cambio:
+`Central PROTOTIPE/dev-dashboard/firestore.rules`: añadido helper
+`isOperator()` + colección `operators/{operatorId}` (`get` para cualquier
+autenticado, `list` solo para operadores activos, `write: if false`);
+reemplazado `request.auth != null` por `isOperator()` en las 10 colecciones
+sensibles listadas arriba. `firebase.json`: bloque `emulators.firestore`
+añadido. `package.json`: dependencias de vitest + rules-unit-testing.
+`tests/unit/firestoreRules.spec.js` (NUEVO): 9 casos de prueba.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity (implementación), Claude Code (reverificación
+  y commit).
+- **Rama / HEAD observado:** `docs/context-packaging`.
+- **Alcance propio:** `Central PROTOTIPE/dev-dashboard/`.
+- **Cambios preexistentes preservados:** sí.
+
+### Evidencia:
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW` — reverificado por Claude Code
+  ejecutando los comandos exactos de "Reverificación rápida" de
+  `TRASPASO_CORE-357_2026-07-15.md`: emulador de Firestore levantado,
+  `npx vitest run tests/unit/firestoreRules.spec.js` → `Tests 9 passed (9)`;
+  `npm run build` → build exitoso; `npm run lint` → sin errores. Coincide
+  exactamente con lo reportado.
+- **Commit local:** `6525993` (rama `docs/context-packaging`, sin push).
+
+### Archivos modificados:
+- [`Central PROTOTIPE/dev-dashboard/firestore.rules`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firestore.rules) [MODIFY]
+- [`Central PROTOTIPE/dev-dashboard/firebase.json`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/firebase.json) [MODIFY]
+- [`Central PROTOTIPE/dev-dashboard/package.json`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/package.json) [MODIFY]
+- [`Central PROTOTIPE/dev-dashboard/tests/unit/firestoreRules.spec.js`](file:///D:/PROTOTIPE/Central%20PROTOTIPE/dev-dashboard/tests/unit/firestoreRules.spec.js) [NEW]
+
+---
+
 ## [MINOR] 3 tareas asignadas a Antigravity para trabajo nocturno en paralelo — 2026-07-15
 
 ### Contexto:
@@ -225,6 +648,39 @@ leer el hash como lo haría el login real (sesión autenticada no-admin).
 - **Siguiente paso exacto:** diseñar `SEC-015` (identidad real de
   empleados) en modo plan antes de tocar código, mismo tratamiento que
   `SEC-014` dado el tamaño y la criticidad.
+
+---
+
+## [MINOR] CORE-357 en revisión — claim/allowlist real de operador del Dashboard Central — 2026-07-15
+
+### Contexto:
+Todas las colecciones sensibles del Dashboard Central (`tokens`, `clientes_control`, `whatsappTemplates`, `configuracion_sistema`, `briefings`, `cotizaciones`, `dashboard_config`, `health_checks`) requerían únicamente `request.auth != null`, permitiendo que cualquier usuario autenticado de Firebase Auth obtuviera control total de la base de datos sin un allowlist o rol de operador.
+
+### Cambio:
+1. `Central PROTOTIPE/dev-dashboard/firestore.rules`:
+   - Se declaró la colección `/operators/{operatorId}` con `allow get: if request.auth != null;` (para que el usuario consulte su propio estado), `allow list: if isOperator();`, y escritura deshabilitada (`allow write: if false`) para forzar su provisión manual por el fundador.
+   - Se implementó la regla helper `isOperator()` que valida que el usuario esté autenticado, su UID exista en `/operators/` y tenga el campo `activo == true`.
+   - Se reemplazaron todas las validaciones de `request.auth != null` por `isOperator()` en las colecciones sensibles, excepto para `/operators/{operatorId}` donde se mantiene `request.auth != null` en el get de lectura inicial.
+2. `Central PROTOTIPE/dev-dashboard/firebase.json`:
+   - Se añadió la configuración de `"emulators"` para habilitar el puerto `8080` de Firestore Emulator localmente.
+3. `Central PROTOTIPE/dev-dashboard/package.json`:
+   - Se añadieron `vitest` y `@firebase/rules-unit-testing` a `devDependencies` y el script `"test": "vitest run"`.
+4. `Central PROTOTIPE/dev-dashboard/tests/unit/firestoreRules.spec.js` (NUEVO):
+   - Se implementaron 9 pruebas unitarias que cubren casos de usuario anónimo denegado, usuario autenticado no-operador denegado, operador inactivo denegado, operador activo permitido en todas las colecciones sensibles, y la validación de la actualización pública exclusiva de `lastPingResponse`.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity.
+- **Rama / HEAD observado:** `docs/context-packaging` / `8d5375e` (ahead 15).
+- **Pruebas ejecutadas y resultado literal:**
+  - `npx vitest run tests/unit/firestoreRules.spec.js` → `Tests  9 passed (9)` (HECHO VERIFICADO).
+  - `npm run build` → compilación de producción exitosa y sin regresiones en prebuild (HECHO VERIFICADO).
+  - `npx eslint tests/unit/firestoreRules.spec.js` → limpio, 0 errores/warnings (HECHO VERIFICADO).
+  - `npm run lint` → limpio, 0 errores (HECHO VERIFICADO).
+- **Cambios preexistentes preservados:** Todos los cambios preexistentes de Claude en `Plantillas Core/App Ventas/` y `Prototipe-CLI/` fueron preservados y respetados (HECHO VERIFICADO).
+- **Documentación actualizada:** `Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/traspasos/TRASPASO_CORE-357_2026-07-15.md` (HECHO VERIFICADO).
+- **Siguiente paso exacto:** Quien retome debe correr la reverificación rápida descrita en el traspaso antes de marcar a `VERIFIED_COMPLETE`.
+
+---
 
 ## [MINOR] CORE-352 en revisión — build autónomo del Dashboard Central — 2026-07-15
 
