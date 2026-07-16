@@ -104,4 +104,41 @@ export async function getClientsUpdatedSince(sinceDate, limitVal = 100) {
   }
 }
 
+/**
+ * Registra un cliente nuevo (primer login por celular) en Firestore.
+ * @param {string} celular - Número de celular (ID del documento)
+ * @param {{ nombre: string, ownerUid: string }} data - Datos iniciales del cliente
+ */
+export async function registerNewClient(celular, { nombre, ownerUid }) {
+  if (!celular || !nombre || !ownerUid) return
+  const userRef = doc(db, COLLECTIONS.USERS, celular)
+  await setDoc(userRef, {
+    nombre,
+    celular,
+    role: 'client',
+    ownerUid,
+    fechaRegistro: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  })
+}
+
+/**
+ * Registra al primer administrador (bootstrap de arranque inicial). Solo
+ * puede ejecutarse una vez — firestore.rules exige que config/settings no
+ * exista todavía (isFirstStart, ver SEC-013).
+ * @param {string} uid - UID de Firebase Auth del admin recién creado
+ * @param {{ email: string, nombre: string, whatsapp: string }} data
+ */
+export async function registerFirstAdmin(uid, { email, nombre, whatsapp }) {
+  if (!uid) return
+  const userRef = doc(db, COLLECTIONS.USERS, uid)
+  await setDoc(userRef, {
+    email,
+    role: 'admin',
+    nombre,
+    whatsapp,
+    updatedAt: serverTimestamp(),
+  }, { merge: true })
+}
+
 
