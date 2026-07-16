@@ -1,5 +1,137 @@
 # 📝 Bitácora de Cambios e Historial de Commits
 
+## CORE-364 — 2026-07-15
+**Corregir bucle de navegación infinito ("Throttling navigation")**
+
+### Contexto:
+El fundador reportó en vivo, con el navegador abierto contra el servidor
+de desarrollo, el error de consola "Throttling navigation to prevent the
+browser from hanging" al abrir App Ventas — la app se quedaba saltando
+sin parar entre `/` y `/tienda/catalogo`, bloqueando cualquier login.
+
+### Diagnóstico (con evidencia real de consola, no solo lectura de código):
+Se instrumentó temporalmente `authStore.js`, `useAuthInit.js`,
+`WelcomePage.jsx` y `RequireAuth` con `console.log`, se pidió al fundador
+recargar y pegar la consola completa. El log mostró el efecto de
+`WelcomePage.jsx` disparándose docenas de veces seguidas con
+`{role: 'client', isLoading: false}` **idéntico** en cada disparo — es
+decir, ni `role` ni `isLoading` cambiaban, así que la única dependencia
+capaz de estar cambiando de referencia era `navigate`. Se retiraron los
+logs de diagnóstico antes de cerrar (no quedó ningún `console.log` de
+depuración en el código final).
+
+Mientras se investigaba, Antigravity entregó independientemente un
+traspaso con el mismo diagnóstico de 3 capas (`useAuthInit.js` con `role`
+en deps → re-suscripción de `onAuthStateChanged` → re-render de `App.jsx`
+→ `navigate` cambia de referencia → efecto de `WelcomePage.jsx` se
+re-dispara → `AppRoutes.jsx` manda cualquier ruta no reconocida de vuelta
+a `/` en vez de al destino real, cerrando el ciclo). Se aceptó ese
+diagnóstico (coincidía con la evidencia propia) pero **no el traspaso tal
+cual** — ver hallazgos de revisión abajo.
+
+### Cambio:
+- `useAuthInit.js` (Core, template-ventas, ventas-moni-app): el listener
+  de `onAuthStateChanged` ahora se monta una sola vez (`deps=[]`); `role`
+  se lee fresco con `useAuthStore.getState().role` dentro del efecto en
+  vez de ser una dependencia reactiva.
+- `WelcomePage.jsx`: reescrito a `<Navigate>` declarativo (patrón correcto
+  de React Router v6 para redirecciones de auth — se evalúa en el render
+  normal, sin efecto ni arreglo de dependencias).
+- `LoginPage.jsx` (Core; ya tenía un fix previo de esta misma sesión):
+  `navigate` excluido del arreglo de dependencias de su efecto de
+  redirección.
+- `AppRoutes.jsx`: nueva función `NotFoundRedirect` — la ruta comodín
+  (`*`) ahora resuelve el destino final directo según `role` (con el
+  mismo guard `user &&` que `RequireAuth`), sin pasar por `WelcomePage`.
+
+### Hallazgo — revisión del traspaso de Antigravity, 2 bugs reales corregidos antes de aceptar:
+1. `WelcomePage.jsx` quedó sin importar `useNavigate` (se cambió a
+   `<Navigate>` declarativo para el redirect de sesión), pero el botón
+   "Comencemos" de la página de bienvenida todavía llama
+   `navigate('/login')` — `npx eslint` lo confirmó como `'navigate' is not
+   defined` (`no-undef`), un `ReferenceError` real al hacer clic.
+   Corregido: se restauró el import de `useNavigate` y la variable
+   `navigate` para ese uso puntual.
+2. `NotFoundRedirect` destructuraba `user` de `useAuthStore()` pero nunca
+   lo usaba (`no-unused-vars`) — a diferencia de `RequireAuth`, que exige
+   `user` truthy antes de confiar en `role`. Corregido para aplicar el
+   mismo criterio: `if (user && role === ROLES.ADMIN) ...` en vez de
+   confiar solo en `role`.
+
+Ambos bugs se replicaron idénticos en `ventas-moni-app` (mismo traspaso
+aplicado ahí) y se corrigieron igual.
+
+### Blindaje adicional (iniciativa propia, no pedido en el traspaso):
+Se buscaron otros efectos con el mismo patrón de riesgo (`navigate` en un
+arreglo de dependencias) en las 3 copias. Se encontraron 5 más:
+`AdminLayout.jsx` (redirección a POS sin conexión), `AdminOrders.jsx` y
+`ClientOrders.jsx` (redirección si `onlineOrdersEnabled` está apagado),
+`ClientFavorites.jsx` (redirección a login sin sesión), y un segundo
+efecto en `ClientOrders.jsx` (limpieza de `location.state` tras abrir un
+pedido desde notificación). Todos tenían una guarda que se "autodesactiva"
+tras el primer disparo (menor riesgo que `WelcomePage.jsx`, que no tenía
+ninguna), pero se corrigieron con el mismo criterio por consistencia y
+prevención.
+
+### Hallazgo adicional — bug independiente encontrado durante la reverificación:
+Los 3 archivos de test de SEC-012/015 en `ventas-moni-app`
+(`firestoreRules.spec.js`, `employeePinLogin.spec.js`,
+`employeeAuthEmulator.spec.js`) tenían los puertos del emulador
+hardcodeados a los valores por defecto de Core (`8080`/`9099`) en vez de
+los puertos dedicados de esta instancia (`8085`/`9195`, definidos en su
+propio `firebase.json` desde `CORE-359`) — bug de copiar-pegar de esa
+propagación. Esto significa que sus "pasadas" anteriores en esta sesión
+probablemente se ejecutaron por coincidencia contra el emulador de Core
+(que compartía los puertos por defecto en ese momento), no contra un
+emulador genuinamente aislado de esta instancia. Corregido.
+
+### Verificación durante una sincronización Core→Moni hecha por el fundador:
+A mitad de la reverificación, el fundador sincronizó Core→`ventas-moni-app`
+desde el panel del Dashboard Central (`/api/instancias/sync-and-deploy-stream`,
+un motor de sincronización física de archivos, más amplio que
+`publish_core_to_template.js`). Se revisó el impacto explícitamente: el
+fix de navegación sobrevivió intacto (el contenido sincronizado coincidía
+con lo que Core ya tenía correctamente), pero **la sincronización revirtió
+el fix de puertos de los 3 tests** (los sobrescribió con los valores
+genéricos de Core) — se volvió a aplicar. Se documenta como aprendizaje:
+ese motor de sincronización no preserva personalizaciones legítimas de
+`tests/unit/*.spec.js` por instancia.
+
+### Ejecución y base:
+- **Ejecutor(es):** Antigravity (implementación inicial, 3 copias), Claude
+  Code (diagnóstico con logs reales, revisión, corrección de 2 bugs,
+  blindaje adicional, fix de puertos, reverificación tras la
+  sincronización, commits).
+- **Rama / HEAD observado:** `docs/context-packaging`.
+- **Commits locales:** `a52abd6` (Core), `ecbd322` (template-ventas),
+  `3d7cdc9` (ventas-moni-app) — sin push.
+- **Cambios preexistentes preservados:** sí — excluidos de los commits
+  todos los archivos de la sincronización Core→Moni del fundador
+  (`customer-loyalty`, servicios de billing/credits/inventory/orders/sales,
+  `appConfigStore.js`, `prototipe.lock.json`, carpetas `api/` nuevas) —
+  alcance y revisión independientes de esta tarea.
+
+### Evidencia:
+- `npx eslint` → 0 errores nuevos en las 3 copias (solo deuda preexistente
+  ya documentada en tareas anteriores).
+- `npx vitest run` (emulador dedicado y fresco en cada caso): Core
+  `118 passed (118)`; template-ventas `85 passed (85)`; ventas-moni-app
+  `116 passed (118)`.
+- `npm run build` → exitoso en las 3.
+- **Estado:** `READY_FOR_INDEPENDENT_REVIEW`.
+
+### Riesgo abierto (no resuelto, documentado, no bloquea):
+2 tests de `employeeAuthEmulator.spec.js` fallan de forma reproducible con
+`auth/user-not-found` específicamente en `ventas-moni-app`, incluso en un
+emulador recién creado desde cero (probado varias veces). Investigado a
+fondo: script de diagnóstico aislado (fuera de vitest) reproduce el mismo
+fallo; se comparó configuración, versiones de paquetes y puertos contra
+Core y template-ventas (que sí pasan con archivos de test idénticos salvo
+puertos) sin encontrar la causa exacta. No relacionado con el bug de
+navegación de esta tarea — queda como investigación futura opcional.
+
+---
+
 ## CORE-362 — 2026-07-15
 **Encapsular setDoc() de LoginPage.jsx en userService (template-ventas)**
 
