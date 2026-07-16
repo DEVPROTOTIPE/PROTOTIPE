@@ -261,9 +261,13 @@
     en un proyecto real (el fundador nunca compartió credenciales con
     ninguna IA, consistente con la disciplina de todo este trabajo).
 
-* **[ ] Tarea CORE-353: SEC-015 — identidad real de empleados (bug de login por PIN confirmado)**
-  - Estatus: `PENDING` — diagnóstico confirmado con prueba real el
-    2026-07-15; diseño e implementación de la solución aún no iniciados.
+* **[x] ~~Tarea CORE-353: SEC-015 — identidad real de empleados (bug de login por PIN confirmado)~~**
+  - Estatus: `SUPERADA_POR_CORE-354` — este era el diagnóstico inicial del
+    bug; `CORE-354` (2026-07-15) diseñó e implementó la solución completa
+    descrita abajo (Firebase Auth email/password sintético), ya cerrada,
+    reverificada y propagada a `template-ventas` (`CORE-356`) y
+    `ventas-moni-app` (`CORE-359`). Se marca completada por continuidad
+    documental, sin trabajo adicional pendiente de esta entrada.
   - **Bug confirmado (no ya inferencia):** `tests/unit/employeePinLogin.spec.js`
     (nuevo) reproduce exactamente `authenticateEmployeeByIdAndPin`
     (`src/services/employeeService.js:131-147`) contra el emulador real de
@@ -434,7 +438,7 @@
     clientes no tienen sesión de Firebase Auth (`useAuthInit.js` los
     identifica solo por `localStorage`).
 
-* **[ ] Tarea CORE-349: Activar SEC-012 — suite de pruebas rojas Firestore Emulator**
+* **[x] ~~Tarea CORE-349: Activar SEC-012 — suite de pruebas rojas Firestore Emulator~~**
   - Estatus: `READY_FOR_INDEPENDENT_REVIEW` (suite escrita y verificada corriendo
     contra el emulador real; las vulnerabilidades que prueba siguen sin
     corregirse — eso es `SEC-013`/`SEC-014`/`SEC-016`, tareas separadas).
