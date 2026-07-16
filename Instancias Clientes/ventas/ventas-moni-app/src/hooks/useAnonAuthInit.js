@@ -17,7 +17,15 @@ export default function useAnonAuthInit() {
     if (auth.currentUser) return
 
     signInAnonymously(auth).catch((err) => {
-      console.error('[useAnonAuthInit] No se pudo iniciar sesión anónima:', err)
+      if (err.code === 'auth/admin-restricted-operation') {
+        console.warn(
+          '[useAnonAuthInit] Anonymous Authentication no está habilitado en Firebase Console. ' +
+          'Ve a Firebase Console → Authentication → Sign-in methods → Anónimo → Habilitar. ' +
+          'La app continúa funcionando pero la sesión anónima (SEC-014) no estará activa.'
+        )
+      } else {
+        console.error('[useAnonAuthInit] No se pudo iniciar sesión anónima:', err)
+      }
     })
   }, [])
 }

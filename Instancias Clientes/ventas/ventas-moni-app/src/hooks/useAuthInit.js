@@ -10,11 +10,12 @@ import { ROLES, COLLECTIONS } from '../constants'
  * Maneja la lógica híbrida de sesión y valida privilegios del administrador.
  */
 export default function useAuthInit() {
-  const { role, setAdmin, setLoading, logout } = useAuthStore()
+  const { setAdmin, setLoading, logout } = useAuthStore()
 
   useEffect(() => {
     // 1. Si el LocalStorage ya hidrató un Cliente, apagamos el spinner de inmediato
     // salvo que estemos intentando entrar al panel de administración.
+    const role = useAuthStore.getState().role
     if (role === ROLES.CLIENT && !window.location.pathname.startsWith('/admin')) {
       setLoading(false)
     }
@@ -56,7 +57,19 @@ export default function useAuthInit() {
           })
           .catch((err) => {
             console.error('[useAuthInit] Error al verificar rol en Firestore:', err)
-            logout()
+            // SEC-014: este listener global también dispara para la sesión
+            // anónima de clientes. Antes de SEC-014 esta rama solo se
+            // alcanzaba para admins reales, así que un logout() incondicional
+            // aquí era inofensivo. Ahora, un error transitorio de lectura
+            // (red, arranque en frío del SDK) destruiría también la sesión
+            // de un cliente que nunca intentó ser admin. Mismo guard que la
+            // rama de éxito: solo forzar logout si ya era admin.
+            const currentRole = useAuthStore.getState().role
+            if (currentRole === ROLES.ADMIN) {
+              logout()
+            } else {
+              setLoading(false)
+            }
           })
       } else {
         // Firebase dice que no hay nadie autenticado.
@@ -72,5 +85,10 @@ export default function useAuthInit() {
     return () => {
       unsubscribe()
     }
-  }, [role, setAdmin, setLoading, logout])
+  // El listener de Firebase Auth debe montarse UNA SOLA VEZ.
+  // Incluir `role` u otras funciones del store como dependencias causaba que el
+  // effect se re-ejecutara (y re-suscribiera) cada vez que el rol cambiaba,
+  // generando el loop de navegación "Throttling navigation to prevent hanging".
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 }

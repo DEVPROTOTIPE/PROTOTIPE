@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PROJECT_ID = 'test-prototipe-rules-moni';
+const PROJECT_ID = 'test-prototipe-rules';
 
 let testEnv;
 
@@ -18,6 +18,8 @@ beforeAll(async () => {
     firestore: {
       rules: rulesContent,
       host: '127.0.0.1',
+      // Puerto dedicado de esta instancia (firebase.json), aislado del
+      // 8080 por defecto que usan Core/template-ventas en paralelo.
       port: 8085,
     },
   });

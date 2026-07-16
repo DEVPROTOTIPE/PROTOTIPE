@@ -1,4 +1,3 @@
-/* global process */
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator, signInWithEmailAndPassword, signOut } from 'firebase/auth';
@@ -20,8 +19,10 @@ import { getFirestore as getAdminFirestore } from 'firebase-admin/firestore';
 // gestiona el hash/verificación server-side) pero no cuantitativamente
 // verificable aquí.
 
-const PROJECT_ID = 'test-prototipe-rules-moni';
+const PROJECT_ID = 'test-prototipe-rules';
 
+// Puertos dedicados de esta instancia (firebase.json), aislados de los
+// 8080/9099 por defecto que usan Core/template-ventas en paralelo.
 process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8085';
 process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9195';
 
