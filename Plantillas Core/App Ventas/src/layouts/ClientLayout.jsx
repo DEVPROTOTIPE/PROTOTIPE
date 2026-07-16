@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingCart, Heart, Package, CreditCard, User, Tag, X, Bell } from 'lucide-react'
+import { ShoppingCart, Heart, Package, CreditCard, User, Tag, Bell } from 'lucide-react'
 import useAppConfigStore from '../store/appConfigStore'
 import catalog from '../core/generated/feature-catalog.generated.json'
 import useCartStore from '../store/cartStore'
@@ -15,12 +15,7 @@ import { useCoupons } from '../hooks/useCoupons'
 import useNotificationCenter from '../hooks/useNotificationCenter'
 import NotificationHistoryTray from '../components/common/NotificationHistoryTray'
 import NCToastContainer from '../components/common/NCToastContainer'
-
-
-const NAV_ITEMS_LEFT = [
-  { path: '/tienda/catalogo', icon: ShoppingCart, label: 'Catálogo' },
-  { path: '/tienda/favoritos', icon: Heart, label: 'Favoritos' },
-]
+import MobileBottomNav from '../components/common/MobileBottomNav'
 
 export default function ClientLayout() {
   const location = useLocation()
@@ -50,10 +45,6 @@ export default function ClientLayout() {
     });
     return list;
   }, [isFeatureEnabled]);
-
-  const navItemsRight = useMemo(() => {
-    return dynamicClientMenu;
-  }, [dynamicClientMenu])
 
   const allNavItems = useMemo(() => {
     return [
@@ -168,6 +159,26 @@ export default function ClientLayout() {
       return true
     }).length
   }, [allCoupons])
+
+  // Nav móvil rediseñado: orden fijo pedido por el fundador (Ofertas,
+  // Favoritos, Catálogo al centro, Pedidos) + hamburguesa para el resto de
+  // features realmente activas (`dynamicClientMenu`), en vez de amontonar
+  // todas las features activas en la misma barra (regla `overflow-menu`).
+  const mobileFixedItems = useMemo(() => {
+    const fixed = []
+    if (couponsEnabled) {
+      fixed.push({ type: 'action', label: 'Ofertas', icon: Tag, onClick: () => setIsCouponsOpen(true), badge: activeCouponsCount })
+    }
+    fixed.push({ type: 'link', path: '/tienda/favoritos', icon: Heart, label: 'Favoritos' })
+    fixed.push({ type: 'fab', path: '/tienda/catalogo', icon: ShoppingCart, label: 'Catálogo' })
+    const pedidosItem = dynamicClientMenu.find(i => i.path === '/tienda/pedidos')
+    if (pedidosItem) fixed.push({ type: 'link', ...pedidosItem })
+    return fixed
+  }, [couponsEnabled, activeCouponsCount, dynamicClientMenu])
+
+  const mobileOverflowItems = useMemo(() => {
+    return dynamicClientMenu.filter(i => i.path !== '/tienda/pedidos')
+  }, [dynamicClientMenu])
 
   // Inactividad: 10s si hay items pero el carrito está cerrado
   const { isInactive: isCartInactive } = useInactivityTimer(10000, cartCount > 0 && !isCartOpen)
@@ -610,113 +621,11 @@ export default function ClientLayout() {
 
       {/* ─── BARRA DE NAVEGACIÓN INFERIOR (MOBILE) ───────────────────────── */}
       {!isProductDetail && (
-        <nav className="flex md:hidden fixed bottom-0 left-0 right-0 min-h-[4rem] h-auto bg-surface border-t border-app z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-2 safe-area-bottom">
-          {NAV_ITEMS_LEFT.map(({ path, icon: Icon, label }) => (
-            <NavLink
-              key={path}
-              to={path}
-              className={({ isActive }) =>
-                `flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 relative ${
-                  isActive ? 'text-primary' : 'text-muted hover:text-app'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <motion.div
-                      layoutId="client-nav-indicator"
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary"
-                    />
-                  )}
-                  <Icon size={20} aria-hidden="true" />
-                  <span className="text-[10px] font-medium">{label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-
-          {/* Botón Central Ofertas / Cupones Rediseñado */}
-          {couponsEnabled && (
-            <div className="flex-1 flex flex-col items-center justify-start relative">
-              <div className="flex flex-col items-center justify-center -translate-y-3 relative">
-                {/* Halo de resplandor pulsante suave de ida y vuelta (efecto respiración optimizado para GPU sin cortes bruscos) */}
-                <motion.div
-                  animate={{
-                    scale: [1, 1.15, 1],
-                    opacity: [0.4, 0.8, 0.4]
-                  }}
-                  transition={{
-                    duration: 3.5,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="absolute w-16 h-16 rounded-full pointer-events-none z-0 blur-[2px]"
-                  style={{
-                    background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 55%, transparent) 0%, color-mix(in srgb, var(--color-primary) 20%, transparent) 60%, transparent 80%)'
-                  }}
-                />
-
-                <motion.button
-                  onClick={() => setIsCouponsOpen(true)}
-                  animate={{
-                    scale: [1, 1.04, 1]
-                  }}
-                  transition={{
-                    duration: 2.5,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  whileTap={{ scale: 0.94 }}
-                  className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center border-4 border-surface relative overflow-visible select-none shrink-0 z-10"
-                  style={{ 
-                    WebkitTapHighlightColor: 'transparent',
-                    boxShadow: '0 6px 16px rgba(0,0,0,0.15)'
-                  }}
-                  aria-label="Ofertas y Cupones"
-                >
-
-                  {/* Icono de Tag a 28px con animación de wiggle infinito */}
-                  <div className="animate-wiggle-infinite flex items-center justify-center pointer-events-none z-10">
-                    <Tag size={28} className="text-white" />
-                  </div>
-
-                  {/* Badge de contador duplicado (w-7 h-7) con fuente 14px posicionado en top-[-6px] y right-[-6px] */}
-                  {activeCouponsCount > 0 && (
-                    <span className="absolute -top-[6px] -right-[6px] bg-red-500 text-white text-[14px] font-black rounded-full w-7 h-7 flex items-center justify-center border-2 border-surface animate-bounce shadow-md z-20">
-                      {activeCouponsCount}
-                    </span>
-                  )}
-                </motion.button>
-              </div>
-            </div>
-          )}
-
-          {navItemsRight.map(({ path, icon: Icon, label }) => (
-            <NavLink
-              key={path}
-              to={path}
-              className={({ isActive }) =>
-                `flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 relative ${
-                  isActive ? 'text-primary' : 'text-muted hover:text-app'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <motion.div
-                      layoutId="client-nav-indicator"
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary"
-                    />
-                  )}
-                  <Icon size={20} aria-hidden="true" />
-                  <span className="text-[10px] font-medium">{label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
+        <MobileBottomNav
+          items={mobileFixedItems}
+          overflowItems={mobileOverflowItems}
+          indicatorId="client-nav-indicator"
+        />
       )}
 
       {/* Modal de Cupones */}

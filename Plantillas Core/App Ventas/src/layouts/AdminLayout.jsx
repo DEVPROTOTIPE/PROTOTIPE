@@ -44,6 +44,7 @@ import { useEffect, useState, useMemo, useRef } from 'react'
 import useNotificationCenter from '../hooks/useNotificationCenter'
 import NotificationHistoryTray from '../components/common/NotificationHistoryTray'
 import NCToastContainer from '../components/common/NCToastContainer'
+import MobileBottomNav from '../components/common/MobileBottomNav'
 import { updateClientProfile } from '../services/userService'
 
 import { useConnectivityStore } from '../store/connectivityStore'
@@ -51,6 +52,9 @@ import { useConnectivityStore } from '../store/connectivityStore'
 const getIconComponent = (iconName) => {
   return LucideIcons[iconName] || LucideIcons.HelpCircle;
 };
+
+// Orden fijo del nav móvil (ver mobileFixedItems más abajo)
+const MOBILE_FIXED_PATHS = ['/admin/inicio', '/admin/inventario', '/admin/ventas', '/admin/pedidos']
 
 export default function AdminLayout() {
   const { appName, appIcon } = useAppConfigStore()
@@ -164,6 +168,24 @@ export default function AdminLayout() {
     }
     return allItems;
   }, [isOnline])
+
+  // Nav móvil rediseñado: orden fijo pedido por el fundador (Inicio,
+  // Inventario, Ventas POS al centro, Pedidos) + hamburguesa para el resto
+  // de features realmente activas, en vez de amontonar todas las features
+  // activas en la misma barra (regla `overflow-menu`).
+  const mobileFixedItems = useMemo(() => {
+    return MOBILE_FIXED_PATHS
+      .map(path => filteredNavItems.find(i => i.path === path))
+      .filter(Boolean)
+      .map(item => ({
+        ...item,
+        type: item.path === '/admin/ventas' ? 'fab' : 'link',
+      }))
+  }, [filteredNavItems])
+
+  const mobileOverflowItems = useMemo(() => {
+    return filteredNavItems.filter(i => !MOBILE_FIXED_PATHS.includes(i.path))
+  }, [filteredNavItems])
 
   const handleLogout = async () => {
     try {
@@ -366,72 +388,11 @@ export default function AdminLayout() {
       </main>
 
       {/* ─── NAVBOTTOM MOBILE (hidden en desktop) ───────────────────────── */}
-      <nav
-        className="flex md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface border-t border-app z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-2"
-        aria-label="Navegación inferior administrador"
-      >
-        {filteredNavItems.map(({ path, icon: Icon, label }) => {
-          const isVentas = path === '/admin/ventas'
-          const isConfig = path === '/admin/configuracion'
-
-          const handleNavClick = (e, isActive) => {
-            if (isConfig && isActive) {
-              window.dispatchEvent(new CustomEvent('reset-settings-menu'))
-            }
-          }
-
-          if (isVentas) {
-            return (
-              <NavLink
-                key={path}
-                to={path}
-                onClick={(e) => handleNavClick(e, window.location.pathname === path)}
-                className="flex-1 flex flex-col items-center justify-start relative group"
-                aria-label={label}
-              >
-                {({ isActive }) => (
-                  <div className="flex flex-col items-center justify-center -translate-y-3">
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 active:scale-90 border-4 border-surface bg-primary ${
-                      isActive 
-                        ? 'text-white scale-105' 
-                        : 'text-white/80 hover:scale-105'
-                    }`}>
-                      <Icon size={26} aria-hidden="true" />
-                    </div>
-                  </div>
-                )}
-              </NavLink>
-            )
-          }
-
-          return (
-            <NavLink
-              key={path}
-              to={path}
-              onClick={(e) => handleNavClick(e, window.location.pathname === path)}
-              className={({ isActive }) =>
-                `flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 relative ${
-                  isActive ? 'text-primary' : 'text-muted'
-                }`
-              }
-              aria-label={label}
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <motion.div
-                      layoutId="admin-nav-indicator"
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary"
-                    />
-                  )}
-                  <Icon size={20} aria-hidden="true" />
-                  <span className="text-[10px] font-medium">{label}</span>
-                </>
-              )}
-            </NavLink>
-          )
-        })}
-      </nav>
+      <MobileBottomNav
+        items={mobileFixedItems}
+        overflowItems={mobileOverflowItems}
+        indicatorId="admin-nav-indicator"
+      />
 
       {/* Botón Flotante de Notificaciones en Mobile (esquina superior derecha, hidden en desktop) */}
       <div className="md:hidden fixed top-4 right-4 z-40">
