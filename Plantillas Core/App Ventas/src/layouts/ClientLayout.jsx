@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingCart, Heart, Package, CreditCard, User, Tag, Bell } from 'lucide-react'
+import { ShoppingCart, Heart, Package, CreditCard, User, Tag, Bell, LayoutGrid } from 'lucide-react'
 import useAppConfigStore from '../store/appConfigStore'
 import catalog from '../core/generated/feature-catalog.generated.json'
 import useCartStore from '../store/cartStore'
@@ -48,7 +48,7 @@ export default function ClientLayout() {
 
   const allNavItems = useMemo(() => {
     return [
-      { path: '/tienda/catalogo', icon: ShoppingCart, label: 'Catálogo' },
+      { path: '/tienda/catalogo', icon: LayoutGrid, label: 'Catálogo' },
       { path: '/tienda/favoritos', icon: Heart, label: 'Favoritos' },
       ...dynamicClientMenu,
       { path: '/tienda/perfil', icon: User, label: 'Perfil' },
@@ -170,7 +170,7 @@ export default function ClientLayout() {
       fixed.push({ type: 'action', label: 'Ofertas', icon: Tag, onClick: () => setIsCouponsOpen(true), badge: activeCouponsCount })
     }
     fixed.push({ type: 'link', path: '/tienda/favoritos', icon: Heart, label: 'Favoritos' })
-    fixed.push({ type: 'fab', path: '/tienda/catalogo', icon: ShoppingCart, label: 'Catálogo' })
+    fixed.push({ type: 'fab', path: '/tienda/catalogo', icon: LayoutGrid, label: 'Catálogo' })
     const pedidosItem = dynamicClientMenu.find(i => i.path === '/tienda/pedidos')
     if (pedidosItem) fixed.push({ type: 'link', ...pedidosItem })
     return fixed
