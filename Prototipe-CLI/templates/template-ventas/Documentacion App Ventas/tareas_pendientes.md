@@ -78,4 +78,6 @@ Roadmap de desarrollo, mejoras y corrección de errores para la plantilla base d
   - [x] ~~Crear `src/hooks/useCartRecommendations.js` como hook dedicado con `isMounted` + `fetchVersionRef`.~~
   - [x] ~~Migrar lógica de recomendaciones de `CartDrawer.jsx` al hook dedicado.~~
   - [x] ~~Agregar `version: 2` + `migrate` al `persist` de Zustand para limpiar legacy localStorage.~~
+- [ ] CORE-356: Propagar SEC-012/013/014/015 de Core a template-ventas (Awaiting Review)
+
 

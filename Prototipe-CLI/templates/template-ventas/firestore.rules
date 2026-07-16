@@ -4,14 +4,20 @@ service cloud.firestore {
 
     // Helper para verificar si la petición viene de un Administrador autenticado en Firebase Auth
     function isAdmin() {
-      return request.auth != null && 
+      return request.auth != null &&
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Helper para verificar si la base de datos está vacía (primer arranque)
-    function isFirstStart() {
-      return !exists(/databases/$(database)/documents/config/settings);
+    // SEC-015: helpers de identidad real de empleados (Firebase Auth email/
+    // password sintético, vía employeeAuthLinks/{authUid} -> employeeId).
+    function isEmployee() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/employeeAuthLinks/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/employeeAuthLinks/$(request.auth.uid)).data.activo == true;
+    }
+    function employeeId() {
+      return get(/databases/$(database)/documents/employeeAuthLinks/$(request.auth.uid)).data.employeeId;
     }
 
     // Valida que un pedido nuevo tenga la estructura mínima requerida
@@ -27,13 +33,13 @@ service cloud.firestore {
     // Configuración global y Filtros
     match /config/{document} {
       allow read: if true;
-      allow write: if isAdmin() || isFirstStart();
+      allow write: if isAdmin();
     }
     
     // Subcolecciones de configuración
     match /config/delivery/messengers/{messengerId} {
       allow read: if true;
-      allow write: if isAdmin() || isFirstStart();
+      allow write: if isAdmin();
     }
 
     // Perfiles de usuarios (clientes y administradores)
@@ -41,19 +47,41 @@ service cloud.firestore {
       allow get: if true;
       
       // Permitir creación pública solo si el rol asignado es estrictamente 'client'
-      // O si la petición proviene de un administrador autenticado, o si es el primer arranque (base de datos vacía)
-      allow create: if (request.resource.data.role == 'client') || isAdmin() || isFirstStart();
-      
-      // Permitir actualización de campos personales pero impedir escalar de 'client' a 'admin'
+      // O si la petición proviene de un administrador autenticado.
+      // SEC-013 (2026-07-15): se retiró isFirstStart() — el bootstrap del primer
+      // admin y de config/settings ahora se hace exclusivamente server-side vía
+      // Admin SDK (ver Prototipe-CLI/scripts/bootstrap-admin.js), que ignora
+      // las reglas de cliente por diseño. Ningún cliente anónimo puede volver
+      // a auto-otorgarse admin escribiendo cuando la base está vacía.
+      // SEC-014 (2026-07-15): la creación de un cliente exige sesión anónima
+      // real (useAnonAuthInit) y que ownerUid quede vinculado a esa sesión.
+      allow create: if (
+          request.resource.data.role == 'client' &&
+          request.auth != null &&
+          request.resource.data.ownerUid == request.auth.uid
+        ) || isAdmin();
+
+      // Permitir actualización de campos personales pero impedir escalar de 'client' a 'admin'.
+      // SEC-014: ownerUid solo puede quedar igual (auto-actualización normal) o
+      // rellenarse una vez desde null (backfill de clientes pre-SEC-014 en su
+      // primer login tras el cambio) — nunca reasignarse a otra sesión.
       allow update: if isAdmin() || (
+        request.auth != null &&
         request.resource.data.role == 'client' &&
-        (resource.data.role == 'client' || resource.data.role == null)
+        (resource.data.role == 'client' || resource.data.role == null) &&
+        (
+          request.resource.data.ownerUid == resource.data.ownerUid ||
+          (resource.data.ownerUid == null && request.resource.data.ownerUid == request.auth.uid)
+        )
       );
-      
+
       allow list, delete: if isAdmin();
-      
+
+      // SEC-014: solo la sesión vinculada (ownerUid) al perfil padre puede
+      // leer/escribir sus propios favoritos.
       match /favorites/{favoriteId} {
-        allow read, write: if true;
+        allow read, write: if request.auth != null &&
+          get(/databases/$(database)/documents/users/$(userId)).data.ownerUid == request.auth.uid;
       }
     }
 
@@ -72,11 +100,19 @@ service cloud.firestore {
 
     // Pedidos (Retail y Mayoristas)
     // [SEGURIDAD - FASE 1] orders create ahora valida estructura mínima.
-    // [PENDIENTE MIGRACIóN] orders read sigue abierto mientras se migran pedidos
-    //  existentes a order_tracking. Restringir a isAdmin() en Fase 1.5 (post-migración).
+    // SEC-014 (2026-07-15): confirmado por búsqueda que el cliente ya no lee
+    // esta colección directamente (usa order_tracking/user_order_index vía
+    // trackingToken) — se completa la migración pendiente restringiendo a admin.
     match /orders/{document} {
-      allow create: if validOrder();
-      allow read: if true; // TODO: restringir a isAdmin() tras completar migración a order_tracking
+      // SEC-015: validOrder() sigue rigiendo la estructura; si el pedido
+      // reclama atribución de un vendedor de portal (vendedorId), esa
+      // atribución debe corresponder a la sesión real de ese empleado —
+      // no bloquea el checkout normal de clientes, que no manda ese campo.
+      allow create: if validOrder() && (
+        !('vendedorId' in request.resource.data) ||
+        (isEmployee() && request.resource.data.vendedorId == employeeId())
+      );
+      allow read: if isAdmin();
       allow update: if isAdmin() || (
         // Permitir a repartidores/empleados operativos actualizar el estado de entrega o producción
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'deliveryInfo', 'updatedAt'])
@@ -112,15 +148,28 @@ service cloud.firestore {
       }
     }
 
+    // SEC-014 (2026-07-15): create exige sesión anónima real (accountability
+    // mínima); se preserva la tolerancia existente a clienteCelular:'Desconocido'
+    // para envíos sin login. Read restringido a admin o al dueño vinculado.
     match /wholesaleOrders/{document} {
-      allow create: if true;
-      allow read: if true;   // Mayoristas: permite consultar solicitudes al cliente
+      allow create: if request.auth != null;
+      allow read: if isAdmin() || (
+        request.auth != null &&
+        resource.data.clienteCelular is string &&
+        resource.data.clienteCelular != 'Desconocido' &&
+        get(/databases/$(database)/documents/users/$(resource.data.clienteCelular)).data.ownerUid == request.auth.uid
+      );
       allow update, delete: if isAdmin();
     }
 
     // Créditos / Fiados
+    // SEC-014 (2026-07-15): lectura restringida a admin o al cliente dueño
+    // del celular asociado (cliente.celular), vía ownerUid del perfil.
     match /credits/{document} {
-      allow read: if true;
+      allow read: if isAdmin() || (
+        request.auth != null &&
+        get(/databases/$(database)/documents/users/$(resource.data.cliente.celular)).data.ownerUid == request.auth.uid
+      );
       allow write: if isAdmin();
     }
 
@@ -137,9 +186,19 @@ service cloud.firestore {
     }
 
     // Garantías y Reclamos
+    // SEC-012 (completado 2026-07-15): create era `if true` (abierto); read
+    // dependía de request.auth.token.phone_number, un custom claim de
+    // Firebase Auth que este proyecto nunca usa (clientes usan sesión
+    // anónima + ownerUid desde SEC-014) — un cliente real nunca podía leer
+    // sus propios reclamos. Además el campo real que escribe
+    // createClientClaim es `clientCelular`, no `clienteCelular` como decía
+    // esta regla (confirmado en src/services/claimsService.js:36-41).
     match /claims/{document} {
-      allow create: if true;
-      allow read: if isAdmin() || (request.auth != null && request.auth.token.phone_number == resource.data.clienteCelular);
+      allow create: if request.auth != null;
+      allow read: if isAdmin() || (
+        request.auth != null &&
+        get(/databases/$(database)/documents/users/$(resource.data.clientCelular)).data.ownerUid == request.auth.uid
+      );
       allow update, delete: if isAdmin();
     }
 
@@ -150,7 +209,12 @@ service cloud.firestore {
     //           (para marcar como leída o archivar desde portales de empleados sin Auth)
     // - delete: solo admins
     match /notifications/{document} {
-      allow create: if true;
+      // SEC-015: create exige al menos una sesión real (clientes vía
+      // SEC-014, empleados vía SEC-015 ya cubren esto automáticamente).
+      // No se usa isEmployee() aquí — createCentralNotification también la
+      // llaman flujos de clientes (orderService, creditService), no solo
+      // los portales.
+      allow create: if request.auth != null;
       allow read: if isAdmin() || resource.data.recipientRole == 'client';
       allow update: if isAdmin()
         || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
@@ -158,17 +222,34 @@ service cloud.firestore {
     }
 
     // [NUEVO] Registro de Tokens FCM (Dispositivos)
+    // SEC-012 (completado 2026-07-15): create/update eran `if true`
+    // (abierto) — cualquiera podía registrar o pisar el token de push de
+    // cualquier destinatario. saveFCMToken() no tiene ningún llamador real
+    // todavía en el código (confirmado por búsqueda) — se exige sesión
+    // real como mínimo razonable sin inventar lógica de dueño para una
+    // función aún sin flujo que la use.
     match /fcmTokens/{document} {
       allow read: if isAdmin();
-      allow create, update: if true;
+      allow create, update: if request.auth != null;
       allow delete: if isAdmin();
     }
 
     // Notificaciones del Cliente (Legacy compatibility)
+    // SEC-012 (completado 2026-07-15): mismo problema que claims — create
+    // era `if true`, read dependía de un custom claim (phone_number) que
+    // nunca se usa; se reemplaza por cross-reference a ownerUid (el campo
+    // clienteCelular sí coincide aquí con lo que escribe
+    // createClientNotification, confirmado en clientNotificationService.js).
     match /clientNotifications/{document} {
-      allow read: if isAdmin() || (request.auth != null && request.auth.token.phone_number == resource.data.clienteCelular);
-      allow create: if true;
-      allow update: if isAdmin() || (request.auth != null && request.auth.token.phone_number == resource.data.clienteCelular);
+      allow read: if isAdmin() || (
+        request.auth != null &&
+        get(/databases/$(database)/documents/users/$(resource.data.clienteCelular)).data.ownerUid == request.auth.uid
+      );
+      allow create: if request.auth != null;
+      allow update: if isAdmin() || (
+        request.auth != null &&
+        get(/databases/$(database)/documents/users/$(resource.data.clienteCelular)).data.ownerUid == request.auth.uid
+      );
       allow delete: if isAdmin();
     }
 
@@ -177,19 +258,34 @@ service cloud.firestore {
       allow read: if isAdmin() || (resource != null && resource.data.activo == true);
       allow write: if isAdmin();
 
-      // Subcolección privada de secretos de empleado (PIN)
+      // Subcolección legacy de hashes de PIN (SEC-015: ya no se usa para
+      // login — reemplazada por Firebase Auth real vía employeeAuthLinks.
+      // Se conserva bloqueada como colección muerta, nunca se reactiva.
       match /secrets/{hashedPin} {
         allow read, write: if isAdmin();
       }
     }
 
+    // SEC-015: índice inverso authUid (Firebase Auth) -> employeeId, usado
+    // por isEmployee()/employeeId(). Solo isAdmin() escribe (provisión vía
+    // employeeAuthService/reset-employee-pin.js); el propio empleado puede
+    // leer su propio vínculo.
+    match /employeeAuthLinks/{authUid} {
+      allow read: if isAdmin() || request.auth.uid == authUid;
+      allow write: if isAdmin();
+    }
 
     // Entregas y despachos
     match /deliveries/{deliveryId} {
       allow read: if true;
       allow create, delete: if isAdmin();
-      // Permitir a mensajeros autenticados actualizar el estado de entrega y el historial logístico
-      allow update: if isAdmin() || (request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'history', 'updatedAt', 'deliveredAt']));
+      // SEC-015: antes cualquier request.auth != null podía actualizar
+      // (incluye a cualquier visitante anónimo desde SEC-014) — se acota a
+      // empleados reales o admin.
+      allow update: if isAdmin() || (
+        isEmployee() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'history', 'updatedAt', 'deliveredAt'])
+      );
     }
 
     // Kardex y Movimientos de Stock
@@ -197,14 +293,21 @@ service cloud.firestore {
     //  comercial sensible (volúmenes, proveedores, ajustes internos).
     match /stockMovements/{movementId} {
       allow read: if isAdmin();
-      allow create: if true;         // El sistema escribe movimientos automáticamente
+      // SEC-015: el sistema ya no escribe "automáticamente" sin identidad —
+      // exige que sea un empleado real (bodeguero) o un admin, y que el
+      // employeeId declarado corresponda a la sesión que escribe.
+      allow create: if isAdmin() || (isEmployee() && request.resource.data.employeeId == employeeId());
       allow update, delete: if isAdmin();
     }
 
     // Historial de Accesos y Sesiones QR
     match /accessLogs/{logId} {
       allow read: if isAdmin();
-      allow create, update: if true;
+      // SEC-015: create/update ya no aceptan cualquier request sin
+      // identidad — deben venir de la sesión real del empleado que el log
+      // declara (o de admin).
+      allow create: if isAdmin() || (isEmployee() && request.resource.data.employeeId == employeeId());
+      allow update: if isAdmin() || (isEmployee() && resource.data.employeeId == employeeId());
       allow delete: if isAdmin();
     }
 

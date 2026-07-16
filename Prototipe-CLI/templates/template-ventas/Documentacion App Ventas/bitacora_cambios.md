@@ -661,3 +661,31 @@ Historial de cambios, mejoras y correcciones técnicas aplicadas sobre la planti
 * **Archivos Modificados:**
   - `src/App.jsx` → Modificado el bloque de asignación de `--color-action` para soportar fallbacks en cadena: `const finalActionColor = actionColor || activeColors['--color-primary'] || 'var(--color-primary)'`. Esto asegura que siempre se resuelva a un color válido (el color de acción personalizado, el primario activo del tema actual o el fallback primario CSS heredado).
 
+
+---
+
+### [2026-07-15] - CORE-356: Propagación de correcciones de seguridad SEC-012/013/014/015
+* **Tipo:** Seguridad / Base de Datos / Arquitectura
+* **Severidad:** Crítico
+* **Descripción:** Propagación de las mejoras de seguridad para restringir el acceso a Firestore y robustecer la autenticación de clientes y empleados desde el Core de Ventas a la plantilla base.
+* **Archivos Modificados / Creados:**
+  - `package.json` (Añadidas devDependencies `@firebase/rules-unit-testing` y `firebase-admin`)
+  - `firebase.json` (Añadido bloque de emuladores para Auth)
+  - `firestore.rules` (Reescritas con las reglas robustecidas, helpers `isEmployee()`, `employeeId()`, bloqueo de `/secrets` y validación de `ownerUid`)
+  - `eslint.config.js` (Añadidos ignores para la carpeta `tests/**/*`)
+  - `src/config/firebaseConfig.js` (Exportado `firebaseConfig`)
+  - `src/hooks/useAnonAuthInit.js` [NEW]
+  - `src/hooks/useAuthInit.js`
+  - `src/services/employeeAuthService.js` [NEW]
+  - `src/services/employeeService.js`
+  - `src/constants/index.js`
+  - `src/pages/LoginPage.jsx`
+  - `src/components/portal/RequirePortalAuth.jsx`
+  - `src/layouts/PortalLayout.jsx`
+  - `src/pages/admin/AdminCredits.jsx`
+  - `scripts/bootstrap-admin.js` [NEW]
+  - `scripts/reset-employee-pin.js` [NEW]
+  - `tests/unit/firestoreRules.spec.js` [NEW]
+  - `tests/unit/employeePinLogin.spec.js` [NEW]
+  - `tests/unit/employeeAuthEmulator.spec.js` [NEW]
+* **Estado:** `AWAITING_REVIEW`

@@ -102,6 +102,7 @@ export const COLLECTIONS = {
   CLAIMS: 'claims',
   COUPONS: 'coupons',
   EMPLOYEES: 'employees',
+  EMPLOYEE_AUTH_LINKS: 'employeeAuthLinks',
   TABLES: 'tables',
   PRODUCTION: 'production',
   DELIVERIES: 'deliveries',

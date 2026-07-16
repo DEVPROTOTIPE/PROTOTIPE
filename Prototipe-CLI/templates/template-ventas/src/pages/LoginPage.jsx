@@ -185,6 +185,25 @@ export default function LoginPage() {
             return
           }
 
+          // SEC-014: vinculación por dispositivo. currentUid es la sesión
+          // anónima de ESTE navegador (ver useAnonAuthInit).
+          const currentUid = auth.currentUser?.uid
+
+          if (userData.ownerUid && userData.ownerUid !== currentUid) {
+            // Otro dispositivo/sesión ya reclamó este número.
+            setError(
+              'Este número ya está registrado en otro dispositivo. Por seguridad, ' +
+              'no podemos iniciar sesión aquí. Si eres tú, contacta al vendedor.'
+            )
+            setIsLoading(false)
+            return
+          }
+
+          if (!userData.ownerUid && currentUid) {
+            // Doc pre-SEC-014 sin dueño vinculado: backfill perezoso en el primer login.
+            await setDoc(userRef, { ownerUid: currentUid, updatedAt: serverTimestamp() }, { merge: true })
+          }
+
           // Cliente antiguo: entra de una vez
           setClient({
             nombre: userData.nombre,
@@ -216,12 +235,22 @@ export default function LoginPage() {
       try {
         const cleanPhone = celular.replace(/\D/g, '')
         const userRef = doc(db, COLLECTIONS.USERS, cleanPhone)
-        
+
+        // SEC-014: sin sesión anónima todavía no hay a quién vincular este
+        // número — mejor pedir que reintente que crear un doc sin dueño.
+        const currentUid = auth.currentUser?.uid
+        if (!currentUid) {
+          setError('Estamos preparando tu sesión, intenta de nuevo en un segundo.')
+          setIsLoading(false)
+          return
+        }
+
         // Guardar nuevo cliente
         await setDoc(userRef, {
           nombre: nombre.trim(),
           celular: cleanPhone,
           role: 'client',
+          ownerUid: currentUid,
           fechaRegistro: serverTimestamp(),
           updatedAt: serverTimestamp(),
         })

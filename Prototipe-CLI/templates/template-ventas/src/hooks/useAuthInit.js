@@ -36,7 +36,14 @@ export default function useAuthInit() {
                 displayName: userData.nombre || 'Administrador',
                 photoURL: firebaseUser.photoURL || null
               })
-            } else {
+            } else if (window.location.pathname.startsWith('/admin')) {
+              // SEC-015: este forzado de cierre de sesión solo debe aplicar
+              // en el panel admin. onAuthStateChanged es global — también
+              // dispara para las sesiones anónimas de clientes (SEC-014) y
+              // de empleados (SEC-015), que nunca tendrán un doc users/{uid}
+              // con role:'admin'. Sin este guard, este listener las
+              // desloguearía a los pocos milisegundos de crearse en
+              // cualquier ruta fuera de /admin.
               console.warn('[useAuthInit] Intento de acceso no autorizado. Cerrando sesión.')
               // Establecemos el mensaje de error en el store global para que LoginPage lo capture
               useAuthStore.setState({ error: 'Acceso denegado. Este usuario no tiene permisos de administrador.' })
