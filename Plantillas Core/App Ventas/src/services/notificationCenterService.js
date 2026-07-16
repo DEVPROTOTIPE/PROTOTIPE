@@ -341,6 +341,21 @@ export async function markAsRead(notificationId) {
   }
 }
 
+/**
+ * SEC-014: marca una notificación de DISPOSITIVO_BLOQUEADO como resuelta
+ * (el admin ya presionó "Autorizar este dispositivo"). Persiste el estado
+ * para que sobreviva a cerrar/reabrir la bandeja o recargar la página —
+ * a diferencia de un estado local en memoria, que se perdería.
+ */
+export async function markDeviceAuthorizationResolved(notificationId) {
+  if (!notificationId) return
+  try {
+    await updateDoc(doc(db, COL, notificationId), { status: 'read', resolved: true })
+  } catch (error) {
+    console.error('[NC] Error al marcar autorización de dispositivo como resuelta:', error)
+  }
+}
+
 /** Marca todas las notificaciones no leídas de un recipiente como leídas */
 export async function markAllAsRead(recipientId, recipientRole) {
   if (!recipientId && !recipientRole) return

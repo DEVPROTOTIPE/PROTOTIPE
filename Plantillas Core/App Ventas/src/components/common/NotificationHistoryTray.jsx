@@ -27,7 +27,7 @@ import {
   Star,
   SmartphoneNfc
 } from 'lucide-react'
-import { NC_TYPE_META, NC_TYPES } from '../../services/notificationCenterService'
+import { NC_TYPE_META, NC_TYPES, markDeviceAuthorizationResolved } from '../../services/notificationCenterService'
 
 const colorClasses = {
   primary: 'text-primary bg-primary/10 border-primary/20',
@@ -80,11 +80,13 @@ export default function NotificationHistoryTray({
 
   const handleAuthorizeDevice = async (e, n) => {
     e.stopPropagation()
-    if (!onAuthorizeDevice || !n.celular || authorizingId) return
+    if (!onAuthorizeDevice || !n.celular || n.resolved || authorizingId) return
     setAuthorizingId(n.id)
     try {
       await onAuthorizeDevice(n.celular)
-      if (onMarkRead) onMarkRead(n.id)
+      // Persistido en Firestore (no solo estado local): sobrevive a cerrar
+      // la bandeja, recargar la página, o que otro dispositivo la vea.
+      await markDeviceAuthorizationResolved(n.id)
     } finally {
       setAuthorizingId(null)
     }
@@ -276,18 +278,25 @@ export default function NotificationHistoryTray({
 
                     {/* Acción inline: autorizar dispositivo bloqueado (SEC-014) */}
                     {n.type === NC_TYPES.DISPOSITIVO_BLOQUEADO && n.celular && onAuthorizeDevice && (
-                      <button
-                        onClick={(e) => handleAuthorizeDevice(e, n)}
-                        disabled={authorizingId === n.id}
-                        className="mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-xs font-bold transition-all active:scale-95"
-                      >
-                        {authorizingId === n.id ? (
-                          <Loader2 size={13} className="animate-spin" />
-                        ) : (
-                          <SmartphoneNfc size={13} />
-                        )}
-                        {authorizingId === n.id ? 'Autorizando…' : 'Autorizar este dispositivo'}
-                      </button>
+                      n.resolved ? (
+                        <span className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs font-bold">
+                          <CheckCircle2 size={13} />
+                          Autorizado
+                        </span>
+                      ) : (
+                        <button
+                          onClick={(e) => handleAuthorizeDevice(e, n)}
+                          disabled={authorizingId === n.id}
+                          className="mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-xs font-bold transition-all active:scale-95"
+                        >
+                          {authorizingId === n.id ? (
+                            <Loader2 size={13} className="animate-spin" />
+                          ) : (
+                            <SmartphoneNfc size={13} />
+                          )}
+                          {authorizingId === n.id ? 'Autorizando…' : 'Autorizar este dispositivo'}
+                        </button>
+                      )
                     )}
                   </div>
 
