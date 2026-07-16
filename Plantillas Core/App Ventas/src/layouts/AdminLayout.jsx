@@ -44,6 +44,7 @@ import { useEffect, useState, useMemo, useRef } from 'react'
 import useNotificationCenter from '../hooks/useNotificationCenter'
 import NotificationHistoryTray from '../components/common/NotificationHistoryTray'
 import NCToastContainer from '../components/common/NCToastContainer'
+import { updateClientProfile } from '../services/userService'
 
 import { useConnectivityStore } from '../store/connectivityStore'
 
@@ -349,6 +350,7 @@ export default function AdminLayout() {
                   setIsNotificationsOpen(false)
                   navigate(path)
                 }}
+                onAuthorizeDevice={(celular) => updateClientProfile(celular, { ownerUid: null })}
               />
             </motion.div>
           </div>

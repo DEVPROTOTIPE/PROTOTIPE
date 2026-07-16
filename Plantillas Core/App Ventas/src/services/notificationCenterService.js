@@ -75,6 +75,8 @@ export const NC_TYPES = {
   ENCARGO_NUEVO: 'encargo_nuevo',
   // Cuenta
   BIENVENIDA: 'bienvenida',
+  // Seguridad (SEC-014)
+  DISPOSITIVO_BLOQUEADO: 'dispositivo_bloqueado',
 }
 
 // ─── Categorías de Sonido ────────────────────────────────────────────────────
@@ -109,6 +111,7 @@ export const NC_TYPE_META = {
   [NC_TYPES.RECLAMO_NUEVO]:      { label: 'Nuevo Reclamo',      icon: 'ShieldAlert', color: 'red',      sound: NC_SOUND.ALERTA,      adminRoute: '/admin/reclamos',    clientRoute: null },
   [NC_TYPES.ENCARGO_NUEVO]:      { label: 'Nuevo Encargo',      icon: 'Package',     color: 'purple',   sound: NC_SOUND.PEDIDO,      adminRoute: '/admin/pedidos',     clientRoute: null },
   [NC_TYPES.BIENVENIDA]:         { label: 'Bienvenida',         icon: 'Star',        color: 'primary',  sound: NC_SOUND.CUENTA,      adminRoute: null,                 clientRoute: '/tienda/catalogo' },
+  [NC_TYPES.DISPOSITIVO_BLOQUEADO]: { label: 'Dispositivo Bloqueado', icon: 'SmartphoneNfc', color: 'amber', sound: NC_SOUND.ALERTA, adminRoute: null,             clientRoute: null },
 }
 
 // ─── CREAR NOTIFICACIÓN CENTRAL ───────────────────────────────────────────────

@@ -10,6 +10,7 @@ import useAuthStore from '../store/authStore'
 import useAppConfigStore from '../store/appConfigStore'
 import { updateAppConfig, DEFAULT_SETTINGS } from '../services/appConfigService'
 import { registerFirstAdmin, registerNewClient, updateClientProfile } from '../services/userService'
+import { createCentralNotification, NC_TYPES } from '../services/notificationCenterService'
 import { ROLES, CLIENT_LOGIN_TRUST_MESSAGE, COLLECTIONS } from '../constants'
 import useInactivityTimer from '../hooks/useInactivityTimer'
 import SmartHint from '../components/client/guided/SmartHint'
@@ -193,10 +194,22 @@ export default function LoginPage() {
           const currentUid = auth.currentUser?.uid
 
           if (userData.ownerUid && userData.ownerUid !== currentUid) {
-            // Otro dispositivo/sesión ya reclamó este número.
+            // Otro dispositivo/sesión ya reclamó este número. Se notifica al
+            // admin/vendedor de inmediato con un botón de "Autorizar" en su
+            // panel de notificaciones, para que no tenga que ir a buscar al
+            // cliente manualmente en Créditos.
+            createCentralNotification({
+              recipientId: 'admin',
+              recipientRole: 'admin',
+              title: 'Dispositivo bloqueado',
+              body: `${userData.nombre || 'Un cliente'} (${cleanPhone}) intentó entrar desde un dispositivo nuevo.`,
+              type: NC_TYPES.DISPOSITIVO_BLOQUEADO,
+              extra: { celular: cleanPhone },
+            }).catch((err) => console.error('[LoginPage] Error al notificar bloqueo de dispositivo:', err))
+
             setError(
               'Este número ya está registrado en otro dispositivo. Por seguridad, ' +
-              'no podemos iniciar sesión aquí. Si eres tú, contacta al vendedor.'
+              'no podemos iniciar sesión aquí. Ya avisamos al vendedor para que autorice este dispositivo.'
             )
             setIsLoading(false)
             return

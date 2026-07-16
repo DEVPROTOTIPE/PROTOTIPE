@@ -24,9 +24,10 @@ import {
   Edit,
   Package,
   ShieldAlert,
-  Star
+  Star,
+  SmartphoneNfc
 } from 'lucide-react'
-import { NC_TYPE_META } from '../../services/notificationCenterService'
+import { NC_TYPE_META, NC_TYPES } from '../../services/notificationCenterService'
 
 const colorClasses = {
   primary: 'text-primary bg-primary/10 border-primary/20',
@@ -54,7 +55,8 @@ const iconMap = {
   Package,
   ShieldAlert,
   Star,
-  Bell
+  Bell,
+  SmartphoneNfc
 }
 
 export default function NotificationHistoryTray({
@@ -70,9 +72,23 @@ export default function NotificationHistoryTray({
   onLoadMore,
   onMarkAllRead,
   onClearAll,
+  onAuthorizeDevice,
 }) {
   const [filter, setFilter] = useState('all') // 'all' | 'unread' | 'order' | 'system'
+  const [authorizingId, setAuthorizingId] = useState(null)
   const sentinelRef = useRef(null)
+
+  const handleAuthorizeDevice = async (e, n) => {
+    e.stopPropagation()
+    if (!onAuthorizeDevice || !n.celular || authorizingId) return
+    setAuthorizingId(n.id)
+    try {
+      await onAuthorizeDevice(n.celular)
+      if (onMarkRead) onMarkRead(n.id)
+    } finally {
+      setAuthorizingId(null)
+    }
+  }
 
   // IntersectionObserver sobre el sentinel al fondo de la lista
   useEffect(() => {
@@ -257,6 +273,22 @@ export default function NotificationHistoryTray({
                         </span>
                       )}
                     </div>
+
+                    {/* Acción inline: autorizar dispositivo bloqueado (SEC-014) */}
+                    {n.type === NC_TYPES.DISPOSITIVO_BLOQUEADO && n.celular && onAuthorizeDevice && (
+                      <button
+                        onClick={(e) => handleAuthorizeDevice(e, n)}
+                        disabled={authorizingId === n.id}
+                        className="mt-2.5 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-xs font-bold transition-all active:scale-95"
+                      >
+                        {authorizingId === n.id ? (
+                          <Loader2 size={13} className="animate-spin" />
+                        ) : (
+                          <SmartphoneNfc size={13} />
+                        )}
+                        {authorizingId === n.id ? 'Autorizando…' : 'Autorizar este dispositivo'}
+                      </button>
+                    )}
                   </div>
 
                   {/* Acción rápida de navegación */}
