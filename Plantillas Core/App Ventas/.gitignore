@@ -44,6 +44,7 @@ scratch/
 # Testing reports and results
 playwright-report/
 test-results/
+coverage/
 
 # Carpeta administrativa temporal Git
 .git-backup-temp/

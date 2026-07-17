@@ -309,7 +309,7 @@ export default function PortalBodega() {
               {/* Cantidad */}
               <div className="portal-section">
                 <p className="portal-section-title">{moveType === 'ajuste' ? 'Nuevo stock total' : 'Cantidad'}</p>
-                <input className="portal-input" type="number" min="1" placeholder="Ingresa la cantidad"
+                <input className="portal-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" type="number" min="1" placeholder="Ingresa la cantidad"
                   value={quantity} onChange={e => setQuantity(e.target.value)} />
               </div>
 

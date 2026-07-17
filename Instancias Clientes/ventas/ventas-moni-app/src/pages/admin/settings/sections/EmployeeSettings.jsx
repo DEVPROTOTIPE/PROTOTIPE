@@ -504,11 +504,12 @@ function EmployeeFormCard({ editEmp, setEditEmployee, onSuccess, onError }) {
               <label className="block text-[10px] font-semibold text-muted mb-1">Salario Fijo</label>
               <input
                 type="number"
+                inputmode="decimal"
                 min="0"
                 value={salario || ''}
                 onChange={(e) => setSalario(Math.max(0, parseFloat(e.target.value) || 0))}
                 placeholder="Ingresa el valor numérico"
-                className="w-full h-10 px-3 rounded-lg bg-surface-2 border border-app text-xs text-app focus:outline-none focus:border-primary transition-colors"
+                className="w-full h-10 px-3 rounded-lg bg-surface-2 border border-app text-xs text-app focus:outline-none focus:border-primary transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </div>
             <div>

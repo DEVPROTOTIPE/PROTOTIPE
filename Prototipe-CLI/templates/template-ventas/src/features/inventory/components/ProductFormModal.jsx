@@ -569,11 +569,12 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                 <label className="text-xs font-bold text-app mb-2 block">Cantidad Disponible en Stock *</label>
                 <input
                   type="number"
+                  inputmode="numeric"
                   min={0}
                   placeholder="Ingresa la cantidad"
                   value={stockVal === 0 && formData.variantes?.[0]?.stock === undefined ? '' : stockVal}
                   onChange={(e) => handleStockChange(e.target.value === '' ? '' : Number(e.target.value))}
-                  className="w-full h-12 px-4 rounded-xl border border-app bg-surface text-app focus:border-primary outline-none font-bold text-base"
+                  className="w-full h-12 px-4 rounded-xl border border-app bg-surface text-app focus:border-primary outline-none font-bold text-base [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 {errors[`variantes.0.stock`] && (
                   <p className="text-error text-xs mt-1.5">{errors[`variantes.0.stock`]}</p>
@@ -809,11 +810,12 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                     <>
                       <input
                         type="number"
+                        inputmode="numeric"
                         min={0}
                         placeholder="Ingresa la cantidad en inventario"
                         value={variant.stock === '' ? '' : variant.stock}
                         onChange={(e) => handleVariantChange(variant.id, 'stock', e.target.value)}
-                        className="w-full h-11 px-4 rounded-xl border border-app bg-surface text-sm focus:border-primary outline-none font-bold text-app transition-all"
+                        className="w-full h-11 px-4 rounded-xl border border-app bg-surface text-sm focus:border-primary outline-none font-bold text-app transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       {errors[`variantes.${index}.stock`] && (
                         <p className="text-error text-[10px] mt-0.5">{errors[`variantes.${index}.stock`]}</p>
@@ -1548,10 +1550,11 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                     <label className="block text-xs font-bold text-app mb-1.5">Valor del Descuento</label>
                     <input
                       type="number"
+                      inputmode="decimal"
                       placeholder="Ingresa la cantidad"
                       value={formData.discountValue === 0 ? '' : formData.discountValue}
                       onChange={(e) => setFormData({ ...formData, discountValue: e.target.value === '' ? 0 : Number(e.target.value) })}
-                      className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-app focus:border-primary focus:outline-none"
+                      className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-app focus:border-primary focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     {errors.discountValue && <p className="text-error text-xs mt-1">{errors.discountValue}</p>}
                   </div>
@@ -2047,9 +2050,10 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
             <label className="block text-sm font-medium text-app mb-1">Precio Detal (COP) *</label>
             <input
               type="number"
+              inputmode="decimal"
               value={formData.precioBase}
               onChange={e => setFormData({...formData, precioBase: e.target.value})}
-              className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none"
+              className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
             {errors.precioBase && <p className="text-error text-xs mt-1">{errors.precioBase}</p>}
           </div>
@@ -2058,9 +2062,10 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
             <label className="block text-sm font-medium text-app mb-1">Precio Mayorista (Opcional)</label>
             <input
               type="number"
+              inputmode="decimal"
               value={formData.precioMayorista}
               onChange={e => setFormData({...formData, precioMayorista: e.target.value})}
-              className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none"
+              className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
 
@@ -2068,9 +2073,10 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
             <label className="block text-sm font-medium text-app mb-1">Precio de Costo (COP) (Opcional)</label>
             <input
               type="number"
+              inputmode="decimal"
               value={formData.precioCosto}
               onChange={e => setFormData({...formData, precioCosto: e.target.value})}
-              className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none"
+              className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
             {errors.precioCosto && <p className="text-error text-xs mt-1">{errors.precioCosto}</p>}
           </div>
@@ -2079,10 +2085,11 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
             <label className="block text-sm font-medium text-app mb-1">Stock Mínimo (Umbral de Alerta) *</label>
             <input
               type="number"
+              inputmode="numeric"
               min="0"
               value={formData.umbralAlerta}
               onChange={e => setFormData({...formData, umbralAlerta: e.target.value})}
-              className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none"
+              className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:border-primary focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
             {errors.umbralAlerta && <p className="text-error text-xs mt-1">{errors.umbralAlerta}</p>}
           </div>
@@ -2119,10 +2126,11 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
                   <label className="block text-xs font-bold text-app mb-1.5">Valor del Descuento</label>
                   <input
                     type="number"
+                    inputmode="decimal"
                     placeholder="Ingresa la cantidad"
                     value={formData.discountValue === 0 ? '' : formData.discountValue}
                     onChange={(e) => setFormData({ ...formData, discountValue: e.target.value === '' ? 0 : Number(e.target.value) })}
-                    className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-app focus:border-primary focus:outline-none"
+                    className="w-full h-11 px-4 rounded-xl bg-surface border border-app text-app focus:border-primary focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
 

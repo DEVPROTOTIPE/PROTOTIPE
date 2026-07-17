@@ -2,19 +2,12 @@
   "blueprintVersion": "1.0.0",
   "instanceId": "gourmet-restobar",
   "clientName": "Gourmet Restobar",
+  "coreType": "ventas",
   "vertical": "restaurante",
-  "capabilities": ["order-processing", "inventory-tracking", "pos-checkout", "billing-invoicing"],
   "features": ["inventory", "sales", "orders", "billing"],
   "patterns": ["pattern-search-details", "pattern-wizard-flow"],
   "components": ["OrderCard", "CajaDiariaPOS"],
-  "experience": {
-    "layout": "sidebar",
-    "density": "comfortable",
-    "themeMode": "dark",
-    "typography": "Outfit"
-  },
   "branding": {
-    "paletteChoice": "sunset",
-    "initials": "GMR"
+    "paletteChoice": "amber"
   }
 }

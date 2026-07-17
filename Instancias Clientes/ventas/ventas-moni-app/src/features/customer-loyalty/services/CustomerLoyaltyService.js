@@ -1,11 +1,4 @@
-import { db } from '../../../config/firebaseConfig';
-import { doc, runTransaction } from 'firebase/firestore';
 import { CustomerLoyaltyRepository } from '../api/CustomerLoyaltyRepository';
-import { 
-  LoyaltyAccountSchema, 
-  LoyaltyTransactionSchema,
-  LoyaltyConfigSchema 
-} from '../schemas/CustomerLoyaltySchemas';
 
 export class CustomerLoyaltyService {
   /**
@@ -24,16 +17,14 @@ export class CustomerLoyaltyService {
 
   /**
    * Obtiene la configuración del tenant o la por defecto.
+   *
+   * DEUDA TÉCNICA PRE-EXISTENTE (ver ADR-0001 §20 y bitácora CORE-344): la
+   * lectura delegada al Repository nunca se completa (comportamiento
+   * preservado sin modificar); esta función siempre retorna `DEFAULT_CONFIG`.
    */
   static async getConfig(tenantId) {
-    const docRef = doc(db, `tenants/${tenantId}/loyaltyConfig`, 'settings');
-    try {
-      const snap = await docRef.firestore._getDoc ? docRef.firestore._getDoc(docRef) : null; 
-      // Por defecto fallback si no se quiere leer asíncronamente
-      return this.DEFAULT_CONFIG;
-    } catch {
-      return this.DEFAULT_CONFIG;
-    }
+    await CustomerLoyaltyRepository.getConfigDoc(tenantId);
+    return this.DEFAULT_CONFIG;
   }
 
   /**
@@ -57,28 +48,19 @@ export class CustomerLoyaltyService {
 
   /**
    * Acumula puntos en una cuenta mediante una transacción atómica.
+   * La mecánica de Firestore vive en el Repository; este método solo decide
+   * el nuevo estado del dominio (regla de negocio pura, sin SDK de Firebase).
    */
   static async earnPoints(tenantId, customerId, points, saleId) {
     if (points <= 0) throw new Error('Los puntos a acumular deben ser mayores a cero');
 
-    const accountRef = doc(db, `tenants/${tenantId}/loyaltyAccounts`, customerId);
-    const transactionRef = doc(db, `tenants/${tenantId}/loyaltyTransactions`, `txn_earn_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`);
+    const config = this.DEFAULT_CONFIG;
 
-    await runTransaction(db, async (transaction) => {
-      const accountDoc = await transaction.get(accountRef);
-      let currentBalance = 0;
-      let level = 'BRONZE';
-      let createdAt = new Date().toISOString();
-
-      if (accountDoc.exists()) {
-        const data = accountDoc.data();
-        currentBalance = data.pointsBalance || 0;
-        level = data.level || 'BRONZE';
-        createdAt = data.createdAt;
-      }
+    await CustomerLoyaltyRepository.runAccountTransaction(tenantId, customerId, (currentAccount) => {
+      const currentBalance = currentAccount?.pointsBalance || 0;
+      const createdAt = currentAccount?.createdAt || new Date().toISOString();
 
       const newBalance = currentBalance + points;
-      const config = this.DEFAULT_CONFIG; // Se puede leer asíncronamente fuera o usar fallback
 
       // Recalcular nivel en base a thresholds
       let newLevel = 'BRONZE';
@@ -94,9 +76,6 @@ export class CustomerLoyaltyService {
         updatedAt: new Date().toISOString()
       };
 
-      // Validar esquema antes de escribir
-      LoyaltyAccountSchema.parse(updatedAccount);
-
       const newTx = {
         customerId,
         type: 'EARN',
@@ -106,16 +85,14 @@ export class CustomerLoyaltyService {
         createdAt: new Date().toISOString()
       };
 
-      // Validar transacción
-      LoyaltyTransactionSchema.parse(newTx);
-
-      transaction.set(accountRef, updatedAccount);
-      transaction.set(transactionRef, newTx);
+      return { updatedAccount, newTx };
     });
   }
 
   /**
    * Canjea puntos de una cuenta mediante una transacción atómica.
+   * La mecánica de Firestore vive en el Repository; este método solo decide
+   * el nuevo estado del dominio (regla de negocio pura, sin SDK de Firebase).
    */
   static async redeemPoints(tenantId, customerId, points, referenceId) {
     if (points <= 0) throw new Error('Los puntos a canjear deben ser mayores a cero');
@@ -125,17 +102,12 @@ export class CustomerLoyaltyService {
       throw new Error(`El mínimo de puntos para realizar un canje es de ${config.minimumRedeemPoints} pts`);
     }
 
-    const accountRef = doc(db, `tenants/${tenantId}/loyaltyAccounts`, customerId);
-    const transactionRef = doc(db, `tenants/${tenantId}/loyaltyTransactions`, `txn_redeem_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`);
-
-    await runTransaction(db, async (transaction) => {
-      const accountDoc = await transaction.get(accountRef);
-      if (!accountDoc.exists()) {
+    await CustomerLoyaltyRepository.runAccountTransaction(tenantId, customerId, (currentAccount) => {
+      if (!currentAccount) {
         throw new Error('El cliente no tiene una cuenta de fidelización activa');
       }
 
-      const accountData = accountDoc.data();
-      const currentBalance = accountData.pointsBalance || 0;
+      const currentBalance = currentAccount.pointsBalance || 0;
 
       if (currentBalance < points) {
         throw new Error('LOYALTY_INSUFFICIENT_POINTS');
@@ -153,12 +125,9 @@ export class CustomerLoyaltyService {
         customerId,
         pointsBalance: newBalance,
         level: newLevel,
-        createdAt: accountData.createdAt,
+        createdAt: currentAccount.createdAt,
         updatedAt: new Date().toISOString()
       };
-
-      // Validar esquema
-      LoyaltyAccountSchema.parse(updatedAccount);
 
       const newTx = {
         customerId,
@@ -169,10 +138,7 @@ export class CustomerLoyaltyService {
         createdAt: new Date().toISOString()
       };
 
-      LoyaltyTransactionSchema.parse(newTx);
-
-      transaction.set(accountRef, updatedAccount);
-      transaction.set(transactionRef, newTx);
+      return { updatedAccount, newTx };
     });
   }
 

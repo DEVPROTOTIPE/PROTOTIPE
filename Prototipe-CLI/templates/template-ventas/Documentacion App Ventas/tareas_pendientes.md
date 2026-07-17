@@ -77,7 +77,5 @@ Roadmap de desarrollo, mejoras y corrección de errores para la plantilla base d
   - [x] ~~Solución: Agregar `commercialOptimization` a `partialize` en `appConfigStore.js` + cambiar check a `!== false` en `useCartRecommendations.js`.~~
   - [x] ~~Crear `src/hooks/useCartRecommendations.js` como hook dedicado con `isMounted` + `fetchVersionRef`.~~
   - [x] ~~Migrar lógica de recomendaciones de `CartDrawer.jsx` al hook dedicado.~~
-  - [x] ~~Agregar `version: 2` + `migrate` al `persist` de Zustand para limpiar legacy localStorage.~~
-- [ ] CORE-356: Propagar SEC-012/013/014/015 de Core a template-ventas (Awaiting Review)
-
-
+  - [x] ~~Agregar version: 2 + migrate al persist de Zustand para limpiar legacy localStorage.~~
+- [x] ~~🎨 Auditoría y Corrección de Responsividad (CORE-365)~~

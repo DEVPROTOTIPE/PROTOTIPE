@@ -102,13 +102,13 @@ export const COLLECTIONS = {
   CLAIMS: 'claims',
   COUPONS: 'coupons',
   EMPLOYEES: 'employees',
+  EMPLOYEE_AUTH_LINKS: 'employeeAuthLinks', // SEC-015: índice inverso authUid -> employeeId
   TABLES: 'tables',
   PRODUCTION: 'production',
   DELIVERIES: 'deliveries',
   STOCK_MOVEMENTS: 'stockMovements',
   ACCESS_LOGS: 'accessLogs',
   DELIVERY_ANALYTICS: 'deliveryAnalytics',
-  EMPLOYEE_AUTH_LINKS: 'employeeAuthLinks', // SEC-015: índice inverso authUid -> employeeId
 }
 
 // ─── Estados logísticos de entrega (mensajero propio) ─────────────────────────

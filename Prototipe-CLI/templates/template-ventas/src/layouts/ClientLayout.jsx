@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingCart, Heart, Package, CreditCard, User, Tag, X, Bell } from 'lucide-react'
+import { ShoppingCart, Heart, Package, CreditCard, User, Tag, Bell, LayoutGrid } from 'lucide-react'
 import useAppConfigStore from '../store/appConfigStore'
 import catalog from '../core/generated/feature-catalog.generated.json'
 import useCartStore from '../store/cartStore'
@@ -15,12 +15,8 @@ import { useCoupons } from '../hooks/useCoupons'
 import useNotificationCenter from '../hooks/useNotificationCenter'
 import NotificationHistoryTray from '../components/common/NotificationHistoryTray'
 import NCToastContainer from '../components/common/NCToastContainer'
-
-
-const NAV_ITEMS_LEFT = [
-  { path: '/tienda/catalogo', icon: ShoppingCart, label: 'Catálogo' },
-  { path: '/tienda/favoritos', icon: Heart, label: 'Favoritos' },
-]
+import MobileBottomNav from '../components/common/MobileBottomNav'
+import HeaderBackground from '../components/common/HeaderBackground'
 
 export default function ClientLayout() {
   const location = useLocation()
@@ -51,13 +47,9 @@ export default function ClientLayout() {
     return list;
   }, [isFeatureEnabled]);
 
-  const navItemsRight = useMemo(() => {
-    return dynamicClientMenu;
-  }, [dynamicClientMenu])
-
   const allNavItems = useMemo(() => {
     return [
-      { path: '/tienda/catalogo', icon: ShoppingCart, label: 'Catálogo' },
+      { path: '/tienda/catalogo', icon: LayoutGrid, label: 'Catálogo' },
       { path: '/tienda/favoritos', icon: Heart, label: 'Favoritos' },
       ...dynamicClientMenu,
       { path: '/tienda/perfil', icon: User, label: 'Perfil' },
@@ -168,6 +160,26 @@ export default function ClientLayout() {
       return true
     }).length
   }, [allCoupons])
+
+  // Nav móvil rediseñado: orden fijo pedido por el fundador (Ofertas,
+  // Favoritos, Catálogo al centro, Pedidos) + hamburguesa para el resto de
+  // features realmente activas (`dynamicClientMenu`), en vez de amontonar
+  // todas las features activas en la misma barra (regla `overflow-menu`).
+  const mobileFixedItems = useMemo(() => {
+    const fixed = []
+    if (couponsEnabled) {
+      fixed.push({ type: 'action', label: 'Ofertas', icon: Tag, onClick: () => setIsCouponsOpen(true), badge: activeCouponsCount })
+    }
+    fixed.push({ type: 'link', path: '/tienda/favoritos', icon: Heart, label: 'Favoritos' })
+    fixed.push({ type: 'fab', path: '/tienda/catalogo', icon: LayoutGrid, label: 'Catálogo' })
+    const pedidosItem = dynamicClientMenu.find(i => i.path === '/tienda/pedidos')
+    if (pedidosItem) fixed.push({ type: 'link', ...pedidosItem })
+    return fixed
+  }, [couponsEnabled, activeCouponsCount, dynamicClientMenu])
+
+  const mobileOverflowItems = useMemo(() => {
+    return dynamicClientMenu.filter(i => i.path !== '/tienda/pedidos')
+  }, [dynamicClientMenu])
 
   // Inactividad: 10s si hay items pero el carrito está cerrado
   const { isInactive: isCartInactive } = useInactivityTimer(10000, cartCount > 0 && !isCartOpen)
@@ -403,77 +415,23 @@ export default function ClientLayout() {
       <main className={`flex-1 md:ml-64 min-h-screen w-full max-w-[100vw] md:max-w-none overflow-x-hidden relative flex flex-col ${isProductDetail ? 'pb-0' : 'pb-20 md:pb-0'}`}>
         {/* Cabecera superior móvil premium translúcida con curva asimétrica en S (efecto frosted glass) */}
         {!isProductDetail && (
-          <motion.header 
-            animate={{ 
+          <motion.header
+            animate={{
               opacity: showHeader ? 1 : 0,
               pointerEvents: showHeader ? 'auto' : 'none'
             }}
-            transition={{ duration: 0.45, ease: 'easeOut' }}
-            className="flex md:hidden flex-col px-4 pt-4 pb-8 text-white z-30 sticky top-0 shrink-0 relative overflow-hidden backdrop-blur-lg"
+            transition={{
+              opacity: { duration: 0.45, ease: 'easeOut' },
+              pointerEvents: { duration: 0.45, ease: 'easeOut' }
+            }}
+            className="flex md:hidden flex-col px-4 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-3 text-white z-30 sticky top-0 shrink-0 relative overflow-hidden backdrop-blur-lg"
             style={{
-              background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 75%, transparent), color-mix(in srgb, color-mix(in srgb, var(--color-primary) 85%, #000000) 80%, transparent))',
-              clipPath: 'url(#header-s-curve)',
+              background: '#0B111E',
               filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.15))'
             }}
           >
-            {/* Orbes de luz ambientales GPU-accelerated dinámicos (adaptados a la paleta activa) */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-              {/* Orbe 1: Mezcla Luminosa con Luz Primaria */}
-              <motion.div 
-                className="absolute -left-20 -top-20 w-72 h-72 rounded-full blur-3xl pointer-events-none opacity-40"
-                style={{
-                  background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary-light) 50%, white) 0%, transparent 70%)',
-                  willChange: 'transform'
-                }}
-                animate={{
-                  x: [0, 30, 0],
-                  y: [0, -20, 0]
-                }}
-                transition={{
-                  duration: 10,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              {/* Orbe 2: Mezcla Viva con Acento del Tema */}
-              <motion.div 
-                className="absolute -right-20 -bottom-20 w-72 h-72 rounded-full blur-3xl pointer-events-none opacity-45"
-                style={{
-                  background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 30%, var(--color-accent)) 0%, transparent 75%)',
-                  willChange: 'transform'
-                }}
-                animate={{
-                  x: [0, -25, 0],
-                  y: [0, 20, 0]
-                }}
-                transition={{
-                  duration: 12,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-            </div>
-
-            {/* Borde de Cristal Neón S-Curve (Trazo SVG de alta visibilidad adaptado al tema) */}
-            <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
-              <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                <defs>
-                  <linearGradient id="edge-neon-glow" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="white" stopOpacity="0.6" />
-                    <stop offset="35%" stopColor="var(--color-accent)" stopOpacity="0.4" />
-                    <stop offset="70%" stopColor="white" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0.5" />
-                  </linearGradient>
-                </defs>
-                <path 
-                  d="M 100,72 C 65,72 35,100 0,100" 
-                  fill="none" 
-                  stroke="url(#edge-neon-glow)" 
-                  strokeWidth="2"
-                  className="opacity-90"
-                />
-              </svg>
-            </div>
+            {/* Fondo aurora amorfo dinámico centralizado */}
+            <HeaderBackground />
 
             {/* Fila principal centrada verticalmente */}
             <div className="w-full flex items-center justify-between h-12 relative z-10">
@@ -610,113 +568,11 @@ export default function ClientLayout() {
 
       {/* ─── BARRA DE NAVEGACIÓN INFERIOR (MOBILE) ───────────────────────── */}
       {!isProductDetail && (
-        <nav className="flex md:hidden fixed bottom-0 left-0 right-0 min-h-[4rem] h-auto bg-surface border-t border-app z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-2 safe-area-bottom">
-          {NAV_ITEMS_LEFT.map(({ path, icon: Icon, label }) => (
-            <NavLink
-              key={path}
-              to={path}
-              className={({ isActive }) =>
-                `flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 relative ${
-                  isActive ? 'text-primary' : 'text-muted hover:text-app'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <motion.div
-                      layoutId="client-nav-indicator"
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary"
-                    />
-                  )}
-                  <Icon size={20} aria-hidden="true" />
-                  <span className="text-[10px] font-medium">{label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-
-          {/* Botón Central Ofertas / Cupones Rediseñado */}
-          {couponsEnabled && (
-            <div className="flex-1 flex flex-col items-center justify-start relative">
-              <div className="flex flex-col items-center justify-center -translate-y-3 relative">
-                {/* Halo de resplandor pulsante suave de ida y vuelta (efecto respiración optimizado para GPU sin cortes bruscos) */}
-                <motion.div
-                  animate={{
-                    scale: [1, 1.15, 1],
-                    opacity: [0.4, 0.8, 0.4]
-                  }}
-                  transition={{
-                    duration: 3.5,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="absolute w-16 h-16 rounded-full pointer-events-none z-0 blur-[2px]"
-                  style={{
-                    background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 55%, transparent) 0%, color-mix(in srgb, var(--color-primary) 20%, transparent) 60%, transparent 80%)'
-                  }}
-                />
-
-                <motion.button
-                  onClick={() => setIsCouponsOpen(true)}
-                  animate={{
-                    scale: [1, 1.04, 1]
-                  }}
-                  transition={{
-                    duration: 2.5,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  whileTap={{ scale: 0.94 }}
-                  className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center border-4 border-surface relative overflow-visible select-none shrink-0 z-10"
-                  style={{ 
-                    WebkitTapHighlightColor: 'transparent',
-                    boxShadow: '0 6px 16px rgba(0,0,0,0.15)'
-                  }}
-                  aria-label="Ofertas y Cupones"
-                >
-
-                  {/* Icono de Tag a 28px con animación de wiggle infinito */}
-                  <div className="animate-wiggle-infinite flex items-center justify-center pointer-events-none z-10">
-                    <Tag size={28} className="text-white" />
-                  </div>
-
-                  {/* Badge de contador duplicado (w-7 h-7) con fuente 14px posicionado en top-[-6px] y right-[-6px] */}
-                  {activeCouponsCount > 0 && (
-                    <span className="absolute -top-[6px] -right-[6px] bg-red-500 text-white text-[14px] font-black rounded-full w-7 h-7 flex items-center justify-center border-2 border-surface animate-bounce shadow-md z-20">
-                      {activeCouponsCount}
-                    </span>
-                  )}
-                </motion.button>
-              </div>
-            </div>
-          )}
-
-          {navItemsRight.map(({ path, icon: Icon, label }) => (
-            <NavLink
-              key={path}
-              to={path}
-              className={({ isActive }) =>
-                `flex-1 flex flex-col items-center justify-center gap-1 transition-all duration-300 relative ${
-                  isActive ? 'text-primary' : 'text-muted hover:text-app'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <motion.div
-                      layoutId="client-nav-indicator"
-                      className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary"
-                    />
-                  )}
-                  <Icon size={20} aria-hidden="true" />
-                  <span className="text-[10px] font-medium">{label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
+        <MobileBottomNav
+          items={mobileFixedItems}
+          overflowItems={mobileOverflowItems}
+          indicatorId="client-nav-indicator"
+        />
       )}
 
       {/* Modal de Cupones */}
@@ -733,14 +589,7 @@ export default function ClientLayout() {
         />
       )}
 
-      {/* SVG para el clipPath de la curva asimétrica en S de la cabecera */}
-      <svg className="absolute w-0 h-0" aria-hidden="true">
-        <defs>
-          <clipPath id="header-s-curve" clipPathUnits="objectBoundingBox">
-            <path d="M0,0 L1,0 L1,0.72 C0.65,0.72 0.35,1 0,1 Z" />
-          </clipPath>
-        </defs>
-      </svg>
+
     </div>
   )
 }

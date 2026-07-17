@@ -118,7 +118,6 @@ export async function registerFirstAdmin(uid, { email, nombre, whatsapp }) {
   }, { merge: true })
 }
 
-
 /**
  * Obtiene los clientes actualizados desde una fecha específica (sincronización delta).
  * @param {Date} sinceDate - Fecha límite inferior

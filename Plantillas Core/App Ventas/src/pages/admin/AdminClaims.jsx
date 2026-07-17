@@ -170,7 +170,7 @@ export default function AdminClaims() {
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
             <ShieldAlert size={20} />
           </div>

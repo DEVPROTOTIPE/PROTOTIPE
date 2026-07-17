@@ -2,19 +2,12 @@
   "blueprintVersion": "1.0.0",
   "instanceId": "clinica-veterinaria-sanitas",
   "clientName": "Clínica Veterinaria Sanitas",
+  "coreType": "core-seed",
   "vertical": "clinica",
-  "capabilities": ["calendar-management", "customer-records", "billing-invoicing"],
   "features": ["appointments", "patients", "billing"],
   "patterns": ["pattern-calendar-workspace", "pattern-search-details"],
   "components": ["PremiumCalendar"],
-  "experience": {
-    "layout": "sidebar",
-    "density": "compact",
-    "themeMode": "dark-detect",
-    "typography": "Outfit"
-  },
   "branding": {
-    "paletteChoice": "violet",
-    "initials": "CVS"
+    "paletteChoice": "violet"
   }
 }

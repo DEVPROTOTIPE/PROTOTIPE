@@ -175,11 +175,12 @@ export default function WholesaleRequestModal({ product, type, isOpen, onClose }
                   </label>
                   <input
                     type="number"
+                    inputmode="numeric"
                     min={isWholesale ? "12" : "1"}
                     required
                     value={cantidad}
                     onChange={(e) => setCantidad(e.target.value)}
-                    className="w-full h-12 px-4 rounded-2xl bg-surface border border-slate-200/60 text-app focus:outline-none focus:border-primary text-center font-bold text-lg"
+                    className="w-full h-12 px-4 rounded-2xl bg-surface border border-slate-200/60 text-app focus:outline-none focus:border-primary text-center font-bold text-lg [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     placeholder={isWholesale ? "Ej: 12" : "Ej: 3"}
                   />
                 </div>

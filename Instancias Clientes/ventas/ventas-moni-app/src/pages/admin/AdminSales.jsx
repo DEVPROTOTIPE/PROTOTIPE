@@ -637,7 +637,7 @@ export default function AdminSales() {
       
       {/* ─── ENCABEZADO ─────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-md">
             <ShoppingCart size={20} className="text-white" />
           </div>

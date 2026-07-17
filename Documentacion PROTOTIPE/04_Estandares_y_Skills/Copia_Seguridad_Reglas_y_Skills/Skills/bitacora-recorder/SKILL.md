@@ -6,7 +6,8 @@ description: >
   sea un nuevo CLI, una corrección, un [MINOR] o un [BUILD_FAILED].
   Garantiza que: (1) cada entrada es atómica (un solo cambio por ID),
   (2) incluye la sección "Archivos modificados" con rutas absolutas,
-  (3) no mezcla archivos de tareas distintas.
+  (3) identifica ejecutor, rama/HEAD y evidencia,
+  (4) no mezcla archivos de tareas distintas ni atribuye cambios preexistentes.
 ---
 
 # Skill: bitacora-recorder
@@ -31,6 +32,16 @@ No omitir ninguna sección. No mezclar archivos de otras tareas.
 1. **[Componente o área]:** [Qué se hizo y por qué.]
 2. **[Componente o área]:** [Qué se hizo y por qué.]
 <!-- Mínimo 1 ítem. Máximo lo que aplique para ESA tarea únicamente. -->
+
+### Ejecución y base:
+- **Ejecutor(es):** [Fundador|Codex|Claude|Antigravity|otro identificado]
+- **Rama / HEAD observado:** `[rama]` / `[commit corto]`
+- **Alcance propio:** [Qué archivos o áreas asumió este ejecutor.]
+- **Cambios preexistentes preservados:** [Sí; resumen sin reasignarlos a esta tarea.]
+
+### Evidencia:
+- [Comando, prueba, diff o inspección y su resultado verificable.]
+- **Estado:** `[READY|IN_PROGRESS|BLOCKED|VERIFIED_COMPLETE|otro estado canónico]`
 
 ### Archivos modificados:
 - [`nombre_archivo.ext`](file:///ruta/absoluta/nombre_archivo.ext) [NEW|MODIFY|DELETE|DEPLOY]
@@ -62,7 +73,8 @@ No omitir ninguna sección. No mezclar archivos de otras tareas.
 - **NUNCA reutilizar un ID existente.**
 
 ### Paso 2 — Listar solo los archivos de ESTA tarea
-- Reconstruir mentalmente qué archivos tocaste en la sesión actual para este cambio específico.
+- Consultar `git status` y el diff de alcance; no depender solo de memoria.
+- Registrar el ejecutor real y distinguir sus cambios de modificaciones preexistentes o concurrentes.
 - Si editaste 10 archivos para 3 tareas distintas, cada tarea tiene su propia entrada con sus 3-4 archivos.
 - **Test de sanidad:** ¿El archivo que estoy listando existe porque implementé ESTA funcionalidad?
   - SÍ → incluirlo.
@@ -79,6 +91,9 @@ Checklist mental:
 [ ] El ID es único y correlativo al anterior
 [ ] El título describe UNA sola tarea
 [ ] "Cambios realizados" tiene ≥1 ítem
+[ ] Se identifican ejecutor, rama/HEAD y alcance propio
+[ ] La evidencia distingue inspección de resultado informado
+[ ] Los cambios preexistentes están preservados y no se atribuyen a esta tarea
 [ ] "Archivos modificados" tiene ≥1 archivo con ruta absoluta
 [ ] Ningún archivo listado pertenece a una tarea distinta
 [ ] Las etiquetas [NEW|MODIFY|DELETE|DEPLOY] son correctas

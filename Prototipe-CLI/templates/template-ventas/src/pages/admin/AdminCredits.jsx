@@ -154,7 +154,7 @@ export default function AdminCredits() {
       animate={{ opacity: 1, y: 0 }}
       className="p-4 md:p-8 w-full"
     >
-      <div className="flex items-center gap-3 mb-8">
+      <div className="hidden md:flex items-center gap-3 mb-8">
         <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center">
           <CreditCard size={20} className="text-white" />
         </div>
@@ -402,9 +402,10 @@ export default function AdminCredits() {
               <label className="block text-sm font-medium text-app mb-1">Monto a abonar *</label>
               <input
                 type="number"
+                inputmode="decimal"
                 value={paymentMonto}
                 onChange={(e) => setPaymentMonto(e.target.value)}
-                className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-lg font-bold"
+                className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-lg font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 placeholder="Ingresa el valor numérico"
               />
               {paymentError && <p className="text-xs text-error mt-1">{paymentError}</p>}

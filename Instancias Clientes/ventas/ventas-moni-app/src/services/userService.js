@@ -82,29 +82,6 @@ export async function updateClientProfile(celular, data) {
 }
 
 /**
- * Obtiene los clientes actualizados desde una fecha específica (sincronización delta).
- * @param {Date} sinceDate - Fecha límite inferior
- * @param {number} limitVal - Límite de documentos a retornar
- * @returns {Promise<Array>} Lista de clientes actualizados
- */
-export async function getClientsUpdatedSince(sinceDate, limitVal = 100) {
-  try {
-    const clientsRef = collection(db, COLLECTIONS.USERS)
-    const q = query(
-      clientsRef,
-      where('updatedAt', '>', sinceDate),
-      orderBy('updatedAt', 'asc'),
-      limit(limitVal)
-    )
-    const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  } catch (error) {
-    console.error('[getClientsUpdatedSince] Error al obtener clientes delta:', error)
-    return []
-  }
-}
-
-/**
  * Registra un cliente nuevo (primer login por celular) en Firestore.
  * @param {string} celular - Número de celular (ID del documento)
  * @param {{ nombre: string, ownerUid: string }} data - Datos iniciales del cliente
@@ -139,6 +116,29 @@ export async function registerFirstAdmin(uid, { email, nombre, whatsapp }) {
     whatsapp,
     updatedAt: serverTimestamp(),
   }, { merge: true })
+}
+
+/**
+ * Obtiene los clientes actualizados desde una fecha específica (sincronización delta).
+ * @param {Date} sinceDate - Fecha límite inferior
+ * @param {number} limitVal - Límite de documentos a retornar
+ * @returns {Promise<Array>} Lista de clientes actualizados
+ */
+export async function getClientsUpdatedSince(sinceDate, limitVal = 100) {
+  try {
+    const clientsRef = collection(db, COLLECTIONS.USERS)
+    const q = query(
+      clientsRef,
+      where('updatedAt', '>', sinceDate),
+      orderBy('updatedAt', 'asc'),
+      limit(limitVal)
+    )
+    const querySnapshot = await getDocs(q)
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  } catch (error) {
+    console.error('[getClientsUpdatedSince] Error al obtener clientes delta:', error)
+    return []
+  }
 }
 
 

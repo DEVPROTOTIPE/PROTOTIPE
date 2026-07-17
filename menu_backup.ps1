@@ -8,9 +8,10 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
-$rootDir = if ($env:PROTOTIPE_WORKSPACE_ROOT) { $env:PROTOTIPE_WORKSPACE_ROOT } else { "D:\PROTOTIPE" }
+$scriptRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
+$rootDir = if ($env:PROTOTIPE_WORKSPACE_ROOT) { $env:PROTOTIPE_WORKSPACE_ROOT } else { $scriptRoot }
 if (-not (Test-Path $rootDir)) {
-    $rootDir = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
+    throw "No se encontró la raíz de PROTOTIPE: $rootDir"
 }
 $coresDir = "$rootDir\Plantillas Core"
 $instancesDir = "$rootDir\Instancias Clientes"

@@ -3,8 +3,16 @@ import useAuthStore from '../../../store/authStore'; // Ajustar ruta de imports 
 import { useCustomerLoyalty } from '../hooks/useCustomerLoyalty';
 import { Plus, Loader2 } from 'lucide-react';
 
-export default function AdminView() {
-  const { user } = useAuthStore();
+export default function AdminCustomerLoyalty() {
+  const { user, role } = useAuthStore();
+  const isAdmin = role === 'admin';
+
+  if (!isAdmin || !user) return null;
+
+  return <AdminCustomerLoyaltyContent user={user} />;
+}
+
+function AdminCustomerLoyaltyContent({ user }) {
   const tenantId = user?.tenantId || 'demo';
   const { data, loading, error, addRecord } = useCustomerLoyalty(tenantId);
   const [form, setForm] = useState({ name: '' });
@@ -87,17 +95,17 @@ export default function AdminView() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
                 <thead>
-                  <tr className="border-b border-[var(--color-border)] text-[var(--color-text-muted)]">
-                    <th className="py-2 font-medium">ID</th>
-                    <th className="py-2 font-medium">Nombre</th>
+                  <tr className="border-b border-[var(--color-border)] text-[var(--color-text-muted)] whitespace-nowrap">
+                    <th className="py-2 font-medium pr-4">ID</th>
+                    <th className="py-2 font-medium pr-4">Nombre</th>
                     <th className="py-2 font-medium">Fecha</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--color-border)]">
+                <tbody className="divide-y divide-[var(--color-border)] whitespace-nowrap">
                   {data.map((item) => (
                     <tr key={item.id} className="text-[var(--color-text)]">
-                      <td className="py-3 font-mono text-xs">{item.id}</td>
-                      <td className="py-3">{item.name}</td>
+                      <td className="py-3 font-mono text-xs pr-4">{item.id}</td>
+                      <td className="py-3 pr-4 max-w-[200px] truncate" title={item.name}>{item.name}</td>
                       <td className="py-3 text-[var(--color-text-muted)] text-xs">
                         {new Date(item.createdAt).toLocaleDateString()}
                       </td>

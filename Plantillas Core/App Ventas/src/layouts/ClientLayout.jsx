@@ -16,6 +16,7 @@ import useNotificationCenter from '../hooks/useNotificationCenter'
 import NotificationHistoryTray from '../components/common/NotificationHistoryTray'
 import NCToastContainer from '../components/common/NCToastContainer'
 import MobileBottomNav from '../components/common/MobileBottomNav'
+import HeaderBackground from '../components/common/HeaderBackground'
 
 export default function ClientLayout() {
   const location = useLocation()
@@ -414,77 +415,23 @@ export default function ClientLayout() {
       <main className={`flex-1 md:ml-64 min-h-screen w-full max-w-[100vw] md:max-w-none overflow-x-hidden relative flex flex-col ${isProductDetail ? 'pb-0' : 'pb-20 md:pb-0'}`}>
         {/* Cabecera superior móvil premium translúcida con curva asimétrica en S (efecto frosted glass) */}
         {!isProductDetail && (
-          <motion.header 
-            animate={{ 
+          <motion.header
+            animate={{
               opacity: showHeader ? 1 : 0,
               pointerEvents: showHeader ? 'auto' : 'none'
             }}
-            transition={{ duration: 0.45, ease: 'easeOut' }}
-            className="flex md:hidden flex-col px-4 pt-4 pb-8 text-white z-30 sticky top-0 shrink-0 relative overflow-hidden backdrop-blur-lg"
+            transition={{
+              opacity: { duration: 0.45, ease: 'easeOut' },
+              pointerEvents: { duration: 0.45, ease: 'easeOut' }
+            }}
+            className="flex md:hidden flex-col px-4 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-3 text-white z-30 sticky top-0 shrink-0 relative overflow-hidden backdrop-blur-lg"
             style={{
-              background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 75%, transparent), color-mix(in srgb, color-mix(in srgb, var(--color-primary) 85%, #000000) 80%, transparent))',
-              clipPath: 'url(#header-s-curve)',
+              background: '#0B111E',
               filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.15))'
             }}
           >
-            {/* Orbes de luz ambientales GPU-accelerated dinámicos (adaptados a la paleta activa) */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-              {/* Orbe 1: Mezcla Luminosa con Luz Primaria */}
-              <motion.div 
-                className="absolute -left-20 -top-20 w-72 h-72 rounded-full blur-3xl pointer-events-none opacity-40"
-                style={{
-                  background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary-light) 50%, white) 0%, transparent 70%)',
-                  willChange: 'transform'
-                }}
-                animate={{
-                  x: [0, 30, 0],
-                  y: [0, -20, 0]
-                }}
-                transition={{
-                  duration: 10,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              {/* Orbe 2: Mezcla Viva con Acento del Tema */}
-              <motion.div 
-                className="absolute -right-20 -bottom-20 w-72 h-72 rounded-full blur-3xl pointer-events-none opacity-45"
-                style={{
-                  background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 30%, var(--color-accent)) 0%, transparent 75%)',
-                  willChange: 'transform'
-                }}
-                animate={{
-                  x: [0, -25, 0],
-                  y: [0, 20, 0]
-                }}
-                transition={{
-                  duration: 12,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-            </div>
-
-            {/* Borde de Cristal Neón S-Curve (Trazo SVG de alta visibilidad adaptado al tema) */}
-            <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
-              <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                <defs>
-                  <linearGradient id="edge-neon-glow" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="white" stopOpacity="0.6" />
-                    <stop offset="35%" stopColor="var(--color-accent)" stopOpacity="0.4" />
-                    <stop offset="70%" stopColor="white" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0.5" />
-                  </linearGradient>
-                </defs>
-                <path 
-                  d="M 100,72 C 65,72 35,100 0,100" 
-                  fill="none" 
-                  stroke="url(#edge-neon-glow)" 
-                  strokeWidth="2"
-                  className="opacity-90"
-                />
-              </svg>
-            </div>
+            {/* Fondo aurora amorfo dinámico centralizado */}
+            <HeaderBackground />
 
             {/* Fila principal centrada verticalmente */}
             <div className="w-full flex items-center justify-between h-12 relative z-10">
@@ -642,14 +589,7 @@ export default function ClientLayout() {
         />
       )}
 
-      {/* SVG para el clipPath de la curva asimétrica en S de la cabecera */}
-      <svg className="absolute w-0 h-0" aria-hidden="true">
-        <defs>
-          <clipPath id="header-s-curve" clipPathUnits="objectBoundingBox">
-            <path d="M0,0 L1,0 L1,0.72 C0.65,0.72 0.35,1 0,1 Z" />
-          </clipPath>
-        </defs>
-      </svg>
+
     </div>
   )
 }

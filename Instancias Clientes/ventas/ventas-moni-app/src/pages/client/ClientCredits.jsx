@@ -602,12 +602,13 @@ export default function ClientCredits() {
               <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Monto a abonar *</label>
               <input
                 type="number"
+                inputmode="decimal"
                 value={abonoMonto}
                 onChange={(e) => {
                   setAbonoMonto(e.target.value)
                   setAbonoError('')
                 }}
-                className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-lg font-bold"
+                className="w-full h-12 px-4 rounded-xl bg-surface-2 border border-primary-soft text-app focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-lg font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 placeholder="Ingresa el valor numérico"
                 autoFocus
               />

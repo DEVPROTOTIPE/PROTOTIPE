@@ -1,0 +1,62 @@
+[
+  {
+    "id": "none",
+    "name": "Sin Evento Activo",
+    "primary": null,
+    "secondary": null
+  },
+  {
+    "id": "navidad",
+    "name": "Navidad 🎄",
+    "primary": "#d32f2f",
+    "secondary": "#388e3c"
+  },
+  {
+    "id": "halloween",
+    "name": "Halloween 🎃",
+    "primary": "#f57c00",
+    "secondary": "#7b1fa2"
+  },
+  {
+    "id": "madre",
+    "name": "Día de la Madre 🌸",
+    "primary": "#ec407a",
+    "secondary": "#f48fb1"
+  },
+  {
+    "id": "padre",
+    "name": "Día del Padre 👔",
+    "primary": "#0288d1",
+    "secondary": "#455a64"
+  },
+  {
+    "id": "nino",
+    "name": "Día del Niño 🧸",
+    "primary": "#fbc02d",
+    "secondary": "#29b6f6"
+  },
+  {
+    "id": "amistad",
+    "name": "Amor y Amistad ❤️",
+    "primary": "#e91e63",
+    "secondary": "#f48fb1"
+  },
+  {
+    "id": "verano",
+    "name": "Verano ☀️",
+    "primary": "#ffeb3b",
+    "secondary": "#00bcd4"
+  },
+  {
+    "id": "semanasanta",
+    "name": "Semana Santa 🌾",
+    "primary": "#673ab7",
+    "secondary": "#eae6df"
+  },
+  {
+    "id": "mascota",
+    "name": "Día de la Mascota 🐾",
+    "primary": "#8d6e63",
+    "secondary": "#d7ccc8"
+  }
+]

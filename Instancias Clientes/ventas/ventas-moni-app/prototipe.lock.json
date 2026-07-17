@@ -27,9 +27,9 @@
     },
     "src/App.jsx": {
       "owner": "core",
-      "coreHash": "2a960c72783356e80b55b83b753205e5acb63cb669edbb2f2656c92222577d66",
-      "appliedHash": "2a960c72783356e80b55b83b753205e5acb63cb669edbb2f2656c92222577d66",
-      "lastSyncedAt": "2026-07-13T03:51:05.929Z"
+      "coreHash": "f19f93da937059f52f56a3aa2d911d69b757e15078a83d5c536658554a603d24",
+      "appliedHash": "f19f93da937059f52f56a3aa2d911d69b757e15078a83d5c536658554a603d24",
+      "lastSyncedAt": "2026-07-16T03:48:52.953Z"
     },
     "src/components/client/catalog/CatalogBanner.jsx": {
       "owner": "core",
@@ -39,9 +39,9 @@
     },
     "src/components/client/catalog/ProductDetailModal.jsx": {
       "owner": "core",
-      "coreHash": "30378309e63eba4aff64ca552be1d8ad3dace085eee2e3c34d201893dc23cf1f",
-      "appliedHash": "30378309e63eba4aff64ca552be1d8ad3dace085eee2e3c34d201893dc23cf1f",
-      "lastSyncedAt": "2026-07-13T04:25:32.416Z"
+      "coreHash": "952db6272006d073def5d33c3b68bcd8de6910b311dc13bc645e9125663fc367",
+      "appliedHash": "952db6272006d073def5d33c3b68bcd8de6910b311dc13bc645e9125663fc367",
+      "lastSyncedAt": "2026-07-16T16:18:01.388Z"
     },
     "src/components/client/checkout/CheckoutModal.jsx": {
       "owner": "core",
@@ -69,9 +69,9 @@
     },
     "src/constants/index.js": {
       "owner": "core",
-      "coreHash": "86d28948a15f67d3531ebcea516e971d107d34aed5fe50708a7179fcb6871e87",
-      "appliedHash": "86d28948a15f67d3531ebcea516e971d107d34aed5fe50708a7179fcb6871e87",
-      "lastSyncedAt": "2026-07-10T21:56:56.688Z"
+      "coreHash": "534aeffadba8b669b056d3627293cb1222223201f7155a03fa42997ae9438543",
+      "appliedHash": "534aeffadba8b669b056d3627293cb1222223201f7155a03fa42997ae9438543",
+      "lastSyncedAt": "2026-07-16T03:48:53.027Z"
     },
     "src/constants/palettes.js": {
       "owner": "core",
@@ -87,9 +87,9 @@
     },
     "src/layouts/ClientLayout.jsx": {
       "owner": "core",
-      "coreHash": "9995bbbb796888ed69ef99c073790c9fb33cdbfd4ad44802d73175f392096ceb",
-      "appliedHash": "9995bbbb796888ed69ef99c073790c9fb33cdbfd4ad44802d73175f392096ceb",
-      "lastSyncedAt": "2026-07-13T17:43:54.036Z"
+      "coreHash": "93ffcf543a4e804943d3686546f4510be49861703ba69ab32b37b562f189bd50",
+      "appliedHash": "93ffcf543a4e804943d3686546f4510be49861703ba69ab32b37b562f189bd50",
+      "lastSyncedAt": "2026-07-16T19:24:00.984Z"
     },
     "src/pages/WelcomePage.jsx": {
       "owner": "core",
@@ -99,51 +99,51 @@
     },
     "src/pages/admin/AdminClaims.jsx": {
       "owner": "core",
-      "coreHash": "44d2afb44f675415917646f5076677be8d91dce9a0a364daa8b7ad6e00fe604e",
-      "appliedHash": "44d2afb44f675415917646f5076677be8d91dce9a0a364daa8b7ad6e00fe604e",
-      "lastSyncedAt": "2026-07-03T23:06:55.435Z"
+      "coreHash": "346c2f3b27048d8c8792416d05cb279ca89da471640eac7e46d3f97d0d53a8e2",
+      "appliedHash": "346c2f3b27048d8c8792416d05cb279ca89da471640eac7e46d3f97d0d53a8e2",
+      "lastSyncedAt": "2026-07-16T19:24:01.026Z"
     },
     "src/pages/admin/AdminCredits.jsx": {
       "owner": "core",
-      "coreHash": "742d142a066749840883b40ea962a278cfd37004e8e3aecdd8a1be50c2a939f5",
-      "appliedHash": "742d142a066749840883b40ea962a278cfd37004e8e3aecdd8a1be50c2a939f5",
-      "lastSyncedAt": "2026-07-13T03:51:06.202Z"
+      "coreHash": "1d0532bc96ab76683f16d50ad874e0a525db7a52d2e8d4d3f7cd783026eb5544",
+      "appliedHash": "1d0532bc96ab76683f16d50ad874e0a525db7a52d2e8d4d3f7cd783026eb5544",
+      "lastSyncedAt": "2026-07-16T19:24:01.063Z"
     },
     "src/pages/admin/AdminHome.jsx": {
       "owner": "core",
-      "coreHash": "faec50df3f0f4bc6c1b1963877ec60065b85c2792ffe0397436a8ee7e8bf29ee",
-      "appliedHash": "faec50df3f0f4bc6c1b1963877ec60065b85c2792ffe0397436a8ee7e8bf29ee",
-      "lastSyncedAt": "2026-07-13T03:51:06.210Z"
+      "coreHash": "0e49c7db126df7f4eecb7b734f585a29a30ceecfa83a0b0ad1f92a7005172c05",
+      "appliedHash": "0e49c7db126df7f4eecb7b734f585a29a30ceecfa83a0b0ad1f92a7005172c05",
+      "lastSyncedAt": "2026-07-16T19:24:01.091Z"
     },
     "src/pages/admin/AdminInventory.jsx": {
       "owner": "core",
-      "coreHash": "7f0afbff490a46fe1c89ae15b020168666506f26223a371d16832620833dca8a",
-      "appliedHash": "7f0afbff490a46fe1c89ae15b020168666506f26223a371d16832620833dca8a",
-      "lastSyncedAt": "2026-07-13T03:51:06.215Z"
+      "coreHash": "4d47ac6f18e537ad2fbdefef557e7b669f4a6f3a9f843083a4b08f751b443270",
+      "appliedHash": "4d47ac6f18e537ad2fbdefef557e7b669f4a6f3a9f843083a4b08f751b443270",
+      "lastSyncedAt": "2026-07-16T19:24:01.130Z"
     },
     "src/pages/admin/AdminOrders.jsx": {
       "owner": "core",
-      "coreHash": "0ea098fb807c6950959ad48ff814443c562967b598bd914eaf89786a38525dc4",
-      "appliedHash": "0ea098fb807c6950959ad48ff814443c562967b598bd914eaf89786a38525dc4",
-      "lastSyncedAt": "2026-07-13T17:43:54.042Z"
+      "coreHash": "02d9af3d5bfeca550326a18f22f1740303bba80a90befdc3b33adfeb4fc14624",
+      "appliedHash": "02d9af3d5bfeca550326a18f22f1740303bba80a90befdc3b33adfeb4fc14624",
+      "lastSyncedAt": "2026-07-16T19:24:01.173Z"
     },
     "src/pages/admin/AdminQRPerformance.jsx": {
       "owner": "core",
-      "coreHash": "2581048386e255712d67b1dcad572ece282b96d2a6e015fa0b23f1dcbd5c7b9d",
-      "appliedHash": "2581048386e255712d67b1dcad572ece282b96d2a6e015fa0b23f1dcbd5c7b9d",
-      "lastSyncedAt": "2026-07-13T03:51:06.230Z"
+      "coreHash": "fbd0448cf596bedee4e58669890c5d12e9146137e6821f49285ba33b7eaf91ec",
+      "appliedHash": "fbd0448cf596bedee4e58669890c5d12e9146137e6821f49285ba33b7eaf91ec",
+      "lastSyncedAt": "2026-07-16T16:18:01.919Z"
     },
     "src/pages/admin/AdminSalesDetail.jsx": {
       "owner": "core",
-      "coreHash": "8f832fc0f4ada3973163c29a2390ec2189a5ea729b5e2f5743cec2fa73a97e63",
-      "appliedHash": "8f832fc0f4ada3973163c29a2390ec2189a5ea729b5e2f5743cec2fa73a97e63",
-      "lastSyncedAt": "2026-07-13T03:51:06.239Z"
+      "coreHash": "02344f8c71c99a7bcc5bd0f8458d0e2d2873dae5f560129f32213f1db25ffd02",
+      "appliedHash": "02344f8c71c99a7bcc5bd0f8458d0e2d2873dae5f560129f32213f1db25ffd02",
+      "lastSyncedAt": "2026-07-16T19:24:01.256Z"
     },
     "src/pages/admin/AdminSettings.jsx": {
       "owner": "core",
-      "coreHash": "a55dfe77e823f36f6ae4ca5e87f76cbc50ed9a5e15f3fb19e2ed11da5c44dee7",
-      "appliedHash": "a55dfe77e823f36f6ae4ca5e87f76cbc50ed9a5e15f3fb19e2ed11da5c44dee7",
-      "lastSyncedAt": "2026-07-13T03:51:06.243Z"
+      "coreHash": "997fa04ef08fbb20d299c879085e87722f8564e460f69e24b2ef95603de9de87",
+      "appliedHash": "997fa04ef08fbb20d299c879085e87722f8564e460f69e24b2ef95603de9de87",
+      "lastSyncedAt": "2026-07-16T19:24:01.298Z"
     },
     "src/pages/admin/AdminStockAlerts.jsx": {
       "owner": "core",
@@ -159,9 +159,9 @@
     },
     "src/pages/client/ClientCredits.jsx": {
       "owner": "core",
-      "coreHash": "24f5e408a07ac39b8d6b5c150b90a72791ce5149e9653ceb23b4c60ffd5d8c72",
-      "appliedHash": "24f5e408a07ac39b8d6b5c150b90a72791ce5149e9653ceb23b4c60ffd5d8c72",
-      "lastSyncedAt": "2026-07-13T03:51:06.256Z"
+      "coreHash": "53daea533ebd246ddc43949357fad3189465f5d4d6705ae165e897d67f535169",
+      "appliedHash": "53daea533ebd246ddc43949357fad3189465f5d4d6705ae165e897d67f535169",
+      "lastSyncedAt": "2026-07-16T16:18:02.180Z"
     },
     "src/pages/client/OrderTracking.jsx": {
       "owner": "core",
@@ -201,9 +201,9 @@
     },
     "firestore.rules": {
       "owner": "core",
-      "coreHash": "9feb9f59e657b1dfe5b18b1dd07dac05c0b00f9b04c17dc14658badaefe5de99",
-      "appliedHash": "9feb9f59e657b1dfe5b18b1dd07dac05c0b00f9b04c17dc14658badaefe5de99",
-      "lastSyncedAt": "2026-07-13T19:00:18.082Z"
+      "coreHash": "faa8952b58f440547432483180ba905601c76c33f93643b1b31fe4c8f35908a8",
+      "appliedHash": "faa8952b58f440547432483180ba905601c76c33f93643b1b31fe4c8f35908a8",
+      "lastSyncedAt": "2026-07-16T03:48:52.899Z"
     },
     "storage.rules": {
       "owner": "core",
@@ -225,21 +225,21 @@
     },
     "src/pages/admin/settings/sections/DeveloperSettings.jsx": {
       "owner": "core",
-      "coreHash": "3ce0dc10a86c4abc315ce21570e9026eedd17f1ae577c59056ff51d15a659e90",
-      "appliedHash": "3ce0dc10a86c4abc315ce21570e9026eedd17f1ae577c59056ff51d15a659e90",
-      "lastSyncedAt": "2026-07-10T21:56:56.849Z"
+      "coreHash": "cbf9cbad023c8783eb483b19db18ef56afb095eee94b19241f381d10da8f97ae",
+      "appliedHash": "cbf9cbad023c8783eb483b19db18ef56afb095eee94b19241f381d10da8f97ae",
+      "lastSyncedAt": "2026-07-16T21:15:16.272Z"
     },
     "src/services/appConfigService.js": {
       "owner": "core",
-      "coreHash": "fe34d5066d3b35988deb037cab01746e0a0e1f863b39ec6774eb69f1740a33a8",
-      "appliedHash": "fe34d5066d3b35988deb037cab01746e0a0e1f863b39ec6774eb69f1740a33a8",
-      "lastSyncedAt": "2026-07-10T21:56:56.895Z"
+      "coreHash": "e87a0b9a5750632a288fc04b756027d623c6d4fd5da0b9691a0346cfac4943c0",
+      "appliedHash": "e87a0b9a5750632a288fc04b756027d623c6d4fd5da0b9691a0346cfac4943c0",
+      "lastSyncedAt": "2026-07-16T21:15:16.373Z"
     },
     "src/store/appConfigStore.js": {
       "owner": "core",
-      "coreHash": "9191eaf9f2afdcfc6bca62ad82795dbbe6b02248386ea7bd9b37c75ca3dd8b02",
-      "appliedHash": "9191eaf9f2afdcfc6bca62ad82795dbbe6b02248386ea7bd9b37c75ca3dd8b02",
-      "lastSyncedAt": "2026-07-13T19:00:18.097Z"
+      "coreHash": "de945db2035a859d11d65d1a93b320b32ce978031b79808073b9c4e587c358a4",
+      "appliedHash": "de945db2035a859d11d65d1a93b320b32ce978031b79808073b9c4e587c358a4",
+      "lastSyncedAt": "2026-07-16T21:15:16.423Z"
     },
     "src/services/centralFirebaseService.js": {
       "owner": "core",
@@ -251,85 +251,85 @@
       "owner": "core",
       "coreHash": "3f876e51f0a46864ffa7665b4b7a1f5fb5f6f37fb6a28f014e2b12d82962c852",
       "appliedHash": "3f876e51f0a46864ffa7665b4b7a1f5fb5f6f37fb6a28f014e2b12d82962c852",
-      "lastSyncedAt": "2026-07-10T21:56:56.413Z"
+      "lastSyncedAt": "2026-07-16T22:16:02.050Z"
     },
     "coverage/block-navigation.js": {
       "owner": "core",
       "coreHash": "cd8db34b1fbeb973354a93f8b4133c7c7eab34cdda9429a0434be91384783b7e",
       "appliedHash": "cd8db34b1fbeb973354a93f8b4133c7c7eab34cdda9429a0434be91384783b7e",
-      "lastSyncedAt": "2026-07-10T21:56:56.425Z"
+      "lastSyncedAt": "2026-07-16T22:16:02.093Z"
     },
     "coverage/clover.xml": {
       "owner": "core",
-      "coreHash": "2b604552604410fd9c056a2f79797e8cf7f4f6e77d46eed9d5ee6ad66b9c0b02",
-      "appliedHash": "2b604552604410fd9c056a2f79797e8cf7f4f6e77d46eed9d5ee6ad66b9c0b02",
-      "lastSyncedAt": "2026-07-13T03:51:05.659Z"
+      "coreHash": "1948784d87613270ae1413b1ca28810a6c7a2d4d82b776366100059bc61399c0",
+      "appliedHash": "1948784d87613270ae1413b1ca28810a6c7a2d4d82b776366100059bc61399c0",
+      "lastSyncedAt": "2026-07-16T22:16:02.125Z"
     },
     "coverage/components/admin/orders/OrderDeliveryPanel.jsx.html": {
       "owner": "core",
-      "coreHash": "10ef437f0f2c1da1b199ca5ff05325235b036e9c10b33a071f1cc322c7e2f190",
-      "appliedHash": "10ef437f0f2c1da1b199ca5ff05325235b036e9c10b33a071f1cc322c7e2f190",
-      "lastSyncedAt": "2026-07-13T03:51:05.665Z"
+      "coreHash": "d9c53637482469806d95bc206408ab577050f161177fcf0b5b1005d9afe88d9d",
+      "appliedHash": "d9c53637482469806d95bc206408ab577050f161177fcf0b5b1005d9afe88d9d",
+      "lastSyncedAt": "2026-07-16T22:16:02.176Z"
     },
     "coverage/components/admin/orders/index.html": {
       "owner": "core",
-      "coreHash": "2c10d6adddb33ca2257119dfaa862fb7c09dee4b15f1d938f9e2b837a51f2171",
-      "appliedHash": "2c10d6adddb33ca2257119dfaa862fb7c09dee4b15f1d938f9e2b837a51f2171",
-      "lastSyncedAt": "2026-07-13T03:51:05.671Z"
+      "coreHash": "6583ccf3be3faf5ac0c696bed77e929abaf6ff96be8b2638c031e126b4889145",
+      "appliedHash": "6583ccf3be3faf5ac0c696bed77e929abaf6ff96be8b2638c031e126b4889145",
+      "lastSyncedAt": "2026-07-16T22:16:02.219Z"
     },
     "coverage/components/common/AlertConfirmContext.jsx.html": {
       "owner": "core",
-      "coreHash": "e0fd2be3b9fb8c5f4dc7583ad1785ac1798bdd9e2bf6c47aba27feb98d983011",
-      "appliedHash": "e0fd2be3b9fb8c5f4dc7583ad1785ac1798bdd9e2bf6c47aba27feb98d983011",
-      "lastSyncedAt": "2026-07-13T03:51:05.677Z"
+      "coreHash": "7285b6399241db138dd6c76f09616b2b1cd9c048c7548d293a0f46df4f1f663d",
+      "appliedHash": "7285b6399241db138dd6c76f09616b2b1cd9c048c7548d293a0f46df4f1f663d",
+      "lastSyncedAt": "2026-07-16T22:16:02.266Z"
     },
     "coverage/components/common/ModalTemplate.jsx.html": {
       "owner": "core",
-      "coreHash": "656a11aeaf327d8486bb11686233c6266dc48fb456579d136e4d9b47ab4de05d",
-      "appliedHash": "656a11aeaf327d8486bb11686233c6266dc48fb456579d136e4d9b47ab4de05d",
-      "lastSyncedAt": "2026-07-13T03:51:05.683Z"
+      "coreHash": "fcc188375dc56d8182875a476af1bf98c8f6953511da881aa59904dde47ac9cc",
+      "appliedHash": "fcc188375dc56d8182875a476af1bf98c8f6953511da881aa59904dde47ac9cc",
+      "lastSyncedAt": "2026-07-16T22:16:02.311Z"
     },
     "coverage/components/common/index.html": {
       "owner": "core",
-      "coreHash": "02204617dffe56676fae7b4ab55d0d041a903cb5d4269338706be827533fd9fe",
-      "appliedHash": "02204617dffe56676fae7b4ab55d0d041a903cb5d4269338706be827533fd9fe",
-      "lastSyncedAt": "2026-07-13T03:51:05.688Z"
+      "coreHash": "8123a4ffba1181d7ed9b0bbc69ed74297225da0e65a2fa9674641322c5610a56",
+      "appliedHash": "8123a4ffba1181d7ed9b0bbc69ed74297225da0e65a2fa9674641322c5610a56",
+      "lastSyncedAt": "2026-07-16T22:16:02.354Z"
     },
     "coverage/components/ui/LeafletMapPicker.jsx.html": {
       "owner": "core",
-      "coreHash": "99e2644a4f4f3ed303ce5bf1ed069318655f04f7a0de012dcd1e25356a22aa17",
-      "appliedHash": "99e2644a4f4f3ed303ce5bf1ed069318655f04f7a0de012dcd1e25356a22aa17",
-      "lastSyncedAt": "2026-07-13T03:51:05.694Z"
+      "coreHash": "dc6aff73e6e8059f7a28fd8b42e615bedc047afb07b9116e531ea332b2c2e2d3",
+      "appliedHash": "dc6aff73e6e8059f7a28fd8b42e615bedc047afb07b9116e531ea332b2c2e2d3",
+      "lastSyncedAt": "2026-07-16T22:16:02.398Z"
     },
     "coverage/components/ui/NumberInput.jsx.html": {
       "owner": "core",
-      "coreHash": "ac80f0f60b7e225d25f6f7d8396bb68c13c24e96cf422c788661c8e4161073e0",
-      "appliedHash": "ac80f0f60b7e225d25f6f7d8396bb68c13c24e96cf422c788661c8e4161073e0",
-      "lastSyncedAt": "2026-07-13T03:51:05.700Z"
+      "coreHash": "7efa9f4e836fe9902246c498a5cb45b92632c2d8b3f6188ba68713eac0709d9a",
+      "appliedHash": "7efa9f4e836fe9902246c498a5cb45b92632c2d8b3f6188ba68713eac0709d9a",
+      "lastSyncedAt": "2026-07-16T22:16:02.446Z"
     },
     "coverage/components/ui/index.html": {
       "owner": "core",
-      "coreHash": "0a8656426ba2068f227cd8e7bd681900e0eca0a97133dc69f08260e40722e332",
-      "appliedHash": "0a8656426ba2068f227cd8e7bd681900e0eca0a97133dc69f08260e40722e332",
-      "lastSyncedAt": "2026-07-13T03:51:05.709Z"
+      "coreHash": "b3d2b13b52ca84a25c41263ca4c2bef3200cc6057b498d94073337457d3fa457",
+      "appliedHash": "b3d2b13b52ca84a25c41263ca4c2bef3200cc6057b498d94073337457d3fa457",
+      "lastSyncedAt": "2026-07-16T22:16:02.496Z"
     },
     "coverage/constants/index.html": {
       "owner": "core",
-      "coreHash": "cb53379ca8bdd28d3492e17ef695231edef5100c2e349c3cd0d8bba6fb0f31a1",
-      "appliedHash": "cb53379ca8bdd28d3492e17ef695231edef5100c2e349c3cd0d8bba6fb0f31a1",
-      "lastSyncedAt": "2026-07-13T03:51:05.719Z"
+      "coreHash": "23318a84a5b6116f5be99cb0ec4eb3a91b5a4513c91807b936ebd91bc03310ff",
+      "appliedHash": "23318a84a5b6116f5be99cb0ec4eb3a91b5a4513c91807b936ebd91bc03310ff",
+      "lastSyncedAt": "2026-07-16T22:16:02.539Z"
     },
     "coverage/constants/index.js.html": {
       "owner": "core",
-      "coreHash": "3b8a1d7dcdd5a22e2e5ac9587cc2cc465a8662258c8fca3a95959451c16dbb8b",
-      "appliedHash": "3b8a1d7dcdd5a22e2e5ac9587cc2cc465a8662258c8fca3a95959451c16dbb8b",
-      "lastSyncedAt": "2026-07-13T03:51:05.726Z"
+      "coreHash": "bb3c53c427efa099e655e0fa3bd7c56033c4d7e7f570dba8d9f035cdbd86ce19",
+      "appliedHash": "bb3c53c427efa099e655e0fa3bd7c56033c4d7e7f570dba8d9f035cdbd86ce19",
+      "lastSyncedAt": "2026-07-16T22:16:02.583Z"
     },
     "coverage/coverage-final.json": {
       "owner": "core",
-      "coreHash": "d9218bfde25db69c9e71d00d02a49203a553f6e86c3e71dc0d029e9d53d3db6d",
-      "appliedHash": "d9218bfde25db69c9e71d00d02a49203a553f6e86c3e71dc0d029e9d53d3db6d",
-      "lastSyncedAt": "2026-07-13T03:51:05.733Z"
+      "coreHash": "8932cdb82b8fb0fac9d84cc6eacc3f06426a68da16039c3a89aa76d16864f686",
+      "appliedHash": "8932cdb82b8fb0fac9d84cc6eacc3f06426a68da16039c3a89aa76d16864f686",
+      "lastSyncedAt": "2026-07-16T22:16:02.703Z"
     },
     "coverage/favicon.png": {
       "owner": "core",
@@ -339,129 +339,129 @@
     },
     "coverage/features/billing/hooks/index.html": {
       "owner": "core",
-      "coreHash": "886332264fc28a932374f5c8771b13d84a737dd8a7ca39dbbaa298edbe705205",
-      "appliedHash": "886332264fc28a932374f5c8771b13d84a737dd8a7ca39dbbaa298edbe705205",
-      "lastSyncedAt": "2026-07-13T03:51:05.740Z"
+      "coreHash": "10ab8095c072bfdd58d1b75e2345cc15a8fe6b71477ea36ac887ba74642ee27d",
+      "appliedHash": "10ab8095c072bfdd58d1b75e2345cc15a8fe6b71477ea36ac887ba74642ee27d",
+      "lastSyncedAt": "2026-07-16T22:16:02.840Z"
     },
     "coverage/features/billing/hooks/useBilling.js.html": {
       "owner": "core",
-      "coreHash": "d5f929699672e786455533f1edfb7a4f74bc8932118bdcefd53c85aa651633a8",
-      "appliedHash": "d5f929699672e786455533f1edfb7a4f74bc8932118bdcefd53c85aa651633a8",
-      "lastSyncedAt": "2026-07-13T03:51:05.745Z"
+      "coreHash": "1864a0eb8c43572d07240627588edd0272f5890254366791b82f4ca96aebe1d0",
+      "appliedHash": "1864a0eb8c43572d07240627588edd0272f5890254366791b82f4ca96aebe1d0",
+      "lastSyncedAt": "2026-07-16T22:16:02.884Z"
     },
     "coverage/features/billing/index.html": {
       "owner": "core",
-      "coreHash": "b37323364593b045a80272cd744af75adb09789dc08d284495d557aae8810de3",
-      "appliedHash": "b37323364593b045a80272cd744af75adb09789dc08d284495d557aae8810de3",
-      "lastSyncedAt": "2026-07-13T03:51:05.750Z"
+      "coreHash": "b88def3482712bd81552c0f283b6318cafa2a40c035cb93792fd13dd9a545bc4",
+      "appliedHash": "b88def3482712bd81552c0f283b6318cafa2a40c035cb93792fd13dd9a545bc4",
+      "lastSyncedAt": "2026-07-16T22:16:02.928Z"
     },
     "coverage/features/billing/index.js.html": {
       "owner": "core",
-      "coreHash": "748dc711d02f678c287ac7ea12074a147ba526582487af16fefb5793cc6fdd3d",
-      "appliedHash": "748dc711d02f678c287ac7ea12074a147ba526582487af16fefb5793cc6fdd3d",
-      "lastSyncedAt": "2026-07-13T03:51:05.754Z"
+      "coreHash": "a7141c95e36c10001257b846e97f236d3f6910334f7699c165dcc9878e015173",
+      "appliedHash": "a7141c95e36c10001257b846e97f236d3f6910334f7699c165dcc9878e015173",
+      "lastSyncedAt": "2026-07-16T22:16:02.975Z"
     },
     "coverage/features/billing/services/billingService.js.html": {
       "owner": "core",
-      "coreHash": "930631cb8f6b9bf1282bf668a7c3429e38049033ef83579d74455435d2475ae8",
-      "appliedHash": "930631cb8f6b9bf1282bf668a7c3429e38049033ef83579d74455435d2475ae8",
-      "lastSyncedAt": "2026-07-13T03:51:05.759Z"
+      "coreHash": "abbc109fc0697c6f1e2f4b955279f3eb205f17cbf76beca403cf9365f3c49be3",
+      "appliedHash": "abbc109fc0697c6f1e2f4b955279f3eb205f17cbf76beca403cf9365f3c49be3",
+      "lastSyncedAt": "2026-07-16T22:16:03.020Z"
     },
     "coverage/features/billing/services/index.html": {
       "owner": "core",
-      "coreHash": "36319b1d71bc685db3e7bb72881ce3954e5ec3e8746cbcc8e594caf8dc297c55",
-      "appliedHash": "36319b1d71bc685db3e7bb72881ce3954e5ec3e8746cbcc8e594caf8dc297c55",
-      "lastSyncedAt": "2026-07-13T03:51:05.763Z"
+      "coreHash": "53e0ee914ee514d3a2367588444bdd1657b8dda494398a94fdc9fc93a1800c16",
+      "appliedHash": "53e0ee914ee514d3a2367588444bdd1657b8dda494398a94fdc9fc93a1800c16",
+      "lastSyncedAt": "2026-07-16T22:16:03.061Z"
     },
     "coverage/features/credits/services/creditService.js.html": {
       "owner": "core",
-      "coreHash": "ea0320eeb1de777ca4408740b9bb11c81ec397f369cc59f4a5cf11ae650ca4de",
-      "appliedHash": "ea0320eeb1de777ca4408740b9bb11c81ec397f369cc59f4a5cf11ae650ca4de",
-      "lastSyncedAt": "2026-07-13T03:51:05.768Z"
+      "coreHash": "7c1bb5258b0fae58bb7ad6ca4b71968494602803f80d0988a43d36dcb121e162",
+      "appliedHash": "7c1bb5258b0fae58bb7ad6ca4b71968494602803f80d0988a43d36dcb121e162",
+      "lastSyncedAt": "2026-07-16T22:16:03.196Z"
     },
     "coverage/features/credits/services/index.html": {
       "owner": "core",
-      "coreHash": "4cb0cccdc0fa7ca43738160053d43ce5677b496bd8304121e74fab0e67bbbbb3",
-      "appliedHash": "4cb0cccdc0fa7ca43738160053d43ce5677b496bd8304121e74fab0e67bbbbb3",
-      "lastSyncedAt": "2026-07-13T03:51:05.772Z"
+      "coreHash": "10242be8441cd75cb42fed4772275262c47d293e3640b6fe636c57b30a6bc729",
+      "appliedHash": "10242be8441cd75cb42fed4772275262c47d293e3640b6fe636c57b30a6bc729",
+      "lastSyncedAt": "2026-07-16T22:16:03.240Z"
     },
     "coverage/features/orders/components/OrderCard.jsx.html": {
       "owner": "core",
-      "coreHash": "51adb3fe1f2e6d71855227c62b200037ba0c080edf534fe934352a1ea4e6016e",
-      "appliedHash": "51adb3fe1f2e6d71855227c62b200037ba0c080edf534fe934352a1ea4e6016e",
-      "lastSyncedAt": "2026-07-13T03:51:05.788Z"
+      "coreHash": "74d32c05c3fdf5dcc06fdc704d4e7f6600b75104a8799aacefac27e9ab70bada",
+      "appliedHash": "74d32c05c3fdf5dcc06fdc704d4e7f6600b75104a8799aacefac27e9ab70bada",
+      "lastSyncedAt": "2026-07-16T22:16:03.876Z"
     },
     "coverage/features/orders/components/index.html": {
       "owner": "core",
-      "coreHash": "e1e1948566bb20df3f8e76de0f02112f3c7a8035711f50a64aee3a8a165d8cfa",
-      "appliedHash": "e1e1948566bb20df3f8e76de0f02112f3c7a8035711f50a64aee3a8a165d8cfa",
-      "lastSyncedAt": "2026-07-13T03:51:05.793Z"
+      "coreHash": "8b9520e5a251ce8314553a28f03651fd724369e54bd5e3ea488a2de9fc675c8a",
+      "appliedHash": "8b9520e5a251ce8314553a28f03651fd724369e54bd5e3ea488a2de9fc675c8a",
+      "lastSyncedAt": "2026-07-16T22:16:03.923Z"
     },
     "coverage/features/orders/hooks/index.html": {
       "owner": "core",
-      "coreHash": "f99a0ec4babaaad4d85d4998059a2f2457349421b630d5071a41c0afa86b48db",
-      "appliedHash": "f99a0ec4babaaad4d85d4998059a2f2457349421b630d5071a41c0afa86b48db",
-      "lastSyncedAt": "2026-07-13T03:51:05.797Z"
+      "coreHash": "164fd88bdda1bcacb4da34bdf73f5b821e2f45458510ead0117e22548a6824c1",
+      "appliedHash": "164fd88bdda1bcacb4da34bdf73f5b821e2f45458510ead0117e22548a6824c1",
+      "lastSyncedAt": "2026-07-16T22:16:03.965Z"
     },
     "coverage/features/orders/hooks/useOrders.js.html": {
       "owner": "core",
-      "coreHash": "b2ff0d738ae2799a0eb280ca6c5657ea136191d3615e4862cda4baebaf7d0003",
-      "appliedHash": "b2ff0d738ae2799a0eb280ca6c5657ea136191d3615e4862cda4baebaf7d0003",
-      "lastSyncedAt": "2026-07-13T03:51:05.802Z"
+      "coreHash": "c1b5d0674cae1c6453be6dc6e3bffab04583213f40a8304eb05d3b5c2ab9ecd8",
+      "appliedHash": "c1b5d0674cae1c6453be6dc6e3bffab04583213f40a8304eb05d3b5c2ab9ecd8",
+      "lastSyncedAt": "2026-07-16T22:16:04.009Z"
     },
     "coverage/features/orders/index.html": {
       "owner": "core",
-      "coreHash": "aefeb22938ec24b93e3ed417d2e15c591d33897ee1ecc71080dd91ff6ef65032",
-      "appliedHash": "aefeb22938ec24b93e3ed417d2e15c591d33897ee1ecc71080dd91ff6ef65032",
-      "lastSyncedAt": "2026-07-13T03:51:05.807Z"
+      "coreHash": "84bfaa6f4cf594397f220a917d5e2849c749dec933fdaec6f67ada40b1f172e2",
+      "appliedHash": "84bfaa6f4cf594397f220a917d5e2849c749dec933fdaec6f67ada40b1f172e2",
+      "lastSyncedAt": "2026-07-16T22:16:04.057Z"
     },
     "coverage/features/orders/index.js.html": {
       "owner": "core",
-      "coreHash": "6ff9cc870bf5491af9df6dc66453c6644f9ea9989014c6f29d317821715fd9f4",
-      "appliedHash": "6ff9cc870bf5491af9df6dc66453c6644f9ea9989014c6f29d317821715fd9f4",
-      "lastSyncedAt": "2026-07-13T03:51:05.811Z"
+      "coreHash": "65902b05623ff6359ce9ebeca115c7a8d2f8b98a4091b1414cb8ba17cde5984d",
+      "appliedHash": "65902b05623ff6359ce9ebeca115c7a8d2f8b98a4091b1414cb8ba17cde5984d",
+      "lastSyncedAt": "2026-07-16T22:16:04.103Z"
     },
     "coverage/features/orders/services/index.html": {
       "owner": "core",
-      "coreHash": "3375d82342f5800d4f8e27c5ef8f8c9856ea901c9bd890cb352c6f95d8bafaca",
-      "appliedHash": "3375d82342f5800d4f8e27c5ef8f8c9856ea901c9bd890cb352c6f95d8bafaca",
-      "lastSyncedAt": "2026-07-13T03:51:05.816Z"
+      "coreHash": "63e34547e21915e88dcb714422b1c0d7462be15133fb98fdaa0ffc8607c7c70e",
+      "appliedHash": "63e34547e21915e88dcb714422b1c0d7462be15133fb98fdaa0ffc8607c7c70e",
+      "lastSyncedAt": "2026-07-16T22:16:04.151Z"
     },
     "coverage/features/orders/services/orderService.js.html": {
       "owner": "core",
-      "coreHash": "9053fa0c3a551ab3a094504104f07e55dd3c1f68f2e46b38328cf00099ad50ad",
-      "appliedHash": "9053fa0c3a551ab3a094504104f07e55dd3c1f68f2e46b38328cf00099ad50ad",
-      "lastSyncedAt": "2026-07-13T03:51:05.821Z"
+      "coreHash": "e59856a9633ffd367e7c8d85472cd166358d8c8022a9105e8eb46d7138b151e9",
+      "appliedHash": "e59856a9633ffd367e7c8d85472cd166358d8c8022a9105e8eb46d7138b151e9",
+      "lastSyncedAt": "2026-07-16T22:16:04.199Z"
     },
     "coverage/index.html": {
       "owner": "core",
-      "coreHash": "e4dac5c2de5ee0e30f441901ef3f19c05c98145132e9d2a339b2364ad2c78896",
-      "appliedHash": "e4dac5c2de5ee0e30f441901ef3f19c05c98145132e9d2a339b2364ad2c78896",
-      "lastSyncedAt": "2026-07-13T03:51:05.836Z"
+      "coreHash": "6310d42e9db86ce7e43096bcb6734ab63d2224f36ea6cb6154bd56efec45f2e9",
+      "appliedHash": "6310d42e9db86ce7e43096bcb6734ab63d2224f36ea6cb6154bd56efec45f2e9",
+      "lastSyncedAt": "2026-07-16T22:16:04.417Z"
     },
     "coverage/prettify.css": {
       "owner": "core",
       "coreHash": "ea3fe433f9450698ca8a230271688e7aeec12f99c8a7ef6c94379abb38f27823",
       "appliedHash": "ea3fe433f9450698ca8a230271688e7aeec12f99c8a7ef6c94379abb38f27823",
-      "lastSyncedAt": "2026-07-10T21:56:56.565Z"
+      "lastSyncedAt": "2026-07-16T22:16:04.445Z"
     },
     "coverage/prettify.js": {
       "owner": "core",
       "coreHash": "fa1b1e1b906ddcfa08b46f161c0f924f506e1a31b4f3e09b8caaa2463ef52c18",
       "appliedHash": "fa1b1e1b906ddcfa08b46f161c0f924f506e1a31b4f3e09b8caaa2463ef52c18",
-      "lastSyncedAt": "2026-07-10T21:56:56.570Z"
+      "lastSyncedAt": "2026-07-16T22:16:04.523Z"
     },
     "coverage/services/alertService.js.html": {
       "owner": "core",
-      "coreHash": "20d81fe6891aef203776d20b181368a2090937bb87d62a76c9f625583c257ca1",
-      "appliedHash": "20d81fe6891aef203776d20b181368a2090937bb87d62a76c9f625583c257ca1",
-      "lastSyncedAt": "2026-07-13T03:51:05.841Z"
+      "coreHash": "cf67488e5581b054be0e36f1b883709c2c11b5c974c3f3bf3b0de23bce9505ec",
+      "appliedHash": "cf67488e5581b054be0e36f1b883709c2c11b5c974c3f3bf3b0de23bce9505ec",
+      "lastSyncedAt": "2026-07-16T22:16:04.572Z"
     },
     "coverage/services/appConfigService.js.html": {
       "owner": "core",
-      "coreHash": "f8424eb8352b11a9a923a2375ae8e0898622101374f697379dab41796df2be60",
-      "appliedHash": "f8424eb8352b11a9a923a2375ae8e0898622101374f697379dab41796df2be60",
-      "lastSyncedAt": "2026-07-13T03:51:05.846Z"
+      "coreHash": "2fba21a5926dd1327c39d0285829ce3f52a771338660a05077ee373ad53f5573",
+      "appliedHash": "2fba21a5926dd1327c39d0285829ce3f52a771338660a05077ee373ad53f5573",
+      "lastSyncedAt": "2026-07-16T22:16:04.619Z"
     },
     "coverage/services/centralFirebaseService.js.html": {
       "owner": "core",
@@ -471,45 +471,45 @@
     },
     "coverage/services/deliveryService.js.html": {
       "owner": "core",
-      "coreHash": "ae0c834bdbdb149addd2d1dcf753c99e19fdd042a101e1e266b149167f6401d0",
-      "appliedHash": "ae0c834bdbdb149addd2d1dcf753c99e19fdd042a101e1e266b149167f6401d0",
-      "lastSyncedAt": "2026-07-13T03:51:05.856Z"
+      "coreHash": "475483c9c6cb51ea9206b3be00562f98c0297db9731041d1e98fac1ed4cd382c",
+      "appliedHash": "475483c9c6cb51ea9206b3be00562f98c0297db9731041d1e98fac1ed4cd382c",
+      "lastSyncedAt": "2026-07-16T22:16:04.665Z"
     },
     "coverage/services/employeeService.js.html": {
       "owner": "core",
-      "coreHash": "e0198152f34a5be8ac7757b136dfb233db0469f651402507b50b0ca1aa9dae31",
-      "appliedHash": "e0198152f34a5be8ac7757b136dfb233db0469f651402507b50b0ca1aa9dae31",
-      "lastSyncedAt": "2026-07-13T03:51:05.861Z"
+      "coreHash": "b8c4d7a1cfb1ffdf90908bb042d345ec292ccf93dc78fbb2b40fd7759b8285ea",
+      "appliedHash": "b8c4d7a1cfb1ffdf90908bb042d345ec292ccf93dc78fbb2b40fd7759b8285ea",
+      "lastSyncedAt": "2026-07-16T22:16:04.751Z"
     },
     "coverage/services/index.html": {
       "owner": "core",
-      "coreHash": "35b00efd3853963934c7d52cafcee65015110a8eb9c3c75085be6ef414d942e5",
-      "appliedHash": "35b00efd3853963934c7d52cafcee65015110a8eb9c3c75085be6ef414d942e5",
-      "lastSyncedAt": "2026-07-13T03:51:05.866Z"
+      "coreHash": "e3a05b5b220e8a28d25db9282ed595e044b72dfede99a44b1f4032de9a72a21e",
+      "appliedHash": "e3a05b5b220e8a28d25db9282ed595e044b72dfede99a44b1f4032de9a72a21e",
+      "lastSyncedAt": "2026-07-16T22:16:04.796Z"
     },
     "coverage/services/notificationCenterService.js.html": {
       "owner": "core",
-      "coreHash": "a1a9c91293e9f38473f40c14f05cd45bef5967f041c3f346334970e430f7c15e",
-      "appliedHash": "a1a9c91293e9f38473f40c14f05cd45bef5967f041c3f346334970e430f7c15e",
-      "lastSyncedAt": "2026-07-13T03:51:05.871Z"
+      "coreHash": "ec420228a3a30d3ecf61a51867d96fa7ef613b1e547f322413f7257b303cc359",
+      "appliedHash": "ec420228a3a30d3ecf61a51867d96fa7ef613b1e547f322413f7257b303cc359",
+      "lastSyncedAt": "2026-07-16T22:16:04.842Z"
     },
     "coverage/services/telemetryOutboxDb.js.html": {
       "owner": "core",
-      "coreHash": "e9689aaf08a1717c523d51d851691345b3f9eb0851daedaf797b876c3933a30a",
-      "appliedHash": "e9689aaf08a1717c523d51d851691345b3f9eb0851daedaf797b876c3933a30a",
-      "lastSyncedAt": "2026-07-13T03:51:05.875Z"
+      "coreHash": "c3e71958a2073a453ea44f5be7469f519f28416391bee2a1d09a300abc12f1d7",
+      "appliedHash": "c3e71958a2073a453ea44f5be7469f519f28416391bee2a1d09a300abc12f1d7",
+      "lastSyncedAt": "2026-07-16T22:16:04.884Z"
     },
     "coverage/services/telemetryService.js.html": {
       "owner": "core",
-      "coreHash": "4845817dea013c248d4c137d5c3841f9ac7191e7507400e190af9078430696a4",
-      "appliedHash": "4845817dea013c248d4c137d5c3841f9ac7191e7507400e190af9078430696a4",
-      "lastSyncedAt": "2026-07-13T03:51:05.880Z"
+      "coreHash": "0eb3d2a7aa726b91945d59186786f0bcb1291edc3d01a2d668c7ea046b6167ea",
+      "appliedHash": "0eb3d2a7aa726b91945d59186786f0bcb1291edc3d01a2d668c7ea046b6167ea",
+      "lastSyncedAt": "2026-07-16T22:16:04.927Z"
     },
     "coverage/services/userService.js.html": {
       "owner": "core",
-      "coreHash": "1077507c2dc8f6d3da8b5c0b194c8062fc9ef45bc8b732141ca440ef64527c33",
-      "appliedHash": "1077507c2dc8f6d3da8b5c0b194c8062fc9ef45bc8b732141ca440ef64527c33",
-      "lastSyncedAt": "2026-07-13T03:51:05.886Z"
+      "coreHash": "cf7bc33ba91f85cfaa242d2d94b2d94c1bb70b707d9f4e01da9feb86122df114",
+      "appliedHash": "cf7bc33ba91f85cfaa242d2d94b2d94c1bb70b707d9f4e01da9feb86122df114",
+      "lastSyncedAt": "2026-07-16T22:16:05.016Z"
     },
     "coverage/sort-arrow-sprite.png": {
       "owner": "core",
@@ -521,43 +521,43 @@
       "owner": "core",
       "coreHash": "f8cc5d157379d844fd695ad567b6c29b3c1f0812964ddf6f95c26327e434bab5",
       "appliedHash": "f8cc5d157379d844fd695ad567b6c29b3c1f0812964ddf6f95c26327e434bab5",
-      "lastSyncedAt": "2026-07-10T21:56:56.623Z"
+      "lastSyncedAt": "2026-07-16T22:16:05.071Z"
     },
     "coverage/store/appConfigStore.js.html": {
       "owner": "core",
-      "coreHash": "13f2df2564c21fe9fde253ab2d0d49839b1c7d98fb35eba8c19ffbe426231301",
-      "appliedHash": "13f2df2564c21fe9fde253ab2d0d49839b1c7d98fb35eba8c19ffbe426231301",
-      "lastSyncedAt": "2026-07-13T03:51:05.891Z"
+      "coreHash": "6ec57426ddbffc217a1defeebe9cf44ca18a026f78f7d49fa408473b9384012b",
+      "appliedHash": "6ec57426ddbffc217a1defeebe9cf44ca18a026f78f7d49fa408473b9384012b",
+      "lastSyncedAt": "2026-07-16T22:16:05.115Z"
     },
     "coverage/store/authStore.js.html": {
       "owner": "core",
-      "coreHash": "3f71fcb5c5e4c550e1dd906775f2caeda39f5bdfc0e69b52a1c05d67468ee4e4",
-      "appliedHash": "3f71fcb5c5e4c550e1dd906775f2caeda39f5bdfc0e69b52a1c05d67468ee4e4",
-      "lastSyncedAt": "2026-07-13T03:51:05.896Z"
+      "coreHash": "a8897bfd5fa743da417bcd7288295002055c1fedab697abfdc940f24803481cf",
+      "appliedHash": "a8897bfd5fa743da417bcd7288295002055c1fedab697abfdc940f24803481cf",
+      "lastSyncedAt": "2026-07-16T22:16:05.155Z"
     },
     "coverage/store/index.html": {
       "owner": "core",
-      "coreHash": "d40ca56ca0b84a10c0e9dccbe50577422f65ab1964ab467d198b5b9a59d7e328",
-      "appliedHash": "d40ca56ca0b84a10c0e9dccbe50577422f65ab1964ab467d198b5b9a59d7e328",
-      "lastSyncedAt": "2026-07-13T03:51:05.901Z"
+      "coreHash": "319c01ede335f5ac1d6f67d34d35f7491ae8202682a47973d513f281df9519a8",
+      "appliedHash": "319c01ede335f5ac1d6f67d34d35f7491ae8202682a47973d513f281df9519a8",
+      "lastSyncedAt": "2026-07-16T22:16:05.199Z"
     },
     "coverage/store/portalStore.js.html": {
       "owner": "core",
-      "coreHash": "53e0cb1b585fa96ed774d228b9abd1f4476e73ef73809ea88f5f516395e3cb63",
-      "appliedHash": "53e0cb1b585fa96ed774d228b9abd1f4476e73ef73809ea88f5f516395e3cb63",
-      "lastSyncedAt": "2026-07-13T03:51:05.905Z"
+      "coreHash": "e5f8daf9e2a07c9b4f0e11944dcd865ad3513313ba815c4f21efdd78a7d8adda",
+      "appliedHash": "e5f8daf9e2a07c9b4f0e11944dcd865ad3513313ba815c4f21efdd78a7d8adda",
+      "lastSyncedAt": "2026-07-16T22:16:05.243Z"
     },
     "coverage/utils/formatters.js.html": {
       "owner": "core",
-      "coreHash": "5c61d0f6abed0d2d7e577501db50fc6f8db753509f2b95244335a6a1baef43fc",
-      "appliedHash": "5c61d0f6abed0d2d7e577501db50fc6f8db753509f2b95244335a6a1baef43fc",
-      "lastSyncedAt": "2026-07-13T03:51:05.910Z"
+      "coreHash": "b94e5ff2220eed223ab8ad5591b524eef5ef19867ddfed5d0849bcf4c0e1126c",
+      "appliedHash": "b94e5ff2220eed223ab8ad5591b524eef5ef19867ddfed5d0849bcf4c0e1126c",
+      "lastSyncedAt": "2026-07-16T22:16:05.329Z"
     },
     "coverage/utils/index.html": {
       "owner": "core",
-      "coreHash": "45400a812a9d61ddbd42f08f2a774fd01432f6833125eda1d631637d893683cc",
-      "appliedHash": "45400a812a9d61ddbd42f08f2a774fd01432f6833125eda1d631637d893683cc",
-      "lastSyncedAt": "2026-07-13T03:51:05.915Z"
+      "coreHash": "db9baf97c12b60534e51077a33ba7405d067a716f5ba98769cb829b76e57ebc1",
+      "appliedHash": "db9baf97c12b60534e51077a33ba7405d067a716f5ba98769cb829b76e57ebc1",
+      "lastSyncedAt": "2026-07-16T22:16:05.408Z"
     },
     "firestore.indexes.json": {
       "owner": "core",
@@ -597,9 +597,9 @@
     },
     "src/features/billing/services/billingService.js": {
       "owner": "core",
-      "coreHash": "29ca5169fb591d22e4c4dc183f3cfa19ac8db781da19248b121a9db03933cc79",
-      "appliedHash": "29ca5169fb591d22e4c4dc183f3cfa19ac8db781da19248b121a9db03933cc79",
-      "lastSyncedAt": "2026-07-10T21:56:56.704Z"
+      "coreHash": "cb88816b038ba3fbee635e2a3a2a94a73270d7c427418b2481c60bf266683f1e",
+      "appliedHash": "cb88816b038ba3fbee635e2a3a2a94a73270d7c427418b2481c60bf266683f1e",
+      "lastSyncedAt": "2026-07-16T19:24:00.724Z"
     },
     "src/features/credits/hooks/useCredits.js": {
       "owner": "core",
@@ -615,9 +615,9 @@
     },
     "src/features/credits/services/creditService.js": {
       "owner": "core",
-      "coreHash": "73cc289764ef7d2e70c6a213a5825466dce7185454210921fbbc079eacdbe74e",
-      "appliedHash": "73cc289764ef7d2e70c6a213a5825466dce7185454210921fbbc079eacdbe74e",
-      "lastSyncedAt": "2026-07-13T03:51:06.094Z"
+      "coreHash": "426db450b91c6fd3f5444e398dd63cc2ed08a6c3a8c9ac806370194d6e08f025",
+      "appliedHash": "426db450b91c6fd3f5444e398dd63cc2ed08a6c3a8c9ac806370194d6e08f025",
+      "lastSyncedAt": "2026-07-16T19:24:00.770Z"
     },
     "src/features/inventory/components/CategoryManager.jsx": {
       "owner": "core",
@@ -627,9 +627,9 @@
     },
     "src/features/inventory/components/ProductFormModal.jsx": {
       "owner": "core",
-      "coreHash": "07c11952668ef4b328578d873e8f6529d44617cbe4179671f6a8234b1f044041",
-      "appliedHash": "07c11952668ef4b328578d873e8f6529d44617cbe4179671f6a8234b1f044041",
-      "lastSyncedAt": "2026-07-13T03:51:06.113Z"
+      "coreHash": "71149b928ebe1c99faf277143ca85110cd68ae8d4e576de99d893af5b0560661",
+      "appliedHash": "71149b928ebe1c99faf277143ca85110cd68ae8d4e576de99d893af5b0560661",
+      "lastSyncedAt": "2026-07-16T16:18:01.720Z"
     },
     "src/features/inventory/hooks/useInventory.js": {
       "owner": "core",
@@ -645,9 +645,9 @@
     },
     "src/features/inventory/services/inventoryService.js": {
       "owner": "core",
-      "coreHash": "ee88777e289cde59700aec8aacf95ce85ab9e914e03dac5e302e5028f554b7c7",
-      "appliedHash": "ee88777e289cde59700aec8aacf95ce85ab9e914e03dac5e302e5028f554b7c7",
-      "lastSyncedAt": "2026-07-13T03:51:06.144Z"
+      "coreHash": "a912cf7010b936196720cb80a5547ac44047f9e342daa44a4182b3b4e8cc1a24",
+      "appliedHash": "a912cf7010b936196720cb80a5547ac44047f9e342daa44a4182b3b4e8cc1a24",
+      "lastSyncedAt": "2026-07-16T19:24:00.818Z"
     },
     "src/features/orders/components/OrderCard.jsx": {
       "owner": "core",
@@ -669,9 +669,9 @@
     },
     "src/features/orders/services/orderService.js": {
       "owner": "core",
-      "coreHash": "618e59966fa9d5ee953c7f8d5dbeadb88cbdcab00fcb1432bf2b9e202d9faa69",
-      "appliedHash": "618e59966fa9d5ee953c7f8d5dbeadb88cbdcab00fcb1432bf2b9e202d9faa69",
-      "lastSyncedAt": "2026-07-13T03:51:06.160Z"
+      "coreHash": "27c38a5186c73413e8a6668a61ba0039b352b8930a9d9e66264d4db612b260b5",
+      "appliedHash": "27c38a5186c73413e8a6668a61ba0039b352b8930a9d9e66264d4db612b260b5",
+      "lastSyncedAt": "2026-07-16T19:24:00.867Z"
     },
     "src/features/sales/components/POSCustomItemForm.jsx": {
       "owner": "core",
@@ -717,15 +717,15 @@
     },
     "src/features/sales/services/salesService.js": {
       "owner": "core",
-      "coreHash": "ae8c6eca236d8cb178c8ba7bfae246f0061c24466d7ab8e46d3ea3afb955ddbf",
-      "appliedHash": "ae8c6eca236d8cb178c8ba7bfae246f0061c24466d7ab8e46d3ea3afb955ddbf",
-      "lastSyncedAt": "2026-07-13T03:51:06.174Z"
+      "coreHash": "d5d7bd6769b4e7d16bdd4bcb3ec5fb24488fe13c4cf0e11165ac23e077d5c8db",
+      "appliedHash": "d5d7bd6769b4e7d16bdd4bcb3ec5fb24488fe13c4cf0e11165ac23e077d5c8db",
+      "lastSyncedAt": "2026-07-16T19:24:00.909Z"
     },
     "src/hooks/useAppConfigSync.js": {
       "owner": "core",
-      "coreHash": "e259ca55694b05e00cb31b81f421108c90ab8eba446812c578d3ecd8f0b16c33",
-      "appliedHash": "e259ca55694b05e00cb31b81f421108c90ab8eba446812c578d3ecd8f0b16c33",
-      "lastSyncedAt": "2026-07-13T17:43:54.027Z"
+      "coreHash": "21bb55f40c493725a1a4a26d0d9fb8bcdc32f6b2d4cd9d7bd5a39d665a7b78bd",
+      "appliedHash": "21bb55f40c493725a1a4a26d0d9fb8bcdc32f6b2d4cd9d7bd5a39d665a7b78bd",
+      "lastSyncedAt": "2026-07-16T21:15:16.125Z"
     },
     "src/hooks/useCartRecommendations.js": {
       "owner": "core",
@@ -741,9 +741,9 @@
     },
     "src/pages/admin/AdminSales.jsx": {
       "owner": "core",
-      "coreHash": "5b36d0997490d9c85187160de557154d3fd0aa62788e0560323cb58fd3b015e8",
-      "appliedHash": "5b36d0997490d9c85187160de557154d3fd0aa62788e0560323cb58fd3b015e8",
-      "lastSyncedAt": "2026-07-13T03:51:06.234Z"
+      "coreHash": "514f236b8c466893e58fc8b26c7d804113e8b65829b74b4a6e97f7994dbdf7cf",
+      "appliedHash": "514f236b8c466893e58fc8b26c7d804113e8b65829b74b4a6e97f7994dbdf7cf",
+      "lastSyncedAt": "2026-07-16T19:24:01.217Z"
     },
     "src/pages/admin/settings/sections/DeveloperBillingPanel.jsx": {
       "owner": "core",
@@ -765,15 +765,15 @@
     },
     "src/pages/portal/PortalBodega.jsx": {
       "owner": "core",
-      "coreHash": "5c1121be7ab38eacb0a775fef1c4d450a586755c2d60de9bc34efc9e0a401763",
-      "appliedHash": "5c1121be7ab38eacb0a775fef1c4d450a586755c2d60de9bc34efc9e0a401763",
-      "lastSyncedAt": "2026-07-13T03:51:06.278Z"
+      "coreHash": "8f637ee7d76967f2fbdf8d378eb63f048cbd8656362e6c57f94c3e6c423d54f1",
+      "appliedHash": "8f637ee7d76967f2fbdf8d378eb63f048cbd8656362e6c57f94c3e6c423d54f1",
+      "lastSyncedAt": "2026-07-16T16:18:02.216Z"
     },
     "src/pages/portal/PortalVendedor.jsx": {
       "owner": "core",
-      "coreHash": "5aeca321707a1f52338a17a924467e8ecdea0b03b3fd20d22bc21c2e1f2c3f43",
-      "appliedHash": "5aeca321707a1f52338a17a924467e8ecdea0b03b3fd20d22bc21c2e1f2c3f43",
-      "lastSyncedAt": "2026-07-13T03:51:06.283Z"
+      "coreHash": "d2bb9f90156bfc33973ad01da9140fd1f3b361f7e35a108357bd6f5eca1c5662",
+      "appliedHash": "d2bb9f90156bfc33973ad01da9140fd1f3b361f7e35a108357bd6f5eca1c5662",
+      "lastSyncedAt": "2026-07-16T16:18:02.266Z"
     },
     "src/schemas/appConfigSchema.js": {
       "owner": "core",
@@ -783,9 +783,9 @@
     },
     "src/services/notificationCenterService.js": {
       "owner": "core",
-      "coreHash": "e5b7a3c72a7b6c33ae7e4c76b9964c3cc84c939e37f100e1ee6797a20870d5cb",
-      "appliedHash": "e5b7a3c72a7b6c33ae7e4c76b9964c3cc84c939e37f100e1ee6797a20870d5cb",
-      "lastSyncedAt": "2026-07-13T03:51:06.302Z"
+      "coreHash": "b6c2fa37b64126af2877777ee58a78bc62b374754339234182b3db096a9cea6b",
+      "appliedHash": "b6c2fa37b64126af2877777ee58a78bc62b374754339234182b3db096a9cea6b",
+      "lastSyncedAt": "2026-07-16T14:53:39.432Z"
     },
     "tests/config/app-ventas.config.js": {
       "owner": "core",
@@ -849,27 +849,27 @@
     },
     "coverage/features/inventory/services/index.html": {
       "owner": "core",
-      "coreHash": "a7604b3a8c95bb85f28c840df1e9ee311ba95adf74be3b6c10f6a9992646471b",
-      "appliedHash": "a7604b3a8c95bb85f28c840df1e9ee311ba95adf74be3b6c10f6a9992646471b",
-      "lastSyncedAt": "2026-07-13T03:51:05.776Z"
+      "coreHash": "21479ba8e1645a5aed723c4188d2b28eee59fd33f4abe193ebe986a9158914c9",
+      "appliedHash": "21479ba8e1645a5aed723c4188d2b28eee59fd33f4abe193ebe986a9158914c9",
+      "lastSyncedAt": "2026-07-16T22:16:03.646Z"
     },
     "coverage/features/inventory/services/inventoryService.js.html": {
       "owner": "core",
-      "coreHash": "dcbdb5f003057263f74345a8c11457d68493363b9fe18fd267ab332b069f57f6",
-      "appliedHash": "dcbdb5f003057263f74345a8c11457d68493363b9fe18fd267ab332b069f57f6",
-      "lastSyncedAt": "2026-07-13T03:51:05.783Z"
+      "coreHash": "80a01db26bbe8818765ff5bf2adaeea90ee383a42fcffb338794098ad252755e",
+      "appliedHash": "80a01db26bbe8818765ff5bf2adaeea90ee383a42fcffb338794098ad252755e",
+      "lastSyncedAt": "2026-07-16T22:16:03.742Z"
     },
     "coverage/features/sales/services/index.html": {
       "owner": "core",
-      "coreHash": "2a24976e3376241ee0982c4356ffb64fdc7456e81629c6581d7f2c411705cd2d",
-      "appliedHash": "2a24976e3376241ee0982c4356ffb64fdc7456e81629c6581d7f2c411705cd2d",
-      "lastSyncedAt": "2026-07-13T03:51:05.825Z"
+      "coreHash": "1f3f912eee857093926dc449c3408d048cd24f1ef40ffabe9be67f54df525393",
+      "appliedHash": "1f3f912eee857093926dc449c3408d048cd24f1ef40ffabe9be67f54df525393",
+      "lastSyncedAt": "2026-07-16T22:16:04.324Z"
     },
     "coverage/features/sales/services/salesService.js.html": {
       "owner": "core",
-      "coreHash": "a78db62ba86f98c222bb9ada68d291111f3c164861fc193ffdedf2ad78338f39",
-      "appliedHash": "a78db62ba86f98c222bb9ada68d291111f3c164861fc193ffdedf2ad78338f39",
-      "lastSyncedAt": "2026-07-13T03:51:05.831Z"
+      "coreHash": "0043c29652275a9c37b335c0f8611d690d40f4109be1066b4c98af31bebebd8f",
+      "appliedHash": "0043c29652275a9c37b335c0f8611d690d40f4109be1066b4c98af31bebebd8f",
+      "lastSyncedAt": "2026-07-16T22:16:04.369Z"
     },
     "src/config/features.json": {
       "owner": "core",
@@ -1053,9 +1053,9 @@
     },
     "src/layouts/AdminLayout.jsx": {
       "owner": "core",
-      "coreHash": "ecaa838023df90b919c8af082b1ca090345d0ccb7802811a08e34319764ea479",
-      "appliedHash": "ecaa838023df90b919c8af082b1ca090345d0ccb7802811a08e34319764ea479",
-      "lastSyncedAt": "2026-07-13T17:43:54.031Z"
+      "coreHash": "9026b3e4ffe9cb6c3b891bbe0211de2f971e4da4fefdb51f117ce42b757cbbcd",
+      "appliedHash": "9026b3e4ffe9cb6c3b891bbe0211de2f971e4da4fefdb51f117ce42b757cbbcd",
+      "lastSyncedAt": "2026-07-16T19:24:00.943Z"
     },
     "src/main.jsx": {
       "owner": "core",
@@ -1149,21 +1149,21 @@
     },
     "src/features/customer-loyalty/api/CustomerLoyaltyRepository.js": {
       "owner": "core",
-      "coreHash": "1df3d797ff3218663b00cd056034e401d2bf4fcf4a6358b739acb1ddc6692ead",
-      "appliedHash": "1df3d797ff3218663b00cd056034e401d2bf4fcf4a6358b739acb1ddc6692ead",
-      "lastSyncedAt": "2026-07-13T17:43:53.911Z"
+      "coreHash": "940a84c40db76ad94fba14ec7b6456cf32691ddd422627ddd17cfab0d2589629",
+      "appliedHash": "940a84c40db76ad94fba14ec7b6456cf32691ddd422627ddd17cfab0d2589629",
+      "lastSyncedAt": "2026-07-16T03:48:53.311Z"
     },
     "src/features/customer-loyalty/components/AdminCustomerLoyalty.jsx": {
       "owner": "core",
-      "coreHash": "0bd3545dc7ee7be0072a9fee4d4f6a31b473896bc80dd27e06d08e4f4d84bf8e",
-      "appliedHash": "0bd3545dc7ee7be0072a9fee4d4f6a31b473896bc80dd27e06d08e4f4d84bf8e",
-      "lastSyncedAt": "2026-07-13T17:43:53.915Z"
+      "coreHash": "c4b94a963e14b33b827ea4a8f24b4151a121ebeda320f6627be62689d09bc2f3",
+      "appliedHash": "c4b94a963e14b33b827ea4a8f24b4151a121ebeda320f6627be62689d09bc2f3",
+      "lastSyncedAt": "2026-07-16T16:18:01.544Z"
     },
     "src/features/customer-loyalty/components/AdminView.jsx": {
       "owner": "core",
-      "coreHash": "11b45cb66013bfe01e22d66137cf519e039ba5a69a74b4b974e7885b1539d903",
-      "appliedHash": "11b45cb66013bfe01e22d66137cf519e039ba5a69a74b4b974e7885b1539d903",
-      "lastSyncedAt": "2026-07-13T17:43:53.919Z"
+      "coreHash": "6f056febe94999e4a4512fd10b3f14fb529db5f35d58f1e3e4edd0a8d71f224a",
+      "appliedHash": "6f056febe94999e4a4512fd10b3f14fb529db5f35d58f1e3e4edd0a8d71f224a",
+      "lastSyncedAt": "2026-07-16T16:18:01.587Z"
     },
     "src/features/customer-loyalty/components/ClientCustomerLoyalty.jsx": {
       "owner": "core",
@@ -1173,9 +1173,9 @@
     },
     "src/features/customer-loyalty/components/ClientView.jsx": {
       "owner": "core",
-      "coreHash": "54c91cb8362913a6c5861bf8e3858624d55f34907d15c26be98edd7d7cda2af2",
-      "appliedHash": "54c91cb8362913a6c5861bf8e3858624d55f34907d15c26be98edd7d7cda2af2",
-      "lastSyncedAt": "2026-07-13T17:43:53.928Z"
+      "coreHash": "a47f67fb0f158fa7989a5699d031973bcc32a54aaef83403b81b6b0ae7a6ac57",
+      "appliedHash": "a47f67fb0f158fa7989a5699d031973bcc32a54aaef83403b81b6b0ae7a6ac57",
+      "lastSyncedAt": "2026-07-16T16:18:01.629Z"
     },
     "src/features/customer-loyalty/constants/index.js": {
       "owner": "core",
@@ -1185,9 +1185,9 @@
     },
     "src/features/customer-loyalty/hooks/useCustomerLoyalty.js": {
       "owner": "core",
-      "coreHash": "cf4e624a78769acca3cd9c29f804002ff33fc49187b25f32cbe5f3272ff69090",
-      "appliedHash": "cf4e624a78769acca3cd9c29f804002ff33fc49187b25f32cbe5f3272ff69090",
-      "lastSyncedAt": "2026-07-13T17:43:53.937Z"
+      "coreHash": "165383dd2d67a98e6cd342d1a8137e60ab42c3d890e80247b0e404e58e255922",
+      "appliedHash": "165383dd2d67a98e6cd342d1a8137e60ab42c3d890e80247b0e404e58e255922",
+      "lastSyncedAt": "2026-07-16T03:48:53.339Z"
     },
     "src/features/customer-loyalty/implementation.manifest.json": {
       "owner": "core",
@@ -1197,9 +1197,9 @@
     },
     "src/features/customer-loyalty/index.js": {
       "owner": "core",
-      "coreHash": "b1be2f30adcb73ff60362e0ded4c0fcfa2f9cdaabec0324bc6e540530072d0f8",
-      "appliedHash": "b1be2f30adcb73ff60362e0ded4c0fcfa2f9cdaabec0324bc6e540530072d0f8",
-      "lastSyncedAt": "2026-07-13T17:43:53.945Z"
+      "coreHash": "358edc00f7594380238fb3b84e368218243d81e4e0e453d9ee8fba721f383e14",
+      "appliedHash": "358edc00f7594380238fb3b84e368218243d81e4e0e453d9ee8fba721f383e14",
+      "lastSyncedAt": "2026-07-16T03:48:53.411Z"
     },
     "src/features/customer-loyalty/module.js": {
       "owner": "core",
@@ -1227,9 +1227,9 @@
     },
     "src/features/customer-loyalty/services/CustomerLoyaltyService.js": {
       "owner": "core",
-      "coreHash": "9b8b85eee85f1f5157a7456f0e8e0eafdd4fbb5f7cd97054ab427cf7ce8e1066",
-      "appliedHash": "9b8b85eee85f1f5157a7456f0e8e0eafdd4fbb5f7cd97054ab427cf7ce8e1066",
-      "lastSyncedAt": "2026-07-13T17:43:53.968Z"
+      "coreHash": "83eac13f727e3439908664b90e4794ffdf0180b5249ef4a00b7377a6cff0c021",
+      "appliedHash": "83eac13f727e3439908664b90e4794ffdf0180b5249ef4a00b7377a6cff0c021",
+      "lastSyncedAt": "2026-07-16T03:48:53.485Z"
     },
     "src/features/hello-module/api/HelloModuleRepository.js": {
       "owner": "core",
@@ -1245,9 +1245,9 @@
     },
     "src/features/hello-module/components/ClientHelloModule.jsx": {
       "owner": "core",
-      "coreHash": "c2b7c3685c32b6dc1cd92365d1d255993c8a01a71ab6d4a2217091cee08d757b",
-      "appliedHash": "c2b7c3685c32b6dc1cd92365d1d255993c8a01a71ab6d4a2217091cee08d757b",
-      "lastSyncedAt": "2026-07-13T17:43:53.982Z"
+      "coreHash": "649511cc488a73a0b12113f04376e3e6ccf38e55eb88e3fc29bba139eb279020",
+      "appliedHash": "649511cc488a73a0b12113f04376e3e6ccf38e55eb88e3fc29bba139eb279020",
+      "lastSyncedAt": "2026-07-16T16:18:01.671Z"
     },
     "src/features/hello-module/constants/index.js": {
       "owner": "core",
@@ -1314,6 +1314,318 @@
       "coreHash": "90796610e3f95384776481c297602fd3da8af7a09ecc1ee8222d36617a7f0cdc",
       "appliedHash": "90796610e3f95384776481c297602fd3da8af7a09ecc1ee8222d36617a7f0cdc",
       "lastSyncedAt": "2026-07-13T17:43:54.069Z"
+    },
+    "firebase-debug.log": {
+      "owner": "core",
+      "coreHash": "252e02b06698240e1ae608c1ed57274e5d04f5c6a58f06a429f67d02339c843a",
+      "appliedHash": "252e02b06698240e1ae608c1ed57274e5d04f5c6a58f06a429f67d02339c843a",
+      "lastSyncedAt": "2026-07-16T21:15:16.028Z"
+    },
+    "firestore-debug.log": {
+      "owner": "core",
+      "coreHash": "2409a890b7e8eaa1e351ca80151f13ed89499e7fad4129ca8ffad32064f50242",
+      "appliedHash": "2409a890b7e8eaa1e351ca80151f13ed89499e7fad4129ca8ffad32064f50242",
+      "lastSyncedAt": "2026-07-16T22:16:05.442Z"
+    },
+    "src/features/billing/api/BillingRepository.js": {
+      "owner": "core",
+      "coreHash": "ef5df03475e1e135745fb64be4b3385e3618b2be736c0f0a8c999c31f8aa9663",
+      "appliedHash": "ef5df03475e1e135745fb64be4b3385e3618b2be736c0f0a8c999c31f8aa9663",
+      "lastSyncedAt": "2026-07-16T03:48:53.104Z"
+    },
+    "src/features/credits/api/CreditRepository.js": {
+      "owner": "core",
+      "coreHash": "5a33ed08d43544d990c198a79d2d484f952ce434729fd5a1185ce98e18523d4c",
+      "appliedHash": "5a33ed08d43544d990c198a79d2d484f952ce434729fd5a1185ce98e18523d4c",
+      "lastSyncedAt": "2026-07-16T03:48:53.207Z"
+    },
+    "src/features/inventory/api/InventoryRepository.js": {
+      "owner": "core",
+      "coreHash": "bdc490f96e720ba278537b4a3e75a46e00b7af29ac477485c05725df0700c039",
+      "appliedHash": "bdc490f96e720ba278537b4a3e75a46e00b7af29ac477485c05725df0700c039",
+      "lastSyncedAt": "2026-07-16T03:48:53.536Z"
+    },
+    "src/features/orders/api/OrderRepository.js": {
+      "owner": "core",
+      "coreHash": "ff694c7e146bf8ac0e932b23100f47db5843f0f398c4e4f48a024ee3d416d6bd",
+      "appliedHash": "ff694c7e146bf8ac0e932b23100f47db5843f0f398c4e4f48a024ee3d416d6bd",
+      "lastSyncedAt": "2026-07-16T03:48:53.648Z"
+    },
+    "src/features/sales/api/SalesRepository.js": {
+      "owner": "core",
+      "coreHash": "b14fb814cc798f77b0e2557b46a1be7b7d1e1f16d25544621f961ab74c638b57",
+      "appliedHash": "b14fb814cc798f77b0e2557b46a1be7b7d1e1f16d25544621f961ab74c638b57",
+      "lastSyncedAt": "2026-07-16T03:48:53.749Z"
+    },
+    "src/hooks/useAuthInit.js": {
+      "owner": "core",
+      "coreHash": "0629d96d56ab55017d526eeb5507d29ba92609c89f222f86867c27c45ac3fbaa",
+      "appliedHash": "0629d96d56ab55017d526eeb5507d29ba92609c89f222f86867c27c45ac3fbaa",
+      "lastSyncedAt": "2026-07-16T03:48:53.853Z"
+    },
+    "src/pages/LoginPage.jsx": {
+      "owner": "core",
+      "coreHash": "e469d5e4be801f001a8629f80ca6ab233e116b76edce502af99314a526f7a757",
+      "appliedHash": "e469d5e4be801f001a8629f80ca6ab233e116b76edce502af99314a526f7a757",
+      "lastSyncedAt": "2026-07-16T14:53:39.395Z"
+    },
+    "src/services/employeeService.js": {
+      "owner": "core",
+      "coreHash": "652d65c99289541ee50c4a94a56c2ae396781561512ed3a0dc40b39edb85f19f",
+      "appliedHash": "652d65c99289541ee50c4a94a56c2ae396781561512ed3a0dc40b39edb85f19f",
+      "lastSyncedAt": "2026-07-16T03:48:54.035Z"
+    },
+    "src/services/userService.js": {
+      "owner": "core",
+      "coreHash": "aa079c9622a6cf75bad7c90535f2b87d6dbd7cdacd9ccbaaacb1ddb0a2a1bedf",
+      "appliedHash": "aa079c9622a6cf75bad7c90535f2b87d6dbd7cdacd9ccbaaacb1ddb0a2a1bedf",
+      "lastSyncedAt": "2026-07-16T03:48:54.096Z"
+    },
+    "tests/unit/customerLoyaltyRepository.spec.js": {
+      "owner": "core",
+      "coreHash": "89da8560bc72f798ef3e6d578c02fbf821a620e636be587ef0257fccfe413b62",
+      "appliedHash": "89da8560bc72f798ef3e6d578c02fbf821a620e636be587ef0257fccfe413b62",
+      "lastSyncedAt": "2026-07-16T03:48:54.210Z"
+    },
+    "tests/unit/customerLoyaltyService.spec.js": {
+      "owner": "core",
+      "coreHash": "e95af5fa90daa22975de4fa529dd6bb6bd8fca61c1b6bea02acaa78832117e0f",
+      "appliedHash": "e95af5fa90daa22975de4fa529dd6bb6bd8fca61c1b6bea02acaa78832117e0f",
+      "lastSyncedAt": "2026-07-16T03:48:54.267Z"
+    },
+    "tests/unit/employeeAuthEmulator.spec.js": {
+      "owner": "core",
+      "coreHash": "a2367148682d223f88cfee520f741008332ae495c1f90294c50c5287a5f77561",
+      "appliedHash": "a2367148682d223f88cfee520f741008332ae495c1f90294c50c5287a5f77561",
+      "lastSyncedAt": "2026-07-16T19:24:01.389Z"
+    },
+    "tests/unit/employeePinLogin.spec.js": {
+      "owner": "core",
+      "coreHash": "151c023850d8ccd71f3bd5192d56587a233b7df58be8fa9ff54fb468132abe1d",
+      "appliedHash": "151c023850d8ccd71f3bd5192d56587a233b7df58be8fa9ff54fb468132abe1d",
+      "lastSyncedAt": "2026-07-16T19:24:01.437Z"
+    },
+    "tests/unit/firestoreRules.spec.js": {
+      "owner": "core",
+      "coreHash": "159bee01295b4be0a282d8247a43b8e55019cf6fb0ef927467a7936974b2a92c",
+      "appliedHash": "159bee01295b4be0a282d8247a43b8e55019cf6fb0ef927467a7936974b2a92c",
+      "lastSyncedAt": "2026-07-16T19:24:01.485Z"
+    },
+    "src/components/common/NotificationHistoryTray.jsx": {
+      "owner": "core",
+      "coreHash": "b97a83b1b451559789fd7c04627dc4b11fdc8a24af783e032b391dec42121817",
+      "appliedHash": "b97a83b1b451559789fd7c04627dc4b11fdc8a24af783e032b391dec42121817",
+      "lastSyncedAt": "2026-07-16T14:53:39.314Z"
+    },
+    "src/components/client/catalog/ProductCard.jsx": {
+      "owner": "core",
+      "coreHash": "8bf423e761774d023c4d73f766e484ad84a5d46c3480137507294fdd433b6453",
+      "appliedHash": "8bf423e761774d023c4d73f766e484ad84a5d46c3480137507294fdd433b6453",
+      "lastSyncedAt": "2026-07-16T16:18:01.341Z"
+    },
+    "src/components/client/catalog/WholesaleRequestModal.jsx": {
+      "owner": "core",
+      "coreHash": "899bd377653cb09e8bbfd17ba1b34e18314b3c3d12804a717ba7c6949d692452",
+      "appliedHash": "899bd377653cb09e8bbfd17ba1b34e18314b3c3d12804a717ba7c6949d692452",
+      "lastSyncedAt": "2026-07-16T16:18:01.421Z"
+    },
+    "src/components/common/MobileBottomNav.jsx": {
+      "owner": "core",
+      "coreHash": "89621400cc87c12e97021a92cdf1bc7317c2cb5a70318789429c4a32d5253f3f",
+      "appliedHash": "89621400cc87c12e97021a92cdf1bc7317c2cb5a70318789429c4a32d5253f3f",
+      "lastSyncedAt": "2026-07-16T19:24:00.678Z"
+    },
+    "src/components/ui/NumberInput.jsx": {
+      "owner": "core",
+      "coreHash": "bef55456e14900b04ab1b5d9551266c7427b9f89183b1010a9235aebc5fcc4ec",
+      "appliedHash": "bef55456e14900b04ab1b5d9551266c7427b9f89183b1010a9235aebc5fcc4ec",
+      "lastSyncedAt": "2026-07-16T16:18:01.502Z"
+    },
+    "src/pages/admin/AdminNotificationAnalytics.jsx": {
+      "owner": "core",
+      "coreHash": "eac59537309172f03e761ebe1cdb46efe357debdb957525beafb2177a7726744",
+      "appliedHash": "eac59537309172f03e761ebe1cdb46efe357debdb957525beafb2177a7726744",
+      "lastSyncedAt": "2026-07-16T16:18:01.878Z"
+    },
+    "src/pages/admin/settings/sections/AdSettings.jsx": {
+      "owner": "core",
+      "coreHash": "c881dadcd6e7e82c739969412dfb68b175bc91f314840172ec5df46c2a0524cd",
+      "appliedHash": "c881dadcd6e7e82c739969412dfb68b175bc91f314840172ec5df46c2a0524cd",
+      "lastSyncedAt": "2026-07-16T16:18:02.007Z"
+    },
+    "src/pages/admin/settings/sections/CouponSettings.jsx": {
+      "owner": "core",
+      "coreHash": "cbc1ca19cac0aed8e37125ab8af74c9b6957b1f7b15b2e91d0ab832f589f9e2e",
+      "appliedHash": "cbc1ca19cac0aed8e37125ab8af74c9b6957b1f7b15b2e91d0ab832f589f9e2e",
+      "lastSyncedAt": "2026-07-16T16:18:02.048Z"
+    },
+    "src/pages/admin/settings/sections/EmployeeSettings.jsx": {
+      "owner": "core",
+      "coreHash": "1de569ed0bda257ea49cdbfbe3431fb16c06455668d2fe0857e133e3301978bf",
+      "appliedHash": "1de569ed0bda257ea49cdbfbe3431fb16c06455668d2fe0857e133e3301978bf",
+      "lastSyncedAt": "2026-07-16T16:18:02.134Z"
+    },
+    "src/components/common/HeaderBackground.jsx": {
+      "owner": "core",
+      "coreHash": "8a56070d6e567adf60e568d197dacdd41a95a236966b0813bc8a0d86d44be6fe",
+      "appliedHash": "8a56070d6e567adf60e568d197dacdd41a95a236966b0813bc8a0d86d44be6fe",
+      "lastSyncedAt": "2026-07-16T19:24:00.641Z"
+    },
+    "src/store/adminHomeStatsStore.js": {
+      "owner": "core",
+      "coreHash": "4cb42293aaede498ca2f04f838fe9baaae75322c454c9e2bd857e457ba8bfd6e",
+      "appliedHash": "4cb42293aaede498ca2f04f838fe9baaae75322c454c9e2bd857e457ba8bfd6e",
+      "lastSyncedAt": "2026-07-16T19:24:01.347Z"
+    },
+    "src/pages/admin/settings/sections/AppearanceSettings.jsx": {
+      "owner": "core",
+      "coreHash": "38af5c3c80216f0521a240fc66a3b705ef75f674252fef5292290cbc15e8244b",
+      "appliedHash": "38af5c3c80216f0521a240fc66a3b705ef75f674252fef5292290cbc15e8244b",
+      "lastSyncedAt": "2026-07-16T21:15:16.194Z"
+    },
+    "src/pages/admin/settings/sections/StoreSettings.jsx": {
+      "owner": "core",
+      "coreHash": "db987a5c92c043996f21055cc5568b81853a859960a16e112f028774927d93af",
+      "appliedHash": "db987a5c92c043996f21055cc5568b81853a859960a16e112f028774927d93af",
+      "lastSyncedAt": "2026-07-16T21:15:16.317Z"
+    },
+    "coverage/core/generated/core-manifest.generated.json.html": {
+      "owner": "core",
+      "coreHash": "e8de100210727d692d822987a35591d864d0cfa3dc9230312c1567fc6fcf78f3",
+      "appliedHash": "e8de100210727d692d822987a35591d864d0cfa3dc9230312c1567fc6fcf78f3",
+      "lastSyncedAt": "2026-07-16T22:16:02.625Z"
+    },
+    "coverage/core/generated/index.html": {
+      "owner": "core",
+      "coreHash": "7e7ca0e860230f413a88b59858b98636c8039bb2603920a55be18d05a50c2c18",
+      "appliedHash": "7e7ca0e860230f413a88b59858b98636c8039bb2603920a55be18d05a50c2c18",
+      "lastSyncedAt": "2026-07-16T22:16:02.671Z"
+    },
+    "coverage/features/billing/api/BillingRepository.js.html": {
+      "owner": "core",
+      "coreHash": "4b9e1b190318b252c5b08c2dfa9be94d484a14700de87fb33cd5d8c28ae6fe9e",
+      "appliedHash": "4b9e1b190318b252c5b08c2dfa9be94d484a14700de87fb33cd5d8c28ae6fe9e",
+      "lastSyncedAt": "2026-07-16T22:16:02.749Z"
+    },
+    "coverage/features/billing/api/index.html": {
+      "owner": "core",
+      "coreHash": "3f8518a2159ec60872d9641afd6f37146c262506ff5cb51b14e7c8d7a441f00b",
+      "appliedHash": "3f8518a2159ec60872d9641afd6f37146c262506ff5cb51b14e7c8d7a441f00b",
+      "lastSyncedAt": "2026-07-16T22:16:02.793Z"
+    },
+    "coverage/features/credits/api/CreditRepository.js.html": {
+      "owner": "core",
+      "coreHash": "9a808d4eba1e8dcd67503b110f9ebc86d0ef44de9a19e5d2c67c04cea1c5ff85",
+      "appliedHash": "9a808d4eba1e8dcd67503b110f9ebc86d0ef44de9a19e5d2c67c04cea1c5ff85",
+      "lastSyncedAt": "2026-07-16T22:16:03.105Z"
+    },
+    "coverage/features/credits/api/index.html": {
+      "owner": "core",
+      "coreHash": "3c004a4c157e4ae88734f1481d86cd38790f97e34003c877064d66e7b1276eeb",
+      "appliedHash": "3c004a4c157e4ae88734f1481d86cd38790f97e34003c877064d66e7b1276eeb",
+      "lastSyncedAt": "2026-07-16T22:16:03.152Z"
+    },
+    "coverage/features/customer-loyalty/api/CustomerLoyaltyRepository.js.html": {
+      "owner": "core",
+      "coreHash": "59810905ec97eaefc2ac329b5b3003373c85e831ef77bf12544770814801e5d8",
+      "appliedHash": "59810905ec97eaefc2ac329b5b3003373c85e831ef77bf12544770814801e5d8",
+      "lastSyncedAt": "2026-07-16T22:16:03.285Z"
+    },
+    "coverage/features/customer-loyalty/api/index.html": {
+      "owner": "core",
+      "coreHash": "0e1792f5f53cac3464879fbc16d129c1db19d9edae6fce95cbbbc50be8075645",
+      "appliedHash": "0e1792f5f53cac3464879fbc16d129c1db19d9edae6fce95cbbbc50be8075645",
+      "lastSyncedAt": "2026-07-16T22:16:03.329Z"
+    },
+    "coverage/features/customer-loyalty/schemas/CustomerLoyaltySchemas.js.html": {
+      "owner": "core",
+      "coreHash": "3ac93d0d9cde3b0428640711c81b32eb1cb4e2c548e5af68943cd1527f9b183a",
+      "appliedHash": "3ac93d0d9cde3b0428640711c81b32eb1cb4e2c548e5af68943cd1527f9b183a",
+      "lastSyncedAt": "2026-07-16T22:16:03.373Z"
+    },
+    "coverage/features/customer-loyalty/schemas/index.html": {
+      "owner": "core",
+      "coreHash": "9486fee8f527e167c3e0c1770a3fcb004df71c57f00cb3c62d6343196b32c12a",
+      "appliedHash": "9486fee8f527e167c3e0c1770a3fcb004df71c57f00cb3c62d6343196b32c12a",
+      "lastSyncedAt": "2026-07-16T22:16:03.417Z"
+    },
+    "coverage/features/customer-loyalty/services/CustomerLoyaltyService.js.html": {
+      "owner": "core",
+      "coreHash": "14bbee4829f2cc1b02b38551b8bec38a1e744d71d4e6e39dfc3f47b6753435c1",
+      "appliedHash": "14bbee4829f2cc1b02b38551b8bec38a1e744d71d4e6e39dfc3f47b6753435c1",
+      "lastSyncedAt": "2026-07-16T22:16:03.460Z"
+    },
+    "coverage/features/customer-loyalty/services/index.html": {
+      "owner": "core",
+      "coreHash": "594c9e704de4396ed25de34ab39f2045c258eb8c5e181a3680bca0c6a6b2143f",
+      "appliedHash": "594c9e704de4396ed25de34ab39f2045c258eb8c5e181a3680bca0c6a6b2143f",
+      "lastSyncedAt": "2026-07-16T22:16:03.506Z"
+    },
+    "coverage/features/inventory/api/InventoryRepository.js.html": {
+      "owner": "core",
+      "coreHash": "967ed92e4ccf2d9bb8b77860cdf10b2a183d905ebed1bd194f125deaf2babae7",
+      "appliedHash": "967ed92e4ccf2d9bb8b77860cdf10b2a183d905ebed1bd194f125deaf2babae7",
+      "lastSyncedAt": "2026-07-16T22:16:03.553Z"
+    },
+    "coverage/features/inventory/api/index.html": {
+      "owner": "core",
+      "coreHash": "449477a5009986b77458dc683e635ce1a03217af8c414e24e7d170d6ebf4471a",
+      "appliedHash": "449477a5009986b77458dc683e635ce1a03217af8c414e24e7d170d6ebf4471a",
+      "lastSyncedAt": "2026-07-16T22:16:03.597Z"
+    },
+    "coverage/features/inventory/services/inventoryInterface.js.html": {
+      "owner": "core",
+      "coreHash": "a814bba12bada6bcf9bbf264f5e6404f24b9b61f59fad3dacf9333fdd78a9096",
+      "appliedHash": "a814bba12bada6bcf9bbf264f5e6404f24b9b61f59fad3dacf9333fdd78a9096",
+      "lastSyncedAt": "2026-07-16T22:16:03.695Z"
+    },
+    "coverage/features/orders/api/OrderRepository.js.html": {
+      "owner": "core",
+      "coreHash": "09392bde4ef7bc0c0dfe6bd40efbd79d8b78f2cab9e488e89f2ef350a9a1e189",
+      "appliedHash": "09392bde4ef7bc0c0dfe6bd40efbd79d8b78f2cab9e488e89f2ef350a9a1e189",
+      "lastSyncedAt": "2026-07-16T22:16:03.789Z"
+    },
+    "coverage/features/orders/api/index.html": {
+      "owner": "core",
+      "coreHash": "304ba4e51309d82c3d3ba35bfd3168ed6dad2e4ed0e3cb3ce2f1d87d32e4b5a5",
+      "appliedHash": "304ba4e51309d82c3d3ba35bfd3168ed6dad2e4ed0e3cb3ce2f1d87d32e4b5a5",
+      "lastSyncedAt": "2026-07-16T22:16:03.834Z"
+    },
+    "coverage/features/sales/api/SalesRepository.js.html": {
+      "owner": "core",
+      "coreHash": "b4ba5deb7a134df40ee84d972cfdfa3c1e4d02bd59875130c3cf57d9eff7fd4b",
+      "appliedHash": "b4ba5deb7a134df40ee84d972cfdfa3c1e4d02bd59875130c3cf57d9eff7fd4b",
+      "lastSyncedAt": "2026-07-16T22:16:04.242Z"
+    },
+    "coverage/features/sales/api/index.html": {
+      "owner": "core",
+      "coreHash": "32fc6fc0461c331500e47e96708e71dbb0c20940e24e1fb5c79b77bdcad2a52d",
+      "appliedHash": "32fc6fc0461c331500e47e96708e71dbb0c20940e24e1fb5c79b77bdcad2a52d",
+      "lastSyncedAt": "2026-07-16T22:16:04.281Z"
+    },
+    "coverage/services/employeeAuthService.js.html": {
+      "owner": "core",
+      "coreHash": "986f6b619fa6c3f1283a76712e0fdc07c71f896190ff5f96f8042de23722aa1e",
+      "appliedHash": "986f6b619fa6c3f1283a76712e0fdc07c71f896190ff5f96f8042de23722aa1e",
+      "lastSyncedAt": "2026-07-16T22:16:04.709Z"
+    },
+    "coverage/services/uploadService.js.html": {
+      "owner": "core",
+      "coreHash": "6428f7002b9678f8fa39a1625b1dcee575987ee94c0b9aa16739ddbf26f9dfc2",
+      "appliedHash": "6428f7002b9678f8fa39a1625b1dcee575987ee94c0b9aa16739ddbf26f9dfc2",
+      "lastSyncedAt": "2026-07-16T22:16:04.971Z"
+    },
+    "coverage/utils/featureManifestAdapter.js.html": {
+      "owner": "core",
+      "coreHash": "3f25e4c63f98b76d18dfc7ba85c706aa677d42b603f682b8a1d0883861c22a18",
+      "appliedHash": "3f25e4c63f98b76d18dfc7ba85c706aa677d42b603f682b8a1d0883861c22a18",
+      "lastSyncedAt": "2026-07-16T22:16:05.289Z"
+    },
+    "coverage/utils/imageCompression.js.html": {
+      "owner": "core",
+      "coreHash": "51a2c97d11bdc652c8ee8634faaa54eda4b3aaa84ac955afd28cc062e4352845",
+      "appliedHash": "51a2c97d11bdc652c8ee8634faaa54eda4b3aaa84ac955afd28cc062e4352845",
+      "lastSyncedAt": "2026-07-16T22:16:05.366Z"
     }
   },
   "featuresInstalled": {

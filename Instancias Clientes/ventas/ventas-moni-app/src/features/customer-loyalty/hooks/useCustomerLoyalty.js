@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { db } from '../../../config/firebaseConfig';
-import { doc, onSnapshot, collection, query, where, orderBy } from 'firebase/firestore';
 import { CustomerLoyaltyService } from '../services/CustomerLoyaltyService';
+import { CustomerLoyaltyRepository } from '../api/CustomerLoyaltyRepository';
 
 /**
  * Hook para interactuar reactivamente con la cuenta de fidelización y transacciones del cliente.
@@ -22,38 +21,32 @@ export function useCustomerLoyalty(tenantId, customerId) {
     setError(null);
 
     // 1. Suscripción en tiempo real a la cuenta de puntos
-    const accountRef = doc(db, `tenants/${tenantId}/loyaltyAccounts`, customerId);
-    const unsubAccount = onSnapshot(accountRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setAccount(docSnap.data());
-      } else {
-        // Inicializar de forma perezosa en background si no existe en BD
-        CustomerLoyaltyService.getOrInitializeAccount(tenantId, customerId)
-          .catch((err) => setError(err.message));
+    const unsubAccount = CustomerLoyaltyRepository.subscribeToAccount(
+      tenantId,
+      customerId,
+      (accountData) => {
+        if (accountData) {
+          setAccount(accountData);
+        } else {
+          // Inicializar de forma perezosa en background si no existe en BD
+          CustomerLoyaltyService.getOrInitializeAccount(tenantId, customerId)
+            .catch((err) => setError(err.message));
+        }
+        setLoading(false);
+      },
+      (err) => {
+        setError(err.message);
+        setLoading(false);
       }
-      setLoading(false);
-    }, (err) => {
-      setError(err.message);
-      setLoading(false);
-    });
-
-    // 2. Suscripción en tiempo real a las transacciones de puntos
-    const transactionsCol = collection(db, `tenants/${tenantId}/loyaltyTransactions`);
-    const q = query(
-      transactionsCol,
-      where('customerId', '==', customerId),
-      orderBy('createdAt', 'desc')
     );
 
-    const unsubTransactions = onSnapshot(q, (snap) => {
-      const txs = snap.docs.map(doc => ({
-        transactionId: doc.id,
-        ...doc.data()
-      }));
-      setTransactions(txs);
-    }, (err) => {
-      console.error("Error cargando historial de puntos:", err);
-    });
+    // 2. Suscripción en tiempo real a las transacciones de puntos
+    const unsubTransactions = CustomerLoyaltyRepository.subscribeToTransactions(
+      tenantId,
+      customerId,
+      (txs) => setTransactions(txs),
+      (err) => console.error('Error cargando historial de puntos:', err)
+    );
 
     return () => {
       unsubAccount();

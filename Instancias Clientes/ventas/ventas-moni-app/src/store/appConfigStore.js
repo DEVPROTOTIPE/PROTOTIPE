@@ -10,7 +10,9 @@ const normalizedFeatures = getNormalizedFeatures(manifest)
 
 // Helper para crear flags con sus defaults
 const createDefaultFeatureFlags = () => {
-  const flags = {};
+  const flags = {
+    couponsEnabled: true
+  };
   normalizedFeatures.forEach(feature => {
     const val = Boolean(feature.enabledByDefault);
     flags[feature.id] = val;
@@ -23,7 +25,7 @@ const createDefaultFeatureFlags = () => {
   return flags;
 };
 
-const knownFeatureIds = new Set();
+const knownFeatureIds = new Set(['couponsEnabled']);
 normalizedFeatures.forEach(feature => {
   knownFeatureIds.add(feature.id);
   if (Array.isArray(feature.legacyRemoteKeys)) {
@@ -80,6 +82,7 @@ const useAppConfigStore = create(
       pwaAppIcon: null,
       pwaUseBrandIcon: false,
       activeSeasonalEvent: getPersistedValue('activeSeasonalEvent', 'none'),
+      appearanceLockedByDashboard: getPersistedValue('appearanceLockedByDashboard', false),
       whatsappAdmin: '',
       claimsEnabled: false,
       orderTrackingEnabled: true,
@@ -325,6 +328,7 @@ const useAppConfigStore = create(
         isDarkMode: state.isDarkMode,
         theme: state.theme,
         activeSeasonalEvent: state.activeSeasonalEvent,
+        appearanceLockedByDashboard: state.appearanceLockedByDashboard,
         appFont: state.appFont,
         appRadius: state.appRadius,
         actionColor: state.actionColor,

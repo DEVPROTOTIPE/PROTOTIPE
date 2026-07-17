@@ -109,7 +109,7 @@ describe('salesService - createPhysicalOrder (Venta POS)', () => {
     };
 
     await expect(createPhysicalOrder(orderData, 'admin123'))
-      .rejects.toThrow('Stock insuficiente para "Zapato"');
+      .rejects.toThrow('Stock insuficiente para "Zapato (38)"');
   });
 
   test('Registra el pedido como completado si hay stock e incrementa salesCount', async () => {

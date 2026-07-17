@@ -19,7 +19,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 
 $rootDir = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
 if (-not $rootDir -or -not (Test-Path $rootDir)) {
-    $rootDir = "D:\PROTOTIPE"
+    throw "No se pudo resolver la raíz de PROTOTIPE desde la ubicación del script."
 }
 Set-Location -Path $rootDir
 

@@ -142,7 +142,7 @@ export default function AdminSalesDetail() {
       className="p-4 md:p-8 w-full flex flex-col gap-6"
     >
       {/* Botón de retroceso y Título */}
-      <div className="flex items-center gap-3">
+      <div className="hidden md:flex items-center gap-3">
         <BackButton to="/admin/inicio" />
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-app">Análisis de Ventas</h1>
@@ -205,7 +205,7 @@ export default function AdminSalesDetail() {
         
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-[10px] font-bold text-muted uppercase tracking-widest block mb-1.5">Desde</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-widest flex items-end h-8 mb-2 leading-tight">Desde</label>
             <CustomDatePicker
               value={dateFrom}
               onChange={e => {
@@ -216,7 +216,7 @@ export default function AdminSalesDetail() {
             />
           </div>
           <div>
-            <label className="text-[10px] font-bold text-muted uppercase tracking-widest block mb-1.5">Hasta</label>
+            <label className="text-[10px] font-bold text-muted uppercase tracking-widest flex items-end h-8 mb-2 leading-tight">Hasta</label>
             <CustomDatePicker
               value={dateTo}
               onChange={e => {

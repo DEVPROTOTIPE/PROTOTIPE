@@ -977,7 +977,7 @@ export default function AdminSettings() {
     <div className="admin-page-container min-h-screen pb-16 bg-surface text-app">
       <div className="w-full px-4 sm:px-6 lg:px-8 pt-6 text-left">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
             <BackButton fallback="/admin" />
             <div>
               <h1 className="text-xl font-black text-app">Ajustes</h1>

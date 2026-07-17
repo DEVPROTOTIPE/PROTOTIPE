@@ -376,7 +376,7 @@ export default function App() {
   useAuthInit()
   // SEC-014: sesión anónima real para el área de cliente (vinculación por dispositivo)
   useAnonAuthInit()
-  
+
   // Sincronización global Firestore <-> Zustand en tiempo real
   useAppConfigSync()
 

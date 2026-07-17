@@ -423,9 +423,10 @@ export default function CouponSettings({
                     </label>
                     <input
                       type="number"
+                      inputmode="decimal"
                       value={couponFormData.value}
                       onChange={(e) => setCouponFormData(p => ({ ...p, value: e.target.value }))}
-                      className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary text-sm font-bold"
+                      className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       placeholder={couponFormData.type === 'percentage' ? 'Ej: 10' : 'Ej: 15000'}
                     />
                   </div>
@@ -434,9 +435,10 @@ export default function CouponSettings({
                     <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-2">Compra Mínima ($)</label>
                     <input
                       type="number"
+                      inputmode="decimal"
                       value={couponFormData.minPurchase}
                       onChange={(e) => setCouponFormData(p => ({ ...p, minPurchase: e.target.value }))}
-                      className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary text-sm font-bold"
+                      className="w-full h-11 px-4 rounded-xl bg-surface-2 border border-app text-app focus:outline-none focus:border-primary text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       placeholder="Ingresa información adicional (opcional)"
                     />
                   </div>

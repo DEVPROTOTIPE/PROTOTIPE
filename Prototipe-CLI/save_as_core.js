@@ -1,14 +1,15 @@
 import fs from 'fs-extra'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { getWorkspaceRoot } from './config.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 // Rutas base
 const CLI_ROOT = __dirname
-const BASE_APPS_DIR = 'D:/PROTOTIPE/Instancias Clientes'
-const PLANTILLAS_CORE_DIR = 'D:/PROTOTIPE/Plantillas Core'
+const BASE_APPS_DIR = getWorkspaceRoot()
+const PLANTILLAS_CORE_DIR = path.join(path.dirname(BASE_APPS_DIR), 'Plantillas Core')
 const TEMPLATES_DIR = path.join(CLI_ROOT, 'templates')
 
 /**

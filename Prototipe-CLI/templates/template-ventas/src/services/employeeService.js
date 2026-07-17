@@ -179,3 +179,4 @@ export function subscribeToEmployeesByRole(rol, callback) {
     console.warn(`[employeeService] Error en la suscripción a empleados por rol (${rol}):`, error.message)
   })
 }
+

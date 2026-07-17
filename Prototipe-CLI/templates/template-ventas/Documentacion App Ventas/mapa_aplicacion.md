@@ -50,6 +50,13 @@ Estructura física y lógica de los archivos clave en la plantilla base de Venta
 - `src/services/userService.js`: Gestión de usuarios/clientes con soporte delta incremental a través de `getClientsUpdatedSince`.
 - `src/services/notificationCenterService.js`: Distribuidor centralizado de alertas en tiempo real y sonido para vendedores, bodegueros y mensajeros.
 
+## Apariencia (Paleta/Temporada) y Control Remoto desde el CRM
+- `src/store/appConfigStore.js`: campo `appearanceLockedByDashboard` (persistido) — indica si el CRM central es la fuente de verdad de `theme`/`activeSeasonalEvent` para esta instancia.
+- `src/hooks/useAppConfigSync.js`: el listener central (`clientes_control/{clientId}` en Firestore Central) propaga `appearanceControlledByDashboard` / `dashboardTheme` / `dashboardSeasonalEvent` hacia `theme` / `activeSeasonalEvent` / `appearanceLockedByDashboard` locales, reutilizando el mismo mecanismo de sincronización de billing/flags. `dashboardTheme` puede ser un ID de paleta (string) o un objeto plano `{primary, secondary, accent}` (colores HSL convertidos a hex desde el CRM).
+- `src/pages/admin/settings/sections/AppearanceSettings.jsx` / `StoreSettings.jsx`: cuando `appearanceLockedByDashboard` es `true`, la selección local de tema/temporada queda deshabilitada con aviso "Configurado desde el dashboard".
+- `src/services/appConfigService.js`: `subscribeToAppConfig` ya no resetea la configuración a `DEFAULT_SETTINGS` ante un error transitorio del listener (solo cuando Firestore confirma que el documento no existe).
+- Contraparte en el Dashboard: `Central PROTOTIPE/dev-dashboard/src/components/admin/ClientLifecyclePanel.jsx` (sección "Paleta y Temporada" + sliders HSL de Branding) y `Central PROTOTIPE/dev-dashboard/src/constants/paletteCatalog.js` (catálogo espejo de 100 paletas + 10 eventos de temporada, IDs deben coincidir con `constants/palettes.js`).
+
 ## Colecciones de Base de Datos y Modelo de Seguridad (FASE 1)
 - `orders`: Almacenamiento privado de pedidos completos con PII (nombres, teléfonos, direcciones completas). Restringido únicamente a administradores.
 - `order_tracking`: Colección pública de seguimiento de pedidos (sin PII sensible). Indexada por `trackingToken` (SHA-256 hash). Accesible de forma pública mediante get directo para `/pedido/status`.

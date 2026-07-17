@@ -142,7 +142,7 @@ export default function ProductCard({ product, onOpenDetail, layout = 'grid' }) 
     <motion.div
       whileHover={{ y: -6, scale: 1.01 }}
       transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-      className={`bg-surface overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] transition-all duration-500 cursor-pointer border border-neutral-100 dark:border-neutral-800/80 group ${
+      className={`bg-surface overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-500 cursor-pointer group ${
         layout === 'list' ? 'flex flex-row h-32' : 'flex flex-col h-full'
       } ${isOutOfStock ? 'opacity-70' : ''}`}
       style={{

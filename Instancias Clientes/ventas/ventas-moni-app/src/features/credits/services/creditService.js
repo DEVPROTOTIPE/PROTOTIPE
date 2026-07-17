@@ -1,21 +1,9 @@
-import {
-  collection,
-  doc,
-  getDocs,
-  query,
-  where,
-  serverTimestamp,
-  orderBy,
-  runTransaction,
-  onSnapshot,
-  limit,
-  startAfter
-} from 'firebase/firestore'
-import { db } from '../../../config/firebaseConfig'
-import { COLLECTIONS } from '../../../constants'
+import { CreditRepository } from '../api/CreditRepository'
 import { createCentralNotification, NC_TYPES, subscribeToAdminNotifications } from '../../../services/notificationCenterService'
 
-const creditsRef = collection(db, COLLECTIONS.CREDITS)
+function sortByCreatedAtDesc(credits) {
+  return credits.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0))
+}
 
 /**
  * Obtener todos los créditos filtrados por estado.
@@ -23,11 +11,8 @@ const creditsRef = collection(db, COLLECTIONS.CREDITS)
  * @returns {Promise<Array<object>>} Listado de créditos ordenados por fecha de creación descendente.
  */
 export async function getCredits(estado = 'activo') {
-  const q = query(creditsRef, where('estado', '==', estado))
-  const snap = await getDocs(q)
-  
-  const credits = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  return credits.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0))
+  const credits = await CreditRepository.getAll(estado)
+  return sortByCreatedAtDesc(credits)
 }
 
 /**
@@ -37,11 +22,8 @@ export async function getCredits(estado = 'activo') {
  */
 export async function getClientCredits(celular) {
   if (!celular) return []
-  const q = query(creditsRef, where('cliente.celular', '==', celular))
-  const snap = await getDocs(q)
-  
-  const credits = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  return credits.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0))
+  const credits = await CreditRepository.getByClientPhone(celular)
+  return sortByCreatedAtDesc(credits)
 }
 
 /**
@@ -55,45 +37,34 @@ export async function getClientCredits(celular) {
  * @returns {Promise<void>}
  */
 export async function addPaymentToCredit(creditId, paymentData) {
-  const creditRef = doc(db, COLLECTIONS.CREDITS, creditId)
-  let creditData = null
-
-  await runTransaction(db, async (transaction) => {
-    const creditDoc = await transaction.get(creditRef)
-    if (!creditDoc.exists()) throw new Error('Crédito no encontrado')
-    
-    const data = creditDoc.data()
-    creditData = data
-    
-    if (data.estado === 'pagado') {
+  const creditData = await CreditRepository.runPaymentTransaction(creditId, (current, { serverTimestamp }) => {
+    if (current.estado === 'pagado') {
       throw new Error('Esta deuda ya se encuentra totalmente pagada.')
     }
-    
+
     const nuevoAbono = {
       monto: paymentData.monto,
       nota: paymentData.nota || '',
       fecha: new Date().toISOString(),
     }
 
-    const nuevosAbonos = [...(data.abonos || []), nuevoAbono]
-    const currentSaldo = data.saldoPendiente !== undefined ? data.saldoPendiente : (data.saldoPending !== undefined ? data.saldoPending : data.montoTotal)
+    const nuevosAbonos = [...(current.abonos || []), nuevoAbono]
+    const currentSaldo = current.saldoPendiente !== undefined ? current.saldoPendiente : (current.saldoPending !== undefined ? current.saldoPending : current.montoTotal)
     const nuevoSaldo = Math.max(0, currentSaldo - paymentData.monto)
     const nuevoEstado = nuevoSaldo === 0 ? 'pagado' : 'activo'
 
-    transaction.update(creditRef, {
+    const updatedCredit = {
       abonos: nuevosAbonos,
       saldoPendiente: nuevoSaldo,
       estado: nuevoEstado,
       updatedAt: serverTimestamp()
-    })
-
-    if (nuevoSaldo === 0 && data.orderId) {
-      const orderRef = doc(db, COLLECTIONS.ORDERS, data.orderId)
-      transaction.update(orderRef, {
-        estado: 'completado',
-        updatedAt: serverTimestamp()
-      })
     }
+
+    const orderUpdate = (nuevoSaldo === 0 && current.orderId)
+      ? { orderId: current.orderId, data: { estado: 'completado', updatedAt: serverTimestamp() } }
+      : null
+
+    return { updatedCredit, orderUpdate }
   })
 
   // Notificaciones
@@ -129,11 +100,8 @@ export async function addPaymentToCredit(creditId, paymentData) {
  * @returns {function} Función para cancelar la suscripción.
  */
 export function subscribeToCredits(estado = 'activo', onUpdate) {
-  const q = query(creditsRef, where('estado', '==', estado))
-  return onSnapshot(q, (snap) => {
-    const credits = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-    const sorted = credits.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0))
-    onUpdate(sorted)
+  return CreditRepository.subscribeToAll(estado, (credits) => {
+    onUpdate(sortByCreatedAtDesc(credits))
   }, (error) => {
     console.error('[creditService] Error al escuchar créditos activos:', error)
     onUpdate([])
@@ -151,11 +119,8 @@ export function subscribeToClientCredits(celular, onUpdate) {
     onUpdate([])
     return () => {}
   }
-  const q = query(creditsRef, where('cliente.celular', '==', celular))
-  return onSnapshot(q, (snap) => {
-    const credits = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-    const sorted = credits.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0))
-    onUpdate(sorted)
+  return CreditRepository.subscribeToClientCredits(celular, (credits) => {
+    onUpdate(sortByCreatedAtDesc(credits))
   }, (error) => {
     console.error('[creditService] Error al escuchar créditos del cliente:', error)
     onUpdate([])
@@ -164,34 +129,19 @@ export function subscribeToClientCredits(celular, onUpdate) {
 
 /**
  * Obtener créditos paginados para el panel de administración.
+ *
+ * Nota (comportamiento preservado, no modificado en esta migración): el
+ * cursor `startAfterDoc`/`lastDoc` es un `QueryDocumentSnapshot` de Firestore
+ * que el llamador (fuera de esta feature) guarda y reenvía tal cual para
+ * pedir la siguiente página. Es infraestructura de Firestore cruzando hacia
+ * el consumidor; ya era así antes de esta migración y no se rediseña aquí.
  * @param {string} [estado='activo'] - Estado de créditos.
  * @param {number} [limitSize=10] - Cantidad de documentos por página.
  * @param {object} [startAfterDoc=null] - Documento Firestore de corte para paginación.
  * @returns {Promise<{ credits: Array<object>, lastDoc: object|null, hasNextPage: boolean }>}
  */
 export async function getCreditsPaged(estado = 'activo', limitSize = 10, startAfterDoc = null) {
-  const constraints = [
-    where('estado', '==', estado),
-    orderBy('createdAt', 'desc'),
-    limit(limitSize + 1)
-  ]
-  
-  if (startAfterDoc) {
-    constraints.push(startAfter(startAfterDoc))
-  }
-  
-  const q = query(creditsRef, ...constraints)
-  const snap = await getDocs(q)
-  
-  const docs = snap.docs
-  const hasNextPage = docs.length > limitSize
-  const creditsToShow = hasNextPage ? docs.slice(0, limitSize) : docs
-  
-  return {
-    credits: creditsToShow.map(doc => ({ id: doc.id, ...doc.data() })),
-    lastDoc: creditsToShow[creditsToShow.length - 1] || null,
-    hasNextPage
-  }
+  return CreditRepository.getAllPaged(estado, limitSize, startAfterDoc)
 }
 
 /**

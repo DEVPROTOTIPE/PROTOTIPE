@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import crypto from 'crypto';
+import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { CorePromotionService } from './CorePromotionService.js';
 import { PromotionBlueprintBuilder } from './PromotionBlueprintBuilder.js';
@@ -110,6 +111,20 @@ export class CorePromotionPublisher {
 
       // Copiar staging a Plantillas Core/App [Nombre]
       fs.copySync(blueprint.stagingPath, targetTemplatesCoreDir);
+
+      // Inicializar Git local en el nuevo Core (best-effort, no bloquea la
+      // publicación si falla — mismo patrón que generator.js setupGitHub).
+      // El repositorio remoto de GitHub se crea después, en activate().
+      if (!fs.existsSync(path.join(targetTemplatesCoreDir, '.git'))) {
+        try {
+          execSync('git init', { cwd: targetTemplatesCoreDir, stdio: 'ignore' });
+          execSync('git add .', { cwd: targetTemplatesCoreDir, stdio: 'ignore' });
+          execSync('git commit -m "feat: scaffolding inicial del Core promovido"', { cwd: targetTemplatesCoreDir, stdio: 'ignore' });
+          console.log(`[CorePromotionPublisher] Repositorio Git local inicializado en ${targetTemplatesCoreDir}`);
+        } catch (gitErr) {
+          console.warn(`[CorePromotionPublisher] No se pudo inicializar Git localmente: ${gitErr.message}. Continuando.`);
+        }
+      }
 
       step1.status = 'COMPLETED';
       step1.completedAt = new Date().toISOString();
@@ -425,6 +440,34 @@ export class CorePromotionPublisher {
 
       // Liberar el lock de promoción
       CorePromotionService.releaseLock(blueprint.targetCoreKey);
+
+      // Crear repositorio de GitHub para el Core recién activado, si aún no
+      // tiene uno (best-effort, no revierte la activación si falla — mismo
+      // patrón que el Caso B de generator.js/setupGitHub). Convención de
+      // nombre: prototipe-core-<targetCoreKey> (arquitectura_git.md §6.3).
+      try {
+        let hasRemote = false;
+        try {
+          execSync('git remote get-url origin', { cwd: sourceTemplatesCoreDir, stdio: 'ignore' });
+          hasRemote = true;
+        } catch (_) {
+          hasRemote = false;
+        }
+
+        if (!hasRemote) {
+          const repoName = `prototipe-core-${blueprint.targetCoreKey}`;
+          console.log(`[CorePromotionPublisher] Creando repositorio GitHub para el Core: ${repoName}...`);
+          execSync(`gh repo create ${repoName} --private --source=. --push`, { cwd: sourceTemplatesCoreDir, stdio: 'ignore' });
+
+          // Crear y subir la rama develop (convención de Cores: main + develop)
+          execSync('git checkout -b develop', { cwd: sourceTemplatesCoreDir, stdio: 'ignore' });
+          execSync('git push -u origin develop --no-verify', { cwd: sourceTemplatesCoreDir, stdio: 'ignore' });
+
+          console.log(`[CorePromotionPublisher] Repositorio GitHub creado y subido con éxito: https://github.com/DEVPROTOTIPE/${repoName} (ramas main + develop).`);
+        }
+      } catch (ghErr) {
+        console.warn(`[CorePromotionPublisher] No se pudo crear/subir el repositorio GitHub del Core automáticamente: ${ghErr.message}. Asegúrate de tener 'gh' CLI logueado y créalo manualmente si hace falta.`);
+      }
 
       console.log(`[CorePromotionPublisher] Core '${blueprint.targetCoreKey}' activado v${nextVersion} con éxito.`);
 

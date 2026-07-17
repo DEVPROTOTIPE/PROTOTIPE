@@ -2,12 +2,21 @@ import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import Ajv from 'ajv';
+import { isValidCanonicalBlueprintSemver, isValidCanonicalHsl } from '../lib/BlueprintFormats.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const CLI_ROOT = path.join(__dirname, '..');
 
 const ajv = new Ajv({ allErrors: true });
+ajv.addFormat('blueprint-semver', {
+  type: 'string',
+  validate: isValidCanonicalBlueprintSemver
+});
+ajv.addFormat('hsl-color', {
+  type: 'string',
+  validate: isValidCanonicalHsl
+});
 
 async function loadSchema(schemaName) {
   const schemaPath = path.join(CLI_ROOT, 'knowledge', 'schema', schemaName);

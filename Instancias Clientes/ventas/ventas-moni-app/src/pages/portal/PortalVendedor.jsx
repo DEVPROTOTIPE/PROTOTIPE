@@ -589,9 +589,9 @@ export default function PortalVendedor() {
               <input className="portal-input" placeholder="Detalles / Descripción (opcional)" value={customItem.descripcion}
                 onChange={e => setCustomItem(p => ({ ...p, descripcion: e.target.value }))} />
               <div className="portal-custom-row">
-                <input className="portal-input" type="number" placeholder="Precio" value={customItem.precio}
+                <input className="portal-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" type="number" placeholder="Precio" value={customItem.precio}
                   onChange={e => setCustomItem(p => ({ ...p, precio: e.target.value }))} />
-                <input className="portal-input" type="number" placeholder="Cantidad" value={customItem.cantidad}
+                <input className="portal-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" type="number" placeholder="Cantidad" value={customItem.cantidad}
                   onChange={e => setCustomItem(p => ({ ...p, cantidad: e.target.value }))} />
               </div>
               <button className="portal-custom-add-btn" onClick={addCustom}><Plus size={16} /> Agregar al carrito</button>

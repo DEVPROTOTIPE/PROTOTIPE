@@ -2,19 +2,12 @@
   "blueprintVersion": "1.0.0",
   "instanceId": "crm-inmobiliario-pro",
   "clientName": "CRM Inmobiliario Pro",
+  "coreType": "core-seed",
   "vertical": "crm",
-  "capabilities": ["sales-pipeline", "billing-invoicing"],
   "features": ["crm", "billing"],
   "patterns": ["pattern-kanban-workspace", "pattern-search-details"],
   "components": [],
-  "experience": {
-    "layout": "sidebar",
-    "density": "comfortable",
-    "themeMode": "dark-detect",
-    "typography": "Roboto"
-  },
   "branding": {
-    "paletteChoice": "ocean",
-    "initials": "CIP"
+    "paletteChoice": "violet"
   }
 }

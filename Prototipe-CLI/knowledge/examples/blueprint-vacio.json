@@ -2,19 +2,14 @@
   "blueprintVersion": "1.0.0",
   "instanceId": "base-vacia-seed",
   "clientName": "Base Vacía Seed",
+  "coreType": "core-seed",
   "vertical": "vacio",
-  "capabilities": [],
   "features": [],
   "patterns": [],
   "components": [],
-  "experience": {
-    "layout": "sidebar",
-    "density": "comfortable",
-    "themeMode": "light",
-    "typography": "Outfit"
-  },
   "branding": {
-    "paletteChoice": "slate",
-    "initials": "BVS"
+    "paletteChoice": "custom",
+    "primaryColor": "hsl(215, 16%, 47%)",
+    "secondaryColor": "hsl(215, 20%, 65%)"
   }
 }

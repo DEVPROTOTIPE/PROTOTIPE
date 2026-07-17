@@ -21,10 +21,8 @@ import { getFirestore as getAdminFirestore } from 'firebase-admin/firestore';
 
 const PROJECT_ID = 'test-prototipe-rules';
 
-// Puertos dedicados de esta instancia (firebase.json), aislados de los
-// 8080/9099 por defecto que usan Core/template-ventas en paralelo.
-process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8085';
-process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9195';
+process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
+process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
 
 let clientApp;
 let clientAuth;
@@ -40,9 +38,9 @@ beforeAll(() => {
 
   clientApp = initializeApp({ apiKey: 'fake-api-key', projectId: PROJECT_ID }, 'client-employee-auth-test');
   clientAuth = getAuth(clientApp);
-  connectAuthEmulator(clientAuth, 'http://127.0.0.1:9195', { disableWarnings: true });
+  connectAuthEmulator(clientAuth, 'http://127.0.0.1:9099', { disableWarnings: true });
   clientDb = getFirestore(clientApp);
-  connectFirestoreEmulator(clientDb, '127.0.0.1', 8085);
+  connectFirestoreEmulator(clientDb, '127.0.0.1', 8080);
 });
 
 afterAll(async () => {

@@ -11,7 +11,8 @@ if ! command -v node >/dev/null 2>&1; then
   exit 0
 fi
 
-SCRIPT_PATH="D:/PROTOTIPE/Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/verify_ecosystem_integrity.js"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+SCRIPT_PATH="$REPO_ROOT/Documentacion PROTOTIPE/04_Estandares_y_Skills/Copia_Seguridad_Reglas_y_Skills/verify_ecosystem_integrity.js"
 
 if [ ! -f "$SCRIPT_PATH" ]; then
   echo "⚠️  [Git Hook] Advertencia: No se encontró el script central de integridad. Omitiendo."

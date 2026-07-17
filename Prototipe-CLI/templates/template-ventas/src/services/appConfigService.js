@@ -129,7 +129,12 @@ export function subscribeToAppConfig(onUpdate) {
     if (error && (error.code === 'resource-exhausted' || String(error.message || '').toLowerCase().includes('quota') || String(error.message || '').toLowerCase().includes('resource-exhausted'))) {
       window.dispatchEvent(new Event('firestore-quota-exceeded'))
     }
-    onUpdate(DEFAULT_SETTINGS)
+    // No pisar la configuración ya cargada (nombre, paleta, etc.) con los valores
+    // de fábrica ante un error transitorio (token refrescando, red inestable). Un
+    // error del listener no significa que el documento esté vacío: Firestore ya
+    // distingue eso en la rama de arriba (snap.exists() === false). Sobreescribir
+    // aquí con DEFAULT_SETTINGS pisaba localStorage con datos genéricos y hacía
+    // parecer que la tienda "perdió" su nombre/tema configurados.
   })
 }
 

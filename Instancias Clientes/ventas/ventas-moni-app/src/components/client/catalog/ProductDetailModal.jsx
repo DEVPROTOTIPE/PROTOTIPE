@@ -295,7 +295,7 @@ export default function ProductDetailModal({ product, isOpen, onClose }) {
         )}
 
         {/* Imagen del producto con Galería Avanzada */}
-        <div className="relative w-full h-64 sm:h-80 bg-surface-2 rounded-2xl overflow-hidden shrink-0 border border-app group">
+        <div className="relative w-full h-64 sm:h-80 bg-surface-2 rounded-2xl overflow-hidden shrink-0 group">
           {activeImages.length > 0 ? (
             <>
               <AnimatePresence mode="wait">

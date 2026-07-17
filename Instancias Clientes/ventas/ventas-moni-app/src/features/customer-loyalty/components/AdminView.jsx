@@ -3,8 +3,16 @@ import { useCustomerLoyalty } from '../hooks/useCustomerLoyalty';
 import { Award, Search, ArrowUpRight, ArrowDownLeft, Plus, Minus, Settings, CheckCircle } from 'lucide-react';
 import useAuthStore from '../../../store/authStore';
 
-export default function AdminView({ tenantId: propTenantId }) {
-  const { user } = useAuthStore();
+export default function AdminView(props) {
+  const { user, role } = useAuthStore();
+  const isAdmin = role === 'admin';
+
+  if (!isAdmin || !user) return null;
+
+  return <AdminViewContent {...props} user={user} />;
+}
+
+function AdminViewContent({ tenantId: propTenantId, user }) {
   const tenantId = propTenantId || user?.tenantId || 'demo';
   const [searchCustomerId, setSearchCustomerId] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -152,12 +160,12 @@ export default function AdminView({ tenantId: propTenantId }) {
                         }`}>
                           {tx.type === 'EARN' ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownLeft className="w-4 h-4" />}
                         </div>
-                        <div>
-                          <span className="font-bold text-[var(--color-text)] block leading-tight">
+                        <div className="min-w-0">
+                          <span className="font-bold text-[var(--color-text)] block leading-tight truncate">
                             {tx.type === 'EARN' ? 'Acumulación por Venta' :
                              tx.type === 'REDEEM' ? 'Canje de Recompensa' : 'Ajuste de Saldo'}
                           </span>
-                          <span className="text-xxs text-[var(--color-text-muted)]">
+                          <span className="text-xxs text-[var(--color-text-muted)] block truncate">
                             {new Date(tx.createdAt).toLocaleString()}
                           </span>
                         </div>
@@ -187,10 +195,11 @@ export default function AdminView({ tenantId: propTenantId }) {
                   <label className="text-xs text-[var(--color-text-muted)]">Monto de Venta ($)</label>
                   <input 
                     type="number"
+                    inputmode="decimal"
                     value={saleAmount}
                     onChange={(e) => setSaleAmount(e.target.value)}
                     placeholder="Monto total compra..."
-                    className="w-full px-3 py-2 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-xl text-sm outline-none"
+                    className="w-full px-3 py-2 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-xl text-sm outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <button 
@@ -213,10 +222,11 @@ export default function AdminView({ tenantId: propTenantId }) {
                   <label className="text-xs text-[var(--color-text-muted)]">Puntos a deducir</label>
                   <input 
                     type="number"
+                    inputmode="numeric"
                     value={pointsToRedeem}
                     onChange={(e) => setPointsToRedeem(e.target.value)}
                     placeholder="Mínimo 500 pts..."
-                    className="w-full px-3 py-2 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-xl text-sm outline-none"
+                    className="w-full px-3 py-2 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-xl text-sm outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <button 

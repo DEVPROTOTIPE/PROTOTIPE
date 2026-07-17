@@ -3,6 +3,31 @@
 ```yaml
 # INDEXADOR DE ARQUITECTURA FÍSICA PROTOTIPE (Ahorro de Tokens)
 app_layout:
+  Runtime_Governance:
+    node: 22.23.0
+    npm: 10.9.8
+    portable_runtime: D:/PROTOTIPE_TOOLS/node-v22.23.0-win-x64/
+    declarations: [.nvmrc, .node-version, .npmrc, package.json#engines, package.json#packageManager]
+    verification: verify-runtime.mjs
+    status: CORE-341_VERIFIED_COMPLETE
+  Baseline_Pre_Claude:
+    document: /Documentacion PROTOTIPE/00_Continuidad/BASELINE_ANTES_DE_CLAUDE_2026-07-14.md
+    status: CORE-342_VERIFIED_COMPLETE
+    canonical_root: D:/PROTOTIPE/
+    validation_clones_root: D:/PROTOTIPE_WORKSPACE/
+    integral_build: VERIFIED_GREEN_READ_ONLY
+  AI_Governance:
+    task: CLAUDE-003_VERIFIED_COMPLETE
+    contract: /.agents/AI_WORKFLOW.md
+    legacy_reference: /.agents/AGENTS.md
+    capability_registry: /.agents/capabilities/registry.json
+    canonical_skills: /.agents/skills/
+    claude_adapters: /.claude/skills/
+    path_rules: /.claude/rules/
+    selection: MINIMUM_CAPABILITY_SET
+    writers: ONE_PER_PHYSICAL_WORKTREE
+    external_installation: HUMAN_APPROVAL_AFTER_AUDIT
+    automatic_install_or_update: false
   Dashboard_Central:
     root: /Central PROTOTIPE/dev-dashboard/src/
     components: [components/admin/BrandingEffectsPanel.jsx, components/admin/ClientLifecyclePanel.jsx, components/admin/FeatureFlagManager.jsx, components/admin/VersionManagerView.jsx, components/admin/SaaSOperationsView.jsx, components/admin/BriefingStudioView.jsx, components/admin/FeatureMarketplaceView.jsx, components/admin/ComponentLibraryView.jsx, components/admin/ComponentSandbox.jsx, components/admin/ProvisioningProgressModal.jsx, components/admin/FirebaseAccountsModal.jsx, components/admin/ProvisioningQueueModal.jsx, components/ui/, components/common/]
@@ -27,6 +52,7 @@ app_layout:
 Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e integraciones con Firebase de **App Ventas**. Debe mantenerse actualizado ante cualquier creación, eliminación o refactorización de archivos.
 
 ## 📂 Estructura de Documentación y Negocio
+* **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/traspasos/TRASPASO_CORE-358_2026-07-15.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-358).
 * **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Paginas/Pantalla_Bienvenida/welcome_page.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-366).
 * **`/Documentacion PROTOTIPE/06_Biblioteca_Componentes/Fidelizacion_y_Gamificacion/Tarjeta_Rasca_Gana/scratch_card_reward.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-366).
 * **`/Documentacion PROTOTIPE/03_Auditorias_y_Faro_Core/estado_arquitectura_post_fase9_3.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CLI-367).
@@ -529,7 +555,13 @@ Este mapa detalla de manera estructurada los módulos, vistas, flujos de datos e
 * **`/Central PROTOTIPE/dev-dashboard/scripts/verify_library_integrity.cjs`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-258).
 * **`/Central PROTOTIPE/dev-dashboard/src/App.jsx`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-260).
 * **`/Central PROTOTIPE/dev-dashboard/src/components/admin/ProvisioningProgressModal.jsx`**: Modal modular premium interactivo para monitorear el estado y progreso del aprovisionamiento local en tiempo real. [NEW] CLI-436.
-* **`/.agents/AGENTS.md`**: Auto-registrado mediante diagnóstico de Roadmap (Tarea CORE-265).
+* **`/.agents/AGENTS.md`**: Reducido a índice que enlaza al contrato general y las reglas específicas por ruta. [MODIFY] CORE-348.
+* **`/.claude/rules/00-prohibiciones-globales.md`**: Reglas globales del proyecto (prohibición de restore y protocolo post-change corregido). [NEW] CORE-348.
+* **`/.claude/rules/task-tracking.md`**: Protocolo obligatorio de rastreo, formato y registro híbrido de tareas en el roadmap. [NEW] CORE-348.
+* **`/.claude/rules/dashboard-ui.md`**: Reglas y estándares de interfaz de usuario, tags y modularización del Dashboard Central. [NEW] CORE-348.
+* **`/.claude/rules/component-library.md`**: Estándares transversales de UI, usabilidad responsiva y Design Integrity Guard. [NEW] CORE-348.
+* **`/.claude/rules/colaboracion-componentes.md`**: Flujo de colaboración `@colaborar` y toma de decisiones de componentes. [NEW] CORE-348.
+* **`/.claude/rules/firebase-architecture.md`**: Estándares de arquitectura en 3 capas, offline, resiliencia y gobernanza/seguridad Firebase. [NEW] CORE-348.
 
 ### 👥 Módulo Cliente (Tienda PWA)
 * **`/src/layouts/ClientLayout.jsx`**: Layout raíz del flujo del cliente. Gestiona la barra de navegación, el banner dinámico de anuncios, el carrito lateral y el modal de cupones.

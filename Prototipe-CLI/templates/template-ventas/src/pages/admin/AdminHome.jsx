@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   LayoutDashboard, TrendingUp, DollarSign, AlertTriangle,
-  Package, ShoppingBag, CreditCard, Settings, ChevronRight,
-  BarChart3, Banknote, ArrowRight, X, Wallet, Percent, QrCode, Megaphone, Loader2
+  Package, ShoppingBag, CreditCard, ChevronRight,
+  BarChart3, Banknote, ArrowRight, Wallet, Percent, QrCode, Megaphone, Loader2
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useOrders } from '../../features/orders'
@@ -16,18 +16,17 @@ import useAuthStore from '../../store/authStore'
 import useAppConfigStore from '../../store/appConfigStore'
 import { useEffect } from 'react'
 import { getTrackingMetrics } from '../../services/trackingAnalyticsService'
+import { useAdminHomeStatsStore } from '../../store/adminHomeStatsStore'
 
 export default function AdminHome() {
   const { user, isLoading: isAuthLoading } = useAuthStore()
-  const { sellerName, appIcon, appName, creditsEnabled } = useAppConfigStore()
+  const { creditsEnabled } = useAppConfigStore()
   const navigate = useNavigate()
   const { data: orders = [] } = useOrders()
   const { data: credits = [] } = useCredits('activo')
   const { data: products = [] } = useProducts()
   const { metrics: billingMetrics, isLoading: billingLoading } = useBilling()
   const [showBillingModal, setShowBillingModal] = useState(false)
-  const [isBursting, setIsBursting] = useState(false)
-  const [showCommandCenter, setShowCommandCenter] = useState(false)
 
   // Estados para telemetría de conversión de seguimiento
   const [trackingMetrics, setTrackingMetrics] = useState(null)
@@ -123,6 +122,19 @@ export default function AdminHome() {
     }
   }, [orders, credits, products, creditsEnabled])
 
+  // Publica un recorte de estas métricas al store compartido, para que los
+  // chips del encabezado (AdminLayout.jsx, solo en Inicio) puedan mostrarlas
+  // sin abrir sus propios listeners de Firestore duplicados.
+  useEffect(() => {
+    useAdminHomeStatsStore.getState().setAdminHomeStats({
+      ventasHoy: metricas.cajaTotal,
+      pedidosPendientes: metricas.pedidosPendientes,
+      stockBajoCount: metricas.stockBajo.length,
+      fiado: metricas.fiado,
+      creditsEnabled
+    })
+  }, [metricas, creditsEnabled])
+
   // ─── CÁLCULO DE PRODUCTOS MÁS VENDIDOS (TENDENCIAS) ───────────────────────
   const topProducts = useMemo(() => {
     const completedOrders = orders.filter(o => o.estado === ORDER_STATES.COMPLETED)
@@ -189,153 +201,13 @@ export default function AdminHome() {
         .pulse-red-alert { animation: pulse-red 2.2s infinite ease-in-out !important; }
       `}} />
 
-      {/* Cabecera Semicircular Full-Bleed (Estilo Banner Curvo) */}
-      <div className="relative -mx-4 -mt-4 mb-12 md:-mx-8 md:-mt-8 z-10">
-        {/* Banner de Fondo con Degradado de Marca */}
-        <div 
-          className="relative text-white pt-8 pb-14 px-6 text-center shadow-lg rounded-b-[40%_25px] md:rounded-b-[50%_40px] flex flex-col items-center justify-center min-h-[180px] md:min-h-[220px] backdrop-blur-lg"
-          style={{
-            background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 90%, transparent), color-mix(in srgb, color-mix(in srgb, var(--color-primary) 55%, var(--color-accent)) 85%, transparent))'
-          }}
-        >
-          {/* Orbes de luz decorativos GPU-accelerated dinámicos (adaptados a la paleta activa) */}
-          <div className="absolute top-0 left-0 w-full h-full overflow-hidden rounded-b-[40%_25px] md:rounded-b-[50%_40px] pointer-events-none">
-            {/* Orbe 1: Mezcla Luminosa con Luz Primaria */}
-            <motion.div 
-              className="absolute -left-20 -top-20 w-80 h-80 rounded-full blur-3xl opacity-30"
-              style={{
-                background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary-light) 50%, white) 0%, transparent 70%)',
-                willChange: 'transform'
-              }}
-              animate={{
-                x: [0, 25, 0],
-                y: [0, -15, 0]
-              }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-            {/* Orbe 2: Mezcla Viva con Acento del Tema */}
-            <motion.div 
-              className="absolute -right-20 -bottom-20 w-80 h-80 rounded-full blur-3xl opacity-35"
-              style={{
-                background: 'radial-gradient(circle, color-mix(in srgb, var(--color-primary) 30%, var(--color-accent)) 0%, transparent 75%)',
-                willChange: 'transform'
-              }}
-              animate={{
-                x: [0, -20, 0],
-                y: [0, 20, 0]
-              }}
-              transition={{
-                duration: 10,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-          </div>
-
-          <div className="relative z-10 max-w-xl flex flex-col items-center gap-2">
-            {/* Tag de Estado */}
-            <span className="text-[9px] font-bold uppercase tracking-widest bg-white/10 border border-white/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success"></span>
-              </span>
-              Panel de Control
-            </span>
- 
-            {/* Saludo Principal con color adaptativo de acento en el nombre del vendedor */}
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight mt-1 leading-tight text-white">
-              {(() => {
-                const hour = new Date().getHours()
-                if (hour < 12) return 'Buenos días'
-                if (hour < 18) return 'Buenas tardes'
-                return 'Buenas noches'
-              })()}, <span className="text-[var(--color-primary-light)] font-black" style={{ textShadow: '0 2px 14px rgba(0,0,0,0.35)' }}>{sellerName || 'Mónica Henao'}</span>
-            </h1>
- 
-            {/* Línea divisoria fina */}
-            <div className="w-24 h-[1px] bg-white/30 my-1" />
- 
-            {/* Fecha y Subtexto */}
-            <p className="text-xs text-white/80 font-medium tracking-wide uppercase">
-              {new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}
-            </p>
-            <p className="text-[10px] md:text-xs text-white/70 italic mt-0.5">
-              "Resumen de operaciones y estado comercial del comercio"
-            </p>
-          </div>
- 
-          {/* Avatar / Inicial circular overlapping en el centro inferior con aura de resplandor adaptada al tema */}
-          <div 
-            className="absolute bottom-0 translate-y-1/2 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
-            style={{
-              filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.15)) drop-shadow(0 0 10px var(--color-accent))'
-            }}
-          >
-            {appIcon ? (
-              <div 
-                className="relative shrink-0 select-none pointer-events-auto cursor-pointer"
-                onClick={() => {
-                  setIsBursting(true)
-                  setTimeout(() => setIsBursting(false), 600)
-                  setShowCommandCenter(true)
-                }}
-              >
-                {/* Expansive rings (Onda de choque/glow burst) */}
-                {isBursting && (
-                  <motion.span
-                    initial={{ scale: 0.8, opacity: 0.8 }}
-                    animate={{ scale: 2.2, opacity: 0 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="absolute inset-0 rounded-full border-4 border-[var(--color-accent)] pointer-events-none z-10"
-                    style={{ boxShadow: '0 0 20px var(--color-accent), inset 0 0 20px var(--color-accent)' }}
-                  />
-                )}
-                <img 
-                  src={appIcon} 
-                  alt={appName || 'Logo'} 
-                  className="h-20 w-20 md:h-24 md:w-24 rounded-full object-contain border-4 border-surface bg-white p-0.5 shadow-md hover:scale-105 transition-transform duration-300 relative z-20"
-                />
-              </div>
-            ) : (
-              <div 
-                className="relative shrink-0 select-none pointer-events-auto cursor-pointer"
-                onClick={() => {
-                  setIsBursting(true)
-                  setTimeout(() => setIsBursting(false), 600)
-                  setShowCommandCenter(true)
-                }}
-              >
-                {/* Expansive rings (Onda de choque/glow burst) */}
-                {isBursting && (
-                  <motion.span
-                    initial={{ scale: 0.8, opacity: 0.8 }}
-                    animate={{ scale: 2.2, opacity: 0 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="absolute inset-0 rounded-full border-4 border-[var(--color-accent)] pointer-events-none z-10"
-                    style={{ boxShadow: '0 0 20px var(--color-accent), inset 0 0 20px var(--color-accent)' }}
-                  />
-                )}
-                <div 
-                  className="w-20 h-20 md:w-24 md:h-24 rounded-full text-white font-black text-3xl md:text-4xl flex items-center justify-center shadow-lg border-4 border-surface transform hover:scale-105 transition-transform duration-300 relative z-20"
-                  style={{ 
-                    background: 'linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 85%, #000000))'
-                  }}
-                >
-                  {(appName || 'V').charAt(0).toUpperCase()}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
+      {/* El saludo (antes una tarjeta deslizable aparte, con el logo duplicado
+          y una costura entre dos fondos animados) ahora vive dentro del
+          propio header de AdminLayout.jsx cuando la ruta es /admin/inicio —
+          un único elemento con curva, sin piezas que sincronizar. */}
 
       {/* ─── TARJETAS DE MÉTRICAS ──────────────────────────────────────────── */}
-      <div className={`grid grid-cols-2 ${creditsEnabled ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-3 md:gap-4 mb-8`}>
+      <div className={`hidden md:grid grid-cols-2 ${creditsEnabled ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-3 md:gap-4 mb-8`}>
 
         {/* Ventas */}
         <motion.div
@@ -437,7 +309,7 @@ export default function AdminHome() {
       </div>
 
       {/* ─── ACCESOS RÁPIDOS COMPLETO (Symmetrical horizontal grid) ────────── */}
-      <motion.div variants={itemVariants} className="mt-5">
+      <motion.div variants={itemVariants} className="mt-5 hidden md:block">
         <h2 className="text-[11px] font-black text-primary uppercase tracking-widest mb-3 flex items-center gap-1.5 opacity-80">
           🚀 Accesos Rápidos
         </h2>
@@ -684,120 +556,6 @@ export default function AdminHome() {
         </div>
       </motion.div>
     </motion.div>
-
-    {/* Centro de Mando Express (Glow Burst Menu) */}
-    <AnimatePresence>
-      {showCommandCenter && (
-        <>
-          {/* Fondo / Backdrop con hardware acceleration */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'linear' }}
-            onClick={() => setShowCommandCenter(false)}
-            className="fixed inset-0 bg-black/60 z-40 cursor-pointer will-change-opacity"
-          />
-
-          {/* Tarjeta de Atajos Rápidos con hardware acceleration */}
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0, y: 30 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 30 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-24 left-0 right-0 mx-auto z-50 w-[92%] max-w-sm bg-[var(--color-surface)]/95 border border-[var(--color-border)] rounded-3xl p-5 shadow-2xl flex flex-col gap-4 text-[var(--color-text)] will-change-transform"
-          >
-            {/* Cabecera */}
-            <div className="flex justify-between items-center border-b border-[var(--color-border)] pb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">⚡</span>
-                <div>
-                  <h4 className="font-bold text-sm text-[var(--color-text)]">Centro de Mando Express</h4>
-                  <p className="text-[10px] text-[var(--color-text-muted)]">Atajos de administración rápidos</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowCommandCenter(false)}
-                className="w-7 h-7 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
-              >
-                <X size={14} />
-              </button>
-            </div>
-
-            {/* Grid de Atajos Dinámico */}
-            {(() => {
-              const activeAtajos = [
-                {
-                  label: 'Registrar Pedido',
-                  desc: 'Admin Pedidos',
-                  icon: ShoppingBag,
-                  path: '/admin/pedidos',
-                  color: 'text-violet-500 bg-violet-500/10 border-violet-500/20'
-                },
-                creditsEnabled && {
-                  label: 'Ver Cartera',
-                  desc: 'Créditos y Fiados',
-                  icon: CreditCard,
-                  path: '/admin/credito',
-                  color: 'text-amber-500 bg-amber-500/10 border-amber-500/20'
-                },
-                {
-                  label: 'Inventario / Stock',
-                  desc: 'Control de Catálogo',
-                  icon: Package,
-                  path: '/admin/inventario',
-                  color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
-                },
-                {
-                  label: 'Ajustes Negocio',
-                  desc: 'Configuración',
-                  icon: Settings,
-                  path: '/admin/configuracion',
-                  color: 'text-sky-500 bg-sky-500/10 border-sky-500/20'
-                }
-              ].filter(Boolean)
-
-              return (
-                <div className={`grid gap-3 ${activeAtajos.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-                  {activeAtajos.map((item, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => {
-                        setShowCommandCenter(false)
-                        navigate(item.path)
-                      }}
-                      className="bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-3)] border border-[var(--color-border)] rounded-2xl p-4 flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all active:scale-95 hover:border-[var(--color-primary-light)]/40 group"
-                    >
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${item.color} group-hover:scale-110 transition-transform`}>
-                        <item.icon size={18} />
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[10px] font-bold leading-tight text-[var(--color-text)]">
-                          {item.label}
-                        </span>
-                        <span className="text-[8px] text-[var(--color-text-muted)] mt-0.5">
-                          {item.desc}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )
-            })()}
-
-            {/* Estado del sistema (Footer) */}
-            <div className="border-t border-[var(--color-border)] pt-3 flex justify-between items-center text-[8px] text-[var(--color-text-muted)] font-mono">
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Firestore Online</span>
-              </div>
-              <span>Sync PWA Activa</span>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
   </>
 )
 }

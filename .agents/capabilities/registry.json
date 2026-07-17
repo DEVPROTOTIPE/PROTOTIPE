@@ -1,0 +1,502 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-07-14",
+  "task": "CLAUDE-003",
+  "policy": {
+    "defaultAllowedStatuses": [
+      "INTERNAL_ACTIVE",
+      "INTERNAL_PILOT",
+      "AVAILABLE_NATIVE",
+      "APPROVED_GUARDED",
+      "REFERENCE_ON_DEMAND",
+      "DEPENDENCY_ON_DEMAND"
+    ],
+    "externalInstallation": "HUMAN_APPROVAL_AFTER_AUDIT",
+    "automaticInstall": false,
+    "automaticUpdate": false,
+    "globalInstall": false,
+    "selectionRule": "MINIMUM_CAPABILITY_SET",
+    "independentReviewFor": [
+      "security",
+      "architecture",
+      "data",
+      "billing",
+      "release"
+    ]
+  },
+  "capabilities": [
+    {
+      "id": "internal:bitacora-recorder",
+      "name": "bitacora-recorder",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/bitacora-recorder/SKILL.md",
+      "summary": "Registra un cambio técnico atómico y su evidencia en la bitácora.",
+      "tags": ["documentacion", "bitacora", "trazabilidad", "handoff"],
+      "triggers": ["documentar cambio", "registrar evidencia", "handoff", "bitacora"]
+    },
+    {
+      "id": "internal:briefing-analizador",
+      "name": "briefing-analizador",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/briefing-analizador/SKILL.md",
+      "summary": "Analiza briefings y extrae requisitos accionables.",
+      "tags": ["briefing", "requisitos", "discovery", "producto"]
+    },
+    {
+      "id": "internal:cli-log-streamer",
+      "name": "cli-log-streamer",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/cli-log-streamer/SKILL.md",
+      "summary": "Consulta logs del Bridge para diagnóstico local.",
+      "tags": ["cli", "bridge", "logs", "diagnostico"]
+    },
+    {
+      "id": "internal:component-creator",
+      "name": "component-creator",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/component-creator/SKILL.md",
+      "summary": "Crea, documenta y cataloga componentes reutilizables.",
+      "tags": ["react", "ui", "componente", "biblioteca"],
+      "triggers": ["crear componente", "nuevo componente", "componente reutilizable"],
+      "excludes": ["extraer componente", "portar componente", "migrar componente"]
+    },
+    {
+      "id": "internal:component-extractor",
+      "name": "component-extractor",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/component-extractor/SKILL.md",
+      "summary": "Extrae componentes generalizables hacia la biblioteca.",
+      "tags": ["react", "ui", "extraccion", "reutilizacion"],
+      "triggers": ["extraer componente", "generalizar componente"],
+      "excludes": ["crear componente", "portar componente"]
+    },
+    {
+      "id": "internal:cotizador-rapido",
+      "name": "cotizador-rapido",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/cotizador-rapido/SKILL.md",
+      "summary": "Apoya cotización y alcance comercial preliminar.",
+      "tags": ["negocio", "precio", "cotizacion", "alcance"]
+    },
+    {
+      "id": "internal:crear-skill-prototipe",
+      "name": "crear-skill-prototipe",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/crear-skill-prototipe/SKILL.md",
+      "summary": "Crea skills internas con auditoría de viabilidad y documentación.",
+      "tags": ["skill", "automatizacion", "claude", "agentes"]
+    },
+    {
+      "id": "internal:database-seeder",
+      "name": "database-seeder",
+      "kind": "skill",
+      "status": "INTERNAL_RESTRICTED",
+      "source": ".agents/skills/database-seeder/SKILL.md",
+      "summary": "Genera datos sintéticos de desarrollo con controles de esquema.",
+      "tags": ["firebase", "firestore", "datos", "testing"],
+      "triggers": ["datos sinteticos", "seed database", "poblar firestore"]
+    },
+    {
+      "id": "internal:developer-manual-builder",
+      "name": "developer-manual-builder",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/developer-manual-builder/SKILL.md",
+      "summary": "Crea manuales técnicos y actualiza el mapa documental.",
+      "tags": ["documentacion", "manual", "desarrollo", "mapa"]
+    },
+    {
+      "id": "internal:gemini-rules-sync",
+      "name": "gemini-rules-sync",
+      "kind": "skill",
+      "status": "INTERNAL_RESTRICTED",
+      "source": ".agents/skills/gemini-rules-sync/SKILL.md",
+      "summary": "Sincroniza reglas Gemini heredadas; requiere revisión antes de escribir.",
+      "tags": ["gemini", "antigravity", "reglas", "sincronizacion"],
+      "triggers": ["sincronizar reglas gemini", "alinear gemini md", "reglas antigravity"]
+    },
+    {
+      "id": "internal:git-strategist",
+      "name": "git-strategist",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/git-strategist/SKILL.md",
+      "summary": "Analiza estrategia Git sin conceder permisos de commit o push.",
+      "tags": ["git", "branch", "diff", "versionado"]
+    },
+    {
+      "id": "internal:integrity-compiler",
+      "name": "integrity-compiler",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/integrity-compiler/SKILL.md",
+      "summary": "Ejecuta validadores de integridad y build proporcional.",
+      "tags": ["build", "lint", "integridad", "validacion"]
+    },
+    {
+      "id": "internal:objection-handler",
+      "name": "objection-handler",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/objection-handler/SKILL.md",
+      "summary": "Estructura respuestas a objeciones comerciales.",
+      "tags": ["ventas", "negocio", "objeciones", "comercial"]
+    },
+    {
+      "id": "internal:onboarder-marcas",
+      "name": "onboarder-marcas",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/onboarder-marcas/SKILL.md",
+      "summary": "Guía incorporación de marca y configuración de cliente.",
+      "tags": ["onboarding", "marca", "cliente", "configuracion"]
+    },
+    {
+      "id": "internal:portar-componente",
+      "name": "portar-componente",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/portar-componente/SKILL.md",
+      "summary": "Porta componentes aprobados entre biblioteca, plantilla e instancia.",
+      "tags": ["react", "ui", "portabilidad", "componente"],
+      "triggers": ["portar componente", "migrar componente", "inyectar componente"],
+      "excludes": ["crear componente", "extraer componente"]
+    },
+    {
+      "id": "internal:post-discovery-analyzer",
+      "name": "post-discovery-analyzer",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/post-discovery-analyzer/SKILL.md",
+      "summary": "Convierte resultados de discovery en decisiones y tareas.",
+      "tags": ["discovery", "producto", "requisitos", "roadmap"]
+    },
+    {
+      "id": "internal:project-cleanup",
+      "name": "project-cleanup",
+      "kind": "skill",
+      "status": "INTERNAL_RESTRICTED",
+      "source": ".agents/skills/project-cleanup/SKILL.md",
+      "summary": "Propone limpieza limitada por lista blanca; toda eliminación requiere autorización.",
+      "tags": ["limpieza", "cache", "temporales"],
+      "triggers": ["limpiar temporales", "depurar cache", "limpieza del proyecto"]
+    },
+    {
+      "id": "internal:sandbox-integrator",
+      "name": "sandbox-integrator",
+      "kind": "skill",
+      "status": "INTERNAL_ACTIVE",
+      "source": ".agents/skills/sandbox-integrator/SKILL.md",
+      "summary": "Integra componentes en sandboxes de validación.",
+      "tags": ["sandbox", "ui", "testing", "componente"]
+    },
+    {
+      "id": "internal:route-capabilities",
+      "name": "route-capabilities",
+      "kind": "skill",
+      "status": "INTERNAL_PILOT",
+      "source": ".agents/skills/route-capabilities/SKILL.md",
+      "summary": "Selecciona el conjunto mínimo de capacidades aprobadas para una tarea.",
+      "tags": ["router", "skills", "agentes", "herramientas", "decision"],
+      "triggers": ["seleccionar skill", "elegir herramienta", "enrutar capacidad"]
+    },
+    {
+      "id": "internal:find-skills-governed",
+      "name": "find-skills-governed",
+      "kind": "skill",
+      "status": "INTERNAL_PILOT",
+      "source": ".agents/skills/find-skills-governed/SKILL.md",
+      "summary": "Busca candidatos externos sin instalarlos ni ejecutarlos.",
+      "tags": ["skills", "descubrimiento", "supply-chain", "auditoria"],
+      "triggers": ["buscar skill externa", "descubrir herramienta", "discovery review required"]
+    },
+    {
+      "id": "catalog:superpowers",
+      "name": "Superpowers",
+      "kind": "plugin",
+      "status": "DEFERRED_REDUNDANT",
+      "scoreFromCatalog": 10,
+      "source": "obra/superpowers-marketplace",
+      "summary": "Metodología completa de planificación, TDD y revisión; solapa el flujo canónico.",
+      "tags": ["metodologia", "tdd", "plan", "review"]
+    },
+    {
+      "id": "catalog:stop-slop",
+      "name": "Stop Slop",
+      "kind": "skill",
+      "status": "DEFERRED_LOW_VALUE",
+      "scoreFromCatalog": 6,
+      "source": "hardikpandya/stop-slop",
+      "summary": "Mejora estilo de prosa; no resuelve un riesgo prioritario de PROTOTIPE.",
+      "tags": ["prosa", "estilo", "redaccion"]
+    },
+    {
+      "id": "catalog:frontend-design",
+      "name": "Frontend Design",
+      "kind": "plugin",
+      "status": "CANDIDATE_REVIEW",
+      "scoreFromCatalog": 9,
+      "source": "claude-plugins-official/frontend-design",
+      "summary": "Dirección visual oficial; candidato a piloto UI después de reconciliar reglas existentes.",
+      "tags": ["frontend", "ui", "ux", "design"]
+    },
+    {
+      "id": "catalog:impeccable",
+      "name": "Impeccable",
+      "kind": "tool",
+      "status": "DEFERRED_REDUNDANT",
+      "scoreFromCatalog": 8,
+      "source": "impeccable",
+      "summary": "Suite amplia de refinamiento visual que se solapa con estándares y Frontend Design.",
+      "tags": ["frontend", "ui", "ux", "audit"]
+    },
+    {
+      "id": "catalog:ui-ux-pro-max",
+      "name": "UI/UX Pro Max",
+      "kind": "plugin",
+      "status": "CANDIDATE_REVIEW",
+      "scoreFromCatalog": 7,
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "summary": "Referencias visuales por industria; validar licencias, compatibilidad y redundancia.",
+      "tags": ["frontend", "ui", "ux", "industria", "paletas"]
+    },
+    {
+      "id": "catalog:framer-motion",
+      "name": "Framer Motion",
+      "kind": "dependency",
+      "status": "DEPENDENCY_ON_DEMAND",
+      "scoreFromCatalog": 6,
+      "source": "npm:framer-motion",
+      "summary": "Dependencia React, no skill; añadir solo si una feature aprobada necesita movimiento.",
+      "tags": ["react", "animacion", "motion", "dependency"]
+    },
+    {
+      "id": "catalog:code-review",
+      "name": "Code Review",
+      "kind": "plugin",
+      "status": "CANDIDATE_REVIEW",
+      "scoreFromCatalog": 9,
+      "source": "claude-plugins-official/code-review",
+      "summary": "Revisión multiagente oficial; evaluar costo, falsos positivos y convivencia con reviewers internos.",
+      "tags": ["review", "codigo", "calidad", "agentes"]
+    },
+    {
+      "id": "catalog:security-review",
+      "name": "Security Review",
+      "kind": "native-skill",
+      "status": "AVAILABLE_NATIVE",
+      "scoreFromCatalog": 10,
+      "source": "claude-code-bundled",
+      "summary": "Revisión de seguridad incluida; usar como segundo revisor, nunca como certificación única.",
+      "tags": ["security", "seguridad", "review", "vulnerabilidad", "supply-chain"],
+      "triggers": ["revisar seguridad", "firebase rules", "firestore rules", "autenticacion", "secretos", "vulnerabilidades"]
+    },
+    {
+      "id": "catalog:react-doctor",
+      "name": "React Doctor",
+      "kind": "tool",
+      "status": "CANDIDATE_REVIEW",
+      "scoreFromCatalog": 7,
+      "source": "npm:react-doctor",
+      "summary": "Escáner React; validar reglas, escritura de instalación y compatibilidad con React/Vite.",
+      "tags": ["react", "lint", "quality", "diagnostico"]
+    },
+    {
+      "id": "catalog:claude-mem",
+      "name": "Claude Mem",
+      "kind": "plugin",
+      "status": "DEFERRED_REDUNDANT",
+      "scoreFromCatalog": 8,
+      "source": "thedotmack/claude-mem",
+      "summary": "Memoria adicional aplazada; primero usar memoria nativa y documentación canónica.",
+      "tags": ["memory", "context", "continuidad"]
+    },
+    {
+      "id": "catalog:codebase-memory-mcp",
+      "name": "Codebase Memory MCP",
+      "kind": "mcp",
+      "status": "DEFERRED_SECURITY_REVIEW",
+      "scoreFromCatalog": 7,
+      "source": "DeusData/codebase-memory-mcp",
+      "summary": "Grafo de código; aplazado hasta medir necesidad, privacidad y costo operacional.",
+      "tags": ["mcp", "memory", "graph", "codebase"]
+    },
+    {
+      "id": "catalog:graphify",
+      "name": "Graphify",
+      "kind": "tool",
+      "status": "DEFERRED_SECURITY_REVIEW",
+      "scoreFromCatalog": 8,
+      "source": "graphifyy",
+      "summary": "Grafo multimodal; aplazado hasta auditar tratamiento de datos y demostrar ahorro real.",
+      "tags": ["memory", "graph", "multimodal", "context"]
+    },
+    {
+      "id": "catalog:mcp-builder",
+      "name": "MCP Builder",
+      "kind": "skill",
+      "status": "REFERENCE_ON_DEMAND",
+      "scoreFromCatalog": 8,
+      "source": "anthropics/skills/mcp-builder",
+      "summary": "Referencia oficial para construir MCP cuando exista una integración aprobada.",
+      "tags": ["mcp", "integration", "tooling", "official"]
+    },
+    {
+      "id": "catalog:agent-browser",
+      "name": "Agent Browser",
+      "kind": "tool",
+      "status": "DEFERRED_REDUNDANT",
+      "scoreFromCatalog": 6,
+      "source": "marketplace-unverified",
+      "summary": "Automatización de navegador aplazada; usar primero herramientas existentes y pruebas E2E.",
+      "tags": ["browser", "automation", "testing", "web"]
+    },
+    {
+      "id": "catalog:remotion",
+      "name": "Remotion",
+      "kind": "framework",
+      "status": "OUT_OF_SCOPE",
+      "scoreFromCatalog": 6,
+      "source": "remotion-dev/skills",
+      "summary": "Video programático fuera del alcance actual.",
+      "tags": ["video", "react", "media"]
+    },
+    {
+      "id": "catalog:hyperframes",
+      "name": "HyperFrames",
+      "kind": "skill-pack",
+      "status": "OUT_OF_SCOPE",
+      "scoreFromCatalog": 6,
+      "source": "heygen-com/hyperframes",
+      "summary": "Generación de video fuera del alcance actual; no instalar paquetes completos.",
+      "tags": ["video", "media", "html"]
+    },
+    {
+      "id": "catalog:scrapling",
+      "name": "Scrapling",
+      "kind": "skill",
+      "status": "OUT_OF_SCOPE_UNTIL_NEED",
+      "scoreFromCatalog": 6,
+      "source": "hyperpuncher/dotagents",
+      "summary": "Scraping aplazado hasta existir caso, base legal, robots y límites de datos.",
+      "tags": ["scraping", "web", "data", "legal"]
+    },
+    {
+      "id": "catalog:markitdown",
+      "name": "MarkItDown",
+      "kind": "tool",
+      "status": "CANDIDATE_REVIEW",
+      "scoreFromCatalog": 8,
+      "source": "Microsoft/markitdown-or-wrapper-unverified",
+      "summary": "Conversión documental útil; el comando del catálogo usa un wrapper externo y debe auditarse.",
+      "tags": ["document", "pdf", "word", "markdown", "conversion"]
+    },
+    {
+      "id": "catalog:repomix",
+      "name": "Repomix",
+      "kind": "plugin",
+      "status": "DEFERRED_REDUNDANT",
+      "scoreFromCatalog": 8,
+      "source": "yamadashy/repomix",
+      "summary": "Empaquetado de repositorio aplazado; ya existe context packaging determinista.",
+      "tags": ["repository", "context", "packaging", "secrets"]
+    },
+    {
+      "id": "catalog:marketing-skills",
+      "name": "Marketing Skills for AI Agents",
+      "kind": "skill-pack",
+      "status": "DEFERRED_BUSINESS_PHASE",
+      "scoreFromCatalog": 7,
+      "source": "coreyhaines31/marketingskills",
+      "summary": "Revisar solo durante validación comercial y seleccionar skills individuales.",
+      "tags": ["marketing", "seo", "copy", "ads"]
+    },
+    {
+      "id": "catalog:gstack",
+      "name": "gstack",
+      "kind": "agent-pack",
+      "status": "REJECTED_OVERLOAD",
+      "scoreFromCatalog": 8,
+      "source": "garrytan/gstack",
+      "summary": "Paquete de 23 roles rechazado ahora por redundancia, contexto y gobierno complejo.",
+      "tags": ["agents", "team", "workflow", "overload"]
+    },
+    {
+      "id": "catalog:the-agency",
+      "name": "The Agency",
+      "kind": "agent-pack",
+      "status": "REJECTED_OVERLOAD",
+      "scoreFromCatalog": 7,
+      "source": "msitarzewski/agency-agents",
+      "summary": "Paquete de 230 agentes rechazado por sobrecarga y falta de necesidad demostrada.",
+      "tags": ["agents", "team", "catalog", "overload"]
+    },
+    {
+      "id": "catalog:the-architect",
+      "name": "The Architect",
+      "kind": "agent",
+      "status": "DEFERRED_REDUNDANT",
+      "scoreFromCatalog": 6,
+      "source": "Hainrixz/the-architect",
+      "summary": "Planeación cubierta por blueprint y revisión arquitectónica interna.",
+      "tags": ["architecture", "plan", "blueprint"]
+    },
+    {
+      "id": "catalog:whatsapp-agentkit",
+      "name": "WhatsApp AgentKit",
+      "kind": "application-kit",
+      "status": "OUT_OF_SCOPE",
+      "scoreFromCatalog": 6,
+      "source": "Hainrixz/whatsapp-agentkit",
+      "summary": "Producto de atención WhatsApp fuera del alcance de la fundación Claude.",
+      "tags": ["whatsapp", "automation", "customer-service"]
+    },
+    {
+      "id": "catalog:auto-crm",
+      "name": "Auto-CRM",
+      "kind": "application",
+      "status": "REJECTED_PRODUCT_DUPLICATION",
+      "scoreFromCatalog": 6,
+      "source": "Hainrixz/auto-crm",
+      "summary": "Aplicación completa que duplicaría capacidades de producto y no es una skill de desarrollo.",
+      "tags": ["crm", "application", "product"]
+    },
+    {
+      "id": "catalog:find-skills",
+      "name": "Find Skills",
+      "kind": "skill-and-cli",
+      "status": "APPROVED_GUARDED",
+      "scoreFromCatalog": 7,
+      "source": "vercel-labs/skills/skills/find-skills",
+      "summary": "Buscador externo permitido solo para descubrimiento; instalación y actualización automáticas prohibidas.",
+      "tags": ["skills", "discovery", "registry", "supply-chain"]
+    },
+    {
+      "id": "catalog:scheduled-tasks",
+      "name": "Tareas programadas",
+      "kind": "native-feature",
+      "status": "DEFERRED_AUTOMATION",
+      "scoreFromCatalog": 8,
+      "source": "claude-code-desktop",
+      "summary": "Automatización nativa aplazada hasta definir tareas idempotentes, permisos y supervisión.",
+      "tags": ["automation", "schedule", "desktop", "operations"]
+    },
+    {
+      "id": "catalog:clerk",
+      "name": "Clerk",
+      "kind": "external-service",
+      "status": "REJECTED_STACK_MISMATCH",
+      "scoreFromCatalog": 7,
+      "source": "clerk",
+      "summary": "Servicio de autenticación, no herramienta de IA; no sustituye Firebase Auth sin ADR y migración.",
+      "tags": ["auth", "service", "dependency", "migration"]
+    }
+  ]
+}

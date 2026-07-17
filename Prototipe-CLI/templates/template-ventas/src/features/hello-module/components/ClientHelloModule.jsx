@@ -11,11 +11,11 @@ export default function ClientView() {
   const navigate = useNavigate();
 
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
-      {/* Botón Volver */}
+    <div className="p-4 sm:p-6 lg:p-8 w-full max-w-5xl mx-auto space-y-6">
+      {/* Botón Volver (solo móvil) */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors min-h-[44px]"
+        className="md:hidden flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors min-h-[44px]"
       >
         <ArrowLeft className="w-4 h-4" />
         Volver

@@ -149,14 +149,14 @@ export default function AdminQRPerformance() {
           <div className="overflow-x-auto no-scrollbar">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-surface-2/50 text-muted text-xs uppercase tracking-wider">
-                  <th className="font-semibold p-3 rounded-l-xl">Producto</th>
-                  <th className="font-semibold p-3">Categoría</th>
-                  <th className="font-semibold p-3">Precio</th>
+                <tr className="bg-surface-2/50 text-muted text-xs uppercase tracking-wider whitespace-nowrap">
+                  <th className="font-semibold p-3 rounded-l-xl pr-6">Producto</th>
+                  <th className="font-semibold p-3 pr-6">Categoría</th>
+                  <th className="font-semibold p-3 pr-6">Precio</th>
                   <th className="font-semibold p-3 text-right rounded-r-xl">Escaneos</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-app">
+              <tbody className="divide-y divide-app whitespace-nowrap">
                 {topProducts.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="p-8 text-center text-xs text-muted">
@@ -166,9 +166,9 @@ export default function AdminQRPerformance() {
                 ) : (
                   topProducts.map(p => (
                     <tr key={p.id} className="hover:bg-surface-2/30 transition-colors">
-                      <td className="p-3 font-bold text-sm text-app">{p.nombre}</td>
-                      <td className="p-3 text-xs text-muted">{p.categoria}</td>
-                      <td className="p-3 text-sm font-semibold text-app">{formatCurrency(p.price || p.precio)}</td>
+                      <td className="p-3 font-bold text-sm text-app pr-6">{p.nombre}</td>
+                      <td className="p-3 text-xs text-muted pr-6">{p.categoria}</td>
+                      <td className="p-3 text-sm font-semibold text-app pr-6">{formatCurrency(p.price || p.precio)}</td>
                       <td className="p-3 text-right font-black text-primary text-sm">{p.scans}</td>
                     </tr>
                   ))

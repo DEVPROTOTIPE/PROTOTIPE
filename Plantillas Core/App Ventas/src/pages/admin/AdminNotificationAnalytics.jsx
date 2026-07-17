@@ -71,24 +71,24 @@ export default function AdminNotificationAnalytics() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-app text-muted bg-surface-2">
-                <th className="p-3">Destinatario</th>
-                <th className="p-3">Rol</th>
-                <th className="p-3">Título / Mensaje</th>
-                <th className="p-3">Estado</th>
+              <tr className="border-b border-app text-muted bg-surface-2 whitespace-nowrap">
+                <th className="p-3 pr-6">Destinatario</th>
+                <th className="p-3 pr-6">Rol</th>
+                <th className="p-3 pr-6">Título / Mensaje</th>
+                <th className="p-3 pr-6">Estado</th>
                 <th className="p-3">Categoría de Sonido</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="whitespace-nowrap">
               {recentNotifications.map(n => (
                 <tr key={n.id} className="border-b border-app hover:bg-surface-2 transition-colors">
-                  <td className="p-3 font-medium">{n.recipientId}</td>
-                  <td className="p-3"><span className="px-2 py-0.5 rounded-full bg-surface-3 text-[10px]">{n.recipientRole}</span></td>
-                  <td className="p-3">
+                  <td className="p-3 font-medium pr-6">{n.recipientId}</td>
+                  <td className="p-3 pr-6"><span className="px-2 py-0.5 rounded-full bg-surface-3 text-[10px]">{n.recipientRole}</span></td>
+                  <td className="p-3 pr-6">
                     <p className="font-bold text-[11px]">{n.title}</p>
                     <p className="text-[10px] text-muted truncate max-w-xs">{n.body}</p>
                   </td>
-                  <td className="p-3">
+                  <td className="p-3 pr-6">
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                       n.status === 'read' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
                     }`}>

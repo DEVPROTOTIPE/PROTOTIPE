@@ -471,18 +471,20 @@ export default function AdSettings({
                       <label className="text-xs font-bold text-app mb-1 block">Precio Original ($)</label>
                       <input
                         type="number"
+                        inputmode="decimal"
                         value={adFormData.price}
                         onChange={(e) => setAdFormData({ ...adFormData, price: Number(e.target.value) })}
-                        className="w-full h-11 px-3 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
+                        className="w-full h-11 px-3 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
                     <div>
                       <label className="text-xs font-bold text-app mb-1 block">Precio Promoción ($)</label>
                       <input
                         type="number"
+                        inputmode="decimal"
                         value={adFormData.promoPrice}
                         onChange={(e) => setAdFormData({ ...adFormData, promoPrice: Number(e.target.value) })}
-                        className="w-full h-11 px-3 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors"
+                        className="w-full h-11 px-3 rounded-xl bg-surface border border-app text-sm text-app focus:outline-none focus:border-primary transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
                   </div>

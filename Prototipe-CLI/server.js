@@ -205,6 +205,13 @@ function validatePrototipeMetadata(meta, folderName) {
   if (!safeMeta.projectName) {
     safeMeta.projectName = folderName;
   }
+  // Fase A del manifest de overrides (2026-07-16): rutas (relativas a la raíz
+  // del proyecto del cliente) que son personalización intencional de ESE
+  // cliente. El sincronizador y el detector de drift las excluyen por
+  // completo — nunca se sobreescriben ni se marcan como desviación.
+  if (!Array.isArray(safeMeta.overrides)) {
+    safeMeta.overrides = [];
+  }
   return safeMeta;
 }
 
@@ -9016,7 +9023,16 @@ app.get('/api/project/drift', async (req, res) => {
       });
     }
 
-    const coreFiles = await getFilesRecursively(coreDir);
+    // Fase A del manifest de overrides (2026-07-16): archivos declarados por
+    // el propio cliente en .prototipe.json como personalización intencional
+    // se excluyen del cálculo de drift por completo — nunca se marcan como
+    // desviación ni se contarían falsamente en contra de la paridad.
+    const clientOverrides = Array.isArray(meta.overrides)
+      ? meta.overrides.map(p => String(p).replace(/\\/g, '/'))
+      : [];
+
+    const coreFilesRaw = await getFilesRecursively(coreDir);
+    const coreFiles = coreFilesRaw.filter(f => !clientOverrides.includes(f.relativePath));
     const clientFiles = await getFilesRecursively(projectDir);
 
     const clientFileMap = new Map();
@@ -9187,6 +9203,7 @@ app.get('/api/project/drift', async (req, res) => {
       lockData,
       parityPercent,
       differences,
+      overridesApplied: clientOverrides,
       dependenciesOutOfSync,
       dependencyDetails,
       buildAuditStatus,
@@ -11041,199 +11058,6 @@ app.get('/api/git/cores-and-clients', async (req, res) => {
   }
 });
 
-
-// --- STREAM SSE PARA SINCRONIZAR CORE A CLIENTES Y DESPLEGAR ---
-app.get('/api/git/sync-core-to-clients-stream', async (req, res) => {
-  const { corePath, sourceBranch, clientBranches } = req.query;
-
-  if (!corePath || !sourceBranch || !clientBranches) {
-    return res.status(400).json({ error: 'Faltan parámetros obligatorios: corePath, sourceBranch, clientBranches.' });
-  }
-
-  const branchesToSync = clientBranches.split(',').map(b => b.trim()).filter(Boolean);
-
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders();
-
-  const send = (type, data) => {
-    try {
-      if (!res.writableEnded && !res.finished && res.socket && !res.socket.destroyed) {
-        res.write(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`);
-      }
-    } catch (err) {
-      console.warn('[SSE Sync Core Send Error]', err.message);
-    }
-  };
-
-  send('log', { text: `🚀 Iniciando sincronización del Core en: ${path.basename(corePath)}`, type: 'info' });
-  send('log', { text: `📜 Rama origen (Core): ${sourceBranch}`, type: 'info' });
-  send('log', { text: `👥 Ramas cliente a actualizar: ${branchesToSync.join(', ')}`, type: 'info' });
-  send('log', { text: '──────────────────────────────────────────────────', type: 'info' });
-
-  let originalBranch = 'main';
-  try {
-    originalBranch = await getGitBranch(corePath) || 'main';
-  } catch (_) {}
-
-  let isAborted = false;
-  let activeChild = null;
-
-  req.on('close', () => {
-    if (!isAborted) {
-      isAborted = true;
-      if (activeChild) {
-        try {
-          activeChild.kill();
-        } catch (_) {}
-      }
-      console.warn('[API /api/git/sync-core-to-clients-stream] Cliente cerró conexión SSE de forma repentina.');
-    }
-  });
-
-  const runCommandStream = (cmdStr, args, cwd) => {
-    return new Promise((resolve, reject) => {
-      if (isAborted) {
-        return reject(new Error('Sincronización abortada por desconexión del cliente.'));
-      }
-      send('log', { text: `👉 Ejecutando: ${cmdStr} ${args.join(' ')}`, type: 'command' });
-      
-      const child = spawn(cmdStr, args, {
-        cwd,
-        shell: true,
-        env: { ...process.env, FORCE_COLOR: '0' }
-      });
-      activeChild = child;
-
-      child.stdout.on('data', (data) => {
-        const lines = data.toString('utf8').split(/\r?\n/).filter(l => l.trim());
-        lines.forEach(line => send('log', { text: `   ${line}`, type: 'stdout' }));
-      });
-
-      child.stderr.on('data', (data) => {
-        const lines = data.toString('utf8').split(/\r?\n/).filter(l => l.trim());
-        lines.forEach(line => send('log', { text: `   ⚠ ${line}`, type: 'stderr' }));
-      });
-
-      child.on('close', (code) => {
-        activeChild = null;
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(new Error(`Comando falló con código ${code}`));
-        }
-      });
-
-      child.on('error', (err) => {
-        activeChild = null;
-        reject(err);
-      });
-    });
-  };
-
-  try {
-    send('log', { text: '📦 Resguardando cambios locales en stash...', type: 'info' });
-    try {
-      await execGitCommand('git stash', corePath);
-    } catch (_) {}
-
-    for (const clientBranch of branchesToSync) {
-      if (isAborted) {
-        throw new Error('Sincronización abortada por desconexión del cliente.');
-      }
-      const clientName = clientBranch.replace(/^cliente\//, '');
-      send('client-status', { client: clientName, status: 'running' });
-      send('log', { text: `\n🔄 [Cliente: ${clientName}] Iniciando actualización...`, type: 'header' });
-
-      try {
-        send('log', { text: `   Checkout a rama: ${clientBranch}`, type: 'info' });
-        await execGitCommand(['checkout', clientBranch], corePath);
-
-        send('log', { text: `   Fusionando cambios de: ${sourceBranch}`, type: 'info' });
-        try {
-          await execGitCommand(['merge', sourceBranch, '--no-verify', '-m', 'merge: Core global update'], corePath);
-        } catch (mergeErr) {
-          send('log', { text: `❌ Conflicto de fusión detectado para ${clientName}. Abortando merge...`, type: 'error' });
-          await execGitCommand(['merge', '--abort'], corePath);
-          throw new Error('Conflicto de fusión en Git');
-        }
-
-        send('log', { text: '   Subiendo rama actualizada a GitHub...', type: 'info' });
-        await execGitCommand(['push', 'origin', clientBranch, '--no-verify'], corePath);
-
-        // Leer .env.local de la instancia física del cliente para obtener su Firebase Project ID
-        const clientPhysicalPath = await findProjectDir(clientName);
-        const clientEnvPath = clientPhysicalPath ? path.join(clientPhysicalPath, '.env.local') : '';
-        let firebaseProjectId = '';
-
-        if (clientEnvPath && await fs.pathExists(clientEnvPath)) {
-          const envContent = await fs.readFile(clientEnvPath, 'utf8');
-          const match = envContent.match(/VITE_FIREBASE_PROJECT_ID\s*=\s*(.+)/);
-          if (match && match[1]) {
-            firebaseProjectId = match[1].trim().replace(/['"]/g, '');
-          }
-        }
-
-        if (!firebaseProjectId) {
-          // Fallback: leer del .env.local del core si el cliente no tiene su propio project ID configurado
-          const coreEnvPath = path.join(corePath, '.env.local');
-          if (await fs.pathExists(coreEnvPath)) {
-            const envContent = await fs.readFile(coreEnvPath, 'utf8');
-            const match = envContent.match(/VITE_FIREBASE_PROJECT_ID\s*=\s*(.+)/);
-            if (match && match[1]) {
-              firebaseProjectId = match[1].trim().replace(/['"]/g, '');
-              send('log', { text: `⚠ Usando Firebase Project ID del Core como fallback: ${firebaseProjectId}`, type: 'warn' });
-            }
-          }
-        }
-
-        if (firebaseProjectId) {
-          firebaseProjectId = firebaseProjectId.trim().toLowerCase().replace(/[^a-z0-9\-]/g, '');
-          send('log', { text: `🚀 Firebase Project detectado para ${clientName}: ${firebaseProjectId}`, type: 'info' });
-          
-          send('log', { text: '   Compilando assets de producción...', type: 'info' });
-          await runCommandStream('npm', ['run', 'build'], clientPhysicalPath || corePath);
-
-          send('log', { text: `   Desplegando a Firebase Hosting para proyecto: ${firebaseProjectId}...`, type: 'info' });
-          await runCommandStream('firebase', ['deploy', '--only', 'hosting', '-P', firebaseProjectId], clientPhysicalPath || corePath);
-          
-          send('log', { text: `✅ Cliente ${clientName} actualizado y desplegado correctamente en producción.`, type: 'success' });
-        } else {
-          send('log', { text: `⚠ No se encontró VITE_FIREBASE_PROJECT_ID para ${clientName}. Sincronización Git realizada, deploy omitido.`, type: 'warn' });
-        }
-
-        send('client-status', { client: clientName, status: 'success' });
-      } catch (err) {
-        send('log', { text: `❌ Fallo en la sincronización de ${clientName}: ${err.message}`, type: 'error' });
-        send('client-status', { client: clientName, status: 'error', error: err.message });
-      }
-    }
-
-    send('log', { text: '\n🧹 Limpiando y regresando a la rama de origen...', type: 'info' });
-    try {
-      await execGitCommand(['checkout', originalBranch], corePath);
-      await execGitCommand(['stash', 'pop'], corePath);
-    } catch (_) {}
-
-    send('log', { text: '──────────────────────────────────────────────────', type: 'info' });
-    send('log', { text: '🎉 Sincronización global completada.', type: 'success' });
-    send('complete', { success: true });
-  } catch (err) {
-    send('log', { text: `❌ Error global durante la sincronización: ${err.message}`, type: 'error' });
-    send('complete', { success: false, error: err.message });
-    // Si falló a mitad de camino o se canceló, restaurar la rama original del Core
-    try {
-      await execGitCommand(['checkout', originalBranch], corePath);
-      await execGitCommand(['stash', 'pop'], corePath);
-    } catch (_) {}
-  } finally {
-    try {
-      if (!res.writableEnded && !res.finished) res.end();
-    } catch (_) {}
-  }
-});
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Archivos/carpetas excluidos de la sincronización física Core → Cliente.
 // Preserva la identidad del cliente (Firebase, marca, configuración).
@@ -11395,10 +11219,16 @@ app.get('/api/instancias/list', async (req, res) => {
         // ── Detección REAL por hash MD5 ─────────────────────────────────
         let driftCount = 0;
         let dependenciesOutOfSync = false;
+        // Fase A del manifest de overrides (2026-07-16): no contar como drift
+        // los archivos que este cliente ya declaró como personalización suya.
+        const clientOverridesForDrift = Array.isArray(meta.overrides)
+          ? meta.overrides.map(p => String(p).replace(/\\/g, '/'))
+          : [];
         try {
           const coreFiles = await getSyncFilesRecursiveAsync(core.path);
           for (const relFile of coreFiles) {
             if (relFile === 'package.json') continue;
+            if (clientOverridesForDrift.includes(relFile)) continue;
             const coreHash   = await getSyncFileHashAsync(path.join(core.path, relFile));
             const clientHash = await getSyncFileHashAsync(path.join(fullPath, relFile));
             if (coreHash !== clientHash) driftCount++;
@@ -12097,7 +11927,28 @@ app.get('/api/instancias/sync-and-deploy-stream', async (req, res) => {
       try {
         // ── Fase 1: Detectar diferencias (copia diferencial por hash) ──────
         log(`   📊 Comparando archivos core vs cliente...`, 'info');
-        const coreFiles = await getSyncFilesRecursiveAsync(corePath);
+
+        // Fase A del manifest de overrides (2026-07-16): leer las rutas que
+        // este cliente declaró como personalización intencional en su propio
+        // .prototipe.json, para que el sincronizador nunca las toque.
+        let clientOverrides = [];
+        try {
+          const clientMetaPath = path.join(clientPath, '.prototipe.json');
+          if (await fs.pathExists(clientMetaPath)) {
+            const clientMeta = await fs.readJson(clientMetaPath);
+            if (Array.isArray(clientMeta.overrides)) {
+              clientOverrides = clientMeta.overrides.map(p => String(p).replace(/\\/g, '/'));
+            }
+          }
+        } catch (overrideErr) {
+          log(`   ⚠ No se pudieron leer los overrides de ${folderName}: ${overrideErr.message}`, 'warn');
+        }
+        if (clientOverrides.length > 0) {
+          log(`   🔒 ${clientOverrides.length} archivo(s) marcados como personalización del cliente (overrides) — no se tocarán.`, 'info');
+        }
+
+        const coreFilesRaw = await getSyncFilesRecursiveAsync(corePath);
+        const coreFiles = coreFilesRaw.filter(f => !clientOverrides.includes(f));
         const changes = [];
 
         for (const file of coreFiles) {
@@ -15702,7 +15553,6 @@ async function startServer(port) {
       'GET:/api/git/log': 'Historial de commits',
       'GET:/api/git/backup-stream': 'SSE Stream de backup en vivo',
       'GET:/api/git/cores-and-clients': 'Listar repositorios de cores e instancias',
-      'GET:/api/git/sync-core-to-clients-stream': 'SSE Stream de propagación Git',
       'GET:/api/instancias/list': 'Listar carpetas físicas de clientes',
       'GET:/api/instancias/sync-and-deploy-stream': 'SSE Stream de despliegue en lote',
       'GET:/api/project/firebase-rules/drift-global': 'Comprobar desviación de reglas',

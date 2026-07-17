@@ -51,7 +51,8 @@ export default function NumberInput({ value, onChange, min, max, step, className
       disabled={disabled}
       id={id}
       name={name}
-      className={className}
+      className={`${className || ''} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`.trim()}
+      inputmode={rest.inputmode || "numeric"}
       {...rest}
     />
   )

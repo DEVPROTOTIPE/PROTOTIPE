@@ -132,3 +132,119 @@ Para evitar tener mapeos estáticos en el código que requieran mantenimiento ma
 1. **No mezclar entornos:** Nunca expongas credenciales de desarrollo (`.env`, `serviceAccountKey.json`) al directorio `templates/` o repositorios.
 2. **Sincronización:** Cada vez que edites el código de un Core en `Plantillas Core/`, recuerda activar la sincronización hacia `templates/` para que los clientes puedan recibir la actualización en sus preflights.
 3. **Consistencia de Versión:** La versión real que corre una instancia cliente se lee de su `package.json` físico de manera prioritaria sobre el lockfile, auto-alineando este último en caliente si difieren.
+
+---
+
+## 🔒 6. Manifiesto de Overrides (Personalizaciones Intencionales del Cliente)
+
+**Estado:** `ACTIVO` — implementado 2026-07-16 (Fase A de la
+`Documentacion PROTOTIPE/00_Continuidad/canonical/propuesta_arquitectura_git_2026-07-16.md`).
+
+### 6.1 El problema que resuelve
+
+Antes de esta implementación, el sincronizador y el detector de drift
+comparaban **ciegamente** cada archivo del Core contra el mismo archivo en
+el cliente por hash MD5. Si diferían, el archivo se marcaba como
+"desviación" (`drift`) y el sincronizador lo **sobreescribía** en el
+siguiente `sync`. Esto no distinguía entre dos casos muy distintos:
+
+- El cliente simplemente no se ha sincronizado todavía (drift real, se
+  debe corregir).
+- El cliente tiene una **personalización intencional** en ese archivo
+  (una decisión de negocio o técnica válida) que **nunca debería
+  sobreescribirse**.
+
+Este hallazgo (`R-024`) se confirmó formalmente en la auditoría de Fase 3
+del roadmap técnico (`CORE-370`, 2026-07-16).
+
+### 6.2 Cómo declarar un override (uso práctico)
+
+Cada cliente tiene su propio archivo `.prototipe.json` en la raíz de su
+proyecto (ej. `Instancias Clientes/ventas/ventas-moni-app/.prototipe.json`).
+Para declarar que un archivo es una personalización intencional de ESE
+cliente, agrega su ruta (relativa a la raíz del proyecto del cliente, con
+`/` como separador) al array `overrides`:
+
+```json
+{
+  "clientId": "ventas-moni-app",
+  "projectName": "ventas-moni-app",
+  "template": "ventas",
+  "coreType": "ventas",
+  "niche": "retail",
+  "version": "1.0.6",
+  "createdAt": "2026-06-19T22:31:25.897Z",
+  "overrides": [
+    "src/index.css",
+    "src/features/credits/services/creditService.js"
+  ]
+}
+```
+
+Cualquier archivo listado ahí:
+- **Nunca** se marcará como "desviación" en el detector de drift.
+- **Nunca** se sobreescribirá en un sync/deploy de ese cliente.
+- No afecta a NINGÚN otro cliente — el manifiesto es por cliente, no
+  global.
+
+Si el archivo no existe en `.prototipe.json` todavía o el campo
+`overrides` no está presente, se asume una lista vacía (comportamiento
+idéntico al que existía antes de esta implementación — retrocompatible,
+ningún cliente existente se ve afectado a menos que se le agregue el
+campo explícitamente).
+
+### 6.3 Dónde vive el código (para no perderle la pista)
+
+Todo en `Prototipe-CLI/server.js`:
+
+| Función/endpoint | Línea aprox. | Qué hace con `overrides` |
+|---|---|---|
+| `validatePrototipeMetadata()` | ~194 | Garantiza que `meta.overrides` sea siempre un array (default `[]` si falta) |
+| `GET /api/project/drift` | ~8937 | Filtra `coreFiles` para excluir rutas en `overrides` **antes** de calcular `differences`/`parityPercent`. Expone el campo `overridesApplied` en la respuesta para que la UI pueda mostrarlo. |
+| `GET /api/instancias/list` (cálculo de `driftCount` por cliente, usado en el badge de `CoreSyncPanel.jsx`) | ~11406 | Salta los archivos en `overrides` al contar `driftCount` |
+| `GET /api/instancias/sync-and-deploy-stream` (sincronización real, batch) | ~12107 | Lee `overrides` del `.prototipe.json` del cliente y los excluye de `coreFiles` antes de calcular `changes` — esos archivos nunca se copian ni se sobreescriben. Registra en el log de sync cuántos archivos se saltaron por override. |
+
+### 6.4 Verificación realizada (evidencia real, no teórica)
+
+Probado en vivo contra Moni (`ventas-moni-app`), usando `src/pages/LoginPage.jsx`
+(que hoy difiere de verdad entre Core y Moni) como caso de prueba:
+
+```
+ANTES de declarar el override:
+  LoginPage.jsx en differences: true
+  overridesApplied: []
+  total differences: 73
+
+DESPUÉS de declarar "src/pages/LoginPage.jsx" en overrides:
+  LoginPage.jsx en differences: false
+  overridesApplied: ["src/pages/LoginPage.jsx"]
+  total differences: 72
+
+Badge de CoreSyncPanel (driftCount vía /api/instancias/list): 72 (coincide)
+```
+
+El override de prueba se **revirtió** después de la verificación (ese
+archivo difiere hoy porque un fix de bug no se ha propagado a Core
+todavía, no porque sea una personalización de negocio real — dejarlo
+marcado como override lo habría ocultado para siempre de futuras
+sincronizaciones, que es exactamente lo que no se quiere en ese caso).
+
+### 6.5 Lo que esta Fase A **no** incluye todavía (alcance explícito)
+
+- **No hay UI en el Dashboard** para declarar/quitar overrides — hoy se
+  edita `.prototipe.json` a mano. Un panel dedicado (quizás dentro de
+  `ClientLifecyclePanel.jsx`) queda como mejora futura, no bloqueante.
+- **No se probó contra un sync/deploy real completo** (solo contra los
+  endpoints de solo-lectura de drift) — la lógica del endpoint de sync es
+  idéntica en estructura (mismo patrón de filtrado), pero un test end-to-end
+  de un deploy real con overrides queda pendiente de la primera vez que se
+  use en producción.
+- **No reemplaza** el mecanismo estático `isPathExcludedFromSync()`
+  (archivos como `.env.local`, `firebase.json`, credenciales) — ambos
+  mecanismos coexisten: el estático protege archivos que NUNCA deben
+  sincronizarse para ningún cliente; el manifiesto de overrides protege
+  archivos que un cliente **específico** decidió personalizar.
+- Esta es la **Fase A** de un plan de 5 fases — ver
+  `propuesta_arquitectura_git_2026-07-16.md` para las Fases B-E (copia
+  atómica, respaldo automatizado vía CI, reconciliador completo, limpieza
+  de código huérfano de git).

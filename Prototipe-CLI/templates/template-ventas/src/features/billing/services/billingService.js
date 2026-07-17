@@ -1,17 +1,5 @@
-import {
-  collection,
-  doc,
-  query,
-  where,
-  onSnapshot,
-  orderBy,
-} from 'firebase/firestore'
-import { db } from '../../../config/firebaseConfig'
+import { BillingRepository } from '../api/BillingRepository'
 import { updateAppConfig } from '../../../services/appConfigService'
-import { COLLECTIONS, ORDER_STATES } from '../../../constants'
-
-const ordersRef = collection(db, COLLECTIONS.ORDERS)
-const SETTINGS_REF = doc(db, 'config', 'settings')
 
 /**
  * Guarda el nuevo porcentaje de comisión del desarrollador en Firestore.
@@ -52,7 +40,7 @@ function calcMetrics(orders, billingConfig) {
     } else if (billingMode === 'fixed_per_service') {
       comision = montoFijoServicio;
     }
-    
+
     // Sumar tarifa de procesamiento DIAN si aplica
     if (enableDianBilling && o.requiereFacturaElectronica) {
       comision += costoPorFacturaDian;
@@ -170,13 +158,14 @@ function calcMetrics(orders, billingConfig) {
 
 /**
  * Suscripción en tiempo real a las métricas de facturación.
- * Escucha pedidos completados y la configuración de facturación simultáneamente.
+ * Escucha pedidos completados y la configuración de facturación simultáneamente
+ * (vía BillingRepository) y recalcula las métricas del dominio cada vez que
+ * cualquiera de las dos fuentes cambia.
  * @param {function} onUpdate - Callback con las métricas calculadas
  * @returns {function} Función para cancelar ambas suscripciones
  */
 export function subscribeToBillingData(onUpdate) {
-  let latestOrders = []
-  let latestConfig = {
+  const DEFAULT_CONFIG = {
     billingMode: import.meta.env.VITE_DEVELOPER_BILLING_MODE || 'percentage',
     comisionPorcentaje: import.meta.env.VITE_DEVELOPER_COMMISSION_PERCENT ? Number(import.meta.env.VITE_DEVELOPER_COMMISSION_PERCENT) : 1,
     montoFijoServicio: import.meta.env.VITE_DEVELOPER_FIXED_SERVICE_FEE ? Number(import.meta.env.VITE_DEVELOPER_FIXED_SERVICE_FEE) : 0,
@@ -186,50 +175,26 @@ export function subscribeToBillingData(onUpdate) {
     triggerTelemetryReport: null
   }
 
-  // ─── Suscripción a pedidos completados ───────────────────────────
-  // Para optimizar lecturas Firestore, limitamos la búsqueda a los últimos 6 meses.
-  const sixMonthsAgo = new Date()
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
-  sixMonthsAgo.setDate(1)
-  sixMonthsAgo.setHours(0, 0, 0, 0)
-
-  const qOrders = query(
-    ordersRef,
-    where('estado', '==', ORDER_STATES.COMPLETED),
-    where('createdAt', '>=', sixMonthsAgo),
-    orderBy('createdAt', 'desc')
-  )
-
-  const unsubOrders = onSnapshot(qOrders, (snap) => {
-    latestOrders = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
-    onUpdate(calcMetrics(latestOrders, latestConfig))
-  }, (error) => {
-    console.error("[Billing] Error al escuchar pedidos completados:", error)
-  })
-
-  // ─── Suscripción a la configuración de facturación ───────────────────
-  const unsubSettings = onSnapshot(SETTINGS_REF, (snap) => {
-    if (snap.exists()) {
-      const data = snap.data()
-      latestConfig = {
-        billingMode: data.developerBillingMode || import.meta.env.VITE_DEVELOPER_BILLING_MODE || 'percentage',
-        comisionPorcentaje: data.developerCommissionPercent ?? (import.meta.env.VITE_DEVELOPER_COMMISSION_PERCENT ? Number(import.meta.env.VITE_DEVELOPER_COMMISSION_PERCENT) : 1),
-        montoFijoServicio: data.developerFixedServiceFee ?? (import.meta.env.VITE_DEVELOPER_FIXED_SERVICE_FEE ? Number(import.meta.env.VITE_DEVELOPER_FIXED_SERVICE_FEE) : 0),
-        pagoMensualFijo: data.developerFlatMonthlyFee ?? (import.meta.env.VITE_DEVELOPER_FLAT_MONTHLY_FEE ? Number(import.meta.env.VITE_DEVELOPER_FLAT_MONTHLY_FEE) : 0),
-        enableDianBilling: data.enableDianBilling === true || import.meta.env.VITE_DEVELOPER_ENABLE_DIAN_BILLING === 'true' || import.meta.env.VITE_DEVELOPER_ENABLE_DIAN_BILLING === true,
-        costoPorFacturaDian: data.costoPorFacturaDian ?? (import.meta.env.VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN ? Number(import.meta.env.VITE_DEVELOPER_COSTO_POR_FACTURA_DIAN) : 0),
-        triggerTelemetryReport: data.triggerTelemetryReport ?? null
-      }
-      onUpdate(calcMetrics(latestOrders, latestConfig))
+  return BillingRepository.subscribeToBillingData(
+    ({ orders, settingsData }) => {
+      const config = settingsData
+        ? {
+            billingMode: settingsData.developerBillingMode || DEFAULT_CONFIG.billingMode,
+            comisionPorcentaje: settingsData.developerCommissionPercent ?? DEFAULT_CONFIG.comisionPorcentaje,
+            montoFijoServicio: settingsData.developerFixedServiceFee ?? DEFAULT_CONFIG.montoFijoServicio,
+            pagoMensualFijo: settingsData.developerFlatMonthlyFee ?? DEFAULT_CONFIG.pagoMensualFijo,
+            enableDianBilling: settingsData.enableDianBilling === true || DEFAULT_CONFIG.enableDianBilling,
+            costoPorFacturaDian: settingsData.costoPorFacturaDian ?? DEFAULT_CONFIG.costoPorFacturaDian,
+            triggerTelemetryReport: settingsData.triggerTelemetryReport ?? null
+          }
+        : DEFAULT_CONFIG
+      onUpdate(calcMetrics(orders, config))
+    },
+    {
+      onOrdersError: (error) => console.error('[Billing] Error al escuchar pedidos completados:', error),
+      onSettingsError: (error) => console.error('[Billing] Error al escuchar configuración local en billingService:', error),
     }
-  }, (error) => {
-    console.error("[Billing] Error al escuchar configuración local en billingService:", error)
-  })
-
-  return () => {
-    unsubOrders()
-    unsubSettings()
-  }
+  )
 }
 
 // Exportado exclusivamente para pruebas unitarias

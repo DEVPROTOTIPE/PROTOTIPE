@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Save, MessageSquare, Megaphone, Plus, Trash2, ChevronDown } from 'lucide-react'
+import { Save, MessageSquare, Megaphone, Plus, Trash2, ChevronDown, Lock } from 'lucide-react'
 import { updateAppConfig } from '../../../../services/appConfigService'
 import { subscribeToAllMovements } from '../../../../services/stockMovementService'
 
@@ -217,9 +217,17 @@ export default function StoreSettings({
       {activeSubSection === 'temporada' && (
         <>
           <div className="p-5 sm:p-6 space-y-6">
-            <div className="space-y-4">
+            {config.appearanceLockedByDashboard && (
+              <div className="p-4 bg-amber-500/10 border border-amber-500/25 rounded-2xl flex items-center gap-3">
+                <Lock size={18} className="text-amber-500 shrink-0" />
+                <p className="text-xs text-amber-600 dark:text-amber-400 font-bold leading-relaxed">
+                  Configurado desde el dashboard. La temporada activa la controla el desarrollador de forma remota; la selección local está bloqueada.
+                </p>
+              </div>
+            )}
+            <div className={`space-y-4 ${config.appearanceLockedByDashboard ? 'opacity-50 pointer-events-none' : ''}`}>
               <label className="block text-xs font-bold text-app uppercase tracking-wider">Selecciona una Temporada Activa</label>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[460px] overflow-y-auto p-2.5 pr-2">
                 {[
                   { id: 'none', label: 'Ninguno (Tema normal)', desc: 'Desactiva efectos visuales extras', emoji: '✨', colors: [] },
@@ -295,9 +303,10 @@ export default function StoreSettings({
 
           <div className="p-5 border-t border-app bg-surface-2/30">
             <button
+              disabled={config.appearanceLockedByDashboard}
               onClick={async () => {
                 try {
-                  await updateAppConfig({ 
+                  await updateAppConfig({
                     activeSeasonalEvent: formData.activeSeasonalEvent || 'none'
                   })
                   config.setConfig({
@@ -309,9 +318,10 @@ export default function StoreSettings({
                   setSaveMessage({ type: 'error', text: 'Error al guardar la temporada.' })
                 }
               }}
-              className="w-full h-12 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-sm cursor-pointer border-none"
+              className="w-full h-12 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-sm cursor-pointer border-none disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
             >
-              <Save size={18} /> Guardar Cambios de Temporada
+              {config.appearanceLockedByDashboard ? <Lock size={18} /> : <Save size={18} />}
+              {config.appearanceLockedByDashboard ? 'Bloqueado desde el Dashboard' : 'Guardar Cambios de Temporada'}
             </button>
           </div>
         </>

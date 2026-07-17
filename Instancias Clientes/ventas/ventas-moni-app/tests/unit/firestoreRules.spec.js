@@ -18,9 +18,7 @@ beforeAll(async () => {
     firestore: {
       rules: rulesContent,
       host: '127.0.0.1',
-      // Puerto dedicado de esta instancia (firebase.json), aislado del
-      // 8080 por defecto que usan Core/template-ventas en paralelo.
-      port: 8085,
+      port: 8080,
     },
   });
 });

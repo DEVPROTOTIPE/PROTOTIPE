@@ -20,7 +20,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 
 $rootDir = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
 if (-not $rootDir -or -not (Test-Path $rootDir)) {
-    $rootDir = "D:\PROTOTIPE"
+    throw "No se pudo resolver la raíz de PROTOTIPE desde la ubicación del script."
 }
 
 $viteWasStoppedSub = $false
@@ -117,13 +117,44 @@ if (Test-Path $gitTempPath) {
 $isInstance = $false
 if ($SubprojectPath -match 'Instancias Clientes') {
     $isInstance = $true
-    $parentPath = Split-Path -Path $SubprojectPath -Parent
-    $niche = Split-Path -Path $parentPath -Leaf # ej: "ventas"
-    
-    Write-Host "  [Instancia Detectada] Sincronizando con repositorio remoto del Core..." -ForegroundColor Cyan
-    
-    # Encontrar la carpeta de plantilla core que coincida con el nicho
-    $coreFolder = Get-ChildItem -Path "$rootDir\Plantillas Core" -Directory | Where-Object { $_.Name -match $niche } | Select-Object -First 1
+
+    # Metodo principal (robusto): leer el .prototipe.json de la propia instancia
+    # y resolver su Core real via plantillas_registro.json — el mismo mecanismo
+    # que ya usa generator.js para el aprovisionamiento (arquitectura_git.md §6.3).
+    # Evita depender de que el nombre de la carpeta del Core "coincida" con el
+    # nicho por casualidad, que es lo unico que hacia la version anterior.
+    $coreFolder = $null
+    $prototipeJsonPath = Join-Path $SubprojectPath ".prototipe.json"
+    if (Test-Path $prototipeJsonPath) {
+        try {
+            $instanceMeta = Get-Content -Path $prototipeJsonPath -Raw | ConvertFrom-Json
+            $coreKey = $instanceMeta.coreType
+            if (-not $coreKey) { $coreKey = $instanceMeta.template }
+            $registroPath = Join-Path $rootDir "Prototipe-CLI\plantillas_registro.json"
+            if ($coreKey -and (Test-Path $registroPath)) {
+                $registro = Get-Content -Path $registroPath -Raw | ConvertFrom-Json
+                $entry = $registro.plantillas.$coreKey
+                if ($entry -and $entry.fuente -and (Test-Path $entry.fuente)) {
+                    $coreFolder = Get-Item -Path $entry.fuente
+                    Write-Host "  [Instancia Detectada] Core resuelto via registro (plantillas_registro.json): $($coreFolder.Name)" -ForegroundColor Cyan
+                }
+            }
+        } catch {
+            Write-Host "    [!] ADVERTENCIA: No se pudo leer/resolver .prototipe.json o el registro: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
+    }
+
+    # Fallback (metodo anterior, solo si el registro no resolvio nada): adivinar
+    # por coincidencia de nombre de carpeta con el nicho. No usar como mecanismo
+    # principal para Cores nuevos — depende de que los nombres de carpeta
+    # casualmente coincidan.
+    if ($null -eq $coreFolder) {
+        $parentPath = Split-Path -Path $SubprojectPath -Parent
+        $niche = Split-Path -Path $parentPath -Leaf # ej: "ventas"
+        Write-Host "  [Instancia Detectada] Sincronizando con repositorio remoto del Core (fallback por nombre de nicho: '$niche')..." -ForegroundColor Cyan
+        $coreFolder = Get-ChildItem -Path "$rootDir\Plantillas Core" -Directory | Where-Object { $_.Name -match $niche } | Select-Object -First 1
+    }
+
     if ($null -ne $coreFolder) {
         # Obtener el remoto origin de la plantilla core
         $coreGitDir = Join-Path $coreFolder.FullName ".git"

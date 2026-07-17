@@ -38,3 +38,4 @@ dist-ssr
 # Testing reports and results
 playwright-report/
 test-results/
+coverage/

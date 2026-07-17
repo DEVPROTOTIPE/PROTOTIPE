@@ -102,7 +102,7 @@ export const COLLECTIONS = {
   CLAIMS: 'claims',
   COUPONS: 'coupons',
   EMPLOYEES: 'employees',
-  EMPLOYEE_AUTH_LINKS: 'employeeAuthLinks',
+  EMPLOYEE_AUTH_LINKS: 'employeeAuthLinks', // SEC-015: índice inverso authUid -> employeeId
   TABLES: 'tables',
   PRODUCTION: 'production',
   DELIVERIES: 'deliveries',
